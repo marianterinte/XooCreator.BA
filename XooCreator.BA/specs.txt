@@ -1,0 +1,254 @@
+﻿BUSINESS Logic idea:
+Pentru a juca copacul imaginatiei trebuie sa ai minim 15 credite cumparate.
+Sa zicem ca userul ajunge la nivelul 3 cu aceste 15 credite
+1. Userul vede copacul imaginatiei care are mereu o radacina.
+va trebui sa iti alegi un tip de radacina (culoare sau tip de copac).
+in functie de asta primesti un tip de animal de baza. 
+
+2.Dupa radacina incepe sa avanseze prin a isi alege o locatie pentru acel copac ( locatia poate fi junga, sahara, etc.)
+In functie de ce locatie ii da prezentam un copac cu crengi si vom alege animale din acea zona. 
+3. Etajul 1 al copacului, si crengile de baza sa zicem ( are 3 optiuni: o creanga subtire dar lunga, una groasa si scurta, una potrivita) 
+aceastea trebuie sa emane un tip de caracter asociat cu un animit animal. (ce-l de al doilea pentru generearea hybridului).
+Tot asa pana la etajul 3.
+Apoi daca mai alimentaza credite poate juca si alte etaje. 
+
+As vrea sa gandim arhitectura unei aplicatii angular pentru asa ceva, ce backend mi-ai propune care sa fie usor de gestionat.
+(.net, node?, eu de exemplu stiu C#, dar sunt deschis si la altele). as vrea sa facem usor un server care sa consume
+un postgress db si sa stocam toate detaliile necesare de backend. ( pozele vor ramane pe frotend nu? sau ba?) 
+Apoi vreau sa integram cu auth0 usor si sa poata fi deplyed usor in github la fel cum e si angular momentan.
+
+Te rog sa iti dai cu parerea intai.
+ 
+ChatGPT said:
+Thought for 6s
+
+Ador ideea cu “Copacul Imaginației” ca mod premium (deblocat la 15 credite) + progres pe etaje. Are logică, e extensibil și poate susține monetizare fair.
+
+Mai jos ți-o pun „cap-coadă”: arhitectură Angular, backend propus, DB (Postgres), stocare imagini, Auth0, deploy cu GitHub, plus un flow de joc și un model de date minimal. Țin totul pragmatic, fără cod.
+
+Ce aș alege pentru tine (opinia mea)
+
+Backend: .NET 8 Minimal APIs (sau ASP.NET Core) + EF Core pentru Postgres.
+Motiv: știi C#, stack matur, tooling excelent, integrare ușoară cu Auth0 (OIDC), hosting simplu.
+
+DB: PostgreSQL (prod: Aiven/Neon/Supabase/Render; local: Docker).
+
+Stocare imagini: NU pe frontend. Salvezi imaginile în cloud (S3/Azure Blob/GCS) + CDN; în Postgres ții doar metadate și URL. Frontendul doar le afișează/cache-uie.
+
+Auth: Auth0 (SPA flow) + API protejat cu JWT Bearer în .NET.
+
+Deploy: GitHub Actions → build Angular & .NET, deploy pe Vercel/Netlify (frontend) + Fly.io/Render/Azure (API) + S3/Blob (imagini).
+
+AI imagini & texte: endpoint backend care pune job în coadă (ex. Hangfire/BackgroundService/Azure Queue). Frontendul poll-uiește status (sau SSE).
+
+Angular – structură & state
+
+Angular 17+ fără zone, Signals pentru state locale.
+
+Module/feature slices (standalone components):
+
+home/ (carusel moduri + ancore spre secțiuni)
+
+builder/ (create for fun)
+
+tree/ (Copacul Imaginației: hartă/ramuri/etaje)
+
+bestiary/ (colecție, detalii creatură)
+
+auth/ (login/logout + guard)
+
+store/ (credite, achiziții)
+
+profile/ (progres copil)
+
+Services:
+
+AuthService (Auth0 SDK; expune user, idToken)
+
+CreditsService (saldo, tranzacții)
+
+CreaturesService (CRUD creaturi + generare)
+
+TreeService (progres pe etaje, opțiuni disponibile, rezultate)
+
+ImagesService (upload, presigned URLs)
+
+Routing & guards:
+
+tree protejat: verifică credits >= 15 (sau feature flag dacă vrei demo).
+
+Offline/cache:
+
+IndexedDB pt. thumbnail-uri + ultimele povești; fallback frumos.
+
+Flow de joc – Copacul Imaginației (BL sumar)
+
+Gating: acces doar dacă userul are ≥ 15 credite cumpărate (nu cele gratuite).
+
+Etapa „Rădăcină” (nivel 0): copilul alege un tip de rădăcină (culoare/tip copac) → se mapează la animal de bază (arhetip de personalitate).
+
+Alege Locația (junglă/savană/tundră/insulă norilor) → definește setul de specii preferențiale și look & feel pentru copac.
+
+Etajele 1–3 (crengi): la fiecare etaj alege dintre 3 tipuri de creangă (subțire-lungă / groasă-scurtă / potrivită). Fiecare creangă are un trait (ex. Curiozitate, Curaj, Blândețe) și un animal-ghid asociat.
+
+Rezultat hibrid: combinația (rădăcină+locație+crengi) → prompt AI + poveste + atribute; consumă credite după regulă (ex. 1 credit/etaj generat sau 1/creatură).
+
+Extindere etaje: dacă alimentează credite, deblochezi Etajele 4–6 (avansat, rarități).
+
+Persistență: fiecare decizie = nod în progresul copacului; creaturile rezultate apar ca frunze pe ramuri, cu povești.
+
+Model de date (Postgres – minim, extensibil)
+
+users
+
+id (uuid), auth0_sub, display_name, created_at
+
+credits_wallets
+
+user_id, balance, updated_at
+
+credit_transactions
+
+id, user_id, amount, type (purchase|spend|grant), ref, created_at
+
+trees
+
+id, user_id, root_type, location, current_tier (int), created_at
+
+tree_choices
+
+id, tree_id, tier (int), branch_type (thin|thick|balanced), trait_awarded, created_at
+
+creatures
+
+id, user_id, tree_id?, name, archetype, traits (jsonb), rarity, image_url, thumb_url, prompt_used (jsonb), story (text), created_at
+
+bestiary_entries (opțional, pentru colecție globală)
+
+id, code, title, description, rarity, sample_image_url
+
+jobs (AI generate)
+
+id, user_id, type (image|story), payload (jsonb), status (queued|running|done|error), result_url, error, created_at, updated_at
+
+Observație: imaginile se țin în bucket; în DB pui doar URL-urile + metadate.
+
+API (contract scurt)
+
+POST /api/auth/session – schimbă tokenul de la Auth0 dacă ai nevoie de backend session (opțional).
+
+GET /api/credits / POST /api/credits/purchase / POST /api/credits/spend
+
+POST /api/tree/start – validează ≥ 15 credite, creează tree cu root_type.
+
+POST /api/tree/location – setează location.
+
+POST /api/tree/choose-branch – adaugă tree_choices (tier N).
+
+POST /api/creatures/generate – pornește job AI; decrement credite doar la status=done (sau rezervare la start + refund la fail).
+
+GET /api/creatures – listă user; GET /api/creatures/{id}
+
+GET /api/tree/{id} – structură + decizii + frunze create.
+
+POST /api/images/presign – backend întoarce presigned URL pt. upload direct (dacă e cazul pentru user-generated).
+
+Reguli de business – credite (exemplu)
+
+Acces Copac: necesită prima dată ≥ 15 credite cumpărate (flag tree_unlocked=true).
+
+Consum pe parcurs:
+
+0 credite: alegere root/location/branch (free logic)
+
+1 credit / generare creatură (imagine + poveste), sau 1/tier dacă vrei raritate by tier.
+
+Consum la succes (nu pe fail). Păstrezi job logs.
+
+Stocare imagini – cum aș face
+
+Bucket (S3 / Azure Blob / GCS) + CDN.
+
+La generare AI: backend salvează imaginea în bucket, creează thumbnail (Lambda/Function), pune URL-urile în DB.
+
+Frontend doar citește URL-uri; offline cache ușor în IndexedDB.
+
+NU ține imagini în localStorage (spațiu mic, fără beneficii).
+
+Auth0 – integrare simplă
+
+SPA: Auth0 Angular SDK (login/guard/claims).
+
+API: JWT Bearer validation în .NET (audience/issuer din Auth0).
+
+Role-uri ușoare (ex. role:parent pentru control părinte).
+
+Privacy copii: cont părinte + sub-profil copil (model separat dacă vrei conformitate sporită).
+
+Deploy – simplu și repetabil
+
+Frontend (Angular): Vercel/Netlify/Static Web Apps (build în GitHub Actions).
+
+API .NET: Fly.io / Render / Azure App Service (container sau build nativ).
+
+DB: Postgres managed (Aiven/Neon/Supabase).
+
+Storage: S3/Blob + CloudFront/Azure CDN.
+
+CI/CD: 2 workflows:
+
+frontend.yml: pnpm install → build → deploy.
+
+api.yml: dotnet restore/build/test → deploy container.
+
+Considerații de siguranță & conținut (5–10 ani)
+
+Filtre prompt: listă albă de cuvinte, interzicere conținut neadecvat + verificare automată output (Vision moderation).
+
+Rate-limit pe user pentru generări.
+
+Privacy: nu colecta date personale ale copilului; storyteller fără PII.
+
+Fallback: când AI dă fail, returnezi un placeholder prietenos + „încearcă din nou”.
+
+
+
+
+
+
+
+BUILDER DATA 
+
+import { AnimalOption, PartDef, PartKey, BASE_PARTS, S } from './builder-types';
+
+export const PARTS: ReadonlyArray<PartDef> = [
+  { key: 'head', name: 'Head', image: 'images/bodyparts/face.webp' },
+  { key: 'body', name: 'Body', image: 'images/bodyparts/body.webp' },
+  { key: 'arms', name: 'Arms', image: 'images/bodyparts/hands.webp' },
+  { key: 'legs', name: 'Legs', image: 'images/bodyparts/legs.webp' },
+  { key: 'tail', name: 'Tail', image: 'images/bodyparts/tail.webp' },
+  { key: 'wings', name: 'Wings', image: 'images/bodyparts/wings.webp' },
+  { key: 'horn', name: 'Horn', image: 'images/bodyparts/horn.webp' },
+  { key: 'horns', name: 'Horns', image: 'images/bodyparts/horns.webp' },
+] as const;
+
+export const ANIMALS: ReadonlyArray<AnimalOption> = [
+  { src: 'images/animals/base/bunny.jpg',   label: 'Bunny',    supports: S([...BASE_PARTS]) },
+  { src: 'images/animals/base/cat.jpg',     label: 'Cat',      supports: S([...BASE_PARTS]) },
+  { src: 'images/animals/base/giraffe.jpg', label: 'Giraffe',  supports: S([...BASE_PARTS, 'horn', 'horns']) },
+  { src: 'images/animals/base/dog.jpg',     label: 'Dog',      supports: S([...BASE_PARTS]) },
+  { src: 'images/animals/base/fox.jpg',     label: 'Fox',      supports: S([...BASE_PARTS]) },
+  { src: 'images/animals/base/hippo.jpg',   label: 'Hippo',    supports: S([...BASE_PARTS]) },
+  { src: 'images/animals/base/monkey.jpg',  label: 'Monkey',   supports: S([...BASE_PARTS]) },
+  { src: 'images/animals/base/camel.jpg',   label: 'Camel',    supports: S([...BASE_PARTS]) },
+  { src: 'images/animals/base/deer.jpg',    label: 'Deer',     supports: S([...BASE_PARTS, 'horn', 'horns']) },
+  { src: 'images/animals/base/duck.jpg',    label: 'Duck',     supports: S([...BASE_PARTS, 'wings']) },
+  { src: 'images/animals/base/eagle.jpg',   label: 'Eagle',    supports: S([...BASE_PARTS, 'wings']) },
+  { src: 'images/animals/base/elephant.jpg',label: 'Elephant', supports: S([...BASE_PARTS]) },
+  { src: 'images/animals/base/ostrich.jpg', label: 'Ostrich',  supports: S([...BASE_PARTS, 'wings']) },
+  { src: 'images/animals/base/parrot.jpg',  label: 'Parrot',   supports: S([...BASE_PARTS, 'wings']) },
+] as const;
+
+export const BASE_UNLOCKED_ANIMAL_COUNT = 3;
+export const BASE_LOCKED_PARTS = new Set<PartKey>(['legs', 'tail', 'wings', 'horn', 'horns']);
+
