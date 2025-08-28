@@ -52,3 +52,6 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+/XooCreator.BA/.vs
+/.vs/XooCreatorBA/v17
+/.vs/VSWorkspaceState.json
