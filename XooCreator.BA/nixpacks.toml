@@ -1,0 +1,34 @@
+# Nixpacks configuration for building a .NET 8 app on Railway without Docker
+
+[phases.setup]
+# Install .NET 8 SDK + runtime and native deps
+nixPkgs = [
+  "dotnet-sdk_8",
+  "dotnet-runtime_8",
+  "icu",
+  "zlib",
+  "openssl"
+]
+
+[phases.install]
+# Restore NuGet packages
+cmds = [
+  "dotnet restore ./XooCreator.BA.csproj"
+]
+cacheDirectories = ["/root/.nuget/packages"]
+
+[phases.build]
+# Compile and publish to a self-contained folder 'out'
+cmds = [
+  "dotnet publish ./XooCreator.BA.csproj -c Release -o ./out"
+]
+
+[start]
+# Start the published app
+cmd = "dotnet ./out/XooCreator.BA.dll"
+
+[variables]
+# Bind to the port provided by Railway (also handled by Program.cs)
+ASPNETCORE_URLS = "http://0.0.0.0:${PORT}"
+# Use full globalization with ICU installed
+DOTNET_SYSTEM_GLOBALIZATION_INVARIANT = "false"
