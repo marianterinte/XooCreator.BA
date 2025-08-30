@@ -1,10 +1,18 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Npgsql;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Bind port from PORT env var (Railway) if provided
+var portEnv = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrWhiteSpace(portEnv))
+{
+    builder.WebHost.UseUrls($"http://0.0.0.0:{portEnv}");
+}
 
 // Add services to the container.
 builder.Services.AddEndpointsApiExplorer();
@@ -28,7 +36,7 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader()
               .AllowCredentials();
     });
-    
+
     // More permissive policy for development
     options.AddPolicy("AllowDevelopment", policy =>
     {
@@ -36,7 +44,7 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod()
               .AllowAnyHeader();
     });
-    
+
     // Railway production policy
     options.AddPolicy("AllowProduction", policy =>
     {
@@ -49,12 +57,32 @@ builder.Services.AddCors(options =>
 // EF Core PostgreSQL
 builder.Services.AddDbContext<XooDbContext>(options =>
 {
-    // Railway provides DATABASE_URL environment variable
-    var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL") 
-        ?? builder.Configuration.GetConnectionString("Postgres")
-        ?? "Host=localhost;Port=5432;Database=xoo_db;Username=postgres;Password=admin";
-    
-    options.UseNpgsql(connectionString);
+    // Railway provides DATABASE_URL in URL form: postgres://user:pass@host:port/db
+    var dbUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+    string cs;
+    if (!string.IsNullOrWhiteSpace(dbUrl))
+    {
+        var uri = new Uri(dbUrl);
+        var userInfo = uri.UserInfo.Split(':');
+        var npg = new NpgsqlConnectionStringBuilder
+        {
+            Host = uri.Host,
+            Port = uri.Port,
+            Username = userInfo.ElementAtOrDefault(0) ?? "postgres",
+            Password = userInfo.ElementAtOrDefault(1) ?? string.Empty,
+            Database = uri.AbsolutePath.Trim('/'),
+            SslMode = SslMode.Require,
+            TrustServerCertificate = true
+        };
+        cs = npg.ConnectionString;
+    }
+    else
+    {
+        cs = builder.Configuration.GetConnectionString("Postgres")
+            ?? "Host=localhost;Port=5432;Database=xoo_db;Username=postgres;Password=admin";
+    }
+
+    options.UseNpgsql(cs);
 });
 
 // Repositories
@@ -72,40 +100,26 @@ using (var scope = app.Services.CreateScope())
     }
     catch (Exception ex)
     {
-        // Log but don't crash if migration fails
         Console.WriteLine($"Migration failed: {ex.Message}");
     }
 }
 
 // Configure the HTTP request pipeline.
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "XooCreator.BA v1.0.0");
+    c.RoutePrefix = "swagger";
+});
+
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "XooCreator.BA v1.0.0");
-        c.RoutePrefix = "swagger";
-    });
-    
-    // Use more permissive CORS in development
     app.UseCors("AllowDevelopment");
 }
 else
 {
-    // Enable Swagger in production for Railway
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "XooCreator.BA v1.0.0");
-        c.RoutePrefix = "swagger";
-    });
-    
-    // Use production CORS policy
     app.UseCors("AllowProduction");
 }
-
-// Remove HTTPS redirection for Railway (it handles SSL termination)
-// app.UseHttpsRedirection();
 
 // Minimal API endpoint for builder data from DB
 app.MapGet("/api/builder/data", async (XooDbContext db, CancellationToken ct) =>
