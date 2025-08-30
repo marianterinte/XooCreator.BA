@@ -1,10 +1,10 @@
 # Nixpacks configuration for building a .NET 8 app on Railway without Docker
 
 [phases.setup]
-# Install .NET 8 SDK + runtime and native deps
+# Install only the .NET 8 SDK (includes the runtime) and native deps
+# Installing both sdk and runtime causes file-collision errors in nix
 nixPkgs = [
   "dotnet-sdk_8",
-  "dotnet-runtime_8",
   "icu",
   "zlib",
   "openssl"
@@ -16,6 +16,7 @@ cmds = [
   "set -e",
   "if [ -f ./XooCreator.BA/XooCreator.BA.csproj ]; then CSProj=./XooCreator.BA/XooCreator.BA.csproj; elif [ -f ./XooCreator.BA.csproj ]; then CSProj=./XooCreator.BA.csproj; else CSProj=$(find . -maxdepth 3 -name '*.csproj' | head -n 1); fi",
   "echo Using project: $CSProj",
+  "dotnet --info",
   "dotnet restore \"$CSProj\""
 ]
 cacheDirectories = ["/root/.nuget/packages"]
@@ -38,3 +39,6 @@ cmd = "dotnet ./out/XooCreator.BA.dll"
 ASPNETCORE_URLS = "http://0.0.0.0:${PORT}"
 # Use full globalization with ICU installed
 DOTNET_SYSTEM_GLOBALIZATION_INVARIANT = "false"
+# Reduce noisy banners
+DOTNET_CLI_TELEMETRY_OPTOUT = "true"
+DOTNET_NOLOGO = "true"
