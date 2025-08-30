@@ -11,27 +11,27 @@ nixPkgs = [
 ]
 
 [phases.install]
-# Restore NuGet packages (auto-detect the csproj path)
+# Restore NuGet packages (prefer subfolder /XooCreator.BA, fallback to root)
 cmds = [
   "set -e",
-  "CSProj=$(find . -maxdepth 3 -name '*.csproj' | head -n 1)",
+  "if [ -f ./XooCreator.BA/XooCreator.BA.csproj ]; then CSProj=./XooCreator.BA/XooCreator.BA.csproj; elif [ -f ./XooCreator.BA.csproj ]; then CSProj=./XooCreator.BA.csproj; else CSProj=$(find . -maxdepth 3 -name '*.csproj' | head -n 1); fi",
   "echo Using project: $CSProj",
   "dotnet restore \"$CSProj\""
 ]
 cacheDirectories = ["/root/.nuget/packages"]
 
 [phases.build]
-# Compile and publish to a self-contained folder 'out'
+# Compile and publish to a folder 'out' at the working directory
 cmds = [
   "set -e",
-  "CSProj=$(find . -maxdepth 3 -name '*.csproj' | head -n 1)",
+  "if [ -f ./XooCreator.BA/XooCreator.BA.csproj ]; then CSProj=./XooCreator.BA/XooCreator.BA.csproj; elif [ -f ./XooCreator.BA.csproj ]; then CSProj=./XooCreator.BA.csproj; else CSProj=$(find . -maxdepth 3 -name '*.csproj' | head -n 1); fi",
   "echo Publishing project: $CSProj",
   "dotnet publish \"$CSProj\" -c Release -o ./out"
 ]
 
 [start]
-# Use Procfile if present; otherwise start the published dll explicitly
-cmd = "if [ -f Procfile ]; then ./.nixpacks/scripts/foreman Procfile; else dotnet ./out/XooCreator.BA.dll; fi"
+# Start the published dll (works whether root is repo/ or /XooCreator.BA)
+cmd = "dotnet ./out/XooCreator.BA.dll"
 
 [variables]
 # Bind to the port provided by Railway (also handled by Program.cs)

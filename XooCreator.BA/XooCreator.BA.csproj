@@ -25,4 +25,8 @@
     <Folder Include="Features\Builder\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include=".github\workflows\railway-deploy.yml" />
+  </ItemGroup>
+
 </Project>
