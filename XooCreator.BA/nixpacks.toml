@@ -11,21 +11,27 @@ nixPkgs = [
 ]
 
 [phases.install]
-# Restore NuGet packages
+# Restore NuGet packages (auto-detect the csproj path)
 cmds = [
-  "dotnet restore ./XooCreator.BA.csproj"
+  "set -e",
+  "CSProj=$(find . -maxdepth 3 -name '*.csproj' | head -n 1)",
+  "echo Using project: $CSProj",
+  "dotnet restore \"$CSProj\""
 ]
 cacheDirectories = ["/root/.nuget/packages"]
 
 [phases.build]
 # Compile and publish to a self-contained folder 'out'
 cmds = [
-  "dotnet publish ./XooCreator.BA.csproj -c Release -o ./out"
+  "set -e",
+  "CSProj=$(find . -maxdepth 3 -name '*.csproj' | head -n 1)",
+  "echo Publishing project: $CSProj",
+  "dotnet publish \"$CSProj\" -c Release -o ./out"
 ]
 
 [start]
-# Start the published app
-cmd = "dotnet ./out/XooCreator.BA.dll"
+# Use Procfile if present; otherwise start the published dll explicitly
+cmd = "if [ -f Procfile ]; then ./.nixpacks/scripts/foreman Procfile; else dotnet ./out/XooCreator.BA.dll; fi"
 
 [variables]
 # Bind to the port provided by Railway (also handled by Program.cs)
