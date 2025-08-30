@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using XooCreator.BA.Data;
@@ -11,9 +12,11 @@ using XooCreator.BA.Data;
 namespace XooCreator.BA.Data.Migrations
 {
     [DbContext(typeof(XooDbContext))]
-    partial class XooDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250830202421_AddRegionsAndAssignAnimals")]
+    partial class AddRegionsAndAssignAnimals
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,11 +31,6 @@ namespace XooCreator.BA.Data.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
-
-                    b.Property<bool>("IsHybrid")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false);
 
                     b.Property<string>("Label")
                         .IsRequired()
@@ -57,7 +55,6 @@ namespace XooCreator.BA.Data.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000001"),
-                            IsHybrid = false,
                             Label = "Bunny",
                             RegionId = new Guid("10000000-0000-0000-0000-000000000003"),
                             Src = "images/animals/base/bunny.jpg"
@@ -65,7 +62,6 @@ namespace XooCreator.BA.Data.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000002"),
-                            IsHybrid = false,
                             Label = "Cat",
                             RegionId = new Guid("10000000-0000-0000-0000-000000000003"),
                             Src = "images/animals/base/cat.jpg"
@@ -73,7 +69,6 @@ namespace XooCreator.BA.Data.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000003"),
-                            IsHybrid = false,
                             Label = "Giraffe",
                             RegionId = new Guid("10000000-0000-0000-0000-000000000004"),
                             Src = "images/animals/base/giraffe.jpg"
@@ -81,7 +76,6 @@ namespace XooCreator.BA.Data.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000004"),
-                            IsHybrid = false,
                             Label = "Dog",
                             RegionId = new Guid("10000000-0000-0000-0000-000000000003"),
                             Src = "images/animals/base/dog.jpg"
@@ -89,7 +83,6 @@ namespace XooCreator.BA.Data.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000005"),
-                            IsHybrid = false,
                             Label = "Fox",
                             RegionId = new Guid("10000000-0000-0000-0000-000000000005"),
                             Src = "images/animals/base/fox.jpg"
@@ -97,7 +90,6 @@ namespace XooCreator.BA.Data.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000006"),
-                            IsHybrid = false,
                             Label = "Hippo",
                             RegionId = new Guid("10000000-0000-0000-0000-000000000006"),
                             Src = "images/animals/base/hippo.jpg"
@@ -105,7 +97,6 @@ namespace XooCreator.BA.Data.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000007"),
-                            IsHybrid = false,
                             Label = "Monkey",
                             RegionId = new Guid("10000000-0000-0000-0000-000000000002"),
                             Src = "images/animals/base/monkey.jpg"
@@ -113,7 +104,6 @@ namespace XooCreator.BA.Data.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000008"),
-                            IsHybrid = false,
                             Label = "Camel",
                             RegionId = new Guid("10000000-0000-0000-0000-000000000001"),
                             Src = "images/animals/base/camel.jpg"
@@ -121,7 +111,6 @@ namespace XooCreator.BA.Data.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000009"),
-                            IsHybrid = false,
                             Label = "Deer",
                             RegionId = new Guid("10000000-0000-0000-0000-000000000005"),
                             Src = "images/animals/base/deer.jpg"
@@ -129,7 +118,6 @@ namespace XooCreator.BA.Data.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-00000000000a"),
-                            IsHybrid = false,
                             Label = "Duck",
                             RegionId = new Guid("10000000-0000-0000-0000-000000000006"),
                             Src = "images/animals/base/duck.jpg"
@@ -137,7 +125,6 @@ namespace XooCreator.BA.Data.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-00000000000b"),
-                            IsHybrid = false,
                             Label = "Eagle",
                             RegionId = new Guid("10000000-0000-0000-0000-000000000007"),
                             Src = "images/animals/base/eagle.jpg"
@@ -145,7 +132,6 @@ namespace XooCreator.BA.Data.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-00000000000c"),
-                            IsHybrid = false,
                             Label = "Elephant",
                             RegionId = new Guid("10000000-0000-0000-0000-000000000004"),
                             Src = "images/animals/base/elephant.jpg"
@@ -153,7 +139,6 @@ namespace XooCreator.BA.Data.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-00000000000d"),
-                            IsHybrid = false,
                             Label = "Ostrich",
                             RegionId = new Guid("10000000-0000-0000-0000-000000000004"),
                             Src = "images/animals/base/ostrich.jpg"
@@ -161,170 +146,9 @@ namespace XooCreator.BA.Data.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-00000000000e"),
-                            IsHybrid = false,
                             Label = "Parrot",
                             RegionId = new Guid("10000000-0000-0000-0000-000000000002"),
                             Src = "images/animals/base/parrot.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-00000000000f"),
-                            IsHybrid = false,
-                            Label = "Jaguar",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            Src = "images/animals/base/jaguar.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000010"),
-                            IsHybrid = false,
-                            Label = "Tucan",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            Src = "images/animals/base/tucan.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000011"),
-                            IsHybrid = false,
-                            Label = "Anaconda",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            Src = "images/animals/base/anaconda.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000012"),
-                            IsHybrid = false,
-                            Label = "Maimu?a Capucin",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            Src = "images/animals/base/maimuta_capucin.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000013"),
-                            IsHybrid = false,
-                            Label = "Broasca Otr?vitoare",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            Src = "images/animals/base/broasca_otravitoare.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000014"),
-                            IsHybrid = false,
-                            Label = "Leu",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000002"),
-                            Src = "images/animals/base/leu.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000015"),
-                            IsHybrid = false,
-                            Label = "Elefant African",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000002"),
-                            Src = "images/animals/base/elefant_african.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000016"),
-                            IsHybrid = false,
-                            Label = "Giraf?",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000002"),
-                            Src = "images/animals/base/girafa.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000017"),
-                            IsHybrid = false,
-                            Label = "Zebra",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000002"),
-                            Src = "images/animals/base/zebra.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000018"),
-                            IsHybrid = false,
-                            Label = "Rinocer",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000002"),
-                            Src = "images/animals/base/rinocer.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000019"),
-                            IsHybrid = false,
-                            Label = "Bizon (America de Nord)",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000003"),
-                            Src = "images/animals/base/bizon.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-00000000001a"),
-                            IsHybrid = false,
-                            Label = "Antilopa Saiga (Eurasia)",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000003"),
-                            Src = "images/animals/base/saiga.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-00000000001b"),
-                            IsHybrid = false,
-                            Label = "Lup cenu?iu",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000003"),
-                            Src = "images/animals/base/lup_cenusiu.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-00000000001c"),
-                            IsHybrid = false,
-                            Label = "Cal s?lbatic (Przewalski)",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000003"),
-                            Src = "images/animals/base/cal_przewalski.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-00000000001d"),
-                            IsHybrid = false,
-                            Label = "Vultur de step?",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000003"),
-                            Src = "images/animals/base/vultur_de_stepa.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-00000000001e"),
-                            IsHybrid = false,
-                            Label = "Vaca",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000004"),
-                            Src = "images/animals/base/vaca.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-00000000001f"),
-                            IsHybrid = false,
-                            Label = "Oaia",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000004"),
-                            Src = "images/animals/base/oaia.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000020"),
-                            IsHybrid = false,
-                            Label = "Calul",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000004"),
-                            Src = "images/animals/base/calul.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000021"),
-                            IsHybrid = false,
-                            Label = "G?ina",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000004"),
-                            Src = "images/animals/base/gaina.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000022"),
-                            IsHybrid = false,
-                            Label = "Porcul",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000004"),
-                            Src = "images/animals/base/porc.jpg"
                         });
                 });
 
@@ -662,426 +486,6 @@ namespace XooCreator.BA.Data.Migrations
                         {
                             AnimalId = new Guid("00000000-0000-0000-0000-00000000000e"),
                             PartKey = "wings"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000f"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000f"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000f"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000010"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000010"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000010"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000010"),
-                            PartKey = "legs"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000010"),
-                            PartKey = "tail"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000010"),
-                            PartKey = "wings"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000011"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000011"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000011"),
-                            PartKey = "tail"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000012"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000012"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000012"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000013"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000013"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000013"),
-                            PartKey = "legs"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000013"),
-                            PartKey = "tail"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000014"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000014"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000014"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000015"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000015"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000015"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000016"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000016"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000016"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000016"),
-                            PartKey = "legs"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000016"),
-                            PartKey = "tail"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000017"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000017"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000017"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000017"),
-                            PartKey = "legs"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000017"),
-                            PartKey = "tail"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000018"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000018"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000018"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000018"),
-                            PartKey = "legs"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000018"),
-                            PartKey = "tail"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000018"),
-                            PartKey = "horn"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000019"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000019"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000019"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001a"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001a"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001a"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001a"),
-                            PartKey = "legs"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001a"),
-                            PartKey = "tail"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001a"),
-                            PartKey = "horns"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001b"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001b"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001b"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001c"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001c"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001c"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001c"),
-                            PartKey = "legs"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001c"),
-                            PartKey = "tail"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001d"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001d"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001d"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001d"),
-                            PartKey = "legs"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001d"),
-                            PartKey = "tail"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001d"),
-                            PartKey = "wings"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001e"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001e"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001e"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001f"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001f"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001f"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000020"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000020"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000020"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000020"),
-                            PartKey = "legs"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000020"),
-                            PartKey = "tail"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000021"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000021"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000021"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000021"),
-                            PartKey = "legs"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000021"),
-                            PartKey = "tail"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000021"),
-                            PartKey = "wings"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000022"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000022"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000022"),
-                            PartKey = "arms"
                         });
                 });
 
@@ -1380,26 +784,6 @@ namespace XooCreator.BA.Data.Migrations
                         {
                             Id = new Guid("10000000-0000-0000-0000-000000000007"),
                             Name = "Mountains"
-                        },
-                        new
-                        {
-                            Id = new Guid("20000000-0000-0000-0000-000000000001"),
-                            Name = "Jungl?"
-                        },
-                        new
-                        {
-                            Id = new Guid("20000000-0000-0000-0000-000000000002"),
-                            Name = "Savana"
-                        },
-                        new
-                        {
-                            Id = new Guid("20000000-0000-0000-0000-000000000003"),
-                            Name = "Step?"
-                        },
-                        new
-                        {
-                            Id = new Guid("20000000-0000-0000-0000-000000000004"),
-                            Name = "Ferm?"
                         });
                 });
 

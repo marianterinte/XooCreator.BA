@@ -17,13 +17,17 @@ public sealed class XooDbContextFactory : IDesignTimeDbContextFactory<XooDbConte
             .AddEnvironmentVariables()
             .Build();
 
-        var connectionString = config.GetConnectionString("DefaultConnection");
-        if (string.IsNullOrWhiteSpace(connectionString))
-            throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+        var cs = config.GetConnectionString("DefaultConnection");
+        if (string.IsNullOrWhiteSpace(cs))
+        {
+            cs = config.GetConnectionString("Postgres");
+        }
+        if (string.IsNullOrWhiteSpace(cs))
+            throw new InvalidOperationException("Connection string 'DefaultConnection' or 'Postgres' not found.");
 
         return new XooDbContext(
             new DbContextOptionsBuilder<XooDbContext>()
-                .UseNpgsql(connectionString)
+                .UseNpgsql(cs)
                 .Options
         );
     }
