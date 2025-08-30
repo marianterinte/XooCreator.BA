@@ -1,14 +1,22 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using XooCreator.BA.Data;
-using XooCreator.BA.Features.Builder;
 using XooCreator.BA.Data.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-// Minimal API - keep controllers for Swagger grouping if needed
+// Minimal API - Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "XooCreator.BA",
+        Version = "v1",
+        Description = "XooCreator Backend API"
+    });
+});
 
 // EF Core PostgreSQL
 builder.Services.AddDbContext<XooDbContext>(options =>
@@ -25,7 +33,10 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "XooCreator.BA v1");
+    });
 }
 
 app.UseHttpsRedirection();
@@ -40,8 +51,8 @@ app.MapGet("/api/builder/data", async (XooDbContext db, CancellationToken ct) =>
     var animalsRaw = await db.Animals
         .Select(a => new
         {
-            a.Src,
-            a.Label,
+            src = a.Src,
+            label = a.Label,
             supports = a.SupportedParts.Select(sp => sp.PartKey)
         })
         .ToListAsync(ct);
