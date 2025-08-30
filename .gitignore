@@ -55,3 +55,5 @@ nunit-*.xml
 /XooCreator.BA/.vs
 /.vs/XooCreatorBA/v17
 /.vs/VSWorkspaceState.json
+/.vs/BE/v17/.wsuo
+/.vs/BE/v17/DocumentLayout.json

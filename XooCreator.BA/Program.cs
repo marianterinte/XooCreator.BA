@@ -30,11 +30,36 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Minimal API endpoint for builder data
-app.MapGet("/api/builder/data", () => Results.Ok(BuilderData.GetCreatureBuilderData()))
-    .WithName("GetCreatureBuilderData")
-    .WithTags("Builder")
-    .Produces(StatusCodes.Status200OK);
+// Minimal API endpoint for builder data from DB
+app.MapGet("/api/builder/data", async (XooDbContext db, CancellationToken ct) =>
+{
+    var parts = await db.BodyParts
+        .Select(p => new { key = p.Key, name = p.Name, image = p.Image })
+        .ToListAsync(ct);
+
+    var animalsRaw = await db.Animals
+        .Select(a => new
+        {
+            a.Src,
+            a.Label,
+            supports = a.SupportedParts.Select(sp => sp.PartKey)
+        })
+        .ToListAsync(ct);
+
+    var config = await db.BuilderConfigs.FirstOrDefaultAsync(ct);
+    var baseLockedParts = await db.BodyParts.Where(p => p.IsBaseLocked).Select(p => p.Key).ToListAsync(ct);
+
+    return Results.Ok(new
+    {
+        parts,
+        animals = animalsRaw,
+        baseUnlockedAnimalCount = config?.BaseUnlockedAnimalCount ?? 3,
+        baseLockedParts
+    });
+})
+.WithName("GetCreatureBuilderData")
+.WithTags("Builder")
+.Produces(StatusCodes.Status200OK);
 
 // Simple DB health endpoint (tests EF connectivity)
 app.MapGet("/api/db/health", async (XooDbContext db, CancellationToken ct) =>
