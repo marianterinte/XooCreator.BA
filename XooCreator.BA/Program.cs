@@ -36,19 +36,46 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod()
               .AllowAnyHeader();
     });
+    
+    // Railway production policy
+    options.AddPolicy("AllowProduction", policy =>
+    {
+        policy.AllowAnyOrigin() // Railway apps can have dynamic URLs
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
 });
 
 // EF Core PostgreSQL
 builder.Services.AddDbContext<XooDbContext>(options =>
 {
-    var cs = builder.Configuration.GetConnectionString("Postgres");
-    options.UseNpgsql(cs);
+    // Railway provides DATABASE_URL environment variable
+    var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL") 
+        ?? builder.Configuration.GetConnectionString("Postgres")
+        ?? "Host=localhost;Port=5432;Database=xoo_db;Username=postgres;Password=admin";
+    
+    options.UseNpgsql(connectionString);
 });
 
 // Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 var app = builder.Build();
+
+// Auto-migrate database on startup (for Railway)
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<XooDbContext>();
+    try
+    {
+        context.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        // Log but don't crash if migration fails
+        Console.WriteLine($"Migration failed: {ex.Message}");
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -65,11 +92,20 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    // Use specific CORS policy in production
-    app.UseCors("AllowAngularDev");
+    // Enable Swagger in production for Railway
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "XooCreator.BA v1.0.0");
+        c.RoutePrefix = "swagger";
+    });
+    
+    // Use production CORS policy
+    app.UseCors("AllowProduction");
 }
 
-app.UseHttpsRedirection();
+// Remove HTTPS redirection for Railway (it handles SSL termination)
+// app.UseHttpsRedirection();
 
 // Minimal API endpoint for builder data from DB
 app.MapGet("/api/builder/data", async (XooDbContext db, CancellationToken ct) =>
@@ -120,5 +156,8 @@ app.MapGet("/api/db/health", async (XooDbContext db, CancellationToken ct) =>
 .WithTags("System")
 .Produces<object>(StatusCodes.Status200OK)
 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
+
+// Root endpoint
+app.MapGet("/", () => "XooCreator.BA API is running! ?? Visit /swagger for API docs.");
 
 app.Run();
