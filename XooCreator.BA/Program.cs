@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using XooCreator.BA.Data;
@@ -6,14 +7,13 @@ using XooCreator.BA.Data.Repositories;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-// Minimal API - Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "XooCreator.BA",
-        Version = "v1",
+        Version = "v1.0.0",
         Description = "XooCreator Backend API"
     });
 });
@@ -30,12 +30,14 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 var app = builder.Build();
 
+// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "XooCreator.BA v1");
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "XooCreator.BA v1.0.0");
+        c.RoutePrefix = "swagger";
     });
 }
 
@@ -70,7 +72,7 @@ app.MapGet("/api/builder/data", async (XooDbContext db, CancellationToken ct) =>
 })
 .WithName("GetCreatureBuilderData")
 .WithTags("Builder")
-.Produces(StatusCodes.Status200OK);
+.Produces<object>(StatusCodes.Status200OK);
 
 // Simple DB health endpoint (tests EF connectivity)
 app.MapGet("/api/db/health", async (XooDbContext db, CancellationToken ct) =>
@@ -88,7 +90,7 @@ app.MapGet("/api/db/health", async (XooDbContext db, CancellationToken ct) =>
 })
 .WithName("DbHealth")
 .WithTags("System")
-.Produces(StatusCodes.Status200OK)
-.Produces(StatusCodes.Status500InternalServerError);
+.Produces<object>(StatusCodes.Status200OK)
+.Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
 
 app.Run();
