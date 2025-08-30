@@ -18,6 +18,26 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+// Add CORS policy for Angular frontend
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularDev", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200")
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();
+    });
+    
+    // More permissive policy for development
+    options.AddPolicy("AllowDevelopment", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 // EF Core PostgreSQL
 builder.Services.AddDbContext<XooDbContext>(options =>
 {
@@ -39,6 +59,14 @@ if (app.Environment.IsDevelopment())
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "XooCreator.BA v1.0.0");
         c.RoutePrefix = "swagger";
     });
+    
+    // Use more permissive CORS in development
+    app.UseCors("AllowDevelopment");
+}
+else
+{
+    // Use specific CORS policy in production
+    app.UseCors("AllowAngularDev");
 }
 
 app.UseHttpsRedirection();
