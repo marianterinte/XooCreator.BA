@@ -1,8 +1,0 @@
-# Railway deployment configuration
-# This tells Railway how to build and deploy the app
-
-[build]
-  command = "dotnet publish -c Release -o ./publish"
-
-[deploy]
-  startCommand = "cd publish && dotnet XooCreator.BA.dll"
