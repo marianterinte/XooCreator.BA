@@ -1,1 +1,1 @@
-web: dotnet ./out/XooCreator.BA.dll
+web: bash -c 'echo "Starting from $(pwd)" && echo "Checking XooCreator.BA.dll..." && ls -la ./out/XooCreator.BA.dll && dotnet ./out/XooCreator.BA.dll'
