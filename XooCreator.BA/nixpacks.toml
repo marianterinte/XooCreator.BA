@@ -14,10 +14,13 @@ nixPkgs = [
 # Restore NuGet packages - Railway sets root to XooCreator.BA directory
 cmds = [
   "set -e",
-  "echo Building from directory: $(pwd)",
+  "echo \"Building from directory: $(pwd)\"",
+  "echo \"Directory contents:\"",
   "ls -la",
+  "echo \"Dotnet info:\"",
   "dotnet --info",
-  "dotnet restore XooCreator.BA.csproj"
+  "echo \"Restoring XooCreator.BA.csproj...\"",
+  "dotnet restore XooCreator.BA.csproj --verbosity normal"
 ]
 cacheDirectories = ["/root/.nuget/packages"]
 
@@ -25,13 +28,31 @@ cacheDirectories = ["/root/.nuget/packages"]
 # Compile and publish to a folder 'out' at the working directory
 cmds = [
   "set -e",
-  "echo Publishing project: XooCreator.BA.csproj",
-  "dotnet publish XooCreator.BA.csproj -c Release -o ./out"
+  "echo \"Publishing project: XooCreator.BA.csproj\"",
+  "dotnet publish XooCreator.BA.csproj -c Release -o ./out --verbosity normal",
+  "echo \"Checking published files:\"",
+  "ls -la ./out/",
+  "echo \"Verifying XooCreator.BA.dll exists:\"",
+  "test -f ./out/XooCreator.BA.dll && echo \"XooCreator.BA.dll found\" || echo \"ERROR: XooCreator.BA.dll not found!\""
 ]
 
 [start]
 # Start the published dll (works whether root is repo/ or /XooCreator.BA)
-cmd = "dotnet ./out/XooCreator.BA.dll"
+cmd = """
+echo "Starting application from $(pwd)"
+echo "Checking for XooCreator.BA.dll..."
+if [ -f ./out/XooCreator.BA.dll ]; then
+  echo "Found XooCreator.BA.dll, starting application..."
+  exec dotnet ./out/XooCreator.BA.dll
+else
+  echo "ERROR: ./out/XooCreator.BA.dll not found!"
+  echo "Directory contents:"
+  ls -la .
+  echo "Out directory contents:"
+  ls -la ./out/ || echo "Out directory does not exist"
+  exit 1
+fi
+"""
 
 [variables]
 # Bind to the port provided by Railway (also handled by Program.cs)

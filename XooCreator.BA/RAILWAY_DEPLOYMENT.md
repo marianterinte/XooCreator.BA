@@ -6,10 +6,13 @@ This document describes how to deploy XooCreator.BA to Railway.
 
 The application uses **nixpacks** for building on Railway. The configuration files are:
 
-- `nixpacks.toml` - Main build configuration for Railway
-- `Procfile` - Process definition (backup)
-- `Dockerfile` - Docker containerization (backup method)
+- `nixpacks.toml` - Main build configuration for Railway (includes error handling and debugging)
+- `railway.json` - Explicit Railway service configuration  
+- `Procfile` - Process definition (backup with debugging output)
+- `Dockerfile.backup` - Docker containerization (backup method, renamed to prioritize nixpacks)
 - `.github/workflows/railway-deploy.yml` - Automated deployment via GitHub Actions
+
+**Note**: The Dockerfile has been renamed to `Dockerfile.backup` to ensure Railway uses nixpacks by default, which is more reliable for .NET deployments.
 
 ## Environment Variables Required
 
@@ -55,6 +58,15 @@ The application automatically runs database migrations on startup. Make sure you
 1. **Build fails**: Check that nixpacks can find the .csproj file
 2. **App won't start**: Verify the `PORT` environment variable is being used
 3. **Database connection**: Ensure `DATABASE_URL` is correctly set
+4. **"Publish folder does not exist" error**: This usually indicates:
+   - Railway is trying to use Docker instead of nixpacks (ensure Dockerfile is renamed to Dockerfile.backup)
+   - Build phase failed (check Railway build logs for detailed error messages)
+   - Wrong working directory (verify --root=./XooCreator.BA in deployment command)
+5. **Deployment conflicts**: Ensure only one deployment method is active:
+   - Primary: nixpacks.toml + railway.json
+   - Backup: Dockerfile.backup (rename to Dockerfile if needed)
+6. **Railway CLI issues**: Try manual deployment with updated CLI version
+7. **GitHub Actions deployment fails**: Check that Railway secrets are correctly set
 
 ## Local Testing
 
@@ -62,8 +74,27 @@ To test the build process locally:
 
 ```bash
 cd XooCreator.BA
-dotnet restore
-dotnet build
-dotnet publish -c Release -o ./out
-dotnet ./out/XooCreator.BA.dll
+dotnet restore XooCreator.BA.csproj --verbosity normal
+dotnet publish XooCreator.BA.csproj -c Release -o ./out --verbosity normal
+ls -la ./out/XooCreator.BA.dll  # Verify the DLL exists
+PORT=5000 dotnet ./out/XooCreator.BA.dll  # Test the start command
 ```
+
+## Debugging Railway Deployments
+
+If deployment fails:
+
+1. **Check Railway build logs** for detailed error messages
+2. **Verify nixpacks configuration** by testing commands locally:
+   ```bash
+   # Test the exact commands from nixpacks.toml
+   dotnet restore XooCreator.BA.csproj --verbosity normal
+   dotnet publish XooCreator.BA.csproj -c Release -o ./out --verbosity normal
+   ```
+3. **Ensure proper file structure** - Railway should see:
+   - `XooCreator.BA.csproj` in the working directory
+   - `nixpacks.toml` and `railway.json` for configuration
+   - `out/XooCreator.BA.dll` after successful build
+4. **Check environment variables** in Railway dashboard:
+   - `DATABASE_URL` (auto-configured with PostgreSQL addon)
+   - `PORT` (auto-configured by Railway)
