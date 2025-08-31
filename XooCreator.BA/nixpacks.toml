@@ -11,13 +11,13 @@ nixPkgs = [
 ]
 
 [phases.install]
-# Restore NuGet packages (prefer subfolder /XooCreator.BA, fallback to root)
+# Restore NuGet packages - Railway sets root to XooCreator.BA directory
 cmds = [
   "set -e",
-  "if [ -f ./XooCreator.BA/XooCreator.BA.csproj ]; then CSProj=./XooCreator.BA/XooCreator.BA.csproj; elif [ -f ./XooCreator.BA.csproj ]; then CSProj=./XooCreator.BA.csproj; else CSProj=$(find . -maxdepth 3 -name '*.csproj' | head -n 1); fi",
-  "echo Using project: $CSProj",
+  "echo Building from directory: $(pwd)",
+  "ls -la",
   "dotnet --info",
-  "dotnet restore \"$CSProj\""
+  "dotnet restore XooCreator.BA.csproj"
 ]
 cacheDirectories = ["/root/.nuget/packages"]
 
@@ -25,9 +25,8 @@ cacheDirectories = ["/root/.nuget/packages"]
 # Compile and publish to a folder 'out' at the working directory
 cmds = [
   "set -e",
-  "if [ -f ./XooCreator.BA/XooCreator.BA.csproj ]; then CSProj=./XooCreator.BA/XooCreator.BA.csproj; elif [ -f ./XooCreator.BA.csproj ]; then CSProj=./XooCreator.BA.csproj; else CSProj=$(find . -maxdepth 3 -name '*.csproj' | head -n 1); fi",
-  "echo Publishing project: $CSProj",
-  "dotnet publish \"$CSProj\" -c Release -o ./out"
+  "echo Publishing project: XooCreator.BA.csproj",
+  "dotnet publish XooCreator.BA.csproj -c Release -o ./out"
 ]
 
 [start]
