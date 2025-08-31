@@ -61,3 +61,6 @@ nunit-*.xml
 # Railway/Deployment outputs
 out/
 publish/
+
+# Local testing scripts
+test-railway-config.sh
