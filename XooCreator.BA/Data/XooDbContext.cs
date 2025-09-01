@@ -123,7 +123,7 @@ public class XooDbContext : DbContext
 
         modelBuilder.Entity<BodyPart>().HasData(part_head, part_body, part_arms, part_legs, part_tail, part_wings, part_horn, part_horns);
 
-        // Regions (existing EN)
+        // Regions (EN only)
         var r_sahara    = new Region { Id = Guid.Parse("10000000-0000-0000-0000-000000000001"), Name = "Sahara" };
         var r_jungle    = new Region { Id = Guid.Parse("10000000-0000-0000-0000-000000000002"), Name = "Jungle" };
         var r_farm      = new Region { Id = Guid.Parse("10000000-0000-0000-0000-000000000003"), Name = "Farm" };
@@ -132,66 +132,55 @@ public class XooDbContext : DbContext
         var r_wetlands  = new Region { Id = Guid.Parse("10000000-0000-0000-0000-000000000006"), Name = "Wetlands" };
         var r_mountains = new Region { Id = Guid.Parse("10000000-0000-0000-0000-000000000007"), Name = "Mountains" };
 
-        // Regions (RO)
-        var rr_jungla   = new Region { Id = Guid.Parse("20000000-0000-0000-0000-000000000001"), Name = "Jungl?" };
-        var rr_savana   = new Region { Id = Guid.Parse("20000000-0000-0000-0000-000000000002"), Name = "Savana" };
-        var rr_stepa    = new Region { Id = Guid.Parse("20000000-0000-0000-0000-000000000003"), Name = "Step?" };
-        var rr_ferma    = new Region { Id = Guid.Parse("20000000-0000-0000-0000-000000000004"), Name = "Ferm?" };
+        modelBuilder.Entity<Region>().HasData(r_sahara, r_jungle, r_farm, r_savanna, r_forest, r_wetlands, r_mountains);
 
-        modelBuilder.Entity<Region>().HasData(r_sahara, r_jungle, r_farm, r_savanna, r_forest, r_wetlands, r_mountains,
-                                              rr_jungla, rr_savana, rr_stepa, rr_ferma);
+        // Animals (EN)
+        var a_bunny    = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000001"), Label = "Bunny",              Src = "images/animals/base/bunny.jpg",              RegionId = r_farm.Id,      IsHybrid = false };
+        var a_cat      = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000002"), Label = "Cat",                Src = "images/animals/base/cat.jpg",                RegionId = r_farm.Id,      IsHybrid = false };
+        var a_giraffe  = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000003"), Label = "Giraffe",            Src = "images/animals/base/giraffe.jpg",            RegionId = r_savanna.Id,   IsHybrid = false };
+        var a_dog      = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000004"), Label = "Dog",                Src = "images/animals/base/dog.jpg",                RegionId = r_farm.Id,      IsHybrid = false };
+        var a_fox      = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000005"), Label = "Fox",                Src = "images/animals/base/fox.jpg",                RegionId = r_forest.Id,    IsHybrid = false };
+        var a_hippo    = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000006"), Label = "Hippo",              Src = "images/animals/base/hippo.jpg",              RegionId = r_wetlands.Id,  IsHybrid = false };
+        var a_monkey   = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000007"), Label = "Monkey",             Src = "images/animals/base/monkey.jpg",             RegionId = r_jungle.Id,    IsHybrid = false };
+        var a_camel    = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000008"), Label = "Camel",              Src = "images/animals/base/camel.jpg",              RegionId = r_sahara.Id,    IsHybrid = false };
+        var a_deer     = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000009"), Label = "Deer",               Src = "images/animals/base/deer.jpg",               RegionId = r_forest.Id,    IsHybrid = false };
+        var a_duck     = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-00000000000a"), Label = "Duck",               Src = "images/animals/base/duck.jpg",               RegionId = r_wetlands.Id,  IsHybrid = false };
+        var a_eagle    = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-00000000000b"), Label = "Eagle",              Src = "images/animals/base/eagle.jpg",              RegionId = r_mountains.Id, IsHybrid = false };
+        var a_elephant = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-00000000000c"), Label = "Elephant",           Src = "images/animals/base/elephant.jpg",           RegionId = r_savanna.Id,   IsHybrid = false };
+        var a_ostrich  = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-00000000000d"), Label = "Ostrich",            Src = "images/animals/base/ostrich.jpg",            RegionId = r_savanna.Id,   IsHybrid = false };
+        var a_parrot   = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-00000000000e"), Label = "Parrot",             Src = "images/animals/base/parrot.jpg",             RegionId = r_jungle.Id,    IsHybrid = false };
 
-        // Animals with valid deterministic GUIDs (existing EN)
-        var a_bunny    = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000001"), Label = "Bunny",    Src = "images/animals/base/bunny.jpg",    RegionId = r_farm.Id,      IsHybrid = false };
-        var a_cat      = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000002"), Label = "Cat",      Src = "images/animals/base/cat.jpg",      RegionId = r_farm.Id,      IsHybrid = false };
-        var a_giraffe  = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000003"), Label = "Giraffe",  Src = "images/animals/base/giraffe.jpg",  RegionId = r_savanna.Id,   IsHybrid = false };
-        var a_dog      = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000004"), Label = "Dog",      Src = "images/animals/base/dog.jpg",      RegionId = r_farm.Id,      IsHybrid = false };
-        var a_fox      = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000005"), Label = "Fox",      Src = "images/animals/base/fox.jpg",      RegionId = r_forest.Id,    IsHybrid = false };
-        var a_hippo    = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000006"), Label = "Hippo",    Src = "images/animals/base/hippo.jpg",    RegionId = r_wetlands.Id,  IsHybrid = false };
-        var a_monkey   = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000007"), Label = "Monkey",   Src = "images/animals/base/monkey.jpg",   RegionId = r_jungle.Id,    IsHybrid = false };
-        var a_camel    = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000008"), Label = "Camel",    Src = "images/animals/base/camel.jpg",    RegionId = r_sahara.Id,    IsHybrid = false };
-        var a_deer     = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000009"), Label = "Deer",     Src = "images/animals/base/deer.jpg",     RegionId = r_forest.Id,    IsHybrid = false };
-        var a_duck     = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-00000000000a"), Label = "Duck",     Src = "images/animals/base/duck.jpg",     RegionId = r_wetlands.Id,  IsHybrid = false };
-        var a_eagle    = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-00000000000b"), Label = "Eagle",    Src = "images/animals/base/eagle.jpg",    RegionId = r_mountains.Id, IsHybrid = false };
-        var a_elephant = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-00000000000c"), Label = "Elephant", Src = "images/animals/base/elephant.jpg", RegionId = r_savanna.Id,   IsHybrid = false };
-        var a_ostrich  = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-00000000000d"), Label = "Ostrich",  Src = "images/animals/base/ostrich.jpg",  RegionId = r_savanna.Id,   IsHybrid = false };
-        var a_parrot   = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-00000000000e"), Label = "Parrot",   Src = "images/animals/base/parrot.jpg",   RegionId = r_jungle.Id,    IsHybrid = false };
+        // Previously-RO animals converted to EN and mapped to EN regions
+        var ar_jaguar   = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-00000000000f"), Label = "Jaguar",             Src = "images/animals/base/jaguar.jpg",             RegionId = r_jungle.Id,    IsHybrid = false };
+        var ar_toucan   = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000010"), Label = "Toucan",             Src = "images/animals/base/toucan.jpg",             RegionId = r_jungle.Id,    IsHybrid = false };
+        var ar_anaconda = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000011"), Label = "Anaconda",           Src = "images/animals/base/anaconda.jpg",           RegionId = r_jungle.Id,    IsHybrid = false };
+        var ar_capuchin = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000012"), Label = "Capuchin Monkey",    Src = "images/animals/base/capuchin_monkey.jpg",    RegionId = r_jungle.Id,    IsHybrid = false };
+        var ar_poisfrog = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000013"), Label = "Poison Dart Frog",   Src = "images/animals/base/poison_dart_frog.jpg",   RegionId = r_jungle.Id,    IsHybrid = false };
 
-        // Animals (RO seeds)
-        // Jungl?
-        var ar_jaguar   = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-00000000000f"), Label = "Jaguar",                 Src = "images/animals/base/jaguar.jpg",          RegionId = rr_jungla.Id, IsHybrid = false };
-        var ar_tucan    = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000010"), Label = "Tucan",                  Src = "images/animals/base/tucan.jpg",           RegionId = rr_jungla.Id, IsHybrid = false };
-        var ar_anaconda = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000011"), Label = "Anaconda",               Src = "images/animals/base/anaconda.jpg",        RegionId = rr_jungla.Id, IsHybrid = false };
-        var ar_capucin  = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000012"), Label = "Maimu?a Capucin",        Src = "images/animals/base/maimuta_capucin.jpg", RegionId = rr_jungla.Id, IsHybrid = false };
-        var ar_broasca  = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000013"), Label = "Broasca Otr?vitoare",   Src = "images/animals/base/broasca_otravitoare.jpg", RegionId = rr_jungla.Id, IsHybrid = false };
+        var ar_lion     = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000014"), Label = "Lion",               Src = "images/animals/base/lion.jpg",               RegionId = r_savanna.Id,   IsHybrid = false };
+        var ar_afrele   = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000015"), Label = "African Elephant",   Src = "images/animals/base/african_elephant.jpg",   RegionId = r_savanna.Id,   IsHybrid = false };
+        var ar_giraffe  = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000016"), Label = "Giraffe",            Src = "images/animals/base/giraffe.jpg",            RegionId = r_savanna.Id,   IsHybrid = false };
+        var ar_zebra    = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000017"), Label = "Zebra",              Src = "images/animals/base/zebra.jpg",              RegionId = r_savanna.Id,   IsHybrid = false };
+        var ar_rhino    = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000018"), Label = "Rhinoceros",         Src = "images/animals/base/rhinoceros.jpg",         RegionId = r_savanna.Id,   IsHybrid = false };
 
-        // Savana
-        var ar_leu      = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000014"), Label = "Leu",                    Src = "images/animals/base/leu.jpg",             RegionId = rr_savana.Id, IsHybrid = false };
-        var ar_elefant  = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000015"), Label = "Elefant African",        Src = "images/animals/base/elefant_african.jpg", RegionId = rr_savana.Id, IsHybrid = false };
-        var ar_girafa   = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000016"), Label = "Giraf?",                 Src = "images/animals/base/girafa.jpg",          RegionId = rr_savana.Id, IsHybrid = false };
-        var ar_zebra    = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000017"), Label = "Zebra",                  Src = "images/animals/base/zebra.jpg",           RegionId = rr_savana.Id, IsHybrid = false };
-        var ar_rinocer  = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000018"), Label = "Rinocer",                Src = "images/animals/base/rinocer.jpg",         RegionId = rr_savana.Id, IsHybrid = false };
+        var ar_bison    = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000019"), Label = "Bison",              Src = "images/animals/base/bison.jpg",              RegionId = r_mountains.Id, IsHybrid = false };
+        var ar_saiga    = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-00000000001a"), Label = "Saiga Antelope",     Src = "images/animals/base/saiga_antelope.jpg",     RegionId = r_savanna.Id,   IsHybrid = false };
+        var ar_graywolf = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-00000000001b"), Label = "Gray Wolf",          Src = "images/animals/base/gray_wolf.jpg",          RegionId = r_forest.Id,    IsHybrid = false };
+        var ar_przew    = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-00000000001c"), Label = "Przewalski's Horse", Src = "images/animals/base/przewalski_horse.jpg",  RegionId = r_mountains.Id, IsHybrid = false };
+        var ar_steppeag = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-00000000001d"), Label = "Steppe Eagle",       Src = "images/animals/base/steppe_eagle.jpg",       RegionId = r_mountains.Id, IsHybrid = false };
 
-        // Step?
-        var ar_bizon    = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000019"), Label = "Bizon (America de Nord)", Src = "images/animals/base/bizon.jpg",            RegionId = rr_stepa.Id,  IsHybrid = false };
-        var ar_saiga    = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-00000000001a"), Label = "Antilopa Saiga (Eurasia)", Src = "images/animals/base/saiga.jpg",            RegionId = rr_stepa.Id,  IsHybrid = false };
-        var ar_lup      = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-00000000001b"), Label = "Lup cenu?iu",            Src = "images/animals/base/lup_cenusiu.jpg",     RegionId = rr_stepa.Id,  IsHybrid = false };
-        var ar_przew    = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-00000000001c"), Label = "Cal s?lbatic (Przewalski)", Src = "images/animals/base/cal_przewalski.jpg",  RegionId = rr_stepa.Id,  IsHybrid = false };
-        var ar_vultur   = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-00000000001d"), Label = "Vultur de step?",        Src = "images/animals/base/vultur_de_stepa.jpg", RegionId = rr_stepa.Id,  IsHybrid = false };
-
-        // Ferm?
-        var ar_vaca     = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-00000000001e"), Label = "Vaca",                   Src = "images/animals/base/vaca.jpg",            RegionId = rr_ferma.Id,  IsHybrid = false };
-        var ar_oaia     = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-00000000001f"), Label = "Oaia",                   Src = "images/animals/base/oaia.jpg",            RegionId = rr_ferma.Id,  IsHybrid = false };
-        var ar_calul    = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000020"), Label = "Calul",                   Src = "images/animals/base/calul.jpg",           RegionId = rr_ferma.Id,  IsHybrid = false };
-        var ar_gaina    = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000021"), Label = "G?ina",                   Src = "images/animals/base/gaina.jpg",           RegionId = rr_ferma.Id,  IsHybrid = false };
-        var ar_porc     = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000022"), Label = "Porcul",                  Src = "images/animals/base/porc.jpg",            RegionId = rr_ferma.Id,  IsHybrid = false };
+        var ar_cow      = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-00000000001e"), Label = "Cow",                Src = "images/animals/base/cow.jpg",                RegionId = r_farm.Id,      IsHybrid = false };
+        var ar_sheep    = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-00000000001f"), Label = "Sheep",              Src = "images/animals/base/sheep.jpg",              RegionId = r_farm.Id,      IsHybrid = false };
+        var ar_horse    = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000020"), Label = "Horse",              Src = "images/animals/base/horse.jpg",              RegionId = r_farm.Id,      IsHybrid = false };
+        var ar_chicken  = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000021"), Label = "Chicken",            Src = "images/animals/base/chicken.jpg",            RegionId = r_farm.Id,      IsHybrid = false };
+        var ar_pig      = new Animal { Id = Guid.Parse("00000000-0000-0000-0000-000000000022"), Label = "Pig",                Src = "images/animals/base/pig.jpg",                RegionId = r_farm.Id,      IsHybrid = false };
 
         modelBuilder.Entity<Animal>().HasData(
             a_bunny, a_cat, a_giraffe, a_dog, a_fox, a_hippo, a_monkey, a_camel, a_deer, a_duck, a_eagle, a_elephant, a_ostrich, a_parrot,
-            ar_jaguar, ar_tucan, ar_anaconda, ar_capucin, ar_broasca,
-            ar_leu, ar_elefant, ar_girafa, ar_zebra, ar_rinocer,
-            ar_bizon, ar_saiga, ar_lup, ar_przew, ar_vultur,
-            ar_vaca, ar_oaia, ar_calul, ar_gaina, ar_porc
+            ar_jaguar, ar_toucan, ar_anaconda, ar_capuchin, ar_poisfrog,
+            ar_lion, ar_afrele, ar_giraffe, ar_zebra, ar_rhino,
+            ar_bison, ar_saiga, ar_graywolf, ar_przew, ar_steppeag,
+            ar_cow, ar_sheep, ar_horse, ar_chicken, ar_pig
         );
 
         // Helper to create supports
@@ -222,34 +211,34 @@ public class XooDbContext : DbContext
         AddSupports(a_ostrich.Id, new[] { "head","body","arms","legs","tail","wings" });
         AddSupports(a_parrot.Id, new[] { "head","body","arms","legs","tail","wings" });
 
-        // RO animals supports
-        // Jungl?
+        // Converted animals supports (same as before)
+        // Jungle
         AddSupports(ar_jaguar.Id, baseParts);
-        AddSupports(ar_tucan.Id, new[] { "head","body","arms","legs","tail","wings" });
+        AddSupports(ar_toucan.Id, new[] { "head","body","arms","legs","tail","wings" });
         AddSupports(ar_anaconda.Id, new[] { "head","body","tail" });
-        AddSupports(ar_capucin.Id, baseParts);
-        AddSupports(ar_broasca.Id, new[] { "head","body","legs","tail" });
+        AddSupports(ar_capuchin.Id, baseParts);
+        AddSupports(ar_poisfrog.Id, new[] { "head","body","legs","tail" });
 
-        // Savana
-        AddSupports(ar_leu.Id, baseParts);
-        AddSupports(ar_elefant.Id, baseParts);
-        AddSupports(ar_girafa.Id, new[] { "head","body","arms","legs","tail" });
+        // Savanna
+        AddSupports(ar_lion.Id, baseParts);
+        AddSupports(ar_afrele.Id, baseParts);
+        AddSupports(ar_giraffe.Id, new[] { "head","body","arms","legs","tail" });
         AddSupports(ar_zebra.Id, new[] { "head","body","arms","legs","tail" });
-        AddSupports(ar_rinocer.Id, new[] { "head","body","arms","legs","tail","horn" });
+        AddSupports(ar_rhino.Id, new[] { "head","body","arms","legs","tail","horn" });
 
-        // Step?
-        AddSupports(ar_bizon.Id, baseParts);
+        // Mountains/Steppe-like
+        AddSupports(ar_bison.Id, baseParts);
         AddSupports(ar_saiga.Id, new[] { "head","body","arms","legs","tail","horns" });
-        AddSupports(ar_lup.Id, baseParts);
+        AddSupports(ar_graywolf.Id, baseParts);
         AddSupports(ar_przew.Id, new[] { "head","body","arms","legs","tail" });
-        AddSupports(ar_vultur.Id, new[] { "head","body","arms","legs","tail","wings" });
+        AddSupports(ar_steppeag.Id, new[] { "head","body","arms","legs","tail","wings" });
 
-        // Ferm?
-        AddSupports(ar_vaca.Id, baseParts);
-        AddSupports(ar_oaia.Id, baseParts);
-        AddSupports(ar_calul.Id, new[] { "head","body","arms","legs","tail" });
-        AddSupports(ar_gaina.Id, new[] { "head","body","arms","legs","tail","wings" });
-        AddSupports(ar_porc.Id, baseParts);
+        // Farm
+        AddSupports(ar_cow.Id, baseParts);
+        AddSupports(ar_sheep.Id, baseParts);
+        AddSupports(ar_horse.Id, new[] { "head","body","arms","legs","tail" });
+        AddSupports(ar_chicken.Id, new[] { "head","body","arms","legs","tail","wings" });
+        AddSupports(ar_pig.Id, baseParts);
 
         modelBuilder.Entity<AnimalPartSupport>().HasData(supports);
 
