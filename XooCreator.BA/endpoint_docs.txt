@@ -1,0 +1,85 @@
+﻿XooCreator.BA API – Endpoint reference (up-to-date)
+
+Base URL
+- {BASE_URL} (example: http://localhost:5000 or Railway deployment URL)
+- All responses are application/json unless stated otherwise
+
+1) System – Root ping
+- Method: GET
+- Path: /
+- Description: Simple ping; useful for uptime checks
+- Request: none
+- Response: text/plain
+  Example: "XooCreator.BA API is running! 🚀 Visit /swagger for API docs."
+- Status codes: 200 OK
+
+2) System – Database health
+- Method: GET
+- Path: /api/db/health
+- Description: EF Core connectivity + pending migrations
+- Request: none
+- Response 200 OK:
+  {
+    "canConnect": true,
+    "pendingMigrations": ["20250901014933_initial"]
+  }
+- Response 500 ProblemDetails on error
+- Status codes: 200 OK, 500 Internal Server Error
+- cURL:
+  curl -s {BASE_URL}/api/db/health
+
+3) CreatureBuilder – Builder data
+- Method: GET
+- Path: /api/creature-builder/data
+- Description: Data needed by the creature builder UI (parts, animals, config)
+- Request: none
+- Response 200 OK:
+  {
+    "parts": [
+      { "key": "head", "name": "Head", "image": "images/bodyparts/face.webp" },
+      { "key": "body", "name": "Body", "image": "images/bodyparts/body.webp" },
+      { "key": "arms", "name": "Arms", "image": "images/bodyparts/hands.webp" }
+      // ... other parts like legs, tail, wings, horn, horns
+    ],
+    "animals": [
+      {
+        "src": "images/animals/base/cat.jpg",
+        "label": "Cat",
+        "supports": ["head", "body", "arms"]
+      },
+      {
+        "src": "images/animals/base/giraffe.jpg",
+        "label": "Giraffe",
+        "supports": ["head", "body", "arms", "legs", "tail", "wings", "horn", "horns"]
+      }
+      // ... full list seeded in DB
+    ],
+    "baseUnlockedAnimalCount": 3,
+    "baseLockedParts": ["legs", "tail", "wings", "horn", "horns"]
+  }
+- Status codes: 200 OK
+- cURL:
+  curl -s {BASE_URL}/api/creature-builder/data
+
+4) Weather – Demo sample (dev only)
+- Method: GET
+- Path: /WeatherForecast
+- Description: Sample controller (scaffolded); not used by product logic
+- Request: none
+- Response 200 OK (array):
+  [
+    {
+      "date": "2025-09-01",
+      "temperatureC": 22,
+      "temperatureF": 71,
+      "summary": "Mild"
+    }
+  ]
+- Status codes: 200 OK
+- cURL:
+  curl -s {BASE_URL}/WeatherForecast
+
+Notes
+- Swagger UI: {BASE_URL}/swagger
+- CORS: Development allows any origin; production allows any origin by policy
+- This document is generated from current code. When endpoints change, regenerate to keep frontend in sync.
