@@ -289,11 +289,7 @@ namespace XooCreator.BA.Migrations
                     { new Guid("10000000-0000-0000-0000-000000000004"), "Savanna" },
                     { new Guid("10000000-0000-0000-0000-000000000005"), "Forest" },
                     { new Guid("10000000-0000-0000-0000-000000000006"), "Wetlands" },
-                    { new Guid("10000000-0000-0000-0000-000000000007"), "Mountains" },
-                    { new Guid("20000000-0000-0000-0000-000000000001"), "Jungl?" },
-                    { new Guid("20000000-0000-0000-0000-000000000002"), "Savana" },
-                    { new Guid("20000000-0000-0000-0000-000000000003"), "Step?" },
-                    { new Guid("20000000-0000-0000-0000-000000000004"), "Ferm?" }
+                    { new Guid("10000000-0000-0000-0000-000000000007"), "Mountains" }
                 });
 
             migrationBuilder.InsertData(
@@ -315,26 +311,26 @@ namespace XooCreator.BA.Migrations
                     { new Guid("00000000-0000-0000-0000-00000000000c"), "Elephant", new Guid("10000000-0000-0000-0000-000000000004"), "images/animals/base/elephant.jpg" },
                     { new Guid("00000000-0000-0000-0000-00000000000d"), "Ostrich", new Guid("10000000-0000-0000-0000-000000000004"), "images/animals/base/ostrich.jpg" },
                     { new Guid("00000000-0000-0000-0000-00000000000e"), "Parrot", new Guid("10000000-0000-0000-0000-000000000002"), "images/animals/base/parrot.jpg" },
-                    { new Guid("00000000-0000-0000-0000-00000000000f"), "Jaguar", new Guid("20000000-0000-0000-0000-000000000001"), "images/animals/base/jaguar.jpg" },
-                    { new Guid("00000000-0000-0000-0000-000000000010"), "Tucan", new Guid("20000000-0000-0000-0000-000000000001"), "images/animals/base/tucan.jpg" },
-                    { new Guid("00000000-0000-0000-0000-000000000011"), "Anaconda", new Guid("20000000-0000-0000-0000-000000000001"), "images/animals/base/anaconda.jpg" },
-                    { new Guid("00000000-0000-0000-0000-000000000012"), "Maimu?a Capucin", new Guid("20000000-0000-0000-0000-000000000001"), "images/animals/base/maimuta_capucin.jpg" },
-                    { new Guid("00000000-0000-0000-0000-000000000013"), "Broasca Otr?vitoare", new Guid("20000000-0000-0000-0000-000000000001"), "images/animals/base/broasca_otravitoare.jpg" },
-                    { new Guid("00000000-0000-0000-0000-000000000014"), "Leu", new Guid("20000000-0000-0000-0000-000000000002"), "images/animals/base/leu.jpg" },
-                    { new Guid("00000000-0000-0000-0000-000000000015"), "Elefant African", new Guid("20000000-0000-0000-0000-000000000002"), "images/animals/base/elefant_african.jpg" },
-                    { new Guid("00000000-0000-0000-0000-000000000016"), "Giraf?", new Guid("20000000-0000-0000-0000-000000000002"), "images/animals/base/girafa.jpg" },
-                    { new Guid("00000000-0000-0000-0000-000000000017"), "Zebra", new Guid("20000000-0000-0000-0000-000000000002"), "images/animals/base/zebra.jpg" },
-                    { new Guid("00000000-0000-0000-0000-000000000018"), "Rinocer", new Guid("20000000-0000-0000-0000-000000000002"), "images/animals/base/rinocer.jpg" },
-                    { new Guid("00000000-0000-0000-0000-000000000019"), "Bizon (America de Nord)", new Guid("20000000-0000-0000-0000-000000000003"), "images/animals/base/bizon.jpg" },
-                    { new Guid("00000000-0000-0000-0000-00000000001a"), "Antilopa Saiga (Eurasia)", new Guid("20000000-0000-0000-0000-000000000003"), "images/animals/base/saiga.jpg" },
-                    { new Guid("00000000-0000-0000-0000-00000000001b"), "Lup cenu?iu", new Guid("20000000-0000-0000-0000-000000000003"), "images/animals/base/lup_cenusiu.jpg" },
-                    { new Guid("00000000-0000-0000-0000-00000000001c"), "Cal s?lbatic (Przewalski)", new Guid("20000000-0000-0000-0000-000000000003"), "images/animals/base/cal_przewalski.jpg" },
-                    { new Guid("00000000-0000-0000-0000-00000000001d"), "Vultur de step?", new Guid("20000000-0000-0000-0000-000000000003"), "images/animals/base/vultur_de_stepa.jpg" },
-                    { new Guid("00000000-0000-0000-0000-00000000001e"), "Vaca", new Guid("20000000-0000-0000-0000-000000000004"), "images/animals/base/vaca.jpg" },
-                    { new Guid("00000000-0000-0000-0000-00000000001f"), "Oaia", new Guid("20000000-0000-0000-0000-000000000004"), "images/animals/base/oaia.jpg" },
-                    { new Guid("00000000-0000-0000-0000-000000000020"), "Calul", new Guid("20000000-0000-0000-0000-000000000004"), "images/animals/base/calul.jpg" },
-                    { new Guid("00000000-0000-0000-0000-000000000021"), "G?ina", new Guid("20000000-0000-0000-0000-000000000004"), "images/animals/base/gaina.jpg" },
-                    { new Guid("00000000-0000-0000-0000-000000000022"), "Porcul", new Guid("20000000-0000-0000-0000-000000000004"), "images/animals/base/porc.jpg" }
+                    { new Guid("00000000-0000-0000-0000-00000000000f"), "Jaguar", new Guid("10000000-0000-0000-0000-000000000002"), "images/animals/base/jaguar.jpg" },
+                    { new Guid("00000000-0000-0000-0000-000000000010"), "Toucan", new Guid("10000000-0000-0000-0000-000000000002"), "images/animals/base/toucan.jpg" },
+                    { new Guid("00000000-0000-0000-0000-000000000011"), "Anaconda", new Guid("10000000-0000-0000-0000-000000000002"), "images/animals/base/anaconda.jpg" },
+                    { new Guid("00000000-0000-0000-0000-000000000012"), "Capuchin Monkey", new Guid("10000000-0000-0000-0000-000000000002"), "images/animals/base/capuchin_monkey.jpg" },
+                    { new Guid("00000000-0000-0000-0000-000000000013"), "Poison Dart Frog", new Guid("10000000-0000-0000-0000-000000000002"), "images/animals/base/poison_dart_frog.jpg" },
+                    { new Guid("00000000-0000-0000-0000-000000000014"), "Lion", new Guid("10000000-0000-0000-0000-000000000004"), "images/animals/base/lion.jpg" },
+                    { new Guid("00000000-0000-0000-0000-000000000015"), "African Elephant", new Guid("10000000-0000-0000-0000-000000000004"), "images/animals/base/african_elephant.jpg" },
+                    { new Guid("00000000-0000-0000-0000-000000000016"), "Giraffe", new Guid("10000000-0000-0000-0000-000000000004"), "images/animals/base/giraffe.jpg" },
+                    { new Guid("00000000-0000-0000-0000-000000000017"), "Zebra", new Guid("10000000-0000-0000-0000-000000000004"), "images/animals/base/zebra.jpg" },
+                    { new Guid("00000000-0000-0000-0000-000000000018"), "Rhinoceros", new Guid("10000000-0000-0000-0000-000000000004"), "images/animals/base/rhinoceros.jpg" },
+                    { new Guid("00000000-0000-0000-0000-000000000019"), "Bison", new Guid("10000000-0000-0000-0000-000000000007"), "images/animals/base/bison.jpg" },
+                    { new Guid("00000000-0000-0000-0000-00000000001a"), "Saiga Antelope", new Guid("10000000-0000-0000-0000-000000000004"), "images/animals/base/saiga_antelope.jpg" },
+                    { new Guid("00000000-0000-0000-0000-00000000001b"), "Gray Wolf", new Guid("10000000-0000-0000-0000-000000000005"), "images/animals/base/gray_wolf.jpg" },
+                    { new Guid("00000000-0000-0000-0000-00000000001c"), "Przewalski's Horse", new Guid("10000000-0000-0000-0000-000000000007"), "images/animals/base/przewalski_horse.jpg" },
+                    { new Guid("00000000-0000-0000-0000-00000000001d"), "Steppe Eagle", new Guid("10000000-0000-0000-0000-000000000007"), "images/animals/base/steppe_eagle.jpg" },
+                    { new Guid("00000000-0000-0000-0000-00000000001e"), "Cow", new Guid("10000000-0000-0000-0000-000000000003"), "images/animals/base/cow.jpg" },
+                    { new Guid("00000000-0000-0000-0000-00000000001f"), "Sheep", new Guid("10000000-0000-0000-0000-000000000003"), "images/animals/base/sheep.jpg" },
+                    { new Guid("00000000-0000-0000-0000-000000000020"), "Horse", new Guid("10000000-0000-0000-0000-000000000003"), "images/animals/base/horse.jpg" },
+                    { new Guid("00000000-0000-0000-0000-000000000021"), "Chicken", new Guid("10000000-0000-0000-0000-000000000003"), "images/animals/base/chicken.jpg" },
+                    { new Guid("00000000-0000-0000-0000-000000000022"), "Pig", new Guid("10000000-0000-0000-0000-000000000003"), "images/animals/base/pig.jpg" }
                 });
 
             migrationBuilder.InsertData(

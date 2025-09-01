@@ -17,7 +17,7 @@ namespace XooCreator.BA.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.8")
+                .HasAnnotation("ProductVersion", "8.0.11")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "uuid-ossp");
@@ -171,160 +171,160 @@ namespace XooCreator.BA.Migrations
                             Id = new Guid("00000000-0000-0000-0000-00000000000f"),
                             IsHybrid = false,
                             Label = "Jaguar",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000001"),
+                            RegionId = new Guid("10000000-0000-0000-0000-000000000002"),
                             Src = "images/animals/base/jaguar.jpg"
                         },
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000010"),
                             IsHybrid = false,
-                            Label = "Tucan",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            Src = "images/animals/base/tucan.jpg"
+                            Label = "Toucan",
+                            RegionId = new Guid("10000000-0000-0000-0000-000000000002"),
+                            Src = "images/animals/base/toucan.jpg"
                         },
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000011"),
                             IsHybrid = false,
                             Label = "Anaconda",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000001"),
+                            RegionId = new Guid("10000000-0000-0000-0000-000000000002"),
                             Src = "images/animals/base/anaconda.jpg"
                         },
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000012"),
                             IsHybrid = false,
-                            Label = "Maimu?a Capucin",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            Src = "images/animals/base/maimuta_capucin.jpg"
+                            Label = "Capuchin Monkey",
+                            RegionId = new Guid("10000000-0000-0000-0000-000000000002"),
+                            Src = "images/animals/base/capuchin_monkey.jpg"
                         },
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000013"),
                             IsHybrid = false,
-                            Label = "Broasca Otr?vitoare",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            Src = "images/animals/base/broasca_otravitoare.jpg"
+                            Label = "Poison Dart Frog",
+                            RegionId = new Guid("10000000-0000-0000-0000-000000000002"),
+                            Src = "images/animals/base/poison_dart_frog.jpg"
                         },
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000014"),
                             IsHybrid = false,
-                            Label = "Leu",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000002"),
-                            Src = "images/animals/base/leu.jpg"
+                            Label = "Lion",
+                            RegionId = new Guid("10000000-0000-0000-0000-000000000004"),
+                            Src = "images/animals/base/lion.jpg"
                         },
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000015"),
                             IsHybrid = false,
-                            Label = "Elefant African",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000002"),
-                            Src = "images/animals/base/elefant_african.jpg"
+                            Label = "African Elephant",
+                            RegionId = new Guid("10000000-0000-0000-0000-000000000004"),
+                            Src = "images/animals/base/african_elephant.jpg"
                         },
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000016"),
                             IsHybrid = false,
-                            Label = "Giraf?",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000002"),
-                            Src = "images/animals/base/girafa.jpg"
+                            Label = "Giraffe",
+                            RegionId = new Guid("10000000-0000-0000-0000-000000000004"),
+                            Src = "images/animals/base/giraffe.jpg"
                         },
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000017"),
                             IsHybrid = false,
                             Label = "Zebra",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000002"),
+                            RegionId = new Guid("10000000-0000-0000-0000-000000000004"),
                             Src = "images/animals/base/zebra.jpg"
                         },
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000018"),
                             IsHybrid = false,
-                            Label = "Rinocer",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000002"),
-                            Src = "images/animals/base/rinocer.jpg"
+                            Label = "Rhinoceros",
+                            RegionId = new Guid("10000000-0000-0000-0000-000000000004"),
+                            Src = "images/animals/base/rhinoceros.jpg"
                         },
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000019"),
                             IsHybrid = false,
-                            Label = "Bizon (America de Nord)",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000003"),
-                            Src = "images/animals/base/bizon.jpg"
+                            Label = "Bison",
+                            RegionId = new Guid("10000000-0000-0000-0000-000000000007"),
+                            Src = "images/animals/base/bison.jpg"
                         },
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-00000000001a"),
                             IsHybrid = false,
-                            Label = "Antilopa Saiga (Eurasia)",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000003"),
-                            Src = "images/animals/base/saiga.jpg"
+                            Label = "Saiga Antelope",
+                            RegionId = new Guid("10000000-0000-0000-0000-000000000004"),
+                            Src = "images/animals/base/saiga_antelope.jpg"
                         },
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-00000000001b"),
                             IsHybrid = false,
-                            Label = "Lup cenu?iu",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000003"),
-                            Src = "images/animals/base/lup_cenusiu.jpg"
+                            Label = "Gray Wolf",
+                            RegionId = new Guid("10000000-0000-0000-0000-000000000005"),
+                            Src = "images/animals/base/gray_wolf.jpg"
                         },
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-00000000001c"),
                             IsHybrid = false,
-                            Label = "Cal s?lbatic (Przewalski)",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000003"),
-                            Src = "images/animals/base/cal_przewalski.jpg"
+                            Label = "Przewalski's Horse",
+                            RegionId = new Guid("10000000-0000-0000-0000-000000000007"),
+                            Src = "images/animals/base/przewalski_horse.jpg"
                         },
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-00000000001d"),
                             IsHybrid = false,
-                            Label = "Vultur de step?",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000003"),
-                            Src = "images/animals/base/vultur_de_stepa.jpg"
+                            Label = "Steppe Eagle",
+                            RegionId = new Guid("10000000-0000-0000-0000-000000000007"),
+                            Src = "images/animals/base/steppe_eagle.jpg"
                         },
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-00000000001e"),
                             IsHybrid = false,
-                            Label = "Vaca",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000004"),
-                            Src = "images/animals/base/vaca.jpg"
+                            Label = "Cow",
+                            RegionId = new Guid("10000000-0000-0000-0000-000000000003"),
+                            Src = "images/animals/base/cow.jpg"
                         },
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-00000000001f"),
                             IsHybrid = false,
-                            Label = "Oaia",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000004"),
-                            Src = "images/animals/base/oaia.jpg"
+                            Label = "Sheep",
+                            RegionId = new Guid("10000000-0000-0000-0000-000000000003"),
+                            Src = "images/animals/base/sheep.jpg"
                         },
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000020"),
                             IsHybrid = false,
-                            Label = "Calul",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000004"),
-                            Src = "images/animals/base/calul.jpg"
+                            Label = "Horse",
+                            RegionId = new Guid("10000000-0000-0000-0000-000000000003"),
+                            Src = "images/animals/base/horse.jpg"
                         },
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000021"),
                             IsHybrid = false,
-                            Label = "G?ina",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000004"),
-                            Src = "images/animals/base/gaina.jpg"
+                            Label = "Chicken",
+                            RegionId = new Guid("10000000-0000-0000-0000-000000000003"),
+                            Src = "images/animals/base/chicken.jpg"
                         },
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000022"),
                             IsHybrid = false,
-                            Label = "Porcul",
-                            RegionId = new Guid("20000000-0000-0000-0000-000000000004"),
-                            Src = "images/animals/base/porc.jpg"
+                            Label = "Pig",
+                            RegionId = new Guid("10000000-0000-0000-0000-000000000003"),
+                            Src = "images/animals/base/pig.jpg"
                         });
                 });
 
@@ -1380,26 +1380,6 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("10000000-0000-0000-0000-000000000007"),
                             Name = "Mountains"
-                        },
-                        new
-                        {
-                            Id = new Guid("20000000-0000-0000-0000-000000000001"),
-                            Name = "Jungl?"
-                        },
-                        new
-                        {
-                            Id = new Guid("20000000-0000-0000-0000-000000000002"),
-                            Name = "Savana"
-                        },
-                        new
-                        {
-                            Id = new Guid("20000000-0000-0000-0000-000000000003"),
-                            Name = "Step?"
-                        },
-                        new
-                        {
-                            Id = new Guid("20000000-0000-0000-0000-000000000004"),
-                            Name = "Ferm?"
                         });
                 });
 
