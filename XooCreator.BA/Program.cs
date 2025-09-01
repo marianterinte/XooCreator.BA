@@ -4,6 +4,8 @@ using Microsoft.OpenApi.Models;
 using Npgsql;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Repositories;
+using XooCreator.BA.Endpoints;
+using XooCreator.BA.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -87,6 +89,10 @@ builder.Services.AddDbContext<XooDbContext>(options =>
 // Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
+// Services
+builder.Services.AddScoped<IDbHealthService, DbHealthService>();
+builder.Services.AddScoped<ICreatureBuilderService, CreatureBuilderService>();
+
 var app = builder.Build();
 
 // Auto-migrate database on startup (for Railway)
@@ -120,57 +126,8 @@ else
     app.UseCors("AllowProduction");
 }
 
-// Minimal API endpoint for builder data from DB
-app.MapGet("/api/builder/data", async (XooDbContext db, CancellationToken ct) =>
-{
-    var parts = await db.BodyParts
-        .Select(p => new { key = p.Key, name = p.Name, image = p.Image })
-        .ToListAsync(ct);
-
-    var animalsRaw = await db.Animals
-        .Select(a => new
-        {
-            src = a.Src,
-            label = a.Label,
-            supports = a.SupportedParts.Select(sp => sp.PartKey)
-        })
-        .ToListAsync(ct);
-
-    var config = await db.BuilderConfigs.FirstOrDefaultAsync(ct);
-    var baseLockedParts = await db.BodyParts.Where(p => p.IsBaseLocked).Select(p => p.Key).ToListAsync(ct);
-
-    return Results.Ok(new
-    {
-        parts,
-        animals = animalsRaw,
-        baseUnlockedAnimalCount = config?.BaseUnlockedAnimalCount ?? 3,
-        baseLockedParts
-    });
-})
-.WithName("GetCreatureBuilderData")
-.WithTags("Builder")
-.Produces<object>(StatusCodes.Status200OK);
-
-// Simple DB health endpoint (tests EF connectivity)
-app.MapGet("/api/db/health", async (XooDbContext db, CancellationToken ct) =>
-{
-    try
-    {
-        var canConnect = await db.Database.CanConnectAsync(ct);
-        var pending = await db.Database.GetPendingMigrationsAsync(ct);
-        return Results.Ok(new { canConnect, pendingMigrations = pending });
-    }
-    catch (Exception ex)
-    {
-        return Results.Problem(ex.Message);
-    }
-})
-.WithName("DbHealth")
-.WithTags("System")
-.Produces<object>(StatusCodes.Status200OK)
-.Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
-
-// Root endpoint
-app.MapGet("/", () => "XooCreator.BA API is running! ?? Visit /swagger for API docs.");
+// Map endpoints by domain
+app.MapCreatureBuilderEndpoints();
+app.MapSystemEndpoints();
 
 app.Run();
