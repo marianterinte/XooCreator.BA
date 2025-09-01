@@ -10,7 +10,7 @@ flowchart TD
     B -- Creează doar de fun --> C["Combină cap + corp + coadă"]
     C --> D["Primește hibrid + poveste"]
     D --> E["Salvare în Bestiar Hibride"]
-    B -- Copacul Imaginatiei premium --> F["Acces cu 15 credite"]
+  B -- Copacul Luminii premium --> F["Acces cu 15 credite"]
     F --> G["Alege tip de Copac"]
     G --> H["Alege o regiune jungla, savana, tundra..."]
     H --> I["Poveste 1 - problemă + întrebare grilă"]
