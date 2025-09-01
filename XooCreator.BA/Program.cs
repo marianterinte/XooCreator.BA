@@ -71,8 +71,7 @@ builder.Services.AddDbContext<XooDbContext>(options =>
             Username = userInfo.ElementAtOrDefault(0) ?? "postgres",
             Password = userInfo.ElementAtOrDefault(1) ?? string.Empty,
             Database = uri.AbsolutePath.Trim('/'),
-            SslMode = SslMode.Require,
-            TrustServerCertificate = true
+            SslMode = SslMode.Require
         };
         cs = npg.ConnectionString;
     }

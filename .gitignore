@@ -57,3 +57,10 @@ nunit-*.xml
 /.vs/VSWorkspaceState.json
 /.vs/BE/v17/.wsuo
 /.vs/BE/v17/DocumentLayout.json
+
+# Railway/Deployment outputs
+out/
+publish/
+
+# Local testing scripts
+test-railway-config.sh
