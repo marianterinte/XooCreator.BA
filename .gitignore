@@ -64,3 +64,4 @@ publish/
 
 # Local testing scripts
 test-railway-config.sh
+package-lock.json
