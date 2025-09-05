@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using XooCreator.BA.Data;
@@ -11,9 +12,11 @@ using XooCreator.BA.Data;
 namespace XooCreator.BA.Migrations
 {
     [DbContext(typeof(XooDbContext))]
-    partial class XooDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250905200733_TreeOfLightMigration")]
+    partial class TreeOfLightMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1597,15 +1600,6 @@ namespace XooCreator.BA.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                            Auth0Sub = "test-user-sub",
-                            CreatedAt = new DateTime(2025, 9, 5, 20, 9, 4, 831, DateTimeKind.Utc).AddTicks(6873),
-                            DisplayName = "Test User"
-                        });
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.UserTokens", b =>

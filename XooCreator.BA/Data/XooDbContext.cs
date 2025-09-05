@@ -14,6 +14,13 @@ public class XooDbContext : DbContext
     public DbSet<Creature> Creatures => Set<Creature>();
     public DbSet<Job> Jobs => Set<Job>();
 
+    // Tree of Light data
+    public DbSet<TreeProgress> TreeProgress => Set<TreeProgress>();
+    public DbSet<StoryProgress> StoryProgress => Set<StoryProgress>();
+    public DbSet<UserTokens> UserTokens => Set<UserTokens>();
+    public DbSet<HeroProgress> HeroProgress => Set<HeroProgress>();
+    public DbSet<HeroTreeProgress> HeroTreeProgress => Set<HeroTreeProgress>();
+
     // Builder data
     public DbSet<BodyPart> BodyParts => Set<BodyPart>();
     public DbSet<Animal> Animals => Set<Animal>();
@@ -241,6 +248,55 @@ public class XooDbContext : DbContext
         AddSupports(ar_pig.Id, baseParts);
 
         modelBuilder.Entity<AnimalPartSupport>().HasData(supports);
+
+        // Tree of Light configurations
+        modelBuilder.Entity<TreeProgress>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.HasIndex(x => new { x.UserId, x.RegionId }).IsUnique();
+            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
+        });
+
+        modelBuilder.Entity<StoryProgress>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.HasIndex(x => new { x.UserId, x.StoryId }).IsUnique();
+            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
+        });
+
+        modelBuilder.Entity<UserTokens>(e =>
+        {
+            e.HasKey(x => x.UserId);
+            e.HasOne(x => x.User).WithOne().HasForeignKey<UserTokens>(x => x.UserId);
+        });
+
+        modelBuilder.Entity<HeroProgress>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.HasIndex(x => new { x.UserId, x.HeroId, x.HeroType }).IsUnique();
+            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
+        });
+
+        modelBuilder.Entity<HeroTreeProgress>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.HasIndex(x => new { x.UserId, x.NodeId }).IsUnique();
+            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
+        });
+
+        // Seed test user
+        var testUserId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+        modelBuilder.Entity<User>().HasData(new User
+        {
+            Id = testUserId,
+            Auth0Sub = "test-user-sub",
+            DisplayName = "Test User",
+            CreatedAt = DateTime.UtcNow
+        });
 
         // Config
         modelBuilder.Entity<BuilderConfig>().HasData(new BuilderConfig { Id = 1, BaseUnlockedAnimalCount = 3 });

@@ -6,6 +6,8 @@ using XooCreator.BA.Data;
 using XooCreator.BA.Data.Repositories;
 using XooCreator.BA.Endpoints;
 using XooCreator.BA.Services;
+using XooCreator.BA.Features.TreeOfLight;
+using XooCreator.BA.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +19,7 @@ if (!string.IsNullOrWhiteSpace(portEnv))
 }
 
 // Add services to the container.
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -90,8 +93,14 @@ builder.Services.AddDbContext<XooDbContext>(options =>
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 // Services
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IUserContextService, UserContextService>();
 builder.Services.AddScoped<IDbHealthService, DbHealthService>();
 builder.Services.AddScoped<ICreatureBuilderService, CreatureBuilderService>();
+
+// Tree of Light Services
+builder.Services.AddScoped<ITreeOfLightRepository, TreeOfLightRepository>();
+builder.Services.AddScoped<ITreeOfLightService, TreeOfLightService>();
 
 var app = builder.Build();
 
@@ -127,6 +136,7 @@ else
 }
 
 // Map endpoints by domain
+app.MapControllers();
 app.MapCreatureBuilderEndpoints();
 app.MapSystemEndpoints();
 
