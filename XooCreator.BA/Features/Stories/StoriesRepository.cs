@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 using XooCreator.BA.Data;
 
 namespace XooCreator.BA.Features.Stories;
@@ -95,7 +96,7 @@ public class StoriesRepository : IStoriesRepository
         var existingCount = await _context.StoryDefinitions.CountAsync();
         if (existingCount > 0) return;
 
-        var stories = GetSeedStories();
+        var stories = await LoadStoriesFromJsonAsync();
         
         foreach (var story in stories)
         {
@@ -103,6 +104,79 @@ public class StoriesRepository : IStoriesRepository
         }
 
         await _context.SaveChangesAsync();
+    }
+
+    private static async Task<List<StoryDefinition>> LoadStoriesFromJsonAsync()
+    {
+        var jsonPath = Path.Combine("Data", "SeedData", "stories-seed.json");
+        
+        if (!File.Exists(jsonPath))
+        {
+            throw new FileNotFoundException($"Stories seed file not found at: {jsonPath}");
+        }
+
+        var jsonContent = await File.ReadAllTextAsync(jsonPath);
+        var seedData = JsonSerializer.Deserialize<StoriesSeedData>(jsonContent, new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            PropertyNameCaseInsensitive = true
+        });
+
+        if (seedData?.Stories == null)
+        {
+            throw new InvalidOperationException("Invalid stories seed data format");
+        }
+
+        return seedData.Stories.Select(MapFromSeedData).ToList();
+    }
+
+    private static StoryDefinition MapFromSeedData(StorySeedData seedData)
+    {
+        var story = new StoryDefinition
+        {
+            StoryId = seedData.StoryId,
+            Title = seedData.Title,
+            CoverImageUrl = seedData.CoverImageUrl,
+            Category = seedData.Category,
+            SortOrder = seedData.SortOrder
+        };
+
+        if (seedData.Tiles != null)
+        {
+            foreach (var tileSeed in seedData.Tiles)
+            {
+                var tile = new StoryTile
+                {
+                    TileId = tileSeed.TileId,
+                    Type = tileSeed.Type,
+                    SortOrder = tileSeed.SortOrder,
+                    Caption = tileSeed.Caption,
+                    Text = tileSeed.Text,
+                    ImageUrl = tileSeed.ImageUrl,
+                    AudioUrl = tileSeed.AudioUrl,
+                    Question = tileSeed.Question
+                };
+
+                if (tileSeed.Answers != null)
+                {
+                    foreach (var answerSeed in tileSeed.Answers)
+                    {
+                        var answer = new StoryAnswer
+                        {
+                            AnswerId = answerSeed.AnswerId,
+                            Text = answerSeed.Text,
+                            Reward = answerSeed.Reward,
+                            SortOrder = answerSeed.SortOrder
+                        };
+                        tile.Answers.Add(answer);
+                    }
+                }
+
+                story.Tiles.Add(tile);
+            }
+        }
+
+        return story;
     }
 
     private static StoryContentDto MapToDto(StoryDefinition story)
@@ -135,255 +209,47 @@ public class StoriesRepository : IStoriesRepository
         };
     }
 
-    private static List<StoryDefinition> GetSeedStories()
-    {
-        var stories = new List<StoryDefinition>();
-
-        // Intro Story
-        var introStory = new StoryDefinition
-        {
-            // Stored canonical ID remains without extra hyphen; alias "intro-puf-puf" accepted via NormalizeStoryId
-            StoryId = "intro-pufpuf",
-            Title = "Împăratul Puf-Puf – Călătoria începe",
-            CoverImageUrl = "images/tol-intro-story/0.Cover.png",
-            Category = "intro",
-            SortOrder = 1
-        };
-
-        introStory.Tiles.AddRange(new[]
-        {
-            new StoryTile
-            {
-                TileId = "p1",
-                Type = "page",
-                SortOrder = 1,
-                Caption = "Călătoria prin stele",
-                Text = "Împăratul Puf-Puf, o pisică vorbitoare de pe planeta Kelo-Ketis, își pilotează nava prin Univers. Totul pare liniștit… până când un zgomot ciudat răsună în cabine.",
-                ImageUrl = "images/tol-intro-story/1.puf-puf-flying.png"
-            },
-            new StoryTile
-            {
-                TileId = "p2",
-                Type = "page",
-                SortOrder = 2,
-                Caption = "Prăbușirea",
-                Text = "Un impact puternic zguduie nava. Împăratul Puf-Puf se trezește pe o planetă necunoscută: Pământul. Nava e avariată, iar drumul spre casă e pierdut.",
-                ImageUrl = "images/tol-intro-story/2.puf-puf-hurt.png"
-            },
-            new StoryTile
-            {
-                TileId = "p3",
-                Type = "page",
-                SortOrder = 3,
-                Caption = "Vocea cristalului",
-                Text = "Din buzunarul său, Puf-Puf scoate un cristal moștenit de pe Kelo-Ketis. Acesta îi arată o hartă străveche: singura cale de întoarcere acasă trece prin Copacul Luminii.",
-                ImageUrl = "images/tol-intro-story/3.puf-puf-crystal.png"
-            },
-            new StoryTile
-            {
-                TileId = "p4",
-                Type = "page",
-                SortOrder = 4,
-                Caption = "Un nou aliat",
-                Text = "Puf-Puf te găsește pe Pământ. El îți cere ajutorul: să repari Copacul Luminii și să-l ajuți să-și regăsească drumul spre casă. În schimb, te va ghida și te va numi Erou al Luminii.",
-                ImageUrl = "images/tol-intro-story/puf-puf-home-planet.png"
-            }
-        });
-
-        var quizTile = new StoryTile
-        {
-            TileId = "q1",
-            Type = "quiz",
-            SortOrder = 5,
-            Question = "Cum ai reacționa în fața necunoscutului, călătorule?"
-        };
-
-        quizTile.Answers.AddRange(new[]
-        {
-            new StoryAnswer { AnswerId = "a", Text = "Aș merge curajos mai departe.", Reward = "Token Courage", SortOrder = 1 },
-            new StoryAnswer { AnswerId = "b", Text = "Aș pune întrebări și aș observa.", Reward = "Token Curiosity", SortOrder = 2 },
-            new StoryAnswer { AnswerId = "c", Text = "Aș analiza situația și aș face un plan.", Reward = "Token Thinking", SortOrder = 3 },
-            new StoryAnswer { AnswerId = "d", Text = "Aș încerca să găsesc o soluție ingenioasă.", Reward = "Token Creativity", SortOrder = 4 }
-        });
-
-        introStory.Tiles.Add(quizTile);
-        stories.Add(introStory);
-
-        // Root Story
-        var rootStory = new StoryDefinition
-        {
-            StoryId = "root-s1",
-            Title = "Povestea Rădăcinii",
-            CoverImageUrl = "images/homepage/Alchimalia.png",
-            Category = "main",
-            SortOrder = 2
-        };
-
-        rootStory.Tiles.AddRange(
-        [
-            new StoryTile
-            {
-                TileId = "p1",
-                Type = "page",
-                SortOrder = 1,
-                Caption = "Începutul călătoriei",
-                Text = "La rădăcina Copacului Luminii pornește o aventură plină de descoperiri.",
-                ImageUrl = "images/biomes/farm.jpg"
-            },
-            new StoryTile
-            {
-                TileId = "p2",
-                Type = "page",
-                SortOrder = 2,
-                Caption = "Glasul pământului",
-                Text = "Rădăcinile adânci șoptesc povești despre răbdare și putere.",
-                ImageUrl = "images/biomes/forest.jpg"
-            },
-            new StoryTile
-            {
-                TileId = "p3",
-                Type = "page",
-                SortOrder = 3,
-                Caption = "Întâlnirea",
-                Text = "Eroii se întâlnesc și își unesc puterile pentru a porni spre lumină.",
-                ImageUrl = "images/biomes/steppe.jpg"
-            },
-            new StoryTile
-            {
-                TileId = "p4",
-                Type = "page",
-                SortOrder = 4,
-                Caption = "Încercarea mică",
-                Text = "Un obstacol minor le pune la încercare încrederea.",
-                ImageUrl = "images/biomes/tropical.jpg"
-            },
-            new StoryTile
-            {
-                TileId = "p5",
-                Type = "page",
-                SortOrder = 5,
-                Caption = "Lecția",
-                Text = "Învăță să asculte natura și să o protejeze.",
-                ImageUrl = "images/biomes/forest.jpg"
-            }
-        ]);
-
-        var rootQuizTile = new StoryTile
-        {
-            TileId = "q1",
-            Type = "quiz",
-            SortOrder = 6,
-            Question = "Ce ai învățat din călătoria la rădăcină?"
-        };
-
-        rootQuizTile.Answers.AddRange(new[]
-        {
-            new StoryAnswer { AnswerId = "a", Text = "Curajul de a începe", Reward = "Insigna Curajului", SortOrder = 1 },
-            new StoryAnswer { AnswerId = "b", Text = "Să asculți natura", Reward = "Medalia Înțelepciunii", SortOrder = 2 },
-            new StoryAnswer { AnswerId = "c", Text = "Bucuria descoperirii", Reward = "Steaua Bucuriei", SortOrder = 3 }
-        });
-
-        rootStory.Tiles.Add(rootQuizTile);
-        stories.Add(rootStory);
-
-        // Trunk Stories
-        stories.AddRange(GetTrunkStories());
-
-        return stories;
-    }
-
-    private static List<StoryDefinition> GetTrunkStories()
-    {
-        var stories = new List<StoryDefinition>();
-
-        // Trunk Story 1
-        var trunk1 = new StoryDefinition
-        {
-            StoryId = "trunk-s1",
-            Title = "Trunchi — Vântul Direcției",
-            CoverImageUrl = "images/biomes/forest.jpg",
-            Category = "main",
-            SortOrder = 3
-        };
-
-        trunk1.Tiles.AddRange(new[]
-        {
-            new StoryTile { TileId = "p1", Type = "page", SortOrder = 1, Caption = "Drumul în sus", Text = "Pe trunchi, pașii devin mai hotărâți.", ImageUrl = "images/biomes/forest.jpg" },
-            new StoryTile { TileId = "p2", Type = "page", SortOrder = 2, Caption = "Îndoiala", Text = "Un vânt rece aduce întrebări. Înaintăm?", ImageUrl = "images/biomes/montain.jpg" },
-            new StoryTile { TileId = "p3", Type = "page", SortOrder = 3, Caption = "Semne", Text = "Frunzele foșnesc într-un ritm care dă curaj.", ImageUrl = "images/biomes/jungle.jpg" }
-        });
-
-        var trunk1Quiz = new StoryTile { TileId = "q1", Type = "quiz", SortOrder = 4, Question = "Ce te ghidează pe drumul ales?" };
-        trunk1Quiz.Answers.AddRange(new[]
-        {
-            new StoryAnswer { AnswerId = "a", Text = "Prietenia", Reward = "Frunza Prieteniei", SortOrder = 1 },
-            new StoryAnswer { AnswerId = "b", Text = "Curajul", Reward = "Inima Curajului", SortOrder = 2 },
-            new StoryAnswer { AnswerId = "c", Text = "Răbdarea", Reward = "Ceasul Răbdării", SortOrder = 3 }
-        });
-        trunk1.Tiles.Add(trunk1Quiz);
-        stories.Add(trunk1);
-
-        // Trunk Story 2
-        var trunk2 = new StoryDefinition
-        {
-            StoryId = "trunk-s2",
-            Title = "Trunchi — Lumina Înțelepciunii",
-            CoverImageUrl = "images/biomes/jungle.jpg",
-            Category = "main",
-            SortOrder = 4
-        };
-
-        trunk2.Tiles.AddRange(new[]
-        {
-            new StoryTile { TileId = "p1", Type = "page", SortOrder = 1, Caption = "Înțelepciunea", Text = "În trunchi, fiecare întrebare devine o lecție.", ImageUrl = "images/biomes/jungle.jpg" },
-            new StoryTile { TileId = "p2", Type = "page", SortOrder = 2, Caption = "Misterul", Text = "Un mister străvechi se dezvăluie printre frunze.", ImageUrl = "images/biomes/montain.jpg" },
-            new StoryTile { TileId = "p3", Type = "page", SortOrder = 3, Caption = "Răspunsul", Text = "Răspunsul vine din interior, nu din exterior.", ImageUrl = "images/biomes/desert.jpg" }
-        });
-
-        var trunk2Quiz = new StoryTile { TileId = "q1", Type = "quiz", SortOrder = 4, Question = "Unde găsești adevărata înțelepciune?" };
-        trunk2Quiz.Answers.AddRange(new[]
-        {
-            new StoryAnswer { AnswerId = "a", Text = "În cărți", Reward = "Cartea Înțelepciunii", SortOrder = 1 },
-            new StoryAnswer { AnswerId = "b", Text = "În experiență", Reward = "Oglinda Experienței", SortOrder = 2 },
-            new StoryAnswer { AnswerId = "c", Text = "În inimă", Reward = "Cristalul Inimii", SortOrder = 3 }
-        });
-        trunk2.Tiles.Add(trunk2Quiz);
-        stories.Add(trunk2);
-
-        // Trunk Story 3
-        var trunk3 = new StoryDefinition
-        {
-            StoryId = "trunk-s3",
-            Title = "Trunchi — Flacăra Creativității",
-            CoverImageUrl = "images/biomes/montain.jpg",
-            Category = "main",
-            SortOrder = 5
-        };
-
-        trunk3.Tiles.AddRange(new[]
-        {
-            new StoryTile { TileId = "p1", Type = "page", SortOrder = 1, Caption = "Inspirația", Text = "Creativitatea este ca o flacără care nu se stinge niciodată.", ImageUrl = "images/biomes/montain.jpg" },
-            new StoryTile { TileId = "p2", Type = "page", SortOrder = 2, Caption = "Visul", Text = "Visurile devin realitate prin acțiune.", ImageUrl = "images/biomes/steppe.jpg" },
-            new StoryTile { TileId = "p3", Type = "page", SortOrder = 3, Caption = "Creația", Text = "Creezi nu doar pentru tine, ci pentru lumea întreagă.", ImageUrl = "images/biomes/tropical.jpg" }
-        });
-
-        var trunk3Quiz = new StoryTile { TileId = "q1", Type = "quiz", SortOrder = 4, Question = "Ce înseamnă să fii creativ?" };
-        trunk3Quiz.Answers.AddRange(new[]
-        {
-            new StoryAnswer { AnswerId = "a", Text = "Să găsești soluții noi", Reward = "Cheile Soluțiilor", SortOrder = 1 },
-            new StoryAnswer { AnswerId = "b", Text = "Să vezi frumusețea", Reward = "Ochii Frumuseții", SortOrder = 2 },
-            new StoryAnswer { AnswerId = "c", Text = "Să dai viață ideilor", Reward = "Sufletul Ideilor", SortOrder = 3 }
-        });
-        trunk3.Tiles.Add(trunk3Quiz);
-        stories.Add(trunk3);
-
-        return stories;
-    }
-
     private static string NormalizeStoryId(string storyId)
     {
         if (string.Equals(storyId, "intro-puf-puf", StringComparison.OrdinalIgnoreCase))
             return "intro-pufpuf";
         return storyId;
     }
+}
+
+// JSON deserialization models
+public class StoriesSeedData
+{
+    public List<StorySeedData> Stories { get; set; } = new();
+}
+
+public class StorySeedData
+{
+    public string StoryId { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
+    public string? CoverImageUrl { get; set; }
+    public string Category { get; set; } = string.Empty;
+    public int SortOrder { get; set; }
+    public List<TileSeedData>? Tiles { get; set; }
+}
+
+public class TileSeedData
+{
+    public string TileId { get; set; } = string.Empty;
+    public string Type { get; set; } = string.Empty;
+    public int SortOrder { get; set; }
+    public string? Caption { get; set; }
+    public string? Text { get; set; }
+    public string? ImageUrl { get; set; }
+    public string? AudioUrl { get; set; }
+    public string? Question { get; set; }
+    public List<AnswerSeedData>? Answers { get; set; }
+}
+
+public class AnswerSeedData
+{
+    public string AnswerId { get; set; } = string.Empty;
+    public string Text { get; set; } = string.Empty;
+    public string Reward { get; set; } = string.Empty;
+    public int SortOrder { get; set; }
 }
