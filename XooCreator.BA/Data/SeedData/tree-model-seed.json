@@ -4,35 +4,35 @@
       "id": "root",
       "label": "R?d?cin?",
       "imageUrl": "images/biomes/farm.jpg",
-      "pufpufMessage": "Aici e R?d?cina, locul unde totul ï¿½ncepe! Curajul t?u va ï¿½nflori aici ca o s?mï¿½n?? magic?. ??",
+      "pufpufMessage": "Aici e R?d?cina, locul unde totul începe! Curajul t?u va înflori aici ca o s?mân?? magic?. ??",
       "sortOrder": 1
     },
     {
       "id": "trunk",
       "label": "Trunchi",
       "imageUrl": "images/biomes/forest.jpg",
-      "pufpufMessage": "Trunchiul e inima copacului! Termin? toate cele trei pove?ti aici pentru a debloca prima ramur?. Fiecare poveste ï¿½?i va aduce mai aproape de urm?torul nivel! ??",
+      "pufpufMessage": "Trunchiul e inima copacului! Termin? toate cele trei pove?ti aici pentru a debloca prima ramur?. Fiecare poveste î?i va aduce mai aproape de urm?torul nivel! ??",
       "sortOrder": 2
     },
     {
       "id": "branch-1",
       "label": "Ramura 1",
       "imageUrl": "images/biomes/desert.jpg",
-      "pufpufMessage": "Ramura ï¿½ntï¿½i - T?rï¿½mul Curajului! Felicit?ri c? ai completat toate pove?tile din Trunchi! Aici aventurierii curajo?i ï¿½?i testeaz? hot?rï¿½rea. ??",
+      "pufpufMessage": "Ramura Întâi - T?râmul Curajului! Felicit?ri c? ai completat toate pove?tile din Trunchi! Aici aventurierii curajo?i î?i testeaz? hot?rârea. ??",
       "sortOrder": 3
     },
     {
       "id": "branch-2",
       "label": "Ramura 2",
       "imageUrl": "images/biomes/jungle.jpg",
-      "pufpufMessage": "Ramura a Doua - Gr?dina ï¿½n?elepciunii! Aici se nasc ideile str?lucite ?i r?spunsurile. ??",
+      "pufpufMessage": "Ramura a Doua - Gr?dina În?elepciunii! Aici se nasc ideile str?lucite ?i r?spunsurile. ??",
       "sortOrder": 4
     },
     {
       "id": "branch-3",
       "label": "Ramura 3",
       "imageUrl": "images/biomes/montain.jpg",
-      "pufpufMessage": "Ramura a Treia - Sanctuarul Creativit??ii! Aici imagina?ia ta va ï¿½nflori ca o floare rar?. ??",
+      "pufpufMessage": "Ramura a Treia - Sanctuarul Creativit??ii! Aici imagina?ia ta va înflori ca o floare rar?. ??",
       "sortOrder": 5
     }
   ],
