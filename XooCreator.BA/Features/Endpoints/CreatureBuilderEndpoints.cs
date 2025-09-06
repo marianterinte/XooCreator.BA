@@ -1,7 +1,6 @@
-using Microsoft.AspNetCore.Mvc;
 using XooCreator.BA.Services;
 
-namespace XooCreator.BA.Endpoints;
+namespace XooCreator.BA.Features.Endpoints;
 
 public static class CreatureBuilderEndpoints
 {

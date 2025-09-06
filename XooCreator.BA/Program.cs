@@ -4,11 +4,11 @@ using Microsoft.OpenApi.Models;
 using Npgsql;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Repositories;
-using XooCreator.BA.Endpoints;
 using XooCreator.BA.Services;
 using XooCreator.BA.Features.TreeOfLight;
 using XooCreator.BA.Features.Stories;
 using XooCreator.BA.Infrastructure;
+using XooCreator.BA.Features.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -145,9 +145,10 @@ else
 }
 
 // Map endpoints by domain
-app.MapControllers(); // Left for any remaining controllers (can be removed later if none)
+// app.MapControllers(); // removed legacy controllers after migration to minimal APIs
 app.MapCreatureBuilderEndpoints();
 app.MapSystemEndpoints();
 app.MapStoryEndpoints();
+app.MapTreeOfLightEndpoints();
 
 app.Run();

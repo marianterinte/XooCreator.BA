@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using XooCreator.BA.Features.Stories;
 using XooCreator.BA.Infrastructure;
 
-namespace XooCreator.BA.Endpoints;
+namespace XooCreator.BA.Features.Stories;
 
 public static class StoryEndpoints
 {
