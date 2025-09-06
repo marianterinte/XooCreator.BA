@@ -17,6 +17,7 @@ public interface ITreeOfLightRepository
     Task<bool> UnlockHeroAsync(Guid userId, string heroId, string heroType, string? sourceStoryId = null);
     Task<bool> UnlockHeroTreeNodeAsync(Guid userId, UnlockHeroTreeNodeRequest request);
     Task<bool> SpendTokensAsync(Guid userId, int courage = 0, int curiosity = 0, int thinking = 0, int creativity = 0);
+    Task ResetUserProgressAsync(Guid userId);
 }
 
 public class TreeOfLightRepository : ITreeOfLightRepository
@@ -311,6 +312,53 @@ public class TreeOfLightRepository : ITreeOfLightRepository
         catch
         {
             return false;
+        }
+    }
+
+    public async Task ResetUserProgressAsync(Guid userId)
+    {
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        
+        try
+        {
+            // Delete all user progress records
+            await _context.TreeProgress.Where(tp => tp.UserId == userId).ExecuteDeleteAsync();
+            await _context.StoryProgress.Where(sp => sp.UserId == userId).ExecuteDeleteAsync();
+            await _context.HeroProgress.Where(hp => hp.UserId == userId).ExecuteDeleteAsync();
+            await _context.HeroTreeProgress.Where(htp => htp.UserId == userId).ExecuteDeleteAsync();
+            
+            // Reset user tokens to default values
+            var userTokens = await _context.UserTokens.FirstOrDefaultAsync(ut => ut.UserId == userId);
+            if (userTokens != null)
+            {
+                userTokens.Courage = 0;
+                userTokens.Curiosity = 0;
+                userTokens.Thinking = 0;
+                userTokens.Creativity = 0;
+                userTokens.UpdatedAt = DateTime.UtcNow;
+            }
+            else
+            {
+                // Create default tokens if they don't exist
+                _context.UserTokens.Add(new UserTokens
+                {
+                    UserId = userId,
+                    Courage = 0,
+                    Curiosity = 0,
+                    Thinking = 0,
+                    Creativity = 0,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                });
+            }
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
         }
     }
 }

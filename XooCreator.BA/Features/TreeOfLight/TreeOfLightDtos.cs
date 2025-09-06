@@ -83,3 +83,10 @@ public record TransformToHeroResponse
     public string? ErrorMessage { get; init; }
     public HeroDto? UnlockedHero { get; init; }
 }
+
+public record ResetProgressResponse
+{
+    public bool Success { get; init; }
+    public string? ErrorMessage { get; init; }
+    public string Message { get; init; } = string.Empty;
+}

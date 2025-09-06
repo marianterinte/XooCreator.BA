@@ -10,6 +10,7 @@ public interface ITreeOfLightService
     Task<CompleteStoryResponse> CompleteStoryAsync(Guid userId, CompleteStoryRequest request);
     Task<UnlockHeroTreeNodeResponse> UnlockHeroTreeNodeAsync(Guid userId, UnlockHeroTreeNodeRequest request);
     Task<TransformToHeroResponse> TransformToHeroAsync(Guid userId, TransformToHeroRequest request);
+    Task<ResetProgressResponse> ResetUserProgressAsync(Guid userId);
 }
 
 public class TreeOfLightService : ITreeOfLightService
@@ -280,5 +281,27 @@ public class TreeOfLightService : ITreeOfLightService
             "UNICORN" => tokens.Courage >= 3 && tokens.Curiosity >= 3 && tokens.Thinking >= 3 && tokens.Creativity >= 3,
             _ => false
         };
+    }
+
+    public async Task<ResetProgressResponse> ResetUserProgressAsync(Guid userId)
+    {
+        try
+        {
+            await _repository.ResetUserProgressAsync(userId);
+            
+            return new ResetProgressResponse
+            {
+                Success = true,
+                Message = "User progress has been successfully reset."
+            };
+        }
+        catch (Exception ex)
+        {
+            return new ResetProgressResponse
+            {
+                Success = false,
+                ErrorMessage = ex.Message
+            };
+        }
     }
 }

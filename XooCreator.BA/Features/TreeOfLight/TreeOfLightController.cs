@@ -115,4 +115,20 @@ public class TreeOfLightController : ControllerBase
 
         return Ok(result);
     }
+
+    [HttpPost("reset-progress")]
+    public async Task<ActionResult<ResetProgressResponse>> ResetProgress()
+    {
+        var userId = await _userContext.GetUserIdAsync();
+        if (userId == null) return Unauthorized();
+
+        var result = await _service.ResetUserProgressAsync(userId.Value);
+        
+        if (!result.Success)
+        {
+            return BadRequest(result);
+        }
+
+        return Ok(result);
+    }
 }
