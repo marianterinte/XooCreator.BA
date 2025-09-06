@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Npgsql;
@@ -9,6 +8,7 @@ using XooCreator.BA.Features.TreeOfLight;
 using XooCreator.BA.Features.Stories;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Features.Endpoints;
+using XooCreator.BA.Infrastructure.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +22,8 @@ if (!string.IsNullOrWhiteSpace(portEnv))
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+// register endpoint handlers via reflection
+builder.Services.AddEndpointDefinitions();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
@@ -146,9 +148,9 @@ else
 
 // Map endpoints by domain
 // app.MapControllers(); // removed legacy controllers after migration to minimal APIs
-app.MapCreatureBuilderEndpoints();
-app.MapSystemEndpoints();
-app.MapStoryEndpoints();
-app.MapTreeOfLightEndpoints();
+// app.MapCreatureBuilderEndpoints(); // migrated to [Endpoint] pattern
+// app.MapSystemEndpoints(); // migrated to [Endpoint] pattern
+// app.MapStoryEndpoints(); // replaced by discovered endpoints
+app.MapDiscoveredEndpoints();
 
 app.Run();
