@@ -1699,6 +1699,138 @@ namespace XooCreator.BA.Migrations
                     b.ToTable("TreeProgress");
                 });
 
+            modelBuilder.Entity("XooCreator.BA.Data.TreeRegion", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("PufpufMessage")
+                        .HasColumnType("text");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("X")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Y")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Id")
+                        .IsUnique();
+
+                    b.ToTable("TreeRegions");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.TreeStoryNode", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("RegionId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("RewardImageUrl")
+                        .HasColumnType("text");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("StoryId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("X")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Y")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RegionId");
+
+                    b.HasIndex("StoryId", "RegionId")
+                        .IsUnique();
+
+                    b.ToTable("TreeStoryNodes");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.TreeUnlockRule", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FromId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int?>("MinCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("RequiredStoriesCsv")
+                        .HasColumnType("text");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("StoryId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ToRegionId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TreeUnlockRules");
+                });
+
             modelBuilder.Entity("XooCreator.BA.Data.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1728,7 +1860,7 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
                             Auth0Sub = "test-user-sub",
-                            CreatedAt = new DateTime(2025, 9, 6, 4, 34, 42, 206, DateTimeKind.Utc).AddTicks(6881),
+                            CreatedAt = new DateTime(2025, 9, 6, 12, 53, 16, 754, DateTimeKind.Utc).AddTicks(3008),
                             DisplayName = "Test User"
                         });
                 });
@@ -1957,6 +2089,26 @@ namespace XooCreator.BA.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("XooCreator.BA.Data.TreeStoryNode", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.TreeRegion", "Region")
+                        .WithMany("Stories")
+                        .HasForeignKey("RegionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("XooCreator.BA.Data.StoryDefinition", "StoryDefinition")
+                        .WithMany()
+                        .HasForeignKey("StoryId")
+                        .HasPrincipalKey("StoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Region");
+
+                    b.Navigation("StoryDefinition");
+                });
+
             modelBuilder.Entity("XooCreator.BA.Data.UserStoryReadProgress", b =>
                 {
                     b.HasOne("XooCreator.BA.Data.User", "User")
@@ -2002,6 +2154,11 @@ namespace XooCreator.BA.Migrations
             modelBuilder.Entity("XooCreator.BA.Data.Tree", b =>
                 {
                     b.Navigation("Choices");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.TreeRegion", b =>
+                {
+                    b.Navigation("Stories");
                 });
 #pragma warning restore 612, 618
         }

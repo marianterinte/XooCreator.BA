@@ -7,7 +7,6 @@ using XooCreator.BA.Services;
 using XooCreator.BA.Features.TreeOfLight;
 using XooCreator.BA.Features.Stories;
 using XooCreator.BA.Infrastructure;
-using XooCreator.BA.Features.Endpoints;
 using XooCreator.BA.Infrastructure.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);

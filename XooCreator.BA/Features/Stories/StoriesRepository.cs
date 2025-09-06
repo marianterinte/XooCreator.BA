@@ -323,8 +323,59 @@ public class StoriesRepository : IStoriesRepository
         trunk1.Tiles.Add(trunk1Quiz);
         stories.Add(trunk1);
 
-        // Similar pattern for trunk-s2 and trunk-s3...
-        // (truncating for brevity, but would include all stories from sample-story.data.ts)
+        // Trunk Story 2
+        var trunk2 = new StoryDefinition
+        {
+            StoryId = "trunk-s2",
+            Title = "Trunchi — Lumina Înțelepciunii",
+            CoverImageUrl = "images/biomes/jungle.jpg",
+            Category = "main",
+            SortOrder = 4
+        };
+
+        trunk2.Tiles.AddRange(new[]
+        {
+            new StoryTile { TileId = "p1", Type = "page", SortOrder = 1, Caption = "Înțelepciunea", Text = "În trunchi, fiecare întrebare devine o lecție.", ImageUrl = "images/biomes/jungle.jpg" },
+            new StoryTile { TileId = "p2", Type = "page", SortOrder = 2, Caption = "Misterul", Text = "Un mister străvechi se dezvăluie printre frunze.", ImageUrl = "images/biomes/montain.jpg" },
+            new StoryTile { TileId = "p3", Type = "page", SortOrder = 3, Caption = "Răspunsul", Text = "Răspunsul vine din interior, nu din exterior.", ImageUrl = "images/biomes/desert.jpg" }
+        });
+
+        var trunk2Quiz = new StoryTile { TileId = "q1", Type = "quiz", SortOrder = 4, Question = "Unde găsești adevărata înțelepciune?" };
+        trunk2Quiz.Answers.AddRange(new[]
+        {
+            new StoryAnswer { AnswerId = "a", Text = "În cărți", Reward = "Cartea Înțelepciunii", SortOrder = 1 },
+            new StoryAnswer { AnswerId = "b", Text = "În experiență", Reward = "Oglinda Experienței", SortOrder = 2 },
+            new StoryAnswer { AnswerId = "c", Text = "În inimă", Reward = "Cristalul Inimii", SortOrder = 3 }
+        });
+        trunk2.Tiles.Add(trunk2Quiz);
+        stories.Add(trunk2);
+
+        // Trunk Story 3
+        var trunk3 = new StoryDefinition
+        {
+            StoryId = "trunk-s3",
+            Title = "Trunchi — Flacăra Creativității",
+            CoverImageUrl = "images/biomes/montain.jpg",
+            Category = "main",
+            SortOrder = 5
+        };
+
+        trunk3.Tiles.AddRange(new[]
+        {
+            new StoryTile { TileId = "p1", Type = "page", SortOrder = 1, Caption = "Inspirația", Text = "Creativitatea este ca o flacără care nu se stinge niciodată.", ImageUrl = "images/biomes/montain.jpg" },
+            new StoryTile { TileId = "p2", Type = "page", SortOrder = 2, Caption = "Visul", Text = "Visurile devin realitate prin acțiune.", ImageUrl = "images/biomes/steppe.jpg" },
+            new StoryTile { TileId = "p3", Type = "page", SortOrder = 3, Caption = "Creația", Text = "Creezi nu doar pentru tine, ci pentru lumea întreagă.", ImageUrl = "images/biomes/tropical.jpg" }
+        });
+
+        var trunk3Quiz = new StoryTile { TileId = "q1", Type = "quiz", SortOrder = 4, Question = "Ce înseamnă să fii creativ?" };
+        trunk3Quiz.Answers.AddRange(new[]
+        {
+            new StoryAnswer { AnswerId = "a", Text = "Să găsești soluții noi", Reward = "Cheile Soluțiilor", SortOrder = 1 },
+            new StoryAnswer { AnswerId = "b", Text = "Să vezi frumusețea", Reward = "Ochii Frumuseții", SortOrder = 2 },
+            new StoryAnswer { AnswerId = "c", Text = "Să dai viață ideilor", Reward = "Sufletul Ideilor", SortOrder = 3 }
+        });
+        trunk3.Tiles.Add(trunk3Quiz);
+        stories.Add(trunk3);
 
         return stories;
     }

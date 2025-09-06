@@ -21,6 +21,11 @@ public class XooDbContext : DbContext
     public DbSet<HeroProgress> HeroProgress => Set<HeroProgress>();
     public DbSet<HeroTreeProgress> HeroTreeProgress => Set<HeroTreeProgress>();
     
+    // Tree of Light Model data
+    public DbSet<TreeRegion> TreeRegions => Set<TreeRegion>();
+    public DbSet<TreeStoryNode> TreeStoryNodes => Set<TreeStoryNode>();
+    public DbSet<TreeUnlockRule> TreeUnlockRules => Set<TreeUnlockRule>();
+    
     // Story System data
     public DbSet<StoryDefinition> StoryDefinitions => Set<StoryDefinition>();
     public DbSet<StoryTile> StoryTiles => Set<StoryTile>();
@@ -294,6 +299,36 @@ public class XooDbContext : DbContext
             e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
         });
 
+        // Tree of Light Model configurations
+        modelBuilder.Entity<TreeRegion>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasMaxLength(50);
+            e.Property(x => x.Label).HasMaxLength(100).IsRequired();
+            e.HasIndex(x => x.Id).IsUnique();
+        });
+
+        modelBuilder.Entity<TreeStoryNode>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.StoryId).HasMaxLength(100).IsRequired();
+            e.Property(x => x.RegionId).HasMaxLength(50).IsRequired();
+            e.HasIndex(x => new { x.StoryId, x.RegionId }).IsUnique();
+            e.HasOne(x => x.Region).WithMany(x => x.Stories).HasForeignKey(x => x.RegionId);
+            e.HasOne(x => x.StoryDefinition).WithMany().HasForeignKey(x => x.StoryId).HasPrincipalKey(s => s.StoryId);
+        });
+
+        modelBuilder.Entity<TreeUnlockRule>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.Type).HasMaxLength(20).IsRequired();
+            e.Property(x => x.FromId).HasMaxLength(100).IsRequired();
+            e.Property(x => x.ToRegionId).HasMaxLength(50).IsRequired();
+            // Note: No FK constraints to allow flexible FromId (can be region or story ID)
+        });
+
         // Story System configurations
         modelBuilder.Entity<StoryDefinition>(e =>
         {
@@ -340,6 +375,9 @@ public class XooDbContext : DbContext
 
         // Config
         modelBuilder.Entity<BuilderConfig>().HasData(new BuilderConfig { Id = 1, BaseUnlockedAnimalCount = 3 });
+
+        // Note: Tree of Light Model seeding moved to TreeOfLightService.SeedTreeModel()
+        // for better control and avoiding FK constraint issues during migrations
 
         base.OnModelCreating(modelBuilder);
     }
