@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 using XooCreator.BA.Data;
 
 namespace XooCreator.BA.Features.TreeOfLight;
@@ -14,6 +15,7 @@ public interface ITreeModelRepository
 public class TreeModelRepository : ITreeModelRepository
 {
     private readonly XooDbContext _context;
+    private const string SeedFilePath = "Data/SeedData/tree-model-seed.json";
 
     public TreeModelRepository(XooDbContext context)
     {
@@ -46,119 +48,152 @@ public class TreeModelRepository : ITreeModelRepository
 
     public async Task SeedTreeModelAsync()
     {
-        // Check if already seeded
-        var existingRegionsCount = await _context.TreeRegions.CountAsync();
-        if (existingRegionsCount > 0) return;
+        // Already seeded? (regions act as presence flag)
+        if (await _context.TreeRegions.AnyAsync()) return;
 
-        // Seed Tree Regions (based on frontend world-model.ts)
-        var regions = new[]
-        {
-            new TreeRegion 
-            { 
-                Id = "root", 
-                Label = "Rădăcină", 
-                ImageUrl = "images/biomes/farm.jpg",
-                PufpufMessage = "Aici e Rădăcina, locul unde totul începe! Curajul tău va înflori aici ca o sămânță magică. 🌱",
-                SortOrder = 1 
-            },
-            new TreeRegion 
-            { 
-                Id = "trunk", 
-                Label = "Trunchi", 
-                ImageUrl = "images/biomes/forest.jpg",
-                PufpufMessage = "Trunchiul e inima copacului! Termină toate cele trei povești aici pentru a debloca prima ramură. Fiecare poveste îți va aduce mai aproape de următorul nivel! 💪",
-                SortOrder = 2 
-            },
-            new TreeRegion 
-            { 
-                Id = "branch-1", 
-                Label = "Ramura 1", 
-                ImageUrl = "images/biomes/desert.jpg",
-                PufpufMessage = "Ramura Întâi - Tărâmul Curajului! Felicitări că ai completat toate poveștile din Trunchi! Aici aventurierii curajoși își testează hotărârea. ⚔️",
-                SortOrder = 3 
-            },
-            new TreeRegion 
-            { 
-                Id = "branch-2", 
-                Label = "Ramura 2", 
-                ImageUrl = "images/biomes/jungle.jpg",
-                PufpufMessage = "Ramura a Doua - Grădina Înțelepciunii! Aici se nasc ideile strălucite și răspunsurile. 🧠",
-                SortOrder = 4 
-            },
-            new TreeRegion 
-            { 
-                Id = "branch-3", 
-                Label = "Ramura 3", 
-                ImageUrl = "images/biomes/montain.jpg",
-                PufpufMessage = "Ramura a Treia - Sanctuarul Creativității! Aici imaginația ta va înflori ca o floare rară. 🎨",
-                SortOrder = 5 
-            }
-        };
+        var seed = await LoadSeedAsync();
 
-        _context.TreeRegions.AddRange(regions);
+        // Map and persist
+        var regions = seed.Regions
+            .OrderBy(r => r.SortOrder)
+            .Select(r => new TreeRegion
+            {
+                Id = r.Id,
+                Label = r.Label,
+                ImageUrl = r.ImageUrl,
+                PufpufMessage = r.PufpufMessage,
+                SortOrder = r.SortOrder
+            }).ToList();
+
+        await _context.TreeRegions.AddRangeAsync(regions);
         await _context.SaveChangesAsync();
 
-        // Seed Tree Story Nodes (based on frontend world-model.ts)
-        var storyNodes = new[]
-        {
-            new TreeStoryNode
+        var storyNodes = seed.StoryNodes
+            .OrderBy(sn => sn.RegionId)
+            .ThenBy(sn => sn.SortOrder)
+            .Select(sn => new TreeStoryNode
             {
-                StoryId = "root-s1",
-                RegionId = "root",
-                RewardImageUrl = "images/homepage/heroes/hero0.jpg",
-                SortOrder = 1
-            },
-            new TreeStoryNode
-            {
-                StoryId = "trunk-s1",
-                RegionId = "trunk",
-                RewardImageUrl = "images/homepage/heroes/hero1.jpg",
-                SortOrder = 1
-            },
-            new TreeStoryNode
-            {
-                StoryId = "trunk-s2",
-                RegionId = "trunk",
-                RewardImageUrl = "images/homepage/heroes/hero2.jpg",
-                SortOrder = 2
-            },
-            new TreeStoryNode
-            {
-                StoryId = "trunk-s3",
-                RegionId = "trunk",
-                RewardImageUrl = "images/homepage/heroes/hero0.jpg",
-                SortOrder = 3
-            }
-        };
+                StoryId = sn.StoryId,
+                RegionId = sn.RegionId,
+                RewardImageUrl = sn.RewardImageUrl,
+                SortOrder = sn.SortOrder
+            }).ToList();
 
-        _context.TreeStoryNodes.AddRange(storyNodes);
+        await _context.TreeStoryNodes.AddRangeAsync(storyNodes);
         await _context.SaveChangesAsync();
 
-        // Seed Tree Unlock Rules (based on frontend world-model.ts)
-        var unlockRules = new[]
-        {
-            // Unlock trunk after root-s1 story completion
-            new TreeUnlockRule
+        var unlockRules = seed.UnlockRules
+            .OrderBy(ur => ur.SortOrder)
+            .Select(ur => new TreeUnlockRule
             {
-                Type = "story",
-                FromId = "root-s1", // story ID
-                ToRegionId = "trunk",
-                StoryId = "root-s1",
-                SortOrder = 1
-            },
-            // Unlock branch-1 after ALL three trunk stories are completed
-            new TreeUnlockRule
-            {
-                Type = "all",
-                FromId = "trunk", // region ID
-                ToRegionId = "branch-1",
-                RequiredStoriesCsv = "trunk-s1,trunk-s2,trunk-s3",
-                SortOrder = 2
-            }
-            // Future: branch-2, branch-3 unlock rules can be added here
-        };
+                Type = ur.Type,
+                FromId = ur.FromId,
+                ToRegionId = ur.ToRegionId,
+                RequiredStoriesCsv = ur.RequiredStoriesCsv,
+                MinCount = ur.MinCount,
+                StoryId = ur.StoryId,
+                SortOrder = ur.SortOrder
+            }).ToList();
 
-        _context.TreeUnlockRules.AddRange(unlockRules);
+        await _context.TreeUnlockRules.AddRangeAsync(unlockRules);
         await _context.SaveChangesAsync();
+    }
+
+    private static readonly JsonSerializerOptions _jsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        ReadCommentHandling = JsonCommentHandling.Skip,
+        AllowTrailingCommas = true
+    };
+
+    private static async Task<TreeModelSeedRoot> LoadSeedAsync()
+    {
+        if (!File.Exists(SeedFilePath))
+        {
+            throw new FileNotFoundException($"Tree model seed file not found at '{SeedFilePath}'.")
+            {
+                HResult = 404
+            };
+        }
+
+        var json = await File.ReadAllTextAsync(SeedFilePath);
+        var data = JsonSerializer.Deserialize<TreeModelSeedRoot>(json, _jsonOptions);
+        if (data == null)
+        {
+            throw new InvalidOperationException("Failed to deserialize tree model seed data.");
+        }
+        ValidateSeed(data);
+        return data;
+    }
+
+    private static void ValidateSeed(TreeModelSeedRoot data)
+    {
+        // Basic validation to prevent silent bad data
+        var regionIds = new HashSet<string>(data.Regions.Select(r => r.Id));
+        foreach (var node in data.StoryNodes)
+        {
+            if (!regionIds.Contains(node.RegionId))
+            {
+                throw new InvalidOperationException($"StoryNode '{node.StoryId}' references unknown region '{node.RegionId}'.")
+                {
+                    HResult = 400
+                };
+            }
+        }
+
+        foreach (var rule in data.UnlockRules)
+        {
+            if (string.IsNullOrWhiteSpace(rule.Type) || string.IsNullOrWhiteSpace(rule.FromId) || string.IsNullOrWhiteSpace(rule.ToRegionId))
+            {
+                throw new InvalidOperationException("UnlockRule has missing mandatory fields (type/fromId/toRegionId).")
+                {
+                    HResult = 400
+                };
+            }
+            if (!regionIds.Contains(rule.ToRegionId))
+            {
+                throw new InvalidOperationException($"UnlockRule targets unknown region '{rule.ToRegionId}'.")
+                {
+                    HResult = 400
+                };
+            }
+        }
+    }
+
+    // Seed DTOs
+    private class TreeModelSeedRoot
+    {
+        public List<TreeRegionSeed> Regions { get; set; } = new();
+        public List<TreeStoryNodeSeed> StoryNodes { get; set; } = new();
+        public List<TreeUnlockRuleSeed> UnlockRules { get; set; } = new();
+    }
+
+    private class TreeRegionSeed
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Label { get; set; } = string.Empty;
+        public string? ImageUrl { get; set; }
+        public string? PufpufMessage { get; set; }
+        public int SortOrder { get; set; }
+    }
+
+    private class TreeStoryNodeSeed
+    {
+        public string StoryId { get; set; } = string.Empty;
+        public string RegionId { get; set; } = string.Empty;
+        public string? RewardImageUrl { get; set; }
+        public int SortOrder { get; set; }
+    }
+
+    private class TreeUnlockRuleSeed
+    {
+        public string Type { get; set; } = string.Empty; // story, all, any
+        public string FromId { get; set; } = string.Empty; // region or story id
+        public string ToRegionId { get; set; } = string.Empty; // target region
+        public string? RequiredStoriesCsv { get; set; } // for all/any
+        public int? MinCount { get; set; } // for any
+        public string? StoryId { get; set; } // for story
+        public int SortOrder { get; set; }
     }
 }
