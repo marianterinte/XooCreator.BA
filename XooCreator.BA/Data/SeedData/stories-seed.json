@@ -2,7 +2,7 @@
   "stories": [
     {
       "storyId": "intro-pufpuf",
-      "title": "�mp?ratul Puf-Puf � C?l?toria �ncepe",
+      "title": "Împăratul Puf-Puf – Călătoria începe",
       "coverImageUrl": "images/tol-intro-story/0.Cover.png",
       "category": "intro",
       "sortOrder": 1,
@@ -11,16 +11,16 @@
           "tileId": "p1",
           "type": "page",
           "sortOrder": 1,
-          "caption": "C?l?toria prin stele",
-          "text": "�mp?ratul Puf-Puf, o pisic? vorbitoare de pe planeta Kelo-Ketis, �?i piloteaz? nava prin Univers. Totul pare lini?tit� p�n? c�nd un zgomot ciudat r?sun? �n cabine.",
+          "caption": "Călătoria prin stele",
+          "text": "Împăratul Puf-Puf, o pisică vorbitoare de pe planeta Kelo-Ketis, își pilotează nava prin Univers. Totul pare liniștit… până când un zgomot ciudat răsună în cabine.",
           "imageUrl": "images/tol-intro-story/1.puf-puf-flying.png"
         },
         {
           "tileId": "p2",
           "type": "page",
           "sortOrder": 2,
-          "caption": "Pr?bu?irea",
-          "text": "Un impact puternic zguduie nava. �mp?ratul Puf-Puf se treze?te pe o planet? necunoscut?: P?m�ntul. Nava e avariat?, iar drumul spre cas? e pierdut.",
+          "caption": "Prăbușirea",
+          "text": "Un impact puternic zguduie nava. Împăratul Puf-Puf se trezește pe o planetă necunoscută: Pământul. Nava e avariată, iar drumul spre casă e pierdut.",
           "imageUrl": "images/tol-intro-story/2.puf-puf-hurt.png"
         },
         {
@@ -28,7 +28,7 @@
           "type": "page",
           "sortOrder": 3,
           "caption": "Vocea cristalului",
-          "text": "Din buzunarul s?u, Puf-Puf scoate un cristal mo?tenit de pe Kelo-Ketis. Acesta �i arat? o hart? str?veche: singura cale de �ntoarcere acas? trece prin Copacul Luminii.",
+          "text": "Din buzunarul său, Puf-Puf scoate un cristal moștenit de pe Kelo-Ketis. Acesta îi arată o hartă străveche: singura cale de întoarcere acasă trece prin Copacul Luminii.",
           "imageUrl": "images/tol-intro-story/3.puf-puf-crystal.png"
         },
         {
@@ -36,36 +36,36 @@
           "type": "page",
           "sortOrder": 4,
           "caption": "Un nou aliat",
-          "text": "Puf-Puf te g?se?te pe P?m�nt. El �?i cere ajutorul: s? repari Copacul Luminii ?i s?-l aju?i s?-?i reg?seasc? drumul spre cas?. �n schimb, te va ghida ?i te va numi Erou al Luminii.",
+          "text": "Puf-Puf te găsește pe Pământ. El îți cere ajutorul: să repari Copacul Luminii și să-l ajuți să-și regăsească drumul spre casă. În schimb, te va ghida și te va numi Erou al Luminii.",
           "imageUrl": "images/tol-intro-story/puf-puf-home-planet.png"
         },
         {
           "tileId": "q1",
           "type": "quiz",
           "sortOrder": 5,
-          "question": "Cum ai reac?iona �n fa?a necunoscutului, c?l?torule?",
+          "question": "Cum ai reacționa în fața necunoscutului, călătorule?",
           "answers": [
             {
               "answerId": "a",
-              "text": "A? merge curajos mai departe.",
+              "text": "Aș merge curajos mai departe.",
               "reward": "Token Courage",
               "sortOrder": 1
             },
             {
               "answerId": "b",
-              "text": "A? pune �ntreb?ri ?i a? observa.",
+              "text": "Aș pune întrebări și aș observa.",
               "reward": "Token Curiosity",
               "sortOrder": 2
             },
             {
               "answerId": "c",
-              "text": "A? analiza situa?ia ?i a? face un plan.",
+              "text": "Aș analiza situația și aș face un plan.",
               "reward": "Token Thinking",
               "sortOrder": 3
             },
             {
               "answerId": "d",
-              "text": "A? �ncerca s? g?sesc o solu?ie ingenioas?.",
+              "text": "Aș încerca să găsesc o soluție ingenioasă.",
               "reward": "Token Creativity",
               "sortOrder": 4
             }
@@ -75,7 +75,7 @@
     },
     {
       "storyId": "root-s1",
-      "title": "Povestea R?d?cinii",
+      "title": "Povestea Rădăcinii",
       "coverImageUrl": "images/homepage/Alchimalia.png",
       "category": "main",
       "sortOrder": 2,
@@ -84,58 +84,58 @@
           "tileId": "p1",
           "type": "page",
           "sortOrder": 1,
-          "caption": "�nceputul c?l?toriei",
-          "text": "La r?d?cina Copacului Luminii porne?te o aventur? plin? de descoperiri.",
+          "caption": "Începutul călătoriei",
+          "text": "La rădăcina Copacului Luminii pornește o aventură plină de descoperiri.",
           "imageUrl": "images/biomes/farm.jpg"
         },
         {
           "tileId": "p2",
           "type": "page",
           "sortOrder": 2,
-          "caption": "Glasul p?m�ntului",
-          "text": "R?d?cinile ad�nci ?optesc pove?ti despre r?bdare ?i putere.",
+          "caption": "Glasul pământului",
+          "text": "Rădăcinile adânci șoptesc povești despre răbdare și putere.",
           "imageUrl": "images/biomes/forest.jpg"
         },
         {
           "tileId": "p3",
           "type": "page",
           "sortOrder": 3,
-          "caption": "�nt�lnirea",
-          "text": "Eroii se �nt�lnesc ?i �?i unesc puterile pentru a porni spre lumin?.",
+          "caption": "Întâlnirea",
+          "text": "Eroii se întâlnesc și își unesc puterile pentru a porni spre lumină.",
           "imageUrl": "images/biomes/steppe.jpg"
         },
         {
           "tileId": "p4",
           "type": "page",
           "sortOrder": 4,
-          "caption": "�ncercarea mic?",
-          "text": "Un obstacol minor le pune la �ncercare �ncrederea.",
+          "caption": "Încercarea mică",
+          "text": "Un obstacol minor le pune la încercare încrederea.",
           "imageUrl": "images/biomes/tropical.jpg"
         },
         {
           "tileId": "p5",
           "type": "page",
           "sortOrder": 5,
-          "caption": "Lec?ia",
-          "text": "�nv??? s? asculte natura ?i s? o protejeze.",
+          "caption": "Lecția",
+          "text": "Învăță să asculte natura și să o protejeze.",
           "imageUrl": "images/biomes/forest.jpg"
         },
         {
           "tileId": "q1",
           "type": "quiz",
           "sortOrder": 6,
-          "question": "Ce ai �nv??at din c?l?toria la r?d?cin??",
+          "question": "Ce ai învățat din călătoria la rădăcină?",
           "answers": [
             {
               "answerId": "a",
-              "text": "Curajul de a �ncepe",
+              "text": "Curajul de a începe",
               "reward": "Insigna Curajului",
               "sortOrder": 1
             },
             {
               "answerId": "b",
-              "text": "S? ascul?i natura",
-              "reward": "Medalia �n?elepciunii",
+              "text": "Să asculți natura",
+              "reward": "Medalia Înțelepciunii",
               "sortOrder": 2
             },
             {
@@ -150,7 +150,7 @@
     },
     {
       "storyId": "trunk-s1",
-      "title": "Trunchi � V�ntul Direc?iei",
+      "title": "Trunchi – Vântul Direcției",
       "coverImageUrl": "images/biomes/forest.jpg",
       "category": "main",
       "sortOrder": 3,
@@ -159,16 +159,16 @@
           "tileId": "p1",
           "type": "page",
           "sortOrder": 1,
-          "caption": "Drumul �n sus",
-          "text": "Pe trunchi, pa?ii devin mai hot?r�?i.",
+          "caption": "Drumul în sus",
+          "text": "Pe trunchi, pașii devin mai hotărâți.",
           "imageUrl": "images/biomes/forest.jpg"
         },
         {
           "tileId": "p2",
           "type": "page",
           "sortOrder": 2,
-          "caption": "�ndoiala",
-          "text": "Un v�nt rece aduce �ntreb?ri. �naint?m?",
+          "caption": "Îndoiala",
+          "text": "Un vânt rece aduce întrebări. Înaintăm?",
           "imageUrl": "images/biomes/montain.jpg"
         },
         {
@@ -176,14 +176,14 @@
           "type": "page",
           "sortOrder": 3,
           "caption": "Semne",
-          "text": "Frunzele fo?nesc �ntr-un ritm care d? curaj.",
+          "text": "Frunzele foșnesc într-un ritm care dă curaj.",
           "imageUrl": "images/biomes/jungle.jpg"
         },
         {
           "tileId": "q1",
           "type": "quiz",
           "sortOrder": 4,
-          "question": "Ce te ghideaz? pe drumul ales?",
+          "question": "Ce te ghidează pe drumul ales?",
           "answers": [
             {
               "answerId": "a",
@@ -199,8 +199,8 @@
             },
             {
               "answerId": "c",
-              "text": "R?bdarea",
-              "reward": "Ceasul R?bd?rii",
+              "text": "Răbdarea",
+              "reward": "Ceasul Răbdării",
               "sortOrder": 3
             }
           ]
@@ -209,7 +209,7 @@
     },
     {
       "storyId": "trunk-s2",
-      "title": "Trunchi � Lumina �n?elepciunii",
+      "title": "Trunchi – Lumina Înțelepciunii",
       "coverImageUrl": "images/biomes/jungle.jpg",
       "category": "main",
       "sortOrder": 4,
@@ -218,8 +218,8 @@
           "tileId": "p1",
           "type": "page",
           "sortOrder": 1,
-          "caption": "�n?elepciunea",
-          "text": "�n trunchi, fiecare �ntrebare devine o lec?ie.",
+          "caption": "Înțelepciunea",
+          "text": "În trunchi, fiecare întrebare devine o lecție.",
           "imageUrl": "images/biomes/jungle.jpg"
         },
         {
@@ -227,38 +227,38 @@
           "type": "page",
           "sortOrder": 2,
           "caption": "Misterul",
-          "text": "Un mister str?vechi se dezv?luie printre frunze.",
+          "text": "Un mister străvechi se dezvăluie printre frunze.",
           "imageUrl": "images/biomes/montain.jpg"
         },
         {
           "tileId": "p3",
           "type": "page",
           "sortOrder": 3,
-          "caption": "R?spunsul",
-          "text": "R?spunsul vine din interior, nu din exterior.",
+          "caption": "Răspunsul",
+          "text": "Răspunsul vine din interior, nu din exterior.",
           "imageUrl": "images/biomes/desert.jpg"
         },
         {
           "tileId": "q1",
           "type": "quiz",
           "sortOrder": 4,
-          "question": "Unde g?se?ti adev?rata �n?elepciune?",
+          "question": "Unde găsești adevărata înțelepciune?",
           "answers": [
             {
               "answerId": "a",
-              "text": "�n c?r?i",
-              "reward": "Cartea �n?elepciunii",
+              "text": "În cărți",
+              "reward": "Cartea Înțelepciunii",
               "sortOrder": 1
             },
             {
               "answerId": "b",
-              "text": "�n experien??",
-              "reward": "Oglinda Experien?ei",
+              "text": "În experiență",
+              "reward": "Oglinda Experienței",
               "sortOrder": 2
             },
             {
               "answerId": "c",
-              "text": "�n inim?",
+              "text": "În inimă",
               "reward": "Cristalul Inimii",
               "sortOrder": 3
             }
@@ -268,7 +268,7 @@
     },
     {
       "storyId": "trunk-s3",
-      "title": "Trunchi � Flac?ra Creativit??ii",
+      "title": "Trunchi – Flacăra Creativității",
       "coverImageUrl": "images/biomes/montain.jpg",
       "category": "main",
       "sortOrder": 5,
@@ -277,8 +277,8 @@
           "tileId": "p1",
           "type": "page",
           "sortOrder": 1,
-          "caption": "Inspira?ia",
-          "text": "Creativitatea este ca o flac?r? care nu se stinge niciodat?.",
+          "caption": "Inspirația",
+          "text": "Creativitatea este ca o flacără care nu se stinge niciodată.",
           "imageUrl": "images/biomes/montain.jpg"
         },
         {
@@ -286,38 +286,38 @@
           "type": "page",
           "sortOrder": 2,
           "caption": "Visul",
-          "text": "Visurile devin realitate prin ac?iune.",
+          "text": "Visurile devin realitate prin acțiune.",
           "imageUrl": "images/biomes/steppe.jpg"
         },
         {
           "tileId": "p3",
           "type": "page",
           "sortOrder": 3,
-          "caption": "Crea?ia",
-          "text": "Creezi nu doar pentru tine, ci pentru lumea �ntreag?.",
+          "caption": "Creația",
+          "text": "Creezi nu doar pentru tine, ci pentru lumea întreagă.",
           "imageUrl": "images/biomes/tropical.jpg"
         },
         {
           "tileId": "q1",
           "type": "quiz",
           "sortOrder": 4,
-          "question": "Ce �nseamn? s? fii creativ?",
+          "question": "Ce înseamnă să fii creativ?",
           "answers": [
             {
               "answerId": "a",
-              "text": "S? g?se?ti solu?ii noi",
-              "reward": "Cheile Solu?iilor",
+              "text": "Să găsești soluții noi",
+              "reward": "Cheile Soluțiilor",
               "sortOrder": 1
             },
             {
               "answerId": "b",
-              "text": "S? vezi frumuse?ea",
-              "reward": "Ochii Frumuse?ii",
+              "text": "Să vezi frumusețea",
+              "reward": "Ochii Frumuseții",
               "sortOrder": 2
             },
             {
               "answerId": "c",
-              "text": "S? dai via?? ideilor",
+              "text": "Să dai viață ideilor",
               "reward": "Sufletul Ideilor",
               "sortOrder": 3
             }
