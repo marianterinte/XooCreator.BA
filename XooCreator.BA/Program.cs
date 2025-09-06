@@ -7,6 +7,7 @@ using XooCreator.BA.Data.Repositories;
 using XooCreator.BA.Endpoints;
 using XooCreator.BA.Services;
 using XooCreator.BA.Features.TreeOfLight;
+using XooCreator.BA.Features.Stories;
 using XooCreator.BA.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -102,19 +103,27 @@ builder.Services.AddScoped<ICreatureBuilderService, CreatureBuilderService>();
 builder.Services.AddScoped<ITreeOfLightRepository, TreeOfLightRepository>();
 builder.Services.AddScoped<ITreeOfLightService, TreeOfLightService>();
 
+// Stories Services
+builder.Services.AddScoped<IStoriesRepository, StoriesRepository>();
+builder.Services.AddScoped<IStoriesService, StoriesService>();
+
 var app = builder.Build();
 
 // Auto-migrate database on startup (for Railway)
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<XooDbContext>();
+    var storiesService = scope.ServiceProvider.GetRequiredService<IStoriesService>();
+    
     try
     {
         context.Database.Migrate();
+        // Initialize stories after migration
+        await storiesService.InitializeStoriesAsync();
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Migration failed: {ex.Message}");
+        Console.WriteLine($"Migration or initialization failed: {ex.Message}");
     }
 }
 

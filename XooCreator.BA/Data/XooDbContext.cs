@@ -20,6 +20,12 @@ public class XooDbContext : DbContext
     public DbSet<UserTokens> UserTokens => Set<UserTokens>();
     public DbSet<HeroProgress> HeroProgress => Set<HeroProgress>();
     public DbSet<HeroTreeProgress> HeroTreeProgress => Set<HeroTreeProgress>();
+    
+    // Story System data
+    public DbSet<StoryDefinition> StoryDefinitions => Set<StoryDefinition>();
+    public DbSet<StoryTile> StoryTiles => Set<StoryTile>();
+    public DbSet<StoryAnswer> StoryAnswers => Set<StoryAnswer>();
+    public DbSet<UserStoryReadProgress> UserStoryReadProgress => Set<UserStoryReadProgress>();
 
     // Builder data
     public DbSet<BodyPart> BodyParts => Set<BodyPart>();
@@ -285,6 +291,40 @@ public class XooDbContext : DbContext
             e.HasKey(x => x.Id);
             e.Property(x => x.Id).ValueGeneratedOnAdd();
             e.HasIndex(x => new { x.UserId, x.NodeId }).IsUnique();
+            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
+        });
+
+        // Story System configurations
+        modelBuilder.Entity<StoryDefinition>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.HasIndex(x => x.StoryId).IsUnique();
+            e.HasMany(x => x.Tiles).WithOne(x => x.StoryDefinition).HasForeignKey(x => x.StoryDefinitionId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<StoryTile>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.HasIndex(x => new { x.StoryDefinitionId, x.TileId }).IsUnique();
+            e.HasOne(x => x.StoryDefinition).WithMany(x => x.Tiles).HasForeignKey(x => x.StoryDefinitionId);
+            e.HasMany(x => x.Answers).WithOne(x => x.StoryTile).HasForeignKey(x => x.StoryTileId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<StoryAnswer>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.HasIndex(x => new { x.StoryTileId, x.AnswerId }).IsUnique();
+            e.HasOne(x => x.StoryTile).WithMany(x => x.Answers).HasForeignKey(x => x.StoryTileId);
+        });
+
+        modelBuilder.Entity<UserStoryReadProgress>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.HasIndex(x => new { x.UserId, x.StoryId, x.TileId }).IsUnique();
             e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
         });
 
