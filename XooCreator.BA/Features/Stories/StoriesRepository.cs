@@ -35,7 +35,8 @@ public class StoriesRepository : IStoriesRepository
 
     public async Task<StoryContentDto?> GetStoryByIdAsync(string storyId)
     {
-        var story = await _context.StoryDefinitions
+    storyId = NormalizeStoryId(storyId);
+    var story = await _context.StoryDefinitions
             .Include(s => s.Tiles)
                 .ThenInclude(t => t.Answers)
             .FirstOrDefaultAsync(s => s.StoryId == storyId && s.IsActive);
@@ -45,6 +46,7 @@ public class StoriesRepository : IStoriesRepository
 
     public async Task<List<UserStoryProgressDto>> GetUserStoryProgressAsync(Guid userId, string storyId)
     {
+    storyId = NormalizeStoryId(storyId);
         var progress = await _context.UserStoryReadProgress
             .Where(p => p.UserId == userId && p.StoryId == storyId)
             .ToListAsync();
@@ -61,6 +63,7 @@ public class StoriesRepository : IStoriesRepository
     {
         try
         {
+            storyId = NormalizeStoryId(storyId);
             var existing = await _context.UserStoryReadProgress
                 .FirstOrDefaultAsync(p => p.UserId == userId && p.StoryId == storyId && p.TileId == tileId);
 
@@ -139,6 +142,7 @@ public class StoriesRepository : IStoriesRepository
         // Intro Story
         var introStory = new StoryDefinition
         {
+            // Stored canonical ID remains without extra hyphen; alias "intro-puf-puf" accepted via NormalizeStoryId
             StoryId = "intro-pufpuf",
             Title = "Împăratul Puf-Puf – Călătoria începe",
             CoverImageUrl = "images/tol-intro-story/0.Cover.png",
@@ -323,5 +327,12 @@ public class StoriesRepository : IStoriesRepository
         // (truncating for brevity, but would include all stories from sample-story.data.ts)
 
         return stories;
+    }
+
+    private static string NormalizeStoryId(string storyId)
+    {
+        if (string.Equals(storyId, "intro-puf-puf", StringComparison.OrdinalIgnoreCase))
+            return "intro-pufpuf";
+        return storyId;
     }
 }

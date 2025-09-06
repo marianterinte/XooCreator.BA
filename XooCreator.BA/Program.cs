@@ -145,8 +145,9 @@ else
 }
 
 // Map endpoints by domain
-app.MapControllers();
+app.MapControllers(); // Left for any remaining controllers (can be removed later if none)
 app.MapCreatureBuilderEndpoints();
 app.MapSystemEndpoints();
+app.MapStoryEndpoints();
 
 app.Run();

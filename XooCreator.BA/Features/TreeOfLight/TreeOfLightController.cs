@@ -28,12 +28,23 @@ public class TreeOfLightController : ControllerBase
         return Ok(progress);
     }
 
+    // Deprecated: returns completed stories (user story progress). Use GET /api/tree-of-light/user-progress instead.
     [HttpGet("stories")]
-    public async Task<ActionResult<List<StoryProgressDto>>> GetStoryProgress()
+    [Obsolete("Use /api/tree-of-light/user-progress")] 
+    public async Task<ActionResult<List<StoryProgressDto>>> GetStoryProgressLegacy()
     {
         var userId = await _userContext.GetUserIdAsync();
         if (userId == null) return Unauthorized();
+        var stories = await _service.GetStoryProgressAsync(userId.Value);
+        return Ok(stories);
+    }
 
+    // New clearer route for user story completion progress
+    [HttpGet("user-progress")]
+    public async Task<ActionResult<List<StoryProgressDto>>> GetUserStoryProgress()
+    {
+        var userId = await _userContext.GetUserIdAsync();
+        if (userId == null) return Unauthorized();
         var stories = await _service.GetStoryProgressAsync(userId.Value);
         return Ok(stories);
     }
