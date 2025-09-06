@@ -11,7 +11,7 @@ public class GetStoriesEndpoint
     private readonly IStoriesService _storiesService;
     public GetStoriesEndpoint(IStoriesService storiesService) => _storiesService = storiesService;
 
-    [Route("/api/stories")] // GET /api/stories
+    [Route("/api/stories")]
     public static async Task<Ok<GetStoriesResponse>> HandleGet([FromServices] GetStoriesEndpoint ep)
     {
         var result = await ep._storiesService.GetAllStoriesAsync();

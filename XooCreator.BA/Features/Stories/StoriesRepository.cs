@@ -219,8 +219,8 @@ public class StoriesRepository : IStoriesRepository
             SortOrder = 2
         };
 
-        rootStory.Tiles.AddRange(new[]
-        {
+        rootStory.Tiles.AddRange(
+        [
             new StoryTile
             {
                 TileId = "p1",
@@ -266,7 +266,7 @@ public class StoriesRepository : IStoriesRepository
                 Text = "Învăță să asculte natura și să o protejeze.",
                 ImageUrl = "images/biomes/forest.jpg"
             }
-        });
+        ]);
 
         var rootQuizTile = new StoryTile
         {
