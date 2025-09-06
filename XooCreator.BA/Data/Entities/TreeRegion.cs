@@ -4,8 +4,6 @@ public class TreeRegion
 {
     public string Id { get; set; } = string.Empty; // root, trunk, branch-1, etc.
     public string Label { get; set; } = string.Empty; // Rădăcină, Trunchi, etc.
-    public int X { get; set; }
-    public int Y { get; set; }
     public string? ImageUrl { get; set; }
     public string? PufpufMessage { get; set; }
     public int SortOrder { get; set; }

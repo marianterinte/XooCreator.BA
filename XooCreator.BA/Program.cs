@@ -103,6 +103,8 @@ builder.Services.AddScoped<ICreatureBuilderService, CreatureBuilderService>();
 // Tree of Light Services
 builder.Services.AddScoped<ITreeOfLightRepository, TreeOfLightRepository>();
 builder.Services.AddScoped<ITreeOfLightService, TreeOfLightService>();
+builder.Services.AddScoped<ITreeModelRepository, TreeModelRepository>();
+builder.Services.AddScoped<ITreeModelService, TreeModelService>();
 
 // Stories Services
 builder.Services.AddScoped<IStoriesRepository, StoriesRepository>();
@@ -115,12 +117,15 @@ using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<XooDbContext>();
     var storiesService = scope.ServiceProvider.GetRequiredService<IStoriesService>();
+    var treeModelService = scope.ServiceProvider.GetRequiredService<ITreeModelService>();
     
     try
     {
         context.Database.Migrate();
         // Initialize stories after migration
         await storiesService.InitializeStoriesAsync();
+        // Initialize tree model after stories are seeded
+        await treeModelService.InitializeTreeModelAsync();
     }
     catch (Exception ex)
     {

@@ -1,3 +1,5 @@
+using XooCreator.BA.Data;
+
 namespace XooCreator.BA.Features.TreeOfLight;
 
 public interface ITreeModelService
@@ -39,8 +41,6 @@ public class TreeModelService : ITreeModelService
                 {
                     Id = r.Id,
                     Label = r.Label,
-                    X = r.X,
-                    Y = r.Y,
                     ImageUrl = r.ImageUrl,
                     PufpufMessage = r.PufpufMessage,
                     SortOrder = r.SortOrder
@@ -51,8 +51,6 @@ public class TreeModelService : ITreeModelService
                     Id = sn.StoryId,
                     Label = sn.StoryDefinition?.Title ?? sn.StoryId,
                     RegionId = sn.RegionId,
-                    X = sn.X,
-                    Y = sn.Y,
                     RewardImageUrl = sn.RewardImageUrl,
                     SortOrder = sn.SortOrder
                 }).ToList(),

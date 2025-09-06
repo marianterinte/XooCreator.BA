@@ -82,8 +82,6 @@ namespace XooCreator.BA.Migrations
                 {
                     Id = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Label = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    X = table.Column<int>(type: "integer", nullable: false),
-                    Y = table.Column<int>(type: "integer", nullable: false),
                     ImageUrl = table.Column<string>(type: "text", nullable: true),
                     PufpufMessage = table.Column<string>(type: "text", nullable: true),
                     SortOrder = table.Column<int>(type: "integer", nullable: false),
@@ -187,8 +185,6 @@ namespace XooCreator.BA.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     StoryId = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     RegionId = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    X = table.Column<int>(type: "integer", nullable: false),
-                    Y = table.Column<int>(type: "integer", nullable: false),
                     RewardImageUrl = table.Column<string>(type: "text", nullable: true),
                     SortOrder = table.Column<int>(type: "integer", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -573,7 +569,7 @@ namespace XooCreator.BA.Migrations
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "Id", "Auth0Sub", "CreatedAt", "DisplayName" },
-                values: new object[] { new Guid("11111111-1111-1111-1111-111111111111"), "test-user-sub", new DateTime(2025, 9, 6, 12, 53, 16, 754, DateTimeKind.Utc).AddTicks(3008), "Test User" });
+                values: new object[] { new Guid("11111111-1111-1111-1111-111111111111"), "test-user-sub", new DateTime(2025, 9, 6, 13, 4, 20, 985, DateTimeKind.Utc).AddTicks(3940), "Test User" });
 
             migrationBuilder.InsertData(
                 table: "Animals",

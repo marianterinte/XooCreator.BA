@@ -57,8 +57,6 @@ public class TreeModelRepository : ITreeModelRepository
             { 
                 Id = "root", 
                 Label = "Rădăcină", 
-                X = 0, 
-                Y = 120, 
                 ImageUrl = "images/biomes/farm.jpg",
                 PufpufMessage = "Aici e Rădăcina, locul unde totul începe! Curajul tău va înflori aici ca o sămânță magică. 🌱",
                 SortOrder = 1 
@@ -67,8 +65,6 @@ public class TreeModelRepository : ITreeModelRepository
             { 
                 Id = "trunk", 
                 Label = "Trunchi", 
-                X = 0, 
-                Y = -100, 
                 ImageUrl = "images/biomes/forest.jpg",
                 PufpufMessage = "Trunchiul e inima copacului! Termină toate cele trei povești aici pentru a debloca prima ramură. Fiecare poveste îți va aduce mai aproape de următorul nivel! 💪",
                 SortOrder = 2 
@@ -77,8 +73,6 @@ public class TreeModelRepository : ITreeModelRepository
             { 
                 Id = "branch-1", 
                 Label = "Ramura 1", 
-                X = -260, 
-                Y = -260, 
                 ImageUrl = "images/biomes/desert.jpg",
                 PufpufMessage = "Ramura Întâi - Tărâmul Curajului! Felicitări că ai completat toate poveștile din Trunchi! Aici aventurierii curajoși își testează hotărârea. ⚔️",
                 SortOrder = 3 
@@ -87,8 +81,6 @@ public class TreeModelRepository : ITreeModelRepository
             { 
                 Id = "branch-2", 
                 Label = "Ramura 2", 
-                X = 0, 
-                Y = -260, 
                 ImageUrl = "images/biomes/jungle.jpg",
                 PufpufMessage = "Ramura a Doua - Grădina Înțelepciunii! Aici se nasc ideile strălucite și răspunsurile. 🧠",
                 SortOrder = 4 
@@ -97,8 +89,6 @@ public class TreeModelRepository : ITreeModelRepository
             { 
                 Id = "branch-3", 
                 Label = "Ramura 3", 
-                X = 260, 
-                Y = -260, 
                 ImageUrl = "images/biomes/montain.jpg",
                 PufpufMessage = "Ramura a Treia - Sanctuarul Creativității! Aici imaginația ta va înflori ca o floare rară. 🎨",
                 SortOrder = 5 
@@ -115,8 +105,6 @@ public class TreeModelRepository : ITreeModelRepository
             {
                 StoryId = "root-s1",
                 RegionId = "root",
-                X = -80,
-                Y = 10,
                 RewardImageUrl = "images/homepage/heroes/hero0.jpg",
                 SortOrder = 1
             },
@@ -124,8 +112,6 @@ public class TreeModelRepository : ITreeModelRepository
             {
                 StoryId = "trunk-s1",
                 RegionId = "trunk",
-                X = -110,
-                Y = -180,
                 RewardImageUrl = "images/homepage/heroes/hero1.jpg",
                 SortOrder = 1
             },
@@ -133,8 +119,6 @@ public class TreeModelRepository : ITreeModelRepository
             {
                 StoryId = "trunk-s2",
                 RegionId = "trunk",
-                X = 0,
-                Y = -180,
                 RewardImageUrl = "images/homepage/heroes/hero2.jpg",
                 SortOrder = 2
             },
@@ -142,8 +126,6 @@ public class TreeModelRepository : ITreeModelRepository
             {
                 StoryId = "trunk-s3",
                 RegionId = "trunk",
-                X = 110,
-                Y = -180,
                 RewardImageUrl = "images/homepage/heroes/hero0.jpg",
                 SortOrder = 3
             }

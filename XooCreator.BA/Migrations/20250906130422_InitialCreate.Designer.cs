@@ -12,7 +12,7 @@ using XooCreator.BA.Data;
 namespace XooCreator.BA.Migrations
 {
     [DbContext(typeof(XooDbContext))]
-    [Migration("20250906125317_InitialCreate")]
+    [Migration("20250906130422_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -1728,12 +1728,6 @@ namespace XooCreator.BA.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("X")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Y")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
 
                     b.HasIndex("Id")
@@ -1771,12 +1765,6 @@ namespace XooCreator.BA.Migrations
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("X")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Y")
-                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -1863,7 +1851,7 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
                             Auth0Sub = "test-user-sub",
-                            CreatedAt = new DateTime(2025, 9, 6, 12, 53, 16, 754, DateTimeKind.Utc).AddTicks(3008),
+                            CreatedAt = new DateTime(2025, 9, 6, 13, 4, 20, 985, DateTimeKind.Utc).AddTicks(3940),
                             DisplayName = "Test User"
                         });
                 });
