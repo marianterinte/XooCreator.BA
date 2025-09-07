@@ -17,10 +17,10 @@ cmds = [
   "echo \"Building from directory: $(pwd)\"",
   "echo \"Directory contents:\"",
   "ls -la",
-  "echo \"Dotnet info:\"",
-  "dotnet --info",
+  "echo \"Dotnet info (build stage):\"",
+  "dotnet --info || true",
   "echo \"Restoring XooCreator.BA.csproj...\"",
-  "dotnet restore XooCreator.BA.csproj --verbosity normal"
+  "dotnet restore XooCreator.BA.csproj --verbosity minimal"
 ]
 cacheDirectories = ["/root/.nuget/packages"]
 
@@ -29,34 +29,33 @@ cacheDirectories = ["/root/.nuget/packages"]
 cmds = [
   "set -e",
   "echo \"Publishing project: XooCreator.BA.csproj\"",
-  "dotnet publish XooCreator.BA.csproj -c Release -o ./out --verbosity normal",
+  "dotnet publish XooCreator.BA.csproj -c Release -o ./out --no-restore --verbosity minimal",
   "echo \"Checking published files:\"",
   "ls -la ./out/",
   "echo \"Verifying XooCreator.BA.dll exists:\"",
-  "test -f ./out/XooCreator.BA.dll && echo \"XooCreator.BA.dll found\" || echo \"ERROR: XooCreator.BA.dll not found!\""
+  "test -f ./out/XooCreator.BA.dll && echo \"XooCreator.BA.dll found\" || (echo \"ERROR: XooCreator.BA.dll not found!\"; exit 1)"
 ]
 
 [start]
-# Start the published dll (works whether root is repo/ or /XooCreator.BA)
+# Remove global.json so runtime container (without SDK) doesn't print SDK resolution warning
 cmd = """
-echo "Starting application from $(pwd)"
-echo "Checking for XooCreator.BA.dll..."
+echo \"Starting application from $(pwd)\"
+# If running in a trimmed runtime image without SDK, global.json causes noisy warning, remove it safely
+[ -f global.json ] && rm -f global.json || true
 if [ -f ./out/XooCreator.BA.dll ]; then
-  echo "Found XooCreator.BA.dll, starting application..."
+  echo \"Running dotnet app...\>"
   exec dotnet ./out/XooCreator.BA.dll
 else
-  echo "ERROR: ./out/XooCreator.BA.dll not found!"
-  echo "Directory contents:"
-  ls -la .
-  echo "Out directory contents:"
-  ls -la ./out/ || echo "Out directory does not exist"
+  echo \"ERROR: ./out/XooCreator.BA.dll not found!\>"
+  ls -la . || true
+  ls -la ./out/ || echo \"Out directory missing\"
   exit 1
 fi
 """
 
 [variables]
-# Port binding handled by Program.cs which reads PORT env var
-# ASPNETCORE_URLS = "http://0.0.0.0:$PORT"  # Disabled - Program.cs handles this
+# Bind to the port provided by Railway (also handled by Program.cs)
+ASPNETCORE_URLS = "http://0.0.0.0:${PORT}"
 # Use full globalization with ICU installed
 DOTNET_SYSTEM_GLOBALIZATION_INVARIANT = "false"
 # Reduce noisy banners
