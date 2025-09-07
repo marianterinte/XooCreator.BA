@@ -55,8 +55,8 @@ fi
 """
 
 [variables]
-# Bind to the port provided by Railway (also handled by Program.cs)
-ASPNETCORE_URLS = "http://0.0.0.0:${PORT}"
+# Port binding handled by Program.cs which reads PORT env var
+# ASPNETCORE_URLS = "http://0.0.0.0:$PORT"  # Disabled - Program.cs handles this
 # Use full globalization with ICU installed
 DOTNET_SYSTEM_GLOBALIZATION_INVARIANT = "false"
 # Reduce noisy banners

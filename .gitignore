@@ -62,6 +62,5 @@ nunit-*.xml
 out/
 publish/
 
-# Local testing scripts
-test-railway-config.sh
+# Local testing scripts (keeping test-railway-config.sh as it's referenced in documentation)
 package-lock.json
