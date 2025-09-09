@@ -4,7 +4,6 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "dotnet ./out/XooCreator.BA.dll",
     "healthcheckPath": "/swagger",
     "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",
