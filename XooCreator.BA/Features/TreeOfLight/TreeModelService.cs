@@ -90,7 +90,8 @@ public class TreeModelService : ITreeModelService
     private List<string> EvaluateUnlockedRegions(List<StoryProgressDto> completedStories, List<TreeUnlockRule> unlockRules)
     {
         var completedStoryIds = new HashSet<string>(completedStories.Select(cs => cs.StoryId));
-        var unlockedRegions = new HashSet<string> { "root" }; // Root is always unlocked
+        // Seed model uses 'gateway' as the initial/root region, so unlock it by default
+        var unlockedRegions = new HashSet<string> { "gateway" };
         
         bool changed;
         do 
