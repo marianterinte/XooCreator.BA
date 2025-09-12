@@ -10,7 +10,7 @@
     {
       "id": "seed",
       "name": "Pisica Puf-Puf",
-      "description": "Companionul tău fidel, începutul călătoriei eroice. El te ghidează prin Copacul Luminii spre planeta Kelo-Ketis.",
+      "description": "Companionul tău fidel, începutul călătoriei eroice spre Kelo-Ketis.",
       "type": "node",
       "costs": {
         "courage": 0,
@@ -24,7 +24,7 @@
       "isUnlocked": true
     },
 
-    // LVL 1 – Eroi de bază
+    // LEVEL 1 – EROI DE BAZĂ
     {
       "id": "hero_brave_puppy",
       "name": "Cățelul Curajos",
@@ -38,7 +38,7 @@
     {
       "id": "hero_curious_cat",
       "name": "Pisica Curioasă",
-      "description": "Explorează fără frică necunoscutul.",
+      "description": "Explorează necunoscutul.",
       "type": "hero",
       "costs": { "curiosity": 1 },
       "prerequisites": [ "seed" ],
@@ -76,7 +76,7 @@
       "isUnlocked": false
     },
 
-    // LVL 2 – Combinații de 2 trăsături
+    // LEVEL 2 – HIBRIZI (2 trăsături)
     {
       "id": "hero_starseeker",
       "name": "Căutătorul de Stele",
@@ -88,19 +88,6 @@
       },
       "prerequisites": [ "hero_brave_puppy", "hero_curious_cat" ],
       "rewards": [ "STARSEEKER Unlock" ],
-      "isUnlocked": false
-    },
-    {
-      "id": "hero_mind_crafter",
-      "name": "Arhitectul Minții",
-      "description": "Gândire + Creativitate = creator de lumi noi.",
-      "type": "hero",
-      "costs": {
-        "thinking": 1,
-        "creativity": 1
-      },
-      "prerequisites": [ "hero_wise_owl", "hero_playful_fox" ],
-      "rewards": [ "MIND_CRAFTER Unlock" ],
       "isUnlocked": false
     },
     {
@@ -117,19 +104,6 @@
       "isUnlocked": false
     },
     {
-      "id": "hero_seer_of_winds",
-      "name": "Vizionarul Vânturilor",
-      "description": "Curiozitate + Gândire = descoperă adevăruri ascunse.",
-      "type": "hero",
-      "costs": {
-        "curiosity": 1,
-        "thinking": 1
-      },
-      "prerequisites": [ "hero_curious_cat", "hero_wise_owl" ],
-      "rewards": [ "SEER_OF_WINDS Unlock" ],
-      "isUnlocked": false
-    },
-    {
       "id": "hero_songweaver",
       "name": "Țesătorul de Cântece",
       "description": "Creativitate + Curiozitate = artist cosmic.",
@@ -142,26 +116,38 @@
       "rewards": [ "SONGWEAVER Unlock" ],
       "isUnlocked": false
     },
-
-    // LVL 3 – Combinații de 3 trăsături
     {
-      "id": "hero_chronos_knight",
-      "name": "Cavalerul Timpului",
-      "description": "Curaj + Gândire + Siguranță = stăpânul echilibrului.",
+      "id": "hero_mind_crafter",
+      "name": "Arhitectul Minții",
+      "description": "Gândire + Creativitate = creator de lumi.",
       "type": "hero",
       "costs": {
-        "courage": 1,
         "thinking": 1,
-        "safety": 1
+        "creativity": 1
       },
-      "prerequisites": [ "hero_brave_puppy", "hero_wise_owl", "hero_guardian_turtle" ],
-      "rewards": [ "CHRONOS_KNIGHT Unlock" ],
+      "prerequisites": [ "hero_wise_owl", "hero_playful_fox" ],
+      "rewards": [ "MIND_CRAFTER Unlock" ],
       "isUnlocked": false
     },
     {
+      "id": "hero_seer_of_winds",
+      "name": "Vizionarul Vânturilor",
+      "description": "Curiozitate + Gândire = descoperă adevăruri ascunse.",
+      "type": "hero",
+      "costs": {
+        "curiosity": 1,
+        "thinking": 1
+      },
+      "prerequisites": [ "hero_curious_cat", "hero_wise_owl" ],
+      "rewards": [ "SEER_OF_WINDS Unlock" ],
+      "isUnlocked": false
+    },
+
+    // LEVEL 3 – TRIPLE
+    {
       "id": "hero_dream_alchemist",
       "name": "Alchimistul Viselor",
-      "description": "Creativitate + Curaj + Curiozitate = transformă ideile în realitate.",
+      "description": "Curaj + Curiozitate + Creativitate = transformă ideile în realitate.",
       "type": "hero",
       "costs": {
         "courage": 1,
@@ -186,8 +172,22 @@
       "rewards": [ "CRYSTAL_SAGE Unlock" ],
       "isUnlocked": false
     },
+    {
+      "id": "hero_chronos_knight",
+      "name": "Cavalerul Timpului",
+      "description": "Curaj + Gândire + Siguranță = stăpânul echilibrului.",
+      "type": "hero",
+      "costs": {
+        "courage": 1,
+        "thinking": 1,
+        "safety": 1
+      },
+      "prerequisites": [ "hero_brave_puppy", "hero_wise_owl", "hero_guardian_turtle" ],
+      "rewards": [ "CHRONOS_KNIGHT Unlock" ],
+      "isUnlocked": false
+    },
 
-    // LVL 4 – Legende
+    // LEVEL 4 – LEGENDE
     {
       "id": "hero_phoenix_guardian",
       "name": "Phoenixul Strălucirii",
@@ -215,20 +215,134 @@
       "isUnlocked": false
     },
 
-    // LVL 10 – Suprem
+    // LEVEL 5–6 – MITICI (4 trăsături)
+    {
+      "id": "hero_sky_architect",
+      "name": "Arhitectul Cerului",
+      "description": "Curaj + Curiozitate + Gândire + Creativitate = clădește poduri între lumi.",
+      "type": "hero",
+      "costs": {
+        "courage": 1,
+        "curiosity": 1,
+        "thinking": 1,
+        "creativity": 1
+      },
+      "prerequisites": [ "hero_dream_alchemist", "hero_crystal_sage" ],
+      "rewards": [ "SKY_ARCHITECT Unlock" ],
+      "isUnlocked": false
+    },
+    {
+      "id": "hero_eternal_guard",
+      "name": "Gardianul Etern",
+      "description": "Siguranță + toate celelalte trăsături = protector universal.",
+      "type": "hero",
+      "costs": {
+        "courage": 1,
+        "curiosity": 1,
+        "thinking": 1,
+        "safety": 2
+      },
+      "prerequisites": [ "hero_chronos_knight", "hero_moon_sentinel" ],
+      "rewards": [ "ETERNAL_GUARD Unlock" ],
+      "isUnlocked": false
+    },
+
+    // LEVEL 7–8 – COSMICI (legați de lumi/planete)
+    {
+      "id": "hero_oceanica_spirit",
+      "name": "Spiritul Oceanica",
+      "description": "Erou cosmic născut din adâncuri acvatice.",
+      "type": "hero",
+      "costs": {
+        "courage": 2,
+        "curiosity": 2,
+        "creativity": 1
+      },
+      "prerequisites": [ "hero_sky_architect" ],
+      "rewards": [ "OCEANICA_SPIRIT Unlock" ],
+      "isUnlocked": false
+    },
+    {
+      "id": "hero_lunaria_oracle",
+      "name": "Oracolul Lunaria",
+      "description": "Vizionar cosmic al tainelor lunare.",
+      "type": "hero",
+      "costs": {
+        "thinking": 2,
+        "curiosity": 2,
+        "safety": 1
+      },
+      "prerequisites": [ "hero_eternal_guard" ],
+      "rewards": [ "LUNARIA_ORACLE Unlock" ],
+      "isUnlocked": false
+    },
+
+    // LEVEL 9 – ARHETIPURI
+    {
+      "id": "hero_archetype_courage",
+      "name": "Arhetipul Curajului",
+      "description": "Esența absolută a curajului pur.",
+      "type": "hero",
+      "costs": { "courage": 3 },
+      "prerequisites": [ "hero_brave_puppy" ],
+      "rewards": [ "ARCHETYPE_COURAGE Unlock" ],
+      "isUnlocked": false
+    },
+    {
+      "id": "hero_archetype_curiosity",
+      "name": "Arhetipul Curiozității",
+      "description": "Manifestarea supremă a explorării.",
+      "type": "hero",
+      "costs": { "curiosity": 3 },
+      "prerequisites": [ "hero_curious_cat" ],
+      "rewards": [ "ARCHETYPE_CURIOSITY Unlock" ],
+      "isUnlocked": false
+    },
+    {
+      "id": "hero_archetype_thinking",
+      "name": "Arhetipul Gândirii",
+      "description": "Înțelepciunea în forma ei pură.",
+      "type": "hero",
+      "costs": { "thinking": 3 },
+      "prerequisites": [ "hero_wise_owl" ],
+      "rewards": [ "ARCHETYPE_THINKING Unlock" ],
+      "isUnlocked": false
+    },
+    {
+      "id": "hero_archetype_creativity",
+      "name": "Arhetipul Creativității",
+      "description": "Forța nemărginită a imaginației.",
+      "type": "hero",
+      "costs": { "creativity": 3 },
+      "prerequisites": [ "hero_playful_fox" ],
+      "rewards": [ "ARCHETYPE_CREATIVITY Unlock" ],
+      "isUnlocked": false
+    },
+    {
+      "id": "hero_archetype_safety",
+      "name": "Arhetipul Siguranței",
+      "description": "Stabilitatea absolută, temelia tuturor eroilor.",
+      "type": "hero",
+      "costs": { "safety": 3 },
+      "prerequisites": [ "hero_guardian_turtle" ],
+      "rewards": [ "ARCHETYPE_SAFETY Unlock" ],
+      "isUnlocked": false
+    },
+
+    // LEVEL 10 – SUPREM
     {
       "id": "hero_alchimalian_dragon",
       "name": "Dragonul Alchimalian",
       "description": "Eroul suprem – întruchiparea tuturor celor cinci trăsături eroice. Doar cei ce au trecut prin toate lumile pot să-l cheme.",
       "type": "hero",
       "costs": {
-        "courage": 2,
-        "curiosity": 2,
-        "thinking": 2,
-        "creativity": 2,
-        "safety": 2
+        "courage": 3,
+        "curiosity": 3,
+        "thinking": 3,
+        "creativity": 3,
+        "safety": 3
       },
-      "prerequisites": [ "hero_brave_puppy", "hero_curious_cat", "hero_wise_owl", "hero_playful_fox", "hero_guardian_turtle" ],
+      "prerequisites": [ "hero_archetype_courage", "hero_archetype_curiosity", "hero_archetype_thinking", "hero_archetype_creativity", "hero_archetype_safety" ],
       "rewards": [ "ALCHIMALIAN_DRAGON Unlock" ],
       "isUnlocked": false
     }
