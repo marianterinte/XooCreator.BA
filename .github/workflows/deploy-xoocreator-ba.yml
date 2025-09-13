@@ -5,10 +5,14 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
+permissions:
+  id-token: write
+  contents: read
+
 env:
   DOTNET_VERSION: '8.0.x'
   WORKING_DIRECTORY: 'XooCreator.BA'
-  PUBLISH_DIR: 'XooCreator.BA/bin/Release/net8.0/publish'
+  PUBLISH_DIR: './publish'
 
 jobs:
   build-and-deploy:
@@ -33,31 +37,40 @@ jobs:
       - name: Publish
         run: dotnet publish XooCreator.BA.csproj --configuration Release --no-build --output ${{ env.PUBLISH_DIR }}
         working-directory: ${{ env.WORKING_DIRECTORY }}
+      
+      - name: Verify Stories folder in publish output
+        run: |
+          echo "Checking if Stories folder exists in publish output..."
+          ls -la ${{ env.WORKING_DIRECTORY }}/${{ env.PUBLISH_DIR }}/Data/SeedData/
+          if [ -d "${{ env.WORKING_DIRECTORY }}/${{ env.PUBLISH_DIR }}/Data/SeedData/Stories" ]; then
+            echo "✓ Stories folder found in publish output"
+            ls -la ${{ env.WORKING_DIRECTORY }}/${{ env.PUBLISH_DIR }}/Data/SeedData/Stories/
+          else
+            echo "⚠️ Stories folder not found in publish output"
+          fi
 
       - name: Azure login
-        uses: azure/login@v1
+        uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          auth-type: SERVICE_PRINCIPAL
 
       - name: Set Azure App Settings (DATABASE_URL, ASPNETCORE_ENVIRONMENT)
-        uses: azure/appservice-settings@v1
-        with:
-          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
-          app-settings-json: |
-            [
-              { "name": "ASPNETCORE_ENVIRONMENT", "value": "Production" },
-              { "name": "DATABASE_URL", "value": "${{ secrets.SUPABASE_DB_URL }}" }
-            ]
+        run: |
+          az webapp config appsettings set \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --name ${{ secrets.AZURE_WEBAPP_NAME }} \
+            --settings \
+              ASPNETCORE_ENVIRONMENT=Production \
+              DATABASE_URL="${{ secrets.SUPABASE_DB_URL }}"
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
-          package: ${{ env.PUBLISH_DIR }}
+          package: ${{ env.WORKING_DIRECTORY }}/${{ env.PUBLISH_DIR }}
 
       # Pas de debug (poți șterge după ce verifici)
       - name: Debug Azure account
