@@ -34,11 +34,15 @@ jobs:
         run: dotnet publish XooCreator.BA.csproj --configuration Release --no-build --output ${{ env.PUBLISH_DIR }}
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
+      - name: Azure login
+        uses: azure/login@v1
+        with:
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+
       - name: Set Azure App Settings (DATABASE_URL, ASPNETCORE_ENVIRONMENT)
         uses: azure/appservice-settings@v1
         with:
           app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           app-settings-json: |
             [
               { "name": "ASPNETCORE_ENVIRONMENT", "value": "Production" },
