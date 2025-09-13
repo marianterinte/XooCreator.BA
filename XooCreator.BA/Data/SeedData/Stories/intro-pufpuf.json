@@ -5,16 +5,63 @@
   "category": "intro",
   "sortOrder": 1,
   "tiles": [
-    { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Chemarea", "text": "Nava lui Puf-Puf e trasă spre Copacul Luminii – o poartă vie între lumi.", "imageUrl": "images/tol-intro-story/1.puf-puf-flying.png" },
-    { "tileId": "p2", "type": "page", "sortOrder": 2, "caption": "Aterizarea", "text": "Pe Terra, cristalul-hartă licărește: drumul spre Kelo-Ketis e presărat cu lumi de explorat.", "imageUrl": "images/tol-intro-story/2.puf-puf-hurt.png" },
-    { "tileId": "p3", "type": "page", "sortOrder": 3, "caption": "Poarta", "text": "Copacul Luminii nu e doar arbore: e un explorator de lumi. Fiecare ramură – un univers.", "imageUrl": "images/tol-intro-story/3.puf-puf-crystal.png" },
-    { "tileId": "p4", "type": "page", "sortOrder": 4, "caption": "Legământul", "text": "Puf-Puf îți cere ajutorul: sari din lume în lume, rezolvă problemele lor și adună tokeni (Curaj, Curiozitate, Gândire, Creativitate, Siguranță) și Fructe speciale pentru Ingineria Animalelor. Cu acești tokeni vei debloca Eroi în Arborele Eroilor. Dacă deblochezi Eroul Luminii, îți va arăta calea către Kelo-Ketis.", "imageUrl": "images/tol-intro-story/puf-puf-home-planet.png" },
-    { "tileId": "q1", "type": "quiz", "sortOrder": 5, "question": "Cum pornești?", "answers": [
-      { "answerId": "a", "text": "Cu ochii deschiși spre mistere", "reward": "token_curiosity", "sortOrder": 1 },
-      { "answerId": "b", "text": "Cu inima hotărâtă",             "reward": "token_courage",   "sortOrder": 2 },
-      { "answerId": "c", "text": "Cu un plan",                    "reward": "token_thinking",  "sortOrder": 3 }
-    ] }
+    {
+      "tileId": "p1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Chemarea",
+      "text": "Nava lui Puf-Puf e trasă spre Copacul Luminii – o poartă vie între lumi.",
+      "imageUrl": "images/tol-intro-story/1.puf-puf-flying.png"
+    },
+    {
+      "tileId": "p2",
+      "type": "page",
+      "sortOrder": 2,
+      "caption": "Aterizarea",
+      "text": "Pe Terra, cristalul-hartă licărește: drumul spre Kelo-Ketis e presărat cu lumi de explorat.",
+      "imageUrl": "images/tol-intro-story/2.puf-puf-hurt.png"
+    },
+    {
+      "tileId": "p3",
+      "type": "page",
+      "sortOrder": 3,
+      "caption": "Poarta",
+      "text": "Copacul Luminii nu e doar arbore: e un explorator de lumi. Fiecare ramură – un univers.",
+      "imageUrl": "images/tol-intro-story/3.puf-puf-crystal.png"
+    },
+    {
+      "tileId": "p4",
+      "type": "page",
+      "sortOrder": 4,
+      "caption": "Legământul",
+      "text": "Puf-Puf îți cere ajutorul: sari din lume în lume, rezolvă problemele lor și adună tokeni (Curaj, Curiozitate, Gândire, Creativitate, Siguranță) și Fructe speciale pentru Ingineria Animalelor. Cu acești tokeni vei debloca Eroi în Arborele Eroilor. Dacă deblochezi Eroul Luminii, îți va arăta calea către Kelo-Ketis.",
+      "imageUrl": "images/tol-intro-story/puf-puf-home-planet.png"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "sortOrder": 5,
+      "question": "Cum pornești?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "Cu ochii deschiși spre mistere",
+          "reward": "token_curiosity",
+          "sortOrder": 1
+        },
+        {
+          "answerId": "b",
+          "text": "Cu inima hotărâtă",
+          "reward": "token_courage",
+          "sortOrder": 2
+        },
+        {
+          "answerId": "c",
+          "text": "Cu un plan",
+          "reward": "token_thinking",
+          "sortOrder": 3
+        }
+      ]
+    }
   ]
 }
-
-
