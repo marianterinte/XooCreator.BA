@@ -1,0 +1,16 @@
+{
+  "storyId": "zephyra-s1",
+  "title": "Zephyra – Poduri de Vânt",
+  "coverImageUrl": "images/worlds/zephyra.jpg",
+  "category": "main",
+  "sortOrder": 17,
+  "tiles": [
+    { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Suspensie", "text": "Construiești trasee aeriene sigure.", "imageUrl": "images/biomes/montain.jpg" },
+    { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Ce prioritate ai?", "answers": [
+      { "answerId": "a", "text": "Siguranță structurală", "reward": "token_safety",   "sortOrder": 1 },
+      { "answerId": "b", "text": "Eficiență",            "reward": "token_thinking", "sortOrder": 2 }
+    ] }
+  ]
+}
+
+

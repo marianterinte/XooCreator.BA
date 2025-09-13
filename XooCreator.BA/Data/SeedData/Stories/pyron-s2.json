@@ -1,0 +1,16 @@
+{
+  "storyId": "pyron-s2",
+  "title": "Pyron – Focul care Creează",
+  "coverImageUrl": "images/worlds/pyron.jpg",
+  "category": "main",
+  "sortOrder": 21,
+  "tiles": [
+    { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Turnare", "text": "Modelezi idei în metal viu.", "imageUrl": "images/biomes/montain.jpg" },
+    { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Ce formă alegi?", "answers": [
+      { "answerId": "a", "text": "Scut",  "reward": "token_safety",    "sortOrder": 1 },
+      { "answerId": "b", "text": "Aripă", "reward": "token_creativity", "sortOrder": 2 }
+    ] }
+  ]
+}
+
+

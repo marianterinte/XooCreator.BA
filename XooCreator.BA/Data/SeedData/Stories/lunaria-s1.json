@@ -1,0 +1,16 @@
+{
+  "storyId": "lunaria-s1",
+  "title": "Lunaria – Umbre Prietenoase",
+  "coverImageUrl": "images/worlds/lunaria.jpg",
+  "category": "main",
+  "sortOrder": 5,
+  "tiles": [
+    { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Labirintul", "text": "Umbrele te ghidează printr-un oraș argintiu.", "imageUrl": "images/biomes/montain.jpg" },
+    { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Cum comunici cu umbrele?", "answers": [
+      { "answerId": "a", "text": "Întrebări simple", "reward": "token_curiosity", "sortOrder": 1 },
+      { "answerId": "b", "text": "Desenez harta",    "reward": "token_thinking",  "sortOrder": 2 }
+    ] }
+  ]
+}
+
+

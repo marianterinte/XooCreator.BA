@@ -1,0 +1,16 @@
+{
+  "storyId": "pyron-s3",
+  "title": "Pyron – Pyro-Pomegranate",
+  "coverImageUrl": "images/worlds/pyron.jpg",
+  "category": "main",
+  "sortOrder": 22,
+  "tiles": [
+    { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Rodul Focului", "text": "Culegi Pyro-Pomegranate, fruct energizant.", "imageUrl": "images/biomes/desert.jpg" },
+    { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Unde îl duci?", "answers": [
+      { "answerId": "a", "text": "Laboratorul de animale", "reward": "fruit_pyro_pomegranate", "sortOrder": 1 },
+      { "answerId": "b", "text": "Forjă",                  "reward": "token_courage",        "sortOrder": 2 }
+    ] }
+  ]
+}
+
+

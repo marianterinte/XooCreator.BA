@@ -1,0 +1,16 @@
+{
+  "storyId": "pyron-s1",
+  "title": "Pyron – Nicovala Stelelor",
+  "coverImageUrl": "images/worlds/pyron.jpg",
+  "category": "main",
+  "sortOrder": 20,
+  "tiles": [
+    { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Fierăria", "text": "Test de curaj: apropiere de mările de lavă.", "imageUrl": "images/biomes/desert.jpg" },
+    { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Cum te protejezi?", "answers": [
+      { "answerId": "a", "text": "Echipament sigur",   "reward": "token_safety",  "sortOrder": 1 },
+      { "answerId": "b", "text": "Antrenament mental", "reward": "token_courage", "sortOrder": 2 }
+    ] }
+  ]
+}
+
+

@@ -1,0 +1,16 @@
+{
+  "storyId": "neptunia-s3",
+  "title": "Neptunia – Perla Nordului",
+  "coverImageUrl": "images/worlds/neptunia.jpg",
+  "category": "main",
+  "sortOrder": 25,
+  "tiles": [
+    { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Descoperire", "text": "Găsești North-Pearl, catalizator rece.", "imageUrl": "images/biomes/montain.jpg" },
+    { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Ce faci cu ea?", "answers": [
+      { "answerId": "a", "text": "Laborator", "reward": "fruit_north_pearl", "sortOrder": 1 },
+      { "answerId": "b", "text": "Arhivă",    "reward": "token_safety",      "sortOrder": 2 }
+    ] }
+  ]
+}
+
+

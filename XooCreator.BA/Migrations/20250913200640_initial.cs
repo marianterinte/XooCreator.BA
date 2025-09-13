@@ -9,7 +9,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace XooCreator.BA.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -569,7 +569,7 @@ namespace XooCreator.BA.Migrations
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "Id", "Auth0Sub", "CreatedAt", "DisplayName" },
-                values: new object[] { new Guid("11111111-1111-1111-1111-111111111111"), "test-user-sub", new DateTime(2025, 9, 6, 13, 4, 20, 985, DateTimeKind.Utc).AddTicks(3940), "Test User" });
+                values: new object[] { new Guid("11111111-1111-1111-1111-111111111111"), "test-user-sub", new DateTime(2025, 9, 13, 20, 6, 39, 744, DateTimeKind.Utc).AddTicks(9495), "Test User" });
 
             migrationBuilder.InsertData(
                 table: "Animals",

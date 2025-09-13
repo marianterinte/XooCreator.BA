@@ -1,0 +1,16 @@
+{
+  "storyId": "aetherion-s1",
+  "title": "Aetherion – Biblioteci de Nori",
+  "coverImageUrl": "images/worlds/aetherion.jpg",
+  "category": "main",
+  "sortOrder": 26,
+  "tiles": [
+    { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Citire Aeriană", "text": "Cărți-nori care se rescriu singure.", "imageUrl": "images/biomes/jungle.jpg" },
+    { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Cum clasifici ideile?", "answers": [
+      { "answerId": "a", "text": "Graf de concepte", "reward": "token_thinking",  "sortOrder": 1 },
+      { "answerId": "b", "text": "Hartă vizuală",    "reward": "token_creativity", "sortOrder": 2 }
+    ] }
+  ]
+}
+
+

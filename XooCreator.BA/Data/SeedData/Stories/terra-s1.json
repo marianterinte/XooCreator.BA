@@ -1,0 +1,16 @@
+{
+  "storyId": "terra-s1",
+  "title": "Terra – Seminte de Drum",
+  "coverImageUrl": "images/worlds/terra.jpg",
+  "category": "main",
+  "sortOrder": 2,
+  "tiles": [
+    { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Grădina", "text": "Ajută fermierii să salveze recolta de la secetă – găsește canalul ascuns.", "imageUrl": "images/biomes/farm.jpg" },
+    { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Ce alegi să faci întâi?", "answers": [
+      { "answerId": "a", "text": "Studiez harta terenurilor", "reward": "token_thinking", "sortOrder": 1 },
+      { "answerId": "b", "text": "Întreb localnicii",         "reward": "token_curiosity", "sortOrder": 2 }
+    ] }
+  ]
+}
+
+

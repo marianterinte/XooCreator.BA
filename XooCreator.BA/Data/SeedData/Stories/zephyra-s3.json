@@ -1,0 +1,16 @@
+{
+  "storyId": "zephyra-s3",
+  "title": "Zephyra – Cheia Aerului",
+  "coverImageUrl": "images/worlds/zephyra.jpg",
+  "category": "main",
+  "sortOrder": 19,
+  "tiles": [
+    { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Cheia", "text": "Primești un filacter care stabilizează curenții.", "imageUrl": "images/biomes/jungle.jpg" },
+    { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Cum o folosești?", "answers": [
+      { "answerId": "a", "text": "Pentru planuri aeriene",     "reward": "token_thinking", "sortOrder": 1 },
+      { "answerId": "b", "text": "Pentru siguranță la înălțime","reward": "token_safety",  "sortOrder": 2 }
+    ] }
+  ]
+}
+
+

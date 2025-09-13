@@ -1,0 +1,17 @@
+{
+  "storyId": "auroria-s3",
+  "title": "Auroria – Sâmburele de Soare",
+  "coverImageUrl": "images/worlds/terra.jpg",
+  "category": "main",
+  "sortOrder": 6,
+  "tiles": [
+    { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Rodul", "text": "Găsești Sun-Seed, o sămânță luminoasă ce încălzește inimi.", "imageUrl": "images/biomes/steppe.jpg" },
+    { "tileId": "p2", "type": "page", "sortOrder": 2, "caption": "Proba", "text": "Cine o poartă trebuie să-și păstreze echilibrul între curaj și grijă.", "imageUrl": "images/biomes/forest.jpg" },
+    { "tileId": "q1", "type": "quiz", "sortOrder": 3, "question": "Ce faci cu sămânța?", "answers": [
+      { "answerId": "a", "text": "O plantez în laborator", "reward": "fruit_sun_seed",   "sortOrder": 1 },
+      { "answerId": "b", "text": "O ofer satului",         "reward": "token_safety",    "sortOrder": 2 }
+    ] }
+  ]
+}
+
+

@@ -1,0 +1,17 @@
+{
+  "storyId": "mechanika-s3",
+  "title": "Mechanika – Steaua din Angrenaj",
+  "coverImageUrl": "images/worlds/pyron.jpg",
+  "category": "main",
+  "sortOrder": 8,
+  "tiles": [
+    { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Descoperire", "text": "Găsești Gear-Star, cristal ce stabilizează ritmul mecanic.", "imageUrl": "images/biomes/desert.jpg" },
+    { "tileId": "p2", "type": "page", "sortOrder": 2, "caption": "Test", "text": "Motorul cântă doar dacă ideea este și sigură și clară.", "imageUrl": "images/biomes/forest.jpg" },
+    { "tileId": "q1", "type": "quiz", "sortOrder": 3, "question": "Unde duci cristalul?", "answers": [
+      { "answerId": "a", "text": "Laboratorul de animale", "reward": "fruit_gear_star", "sortOrder": 1 },
+      { "answerId": "b", "text": "Arhiva orașului",       "reward": "token_thinking",  "sortOrder": 2 }
+    ] }
+  ]
+}
+
+

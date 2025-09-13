@@ -1,0 +1,17 @@
+{
+  "storyId": "nocturna-s3",
+  "title": "Nocturna – Floarea-Stelată",
+  "coverImageUrl": "images/worlds/neptunia.jpg",
+  "category": "main",
+  "sortOrder": 14,
+  "tiles": [
+    { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Floarea", "text": "Găsești Star-Bloom, floare care luminează cu răbdare.", "imageUrl": "images/biomes/forest.jpg" },
+    { "tileId": "p2", "type": "page", "sortOrder": 2, "caption": "Ritmul", "text": "Îi înveți ritmul: trei pulsuri, pauză, două pulsuri.", "imageUrl": "images/biomes/steppe.jpg" },
+    { "tileId": "q1", "type": "quiz", "sortOrder": 3, "question": "Unde o așezi?", "answers": [
+      { "answerId": "a", "text": "Laborator animale", "reward": "fruit_star_bloom", "sortOrder": 1 },
+      { "answerId": "b", "text": "Turnul de semnal",  "reward": "token_curiosity",  "sortOrder": 2 }
+    ] }
+  ]
+}
+
+

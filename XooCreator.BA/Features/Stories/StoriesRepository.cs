@@ -108,26 +108,73 @@ public class StoriesRepository : IStoriesRepository
 
     private static async Task<List<StoryDefinition>> LoadStoriesFromJsonAsync()
     {
-        var jsonPath = Path.Combine("Data", "SeedData", "stories-seed.json");
-        
-        if (!File.Exists(jsonPath))
+        // New preferred source: Data/SeedData/Stories/*.json (one story per file)
+        // Backward compatibility: also merge in any stories from Data/SeedData/stories-seed.json
+        var storiesDir = Path.Combine("Data", "SeedData", "Stories");
+        var legacyPath = Path.Combine("Data", "SeedData", "stories-seed.json");
+
+        var storyMap = new Dictionary<string, StoryDefinition>(StringComparer.OrdinalIgnoreCase);
+
+        if (Directory.Exists(storiesDir))
         {
-            throw new FileNotFoundException($"Stories seed file not found at: {jsonPath}");
+            var files = Directory
+                .EnumerateFiles(storiesDir, "*.json", SearchOption.TopDirectoryOnly)
+                .OrderBy(f => f, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            foreach (var file in files)
+            {
+                var json = await File.ReadAllTextAsync(file);
+                var seed = JsonSerializer.Deserialize<StorySeedData>(json, new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (seed == null)
+                {
+                    throw new InvalidOperationException($"Invalid story seed data in '{file}'.");
+                }
+
+                var def = MapFromSeedData(seed);
+                storyMap[def.StoryId] = def;
+            }
         }
 
-        var jsonContent = await File.ReadAllTextAsync(jsonPath);
-        var seedData = JsonSerializer.Deserialize<StoriesSeedData>(jsonContent, new JsonSerializerOptions
+        if (File.Exists(legacyPath))
         {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            PropertyNameCaseInsensitive = true
-        });
+            var jsonContent = await File.ReadAllTextAsync(legacyPath);
+            var seedData = JsonSerializer.Deserialize<StoriesSeedData>(jsonContent, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                PropertyNameCaseInsensitive = true
+            });
 
-        if (seedData?.Stories == null)
-        {
-            throw new InvalidOperationException("Invalid stories seed data format");
+            if (seedData?.Stories == null)
+            {
+                throw new InvalidOperationException("Invalid stories seed data format");
+            }
+
+            foreach (var s in seedData.Stories)
+            {
+                if (string.IsNullOrWhiteSpace(s.StoryId)) continue;
+                if (!storyMap.ContainsKey(s.StoryId))
+                {
+                    storyMap[s.StoryId] = MapFromSeedData(s);
+                }
+            }
         }
 
-        return seedData.Stories.Select(MapFromSeedData).ToList();
+        if (storyMap.Count == 0)
+        {
+            throw new FileNotFoundException(
+                $"No story seeds found. Checked folder '{storiesDir}' and legacy file '{legacyPath}'.");
+        }
+
+        return storyMap.Values
+            .OrderBy(s => s.SortOrder)
+            .ThenBy(s => s.StoryId, StringComparer.OrdinalIgnoreCase)
+            .ToList();
     }
 
     private static StoryDefinition MapFromSeedData(StorySeedData seedData)

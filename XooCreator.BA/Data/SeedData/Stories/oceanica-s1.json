@@ -1,0 +1,16 @@
+{
+  "storyId": "oceanica-s1",
+  "title": "Oceanica – Coralul Cântător",
+  "coverImageUrl": "images/worlds/oceanica.jpg",
+  "category": "main",
+  "sortOrder": 8,
+  "tiles": [
+    { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Rezonanța", "text": "Cântecul coralilor dezvăluie coordonate ascunse.", "imageUrl": "images/biomes/tropical.jpg" },
+    { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Ce instrument alegi?", "answers": [
+      { "answerId": "a", "text": "Harpa vântului (creativitate)", "reward": "token_creativity", "sortOrder": 1 },
+      { "answerId": "b", "text": "Metronom logic (gândire)",     "reward": "token_thinking",  "sortOrder": 2 }
+    ] }
+  ]
+}
+
+
