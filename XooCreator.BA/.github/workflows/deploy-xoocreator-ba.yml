@@ -1,4 +1,4 @@
-name: Deploy XooCreator.BA to Azure Web App
+﻿name: Deploy XooCreator.BA to Azure Web App
 
 on:
   push:
@@ -56,8 +56,8 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: ${{ env.PUBLISH_DIR }}
 
-
-
+      # Pas de debug (poți șterge după ce verifici)
+      - name: Debug Azure account
+        run: az account show
