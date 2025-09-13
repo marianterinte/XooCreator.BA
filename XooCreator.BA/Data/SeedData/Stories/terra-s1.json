@@ -1,16 +1,103 @@
 {
   "storyId": "terra-s1",
-  "title": "Terra – Seminte de Drum",
-  "coverImageUrl": "images/worlds/terra.jpg",
-  "category": "main",
-  "sortOrder": 2,
+  "title": "Umbra de la Fermă",
+  "coverImageUrl": "images/tol-terra-problem1/0.Cover.png",
+  "category": "terra",
+  "sortOrder": 1,
   "tiles": [
-    { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Grădina", "text": "Ajută fermierii să salveze recolta de la secetă – găsește canalul ascuns.", "imageUrl": "images/biomes/farm.jpg" },
-    { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Ce alegi să faci întâi?", "answers": [
-      { "answerId": "a", "text": "Studiez harta terenurilor", "reward": "token_thinking", "sortOrder": 1 },
-      { "answerId": "b", "text": "Întreb localnicii",         "reward": "token_curiosity", "sortOrder": 2 }
-    ] }
+    {
+      "tileId": "p1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Sosirea",
+      "text": "Călătoria voastră pe Terra vă aduce într-o vale cu câmpuri întinse. Totul pare liniștit, dar fermierii privesc cerul cu teamă.",
+      "imageUrl": "images/tol-terra-problem1/1.arrival.png"
+    },
+    {
+      "tileId": "p2",
+      "type": "page",
+      "sortOrder": 2,
+      "caption": "Tăcerea stranie",
+      "text": "Niciun cocoș nu cântă, niciun câine nu latră. Puf-Puf simte că liniștea e prea grea, ca și cum natura și-ar fi ținut respirația.",
+      "imageUrl": "images/tol-terra-problem1/2.silence.png"
+    },
+    {
+      "tileId": "p3",
+      "type": "page",
+      "sortOrder": 3,
+      "caption": "Șoaptele oamenilor",
+      "text": "Un bătrân se apropie tremurând: ‘E o umbră, domnilor. O umbră ce se coboară din cer la apus. Animalele fug, grânele se culcă la pământ. E un blestem!’",
+      "imageUrl": "images/tol-terra-problem1/3.whispers.png"
+    },
+    {
+      "tileId": "p4",
+      "type": "page",
+      "sortOrder": 4,
+      "caption": "Prima noapte",
+      "text": "Când soarele scade, un foșnet straniu umple văzduhul. Dincolo de nori, ceva enorm se mișcă. O umbră se așterne peste câmp și luna se ascunde.",
+      "imageUrl": "images/tol-terra-problem1/4.first-night.png"
+    },
+    {
+      "tileId": "p5",
+      "type": "page",
+      "sortOrder": 5,
+      "caption": "Vibrația pământului",
+      "text": "Solul tremură. Vântul aduce miros de fum și cenușă. În lanul culcat, se zărește o formă uriașă care strălucește intermitent.",
+      "imageUrl": "images/tol-terra-problem1/5.vibration.png"
+    },
+    {
+      "tileId": "p6",
+      "type": "page",
+      "sortOrder": 6,
+      "caption": "Creatura",
+      "text": "Este o pasăre imensă, cu pene de foc și ochi de cristal. Aripa stângă îi este rănită, iar fiecare bătaie slabă ridică scântei. Nu e un blestem, ci o ființă pierdută din altă lume.",
+      "imageUrl": "images/tol-terra-problem1/6.creature.png"
+    },
+    {
+      "tileId": "p7",
+      "type": "page",
+      "sortOrder": 7,
+      "caption": "Legătura",
+      "text": "Puf-Puf se apropie încet. ‘Aceasta e o creatură a Copacului Luminii’, șoptește el. ‘Dacă o ajutăm, ne poate arăta un drum ascuns pe Terra.’ Pasărea te privește, așteptând.",
+      "imageUrl": "images/tol-terra-problem1/7.bond.png"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "sortOrder": 8,
+      "question": "Cum ajuți pasărea rănită?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "O încurajezi să se ridice, să-și amintească de puterea ei.",
+          "reward": "token_courage",
+          "sortOrder": 1
+        },
+        {
+          "answerId": "b",
+          "text": "O îngrijești cu grijă și răbdare.",
+          "reward": "token_safety",
+          "sortOrder": 2
+        },
+        {
+          "answerId": "c",
+          "text": "Îi construiești un plan pentru a-și întinde din nou aripile.",
+          "reward": "token_thinking",
+          "sortOrder": 3
+        },
+        {
+          "answerId": "d",
+          "text": "Îți folosești creativitatea și găsești o metodă nouă de vindecare.",
+          "reward": "token_creativity",
+          "sortOrder": 4
+        },
+        {
+          "answerId": "e",
+          "text": "Cercetezi semnele luminii de pe penele ei, pentru a descoperi secretul.",
+          "reward": "token_curiosity",
+          "sortOrder": 5
+        }
+      ]
+    }
   ]
 }
-
-
