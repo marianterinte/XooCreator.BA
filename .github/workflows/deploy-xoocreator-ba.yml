@@ -7,7 +7,7 @@ on:
 
 env:
   DOTNET_VERSION: '8.0.x'
-sh.   WORKING_DIRECTORY: 'XooCreator.BA'
+  WORKING_DIRECTORY: 'XooCreator.BA'
   PUBLISH_DIR: 'XooCreator.BA/bin/Release/net8.0/publish'
 
 jobs:
