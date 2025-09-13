@@ -21,13 +21,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include=".github\workflows\" />
     <Folder Include="Data\Migrations\" />
     <Folder Include="Features\Builder\" />
     <Folder Include="Migrations\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include=".github\workflows\railway-deploy.yml" />
   </ItemGroup>
 
 </Project>
