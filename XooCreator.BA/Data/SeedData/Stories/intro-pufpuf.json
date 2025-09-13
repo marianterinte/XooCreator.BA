@@ -10,54 +10,54 @@
       "type": "page",
       "sortOrder": 1,
       "caption": "Chemarea",
-      "text": "Nava lui Puf-Puf e trasă spre Copacul Luminii – o poartă vie între lumi.",
+      "text": "Puf-Puf călătorea prin adâncul universului, când liniștea cosmică fu spartă de un zgomot straniu – un vuiet care nu semăna cu nimic cunoscut. Ca și cum însăși stelele ar fi suspinat.",
       "imageUrl": "images/tol-intro-story/1.puf-puf-flying.png"
     },
     {
       "tileId": "p2",
       "type": "page",
       "sortOrder": 2,
-      "caption": "Aterizarea",
-      "text": "Pe Terra, cristalul-hartă licărește: drumul spre Kelo-Ketis e presărat cu lumi de explorat.",
+      "caption": "Prăbușirea",
+      "text": "Un fulger de lumină i-a cuprins nava și totul s-a prăbușit într-un vârtej orbitor. Puf-Puf s-a trezit rănit, înconjurat de copaci uriași și pământul moale al unei lumi necunoscute: Terra.",
       "imageUrl": "images/tol-intro-story/2.puf-puf-hurt.png"
     },
     {
       "tileId": "p3",
       "type": "page",
       "sortOrder": 3,
-      "caption": "Poarta",
-      "text": "Copacul Luminii nu e doar arbore: e un explorator de lumi. Fiecare ramură – un univers.",
+      "caption": "Cristalul SOS",
+      "text": "Din buzunarul său a scos un cristal străvechi – un far de urgență din Kelo-Ketis. În el clipea o hartă misterioasă: ramuri de lumină, drumuri ce se împleteau în infinit. Toate indicau același adevăr: întoarcerea era posibilă doar prin Copacul Luminii.",
       "imageUrl": "images/tol-intro-story/3.puf-puf-crystal.png"
     },
     {
       "tileId": "p4",
       "type": "page",
       "sortOrder": 4,
-      "caption": "Legământul",
-      "text": "Puf-Puf îți cere ajutorul: sari din lume în lume, rezolvă problemele lor și adună tokeni (Curaj, Curiozitate, Gândire, Creativitate, Siguranță) și Fructe speciale pentru Ingineria Animalelor. Cu acești tokeni vei debloca Eroi în Arborele Eroilor. Dacă deblochezi Eroul Luminii, îți va arăta calea către Kelo-Ketis.",
+      "caption": "Întâlnirea",
+      "text": "În fața trunchiului uriaș al Copacului, Puf-Puf se întoarse și zâmbi. „Trebuie să știi cine sunt eu… o pisică vorbitoare, din mândra rasă a Kelo-Ketis. Soarta ne-a adus aici și numai Copacul Luminii ne poate arăta calea mai departe.”",
       "imageUrl": "images/tol-intro-story/puf-puf-home-planet.png"
     },
     {
       "tileId": "q1",
       "type": "quiz",
       "sortOrder": 5,
-      "question": "Cum pornești?",
+      "question": "Cristalul luminează doar dacă pui întrebarea potrivită… Ce întrebi despre Copacul Luminii?",
       "answers": [
         {
           "answerId": "a",
-          "text": "Cu ochii deschiși spre mistere",
+          "text": "Ce se ascunde în ramurile lui?",
           "reward": "token_curiosity",
           "sortOrder": 1
         },
         {
           "answerId": "b",
-          "text": "Cu inima hotărâtă",
+          "text": "Cum pot urca mai sus, spre vârful său?",
           "reward": "token_courage",
           "sortOrder": 2
         },
         {
           "answerId": "c",
-          "text": "Cu un plan",
+          "text": "De ce a fost chemat Puf-Puf aici?",
           "reward": "token_thinking",
           "sortOrder": 3
         }
