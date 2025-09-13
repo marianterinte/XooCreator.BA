@@ -1,0 +1,55 @@
+name: Deploy XooCreator.BA to Azure Web App
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  WORKING_DIRECTORY: 'BE/XooCreator.BA'
+  PUBLISH_DIR: 'BE/XooCreator.BA/bin/Release/net8.0/publish'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore
+        run: dotnet restore XooCreator.BA.csproj
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+      - name: Build
+        run: dotnet build XooCreator.BA.csproj --configuration Release --no-restore
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+      - name: Publish
+        run: dotnet publish XooCreator.BA.csproj --configuration Release --no-build --output ${{ env.PUBLISH_DIR }}
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+      - name: Set Azure App Settings (DATABASE_URL, ASPNETCORE_ENVIRONMENT)
+        uses: azure/appservice-settings@v1
+        with:
+          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          app-settings-json: |
+            [
+              { "name": "ASPNETCORE_ENVIRONMENT", "value": "Production" },
+              { "name": "DATABASE_URL", "value": "${{ secrets.SUPABASE_DB_URL }}" }
+            ]
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: ${{ env.PUBLISH_DIR }}
+
+
