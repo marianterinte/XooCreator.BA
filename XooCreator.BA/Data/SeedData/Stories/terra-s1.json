@@ -1,7 +1,7 @@
 {
   "storyId": "terra-s1",
   "title": "Umbra de la Fermă",
-  "coverImageUrl": "images/terra-s1/0.Cover.png",
+  "coverImageUrl": "images/stories/terra-s1/0.Cover.png",
   "category": "terra",
   "sortOrder": 1,
   "tiles": [
@@ -11,7 +11,7 @@
       "sortOrder": 1,
       "caption": "Sosirea",
       "text": "Călătoria voastră pe Terra vă aduce într-o vale cu câmpuri întinse. Totul pare liniștit, dar fermierii privesc cerul cu teamă.",
-      "imageUrl": "images/terra-s1/1.arrival.png"
+      "imageUrl": "images/stories/terra-s1/1.arrival.png"
     },
     {
       "tileId": "p2",
@@ -19,7 +19,7 @@
       "sortOrder": 2,
       "caption": "Tăcerea stranie",
       "text": "Niciun cocoș nu cântă, niciun câine nu latră. Puf-Puf simte că liniștea e prea grea, ca și cum natura și-ar fi ținut respirația.",
-      "imageUrl": "images/terra-s1/2.silence.png"
+      "imageUrl": "images/stories/terra-s1/2.silence.png"
     },
     {
       "tileId": "p3",
@@ -27,7 +27,7 @@
       "sortOrder": 3,
       "caption": "Șoaptele oamenilor",
       "text": "Un bătrân se apropie tremurând: ‘E o umbră, domnilor. O umbră ce se coboară din cer la apus. Animalele fug, grânele se culcă la pământ. E un blestem!’",
-      "imageUrl": "images/terra-s1/3.whispers.png"
+      "imageUrl": "images/stories/terra-s1/3.whispers.png"
     },
     {
       "tileId": "p4",
@@ -35,7 +35,7 @@
       "sortOrder": 4,
       "caption": "Prima noapte",
       "text": "Când soarele scade, un foșnet straniu umple văzduhul. Dincolo de nori, ceva enorm se mișcă. O umbră se așterne peste câmp și luna se ascunde.",
-      "imageUrl": "images/terra-s1/4.first-night.png"
+      "imageUrl": "images/stories/terra-s1/4.first-night.png"
     },
     {
       "tileId": "p5",
@@ -43,7 +43,7 @@
       "sortOrder": 5,
       "caption": "Vibrația pământului",
       "text": "Solul tremură. Vântul aduce miros de fum și cenușă. În lanul culcat, se zărește o formă uriașă care strălucește intermitent.",
-      "imageUrl": "images/terra-s1/5.vibration.png"
+      "imageUrl": "images/stories/terra-s1/5.vibration.png"
     },
     {
       "tileId": "p6",
@@ -51,7 +51,7 @@
       "sortOrder": 6,
       "caption": "Creatura",
       "text": "Este o pasăre imensă, cu pene de foc și ochi de cristal. Aripa stângă îi este rănită, iar fiecare bătaie slabă ridică scântei. Nu e un blestem, ci o ființă pierdută din altă lume.",
-      "imageUrl": "images/terra-s1/6.creature.png"
+      "imageUrl": "images/stories/terra-s1/6.creature.png"
     },
     {
       "tileId": "p7",
@@ -59,7 +59,7 @@
       "sortOrder": 7,
       "caption": "Legătura",
       "text": "Puf-Puf se apropie încet. ‘Aceasta e o creatură a Copacului Luminii’, șoptește el. ‘Dacă o ajutăm, ne poate arăta un drum ascuns pe Terra.’ Pasărea te privește, așteptând.",
-      "imageUrl": "images/terra-s1/7.bond.png"
+      "imageUrl": "images/stories/terra-s1/7.bond.png"
     },
     {
       "tileId": "q1",
