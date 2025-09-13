@@ -59,12 +59,27 @@ jobs:
 
       - name: Set Azure App Settings (DATABASE_URL, ASPNETCORE_ENVIRONMENT)
         run: |
-          az webapp config appsettings set \
-            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
-            --name ${{ secrets.AZURE_WEBAPP_NAME }} \
-            --settings \
-              ASPNETCORE_ENVIRONMENT=Production \
-              DATABASE_URL="${{ secrets.SUPABASE_DB_URL }}"
+          # Method 1: Try with resource group secret if available
+          if [ -n "${{ secrets.AZURE_RESOURCE_GROUP }}" ]; then
+            echo "Using provided resource group: ${{ secrets.AZURE_RESOURCE_GROUP }}"
+            az webapp config appsettings set \
+              --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+              --name ${{ secrets.AZURE_WEBAPP_NAME }} \
+              --settings \
+                ASPNETCORE_ENVIRONMENT=Production \
+                DATABASE_URL="${{ secrets.SUPABASE_DB_URL }}"
+          else
+            # Method 2: Auto-discover resource group
+            echo "Auto-discovering resource group..."
+            RG=$(az webapp show --name ${{ secrets.AZURE_WEBAPP_NAME }} --query resourceGroup -o tsv)
+            echo "Found resource group: $RG"
+            az webapp config appsettings set \
+              --resource-group "$RG" \
+              --name ${{ secrets.AZURE_WEBAPP_NAME }} \
+              --settings \
+                ASPNETCORE_ENVIRONMENT=Production \
+                DATABASE_URL="${{ secrets.SUPABASE_DB_URL }}"
+          fi
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
