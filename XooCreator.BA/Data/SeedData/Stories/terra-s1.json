@@ -65,6 +65,7 @@
       "tileId": "q1",
       "type": "quiz",
       "sortOrder": 8,
+      "imageUrl": "images/stories/terra-s1/8.quiz.png",
       "question": "Cum ajuți pasărea rănită?",
       "answers": [
         {
@@ -98,6 +99,14 @@
           "sortOrder": 5
         }
       ]
+    },
+    {
+      "tileId": "p8",
+      "type": "page",
+      "sortOrder": 9,
+      "caption": "Drumul deschis",
+      "text": "După ce a primit ajutorul vostru, pasărea își întinde aripile. Un fascicul de lumină arată o potecă nouă prin câmp, către tărâmuri necunoscute.",
+      "imageUrl": "images/stories/terra-s1/9.path.png"
     }
   ]
 }
