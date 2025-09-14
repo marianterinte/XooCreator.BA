@@ -569,7 +569,7 @@ namespace XooCreator.BA.Migrations
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "Id", "Auth0Sub", "CreatedAt", "DisplayName" },
-                values: new object[] { new Guid("11111111-1111-1111-1111-111111111111"), "test-user-sub", new DateTime(2025, 9, 13, 20, 6, 39, 744, DateTimeKind.Utc).AddTicks(9495), "Test User" });
+                values: new object[] { new Guid("11111111-1111-1111-1111-111111111111"), "test-user-sub", new DateTime(2025, 9, 14, 19, 44, 32, 62, DateTimeKind.Utc).AddTicks(2873), "Test User" });
 
             migrationBuilder.InsertData(
                 table: "Animals",

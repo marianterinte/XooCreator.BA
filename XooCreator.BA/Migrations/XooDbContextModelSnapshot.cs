@@ -1848,7 +1848,7 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
                             Auth0Sub = "test-user-sub",
-                            CreatedAt = new DateTime(2025, 9, 13, 20, 6, 39, 744, DateTimeKind.Utc).AddTicks(9495),
+                            CreatedAt = new DateTime(2025, 9, 14, 19, 44, 32, 62, DateTimeKind.Utc).AddTicks(2873),
                             DisplayName = "Test User"
                         });
                 });
