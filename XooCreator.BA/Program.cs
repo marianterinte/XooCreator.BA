@@ -112,7 +112,7 @@ builder.Services.AddScoped<IStoriesService, StoriesService>();
 
 var app = builder.Build();
 
-// Auto-migrate database on startup (for Railway)
+// Auto-migrate database on startup (and optionally recreate in Development)
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<XooDbContext>();
@@ -121,7 +121,17 @@ using (var scope = app.Services.CreateScope())
     
     try
     {
-        context.Database.Migrate();
+        // Only allow destructive recreate in Development and when explicitly enabled
+        var isDevelopment = app.Environment.IsDevelopment();
+        var recreate = builder.Configuration.GetValue<bool>("Database:RecreateOnStart");
+
+        if (isDevelopment && recreate)
+        {
+            await context.Database.EnsureDeletedAsync();
+        }
+
+        await context.Database.MigrateAsync();
+
         // Initialize stories after migration
         await storiesService.InitializeStoriesAsync();
         // Initialize tree model after stories are seeded
