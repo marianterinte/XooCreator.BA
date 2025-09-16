@@ -118,14 +118,16 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<XooDbContext>();
     var storiesService = scope.ServiceProvider.GetRequiredService<IStoriesService>();
     var treeModelService = scope.ServiceProvider.GetRequiredService<ITreeModelService>();
-    
+
     try
     {
         // Only allow destructive recreate in Development and when explicitly enabled
         var isDevelopment = app.Environment.IsDevelopment();
         var recreate = builder.Configuration.GetValue<bool>("Database:RecreateOnStart");
 
-        if (isDevelopment && recreate)
+
+        // TODO : disable when in production unless explicitly needed
+        if (recreate)
         {
             await context.Database.EnsureDeletedAsync();
         }
