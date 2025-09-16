@@ -401,11 +401,6 @@ namespace XooCreator.BA.Migrations
                         new
                         {
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000003"),
-                            PartKey = "wings"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000003"),
                             PartKey = "horn"
                         },
                         new
@@ -512,11 +507,6 @@ namespace XooCreator.BA.Migrations
                         {
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000009"),
                             PartKey = "tail"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000009"),
-                            PartKey = "wings"
                         },
                         new
                         {
@@ -1827,14 +1817,21 @@ namespace XooCreator.BA.Migrations
 
                     b.Property<string>("Auth0Sub")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("DisplayName")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
 
                     b.HasKey("Id");
 
@@ -1848,8 +1845,17 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
                             Auth0Sub = "test-user-sub",
-                            CreatedAt = new DateTime(2025, 9, 16, 0, 40, 10, 114, DateTimeKind.Utc).AddTicks(390),
-                            DisplayName = "Test User"
+                            CreatedAt = new DateTime(2025, 9, 16, 1, 44, 51, 278, DateTimeKind.Utc).AddTicks(7277),
+                            DisplayName = "Test User",
+                            Email = "test@example.com"
+                        },
+                        new
+                        {
+                            Id = new Guid("22222222-2222-2222-2222-222222222222"),
+                            Auth0Sub = "marian-test-sub",
+                            CreatedAt = new DateTime(2025, 9, 16, 1, 44, 51, 278, DateTimeKind.Utc).AddTicks(7278),
+                            DisplayName = "Marian",
+                            Email = "marian@example.com"
                         });
                 });
 

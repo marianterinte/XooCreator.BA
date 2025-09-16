@@ -48,6 +48,9 @@ public class XooDbContext : DbContext
             e.HasKey(x => x.Id);
             e.HasIndex(x => x.Auth0Sub).IsUnique();
             e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.DisplayName).HasMaxLength(100).IsRequired();
+            e.Property(x => x.Email).HasMaxLength(256).IsRequired();
+            e.Property(x => x.Auth0Sub).HasMaxLength(256).IsRequired();
         });
 
         modelBuilder.Entity<CreditWallet>(e =>
@@ -234,15 +237,28 @@ public class XooDbContext : DbContext
             e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
         });
 
-        // Seed test user
+        // Seed test users
         var testUserId = Guid.Parse("11111111-1111-1111-1111-111111111111");
-        modelBuilder.Entity<UserAlchimalia>().HasData(new UserAlchimalia
-        {
-            Id = testUserId,
-            Auth0Sub = "test-user-sub",
-            DisplayName = "Test User",
-            CreatedAt = DateTime.UtcNow
-        });
+        var marianUserId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+        
+        modelBuilder.Entity<UserAlchimalia>().HasData(
+            new UserAlchimalia
+            {
+                Id = testUserId,
+                Auth0Sub = "test-user-sub",
+                DisplayName = "Test User",
+                Email = "test@example.com",
+                CreatedAt = DateTime.UtcNow
+            },
+            new UserAlchimalia
+            {
+                Id = marianUserId,
+                Auth0Sub = "marian-test-sub",
+                DisplayName = "Marian",
+                Email = "marian@example.com",
+                CreatedAt = DateTime.UtcNow
+            }
+        );
 
         // Config
         modelBuilder.Entity<BuilderConfig>().HasData(new BuilderConfig { Id = 1, BaseUnlockedAnimalCount = 3 });

@@ -119,8 +119,9 @@ namespace XooCreator.BA.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Auth0Sub = table.Column<string>(type: "text", nullable: false),
-                    DisplayName = table.Column<string>(type: "text", nullable: false),
+                    Auth0Sub = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
+                    DisplayName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
@@ -568,8 +569,12 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.InsertData(
                 table: "UsersAlchimalia",
-                columns: new[] { "Id", "Auth0Sub", "CreatedAt", "DisplayName" },
-                values: new object[] { new Guid("11111111-1111-1111-1111-111111111111"), "test-user-sub", new DateTime(2025, 9, 16, 0, 40, 10, 114, DateTimeKind.Utc).AddTicks(390), "Test User" });
+                columns: new[] { "Id", "Auth0Sub", "CreatedAt", "DisplayName", "Email" },
+                values: new object[,]
+                {
+                    { new Guid("11111111-1111-1111-1111-111111111111"), "test-user-sub", new DateTime(2025, 9, 16, 1, 44, 51, 278, DateTimeKind.Utc).AddTicks(7277), "Test User", "test@example.com" },
+                    { new Guid("22222222-2222-2222-2222-222222222222"), "marian-test-sub", new DateTime(2025, 9, 16, 1, 44, 51, 278, DateTimeKind.Utc).AddTicks(7278), "Marian", "marian@example.com" }
+                });
 
             migrationBuilder.InsertData(
                 table: "Animals",
@@ -630,7 +635,6 @@ namespace XooCreator.BA.Migrations
                     { new Guid("00000000-0000-0000-0000-000000000003"), "horns" },
                     { new Guid("00000000-0000-0000-0000-000000000003"), "legs" },
                     { new Guid("00000000-0000-0000-0000-000000000003"), "tail" },
-                    { new Guid("00000000-0000-0000-0000-000000000003"), "wings" },
                     { new Guid("00000000-0000-0000-0000-000000000004"), "arms" },
                     { new Guid("00000000-0000-0000-0000-000000000004"), "body" },
                     { new Guid("00000000-0000-0000-0000-000000000004"), "head" },
@@ -653,7 +657,6 @@ namespace XooCreator.BA.Migrations
                     { new Guid("00000000-0000-0000-0000-000000000009"), "horns" },
                     { new Guid("00000000-0000-0000-0000-000000000009"), "legs" },
                     { new Guid("00000000-0000-0000-0000-000000000009"), "tail" },
-                    { new Guid("00000000-0000-0000-0000-000000000009"), "wings" },
                     { new Guid("00000000-0000-0000-0000-00000000000a"), "arms" },
                     { new Guid("00000000-0000-0000-0000-00000000000a"), "body" },
                     { new Guid("00000000-0000-0000-0000-00000000000a"), "head" },
