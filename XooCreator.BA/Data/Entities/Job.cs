@@ -7,7 +7,7 @@ public class Job
 {
     public Guid Id { get; set; }
     public Guid UserId { get; set; }
-    public User User { get; set; } = null!;
+    public UserAlchimalia User { get; set; } = null!;
     public JobType Type { get; set; }
     public string PayloadJson { get; set; } = "{}";
     public JobStatus Status { get; set; } = JobStatus.Queued;

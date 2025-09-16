@@ -12,7 +12,7 @@ using XooCreator.BA.Data;
 namespace XooCreator.BA.Migrations
 {
     [DbContext(typeof(XooDbContext))]
-    [Migration("20250914194433_initial")]
+    [Migration("20250916004010_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -1822,7 +1822,7 @@ namespace XooCreator.BA.Migrations
                     b.ToTable("TreeUnlockRules");
                 });
 
-            modelBuilder.Entity("XooCreator.BA.Data.User", b =>
+            modelBuilder.Entity("XooCreator.BA.Data.UserAlchimalia", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -1844,14 +1844,14 @@ namespace XooCreator.BA.Migrations
                     b.HasIndex("Auth0Sub")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("UsersAlchimalia");
 
                     b.HasData(
                         new
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
                             Auth0Sub = "test-user-sub",
-                            CreatedAt = new DateTime(2025, 9, 14, 19, 44, 32, 62, DateTimeKind.Utc).AddTicks(2873),
+                            CreatedAt = new DateTime(2025, 9, 16, 0, 40, 10, 114, DateTimeKind.Utc).AddTicks(390),
                             DisplayName = "Test User"
                         });
                 });
@@ -1948,7 +1948,7 @@ namespace XooCreator.BA.Migrations
                         .WithMany()
                         .HasForeignKey("TreeId");
 
-                    b.HasOne("XooCreator.BA.Data.User", "User")
+                    b.HasOne("XooCreator.BA.Data.UserAlchimalia", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1961,7 +1961,7 @@ namespace XooCreator.BA.Migrations
 
             modelBuilder.Entity("XooCreator.BA.Data.CreditTransaction", b =>
                 {
-                    b.HasOne("XooCreator.BA.Data.User", "User")
+                    b.HasOne("XooCreator.BA.Data.UserAlchimalia", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1972,7 +1972,7 @@ namespace XooCreator.BA.Migrations
 
             modelBuilder.Entity("XooCreator.BA.Data.CreditWallet", b =>
                 {
-                    b.HasOne("XooCreator.BA.Data.User", "User")
+                    b.HasOne("XooCreator.BA.Data.UserAlchimalia", "User")
                         .WithOne()
                         .HasForeignKey("XooCreator.BA.Data.CreditWallet", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1983,7 +1983,7 @@ namespace XooCreator.BA.Migrations
 
             modelBuilder.Entity("XooCreator.BA.Data.HeroProgress", b =>
                 {
-                    b.HasOne("XooCreator.BA.Data.User", "User")
+                    b.HasOne("XooCreator.BA.Data.UserAlchimalia", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1994,7 +1994,7 @@ namespace XooCreator.BA.Migrations
 
             modelBuilder.Entity("XooCreator.BA.Data.HeroTreeProgress", b =>
                 {
-                    b.HasOne("XooCreator.BA.Data.User", "User")
+                    b.HasOne("XooCreator.BA.Data.UserAlchimalia", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2005,7 +2005,7 @@ namespace XooCreator.BA.Migrations
 
             modelBuilder.Entity("XooCreator.BA.Data.Job", b =>
                 {
-                    b.HasOne("XooCreator.BA.Data.User", "User")
+                    b.HasOne("XooCreator.BA.Data.UserAlchimalia", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2027,7 +2027,7 @@ namespace XooCreator.BA.Migrations
 
             modelBuilder.Entity("XooCreator.BA.Data.StoryProgress", b =>
                 {
-                    b.HasOne("XooCreator.BA.Data.User", "User")
+                    b.HasOne("XooCreator.BA.Data.UserAlchimalia", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2049,7 +2049,7 @@ namespace XooCreator.BA.Migrations
 
             modelBuilder.Entity("XooCreator.BA.Data.Tree", b =>
                 {
-                    b.HasOne("XooCreator.BA.Data.User", "User")
+                    b.HasOne("XooCreator.BA.Data.UserAlchimalia", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2071,7 +2071,7 @@ namespace XooCreator.BA.Migrations
 
             modelBuilder.Entity("XooCreator.BA.Data.TreeProgress", b =>
                 {
-                    b.HasOne("XooCreator.BA.Data.User", "User")
+                    b.HasOne("XooCreator.BA.Data.UserAlchimalia", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2102,7 +2102,7 @@ namespace XooCreator.BA.Migrations
 
             modelBuilder.Entity("XooCreator.BA.Data.UserStoryReadProgress", b =>
                 {
-                    b.HasOne("XooCreator.BA.Data.User", "User")
+                    b.HasOne("XooCreator.BA.Data.UserAlchimalia", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2113,7 +2113,7 @@ namespace XooCreator.BA.Migrations
 
             modelBuilder.Entity("XooCreator.BA.Data.UserTokens", b =>
                 {
-                    b.HasOne("XooCreator.BA.Data.User", "User")
+                    b.HasOne("XooCreator.BA.Data.UserAlchimalia", "User")
                         .WithOne()
                         .HasForeignKey("XooCreator.BA.Data.UserTokens", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)

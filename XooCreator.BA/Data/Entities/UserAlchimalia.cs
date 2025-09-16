@@ -1,6 +1,6 @@
 namespace XooCreator.BA.Data;
 
-public class User
+public class UserAlchimalia
 {
     public Guid Id { get; set; }
     public string Auth0Sub { get; set; } = string.Empty;

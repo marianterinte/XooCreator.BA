@@ -115,7 +115,7 @@ namespace XooCreator.BA.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Users",
+                name: "UsersAlchimalia",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -125,7 +125,7 @@ namespace XooCreator.BA.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.PrimaryKey("PK_UsersAlchimalia", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -222,9 +222,9 @@ namespace XooCreator.BA.Migrations
                 {
                     table.PrimaryKey("PK_CreditTransactions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_CreditTransactions_Users_UserId",
+                        name: "FK_CreditTransactions_UsersAlchimalia_UserId",
                         column: x => x.UserId,
-                        principalTable: "Users",
+                        principalTable: "UsersAlchimalia",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -241,9 +241,9 @@ namespace XooCreator.BA.Migrations
                 {
                     table.PrimaryKey("PK_CreditWallets", x => x.UserId);
                     table.ForeignKey(
-                        name: "FK_CreditWallets_Users_UserId",
+                        name: "FK_CreditWallets_UsersAlchimalia_UserId",
                         column: x => x.UserId,
-                        principalTable: "Users",
+                        principalTable: "UsersAlchimalia",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -263,9 +263,9 @@ namespace XooCreator.BA.Migrations
                 {
                     table.PrimaryKey("PK_HeroProgress", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_HeroProgress_Users_UserId",
+                        name: "FK_HeroProgress_UsersAlchimalia_UserId",
                         column: x => x.UserId,
-                        principalTable: "Users",
+                        principalTable: "UsersAlchimalia",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -287,9 +287,9 @@ namespace XooCreator.BA.Migrations
                 {
                     table.PrimaryKey("PK_HeroTreeProgress", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_HeroTreeProgress_Users_UserId",
+                        name: "FK_HeroTreeProgress_UsersAlchimalia_UserId",
                         column: x => x.UserId,
-                        principalTable: "Users",
+                        principalTable: "UsersAlchimalia",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -312,9 +312,9 @@ namespace XooCreator.BA.Migrations
                 {
                     table.PrimaryKey("PK_Jobs", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Jobs_Users_UserId",
+                        name: "FK_Jobs_UsersAlchimalia_UserId",
                         column: x => x.UserId,
-                        principalTable: "Users",
+                        principalTable: "UsersAlchimalia",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -334,9 +334,9 @@ namespace XooCreator.BA.Migrations
                 {
                     table.PrimaryKey("PK_StoryProgress", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_StoryProgress_Users_UserId",
+                        name: "FK_StoryProgress_UsersAlchimalia_UserId",
                         column: x => x.UserId,
-                        principalTable: "Users",
+                        principalTable: "UsersAlchimalia",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -357,9 +357,9 @@ namespace XooCreator.BA.Migrations
                 {
                     table.PrimaryKey("PK_TreeProgress", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_TreeProgress_Users_UserId",
+                        name: "FK_TreeProgress_UsersAlchimalia_UserId",
                         column: x => x.UserId,
-                        principalTable: "Users",
+                        principalTable: "UsersAlchimalia",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -379,9 +379,9 @@ namespace XooCreator.BA.Migrations
                 {
                     table.PrimaryKey("PK_Trees", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Trees_Users_UserId",
+                        name: "FK_Trees_UsersAlchimalia_UserId",
                         column: x => x.UserId,
-                        principalTable: "Users",
+                        principalTable: "UsersAlchimalia",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -400,9 +400,9 @@ namespace XooCreator.BA.Migrations
                 {
                     table.PrimaryKey("PK_UserStoryReadProgress", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_UserStoryReadProgress_Users_UserId",
+                        name: "FK_UserStoryReadProgress_UsersAlchimalia_UserId",
                         column: x => x.UserId,
-                        principalTable: "Users",
+                        principalTable: "UsersAlchimalia",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -423,9 +423,9 @@ namespace XooCreator.BA.Migrations
                 {
                     table.PrimaryKey("PK_UserTokens", x => x.UserId);
                     table.ForeignKey(
-                        name: "FK_UserTokens_Users_UserId",
+                        name: "FK_UserTokens_UsersAlchimalia_UserId",
                         column: x => x.UserId,
-                        principalTable: "Users",
+                        principalTable: "UsersAlchimalia",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -503,9 +503,9 @@ namespace XooCreator.BA.Migrations
                         principalTable: "Trees",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Creatures_Users_UserId",
+                        name: "FK_Creatures_UsersAlchimalia_UserId",
                         column: x => x.UserId,
-                        principalTable: "Users",
+                        principalTable: "UsersAlchimalia",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -567,9 +567,9 @@ namespace XooCreator.BA.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Users",
+                table: "UsersAlchimalia",
                 columns: new[] { "Id", "Auth0Sub", "CreatedAt", "DisplayName" },
-                values: new object[] { new Guid("11111111-1111-1111-1111-111111111111"), "test-user-sub", new DateTime(2025, 9, 14, 19, 44, 32, 62, DateTimeKind.Utc).AddTicks(2873), "Test User" });
+                values: new object[] { new Guid("11111111-1111-1111-1111-111111111111"), "test-user-sub", new DateTime(2025, 9, 16, 0, 40, 10, 114, DateTimeKind.Utc).AddTicks(390), "Test User" });
 
             migrationBuilder.InsertData(
                 table: "Animals",
@@ -874,8 +874,8 @@ namespace XooCreator.BA.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Users_Auth0Sub",
-                table: "Users",
+                name: "IX_UsersAlchimalia_Auth0Sub",
+                table: "UsersAlchimalia",
                 column: "Auth0Sub",
                 unique: true);
 
@@ -959,7 +959,7 @@ namespace XooCreator.BA.Migrations
                 name: "StoryDefinitions");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "UsersAlchimalia");
         }
     }
 }

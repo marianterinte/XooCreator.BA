@@ -12,5 +12,5 @@ public class UserStoryReadProgress
     public DateTime ReadAt { get; set; } = DateTime.UtcNow;
     
     // Navigation
-    public User User { get; set; } = null!;
+    public UserAlchimalia User { get; set; } = null!;
 }

@@ -6,7 +6,7 @@ public class XooDbContext : DbContext
 {
     public XooDbContext(DbContextOptions<XooDbContext> options) : base(options) { }
 
-    public DbSet<User> Users => Set<User>();
+    public DbSet<UserAlchimalia> UsersAlchimalia => Set<UserAlchimalia>();
     public DbSet<CreditWallet> CreditWallets => Set<CreditWallet>();
     public DbSet<CreditTransaction> CreditTransactions => Set<CreditTransaction>();
     public DbSet<Tree> Trees => Set<Tree>();
@@ -43,7 +43,7 @@ public class XooDbContext : DbContext
     {
         modelBuilder.HasPostgresExtension("uuid-ossp");
 
-        modelBuilder.Entity<User>(e =>
+        modelBuilder.Entity<UserAlchimalia>(e =>
         {
             e.HasKey(x => x.Id);
             e.HasIndex(x => x.Auth0Sub).IsUnique();
@@ -365,7 +365,7 @@ public class XooDbContext : DbContext
 
         // Seed test user
         var testUserId = Guid.Parse("11111111-1111-1111-1111-111111111111");
-        modelBuilder.Entity<User>().HasData(new User
+        modelBuilder.Entity<UserAlchimalia>().HasData(new UserAlchimalia
         {
             Id = testUserId,
             Auth0Sub = "test-user-sub",

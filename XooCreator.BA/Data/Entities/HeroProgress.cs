@@ -13,5 +13,5 @@ public class HeroProgress
     public DateTime UnlockedAt { get; set; } = DateTime.UtcNow;
     
     // Navigation
-    public User User { get; set; } = null!;
+    public UserAlchimalia User { get; set; } = null!;
 }
