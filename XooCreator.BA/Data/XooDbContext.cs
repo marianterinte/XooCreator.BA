@@ -263,6 +263,44 @@ public class XooDbContext : DbContext
         // Config
         modelBuilder.Entity<BuilderConfig>().HasData(new BuilderConfig { Id = 1, BaseUnlockedAnimalCount = 3 });
 
+        // Seed test credit wallets and transactions
+        modelBuilder.Entity<CreditWallet>().HasData(
+            new CreditWallet 
+            { 
+                UserId = testUserId, 
+                Balance = 5, 
+                UpdatedAt = DateTime.UtcNow 
+            },
+            new CreditWallet 
+            { 
+                UserId = marianUserId, 
+                Balance = 10, 
+                UpdatedAt = DateTime.UtcNow 
+            }
+        );
+
+        // Seed test credit transactions (simulate purchases)
+        modelBuilder.Entity<CreditTransaction>().HasData(
+            new CreditTransaction
+            {
+                Id = Guid.Parse("33333333-3333-3333-3333-333333333333"),
+                UserId = marianUserId,
+                Amount = 15,
+                Type = CreditTransactionType.Purchase,
+                Reference = "test-purchase-marian",
+                CreatedAt = DateTime.UtcNow.AddDays(-1)
+            },
+            new CreditTransaction
+            {
+                Id = Guid.Parse("44444444-4444-4444-4444-444444444444"),
+                UserId = marianUserId,
+                Amount = -5,
+                Type = CreditTransactionType.Spend,
+                Reference = "test-generation",
+                CreatedAt = DateTime.UtcNow.AddHours(-2)
+            }
+        );
+
         // Note: Tree of Light Model seeding moved to TreeOfLightService.SeedTreeModel()
         // for better control and avoiding FK constraint issues during migrations
 
