@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 using XooCreator.BA.Data;
 using XooCreator.BA.Features.CreatureBuilder;
 
@@ -28,12 +29,14 @@ public sealed class CreatureBuilderService : ICreatureBuilderService
             ).ToListAsync(ct);
 
         var config = await _db.BuilderConfigs.FirstOrDefaultAsync(ct);
+        var baseUnlockedAnimalIds = GetBaseUnlockedAnimalIds(config);
+        var baseUnlockedBodyPartKeys = GetBaseUnlockedBodyPartKeys(config);
         var baseLockedParts = await _db.BodyParts.Where(p => p.IsBaseLocked).Select(p => p.Key).ToListAsync(ct);
 
         return new CreatureBuilderDataDto(
             parts,
             animals,
-            config?.BaseUnlockedAnimalCount ?? 3,
+            baseUnlockedAnimalIds.Count,
             baseLockedParts
         );
     }
@@ -52,7 +55,8 @@ public sealed class CreatureBuilderService : ICreatureBuilderService
 
         // Get base configuration
         var config = await _db.BuilderConfigs.FirstOrDefaultAsync(ct);
-        var baseUnlockedAnimalCount = config?.BaseUnlockedAnimalCount ?? 3;
+        var baseUnlockedAnimalIds = GetBaseUnlockedAnimalIds(config);
+        var baseUnlockedBodyPartKeys = GetBaseUnlockedBodyPartKeys(config);
 
         // Get parts with lock status
         var allParts = await _db.BodyParts.ToListAsync(ct);
@@ -60,7 +64,7 @@ public sealed class CreatureBuilderService : ICreatureBuilderService
             p.Key, 
             p.Name, 
             p.Image,
-            IsLocked: !hasFullAccess && p.IsBaseLocked // Locked if no full access and part is base locked
+            IsLocked: !hasFullAccess && !baseUnlockedBodyPartKeys.Contains(p.Key) // Locked if no full access and not in base unlocked list
         )).ToList();
 
         // Get animals with lock status
@@ -70,15 +74,15 @@ public sealed class CreatureBuilderService : ICreatureBuilderService
             .ToListAsync(ct);
 
         var totalAnimalCount = allAnimals.Count;
-        var animals = allAnimals.Select((a, index) => new CreatureBuilderAnimalDto(
+        var animals = allAnimals.Select(a => new CreatureBuilderAnimalDto(
             a.Src,
             a.Label,
             a.SupportedParts.Select(sp => sp.PartKey).ToList(),
-            IsLocked: !hasFullAccess && index >= baseUnlockedAnimalCount 
-            // Locked if no full access and beyond base count
+            IsLocked: !hasFullAccess && !baseUnlockedAnimalIds.Contains(a.Id.ToString())
+            // Locked if no full access and not in base unlocked list
         )).ToList();
 
-        var unlockedAnimalCount = hasFullAccess ? totalAnimalCount : baseUnlockedAnimalCount;
+        var unlockedAnimalCount = hasFullAccess ? totalAnimalCount : baseUnlockedAnimalIds.Count;
 
         return new UserAwareCreatureBuilderDataDto(
             parts,
@@ -88,5 +92,35 @@ public sealed class CreatureBuilderService : ICreatureBuilderService
             hasFullAccess,
             new UserCreditsInfoDto(credits, hasEverPurchased)
         );
+    }
+
+    private static List<string> GetBaseUnlockedAnimalIds(BuilderConfig? config)
+    {
+        if (config?.BaseUnlockedAnimalIds == null)
+            return new List<string> { "00000000-0000-0000-0000-000000000001", "00000000-0000-0000-0000-000000000002", "00000000-0000-0000-0000-000000000003" }; // Default: Bunny, Cat, Giraffe
+
+        try
+        {
+            return JsonSerializer.Deserialize<List<string>>(config.BaseUnlockedAnimalIds) ?? new List<string>();
+        }
+        catch
+        {
+            return new List<string> { "00000000-0000-0000-0000-000000000001", "00000000-0000-0000-0000-000000000002", "00000000-0000-0000-0000-000000000003" }; // Fallback
+        }
+    }
+
+    private static List<string> GetBaseUnlockedBodyPartKeys(BuilderConfig? config)
+    {
+        if (config?.BaseUnlockedBodyPartKeys == null)
+            return new List<string> { "head", "body", "arms" }; // Default: first 3 body parts
+
+        try
+        {
+            return JsonSerializer.Deserialize<List<string>>(config.BaseUnlockedBodyPartKeys) ?? new List<string>();
+        }
+        catch
+        {
+            return new List<string> { "head", "body", "arms" }; // Fallback
+        }
     }
 }

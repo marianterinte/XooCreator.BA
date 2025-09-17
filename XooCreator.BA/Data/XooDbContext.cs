@@ -261,7 +261,12 @@ public class XooDbContext : DbContext
         );
 
         // Config
-        modelBuilder.Entity<BuilderConfig>().HasData(new BuilderConfig { Id = 1, BaseUnlockedAnimalCount = 3 });
+        modelBuilder.Entity<BuilderConfig>().HasData(new BuilderConfig 
+        { 
+            Id = 1, 
+            BaseUnlockedAnimalIds = "[\"00000000-0000-0000-0000-000000000001\",\"00000000-0000-0000-0000-000000000002\",\"00000000-0000-0000-0000-000000000003\"]", // Bunny, Cat, Giraffe
+            BaseUnlockedBodyPartKeys = "[\"head\",\"body\",\"arms\"]" // First 3 body parts
+        });
 
         // Seed test credit wallets and transactions
         modelBuilder.Entity<CreditWallet>().HasData(

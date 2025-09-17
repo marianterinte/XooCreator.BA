@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Repositories;
 
@@ -57,26 +58,22 @@ public class UserProfileService : IUserProfileService
 
             // Get base configuration
             var config = await _db.BuilderConfigs.FirstOrDefaultAsync();
-            var baseUnlockedAnimalCount = config?.BaseUnlockedAnimalCount ?? 3;
+            var baseUnlockedAnimalIds = GetBaseUnlockedAnimalIds(config);
+            var baseUnlockedBodyPartKeys = GetBaseUnlockedBodyPartKeys(config);
 
             // Get locked/unlocked parts
-            var baseLockedParts = await _db.BodyParts
-                .Where(p => p.IsBaseLocked)
-                .Select(p => p.Key)
-                .ToListAsync();
-
             var allParts = await _db.BodyParts
                 .Select(p => p.Key)
                 .ToListAsync();
 
             // Logic: If user has ever purchased credits, they have full access
             var hasFullAccess = hasEverPurchased && credits > 0;
-            var unlockedParts = hasFullAccess ? allParts : allParts.Except(baseLockedParts).ToList();
-            var lockedParts = hasFullAccess ? new List<string>() : baseLockedParts;
+            var unlockedParts = hasFullAccess ? allParts : baseUnlockedBodyPartKeys;
+            var lockedParts = hasFullAccess ? new List<string>() : allParts.Except(baseUnlockedBodyPartKeys).ToList();
 
             // Animal count: if full access, all animals, otherwise base count
             var totalAnimals = await _db.Animals.Where(a => !a.IsHybrid).CountAsync();
-            var unlockedAnimalCount = hasFullAccess ? totalAnimals : baseUnlockedAnimalCount;
+            var unlockedAnimalCount = hasFullAccess ? totalAnimals : baseUnlockedAnimalIds.Count;
 
             var userProfile = new UserProfileDto
             {
@@ -172,6 +169,36 @@ public class UserProfileService : IUserProfileService
                 ErrorMessage = ex.Message,
                 NewBalance = 0
             };
+        }
+    }
+
+    private static List<string> GetBaseUnlockedAnimalIds(BuilderConfig? config)
+    {
+        if (config?.BaseUnlockedAnimalIds == null)
+            return new List<string> { "00000000-0000-0000-0000-000000000001", "00000000-0000-0000-0000-000000000002", "00000000-0000-0000-0000-000000000003" }; // Default: Bunny, Cat, Giraffe
+
+        try
+        {
+            return JsonSerializer.Deserialize<List<string>>(config.BaseUnlockedAnimalIds) ?? new List<string>();
+        }
+        catch
+        {
+            return new List<string> { "00000000-0000-0000-0000-000000000001", "00000000-0000-0000-0000-000000000002", "00000000-0000-0000-0000-000000000003" }; // Fallback
+        }
+    }
+
+    private static List<string> GetBaseUnlockedBodyPartKeys(BuilderConfig? config)
+    {
+        if (config?.BaseUnlockedBodyPartKeys == null)
+            return new List<string> { "head", "body", "arms" }; // Default: first 3 body parts
+
+        try
+        {
+            return JsonSerializer.Deserialize<List<string>>(config.BaseUnlockedBodyPartKeys) ?? new List<string>();
+        }
+        catch
+        {
+            return new List<string> { "head", "body", "arms" }; // Fallback
         }
     }
 }
