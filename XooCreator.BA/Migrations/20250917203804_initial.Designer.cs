@@ -12,7 +12,7 @@ using XooCreator.BA.Data;
 namespace XooCreator.BA.Migrations
 {
     [DbContext(typeof(XooDbContext))]
-    [Migration("20250916014451_initial")]
+    [Migration("20250917203804_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -1168,8 +1168,13 @@ namespace XooCreator.BA.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("BaseUnlockedAnimalCount")
-                        .HasColumnType("integer");
+                    b.Property<string>("BaseUnlockedAnimalIds")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("BaseUnlockedBodyPartKeys")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -1179,7 +1184,8 @@ namespace XooCreator.BA.Migrations
                         new
                         {
                             Id = 1,
-                            BaseUnlockedAnimalCount = 3
+                            BaseUnlockedAnimalIds = "[\"00000000-0000-0000-0000-000000000001\",\"00000000-0000-0000-0000-000000000002\",\"00000000-0000-0000-0000-000000000003\"]",
+                            BaseUnlockedBodyPartKeys = "[\"head\",\"body\",\"arms\"]"
                         });
                 });
 
@@ -1262,6 +1268,26 @@ namespace XooCreator.BA.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("CreditTransactions");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("33333333-3333-3333-3333-333333333333"),
+                            Amount = 15,
+                            CreatedAt = new DateTime(2025, 9, 16, 20, 38, 3, 616, DateTimeKind.Utc).AddTicks(3824),
+                            Reference = "test-purchase-marian",
+                            Type = 0,
+                            UserId = new Guid("22222222-2222-2222-2222-222222222222")
+                        },
+                        new
+                        {
+                            Id = new Guid("44444444-4444-4444-4444-444444444444"),
+                            Amount = -5,
+                            CreatedAt = new DateTime(2025, 9, 17, 18, 38, 3, 616, DateTimeKind.Utc).AddTicks(3830),
+                            Reference = "test-generation",
+                            Type = 1,
+                            UserId = new Guid("22222222-2222-2222-2222-222222222222")
+                        });
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.CreditWallet", b =>
@@ -1278,6 +1304,20 @@ namespace XooCreator.BA.Migrations
                     b.HasKey("UserId");
 
                     b.ToTable("CreditWallets");
+
+                    b.HasData(
+                        new
+                        {
+                            UserId = new Guid("11111111-1111-1111-1111-111111111111"),
+                            Balance = 5,
+                            UpdatedAt = new DateTime(2025, 9, 17, 20, 38, 3, 616, DateTimeKind.Utc).AddTicks(3806)
+                        },
+                        new
+                        {
+                            UserId = new Guid("22222222-2222-2222-2222-222222222222"),
+                            Balance = 10,
+                            UpdatedAt = new DateTime(2025, 9, 17, 20, 38, 3, 616, DateTimeKind.Utc).AddTicks(3807)
+                        });
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.HeroProgress", b =>
@@ -1848,7 +1888,7 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
                             Auth0Sub = "test-user-sub",
-                            CreatedAt = new DateTime(2025, 9, 16, 1, 44, 51, 278, DateTimeKind.Utc).AddTicks(7277),
+                            CreatedAt = new DateTime(2025, 9, 17, 20, 38, 3, 616, DateTimeKind.Utc).AddTicks(3695),
                             DisplayName = "Test User",
                             Email = "test@example.com"
                         },
@@ -1856,7 +1896,7 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("22222222-2222-2222-2222-222222222222"),
                             Auth0Sub = "marian-test-sub",
-                            CreatedAt = new DateTime(2025, 9, 16, 1, 44, 51, 278, DateTimeKind.Utc).AddTicks(7278),
+                            CreatedAt = new DateTime(2025, 9, 17, 20, 38, 3, 616, DateTimeKind.Utc).AddTicks(3697),
                             DisplayName = "Marian",
                             Email = "marian@example.com"
                         });
