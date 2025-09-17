@@ -1,0 +1,27 @@
+Urmatorul feature: 
+Creditele cumparate sunt pentru generearea imaginilor. 
+Vreau sa facem sus unde scrie 0 credits 2 butoane (care sa aiba behvior exclusiv, radio, culori ( green, blue dar faine business ceva, sa se potriveasca cu restul designului.) 
+Aceste butoane vor face switch intre discovery credits si generative credits.
+Daca dau tap pe discovery atunci butonul generate va de veni discover si invers. 
+o sa afisam ceva de genul 5(D) si 0(G).
+Pe butonul cu ? momentan afisam acel modal cu cum functioneaza.
+O sa explicam si despre cum functioneaza creditele. ( fa-l cumva  full screen si explica toate lucurile).
+
+1. Vom avea deci discovery credits si Generative credits.
+Cand un user se va inregistra in aplicatie (NU IMPLEMENTAM ACUM) el va primi sa zicem doar 10 discovery credits. Cu ele va putea sa descopere combinatii in builderul de animale. 
+
+2. Singura diferenta intre cum va functiona flowul intre Discover si Generate este urmatoarea:
+A) - Cand apesi discover se face un request la backend care nu face decat sa iti dea un randoom din configurarea discovery si sa vada ce ai descoperit deja pentru userul curent.
+In backend vom avea o tabela speciala unde vom pune aceste configurati. exista momentan un fisier numit DiscoveryData.csv care practic contine cele 61 de combinatii bodyparts+animals care pot fi descoperite de user cu creditele discovery.
+a.1 Va trebui sa generam acea matrice, tabela cu niste nume bazate pe combinatiile respective pentru animale. + numele fisierelor .png care vor reprezenta pozele ce se vor incaraca momentan din FE cand vor fi disponibile. ( de poze ma voi asigura eu).
+a.2 Va trebui sa seeduim acea configuratie in DB. apoi mereu in acel endpoint de discover animal vom returna animalul care nu a fost inca descoperit de user consumand creditele( in functie de ce combinatie bodyparts/animal trimite. 
+a.3 Eu voi genera vreo 61*3. poze ca sa fie cate 3 poze pentru fiecare combinatie in caz ca userul apasa de 3 ori cel putin pe acea combinatie.
+(aceste poze vor fi pregenerate de mine, daor ca sa aiba userul cava content care nu costa bnai momentan)
+
+B) Cand apesi generate iti va genera pur si simplu un animal unic folosind un api de image generator (NU IMPLEMENTAM ACUM)
+
+C) Poate ca GetUserAwareCreatureBuilderDataEndpoint va trebui adaptat dar vedem mai tarziu ( cantareste si tu asta).
+
+
+
+
