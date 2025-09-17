@@ -47,8 +47,8 @@ public sealed class CreatureBuilderService : ICreatureBuilderService
         var hasEverPurchased = await _db.CreditTransactions
             .AnyAsync(t => t.UserId == userId && t.Type == CreditTransactionType.Purchase, ct);
 
-        // Logic: Full access if user has ever purchased AND has credits > 0
-        var hasFullAccess = hasEverPurchased && credits > 0;
+        // Logic: Full access if user has ever purchased
+        var hasFullAccess = hasEverPurchased;
 
         // Get base configuration
         var config = await _db.BuilderConfigs.FirstOrDefaultAsync(ct);
@@ -74,7 +74,8 @@ public sealed class CreatureBuilderService : ICreatureBuilderService
             a.Src,
             a.Label,
             a.SupportedParts.Select(sp => sp.PartKey).ToList(),
-            IsLocked: !hasFullAccess && index >= baseUnlockedAnimalCount // Locked if no full access and beyond base count
+            IsLocked: !hasFullAccess && index >= baseUnlockedAnimalCount 
+            // Locked if no full access and beyond base count
         )).ToList();
 
         var unlockedAnimalCount = hasFullAccess ? totalAnimalCount : baseUnlockedAnimalCount;
