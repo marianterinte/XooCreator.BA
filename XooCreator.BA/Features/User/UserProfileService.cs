@@ -9,6 +9,8 @@ public interface IUserProfileService
 {
     Task<GetUserProfileResponse> GetUserProfileAsync(Guid userId);
     Task<SpendCreditsResponse> SpendCreditsAsync(Guid userId, SpendCreditsRequest request);
+    Task<SpendCreditsResponse> SpendDiscoveryCreditsAsync(Guid userId, SpendCreditsRequest request);
+    Task<SpendCreditsResponse> SpendGenerativeCreditsAsync(Guid userId, SpendCreditsRequest request);
 }
 
 public class UserProfileService : IUserProfileService
@@ -170,6 +172,51 @@ public class UserProfileService : IUserProfileService
                 NewBalance = 0
             };
         }
+    }
+
+    public async Task<SpendCreditsResponse> SpendDiscoveryCreditsAsync(Guid userId, SpendCreditsRequest request)
+    {
+        try
+        {
+            var wallet = await _db.CreditWallets.FirstOrDefaultAsync(w => w.UserId == userId);
+            if (wallet == null)
+            {
+                return new SpendCreditsResponse { Success = false, ErrorMessage = "Credit wallet not found", NewBalance = 0 };
+            }
+
+            if (wallet.DiscoveryBalance < request.Amount)
+            {
+                return new SpendCreditsResponse { Success = false, ErrorMessage = "Insufficient discovery credits", NewBalance = wallet.DiscoveryBalance };
+            }
+
+            wallet.DiscoveryBalance -= request.Amount;
+            wallet.UpdatedAt = DateTime.UtcNow;
+
+            var transaction = new CreditTransaction
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                Amount = -request.Amount,
+                Type = CreditTransactionType.Spend,
+                Reference = request.Reference,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _db.CreditTransactions.Add(transaction);
+            await _db.SaveChangesAsync();
+
+            return new SpendCreditsResponse { Success = true, NewBalance = wallet.DiscoveryBalance };
+        }
+        catch (Exception ex)
+        {
+            return new SpendCreditsResponse { Success = false, ErrorMessage = ex.Message, NewBalance = 0 };
+        }
+    }
+
+    public Task<SpendCreditsResponse> SpendGenerativeCreditsAsync(Guid userId, SpendCreditsRequest request)
+    {
+        // For now, generative == legacy balance path
+        return SpendCreditsAsync(userId, request);
     }
 
     private static List<string> GetBaseUnlockedAnimalIds(BuilderConfig? config)

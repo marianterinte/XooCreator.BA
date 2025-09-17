@@ -30,4 +30,19 @@ public class GetUserAwareCreatureBuilderDataEndpoint
         var data = await ep._service.GetUserAwareDataAsync(userId.Value, ct);
         return TypedResults.Ok(data);
     }
+
+    [Route("/api/creature-builder/discover")] // POST
+    public static async Task<Results<Ok<object>, UnauthorizedHttpResult, BadRequest<object>>> HandleDiscover(
+        [FromServices] GetUserAwareCreatureBuilderDataEndpoint ep,
+        [FromBody] object request,
+        CancellationToken ct)
+    {
+        var userId = await ep._userContext.GetUserIdAsync();
+        if (userId == null)
+            return TypedResults.Unauthorized();
+
+        // Placeholder: return 200 with success = true until service implemented
+        var response = new { success = true };
+        return TypedResults.Ok(response);
+    }
 }

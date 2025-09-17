@@ -46,6 +46,7 @@ public sealed class CreatureBuilderService : ICreatureBuilderService
         // Get user credit info
         var wallet = await _db.CreditWallets.FirstOrDefaultAsync(w => w.UserId == userId, ct);
         var credits = wallet?.Balance ?? 0;
+        var discovery = wallet?.DiscoveryBalance ?? 0;
 
         var hasEverPurchased = await _db.CreditTransactions
             .AnyAsync(t => t.UserId == userId && t.Type == CreditTransactionType.Purchase, ct);
@@ -90,7 +91,7 @@ public sealed class CreatureBuilderService : ICreatureBuilderService
             unlockedAnimalCount,
             totalAnimalCount,
             hasFullAccess,
-            new UserCreditsInfoDto(credits, hasEverPurchased)
+            new UserCreditsInfoDto(credits, hasEverPurchased, discovery, credits)
         );
     }
 

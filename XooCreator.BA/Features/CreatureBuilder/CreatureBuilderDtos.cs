@@ -14,5 +14,7 @@ public record UserAwareCreatureBuilderDataDto(
 
 public record UserCreditsInfoDto(
     int Balance,
-    bool HasEverPurchased
+    bool HasEverPurchased,
+    int Discovery,
+    int Generative
 );

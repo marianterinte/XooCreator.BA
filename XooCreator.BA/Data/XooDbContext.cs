@@ -9,6 +9,8 @@ public class XooDbContext : DbContext
     public DbSet<UserAlchimalia> UsersAlchimalia => Set<UserAlchimalia>();
     public DbSet<CreditWallet> CreditWallets => Set<CreditWallet>();
     public DbSet<CreditTransaction> CreditTransactions => Set<CreditTransaction>();
+    public DbSet<DiscoveryItem> DiscoveryItems => Set<DiscoveryItem>();
+    public DbSet<UserDiscovery> UserDiscoveries => Set<UserDiscovery>();
     public DbSet<Tree> Trees => Set<Tree>();
     public DbSet<TreeChoice> TreeChoices => Set<TreeChoice>();
     public DbSet<Creature> Creatures => Set<Creature>();
@@ -57,6 +59,24 @@ public class XooDbContext : DbContext
         {
             e.HasKey(x => x.UserId);
             e.HasOne(x => x.User).WithOne().HasForeignKey<CreditWallet>(x => x.UserId);
+        });
+
+        modelBuilder.Entity<DiscoveryItem>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.ArmsKey).HasMaxLength(32);
+            e.Property(x => x.BodyKey).HasMaxLength(32);
+            e.Property(x => x.HeadKey).HasMaxLength(32);
+        });
+
+        modelBuilder.Entity<UserDiscovery>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.HasIndex(x => new { x.UserId, x.DiscoveryItemId, x.VariantIndex }).IsUnique();
+            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
+            e.HasOne(x => x.DiscoveryItem).WithMany().HasForeignKey(x => x.DiscoveryItemId);
         });
 
         modelBuilder.Entity<CreditTransaction>(e =>
