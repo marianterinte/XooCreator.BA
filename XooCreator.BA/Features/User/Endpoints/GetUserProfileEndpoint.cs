@@ -1,4 +1,4 @@
-//Obsolete: The Endpoint feature is deprecated. 
+//Obsolete: The Endpoint feature is deprecated.
     
     
 
@@ -26,11 +26,11 @@
 //        [FromServices] GetUserProfileEndpoint ep)
 //    {
 //        var userId = await ep._userContext.GetUserIdAsync();
-//        if (userId == null) 
+//        if (userId == null)
 //            return TypedResults.Unauthorized();
 
 //        var result = await ep._userProfileService.GetUserProfileAsync(userId.Value);
-        
+
 //        if (!result.Success || result.User == null)
 //            return TypedResults.NotFound();
 
