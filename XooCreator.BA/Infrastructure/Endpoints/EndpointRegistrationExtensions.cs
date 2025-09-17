@@ -50,11 +50,26 @@ public static class EndpointRegistrationExtensions
 
                 switch (httpVerb)
                 {
-                    case "get": app.MapGet(route, del); break;
-                    case "post": app.MapPost(route, del); break;
-                    case "put": app.MapPut(route, del); break;
-                    case "delete": app.MapDelete(route, del); break;
-                    case "patch": app.MapMethods(route, new[] { "PATCH" }, del); break;
+                    case "get": 
+                        app.MapGet(route, del);
+                        Console.WriteLine($"\u001b[32m✓\u001b[0m \u001b[36mGET\u001b[0m \u001b[33m{route}\u001b[0m \u001b[90m->\u001b[0m \u001b[35m{type.Name}.{method.Name}\u001b[0m");
+                        break;
+                    case "post": 
+                        app.MapPost(route, del);
+                        Console.WriteLine($"\u001b[32m✓\u001b[0m \u001b[34mPOST\u001b[0m \u001b[33m{route}\u001b[0m \u001b[90m->\u001b[0m \u001b[35m{type.Name}.{method.Name}\u001b[0m");
+                        break;
+                    case "put": 
+                        app.MapPut(route, del);
+                        Console.WriteLine($"\u001b[32m✓\u001b[0m \u001b[33mPUT\u001b[0m \u001b[33m{route}\u001b[0m \u001b[90m->\u001b[0m \u001b[35m{type.Name}.{method.Name}\u001b[0m");
+                        break;
+                    case "delete": 
+                        app.MapDelete(route, del);
+                        Console.WriteLine($"\u001b[32m✓\u001b[0m \u001b[31mDELETE\u001b[0m \u001b[33m{route}\u001b[0m \u001b[90m->\u001b[0m \u001b[35m{type.Name}.{method.Name}\u001b[0m");
+                        break;
+                    case "patch": 
+                        app.MapMethods(route, new[] { "PATCH" }, del);
+                        Console.WriteLine($"\u001b[32m✓\u001b[0m \u001b[37mPATCH\u001b[0m \u001b[33m{route}\u001b[0m \u001b[90m->\u001b[0m \u001b[35m{type.Name}.{method.Name}\u001b[0m");
+                        break;
                 }
             }
         }
