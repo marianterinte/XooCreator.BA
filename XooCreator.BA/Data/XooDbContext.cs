@@ -68,6 +68,8 @@ public class XooDbContext : DbContext
             e.Property(x => x.ArmsKey).HasMaxLength(32);
             e.Property(x => x.BodyKey).HasMaxLength(32);
             e.Property(x => x.HeadKey).HasMaxLength(32);
+            e.Property(x => x.Name).HasMaxLength(128);
+            e.Property(x => x.Story).HasMaxLength(10000);
         });
 
         modelBuilder.Entity<UserDiscovery>(e =>
@@ -77,6 +79,7 @@ public class XooDbContext : DbContext
             e.HasIndex(x => new { x.UserId, x.DiscoveryItemId, x.VariantIndex }).IsUnique();
             e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
             e.HasOne(x => x.DiscoveryItem).WithMany().HasForeignKey(x => x.DiscoveryItemId);
+            e.ToTable("BestiaryDiscovered"); // rename table
         });
 
         modelBuilder.Entity<CreditTransaction>(e =>

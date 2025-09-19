@@ -100,7 +100,7 @@ public class GetUserAwareCreatureBuilderDataEndpoint
         var res = new DiscoverResponseDto(
             Success: true,
             AllDiscoveredForCombination: false,
-            Item: new DiscoverItemDto(item.Id, item.Name, imageUrl, variant),
+            Item: new DiscoverItemDto(item.Id, item.Name, imageUrl, item.Story, variant),
             ErrorMessage: null,
             DiscoveryCredits: wallet?.DiscoveryBalance
         );

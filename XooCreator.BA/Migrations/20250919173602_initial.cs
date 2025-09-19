@@ -53,7 +53,8 @@ namespace XooCreator.BA.Migrations
                     ArmsKey = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     BodyKey = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     HeadKey = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    Story = table.Column<string>(type: "character varying(10000)", maxLength: 10000, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
@@ -221,6 +222,33 @@ namespace XooCreator.BA.Migrations
                         name: "FK_TreeStoryNodes_TreeRegions_RegionId",
                         column: x => x.RegionId,
                         principalTable: "TreeRegions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BestiaryDiscovered",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    DiscoveryItemId = table.Column<Guid>(type: "uuid", nullable: false),
+                    VariantIndex = table.Column<int>(type: "integer", nullable: false),
+                    DiscoveredAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BestiaryDiscovered", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_BestiaryDiscovered_DiscoveryItems_DiscoveryItemId",
+                        column: x => x.DiscoveryItemId,
+                        principalTable: "DiscoveryItems",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_BestiaryDiscovered_UsersAlchimalia_UserId",
+                        column: x => x.UserId,
+                        principalTable: "UsersAlchimalia",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -399,33 +427,6 @@ namespace XooCreator.BA.Migrations
                     table.PrimaryKey("PK_Trees", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Trees_UsersAlchimalia_UserId",
-                        column: x => x.UserId,
-                        principalTable: "UsersAlchimalia",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "UserDiscoveries",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
-                    DiscoveryItemId = table.Column<Guid>(type: "uuid", nullable: false),
-                    VariantIndex = table.Column<int>(type: "integer", nullable: false),
-                    DiscoveredAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserDiscoveries", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_UserDiscoveries_DiscoveryItems_DiscoveryItemId",
-                        column: x => x.DiscoveryItemId,
-                        principalTable: "DiscoveryItems",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_UserDiscoveries_UsersAlchimalia_UserId",
                         column: x => x.UserId,
                         principalTable: "UsersAlchimalia",
                         principalColumn: "Id",
@@ -617,8 +618,8 @@ namespace XooCreator.BA.Migrations
                 columns: new[] { "Id", "Auth0Sub", "CreatedAt", "DisplayName", "Email" },
                 values: new object[,]
                 {
-                    { new Guid("11111111-1111-1111-1111-111111111111"), "test-user-sub", new DateTime(2025, 9, 19, 16, 58, 32, 960, DateTimeKind.Utc).AddTicks(5169), "Test User", "test@example.com" },
-                    { new Guid("22222222-2222-2222-2222-222222222222"), "marian-test-sub", new DateTime(2025, 9, 19, 16, 58, 32, 960, DateTimeKind.Utc).AddTicks(5171), "Marian", "marian@example.com" }
+                    { new Guid("11111111-1111-1111-1111-111111111111"), "test-user-sub", new DateTime(2025, 9, 19, 17, 36, 2, 262, DateTimeKind.Utc).AddTicks(4131), "Test User", "test@example.com" },
+                    { new Guid("22222222-2222-2222-2222-222222222222"), "marian-test-sub", new DateTime(2025, 9, 19, 17, 36, 2, 262, DateTimeKind.Utc).AddTicks(4132), "Marian", "marian@example.com" }
                 });
 
             migrationBuilder.InsertData(
@@ -667,8 +668,8 @@ namespace XooCreator.BA.Migrations
                 columns: new[] { "Id", "Amount", "CreatedAt", "Reference", "Type", "UserId" },
                 values: new object[,]
                 {
-                    { new Guid("33333333-3333-3333-3333-333333333333"), 15, new DateTime(2025, 9, 18, 16, 58, 32, 960, DateTimeKind.Utc).AddTicks(5375), "test-purchase-marian", 0, new Guid("22222222-2222-2222-2222-222222222222") },
-                    { new Guid("44444444-4444-4444-4444-444444444444"), -5, new DateTime(2025, 9, 19, 14, 58, 32, 960, DateTimeKind.Utc).AddTicks(5384), "test-generation", 1, new Guid("22222222-2222-2222-2222-222222222222") }
+                    { new Guid("33333333-3333-3333-3333-333333333333"), 15, new DateTime(2025, 9, 18, 17, 36, 2, 262, DateTimeKind.Utc).AddTicks(4258), "test-purchase-marian", 0, new Guid("22222222-2222-2222-2222-222222222222") },
+                    { new Guid("44444444-4444-4444-4444-444444444444"), -5, new DateTime(2025, 9, 19, 15, 36, 2, 262, DateTimeKind.Utc).AddTicks(4264), "test-generation", 1, new Guid("22222222-2222-2222-2222-222222222222") }
                 });
 
             migrationBuilder.InsertData(
@@ -676,8 +677,8 @@ namespace XooCreator.BA.Migrations
                 columns: new[] { "UserId", "Balance", "DiscoveryBalance", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { new Guid("11111111-1111-1111-1111-111111111111"), 5, 0, new DateTime(2025, 9, 19, 16, 58, 32, 960, DateTimeKind.Utc).AddTicks(5351) },
-                    { new Guid("22222222-2222-2222-2222-222222222222"), 10, 0, new DateTime(2025, 9, 19, 16, 58, 32, 960, DateTimeKind.Utc).AddTicks(5352) }
+                    { new Guid("11111111-1111-1111-1111-111111111111"), 5, 0, new DateTime(2025, 9, 19, 17, 36, 2, 262, DateTimeKind.Utc).AddTicks(4238) },
+                    { new Guid("22222222-2222-2222-2222-222222222222"), 10, 0, new DateTime(2025, 9, 19, 17, 36, 2, 262, DateTimeKind.Utc).AddTicks(4240) }
                 });
 
             migrationBuilder.InsertData(
@@ -844,6 +845,17 @@ namespace XooCreator.BA.Migrations
                 column: "RegionId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_BestiaryDiscovered_DiscoveryItemId",
+                table: "BestiaryDiscovered",
+                column: "DiscoveryItemId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BestiaryDiscovered_UserId_DiscoveryItemId_VariantIndex",
+                table: "BestiaryDiscovered",
+                columns: new[] { "UserId", "DiscoveryItemId", "VariantIndex" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Creatures_TreeId",
                 table: "Creatures",
                 column: "TreeId");
@@ -940,17 +952,6 @@ namespace XooCreator.BA.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserDiscoveries_DiscoveryItemId",
-                table: "UserDiscoveries",
-                column: "DiscoveryItemId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserDiscoveries_UserId_DiscoveryItemId_VariantIndex",
-                table: "UserDiscoveries",
-                columns: new[] { "UserId", "DiscoveryItemId", "VariantIndex" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_UsersAlchimalia_Auth0Sub",
                 table: "UsersAlchimalia",
                 column: "Auth0Sub",
@@ -968,6 +969,9 @@ namespace XooCreator.BA.Migrations
         {
             migrationBuilder.DropTable(
                 name: "AnimalPartSupports");
+
+            migrationBuilder.DropTable(
+                name: "BestiaryDiscovered");
 
             migrationBuilder.DropTable(
                 name: "BuilderConfigs");
@@ -1009,9 +1013,6 @@ namespace XooCreator.BA.Migrations
                 name: "TreeUnlockRules");
 
             migrationBuilder.DropTable(
-                name: "UserDiscoveries");
-
-            migrationBuilder.DropTable(
                 name: "UserStoryReadProgress");
 
             migrationBuilder.DropTable(
@@ -1024,6 +1025,9 @@ namespace XooCreator.BA.Migrations
                 name: "BodyParts");
 
             migrationBuilder.DropTable(
+                name: "DiscoveryItems");
+
+            migrationBuilder.DropTable(
                 name: "StoryTiles");
 
             migrationBuilder.DropTable(
@@ -1031,9 +1035,6 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.DropTable(
                 name: "TreeRegions");
-
-            migrationBuilder.DropTable(
-                name: "DiscoveryItems");
 
             migrationBuilder.DropTable(
                 name: "Regions");

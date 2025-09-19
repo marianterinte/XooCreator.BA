@@ -1271,7 +1271,7 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("33333333-3333-3333-3333-333333333333"),
                             Amount = 15,
-                            CreatedAt = new DateTime(2025, 9, 18, 16, 58, 32, 960, DateTimeKind.Utc).AddTicks(5375),
+                            CreatedAt = new DateTime(2025, 9, 18, 17, 36, 2, 262, DateTimeKind.Utc).AddTicks(4258),
                             Reference = "test-purchase-marian",
                             Type = 0,
                             UserId = new Guid("22222222-2222-2222-2222-222222222222")
@@ -1280,7 +1280,7 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("44444444-4444-4444-4444-444444444444"),
                             Amount = -5,
-                            CreatedAt = new DateTime(2025, 9, 19, 14, 58, 32, 960, DateTimeKind.Utc).AddTicks(5384),
+                            CreatedAt = new DateTime(2025, 9, 19, 15, 36, 2, 262, DateTimeKind.Utc).AddTicks(4264),
                             Reference = "test-generation",
                             Type = 1,
                             UserId = new Guid("22222222-2222-2222-2222-222222222222")
@@ -1311,14 +1311,14 @@ namespace XooCreator.BA.Migrations
                             UserId = new Guid("11111111-1111-1111-1111-111111111111"),
                             Balance = 5,
                             DiscoveryBalance = 0,
-                            UpdatedAt = new DateTime(2025, 9, 19, 16, 58, 32, 960, DateTimeKind.Utc).AddTicks(5351)
+                            UpdatedAt = new DateTime(2025, 9, 19, 17, 36, 2, 262, DateTimeKind.Utc).AddTicks(4238)
                         },
                         new
                         {
                             UserId = new Guid("22222222-2222-2222-2222-222222222222"),
                             Balance = 10,
                             DiscoveryBalance = 0,
-                            UpdatedAt = new DateTime(2025, 9, 19, 16, 58, 32, 960, DateTimeKind.Utc).AddTicks(5352)
+                            UpdatedAt = new DateTime(2025, 9, 19, 17, 36, 2, 262, DateTimeKind.Utc).AddTicks(4240)
                         });
                 });
 
@@ -1348,7 +1348,13 @@ namespace XooCreator.BA.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<string>("Story")
+                        .IsRequired()
+                        .HasMaxLength(10000)
+                        .HasColumnType("character varying(10000)");
 
                     b.HasKey("Id");
 
@@ -1923,7 +1929,7 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
                             Auth0Sub = "test-user-sub",
-                            CreatedAt = new DateTime(2025, 9, 19, 16, 58, 32, 960, DateTimeKind.Utc).AddTicks(5169),
+                            CreatedAt = new DateTime(2025, 9, 19, 17, 36, 2, 262, DateTimeKind.Utc).AddTicks(4131),
                             DisplayName = "Test User",
                             Email = "test@example.com"
                         },
@@ -1931,7 +1937,7 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("22222222-2222-2222-2222-222222222222"),
                             Auth0Sub = "marian-test-sub",
-                            CreatedAt = new DateTime(2025, 9, 19, 16, 58, 32, 960, DateTimeKind.Utc).AddTicks(5171),
+                            CreatedAt = new DateTime(2025, 9, 19, 17, 36, 2, 262, DateTimeKind.Utc).AddTicks(4132),
                             DisplayName = "Marian",
                             Email = "marian@example.com"
                         });
@@ -1962,7 +1968,7 @@ namespace XooCreator.BA.Migrations
                     b.HasIndex("UserId", "DiscoveryItemId", "VariantIndex")
                         .IsUnique();
 
-                    b.ToTable("UserDiscoveries");
+                    b.ToTable("BestiaryDiscovered", (string)null);
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.UserStoryReadProgress", b =>

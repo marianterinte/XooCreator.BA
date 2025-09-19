@@ -7,6 +7,7 @@ public class DiscoveryItem
     public string BodyKey { get; set; } = string.Empty;
     public string HeadKey { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
+    public string Story { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
 
