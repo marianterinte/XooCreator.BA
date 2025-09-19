@@ -92,8 +92,9 @@ public class GetUserAwareCreatureBuilderDataEndpoint
         await ep._db.SaveChangesAsync(ct);
 
         // 5) Build response item
-        // Single image version for discovery
-        string? imageUrl = item.ImageV1;
+        // Build image path from combination keys (Name or parts) with .jpg
+        string normalize(string s) => s == "—" ? "None" : s;
+        string imageUrl = $"{normalize(item.ArmsKey)}{normalize(item.BodyKey)}{normalize(item.HeadKey)}.jpg";
         var wallet = await ep._db.CreditWallets.FirstOrDefaultAsync(w => w.UserId == userId.Value, ct);
 
         var res = new DiscoverResponseDto(

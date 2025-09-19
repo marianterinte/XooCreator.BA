@@ -102,6 +102,7 @@ builder.Services.AddScoped<IUserContextService, UserContextService>();
 builder.Services.AddScoped<IDbHealthService, DbHealthService>();
 builder.Services.AddScoped<ICreatureBuilderService, CreatureBuilderService>();
 builder.Services.AddScoped<ISeedDiscoveryService, SeedDiscoveryService>();
+builder.Services.AddScoped<IBestiaryFileUpdater, BestiaryFileUpdater>();
 
 // User Services
 builder.Services.AddScoped<XooCreator.BA.Features.User.IUserProfileService, XooCreator.BA.Features.User.UserProfileService>();
@@ -125,6 +126,7 @@ using (var scope = app.Services.CreateScope())
     var storiesService = scope.ServiceProvider.GetRequiredService<IStoriesService>();
     var treeModelService = scope.ServiceProvider.GetRequiredService<ITreeModelService>();
     var discoverySeeder = scope.ServiceProvider.GetRequiredService<ISeedDiscoveryService>();
+    var bestiaryUpdater = scope.ServiceProvider.GetRequiredService<IBestiaryFileUpdater>();
 
     try
     {
@@ -143,6 +145,7 @@ using (var scope = app.Services.CreateScope())
 
         // Seed discovery items (63 combos)
         await discoverySeeder.EnsureSeedAsync();
+        await bestiaryUpdater.EnsureImageFileNamesAsync();
 
         // Dev convenience: ensure discovery credits for test users
         if (recreate)

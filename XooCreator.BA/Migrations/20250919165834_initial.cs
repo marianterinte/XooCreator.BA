@@ -54,9 +54,6 @@ namespace XooCreator.BA.Migrations
                     BodyKey = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     HeadKey = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
-                    ImageV1 = table.Column<string>(type: "text", nullable: true),
-                    ImageV2 = table.Column<string>(type: "text", nullable: true),
-                    ImageV3 = table.Column<string>(type: "text", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
@@ -620,8 +617,8 @@ namespace XooCreator.BA.Migrations
                 columns: new[] { "Id", "Auth0Sub", "CreatedAt", "DisplayName", "Email" },
                 values: new object[,]
                 {
-                    { new Guid("11111111-1111-1111-1111-111111111111"), "test-user-sub", new DateTime(2025, 9, 19, 2, 1, 30, 780, DateTimeKind.Utc).AddTicks(9880), "Test User", "test@example.com" },
-                    { new Guid("22222222-2222-2222-2222-222222222222"), "marian-test-sub", new DateTime(2025, 9, 19, 2, 1, 30, 780, DateTimeKind.Utc).AddTicks(9882), "Marian", "marian@example.com" }
+                    { new Guid("11111111-1111-1111-1111-111111111111"), "test-user-sub", new DateTime(2025, 9, 19, 16, 58, 32, 960, DateTimeKind.Utc).AddTicks(5169), "Test User", "test@example.com" },
+                    { new Guid("22222222-2222-2222-2222-222222222222"), "marian-test-sub", new DateTime(2025, 9, 19, 16, 58, 32, 960, DateTimeKind.Utc).AddTicks(5171), "Marian", "marian@example.com" }
                 });
 
             migrationBuilder.InsertData(
@@ -670,8 +667,8 @@ namespace XooCreator.BA.Migrations
                 columns: new[] { "Id", "Amount", "CreatedAt", "Reference", "Type", "UserId" },
                 values: new object[,]
                 {
-                    { new Guid("33333333-3333-3333-3333-333333333333"), 15, new DateTime(2025, 9, 18, 2, 1, 30, 781, DateTimeKind.Utc).AddTicks(1), "test-purchase-marian", 0, new Guid("22222222-2222-2222-2222-222222222222") },
-                    { new Guid("44444444-4444-4444-4444-444444444444"), -5, new DateTime(2025, 9, 19, 0, 1, 30, 781, DateTimeKind.Utc).AddTicks(8), "test-generation", 1, new Guid("22222222-2222-2222-2222-222222222222") }
+                    { new Guid("33333333-3333-3333-3333-333333333333"), 15, new DateTime(2025, 9, 18, 16, 58, 32, 960, DateTimeKind.Utc).AddTicks(5375), "test-purchase-marian", 0, new Guid("22222222-2222-2222-2222-222222222222") },
+                    { new Guid("44444444-4444-4444-4444-444444444444"), -5, new DateTime(2025, 9, 19, 14, 58, 32, 960, DateTimeKind.Utc).AddTicks(5384), "test-generation", 1, new Guid("22222222-2222-2222-2222-222222222222") }
                 });
 
             migrationBuilder.InsertData(
@@ -679,8 +676,8 @@ namespace XooCreator.BA.Migrations
                 columns: new[] { "UserId", "Balance", "DiscoveryBalance", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { new Guid("11111111-1111-1111-1111-111111111111"), 5, 0, new DateTime(2025, 9, 19, 2, 1, 30, 780, DateTimeKind.Utc).AddTicks(9983) },
-                    { new Guid("22222222-2222-2222-2222-222222222222"), 10, 0, new DateTime(2025, 9, 19, 2, 1, 30, 780, DateTimeKind.Utc).AddTicks(9985) }
+                    { new Guid("11111111-1111-1111-1111-111111111111"), 5, 0, new DateTime(2025, 9, 19, 16, 58, 32, 960, DateTimeKind.Utc).AddTicks(5351) },
+                    { new Guid("22222222-2222-2222-2222-222222222222"), 10, 0, new DateTime(2025, 9, 19, 16, 58, 32, 960, DateTimeKind.Utc).AddTicks(5352) }
                 });
 
             migrationBuilder.InsertData(

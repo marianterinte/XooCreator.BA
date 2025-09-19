@@ -12,7 +12,7 @@ using XooCreator.BA.Data;
 namespace XooCreator.BA.Migrations
 {
     [DbContext(typeof(XooDbContext))]
-    [Migration("20250919020132_initial")]
+    [Migration("20250919165834_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -1274,7 +1274,7 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("33333333-3333-3333-3333-333333333333"),
                             Amount = 15,
-                            CreatedAt = new DateTime(2025, 9, 18, 2, 1, 30, 781, DateTimeKind.Utc).AddTicks(1),
+                            CreatedAt = new DateTime(2025, 9, 18, 16, 58, 32, 960, DateTimeKind.Utc).AddTicks(5375),
                             Reference = "test-purchase-marian",
                             Type = 0,
                             UserId = new Guid("22222222-2222-2222-2222-222222222222")
@@ -1283,7 +1283,7 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("44444444-4444-4444-4444-444444444444"),
                             Amount = -5,
-                            CreatedAt = new DateTime(2025, 9, 19, 0, 1, 30, 781, DateTimeKind.Utc).AddTicks(8),
+                            CreatedAt = new DateTime(2025, 9, 19, 14, 58, 32, 960, DateTimeKind.Utc).AddTicks(5384),
                             Reference = "test-generation",
                             Type = 1,
                             UserId = new Guid("22222222-2222-2222-2222-222222222222")
@@ -1314,14 +1314,14 @@ namespace XooCreator.BA.Migrations
                             UserId = new Guid("11111111-1111-1111-1111-111111111111"),
                             Balance = 5,
                             DiscoveryBalance = 0,
-                            UpdatedAt = new DateTime(2025, 9, 19, 2, 1, 30, 780, DateTimeKind.Utc).AddTicks(9983)
+                            UpdatedAt = new DateTime(2025, 9, 19, 16, 58, 32, 960, DateTimeKind.Utc).AddTicks(5351)
                         },
                         new
                         {
                             UserId = new Guid("22222222-2222-2222-2222-222222222222"),
                             Balance = 10,
                             DiscoveryBalance = 0,
-                            UpdatedAt = new DateTime(2025, 9, 19, 2, 1, 30, 780, DateTimeKind.Utc).AddTicks(9985)
+                            UpdatedAt = new DateTime(2025, 9, 19, 16, 58, 32, 960, DateTimeKind.Utc).AddTicks(5352)
                         });
                 });
 
@@ -1348,15 +1348,6 @@ namespace XooCreator.BA.Migrations
                         .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");
-
-                    b.Property<string>("ImageV1")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ImageV2")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ImageV3")
-                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -1935,7 +1926,7 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
                             Auth0Sub = "test-user-sub",
-                            CreatedAt = new DateTime(2025, 9, 19, 2, 1, 30, 780, DateTimeKind.Utc).AddTicks(9880),
+                            CreatedAt = new DateTime(2025, 9, 19, 16, 58, 32, 960, DateTimeKind.Utc).AddTicks(5169),
                             DisplayName = "Test User",
                             Email = "test@example.com"
                         },
@@ -1943,7 +1934,7 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("22222222-2222-2222-2222-222222222222"),
                             Auth0Sub = "marian-test-sub",
-                            CreatedAt = new DateTime(2025, 9, 19, 2, 1, 30, 780, DateTimeKind.Utc).AddTicks(9882),
+                            CreatedAt = new DateTime(2025, 9, 19, 16, 58, 32, 960, DateTimeKind.Utc).AddTicks(5171),
                             DisplayName = "Marian",
                             Email = "marian@example.com"
                         });

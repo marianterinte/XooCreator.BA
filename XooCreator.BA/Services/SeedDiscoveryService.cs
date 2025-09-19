@@ -27,10 +27,7 @@ public sealed class SeedDiscoveryService : ISeedDiscoveryService
             ArmsKey = c.Arms,
             BodyKey = c.Body,
             HeadKey = c.Head,
-            Name = $"{c.Arms}-{c.Body}-{c.Head}",
-            ImageV1 = BuildImageName(c),
-            ImageV2 = null,
-            ImageV3 = null
+            Name = $"{c.Arms}-{c.Body}-{c.Head}"
         }).ToList();
 
         _db.DiscoveryItems.AddRange(entries);
@@ -55,12 +52,7 @@ public sealed class SeedDiscoveryService : ISeedDiscoveryService
         return lines;
     }
 
-    private static string BuildImageName((string Arms, string Body, string Head) c)
-    {
-        string normalize(string s) => s == "—" ? "None" : s;
-        var file = $"{normalize(c.Arms)}{normalize(c.Body)}{normalize(c.Head)}.png";
-        return file;
-    }
+    // Image path is constructed on the fly in endpoint, no need to store
 }
 
 
