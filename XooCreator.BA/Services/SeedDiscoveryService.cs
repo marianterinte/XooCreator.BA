@@ -39,35 +39,18 @@ public sealed class SeedDiscoveryService : ISeedDiscoveryService
 
     private static IEnumerable<(string Arms, string Body, string Head)> Get63Combinations()
     {
-        // Based on LOI.txt list (63 combos). Use "—" where empty.
-        string[] A = new[] { "Bunny", "Giraffe", "Hippo", "—" };
-        string[] B = new[] { "Bunny", "Giraffe", "Hippo", "—" };
-        string[] H = new[] { "Bunny", "Giraffe", "Hippo", "—" };
-
-        // Explicit list from LOI (order is not critical for seeding)
+        // Updated list from CSV provided (excludes single-body-part combos). Use "—" where empty.
         var lines = new (string Arms, string Body, string Head)[]
         {
-            ("Bunny","—","—"),("Giraffe","—","—"),("Hippo","—","—"),
-            ("—","Bunny","—"),("—","Giraffe","—"),("—","Hippo","—"),
-            ("—","—","Bunny"),("—","—","Giraffe"),("—","—","Hippo"),
-            ("Bunny","Bunny","—"),("Bunny","Giraffe","—"),("Bunny","Hippo","—"),
-            ("Giraffe","Bunny","—"),("Giraffe","Giraffe","—"),("Giraffe","Hippo","—"),
-            ("Hippo","Bunny","—"),("Hippo","Giraffe","—"),("Hippo","Hippo","—"),
-            ("Bunny","—","Bunny"),("Bunny","—","Giraffe"),("Bunny","—","Hippo"),
-            ("Giraffe","—","Bunny"),("Giraffe","—","Giraffe"),("Giraffe","—","Hippo"),
-            ("Hippo","—","Bunny"),("Hippo","—","Giraffe"),("Hippo","—","Hippo"),
-            ("—","Bunny","Bunny"),("—","Bunny","Giraffe"),("—","Bunny","Hippo"),
-            ("—","Giraffe","Bunny"),("—","Giraffe","Giraffe"),("—","Giraffe","Hippo"),
-            ("—","Hippo","Bunny"),("—","Hippo","Giraffe"),("—","Hippo","Hippo"),
-            ("Bunny","Bunny","Bunny"),("Bunny","Bunny","Giraffe"),("Bunny","Bunny","Hippo"),
-            ("Bunny","Giraffe","Bunny"),("Bunny","Giraffe","Giraffe"),("Bunny","Giraffe","Hippo"),
+            ("Bunny","Giraffe","—"),("Bunny","Hippo","—"),("Giraffe","Bunny","—"),("Giraffe","Hippo","—"),("Hippo","Bunny","—"),("Hippo","Giraffe","—"),
+            ("Bunny","—","Giraffe"),("Bunny","—","Hippo"),("Giraffe","—","Bunny"),("Giraffe","—","Hippo"),("Hippo","—","Bunny"),("Hippo","—","Giraffe"),
+            ("—","Bunny","Giraffe"),("—","Bunny","Hippo"),("—","Giraffe","Bunny"),("—","Giraffe","Hippo"),("—","Hippo","Bunny"),("—","Hippo","Giraffe"),
+            ("Bunny","Bunny","Giraffe"),("Bunny","Bunny","Hippo"),("Bunny","Giraffe","Bunny"),("Bunny","Giraffe","Giraffe"),("Bunny","Giraffe","Hippo"),
             ("Bunny","Hippo","Bunny"),("Bunny","Hippo","Giraffe"),("Bunny","Hippo","Hippo"),
-            ("Giraffe","Bunny","Bunny"),("Giraffe","Bunny","Giraffe"),("Giraffe","Bunny","Hippo"),
-            ("Giraffe","Giraffe","Bunny"),("Giraffe","Giraffe","Giraffe"),("Giraffe","Giraffe","Hippo"),
+            ("Giraffe","Bunny","Bunny"),("Giraffe","Bunny","Giraffe"),("Giraffe","Bunny","Hippo"),("Giraffe","Giraffe","Bunny"),("Giraffe","Giraffe","Hippo"),
             ("Giraffe","Hippo","Bunny"),("Giraffe","Hippo","Giraffe"),("Giraffe","Hippo","Hippo"),
-            ("Hippo","Bunny","Bunny"),("Hippo","Bunny","Giraffe"),("Hippo","Bunny","Hippo"),
-            ("Hippo","Giraffe","Bunny"),("Hippo","Giraffe","Giraffe"),("Hippo","Giraffe","Hippo"),
-            ("Hippo","Hippo","Bunny"),("Hippo","Hippo","Giraffe"),("Hippo","Hippo","Hippo")
+            ("Hippo","Bunny","Bunny"),("Hippo","Bunny","Giraffe"),("Hippo","Bunny","Hippo"),("Hippo","Giraffe","Bunny"),("Hippo","Giraffe","Giraffe"),
+            ("Hippo","Giraffe","Hippo"),("Hippo","Hippo","Bunny"),("Hippo","Hippo","Giraffe")
         };
         return lines;
     }
