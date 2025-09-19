@@ -8,9 +8,9 @@
   },
   {
     "id": "00000000-0000-0000-0000-000000000002",
-    "label": "Cat",
-    "src": "images/animals/base/cat.jpg",
-    "regionId": "10000000-0000-0000-0000-000000000003",
+    "label": "Hippo",
+    "src": "images/animals/base/hippo.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000006",
     "isHybrid": false
   },
   {
@@ -36,9 +36,9 @@
   },
   {
     "id": "00000000-0000-0000-0000-000000000006",
-    "label": "Hippo",
-    "src": "images/animals/base/hippo.jpg",
-    "regionId": "10000000-0000-0000-0000-000000000006",
+    "label": "Cat",
+    "src": "images/animals/base/cat.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000003",
     "isHybrid": false
   },
   {

@@ -27,7 +27,10 @@ public sealed class SeedDiscoveryService : ISeedDiscoveryService
             ArmsKey = c.Arms,
             BodyKey = c.Body,
             HeadKey = c.Head,
-            Name = $"{c.Arms}-{c.Body}-{c.Head}"
+            Name = $"{c.Arms}-{c.Body}-{c.Head}",
+            ImageV1 = BuildImageName(c, 1),
+            ImageV2 = BuildImageName(c, 2),
+            ImageV3 = BuildImageName(c, 3)
         }).ToList();
 
         _db.DiscoveryItems.AddRange(entries);
@@ -67,6 +70,13 @@ public sealed class SeedDiscoveryService : ISeedDiscoveryService
             ("Hippo","Hippo","Bunny"),("Hippo","Hippo","Giraffe"),("Hippo","Hippo","Hippo")
         };
         return lines;
+    }
+
+    private static string BuildImageName((string Arms, string Body, string Head) c, int variant)
+    {
+        string normalize(string s) => s == "—" ? "None" : s;
+        var file = $"{normalize(c.Arms)}{normalize(c.Body)}{normalize(c.Head)}V{variant}.png";
+        return file;
     }
 }
 

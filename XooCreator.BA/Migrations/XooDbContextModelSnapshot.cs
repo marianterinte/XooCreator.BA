@@ -66,9 +66,9 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000002"),
                             IsHybrid = false,
-                            Label = "Cat",
-                            RegionId = new Guid("10000000-0000-0000-0000-000000000003"),
-                            Src = "images/animals/base/cat.jpg"
+                            Label = "Hippo",
+                            RegionId = new Guid("10000000-0000-0000-0000-000000000006"),
+                            Src = "images/animals/base/hippo.jpg"
                         },
                         new
                         {
@@ -98,9 +98,9 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000006"),
                             IsHybrid = false,
-                            Label = "Hippo",
-                            RegionId = new Guid("10000000-0000-0000-0000-000000000006"),
-                            Src = "images/animals/base/hippo.jpg"
+                            Label = "Cat",
+                            RegionId = new Guid("10000000-0000-0000-0000-000000000003"),
+                            Src = "images/animals/base/cat.jpg"
                         },
                         new
                         {
@@ -1271,7 +1271,7 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("33333333-3333-3333-3333-333333333333"),
                             Amount = 15,
-                            CreatedAt = new DateTime(2025, 9, 17, 17, 8, 50, 285, DateTimeKind.Utc).AddTicks(9633),
+                            CreatedAt = new DateTime(2025, 9, 18, 2, 1, 30, 781, DateTimeKind.Utc).AddTicks(1),
                             Reference = "test-purchase-marian",
                             Type = 0,
                             UserId = new Guid("22222222-2222-2222-2222-222222222222")
@@ -1280,7 +1280,7 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("44444444-4444-4444-4444-444444444444"),
                             Amount = -5,
-                            CreatedAt = new DateTime(2025, 9, 18, 15, 8, 50, 285, DateTimeKind.Utc).AddTicks(9640),
+                            CreatedAt = new DateTime(2025, 9, 19, 0, 1, 30, 781, DateTimeKind.Utc).AddTicks(8),
                             Reference = "test-generation",
                             Type = 1,
                             UserId = new Guid("22222222-2222-2222-2222-222222222222")
@@ -1311,14 +1311,14 @@ namespace XooCreator.BA.Migrations
                             UserId = new Guid("11111111-1111-1111-1111-111111111111"),
                             Balance = 5,
                             DiscoveryBalance = 0,
-                            UpdatedAt = new DateTime(2025, 9, 18, 17, 8, 50, 285, DateTimeKind.Utc).AddTicks(9612)
+                            UpdatedAt = new DateTime(2025, 9, 19, 2, 1, 30, 780, DateTimeKind.Utc).AddTicks(9983)
                         },
                         new
                         {
                             UserId = new Guid("22222222-2222-2222-2222-222222222222"),
                             Balance = 10,
                             DiscoveryBalance = 0,
-                            UpdatedAt = new DateTime(2025, 9, 18, 17, 8, 50, 285, DateTimeKind.Utc).AddTicks(9614)
+                            UpdatedAt = new DateTime(2025, 9, 19, 2, 1, 30, 780, DateTimeKind.Utc).AddTicks(9985)
                         });
                 });
 
@@ -1932,7 +1932,7 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
                             Auth0Sub = "test-user-sub",
-                            CreatedAt = new DateTime(2025, 9, 18, 17, 8, 50, 285, DateTimeKind.Utc).AddTicks(9473),
+                            CreatedAt = new DateTime(2025, 9, 19, 2, 1, 30, 780, DateTimeKind.Utc).AddTicks(9880),
                             DisplayName = "Test User",
                             Email = "test@example.com"
                         },
@@ -1940,7 +1940,7 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("22222222-2222-2222-2222-222222222222"),
                             Auth0Sub = "marian-test-sub",
-                            CreatedAt = new DateTime(2025, 9, 18, 17, 8, 50, 285, DateTimeKind.Utc).AddTicks(9475),
+                            CreatedAt = new DateTime(2025, 9, 19, 2, 1, 30, 780, DateTimeKind.Utc).AddTicks(9882),
                             DisplayName = "Marian",
                             Email = "marian@example.com"
                         });

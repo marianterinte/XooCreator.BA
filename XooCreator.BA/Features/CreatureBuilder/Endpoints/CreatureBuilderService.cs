@@ -74,14 +74,35 @@ public sealed class CreatureBuilderService : ICreatureBuilderService
             .Include(a => a.SupportedParts)
             .ToListAsync(ct);
 
+        //// Order animals so base unlocked appear first in configured order (e.g., Bunny, Hippo, Giraffe), others by label
+        //var priorityMap = new Dictionary<string, int>();
+        //for (int i = 0; i < baseUnlockedAnimalIds.Count; i++)
+        //{
+        //    priorityMap[baseUnlockedAnimalIds[i]] = i;
+        //}
+        //var orderedAnimals = allAnimals
+        //    .OrderBy(a => priorityMap.TryGetValue(a.Id.ToString(), out var p) ? p : int.MaxValue)
+        //    .ThenBy(a => a.Label)
+        //    .ToList();
+
+        //var totalAnimalCount = orderedAnimals.Count;
+        //var animals = orderedAnimals.Select(a => new CreatureBuilderAnimalDto(
+        //    a.Src,
+        //    a.Label,
+        //    a.SupportedParts.Select(sp => sp.PartKey).ToList(),
+        //    IsLocked: !hasFullAccess && !baseUnlockedAnimalIds.Contains(a.Id.ToString())
+        //    // Locked if no full access and not in base unlocked list
+        //)).ToList();
+
         var totalAnimalCount = allAnimals.Count;
         var animals = allAnimals.Select(a => new CreatureBuilderAnimalDto(
             a.Src,
             a.Label,
             a.SupportedParts.Select(sp => sp.PartKey).ToList(),
             IsLocked: !hasFullAccess && !baseUnlockedAnimalIds.Contains(a.Id.ToString())
-            // Locked if no full access and not in base unlocked list
+        // Locked if no full access and not in base unlocked list
         )).ToList();
+
 
         var unlockedAnimalCount = hasFullAccess ? totalAnimalCount : baseUnlockedAnimalIds.Count;
 
