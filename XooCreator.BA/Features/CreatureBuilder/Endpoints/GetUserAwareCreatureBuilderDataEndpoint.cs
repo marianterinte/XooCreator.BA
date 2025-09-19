@@ -92,13 +92,8 @@ public class GetUserAwareCreatureBuilderDataEndpoint
         await ep._db.SaveChangesAsync(ct);
 
         // 5) Build response item
-        string? imageUrl = variant switch
-        {
-            1 => item.ImageV1,
-            2 => item.ImageV2,
-            3 => item.ImageV3,
-            _ => null
-        };
+        // Single image version for discovery
+        string? imageUrl = item.ImageV1;
         var wallet = await ep._db.CreditWallets.FirstOrDefaultAsync(w => w.UserId == userId.Value, ct);
 
         var res = new DiscoverResponseDto(

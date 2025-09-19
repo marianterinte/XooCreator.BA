@@ -28,9 +28,9 @@ public sealed class SeedDiscoveryService : ISeedDiscoveryService
             BodyKey = c.Body,
             HeadKey = c.Head,
             Name = $"{c.Arms}-{c.Body}-{c.Head}",
-            ImageV1 = BuildImageName(c, 1),
-            ImageV2 = BuildImageName(c, 2),
-            ImageV3 = BuildImageName(c, 3)
+            ImageV1 = BuildImageName(c),
+            ImageV2 = null,
+            ImageV3 = null
         }).ToList();
 
         _db.DiscoveryItems.AddRange(entries);
@@ -55,10 +55,10 @@ public sealed class SeedDiscoveryService : ISeedDiscoveryService
         return lines;
     }
 
-    private static string BuildImageName((string Arms, string Body, string Head) c, int variant)
+    private static string BuildImageName((string Arms, string Body, string Head) c)
     {
         string normalize(string s) => s == "—" ? "None" : s;
-        var file = $"{normalize(c.Arms)}{normalize(c.Body)}{normalize(c.Head)}V{variant}.png";
+        var file = $"{normalize(c.Arms)}{normalize(c.Body)}{normalize(c.Head)}.png";
         return file;
     }
 }
