@@ -33,7 +33,7 @@ public record DiscoverItemDto(
 
 public record DiscoverResponseDto(
     bool Success,
-    bool AllDiscoveredForCombination,
+    bool AlreadyDiscovered,
     DiscoverItemDto? Item,
     string? ErrorMessage,
     int? DiscoveryCredits

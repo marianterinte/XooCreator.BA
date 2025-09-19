@@ -64,45 +64,51 @@ public class GetUserAwareCreatureBuilderDataEndpoint
             .Where(ud => ud.UserId == userId.Value && ud.DiscoveryItemId == item.Id)
             .Select(ud => ud.VariantIndex)
             .ToListAsync(ct);
-
-        // 3) Pick the lowest missing variant from 1..3
-        int variant = new[] { 1, 2, 3 }.FirstOrDefault(v => !discovered.Contains(v));
-        if (variant == 0)
+        bool alreadyDiscovered = discovered.Count > 0;
+        int variant;
+        if (alreadyDiscovered)
         {
-            // All discovered for this combination
-            var walletLeft = await ep._db.CreditWallets.FirstOrDefaultAsync(w => w.UserId == userId.Value, ct);
-            return TypedResults.Ok(new DiscoverResponseDto(
-                Success: true,
-                AllDiscoveredForCombination: true,
-                Item: null,
-                ErrorMessage: null,
-                DiscoveryCredits: walletLeft?.DiscoveryBalance
-            ));
+            // Reuse the last discovered variant (or 1 as fallback)
+            variant = discovered.Max();
+        }
+        else
+        {
+            // Spend one discovery credit only when this combination is first discovered
+            var wallet = await ep._db.CreditWallets.FirstOrDefaultAsync(w => w.UserId == userId.Value, ct);
+            if (wallet == null)
+                return TypedResults.BadRequest(new DiscoverResponseDto(false, false, null, "Wallet not found", null));
+            if (wallet.DiscoveryBalance <= 0)
+                return TypedResults.BadRequest(new DiscoverResponseDto(false, false, null, "Insufficient discovery credits", wallet.DiscoveryBalance));
+
+            wallet.DiscoveryBalance -= 1;
+            wallet.UpdatedAt = DateTime.UtcNow;
+
+            // First time discovery: assign variant 1
+            variant = 1;
+
+            ep._db.UserDiscoveries.Add(new UserDiscovery
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId.Value,
+                DiscoveryItemId = item.Id,
+                VariantIndex = variant,
+                DiscoveredAt = DateTime.UtcNow
+            });
+            await ep._db.SaveChangesAsync(ct);
         }
 
-        // 4) Record discovery
-        ep._db.UserDiscoveries.Add(new UserDiscovery
-        {
-            Id = Guid.NewGuid(),
-            UserId = userId.Value,
-            DiscoveryItemId = item.Id,
-            VariantIndex = variant,
-            DiscoveredAt = DateTime.UtcNow
-        });
-        await ep._db.SaveChangesAsync(ct);
-
-        // 5) Build response item
+        // Build response item
         // Build image path from combination keys (Name or parts) with .jpg
         string normalize(string s) => s == "—" ? "None" : s;
         string imageUrl = $"{normalize(item.ArmsKey)}{normalize(item.BodyKey)}{normalize(item.HeadKey)}.jpg";
-        var wallet = await ep._db.CreditWallets.FirstOrDefaultAsync(w => w.UserId == userId.Value, ct);
+        var walletNow = await ep._db.CreditWallets.FirstOrDefaultAsync(w => w.UserId == userId.Value, ct);
 
         var res = new DiscoverResponseDto(
             Success: true,
-            AllDiscoveredForCombination: false,
+            AlreadyDiscovered: alreadyDiscovered,
             Item: new DiscoverItemDto(item.Id, item.Name, imageUrl, item.Story, variant),
             ErrorMessage: null,
-            DiscoveryCredits: wallet?.DiscoveryBalance
+            DiscoveryCredits: walletNow?.DiscoveryBalance
         );
         return TypedResults.Ok(res);
     }
