@@ -101,6 +101,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserContextService, UserContextService>();
 builder.Services.AddScoped<IDbHealthService, DbHealthService>();
 builder.Services.AddScoped<ICreatureBuilderService, CreatureBuilderService>();
+builder.Services.AddScoped<ISeedDiscoveryService, SeedDiscoveryService>();
 
 // User Services
 builder.Services.AddScoped<XooCreator.BA.Features.User.IUserProfileService, XooCreator.BA.Features.User.UserProfileService>();
@@ -123,6 +124,7 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<XooDbContext>();
     var storiesService = scope.ServiceProvider.GetRequiredService<IStoriesService>();
     var treeModelService = scope.ServiceProvider.GetRequiredService<ITreeModelService>();
+    var discoverySeeder = scope.ServiceProvider.GetRequiredService<ISeedDiscoveryService>();
 
     try
     {
@@ -138,6 +140,20 @@ using (var scope = app.Services.CreateScope())
         }
 
         await context.Database.MigrateAsync();
+
+        // Seed discovery items (63 combos)
+        await discoverySeeder.EnsureSeedAsync();
+
+        // Dev convenience: ensure discovery credits for test users
+        if (recreate)
+        {
+            var wallets = await context.CreditWallets.ToListAsync();
+            foreach (var w in wallets)
+            {
+                if (w.DiscoveryBalance < 10) w.DiscoveryBalance = 10; // give some discovery credits for testing
+            }
+            await context.SaveChangesAsync();
+        }
 
         // Initialize stories after migration
         await storiesService.InitializeStoriesAsync();

@@ -18,3 +18,22 @@ public record UserCreditsInfoDto(
     int Discovery,
     int Generative
 );
+
+public record DiscoverRequestDto(DiscoverCombinationDto Combination, DiscoverSelectionDto? Selection);
+public record DiscoverCombinationDto(string Head, string Body, string Arms);
+public record DiscoverSelectionDto(List<string> Parts);
+
+public record DiscoverItemDto(
+    Guid Id,
+    string Name,
+    string? ImageUrl,
+    int VariantIndex
+);
+
+public record DiscoverResponseDto(
+    bool Success,
+    bool AllDiscoveredForCombination,
+    DiscoverItemDto? Item,
+    string? ErrorMessage,
+    int? DiscoveryCredits
+);

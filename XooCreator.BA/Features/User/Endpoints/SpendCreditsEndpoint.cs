@@ -34,9 +34,10 @@ public class SpendCreditsEndpoint
     }
 
     [Route("/api/user/spend-discovery-credits")] // POST
-    public static async Task<Results<Ok<SpendCreditsResponse>, UnauthorizedHttpResult, BadRequest<SpendCreditsResponse>>> HandlePostDiscovery(
+    public static async Task<Results<Ok<SpendCreditsResponse>, UnauthorizedHttpResult, BadRequest<SpendCreditsResponse>>> HandlePost(
         [FromServices] SpendCreditsEndpoint ep,
-        [FromBody] SpendCreditsRequest request)
+        [FromBody] SpendCreditsRequest request,
+        CancellationToken ct)
     {
         var userId = await ep._userContext.GetUserIdAsync();
         if (userId == null) 
