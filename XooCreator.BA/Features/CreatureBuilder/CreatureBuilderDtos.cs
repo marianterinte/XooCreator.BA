@@ -27,8 +27,7 @@ public record DiscoverItemDto(
     Guid Id,
     string Name,
     string? ImageUrl,
-    string? Story,
-    int VariantIndex
+    string? Story
 );
 
 public record DiscoverResponseDto(

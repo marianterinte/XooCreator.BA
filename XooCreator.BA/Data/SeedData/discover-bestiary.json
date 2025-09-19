@@ -376,6 +376,50 @@
     "ImagePrompt": "An anthropomorphic hybrid with the arms of a giraffe, the body and head of a bunny. The giraffe arms are long, golden, glowing with runes, while the bunny torso and head are soft, white, glowing with pastel colors. The character wears a cloak embroidered with moons and flowers. Its eyes shine violet and turquoise. The background is a magical meadow filled with glowing mushrooms under enchanted skies. The style is whimsical, colorful, fantasy, cartoon-like.",
     "Story": "Girafonix a apărut atunci când o girafă a îmbrățișat doi iepuri. Copacul Luminii le-a unit într-o singură ființă. El este un spirit al compasiunii și al jocului, aducând veselie în ramurile lumilor.",
     "ImageFileName": "GiraffeBunnyBunny.png"
+  },
+  {
+    "Combination": "BunnyHippoBunny",
+    "Name": "Iepopoturel",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms and head of a bunny and the body of a hippo. The bunny arms are small, soft, glowing pastel, the hippo torso is wide, gray, shimmering with pearly ripples, and the bunny head is white, glowing with magical ears. The character wears a robe embroidered with moons and flowers. Its eyes shine turquoise and violet, full of playful courage. The background is a magical pond with glowing reeds and enchanted fireflies. The style is whimsical, colorful, fantasy, cartoon-like.",
+    "Story": "Iepopoturel s-a născut atunci când un iepure a cerut prietenia unui hipopotam, iar Copacul Luminii le-a unit destinele. Cu brațe agile și cap jucăuș, dar trup solid, el este un spirit al echilibrului între fragilitate și putere, aducând veselie și protecție în ramurile lumilor.",
+    "ImageFileName": "BunnyHippoBunny.png"
+  },
+  {
+    "Combination": "BunnyGiraffeBunny",
+    "Name": "Iepurafonix",
+    "ImagePrompt": "An anthropomorphic hybrid with the arms and head of a bunny and the body of a giraffe. The bunny arms and head are white, glowing with pastel magical light, while the giraffe torso is tall and golden, decorated with glowing amber spots. The character wears a robe embroidered with stars and rainbow spirals. Its eyes shine emerald and violet, joyful and curious. The background is a glowing savanna meadow under starlit skies. The style is whimsical, colorful, fantasy, cartoonish.",
+    "Story": "Iepurafonix s-a ivit atunci când doi iepuri și-au dorit să vadă lumea de sus. Copacul Luminii a răspuns și le-a oferit trupul unei girafe, dar i-a păstrat inimile și chipurile jucăușe. El este un spirit al viselor și al speranței, purtând lumina copilăriei în ochii săi.",
+    "ImageFileName": "BunnyGiraffeBunny.png"
+  },
+  {
+    "Combination": "GiraffeHippoGiraffe",
+    "Name": "Girafopotrel",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms and head of a giraffe and the body of a hippo. The giraffe arms are long and golden with glowing constellations, the hippo torso is massive and gray with pearly ripples, and the giraffe head is tall, glowing amber with runes. The character wears a cloak embroidered with rivers and stars. Its eyes shine turquoise and jade. The background is a magical riverbank in a glowing savanna. The style is whimsical, colorful, fantasy, cartoon-like.",
+    "Story": "Girafopotrel a apărut atunci când două girafe au vegheat un hipopotam rătăcit sub lumina stelelor. Copacul Luminii le-a unit pentru a păstra echilibrul între cer și apă. El este un spirit al protecției și al clarității, aducând viziune și putere blândă.",
+    "ImageFileName": "GiraffeHippoGiraffe.png"
+  },
+  {
+    "Combination": "GiraffeBunnyGiraffe",
+    "Name": "Girafiepix",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms and head of a giraffe and the body of a bunny. The giraffe arms are long and golden, the bunny torso is agile and glowing with pastel light, while the giraffe head is tall and noble, decorated with amber runes. The character wears a robe embroidered with moons and flowers. Its eyes shine emerald and violet. The background is a whimsical meadow lit by enchanted fireflies. The style is vibrant, colorful, fantasy, cartoonish.",
+    "Story": "Girafiepix s-a născut atunci când două girafe au protejat un iepure mic. Copacul Luminii i-a unit într-un singur trup, dăruindu-le agilitatea pământului și viziunea cerului. El este un spirit al prieteniei și al înțelepciunii, capabil să unească lumi opuse.",
+    "ImageFileName": "GiraffeBunnyGiraffe.png"
+  },
+  {
+    "Combination": "HippoBunnyHippo",
+    "Name": "Hipopoturel",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms and head of a hippo and the body of a bunny. The hippo arms are strong, gray, glowing faintly with magic, the bunny torso is small and pastel, agile, while the hippo head is large and calm, shimmering with pearly waves. The character wears a robe embroidered with lotus and constellations. Its eyes shine sapphire and emerald. The background is a magical meadow near a glowing pond. The style is whimsical, colorful, fantasy, cartoon-like.",
+    "Story": "Hipopoturel a apărut atunci când doi hipopotami au dorit să protejeze un iepure fragil. Copacul Luminii i-a unit într-un trup comun, mic dar puternic. El este un spirit al protecției și al curajului, aducând echilibru între joacă și forță.",
+    "ImageFileName": "HippoBunnyHippo.png"
+  },
+  {
+    "Combination": "HippoGiraffeHippo",
+    "Name": "Hipogafon",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms and head of a hippo and the body of a giraffe. The hippo arms are massive and gray, shimmering with pearly light, the giraffe torso is tall and golden with glowing amber spots, and the hippo head is large and noble. The character wears a cloak embroidered with rivers and stars. Its eyes shine turquoise and jade. The background is a glowing savanna with enchanted fireflies under starlit skies. The style is whimsical, colorful, fantasy, cartoon-like.",
+    "Story": "Hipogafon s-a născut atunci când doi hipopotami și o girafă și-au împărțit un vis comun: să unească apele și cerul. Copacul Luminii i-a unit într-un singur trup. El este un spirit al stabilității și al înțelepciunii, aducând claritate în mijlocul furtunii.",
+    "ImageFileName": "HippoGiraffeHippo.png"
   }
+
+
 
 ]

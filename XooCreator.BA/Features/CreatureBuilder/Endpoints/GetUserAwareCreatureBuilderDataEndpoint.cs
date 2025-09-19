@@ -59,19 +59,11 @@ public class GetUserAwareCreatureBuilderDataEndpoint
             return TypedResults.BadRequest(new DiscoverResponseDto(false, false, null, "Combination not found", null));
         }
 
-        // 2) Which variants user already discovered for this item
-        var discovered = await ep._db.UserDiscoveries
-            .Where(ud => ud.UserId == userId.Value && ud.DiscoveryItemId == item.Id)
-            .Select(ud => ud.VariantIndex)
-            .ToListAsync(ct);
-        bool alreadyDiscovered = discovered.Count > 0;
-        int variant;
-        if (alreadyDiscovered)
-        {
-            // Reuse the last discovered variant (or 1 as fallback)
-            variant = discovered.Max();
-        }
-        else
+        // 2) Check if already discovered
+        var existing = await ep._db.UserDiscoveries
+            .AnyAsync(ud => ud.UserId == userId.Value && ud.DiscoveryItemId == item.Id, ct);
+        bool alreadyDiscovered = existing;
+        if (!alreadyDiscovered)
         {
             // Spend one discovery credit only when this combination is first discovered
             var wallet = await ep._db.CreditWallets.FirstOrDefaultAsync(w => w.UserId == userId.Value, ct);
@@ -83,15 +75,11 @@ public class GetUserAwareCreatureBuilderDataEndpoint
             wallet.DiscoveryBalance -= 1;
             wallet.UpdatedAt = DateTime.UtcNow;
 
-            // First time discovery: assign variant 1
-            variant = 1;
-
             ep._db.UserDiscoveries.Add(new UserDiscovery
             {
                 Id = Guid.NewGuid(),
                 UserId = userId.Value,
                 DiscoveryItemId = item.Id,
-                VariantIndex = variant,
                 DiscoveredAt = DateTime.UtcNow
             });
             await ep._db.SaveChangesAsync(ct);
@@ -106,7 +94,7 @@ public class GetUserAwareCreatureBuilderDataEndpoint
         var res = new DiscoverResponseDto(
             Success: true,
             AlreadyDiscovered: alreadyDiscovered,
-            Item: new DiscoverItemDto(item.Id, item.Name, imageUrl, item.Story, variant),
+            Item: new DiscoverItemDto(item.Id, item.Name, imageUrl, item.Story),
             ErrorMessage: null,
             DiscoveryCredits: walletNow?.DiscoveryBalance
         );

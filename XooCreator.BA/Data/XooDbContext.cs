@@ -76,7 +76,7 @@ public class XooDbContext : DbContext
         {
             e.HasKey(x => x.Id);
             e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.HasIndex(x => new { x.UserId, x.DiscoveryItemId, x.VariantIndex }).IsUnique();
+            e.HasIndex(x => new { x.UserId, x.DiscoveryItemId }).IsUnique();
             e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
             e.HasOne(x => x.DiscoveryItem).WithMany().HasForeignKey(x => x.DiscoveryItemId);
             e.ToTable("BestiaryDiscovered"); // rename table
