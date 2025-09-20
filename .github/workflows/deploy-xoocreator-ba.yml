@@ -11,7 +11,7 @@ permissions:
 
 env:
   DOTNET_VERSION: '8.0.x'
-  WORKING_DIRECTORY: 'XooCreatorBA/XooCreator.BA'
+  WORKING_DIRECTORY: 'XooCreator.BA'
   PUBLISH_DIR: './publish'
 
 jobs:
@@ -67,7 +67,6 @@ jobs:
               --name ${{ secrets.AZURE_WEBAPP_NAME }} \
               --settings \
                 ASPNETCORE_ENVIRONMENT=Production \
-              DOTNET_ENVIRONMENT=Production \
                 DATABASE_URL="${{ secrets.SUPABASE_DB_URL }}"
           else
             # Method 2: Auto-discover resource group
@@ -79,7 +78,6 @@ jobs:
               --name ${{ secrets.AZURE_WEBAPP_NAME }} \
               --settings \
                 ASPNETCORE_ENVIRONMENT=Production \
-              DOTNET_ENVIRONMENT=Production \
                 DATABASE_URL="${{ secrets.SUPABASE_DB_URL }}"
           fi
 

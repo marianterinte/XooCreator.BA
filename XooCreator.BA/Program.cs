@@ -34,43 +34,36 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Add CORS policies
+// Add CORS policy for Angular frontend
 builder.Services.AddCors(options =>
 {
-    // Local/dev environments
     options.AddPolicy("AllowAngularDev", policy =>
     {
-        policy.WithOrigins(
-                "http://localhost:4200",
-                "https://localhost:4200",
-                "http://localhost:5173",
-                "https://localhost:5173"
-            )
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowCredentials();
+        policy.WithOrigins("" +
+            "http://localhost:4200",
+            "https://localhost:4200" +
+            "https://alchimalia.com")
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();
     });
 
-    // More permissive policy for local-only testing
+    // More permissive policy for development
     options.AddPolicy("AllowDevelopment", policy =>
     {
-        policy
-            .SetIsOriginAllowed(_ => true)
-            .AllowAnyHeader()
-            .AllowAnyMethod();
-        // No credentials with AllowAnyOrigin; SetIsOriginAllowed avoids the conflict while remaining permissive for local
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .SetIsOriginAllowed(origin => true) // Allow any origin for development
+              .SetPreflightMaxAge(TimeSpan.FromSeconds(86400)); // Cache preflight for 24 hours
     });
 
-    // Production: restrict to deployed FE domains
+    // Railway production policy
     options.AddPolicy("AllowProduction", policy =>
     {
-        policy.WithOrigins(
-                "https://alchimalia.com",
-                "https://www.alchimalia.com"
-            )
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowCredentials();
+        policy.AllowAnyOrigin() // Railway apps can have dynamic URLs
+              .AllowAnyMethod()
+              .AllowAnyHeader();
     });
 });
 
@@ -195,7 +188,7 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseCors("AllowProduction");
+    app.UseCors("AllowAngularDev");
 }
 
 // Map endpoints by domain
