@@ -1,5 +1,4 @@
-
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Npgsql;
 using XooCreator.BA.Data;
@@ -19,10 +18,9 @@ if (!string.IsNullOrWhiteSpace(portEnv))
     builder.WebHost.UseUrls($"http://0.0.0.0:{portEnv}");
 }
 
-// Add services to the container.
+// Add services
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-// register endpoint handlers via reflection
 builder.Services.AddEndpointDefinitions();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -34,37 +32,28 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Add CORS policy for Angular frontend
+// === CORS: o singură policy super permisivă, valabilă peste tot ===
+// Dacă ai nevoie de cookies/credențiale, păstrează AllowCredentials + SetIsOriginAllowed(true).
+// Dacă NU ai nevoie de credențiale, vezi varianta comentată mai jos.
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAngularDev", policy =>
-    {
-        policy.WithOrigins("" +
-            "http://localhost:4200",
-            "https://localhost:4200," +
-            "https://alchimalia.com")
-              .AllowAnyMethod()
-              .AllowAnyHeader()
-              .AllowCredentials();
-    });
+    options.AddPolicy("AllowAll", policy =>
+        policy
+            .SetIsOriginAllowed(_ => true) // acceptă orice Origin; va întoarce Originul cererii (nu "*")
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials()
+            .SetPreflightMaxAge(TimeSpan.FromHours(24))
+    );
 
-    // More permissive policy for development
-    options.AddPolicy("AllowDevelopment", policy =>
-    {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader()
-              .SetIsOriginAllowed(origin => true) // Allow any origin for development
-              .SetPreflightMaxAge(TimeSpan.FromSeconds(86400)); // Cache preflight for 24 hours
-    });
-
-    // Railway production policy
-    options.AddPolicy("AllowProduction", policy =>
-    {
-        policy.AllowAnyOrigin() // Railway apps can have dynamic URLs
-              .AllowAnyMethod()
-              .AllowAnyHeader();
-    });
+    // VARIANTĂ FĂRĂ CREDENȚIALE (înlocuiește policy-ul de mai sus dacă nu folosești cookies):
+    // options.AddPolicy("AllowAll", policy =>
+    //     policy
+    //         .AllowAnyOrigin()
+    //         .AllowAnyMethod()
+    //         .AllowAnyHeader()
+    //         .SetPreflightMaxAge(TimeSpan.FromHours(24))
+    // );
 });
 
 // EF Core PostgreSQL
@@ -123,7 +112,7 @@ builder.Services.AddScoped<IStoriesService, StoriesService>();
 
 var app = builder.Build();
 
-// Auto-migrate database on startup (and optionally recreate in Development)
+// Auto-migrate database on startup + initializare date
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<XooDbContext>();
@@ -134,12 +123,8 @@ using (var scope = app.Services.CreateScope())
 
     try
     {
-        // Only allow destructive recreate in Development and when explicitly enabled
-        var isDevelopment = app.Environment.IsDevelopment();
         var recreate = builder.Configuration.GetValue<bool>("Database:RecreateOnStart");
 
-
-        // TODO : disable when in production unless explicitly needed
         if (recreate)
         {
             await context.Database.EnsureDeletedAsync();
@@ -151,20 +136,17 @@ using (var scope = app.Services.CreateScope())
         await discoverySeeder.EnsureSeedAsync();
         await bestiaryUpdater.EnsureImageFileNamesAsync();
 
-        // Dev convenience: ensure discovery credits for test users
         if (recreate)
         {
             var wallets = await context.CreditWallets.ToListAsync();
             foreach (var w in wallets)
             {
-                if (w.DiscoveryBalance < 10) w.DiscoveryBalance = 10; // give some discovery credits for testing
+                if (w.DiscoveryBalance < 10) w.DiscoveryBalance = 10;
             }
             await context.SaveChangesAsync();
         }
 
-        // Initialize stories after migration
         await storiesService.InitializeStoriesAsync();
-        // Initialize tree model after stories are seeded
         await treeModelService.InitializeTreeModelAsync();
     }
     catch (Exception ex)
@@ -173,7 +155,7 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// Configure the HTTP request pipeline.
+// Swagger
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
@@ -181,21 +163,10 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = "swagger";
 });
 
-// Apply CORS before other middleware
-if (app.Environment.IsDevelopment())
-{
-    app.UseCors("AllowDevelopment");
-}
-else
-{
-    app.UseCors("AllowProduction");
-}
+// === Aplicăm CORS global, fără dependență de environment ===
+app.UseCors("AllowAll");
 
-// Map endpoints by domain
-// app.MapControllers(); // removed legacy controllers after migration to minimal APIs
-// app.MapCreatureBuilderEndpoints(); // migrated to [Endpoint] pattern
-// app.MapSystemEndpoints(); // migrated to [Endpoint] pattern
-// app.MapStoryEndpoints(); // replaced by discovered endpoints
+// Map endpoints (Endpoint Discovery)
 app.MapDiscoveredEndpoints();
 
 app.Run();
