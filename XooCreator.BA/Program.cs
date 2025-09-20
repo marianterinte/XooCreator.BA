@@ -125,7 +125,7 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var recreate = builder.Configuration.GetValue<bool>("Database:RecreateOnStart");
-
+        recreate = true;
         if (recreate)
         {
             await context.Database.EnsureDeletedAsync();

@@ -233,7 +233,6 @@ namespace XooCreator.BA.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     DiscoveryItemId = table.Column<Guid>(type: "uuid", nullable: false),
-                    VariantIndex = table.Column<int>(type: "integer", nullable: false),
                     DiscoveredAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
@@ -618,8 +617,8 @@ namespace XooCreator.BA.Migrations
                 columns: new[] { "Id", "Auth0Sub", "CreatedAt", "DisplayName", "Email" },
                 values: new object[,]
                 {
-                    { new Guid("11111111-1111-1111-1111-111111111111"), "test-user-sub", new DateTime(2025, 9, 19, 17, 36, 2, 262, DateTimeKind.Utc).AddTicks(4131), "Test User", "test@example.com" },
-                    { new Guid("22222222-2222-2222-2222-222222222222"), "marian-test-sub", new DateTime(2025, 9, 19, 17, 36, 2, 262, DateTimeKind.Utc).AddTicks(4132), "Marian", "marian@example.com" }
+                    { new Guid("11111111-1111-1111-1111-111111111111"), "test-user-sub", new DateTime(2025, 9, 20, 15, 31, 24, 300, DateTimeKind.Utc).AddTicks(7577), "Test User", "test@example.com" },
+                    { new Guid("22222222-2222-2222-2222-222222222222"), "marian-test-sub", new DateTime(2025, 9, 20, 15, 31, 24, 300, DateTimeKind.Utc).AddTicks(7579), "Marian", "marian@example.com" }
                 });
 
             migrationBuilder.InsertData(
@@ -668,8 +667,8 @@ namespace XooCreator.BA.Migrations
                 columns: new[] { "Id", "Amount", "CreatedAt", "Reference", "Type", "UserId" },
                 values: new object[,]
                 {
-                    { new Guid("33333333-3333-3333-3333-333333333333"), 15, new DateTime(2025, 9, 18, 17, 36, 2, 262, DateTimeKind.Utc).AddTicks(4258), "test-purchase-marian", 0, new Guid("22222222-2222-2222-2222-222222222222") },
-                    { new Guid("44444444-4444-4444-4444-444444444444"), -5, new DateTime(2025, 9, 19, 15, 36, 2, 262, DateTimeKind.Utc).AddTicks(4264), "test-generation", 1, new Guid("22222222-2222-2222-2222-222222222222") }
+                    { new Guid("33333333-3333-3333-3333-333333333333"), 15, new DateTime(2025, 9, 19, 15, 31, 24, 300, DateTimeKind.Utc).AddTicks(7876), "test-purchase-marian", 0, new Guid("22222222-2222-2222-2222-222222222222") },
+                    { new Guid("44444444-4444-4444-4444-444444444444"), -5, new DateTime(2025, 9, 20, 13, 31, 24, 300, DateTimeKind.Utc).AddTicks(7884), "test-generation", 1, new Guid("22222222-2222-2222-2222-222222222222") }
                 });
 
             migrationBuilder.InsertData(
@@ -677,8 +676,8 @@ namespace XooCreator.BA.Migrations
                 columns: new[] { "UserId", "Balance", "DiscoveryBalance", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { new Guid("11111111-1111-1111-1111-111111111111"), 5, 0, new DateTime(2025, 9, 19, 17, 36, 2, 262, DateTimeKind.Utc).AddTicks(4238) },
-                    { new Guid("22222222-2222-2222-2222-222222222222"), 10, 0, new DateTime(2025, 9, 19, 17, 36, 2, 262, DateTimeKind.Utc).AddTicks(4240) }
+                    { new Guid("11111111-1111-1111-1111-111111111111"), 5, 0, new DateTime(2025, 9, 20, 15, 31, 24, 300, DateTimeKind.Utc).AddTicks(7844) },
+                    { new Guid("22222222-2222-2222-2222-222222222222"), 10, 0, new DateTime(2025, 9, 20, 15, 31, 24, 300, DateTimeKind.Utc).AddTicks(7846) }
                 });
 
             migrationBuilder.InsertData(
@@ -850,9 +849,9 @@ namespace XooCreator.BA.Migrations
                 column: "DiscoveryItemId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_BestiaryDiscovered_UserId_DiscoveryItemId_VariantIndex",
+                name: "IX_BestiaryDiscovered_UserId_DiscoveryItemId",
                 table: "BestiaryDiscovered",
-                columns: new[] { "UserId", "DiscoveryItemId", "VariantIndex" },
+                columns: new[] { "UserId", "DiscoveryItemId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
