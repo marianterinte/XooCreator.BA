@@ -41,7 +41,7 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins("" +
             "http://localhost:4200",
-            "https://localhost:4200" +
+            "https://localhost:4200," +
             "https://alchimalia.com")
               .AllowAnyMethod()
               .AllowAnyHeader()
@@ -188,7 +188,7 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseCors("AllowAngularDev");
+    app.UseCors("AllowProduction");
 }
 
 // Map endpoints by domain
