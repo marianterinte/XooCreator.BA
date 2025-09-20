@@ -1,3 +1,4 @@
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Npgsql;
@@ -38,7 +39,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularDev", policy =>
     {
-        policy.WithOrigins("http://localhost:4200", "https://localhost:4200")
+        policy.WithOrigins("" +
+            "http://localhost:4200",
+            "https://localhost:4200," +
+            "https://alchimalia.com")
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
