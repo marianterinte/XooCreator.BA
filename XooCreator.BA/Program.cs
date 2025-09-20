@@ -111,6 +111,7 @@ builder.Services.AddScoped<IStoriesRepository, StoriesRepository>();
 builder.Services.AddScoped<IStoriesService, StoriesService>();
 
 var app = builder.Build();
+app.UseCors("AllowAll");
 
 // Auto-migrate database on startup + initializare date
 using (var scope = app.Services.CreateScope())
@@ -164,7 +165,6 @@ app.UseSwaggerUI(c =>
 });
 
 // === Aplicăm CORS global, fără dependență de environment ===
-app.UseCors("AllowAll");
 
 // Map endpoints (Endpoint Discovery)
 app.MapDiscoveredEndpoints();
