@@ -128,7 +128,10 @@ using (var scope = app.Services.CreateScope())
         recreate = true;
         if (recreate)
         {
-            await context.Database.EnsureDeletedAsync();
+            //await context.Database.EnsureDeletedAsync();
+
+            context.Database.ExecuteSqlRaw("DROP SCHEMA public CASCADE; CREATE SCHEMA public;");
+            context.Database.Migrate();
         }
 
         await context.Database.MigrateAsync();
