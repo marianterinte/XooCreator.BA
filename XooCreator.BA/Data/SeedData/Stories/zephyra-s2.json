@@ -5,12 +5,43 @@
   "category": "main",
   "sortOrder": 18,
   "tiles": [
-    { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Întrebarea Vântului", "text": "Un oracol de pânză răspunde la curaj.", "imageUrl": "images/biomes/steppe.jpg" },
-    { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Ce întrebi?", "answers": [
-      { "answerId": "a", "text": "Unde bate drumul meu?", "reward": "token_courage", "sortOrder": 1 },
-      { "answerId": "b", "text": "Ce riscuri văd?",       "reward": "token_safety",  "sortOrder": 2 }
-    ] }
+    {
+      "tileId": "p1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Întrebarea Vântului",
+      "text": "Un oracol de pânză răspunde la curaj.",
+      "imageUrl": "images/biomes/steppe.jpg"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "sortOrder": 2,
+      "question": "Ce întrebi?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "Unde bate drumul meu?",
+          "sortOrder": 1,
+          "tokens": [
+            {
+              "quantity": 3,
+              "tokenType": "token_courage"
+            }
+          ]
+        },
+        {
+          "answerId": "b",
+          "text": "Ce riscuri văd?",
+          "sortOrder": 2,
+          "tokens": [
+            {
+              "quantity": 3,
+              "tokenType": "token_safety"
+            }
+          ]
+        }
+      ]
+    }
   ]
 }
-
-

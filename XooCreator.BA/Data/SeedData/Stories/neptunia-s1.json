@@ -5,12 +5,43 @@
   "category": "main",
   "sortOrder": 23,
   "tiles": [
-    { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Catedrale", "text": "Gheața vibrează în armonii rare.", "imageUrl": "images/biomes/montain.jpg" },
-    { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Cum captezi sunetul?", "answers": [
-      { "answerId": "a", "text": "Dispozitiv optic",   "reward": "token_thinking",  "sortOrder": 1 },
-      { "answerId": "b", "text": "Partitură liberă",   "reward": "token_creativity", "sortOrder": 2 }
-    ] }
+    {
+      "tileId": "p1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Catedrale",
+      "text": "Gheața vibrează în armonii rare.",
+      "imageUrl": "images/biomes/montain.jpg"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "sortOrder": 2,
+      "question": "Cum captezi sunetul?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "Dispozitiv optic",
+          "sortOrder": 1,
+          "tokens": [
+            {
+              "quantity": 3,
+              "tokenType": "token_thinking"
+            }
+          ]
+        },
+        {
+          "answerId": "b",
+          "text": "Partitură liberă",
+          "sortOrder": 2,
+          "tokens": [
+            {
+              "quantity": 3,
+              "tokenType": "token_creativity"
+            }
+          ]
+        }
+      ]
+    }
   ]
 }
-
-

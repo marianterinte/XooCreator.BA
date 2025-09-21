@@ -5,12 +5,43 @@
   "category": "main",
   "sortOrder": 19,
   "tiles": [
-    { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Cheia", "text": "Primești un filacter care stabilizează curenții.", "imageUrl": "images/biomes/jungle.jpg" },
-    { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Cum o folosești?", "answers": [
-      { "answerId": "a", "text": "Pentru planuri aeriene",     "reward": "token_thinking", "sortOrder": 1 },
-      { "answerId": "b", "text": "Pentru siguranță la înălțime","reward": "token_safety",  "sortOrder": 2 }
-    ] }
+    {
+      "tileId": "p1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Cheia",
+      "text": "Primești un filacter care stabilizează curenții.",
+      "imageUrl": "images/biomes/jungle.jpg"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "sortOrder": 2,
+      "question": "Cum o folosești?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "Pentru planuri aeriene",
+          "sortOrder": 1,
+          "tokens": [
+            {
+              "quantity": 3,
+              "tokenType": "token_thinking"
+            }
+          ]
+        },
+        {
+          "answerId": "b",
+          "text": "Pentru siguranță la înălțime",
+          "sortOrder": 2,
+          "tokens": [
+            {
+              "quantity": 3,
+              "tokenType": "token_safety"
+            }
+          ]
+        }
+      ]
+    }
   ]
 }
-
-

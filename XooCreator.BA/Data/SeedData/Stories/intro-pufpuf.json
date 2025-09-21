@@ -48,19 +48,19 @@
         {
           "answerId": "a",
           "text": "Ce se ascunde în ramurile lui?",
-          "reward": "token_curiosity",
+          "tokens": [{"tokenType": "token_curiosity", "quantity": 3}],
           "sortOrder": 1
         },
         {
           "answerId": "b",
           "text": "Cum pot urca mai sus, spre vârful său?",
-          "reward": "token_courage",
+          "tokens": [{"tokenType": "token_courage", "quantity": 3}],
           "sortOrder": 2
         },
         {
           "answerId": "c",
           "text": "De ce a fost chemat Puf-Puf aici?",
-          "reward": "token_thinking",
+          "tokens": [{"tokenType": "token_thinking", "quantity": 3}],
           "sortOrder": 3
         }
       ]

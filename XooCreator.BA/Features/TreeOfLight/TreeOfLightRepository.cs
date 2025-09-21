@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 using XooCreator.BA.Data;
 
 namespace XooCreator.BA.Features.TreeOfLight;
@@ -13,8 +14,7 @@ public interface ITreeOfLightRepository
     
     Task<bool> CompleteStoryAsync(Guid userId, CompleteStoryRequest request);
     Task<bool> UnlockRegionAsync(Guid userId, string regionId);
-    Task<bool> AwardTokensAsync(Guid userId, int courage = 0, int curiosity = 0, int thinking = 0, int creativity = 0);
-    Task<bool> UnlockHeroAsync(Guid userId, string heroId, string heroType, string? sourceStoryId = null);
+    Task<bool> AwardTokensAsync(Guid userId, int courage = 0, int curiosity = 0, int thinking = 0, int creativity = 0, int safety=0);
     Task<bool> UnlockHeroTreeNodeAsync(Guid userId, UnlockHeroTreeNodeRequest request);
     Task<bool> SpendTokensAsync(Guid userId, int courage = 0, int curiosity = 0, int thinking = 0, int creativity = 0);
     Task ResetUserProgressAsync(Guid userId);
@@ -44,16 +44,19 @@ public class TreeOfLightRepository : ITreeOfLightRepository
 
     public async Task<List<StoryProgressDto>> GetStoryProgressAsync(Guid userId)
     {
-        return await _context.StoryProgress
+        var storyProgresses = await _context.StoryProgress
             .Where(sp => sp.UserId == userId)
-            .Select(sp => new StoryProgressDto
-            {
-                StoryId = sp.StoryId,
-                SelectedAnswer = sp.SelectedAnswer,
-                RewardReceived = sp.RewardReceived,
-                CompletedAt = sp.CompletedAt
-            })
             .ToListAsync();
+
+        return storyProgresses.Select(sp => new StoryProgressDto
+        {
+            StoryId = sp.StoryId,
+            SelectedAnswer = sp.SelectedAnswer,
+            Tokens = !string.IsNullOrEmpty(sp.TokensJson) 
+                ? JsonSerializer.Deserialize<List<TokenReward>>(sp.TokensJson) ?? new List<TokenReward>()
+                : new List<TokenReward>(),
+            CompletedAt = sp.CompletedAt
+        }).ToList();
     }
 
     public async Task<UserTokensDto> GetUserTokensAsync(Guid userId)
@@ -133,7 +136,7 @@ public class TreeOfLightRepository : ITreeOfLightRepository
                 UserId = userId,
                 StoryId = request.StoryId,
                 SelectedAnswer = request.SelectedAnswer,
-                RewardReceived = request.RewardReceived
+                TokensJson = request.Tokens.Count > 0 ? JsonSerializer.Serialize(request.Tokens) : null
             };
 
             _context.StoryProgress.Add(storyProgress);
@@ -185,7 +188,7 @@ public class TreeOfLightRepository : ITreeOfLightRepository
         }
     }
 
-    public async Task<bool> AwardTokensAsync(Guid userId, int courage = 0, int curiosity = 0, int thinking = 0, int creativity = 0)
+    public async Task<bool> AwardTokensAsync(Guid userId, int courage = 0, int curiosity = 0, int thinking = 0, int creativity = 0, int safety = 0)
     {
         try
         {
@@ -222,35 +225,6 @@ public class TreeOfLightRepository : ITreeOfLightRepository
         }
     }
 
-    public async Task<bool> UnlockHeroAsync(Guid userId, string heroId, string heroType, string? sourceStoryId = null)
-    {
-        try
-        {
-            var existingHero = await _context.HeroProgress
-                .FirstOrDefaultAsync(hp => hp.UserId == userId && hp.HeroId == heroId && hp.HeroType == heroType);
-
-            if (existingHero != null)
-            {
-                return false; // Already unlocked
-            }
-
-            var heroProgress = new HeroProgress
-            {
-                UserId = userId,
-                HeroId = heroId,
-                HeroType = heroType,
-                SourceStoryId = sourceStoryId ?? string.Empty
-            };
-
-            _context.HeroProgress.Add(heroProgress);
-            await _context.SaveChangesAsync();
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
-    }
 
     public async Task<bool> UnlockHeroTreeNodeAsync(Guid userId, UnlockHeroTreeNodeRequest request)
     {

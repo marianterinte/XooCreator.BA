@@ -5,12 +5,43 @@
   "category": "main",
   "sortOrder": 12,
   "tiles": [
-    { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Consiliul", "text": "Arborii îți cer un plan pentru echilibru.", "imageUrl": "images/biomes/jungle.jpg" },
-    { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Ce plan propui?", "answers": [
-      { "answerId": "a", "text": "Replantare strategică", "reward": "token_thinking",  "sortOrder": 1 },
-      { "answerId": "b", "text": "Rețea de polen-drone",  "reward": "token_creativity", "sortOrder": 2 }
-    ] }
+    {
+      "tileId": "p1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Consiliul",
+      "text": "Arborii îți cer un plan pentru echilibru.",
+      "imageUrl": "images/biomes/jungle.jpg"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "sortOrder": 2,
+      "question": "Ce plan propui?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "Replantare strategică",
+          "sortOrder": 1,
+          "tokens": [
+            {
+              "quantity": 3,
+              "tokenType": "token_thinking"
+            }
+          ]
+        },
+        {
+          "answerId": "b",
+          "text": "Rețea de polen-drone",
+          "sortOrder": 2,
+          "tokens": [
+            {
+              "quantity": 3,
+              "tokenType": "token_creativity"
+            }
+          ]
+        }
+      ]
+    }
   ]
 }
-
-

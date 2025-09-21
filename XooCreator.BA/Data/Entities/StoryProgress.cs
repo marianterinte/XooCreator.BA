@@ -9,7 +9,7 @@ public class StoryProgress
     public Guid UserId { get; set; }
     public string StoryId { get; set; } = string.Empty; // e.g., "root-s1", "farm-s1"
     public string? SelectedAnswer { get; set; } // The choice made by user
-    public string? RewardReceived { get; set; } // The reward name/id received
+    public string? TokensJson { get; set; } // JSON serialized list of TokenReward objects
     public DateTime CompletedAt { get; set; } = DateTime.UtcNow;
     
     // Navigation

@@ -5,12 +5,43 @@
   "category": "main",
   "sortOrder": 26,
   "tiles": [
-    { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Citire Aeriană", "text": "Cărți-nori care se rescriu singure.", "imageUrl": "images/biomes/jungle.jpg" },
-    { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Cum clasifici ideile?", "answers": [
-      { "answerId": "a", "text": "Graf de concepte", "reward": "token_thinking",  "sortOrder": 1 },
-      { "answerId": "b", "text": "Hartă vizuală",    "reward": "token_creativity", "sortOrder": 2 }
-    ] }
+    {
+      "tileId": "p1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Citire Aeriană",
+      "text": "Cărți-nori care se rescriu singure.",
+      "imageUrl": "images/biomes/jungle.jpg"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "sortOrder": 2,
+      "question": "Cum clasifici ideile?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "Graf de concepte",
+          "sortOrder": 1,
+          "tokens": [
+            {
+              "quantity": 3,
+              "tokenType": "token_thinking"
+            }
+          ]
+        },
+        {
+          "answerId": "b",
+          "text": "Hartă vizuală",
+          "sortOrder": 2,
+          "tokens": [
+            {
+              "quantity": 3,
+              "tokenType": "token_creativity"
+            }
+          ]
+        }
+      ]
+    }
   ]
 }
-
-

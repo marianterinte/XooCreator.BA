@@ -5,12 +5,43 @@
   "category": "main",
   "sortOrder": 27,
   "tiles": [
-    { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Prototipare", "text": "Construiești aripi pentru idei grele.", "imageUrl": "images/biomes/forest.jpg" },
-    { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Ce alegi?", "answers": [
-      { "answerId": "a", "text": "Aripi ușoare (creativitate)", "reward": "token_creativity", "sortOrder": 1 },
-      { "answerId": "b", "text": "Aripi stabile (gândire)",    "reward": "token_thinking",  "sortOrder": 2 }
-    ] }
+    {
+      "tileId": "p1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Prototipare",
+      "text": "Construiești aripi pentru idei grele.",
+      "imageUrl": "images/biomes/forest.jpg"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "sortOrder": 2,
+      "question": "Ce alegi?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "Aripi ușoare (creativitate)",
+          "sortOrder": 1,
+          "tokens": [
+            {
+              "quantity": 3,
+              "tokenType": "token_creativity"
+            }
+          ]
+        },
+        {
+          "answerId": "b",
+          "text": "Aripi stabile (gândire)",
+          "sortOrder": 2,
+          "tokens": [
+            {
+              "quantity": 3,
+              "tokenType": "token_thinking"
+            }
+          ]
+        }
+      ]
+    }
   ]
 }
-
-

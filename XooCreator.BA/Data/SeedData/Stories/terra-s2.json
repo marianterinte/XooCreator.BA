@@ -5,12 +5,43 @@
   "category": "main",
   "sortOrder": 3,
   "tiles": [
-    { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Râul", "text": "Construiește un pod simplu cu resurse puține.", "imageUrl": "images/biomes/forest.jpg" },
-    { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Ce material alegi?", "answers": [
-      { "answerId": "a", "text": "Piatră (siguranță)",                 "reward": "token_safety",     "sortOrder": 1 },
-      { "answerId": "b", "text": "Lemn flexibil (creativitate)",      "reward": "token_creativity",  "sortOrder": 2 }
-    ] }
+    {
+      "tileId": "p1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Râul",
+      "text": "Construiește un pod simplu cu resurse puține.",
+      "imageUrl": "images/biomes/forest.jpg"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "sortOrder": 2,
+      "question": "Ce material alegi?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "Piatră (siguranță)",
+          "sortOrder": 1,
+          "tokens": [
+            {
+              "quantity": 3,
+              "tokenType": "token_safety"
+            }
+          ]
+        },
+        {
+          "answerId": "b",
+          "text": "Lemn flexibil (creativitate)",
+          "sortOrder": 2,
+          "tokens": [
+            {
+              "quantity": 3,
+              "tokenType": "token_creativity"
+            }
+          ]
+        }
+      ]
+    }
   ]
 }
-
-

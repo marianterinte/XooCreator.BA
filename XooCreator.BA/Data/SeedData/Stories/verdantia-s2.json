@@ -5,15 +5,67 @@
   "category": "main",
   "sortOrder": 10,
   "tiles": [
-    { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Izvoarele", "text": "Un labirint de canale din rădăcini dirijează apa.", "imageUrl": "images/biomes/steppe.jpg" },
-    { "tileId": "p2", "type": "page", "sortOrder": 2, "caption": "Rezonanța", "text": "Un fluier din bambus deschide o vană naturală.", "imageUrl": "images/biomes/jungle.jpg" },
-    { "tileId": "p3", "type": "page", "sortOrder": 3, "caption": "Echilibru", "text": "Prea mult debit rupe frunzele; prea puțin usucă florile.", "imageUrl": "images/biomes/forest.jpg" },
-    { "tileId": "p4", "type": "page", "sortOrder": 4, "caption": "Harta apelor", "text": "Notezi un program de irigații pentru toată grădina.", "imageUrl": "images/biomes/montain.jpg" },
-    { "tileId": "q1", "type": "quiz", "sortOrder": 5, "question": "Ce reguli aplici?", "answers": [
-      { "answerId": "a", "text": "Repartiție egală", "reward": "token_thinking",  "sortOrder": 1 },
-      { "answerId": "b", "text": "Prioritate răsaduri", "reward": "token_creativity", "sortOrder": 2 }
-    ] }
+    {
+      "tileId": "p1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Izvoarele",
+      "text": "Un labirint de canale din rădăcini dirijează apa.",
+      "imageUrl": "images/biomes/steppe.jpg"
+    },
+    {
+      "tileId": "p2",
+      "type": "page",
+      "sortOrder": 2,
+      "caption": "Rezonanța",
+      "text": "Un fluier din bambus deschide o vană naturală.",
+      "imageUrl": "images/biomes/jungle.jpg"
+    },
+    {
+      "tileId": "p3",
+      "type": "page",
+      "sortOrder": 3,
+      "caption": "Echilibru",
+      "text": "Prea mult debit rupe frunzele; prea puțin usucă florile.",
+      "imageUrl": "images/biomes/forest.jpg"
+    },
+    {
+      "tileId": "p4",
+      "type": "page",
+      "sortOrder": 4,
+      "caption": "Harta apelor",
+      "text": "Notezi un program de irigații pentru toată grădina.",
+      "imageUrl": "images/biomes/montain.jpg"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "sortOrder": 5,
+      "question": "Ce reguli aplici?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "Repartiție egală",
+          "sortOrder": 1,
+          "tokens": [
+            {
+              "quantity": 3,
+              "tokenType": "token_thinking"
+            }
+          ]
+        },
+        {
+          "answerId": "b",
+          "text": "Prioritate răsaduri",
+          "sortOrder": 2,
+          "tokens": [
+            {
+              "quantity": 3,
+              "tokenType": "token_creativity"
+            }
+          ]
+        }
+      ]
+    }
   ]
 }
-
-

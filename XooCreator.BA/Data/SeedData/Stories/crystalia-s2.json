@@ -5,12 +5,43 @@
   "category": "main",
   "sortOrder": 15,
   "tiles": [
-    { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Atelierul", "text": "Înveți să împletești idei în forme.", "imageUrl": "images/biomes/desert.jpg" },
-    { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Ce structură alegi?", "answers": [
-      { "answerId": "a", "text": "Rețea logică",    "reward": "token_thinking",  "sortOrder": 1 },
-      { "answerId": "b", "text": "Model generativ", "reward": "token_creativity", "sortOrder": 2 }
-    ] }
+    {
+      "tileId": "p1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Atelierul",
+      "text": "Înveți să împletești idei în forme.",
+      "imageUrl": "images/biomes/desert.jpg"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "sortOrder": 2,
+      "question": "Ce structură alegi?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "Rețea logică",
+          "sortOrder": 1,
+          "tokens": [
+            {
+              "quantity": 3,
+              "tokenType": "token_thinking"
+            }
+          ]
+        },
+        {
+          "answerId": "b",
+          "text": "Model generativ",
+          "sortOrder": 2,
+          "tokens": [
+            {
+              "quantity": 3,
+              "tokenType": "token_creativity"
+            }
+          ]
+        }
+      ]
+    }
   ]
 }
-
-

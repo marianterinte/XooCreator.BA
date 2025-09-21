@@ -5,15 +5,67 @@
   "category": "main",
   "sortOrder": 9,
   "tiles": [
-    { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Podul de frunze", "text": "Rădăcini împletite se arcuiesc peste prăpastie.", "imageUrl": "images/biomes/forest.jpg" },
-    { "tileId": "p2", "type": "page", "sortOrder": 2, "caption": "Sera vie", "text": "Plantele răspund la cântece; cresc în forme dorite.", "imageUrl": "images/biomes/jungle.jpg" },
-    { "tileId": "p3", "type": "page", "sortOrder": 3, "caption": "Ucenicia", "text": "Învăț cum să ghidez o liană fără s-o rănesc.", "imageUrl": "images/biomes/forest.jpg" },
-    { "tileId": "p4", "type": "page", "sortOrder": 4, "caption": "Polenul-lumină", "text": "Licurici plantați desenează harta grădinii.", "imageUrl": "images/biomes/tropical.jpg" },
-    { "tileId": "q1", "type": "quiz", "sortOrder": 5, "question": "Cum stabilizezi podul verde?", "answers": [
-      { "answerId": "a", "text": "Noduri simetrice", "reward": "token_thinking",  "sortOrder": 1 },
-      { "answerId": "b", "text": "Ancoră de pietre", "reward": "token_safety",    "sortOrder": 2 }
-    ] }
+    {
+      "tileId": "p1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Podul de frunze",
+      "text": "Rădăcini împletite se arcuiesc peste prăpastie.",
+      "imageUrl": "images/biomes/forest.jpg"
+    },
+    {
+      "tileId": "p2",
+      "type": "page",
+      "sortOrder": 2,
+      "caption": "Sera vie",
+      "text": "Plantele răspund la cântece; cresc în forme dorite.",
+      "imageUrl": "images/biomes/jungle.jpg"
+    },
+    {
+      "tileId": "p3",
+      "type": "page",
+      "sortOrder": 3,
+      "caption": "Ucenicia",
+      "text": "Învăț cum să ghidez o liană fără s-o rănesc.",
+      "imageUrl": "images/biomes/forest.jpg"
+    },
+    {
+      "tileId": "p4",
+      "type": "page",
+      "sortOrder": 4,
+      "caption": "Polenul-lumină",
+      "text": "Licurici plantați desenează harta grădinii.",
+      "imageUrl": "images/biomes/tropical.jpg"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "sortOrder": 5,
+      "question": "Cum stabilizezi podul verde?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "Noduri simetrice",
+          "sortOrder": 1,
+          "tokens": [
+            {
+              "quantity": 3,
+              "tokenType": "token_thinking"
+            }
+          ]
+        },
+        {
+          "answerId": "b",
+          "text": "Ancoră de pietre",
+          "sortOrder": 2,
+          "tokens": [
+            {
+              "quantity": 3,
+              "tokenType": "token_safety"
+            }
+          ]
+        }
+      ]
+    }
   ]
 }
-
-

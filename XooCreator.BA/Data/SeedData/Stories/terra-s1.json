@@ -71,31 +71,31 @@
         {
           "answerId": "a",
           "text": "O încurajezi să se ridice, să-și amintească de puterea ei.",
-          "reward": "token_courage",
+          "tokens": [{"tokenType": "token_courage", "quantity": 3}],
           "sortOrder": 1
         },
         {
           "answerId": "b",
           "text": "O îngrijești cu grijă și răbdare.",
-          "reward": "token_safety",
+          "tokens": [{"tokenType": "token_safety", "quantity": 3}],
           "sortOrder": 2
         },
         {
           "answerId": "c",
           "text": "Îi construiești un plan pentru a-și întinde din nou aripile.",
-          "reward": "token_thinking",
+          "tokens": [{"tokenType": "token_thinking", "quantity": 3}],
           "sortOrder": 3
         },
         {
           "answerId": "d",
           "text": "Îți folosești creativitatea și găsești o metodă nouă de vindecare.",
-          "reward": "token_creativity",
+          "tokens": [{"tokenType": "token_creativity", "quantity": 3}],
           "sortOrder": 4
         },
         {
           "answerId": "e",
           "text": "Cercetezi semnele luminii de pe penele ei, pentru a descoperi secretul.",
-          "reward": "token_curiosity",
+          "tokens": [{"tokenType": "token_curiosity", "quantity": 3}],
           "sortOrder": 5
         }
       ]

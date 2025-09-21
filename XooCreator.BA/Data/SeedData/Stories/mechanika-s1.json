@@ -5,14 +5,59 @@
   "category": "main",
   "sortOrder": 6,
   "tiles": [
-    { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Fabrica", "text": "Un oraș-fabrică suspină; motorul central se poticnește.", "imageUrl": "images/biomes/desert.jpg" },
-    { "tileId": "p2", "type": "page", "sortOrder": 2, "caption": "Diagnoza", "text": "Conducte, supape, ritmuri; ai nevoie de logică și ascultare.", "imageUrl": "images/biomes/montain.jpg" },
-    { "tileId": "p3", "type": "page", "sortOrder": 3, "caption": "Ajustaj", "text": "Un angrenaj lipsește exact din locul unde curge energia.", "imageUrl": "images/biomes/forest.jpg" },
-    { "tileId": "q1", "type": "quiz", "sortOrder": 4, "question": "Cum pornești motorul?", "answers": [
-      { "answerId": "a", "text": "Protocol de siguranță", "reward": "token_safety",    "sortOrder": 1 },
-      { "answerId": "b", "text": "Repornire creativă",   "reward": "token_creativity", "sortOrder": 2 }
-    ] }
+    {
+      "tileId": "p1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Fabrica",
+      "text": "Un oraș-fabrică suspină; motorul central se poticnește.",
+      "imageUrl": "images/biomes/desert.jpg"
+    },
+    {
+      "tileId": "p2",
+      "type": "page",
+      "sortOrder": 2,
+      "caption": "Diagnoza",
+      "text": "Conducte, supape, ritmuri; ai nevoie de logică și ascultare.",
+      "imageUrl": "images/biomes/montain.jpg"
+    },
+    {
+      "tileId": "p3",
+      "type": "page",
+      "sortOrder": 3,
+      "caption": "Ajustaj",
+      "text": "Un angrenaj lipsește exact din locul unde curge energia.",
+      "imageUrl": "images/biomes/forest.jpg"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "sortOrder": 4,
+      "question": "Cum pornești motorul?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "Protocol de siguranță",
+          "sortOrder": 1,
+          "tokens": [
+            {
+              "quantity": 3,
+              "tokenType": "token_safety"
+            }
+          ]
+        },
+        {
+          "answerId": "b",
+          "text": "Repornire creativă",
+          "sortOrder": 2,
+          "tokens": [
+            {
+              "quantity": 3,
+              "tokenType": "token_creativity"
+            }
+          ]
+        }
+      ]
+    }
   ]
 }
-
-

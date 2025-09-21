@@ -5,12 +5,38 @@
   "category": "main",
   "sortOrder": 13,
   "tiles": [
-    { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Fructul Vântului", "text": "Culegi Zephyr-Plum, fruct aerofor.", "imageUrl": "images/biomes/forest.jpg" },
-    { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Cui îl dăruiești?", "answers": [
-      { "answerId": "a", "text": "Laboratorul de animale", "reward": "fruit_zephyr_plum", "sortOrder": 1 },
-      { "answerId": "b", "text": "Gardienilor pădurii",   "reward": "token_safety",     "sortOrder": 2 }
-    ] }
+    {
+      "tileId": "p1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Fructul Vântului",
+      "text": "Culegi Zephyr-Plum, fruct aerofor.",
+      "imageUrl": "images/biomes/forest.jpg"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "sortOrder": 2,
+      "question": "Cui îl dăruiești?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "Laboratorul de animale",
+          "sortOrder": 1,
+          "tokens": []
+        },
+        {
+          "answerId": "b",
+          "text": "Gardienilor pădurii",
+          "sortOrder": 2,
+          "tokens": [
+            {
+              "quantity": 3,
+              "tokenType": "token_safety"
+            }
+          ]
+        }
+      ]
+    }
   ]
 }
-
-

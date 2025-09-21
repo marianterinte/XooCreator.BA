@@ -1,3 +1,5 @@
+using XooCreator.BA.Features.TreeOfLight;
+
 namespace XooCreator.BA.Features.Stories;
 
 public record StoryContentDto
@@ -28,7 +30,7 @@ public record StoryAnswerDto
 {
     public required string Id { get; init; }
     public required string Text { get; init; }
-    public required string Reward { get; init; }
+    public List<TokenReward> Tokens { get; init; } = new();
 }
 
 public record UserStoryProgressDto

@@ -5,12 +5,43 @@
   "category": "main",
   "sortOrder": 24,
   "tiles": [
-    { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Dialog", "text": "Îți răspund în coduri de lumină.", "imageUrl": "images/biomes/tropical.jpg" },
-    { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Cum traduci?", "answers": [
-      { "answerId": "a", "text": "Model logic",        "reward": "token_thinking",  "sortOrder": 1 },
-      { "answerId": "b", "text": "Pictograme creative", "reward": "token_creativity", "sortOrder": 2 }
-    ] }
+    {
+      "tileId": "p1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Dialog",
+      "text": "Îți răspund în coduri de lumină.",
+      "imageUrl": "images/biomes/tropical.jpg"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "sortOrder": 2,
+      "question": "Cum traduci?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "Model logic",
+          "sortOrder": 1,
+          "tokens": [
+            {
+              "quantity": 3,
+              "tokenType": "token_thinking"
+            }
+          ]
+        },
+        {
+          "answerId": "b",
+          "text": "Pictograme creative",
+          "sortOrder": 2,
+          "tokens": [
+            {
+              "quantity": 3,
+              "tokenType": "token_creativity"
+            }
+          ]
+        }
+      ]
+    }
   ]
 }
-
-

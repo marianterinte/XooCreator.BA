@@ -5,12 +5,38 @@
   "category": "main",
   "sortOrder": 16,
   "tiles": [
-    { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Răsplată", "text": "Primești Crystal-Pear, stabilizator de forme.", "imageUrl": "images/biomes/montain.jpg" },
-    { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Unde îl depozitezi?", "answers": [
-      { "answerId": "a", "text": "Laboratorul de animale", "reward": "fruit_crystal_pear", "sortOrder": 1 },
-      { "answerId": "b", "text": "Arhiva ideilor",         "reward": "token_thinking",   "sortOrder": 2 }
-    ] }
+    {
+      "tileId": "p1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Răsplată",
+      "text": "Primești Crystal-Pear, stabilizator de forme.",
+      "imageUrl": "images/biomes/montain.jpg"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "sortOrder": 2,
+      "question": "Unde îl depozitezi?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "Laboratorul de animale",
+          "sortOrder": 1,
+          "tokens": []
+        },
+        {
+          "answerId": "b",
+          "text": "Arhiva ideilor",
+          "sortOrder": 2,
+          "tokens": [
+            {
+              "quantity": 3,
+              "tokenType": "token_thinking"
+            }
+          ]
+        }
+      ]
+    }
   ]
 }
-
-

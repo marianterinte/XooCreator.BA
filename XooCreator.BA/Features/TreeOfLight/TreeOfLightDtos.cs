@@ -11,7 +11,7 @@ public record StoryProgressDto
 {
     public required string StoryId { get; init; }
     public string? SelectedAnswer { get; init; }
-    public string? RewardReceived { get; init; }
+    public List<TokenReward> Tokens { get; init; } = new();
     public DateTime CompletedAt { get; init; }
 }
 
@@ -41,11 +41,16 @@ public record HeroTreeNodeDto
     public DateTime UnlockedAt { get; init; }
 }
 
+public record TokenReward
+{
+    public required string TokenType { get; init; }
+    public required int Quantity { get; init; }
+}
+
 public record CompleteStoryRequest
 {
     public required string StoryId { get; init; }
     public string? SelectedAnswer { get; init; }
-    public string? RewardReceived { get; init; }
 }
 
 public record CompleteStoryResponse
@@ -144,6 +149,6 @@ public record CompletedStoryDto
 {
     public required string StoryId { get; init; }
     public string? SelectedAnswer { get; init; }
-    public string? RewardReceived { get; init; }
+    public List<TokenReward> Tokens { get; init; } = new();
     public DateTime CompletedAt { get; init; }
 }

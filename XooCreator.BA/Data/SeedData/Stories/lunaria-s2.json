@@ -5,12 +5,43 @@
   "category": "main",
   "sortOrder": 6,
   "tiles": [
-    { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Reflexii", "text": "Un lac oglindă prezintă soluții dacă pui întrebarea potrivită.", "imageUrl": "images/biomes/jungle.jpg" },
-    { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Care e întrebarea potrivită?", "answers": [
-      { "answerId": "a", "text": "Ce nu înțeleg încă?", "reward": "token_curiosity", "sortOrder": 1 },
-      { "answerId": "b", "text": "Ce date îmi lipsesc?", "reward": "token_thinking",  "sortOrder": 2 }
-    ] }
+    {
+      "tileId": "p1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Reflexii",
+      "text": "Un lac oglindă prezintă soluții dacă pui întrebarea potrivită.",
+      "imageUrl": "images/biomes/jungle.jpg"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "sortOrder": 2,
+      "question": "Care e întrebarea potrivită?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "Ce nu înțeleg încă?",
+          "sortOrder": 1,
+          "tokens": [
+            {
+              "quantity": 3,
+              "tokenType": "token_curiosity"
+            }
+          ]
+        },
+        {
+          "answerId": "b",
+          "text": "Ce date îmi lipsesc?",
+          "sortOrder": 2,
+          "tokens": [
+            {
+              "quantity": 3,
+              "tokenType": "token_thinking"
+            }
+          ]
+        }
+      ]
+    }
   ]
 }
-
-

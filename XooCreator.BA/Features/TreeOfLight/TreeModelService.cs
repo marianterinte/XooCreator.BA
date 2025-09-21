@@ -72,7 +72,7 @@ public class TreeModelService : ITreeModelService
                 {
                     StoryId = cs.StoryId,
                     SelectedAnswer = cs.SelectedAnswer,
-                    RewardReceived = cs.RewardReceived,
+                    Tokens = cs.Tokens,
                     CompletedAt = cs.CompletedAt
                 }).ToList(),
                 

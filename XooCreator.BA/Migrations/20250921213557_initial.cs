@@ -373,7 +373,7 @@ namespace XooCreator.BA.Migrations
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     StoryId = table.Column<string>(type: "text", nullable: false),
                     SelectedAnswer = table.Column<string>(type: "text", nullable: true),
-                    RewardReceived = table.Column<string>(type: "text", nullable: true),
+                    TokensJson = table.Column<string>(type: "text", nullable: true),
                     CompletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
@@ -508,7 +508,7 @@ namespace XooCreator.BA.Migrations
                     StoryTileId = table.Column<Guid>(type: "uuid", nullable: false),
                     AnswerId = table.Column<string>(type: "text", nullable: false),
                     Text = table.Column<string>(type: "text", nullable: false),
-                    Reward = table.Column<string>(type: "text", nullable: false),
+                    TokensJson = table.Column<string>(type: "text", nullable: true),
                     SortOrder = table.Column<int>(type: "integer", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
@@ -617,8 +617,8 @@ namespace XooCreator.BA.Migrations
                 columns: new[] { "Id", "Auth0Sub", "CreatedAt", "DisplayName", "Email" },
                 values: new object[,]
                 {
-                    { new Guid("11111111-1111-1111-1111-111111111111"), "test-user-sub", new DateTime(2025, 9, 20, 15, 31, 24, 300, DateTimeKind.Utc).AddTicks(7577), "Test User", "test@example.com" },
-                    { new Guid("22222222-2222-2222-2222-222222222222"), "marian-test-sub", new DateTime(2025, 9, 20, 15, 31, 24, 300, DateTimeKind.Utc).AddTicks(7579), "Marian", "marian@example.com" }
+                    { new Guid("11111111-1111-1111-1111-111111111111"), "test-user-sub", new DateTime(2025, 9, 21, 21, 35, 57, 327, DateTimeKind.Utc).AddTicks(5066), "Test User", "test@example.com" },
+                    { new Guid("22222222-2222-2222-2222-222222222222"), "marian-test-sub", new DateTime(2025, 9, 21, 21, 35, 57, 327, DateTimeKind.Utc).AddTicks(5068), "Marian", "marian@example.com" }
                 });
 
             migrationBuilder.InsertData(
@@ -667,8 +667,8 @@ namespace XooCreator.BA.Migrations
                 columns: new[] { "Id", "Amount", "CreatedAt", "Reference", "Type", "UserId" },
                 values: new object[,]
                 {
-                    { new Guid("33333333-3333-3333-3333-333333333333"), 15, new DateTime(2025, 9, 19, 15, 31, 24, 300, DateTimeKind.Utc).AddTicks(7876), "test-purchase-marian", 0, new Guid("22222222-2222-2222-2222-222222222222") },
-                    { new Guid("44444444-4444-4444-4444-444444444444"), -5, new DateTime(2025, 9, 20, 13, 31, 24, 300, DateTimeKind.Utc).AddTicks(7884), "test-generation", 1, new Guid("22222222-2222-2222-2222-222222222222") }
+                    { new Guid("33333333-3333-3333-3333-333333333333"), 15, new DateTime(2025, 9, 20, 21, 35, 57, 327, DateTimeKind.Utc).AddTicks(5208), "test-purchase-marian", 0, new Guid("22222222-2222-2222-2222-222222222222") },
+                    { new Guid("44444444-4444-4444-4444-444444444444"), -5, new DateTime(2025, 9, 21, 19, 35, 57, 327, DateTimeKind.Utc).AddTicks(5224), "test-generation", 1, new Guid("22222222-2222-2222-2222-222222222222") }
                 });
 
             migrationBuilder.InsertData(
@@ -676,8 +676,8 @@ namespace XooCreator.BA.Migrations
                 columns: new[] { "UserId", "Balance", "DiscoveryBalance", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { new Guid("11111111-1111-1111-1111-111111111111"), 5, 0, new DateTime(2025, 9, 20, 15, 31, 24, 300, DateTimeKind.Utc).AddTicks(7844) },
-                    { new Guid("22222222-2222-2222-2222-222222222222"), 10, 0, new DateTime(2025, 9, 20, 15, 31, 24, 300, DateTimeKind.Utc).AddTicks(7846) }
+                    { new Guid("11111111-1111-1111-1111-111111111111"), 5, 0, new DateTime(2025, 9, 21, 21, 35, 57, 327, DateTimeKind.Utc).AddTicks(5189) },
+                    { new Guid("22222222-2222-2222-2222-222222222222"), 10, 0, new DateTime(2025, 9, 21, 21, 35, 57, 327, DateTimeKind.Utc).AddTicks(5191) }
                 });
 
             migrationBuilder.InsertData(

@@ -5,14 +5,59 @@
   "category": "main",
   "sortOrder": 13,
   "tiles": [
-    { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Balconul", "text": "Un balcon planta deschide o scenă pentru idei grele.", "imageUrl": "images/biomes/jungle.jpg" },
-    { "tileId": "p2", "type": "page", "sortOrder": 2, "caption": "Contragreutate", "text": "Liane și lumini pun în echilibru o platformă plutitoare.", "imageUrl": "images/biomes/forest.jpg" },
-    { "tileId": "p3", "type": "page", "sortOrder": 3, "caption": "Repere", "text": "Stelele devin repere de navigație urbană nocturnă.", "imageUrl": "images/biomes/montain.jpg" },
-    { "tileId": "q1", "type": "quiz", "sortOrder": 4, "question": "Ce alegi să optimizezi?", "answers": [
-      { "answerId": "a", "text": "Siguranța", "reward": "token_safety",   "sortOrder": 1 },
-      { "answerId": "b", "text": "Eficiența", "reward": "token_thinking", "sortOrder": 2 }
-    ] }
+    {
+      "tileId": "p1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Balconul",
+      "text": "Un balcon planta deschide o scenă pentru idei grele.",
+      "imageUrl": "images/biomes/jungle.jpg"
+    },
+    {
+      "tileId": "p2",
+      "type": "page",
+      "sortOrder": 2,
+      "caption": "Contragreutate",
+      "text": "Liane și lumini pun în echilibru o platformă plutitoare.",
+      "imageUrl": "images/biomes/forest.jpg"
+    },
+    {
+      "tileId": "p3",
+      "type": "page",
+      "sortOrder": 3,
+      "caption": "Repere",
+      "text": "Stelele devin repere de navigație urbană nocturnă.",
+      "imageUrl": "images/biomes/montain.jpg"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "sortOrder": 4,
+      "question": "Ce alegi să optimizezi?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "Siguranța",
+          "sortOrder": 1,
+          "tokens": [
+            {
+              "quantity": 3,
+              "tokenType": "token_safety"
+            }
+          ]
+        },
+        {
+          "answerId": "b",
+          "text": "Eficiența",
+          "sortOrder": 2,
+          "tokens": [
+            {
+              "quantity": 3,
+              "tokenType": "token_thinking"
+            }
+          ]
+        }
+      ]
+    }
   ]
 }
-
-

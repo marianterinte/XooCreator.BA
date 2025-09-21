@@ -1,3 +1,5 @@
+using XooCreator.BA.Features.Stories;
+
 namespace XooCreator.BA.Features.TreeOfLight;
 
 public interface ITreeOfLightService
@@ -16,10 +18,12 @@ public interface ITreeOfLightService
 public class TreeOfLightService : ITreeOfLightService
 {
     private readonly ITreeOfLightRepository _repository;
+    private readonly IStoriesRepository _storiesRepository;
 
-    public TreeOfLightService(ITreeOfLightRepository repository)
+    public TreeOfLightService(ITreeOfLightRepository repository, IStoriesRepository storiesRepository)
     {
         _repository = repository;
+        _storiesRepository = storiesRepository;
     }
 
     public Task<List<TreeProgressDto>> GetTreeProgressAsync(Guid userId)
@@ -64,51 +68,29 @@ public class TreeOfLightService : ITreeOfLightService
 
             var newlyUnlockedRegions = new List<string>();
 
-            // Award tokens and unlock heroes based on story completion logic
-            switch (request.StoryId)
+            // Load story from database to get the correct tokens
+            var story = await _storiesRepository.GetStoryByIdAsync(request.StoryId);
+            if (story != null && !string.IsNullOrEmpty(request.SelectedAnswer))
             {
-                case "root-s1":
-                    await _repository.AwardTokensAsync(userId, courage: 1);
-                    await _repository.UnlockHeroAsync(userId, "COMPANION_PUFPUF", "STORY_REWARD", request.StoryId);
-                    await _repository.UnlockRegionAsync(userId, "farm");
-                    newlyUnlockedRegions.Add("farm");
-                    break;
-                
-                case "farm-s1":
-                case "farm-s2":
-                case "farm-s3":
-                    // Award tokens based on answer choice
-                    await AwardTokensForAnswer(userId, request.SelectedAnswer);
-                    
-                    // Check if farm is complete (all 3 stories done)
-                    var farmStories = await _repository.GetStoryProgressAsync(userId);
-                    var farmCompleted = farmStories.Count(s => s.StoryId.StartsWith("farm-")) >= 3;
-                    
-                    if (farmCompleted)
+                // Find the quiz tile and selected answer
+                var quizTile = story.Tiles.FirstOrDefault(t => t.Type == "quiz");
+                if (quizTile != null)
+                {
+                    var selectedAnswer = quizTile.Answers.FirstOrDefault(a => a.Id == request.SelectedAnswer);
+                    if (selectedAnswer != null && selectedAnswer.Tokens.Count > 0)
                     {
-                        // Unlock next regions based on collected tokens
-                        var tokens = await _repository.GetUserTokensAsync(userId);
-                        if (tokens.Courage >= 2)
+                        // Award tokens based on the tokens from database
+                        foreach (var tokenReward in selectedAnswer.Tokens)
                         {
-                            await _repository.UnlockRegionAsync(userId, "sahara");
-                            newlyUnlockedRegions.Add("sahara");
-                        }
-                        if (tokens.Curiosity + tokens.Creativity >= 2)
-                        {
-                            await _repository.UnlockRegionAsync(userId, "dreamland");
-                            newlyUnlockedRegions.Add("dreamland");
+                            await AwardTokensByType(userId, tokenReward.TokenType, tokenReward.Quantity);
                         }
                     }
-                    break;
-                
-                // Add other story cases as needed
+                }
             }
 
-            // Award story-specific hero
-            if (!string.IsNullOrEmpty(request.RewardReceived))
-            {
-                await _repository.UnlockHeroAsync(userId, request.RewardReceived, "STORY_REWARD", request.StoryId);
-            }
+            // Check for region unlocks based on story completion rules
+            var unlockedRegions = await CheckAndUnlockRegionsAsync(userId, request.StoryId);
+            newlyUnlockedRegions.AddRange(unlockedRegions);
 
             var updatedTokens = await _repository.GetUserTokensAsync(userId);
 
@@ -210,16 +192,8 @@ public class TreeOfLightService : ITreeOfLightService
                 };
             }
 
-            // Unlock the hero
-            var heroUnlocked = await _repository.UnlockHeroAsync(userId, request.HeroId, "HERO_TREE_UNLOCK");
-            if (!heroUnlocked)
-            {
-                return new TransformToHeroResponse
-                {
-                    Success = false,
-                    ErrorMessage = "Hero already unlocked or error occurred"
-                };
-            }
+            // Hero unlocking is now handled by frontend localStorage
+            // No need to unlock in backend
 
             var unlockedHero = new HeroDto
             {
@@ -244,28 +218,94 @@ public class TreeOfLightService : ITreeOfLightService
         }
     }
 
-    private async Task AwardTokensForAnswer(Guid userId, string? answer)
+    private async Task AwardTokensByType(Guid userId, string tokenType, int quantity)
     {
-        // Award different tokens based on answer choice
-        switch (answer?.ToLower())
+        // Award tokens based on token type
+        switch (tokenType.ToLower())
         {
+            case "token_courage":
             case "courage":
-            case "brave":
-                await _repository.AwardTokensAsync(userId, courage: 1);
+                await _repository.AwardTokensAsync(userId, courage: quantity);
                 break;
+            case "token_curiosity":
             case "curiosity":
-            case "curious":
-                await _repository.AwardTokensAsync(userId, curiosity: 1);
+                await _repository.AwardTokensAsync(userId, curiosity: quantity);
                 break;
+            case "token_thinking":
             case "thinking":
-            case "think":
-                await _repository.AwardTokensAsync(userId, thinking: 1);
+                await _repository.AwardTokensAsync(userId, thinking: quantity);
                 break;
+            case "token_creativity":
             case "creativity":
-            case "creative":
-                await _repository.AwardTokensAsync(userId, creativity: 1);
+                await _repository.AwardTokensAsync(userId, creativity: quantity);
                 break;
         }
+    }
+
+    private async Task AwardTokensByReward(Guid userId, string reward)
+    {
+        // Convert reward string to token type and quantity
+        // Examples: "token_courage", "token_curiosity", "token_thinking", "token_creativity", "token_safety"
+        switch (reward.ToLower())
+        {
+            case "token_courage":
+                await _repository.AwardTokensAsync(userId, courage: 1);
+                break;
+            case "token_curiosity":
+                await _repository.AwardTokensAsync(userId, curiosity: 1);
+                break;
+            case "token_thinking":
+                await _repository.AwardTokensAsync(userId, thinking: 1);
+                break;
+            case "token_creativity":
+                await _repository.AwardTokensAsync(userId, creativity: 1);
+                break;
+            case "token_safety":
+                await _repository.AwardTokensAsync(userId, safety: 1);
+                break;
+            // For other rewards (like fruits), do nothing - they're handled elsewhere
+        }
+    }
+
+    private async Task<List<string>> CheckAndUnlockRegionsAsync(Guid userId, string storyId)
+    {
+        var newlyUnlockedRegions = new List<string>();
+        
+        // Check for region unlock rules based on story completion
+        // This could be made more dynamic by loading rules from database
+        switch (storyId)
+        {
+            case "root-s1":
+                await _repository.UnlockRegionAsync(userId, "farm");
+                newlyUnlockedRegions.Add("farm");
+                break;
+                
+            case "farm-s1":
+            case "farm-s2":
+            case "farm-s3":
+                // Check if farm is complete (all 3 stories done)
+                var farmStories = await _repository.GetStoryProgressAsync(userId);
+                var farmCompleted = farmStories.Count(s => s.StoryId.StartsWith("farm-")) >= 3;
+                
+                if (farmCompleted)
+                {
+                    // Unlock next regions based on collected tokens
+                    var tokens = await _repository.GetUserTokensAsync(userId);
+                    if (tokens.Courage >= 2)
+                    {
+                        await _repository.UnlockRegionAsync(userId, "sahara");
+                        newlyUnlockedRegions.Add("sahara");
+                    }
+                    if (tokens.Curiosity + tokens.Creativity >= 2)
+                    {
+                        await _repository.UnlockRegionAsync(userId, "dreamland");
+                        newlyUnlockedRegions.Add("dreamland");
+                    }
+                }
+                break;
+        }
+        
+        return newlyUnlockedRegions;
     }
 
     private static bool CanTransformToHero(string heroId, UserTokensDto tokens)

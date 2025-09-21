@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using XooCreator.BA.Data;
+using XooCreator.BA.Features.TreeOfLight;
 
 namespace XooCreator.BA.Features.Stories;
 
@@ -212,7 +213,9 @@ public class StoriesRepository : IStoriesRepository
                         {
                             AnswerId = answerSeed.AnswerId,
                             Text = answerSeed.Text,
-                            Reward = answerSeed.Reward,
+                            TokensJson = answerSeed.Tokens != null && answerSeed.Tokens.Count > 0 
+                                ? JsonSerializer.Serialize(answerSeed.Tokens) 
+                                : null,
                             SortOrder = answerSeed.SortOrder
                         };
                         tile.Answers.Add(answer);
@@ -250,7 +253,9 @@ public class StoriesRepository : IStoriesRepository
                         {
                             Id = a.AnswerId,
                             Text = a.Text,
-                            Reward = a.Reward
+                            Tokens = !string.IsNullOrEmpty(a.TokensJson) 
+                                ? JsonSerializer.Deserialize<List<TokenReward>>(a.TokensJson) ?? new List<TokenReward>()
+                                : new List<TokenReward>()
                         }).ToList()
                 }).ToList()
         };
@@ -297,6 +302,6 @@ public class AnswerSeedData
 {
     public string AnswerId { get; set; } = string.Empty;
     public string Text { get; set; } = string.Empty;
-    public string Reward { get; set; } = string.Empty;
+    public List<TokenReward>? Tokens { get; set; }
     public int SortOrder { get; set; }
 }

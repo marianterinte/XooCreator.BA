@@ -5,12 +5,43 @@
   "category": "main",
   "sortOrder": 14,
   "tiles": [
-    { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Sala Prismei", "text": "Ecourile îți verifică raționamentul.", "imageUrl": "images/biomes/montain.jpg" },
-    { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Ce verifici întâi?", "answers": [
-      { "answerId": "a", "text": "Ipotezele", "reward": "token_thinking", "sortOrder": 1 },
-      { "answerId": "b", "text": "Riscurile", "reward": "token_safety",   "sortOrder": 2 }
-    ] }
+    {
+      "tileId": "p1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Sala Prismei",
+      "text": "Ecourile îți verifică raționamentul.",
+      "imageUrl": "images/biomes/montain.jpg"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "sortOrder": 2,
+      "question": "Ce verifici întâi?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "Ipotezele",
+          "sortOrder": 1,
+          "tokens": [
+            {
+              "quantity": 3,
+              "tokenType": "token_thinking"
+            }
+          ]
+        },
+        {
+          "answerId": "b",
+          "text": "Riscurile",
+          "sortOrder": 2,
+          "tokens": [
+            {
+              "quantity": 3,
+              "tokenType": "token_safety"
+            }
+          ]
+        }
+      ]
+    }
   ]
 }
-
-

@@ -5,12 +5,38 @@
   "category": "main",
   "sortOrder": 28,
   "tiles": [
-    { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Floarea-Cheie", "text": "Culegi Aether-Orchid, stabilizator de zbor.", "imageUrl": "images/biomes/steppe.jpg" },
-    { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Utilizare?", "answers": [
-      { "answerId": "a", "text": "Laboratorul de animale", "reward": "fruit_aether_orchid", "sortOrder": 1 },
-      { "answerId": "b", "text": "Aripi personale",       "reward": "token_creativity",   "sortOrder": 2 }
-    ] }
+    {
+      "tileId": "p1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Floarea-Cheie",
+      "text": "Culegi Aether-Orchid, stabilizator de zbor.",
+      "imageUrl": "images/biomes/steppe.jpg"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "sortOrder": 2,
+      "question": "Utilizare?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "Laboratorul de animale",
+          "sortOrder": 1,
+          "tokens": []
+        },
+        {
+          "answerId": "b",
+          "text": "Aripi personale",
+          "sortOrder": 2,
+          "tokens": [
+            {
+              "quantity": 3,
+              "tokenType": "token_creativity"
+            }
+          ]
+        }
+      ]
+    }
   ]
 }
-
-

@@ -5,12 +5,38 @@
   "category": "main",
   "sortOrder": 7,
   "tiles": [
-    { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Lunamelon", "text": "Găsești Moon-Melon – fruct ce luminează întunericul.", "imageUrl": "images/biomes/forest.jpg" },
-    { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Cum îl folosești?", "answers": [
-      { "answerId": "a", "text": "Îl păstrez pentru laborator", "reward": "fruit_moonmelon", "sortOrder": 1 },
-      { "answerId": "b", "text": "Îl ofer Umbrelor",           "reward": "token_courage",   "sortOrder": 2 }
-    ] }
+    {
+      "tileId": "p1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Lunamelon",
+      "text": "Găsești Moon-Melon – fruct ce luminează întunericul.",
+      "imageUrl": "images/biomes/forest.jpg"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "sortOrder": 2,
+      "question": "Cum îl folosești?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "Îl păstrez pentru laborator",
+          "sortOrder": 1,
+          "tokens": []
+        },
+        {
+          "answerId": "b",
+          "text": "Îl ofer Umbrelor",
+          "sortOrder": 2,
+          "tokens": [
+            {
+              "quantity": 3,
+              "tokenType": "token_courage"
+            }
+          ]
+        }
+      ]
+    }
   ]
 }
-
-

@@ -5,12 +5,43 @@
   "category": "main",
   "sortOrder": 17,
   "tiles": [
-    { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Suspensie", "text": "Construiești trasee aeriene sigure.", "imageUrl": "images/biomes/montain.jpg" },
-    { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Ce prioritate ai?", "answers": [
-      { "answerId": "a", "text": "Siguranță structurală", "reward": "token_safety",   "sortOrder": 1 },
-      { "answerId": "b", "text": "Eficiență",            "reward": "token_thinking", "sortOrder": 2 }
-    ] }
+    {
+      "tileId": "p1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Suspensie",
+      "text": "Construiești trasee aeriene sigure.",
+      "imageUrl": "images/biomes/montain.jpg"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "sortOrder": 2,
+      "question": "Ce prioritate ai?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "Siguranță structurală",
+          "sortOrder": 1,
+          "tokens": [
+            {
+              "quantity": 3,
+              "tokenType": "token_safety"
+            }
+          ]
+        },
+        {
+          "answerId": "b",
+          "text": "Eficiență",
+          "sortOrder": 2,
+          "tokens": [
+            {
+              "quantity": 3,
+              "tokenType": "token_thinking"
+            }
+          ]
+        }
+      ]
+    }
   ]
 }
-
-

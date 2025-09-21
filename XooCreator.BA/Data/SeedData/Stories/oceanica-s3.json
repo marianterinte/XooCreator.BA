@@ -5,12 +5,38 @@
   "category": "main",
   "sortOrder": 10,
   "tiles": [
-    { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Comoara", "text": "Descoperi Aqua-Pearl, ingredient rar.", "imageUrl": "images/biomes/tropical.jpg" },
-    { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Ce faci cu perla?", "answers": [
-      { "answerId": "a", "text": "O păstrez (animal engineering)", "reward": "fruit_aqua_pearl", "sortOrder": 1 },
-      { "answerId": "b", "text": "O studiez optic",               "reward": "token_thinking",   "sortOrder": 2 }
-    ] }
+    {
+      "tileId": "p1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Comoara",
+      "text": "Descoperi Aqua-Pearl, ingredient rar.",
+      "imageUrl": "images/biomes/tropical.jpg"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "sortOrder": 2,
+      "question": "Ce faci cu perla?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "O păstrez (animal engineering)",
+          "sortOrder": 1,
+          "tokens": []
+        },
+        {
+          "answerId": "b",
+          "text": "O studiez optic",
+          "sortOrder": 2,
+          "tokens": [
+            {
+              "quantity": 3,
+              "tokenType": "token_thinking"
+            }
+          ]
+        }
+      ]
+    }
   ]
 }
-
-
