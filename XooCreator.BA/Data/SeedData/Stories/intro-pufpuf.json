@@ -40,7 +40,9 @@
     {
       "tileId": "q1",
       "type": "quiz",
+      "caption": "Alegerea",
       "sortOrder": 5,
+      "imageUrl": "images/tol-intro-story/TreeOfLight.png",
       "question": "Cristalul luminează doar dacă pui întrebarea potrivită… Ce întrebi despre Copacul Luminii?",
       "answers": [
         {
