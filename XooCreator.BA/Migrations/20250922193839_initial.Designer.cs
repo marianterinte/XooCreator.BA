@@ -12,7 +12,7 @@ using XooCreator.BA.Data;
 namespace XooCreator.BA.Migrations
 {
     [DbContext(typeof(XooDbContext))]
-    [Migration("20250921213557_initial")]
+    [Migration("20250922193839_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -1274,7 +1274,7 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("33333333-3333-3333-3333-333333333333"),
                             Amount = 15,
-                            CreatedAt = new DateTime(2025, 9, 20, 21, 35, 57, 327, DateTimeKind.Utc).AddTicks(5208),
+                            CreatedAt = new DateTime(2025, 9, 21, 19, 38, 38, 847, DateTimeKind.Utc).AddTicks(4125),
                             Reference = "test-purchase-marian",
                             Type = 0,
                             UserId = new Guid("22222222-2222-2222-2222-222222222222")
@@ -1283,7 +1283,7 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("44444444-4444-4444-4444-444444444444"),
                             Amount = -5,
-                            CreatedAt = new DateTime(2025, 9, 21, 19, 35, 57, 327, DateTimeKind.Utc).AddTicks(5224),
+                            CreatedAt = new DateTime(2025, 9, 22, 17, 38, 38, 847, DateTimeKind.Utc).AddTicks(4132),
                             Reference = "test-generation",
                             Type = 1,
                             UserId = new Guid("22222222-2222-2222-2222-222222222222")
@@ -1314,14 +1314,14 @@ namespace XooCreator.BA.Migrations
                             UserId = new Guid("11111111-1111-1111-1111-111111111111"),
                             Balance = 5,
                             DiscoveryBalance = 0,
-                            UpdatedAt = new DateTime(2025, 9, 21, 21, 35, 57, 327, DateTimeKind.Utc).AddTicks(5189)
+                            UpdatedAt = new DateTime(2025, 9, 22, 19, 38, 38, 847, DateTimeKind.Utc).AddTicks(4104)
                         },
                         new
                         {
                             UserId = new Guid("22222222-2222-2222-2222-222222222222"),
                             Balance = 10,
                             DiscoveryBalance = 0,
-                            UpdatedAt = new DateTime(2025, 9, 21, 21, 35, 57, 327, DateTimeKind.Utc).AddTicks(5191)
+                            UpdatedAt = new DateTime(2025, 9, 22, 19, 38, 38, 847, DateTimeKind.Utc).AddTicks(4105)
                         });
                 });
 
@@ -1362,6 +1362,69 @@ namespace XooCreator.BA.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("DiscoveryItems");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.HeroDefinition", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("CourageCost")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("CreativityCost")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CuriosityCost")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<bool>("IsUnlocked")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("PrerequisitesJson")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<string>("RewardsJson")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<int>("SafetyCost")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ThinkingCost")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Id")
+                        .IsUnique();
+
+                    b.ToTable("HeroDefinitions");
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.HeroProgress", b =>
@@ -1413,6 +1476,9 @@ namespace XooCreator.BA.Migrations
                         .HasColumnType("integer");
 
                     b.Property<int>("TokensCostCuriosity")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TokensCostSafety")
                         .HasColumnType("integer");
 
                     b.Property<int>("TokensCostThinking")
@@ -1931,7 +1997,7 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
                             Auth0Sub = "test-user-sub",
-                            CreatedAt = new DateTime(2025, 9, 21, 21, 35, 57, 327, DateTimeKind.Utc).AddTicks(5066),
+                            CreatedAt = new DateTime(2025, 9, 22, 19, 38, 38, 847, DateTimeKind.Utc).AddTicks(3923),
                             DisplayName = "Test User",
                             Email = "test@example.com"
                         },
@@ -1939,7 +2005,7 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("22222222-2222-2222-2222-222222222222"),
                             Auth0Sub = "marian-test-sub",
-                            CreatedAt = new DateTime(2025, 9, 21, 21, 35, 57, 327, DateTimeKind.Utc).AddTicks(5068),
+                            CreatedAt = new DateTime(2025, 9, 22, 19, 38, 38, 847, DateTimeKind.Utc).AddTicks(3924),
                             DisplayName = "Marian",
                             Email = "marian@example.com"
                         });
@@ -2013,6 +2079,9 @@ namespace XooCreator.BA.Migrations
                         .HasColumnType("integer");
 
                     b.Property<int>("Curiosity")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Safety")
                         .HasColumnType("integer");
 
                     b.Property<int>("Thinking")

@@ -63,6 +63,30 @@ namespace XooCreator.BA.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "HeroDefinitions",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    Description = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: false),
+                    Type = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    CourageCost = table.Column<int>(type: "integer", nullable: false),
+                    CuriosityCost = table.Column<int>(type: "integer", nullable: false),
+                    ThinkingCost = table.Column<int>(type: "integer", nullable: false),
+                    CreativityCost = table.Column<int>(type: "integer", nullable: false),
+                    SafetyCost = table.Column<int>(type: "integer", nullable: false),
+                    PrerequisitesJson = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: false),
+                    RewardsJson = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: false),
+                    IsUnlocked = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_HeroDefinitions", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Regions",
                 columns: table => new
                 {
@@ -327,6 +351,7 @@ namespace XooCreator.BA.Migrations
                     TokensCostCuriosity = table.Column<int>(type: "integer", nullable: false),
                     TokensCostThinking = table.Column<int>(type: "integer", nullable: false),
                     TokensCostCreativity = table.Column<int>(type: "integer", nullable: false),
+                    TokensCostSafety = table.Column<int>(type: "integer", nullable: false),
                     UnlockedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
@@ -462,6 +487,7 @@ namespace XooCreator.BA.Migrations
                     Curiosity = table.Column<int>(type: "integer", nullable: false),
                     Thinking = table.Column<int>(type: "integer", nullable: false),
                     Creativity = table.Column<int>(type: "integer", nullable: false),
+                    Safety = table.Column<int>(type: "integer", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
@@ -617,8 +643,8 @@ namespace XooCreator.BA.Migrations
                 columns: new[] { "Id", "Auth0Sub", "CreatedAt", "DisplayName", "Email" },
                 values: new object[,]
                 {
-                    { new Guid("11111111-1111-1111-1111-111111111111"), "test-user-sub", new DateTime(2025, 9, 21, 21, 35, 57, 327, DateTimeKind.Utc).AddTicks(5066), "Test User", "test@example.com" },
-                    { new Guid("22222222-2222-2222-2222-222222222222"), "marian-test-sub", new DateTime(2025, 9, 21, 21, 35, 57, 327, DateTimeKind.Utc).AddTicks(5068), "Marian", "marian@example.com" }
+                    { new Guid("11111111-1111-1111-1111-111111111111"), "test-user-sub", new DateTime(2025, 9, 22, 19, 38, 38, 847, DateTimeKind.Utc).AddTicks(3923), "Test User", "test@example.com" },
+                    { new Guid("22222222-2222-2222-2222-222222222222"), "marian-test-sub", new DateTime(2025, 9, 22, 19, 38, 38, 847, DateTimeKind.Utc).AddTicks(3924), "Marian", "marian@example.com" }
                 });
 
             migrationBuilder.InsertData(
@@ -667,8 +693,8 @@ namespace XooCreator.BA.Migrations
                 columns: new[] { "Id", "Amount", "CreatedAt", "Reference", "Type", "UserId" },
                 values: new object[,]
                 {
-                    { new Guid("33333333-3333-3333-3333-333333333333"), 15, new DateTime(2025, 9, 20, 21, 35, 57, 327, DateTimeKind.Utc).AddTicks(5208), "test-purchase-marian", 0, new Guid("22222222-2222-2222-2222-222222222222") },
-                    { new Guid("44444444-4444-4444-4444-444444444444"), -5, new DateTime(2025, 9, 21, 19, 35, 57, 327, DateTimeKind.Utc).AddTicks(5224), "test-generation", 1, new Guid("22222222-2222-2222-2222-222222222222") }
+                    { new Guid("33333333-3333-3333-3333-333333333333"), 15, new DateTime(2025, 9, 21, 19, 38, 38, 847, DateTimeKind.Utc).AddTicks(4125), "test-purchase-marian", 0, new Guid("22222222-2222-2222-2222-222222222222") },
+                    { new Guid("44444444-4444-4444-4444-444444444444"), -5, new DateTime(2025, 9, 22, 17, 38, 38, 847, DateTimeKind.Utc).AddTicks(4132), "test-generation", 1, new Guid("22222222-2222-2222-2222-222222222222") }
                 });
 
             migrationBuilder.InsertData(
@@ -676,8 +702,8 @@ namespace XooCreator.BA.Migrations
                 columns: new[] { "UserId", "Balance", "DiscoveryBalance", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { new Guid("11111111-1111-1111-1111-111111111111"), 5, 0, new DateTime(2025, 9, 21, 21, 35, 57, 327, DateTimeKind.Utc).AddTicks(5189) },
-                    { new Guid("22222222-2222-2222-2222-222222222222"), 10, 0, new DateTime(2025, 9, 21, 21, 35, 57, 327, DateTimeKind.Utc).AddTicks(5191) }
+                    { new Guid("11111111-1111-1111-1111-111111111111"), 5, 0, new DateTime(2025, 9, 22, 19, 38, 38, 847, DateTimeKind.Utc).AddTicks(4104) },
+                    { new Guid("22222222-2222-2222-2222-222222222222"), 10, 0, new DateTime(2025, 9, 22, 19, 38, 38, 847, DateTimeKind.Utc).AddTicks(4105) }
                 });
 
             migrationBuilder.InsertData(
@@ -870,6 +896,12 @@ namespace XooCreator.BA.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_HeroDefinitions_Id",
+                table: "HeroDefinitions",
+                column: "Id",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_HeroProgress_UserId_HeroId_HeroType",
                 table: "HeroProgress",
                 columns: new[] { "UserId", "HeroId", "HeroType" },
@@ -983,6 +1015,9 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.DropTable(
                 name: "CreditWallets");
+
+            migrationBuilder.DropTable(
+                name: "HeroDefinitions");
 
             migrationBuilder.DropTable(
                 name: "HeroProgress");
