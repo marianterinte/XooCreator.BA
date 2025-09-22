@@ -1,0 +1,24 @@
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+using XooCreator.BA.Infrastructure.Endpoints;
+using XooCreator.BA.Infrastructure;
+
+namespace XooCreator.BA.Features.TreeOfHeroes.Endpoints;
+
+[Endpoint]
+public class GetHeroDefinitionsEndpoint
+{
+    private readonly ITreeOfHeroesService _service;
+
+    public GetHeroDefinitionsEndpoint(ITreeOfHeroesService service)
+    {
+        _service = service;
+    }
+
+    [Route("/api/tree-of-heroes/definitions")] // GET
+    public static async Task<Results<Ok<List<HeroDefinitionDto>>, UnauthorizedHttpResult>> HandleGet([FromServices] GetHeroDefinitionsEndpoint ep)
+    {
+        var definitions = await ep._service.GetHeroDefinitionsAsync();
+        return TypedResults.Ok(definitions);
+    }
+}

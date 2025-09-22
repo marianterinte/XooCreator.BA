@@ -8,6 +8,8 @@ public interface ITreeOfHeroesRepository
     Task<UserTokensDto> GetUserTokensAsync(Guid userId);
     Task<List<HeroDto>> GetHeroProgressAsync(Guid userId);
     Task<List<HeroTreeNodeDto>> GetHeroTreeProgressAsync(Guid userId);
+    Task<List<HeroDefinitionDto>> GetHeroDefinitionsAsync();
+    Task<HeroDefinitionDto?> GetHeroDefinitionByIdAsync(string heroId);
     Task<bool> UnlockHeroTreeNodeAsync(Guid userId, UnlockHeroTreeNodeRequest request);
     Task<bool> SpendTokensAsync(Guid userId, int courage = 0, int curiosity = 0, int thinking = 0, int creativity = 0, int safety = 0);
     Task<bool> AwardTokensAsync(Guid userId, int courage = 0, int curiosity = 0, int thinking = 0, int creativity = 0, int safety = 0);
@@ -173,5 +175,51 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
 
         await _context.SaveChangesAsync();
         return true;
+    }
+
+    public async Task<List<HeroDefinitionDto>> GetHeroDefinitionsAsync()
+    {
+        return await _context.HeroDefinitions
+            .Select(hd => new HeroDefinitionDto
+            {
+                Id = hd.Id,
+                Name = hd.Name,
+                Description = hd.Description,
+                Type = hd.Type,
+                CourageCost = hd.CourageCost,
+                CuriosityCost = hd.CuriosityCost,
+                ThinkingCost = hd.ThinkingCost,
+                CreativityCost = hd.CreativityCost,
+                SafetyCost = hd.SafetyCost,
+                PrerequisitesJson = hd.PrerequisitesJson,
+                RewardsJson = hd.RewardsJson,
+                IsUnlocked = hd.IsUnlocked
+            })
+            .ToListAsync();
+    }
+
+    public async Task<HeroDefinitionDto?> GetHeroDefinitionByIdAsync(string heroId)
+    {
+        var heroDefinition = await _context.HeroDefinitions
+            .FirstOrDefaultAsync(hd => hd.Id == heroId);
+
+        if (heroDefinition == null)
+            return null;
+
+        return new HeroDefinitionDto
+        {
+            Id = heroDefinition.Id,
+            Name = heroDefinition.Name,
+            Description = heroDefinition.Description,
+            Type = heroDefinition.Type,
+            CourageCost = heroDefinition.CourageCost,
+            CuriosityCost = heroDefinition.CuriosityCost,
+            ThinkingCost = heroDefinition.ThinkingCost,
+            CreativityCost = heroDefinition.CreativityCost,
+            SafetyCost = heroDefinition.SafetyCost,
+            PrerequisitesJson = heroDefinition.PrerequisitesJson,
+            RewardsJson = heroDefinition.RewardsJson,
+            IsUnlocked = heroDefinition.IsUnlocked
+        };
     }
 }

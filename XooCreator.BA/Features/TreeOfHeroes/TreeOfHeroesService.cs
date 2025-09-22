@@ -5,6 +5,8 @@ public interface ITreeOfHeroesService
     Task<UserTokensDto> GetUserTokensAsync(Guid userId);
     Task<List<HeroDto>> GetHeroProgressAsync(Guid userId);
     Task<List<HeroTreeNodeDto>> GetHeroTreeProgressAsync(Guid userId);
+    Task<List<HeroDefinitionDto>> GetHeroDefinitionsAsync();
+    Task<HeroDefinitionDto?> GetHeroDefinitionByIdAsync(string heroId);
     Task<UnlockHeroTreeNodeResponse> UnlockHeroTreeNodeAsync(Guid userId, UnlockHeroTreeNodeRequest request);
     Task<TransformToHeroResponse> TransformToHeroAsync(Guid userId, TransformToHeroRequest request);
 }
@@ -31,6 +33,16 @@ public class TreeOfHeroesService : ITreeOfHeroesService
     public Task<List<HeroTreeNodeDto>> GetHeroTreeProgressAsync(Guid userId)
     {
         return _repository.GetHeroTreeProgressAsync(userId);
+    }
+
+    public Task<List<HeroDefinitionDto>> GetHeroDefinitionsAsync()
+    {
+        return _repository.GetHeroDefinitionsAsync();
+    }
+
+    public Task<HeroDefinitionDto?> GetHeroDefinitionByIdAsync(string heroId)
+    {
+        return _repository.GetHeroDefinitionByIdAsync(heroId);
     }
 
     public async Task<UnlockHeroTreeNodeResponse> UnlockHeroTreeNodeAsync(Guid userId, UnlockHeroTreeNodeRequest request)

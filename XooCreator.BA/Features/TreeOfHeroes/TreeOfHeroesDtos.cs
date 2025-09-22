@@ -1,5 +1,21 @@
 namespace XooCreator.BA.Features.TreeOfHeroes;
 
+public record HeroDefinitionDto
+{
+    public required string Id { get; init; }
+    public required string Name { get; init; }
+    public string Description { get; init; } = string.Empty;
+    public required string Type { get; init; }
+    public int CourageCost { get; init; }
+    public int CuriosityCost { get; init; }
+    public int ThinkingCost { get; init; }
+    public int CreativityCost { get; init; }
+    public int SafetyCost { get; init; }
+    public string PrerequisitesJson { get; init; } = string.Empty;
+    public string RewardsJson { get; init; } = string.Empty;
+    public bool IsUnlocked { get; init; }
+}
+
 public record UserTokensDto
 {
     public int Courage { get; init; }

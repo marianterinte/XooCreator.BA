@@ -22,6 +22,7 @@ public class XooDbContext : DbContext
     public DbSet<UserTokens> UserTokens => Set<UserTokens>();
     public DbSet<HeroProgress> HeroProgress => Set<HeroProgress>();
     public DbSet<HeroTreeProgress> HeroTreeProgress => Set<HeroTreeProgress>();
+    public DbSet<HeroDefinition> HeroDefinitions => Set<HeroDefinition>();
     
     // Tree of Light Model data
     public DbSet<TreeRegion> TreeRegions => Set<TreeRegion>();
@@ -194,6 +195,18 @@ public class XooDbContext : DbContext
             e.Property(x => x.Id).ValueGeneratedOnAdd();
             e.HasIndex(x => new { x.UserId, x.NodeId }).IsUnique();
             e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
+        });
+
+        modelBuilder.Entity<HeroDefinition>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasMaxLength(100);
+            e.Property(x => x.Name).HasMaxLength(200).IsRequired();
+            e.Property(x => x.Description).HasMaxLength(1000);
+            e.Property(x => x.Type).HasMaxLength(50).IsRequired();
+            e.Property(x => x.PrerequisitesJson).HasMaxLength(2000);
+            e.Property(x => x.RewardsJson).HasMaxLength(2000);
+            e.HasIndex(x => x.Id).IsUnique();
         });
 
         // Tree of Light Model configurations
