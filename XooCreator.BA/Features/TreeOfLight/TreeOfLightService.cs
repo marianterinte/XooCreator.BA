@@ -56,7 +56,9 @@ public class TreeOfLightService : ITreeOfLightService
         try
         {
             // Complete the story
-            var storyCompleted = await _repository.CompleteStoryAsync(userId, request);
+            var story = await _storiesRepository.GetStoryByIdAsync(request.StoryId);
+
+            var storyCompleted = await _repository.CompleteStoryAsync(userId, request, story);
             if (!storyCompleted)
             {
                 return new CompleteStoryResponse
@@ -69,7 +71,6 @@ public class TreeOfLightService : ITreeOfLightService
             var newlyUnlockedRegions = new List<string>();
 
             // Load story from database to get the correct tokens
-            var story = await _storiesRepository.GetStoryByIdAsync(request.StoryId);
             if (story != null && !string.IsNullOrEmpty(request.SelectedAnswer))
             {
                 // Find the quiz tile and selected answer

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using XooCreator.BA.Data;
+using XooCreator.BA.Features.Stories;
 
 namespace XooCreator.BA.Features.TreeOfLight;
 
@@ -11,10 +12,10 @@ public interface ITreeOfLightRepository
     Task<UserTokensDto> GetUserTokensAsync(Guid userId);
     Task<List<HeroDto>> GetHeroProgressAsync(Guid userId);
     Task<List<HeroTreeNodeDto>> GetHeroTreeProgressAsync(Guid userId);
-    
-    Task<bool> CompleteStoryAsync(Guid userId, CompleteStoryRequest request);
+
+    Task<bool> CompleteStoryAsync(Guid userId, CompleteStoryRequest request, Stories.StoryContentDto? story);
     Task<bool> UnlockRegionAsync(Guid userId, string regionId);
-    Task<bool> AwardTokensAsync(Guid userId, int courage = 0, int curiosity = 0, int thinking = 0, int creativity = 0, int safety=0);
+    Task<bool> AwardTokensAsync(Guid userId, int courage = 0, int curiosity = 0, int thinking = 0, int creativity = 0, int safety = 0);
     Task<bool> UnlockHeroTreeNodeAsync(Guid userId, UnlockHeroTreeNodeRequest request);
     Task<bool> SpendTokensAsync(Guid userId, int courage = 0, int curiosity = 0, int thinking = 0, int creativity = 0);
     Task ResetUserProgressAsync(Guid userId);
@@ -52,7 +53,7 @@ public class TreeOfLightRepository : ITreeOfLightRepository
         {
             StoryId = sp.StoryId,
             SelectedAnswer = sp.SelectedAnswer,
-            Tokens = !string.IsNullOrEmpty(sp.TokensJson) 
+            Tokens = !string.IsNullOrEmpty(sp.TokensJson)
                 ? JsonSerializer.Deserialize<List<TokenReward>>(sp.TokensJson) ?? new List<TokenReward>()
                 : new List<TokenReward>(),
             CompletedAt = sp.CompletedAt
@@ -118,7 +119,7 @@ public class TreeOfLightRepository : ITreeOfLightRepository
             .ToListAsync();
     }
 
-    public async Task<bool> CompleteStoryAsync(Guid userId, CompleteStoryRequest request)
+    public async Task<bool> CompleteStoryAsync(Guid userId, CompleteStoryRequest request, Stories.StoryContentDto? story)
     {
         try
         {
@@ -136,7 +137,7 @@ public class TreeOfLightRepository : ITreeOfLightRepository
                 UserId = userId,
                 StoryId = request.StoryId,
                 SelectedAnswer = request.SelectedAnswer,
-                TokensJson = request.Tokens.Count > 0 ? JsonSerializer.Serialize(request.Tokens) : null
+                TokensJson = GetTokens(story, request.SelectedAnswer)
             };
 
             _context.StoryProgress.Add(storyProgress);
@@ -147,6 +148,28 @@ public class TreeOfLightRepository : ITreeOfLightRepository
         {
             return false;
         }
+    }
+
+    private string GetTokens(StoryContentDto? story, string? selectedAnswer)
+    {
+
+        if (story == null || string.IsNullOrEmpty(selectedAnswer))
+            return null;
+
+        if (story.Tiles.Where(t => t.Type == "quiz")
+                    .SelectMany(t => t.Answers)
+                    .Where(a => a.Id == selectedAnswer)
+                    .SelectMany(a => a.Tokens)
+                    .Any())
+        {
+            return JsonSerializer.Serialize(
+                            story.Tiles
+                                .Where(t => t.Type == "quiz")
+                                .SelectMany(t => t.Answers)
+                                .Where(a => a.Id == selectedAnswer)
+                                .SelectMany(a => a.Tokens));
+        }
+        return null;
     }
 
     public async Task<bool> UnlockRegionAsync(Guid userId, string regionId)
@@ -292,7 +315,7 @@ public class TreeOfLightRepository : ITreeOfLightRepository
     public async Task ResetUserProgressAsync(Guid userId)
     {
         using var transaction = await _context.Database.BeginTransactionAsync();
-        
+
         try
         {
             // Delete all user progress records
@@ -300,7 +323,7 @@ public class TreeOfLightRepository : ITreeOfLightRepository
             await _context.StoryProgress.Where(sp => sp.UserId == userId).ExecuteDeleteAsync();
             await _context.HeroProgress.Where(hp => hp.UserId == userId).ExecuteDeleteAsync();
             await _context.HeroTreeProgress.Where(htp => htp.UserId == userId).ExecuteDeleteAsync();
-            
+
             // Reset user tokens to default values
             var userTokens = await _context.UserTokens.FirstOrDefaultAsync(ut => ut.UserId == userId);
             if (userTokens != null)
