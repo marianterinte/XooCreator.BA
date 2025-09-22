@@ -30,6 +30,10 @@ public class HeroDefinition
     public string PrerequisitesJson { get; set; } = string.Empty; // JSON array of prerequisite IDs
     public string RewardsJson { get; set; } = string.Empty; // JSON array of reward strings
     
+    // Position data for rendering (prevents overlaps)
+    public double PositionX { get; set; } = 0.0;
+    public double PositionY { get; set; } = 0.0;
+    
     // Metadata
     public bool IsUnlocked { get; set; } = false; // Default state
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

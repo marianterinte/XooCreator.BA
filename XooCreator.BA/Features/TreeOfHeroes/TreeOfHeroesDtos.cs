@@ -14,6 +14,8 @@ public record HeroDefinitionDto
     public string PrerequisitesJson { get; init; } = string.Empty;
     public string RewardsJson { get; init; } = string.Empty;
     public bool IsUnlocked { get; init; }
+    public double PositionX { get; init; }
+    public double PositionY { get; init; }
 }
 
 public record UserTokensDto
@@ -71,4 +73,29 @@ public record TransformToHeroResponse
     public bool Success { get; init; }
     public string? ErrorMessage { get; init; }
     public HeroDto? UnlockedHero { get; init; }
+}
+
+// New DTOs for UI configuration
+public record TokenConfigDto
+{
+    public required string Id { get; init; }
+    public required string Label { get; init; }
+    public required string Trait { get; init; }
+    public required string Icon { get; init; }
+    public double Angle { get; init; }
+}
+
+public record HeroImageDto
+{
+    public required string Id { get; init; }
+    public required string Name { get; init; }
+    public required string Image { get; init; }
+}
+
+public record TreeOfHeroesConfigDto
+{
+    public required List<TokenConfigDto> Tokens { get; init; }
+    public required List<HeroImageDto> HeroImages { get; init; }
+    public required List<string> BaseHeroIds { get; init; }
+    public required Dictionary<string, string> CanonicalHybridByPair { get; init; }
 }

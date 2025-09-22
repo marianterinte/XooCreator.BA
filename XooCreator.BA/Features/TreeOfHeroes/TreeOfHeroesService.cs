@@ -7,6 +7,7 @@ public interface ITreeOfHeroesService
     Task<List<HeroTreeNodeDto>> GetHeroTreeProgressAsync(Guid userId);
     Task<List<HeroDefinitionDto>> GetHeroDefinitionsAsync();
     Task<HeroDefinitionDto?> GetHeroDefinitionByIdAsync(string heroId);
+    Task<TreeOfHeroesConfigDto> GetTreeOfHeroesConfigAsync();
     Task<UnlockHeroTreeNodeResponse> UnlockHeroTreeNodeAsync(Guid userId, UnlockHeroTreeNodeRequest request);
     Task<TransformToHeroResponse> TransformToHeroAsync(Guid userId, TransformToHeroRequest request);
 }
@@ -43,6 +44,11 @@ public class TreeOfHeroesService : ITreeOfHeroesService
     public Task<HeroDefinitionDto?> GetHeroDefinitionByIdAsync(string heroId)
     {
         return _repository.GetHeroDefinitionByIdAsync(heroId);
+    }
+
+    public Task<TreeOfHeroesConfigDto> GetTreeOfHeroesConfigAsync()
+    {
+        return _repository.GetTreeOfHeroesConfigAsync();
     }
 
     public async Task<UnlockHeroTreeNodeResponse> UnlockHeroTreeNodeAsync(Guid userId, UnlockHeroTreeNodeRequest request)
@@ -115,26 +121,55 @@ public class TreeOfHeroesService : ITreeOfHeroesService
     {
         try
         {
-            // Check hero transformation requirements based on heroId
-            var tokens = await _repository.GetUserTokensAsync(userId);
-            var canTransform = CanTransformToHero(request.HeroId, tokens);
-
-            if (!canTransform)
+            // Get hero definition to check costs
+            var heroDefinition = await _repository.GetHeroDefinitionByIdAsync(request.HeroId);
+            if (heroDefinition == null)
             {
                 return new TransformToHeroResponse
                 {
                     Success = false,
-                    ErrorMessage = "Requirements not met for this hero transformation"
+                    ErrorMessage = "Hero not found"
                 };
             }
 
-            // Hero unlocking is now handled by frontend localStorage
-            // No need to unlock in backend
+            // Check if user has enough tokens
+            var tokens = await _repository.GetUserTokensAsync(userId);
+            
+            if (tokens.Courage < heroDefinition.CourageCost ||
+                tokens.Curiosity < heroDefinition.CuriosityCost ||
+                tokens.Thinking < heroDefinition.ThinkingCost ||
+                tokens.Creativity < heroDefinition.CreativityCost ||
+                tokens.Safety < heroDefinition.SafetyCost)
+            {
+                return new TransformToHeroResponse
+                {
+                    Success = false,
+                    ErrorMessage = "Insufficient tokens for this transformation"
+                };
+            }
 
+            // Spend tokens for transformation
+            var tokensSpent = await _repository.SpendTokensAsync(userId, 
+                heroDefinition.CourageCost,
+                heroDefinition.CuriosityCost,
+                heroDefinition.ThinkingCost,
+                heroDefinition.CreativityCost,
+                heroDefinition.SafetyCost);
+
+            if (!tokensSpent)
+            {
+                return new TransformToHeroResponse
+                {
+                    Success = false,
+                    ErrorMessage = "Failed to spend tokens"
+                };
+            }
+
+            // Create hero progress record
             var unlockedHero = new HeroDto
             {
                 HeroId = request.HeroId,
-                HeroType = "HERO_TREE_UNLOCK",
+                HeroType = "HERO_TREE_TRANSFORMATION",
                 UnlockedAt = DateTime.UtcNow
             };
 

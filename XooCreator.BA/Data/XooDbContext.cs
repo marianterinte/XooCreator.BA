@@ -206,6 +206,8 @@ public class XooDbContext : DbContext
             e.Property(x => x.Type).HasMaxLength(50).IsRequired();
             e.Property(x => x.PrerequisitesJson).HasMaxLength(2000);
             e.Property(x => x.RewardsJson).HasMaxLength(2000);
+            e.Property(x => x.PositionX).HasColumnType("decimal(10,6)");
+            e.Property(x => x.PositionY).HasColumnType("decimal(10,6)");
             e.HasIndex(x => x.Id).IsUnique();
         });
 

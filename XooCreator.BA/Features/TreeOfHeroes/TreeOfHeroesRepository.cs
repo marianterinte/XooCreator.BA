@@ -10,6 +10,7 @@ public interface ITreeOfHeroesRepository
     Task<List<HeroTreeNodeDto>> GetHeroTreeProgressAsync(Guid userId);
     Task<List<HeroDefinitionDto>> GetHeroDefinitionsAsync();
     Task<HeroDefinitionDto?> GetHeroDefinitionByIdAsync(string heroId);
+    Task<TreeOfHeroesConfigDto> GetTreeOfHeroesConfigAsync();
     Task<bool> UnlockHeroTreeNodeAsync(Guid userId, UnlockHeroTreeNodeRequest request);
     Task<bool> SpendTokensAsync(Guid userId, int courage = 0, int curiosity = 0, int thinking = 0, int creativity = 0, int safety = 0);
     Task<bool> AwardTokensAsync(Guid userId, int courage = 0, int curiosity = 0, int thinking = 0, int creativity = 0, int safety = 0);
@@ -193,7 +194,9 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
                 SafetyCost = hd.SafetyCost,
                 PrerequisitesJson = hd.PrerequisitesJson,
                 RewardsJson = hd.RewardsJson,
-                IsUnlocked = hd.IsUnlocked
+                IsUnlocked = hd.IsUnlocked,
+                PositionX = hd.PositionX,
+                PositionY = hd.PositionY
             })
             .ToListAsync();
     }
@@ -219,7 +222,49 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
             SafetyCost = heroDefinition.SafetyCost,
             PrerequisitesJson = heroDefinition.PrerequisitesJson,
             RewardsJson = heroDefinition.RewardsJson,
-            IsUnlocked = heroDefinition.IsUnlocked
+            IsUnlocked = heroDefinition.IsUnlocked,
+            PositionX = heroDefinition.PositionX,
+            PositionY = heroDefinition.PositionY
         };
+    }
+
+    public Task<TreeOfHeroesConfigDto> GetTreeOfHeroesConfigAsync()
+    {
+        // Static configuration - can be moved to database later
+        var config = new TreeOfHeroesConfigDto
+        {
+            Tokens = new List<TokenConfigDto>
+            {
+                new() { Id = "token_courage", Label = "Curaj", Trait = "courage", Icon = "🦁", Angle = -Math.PI * 0.15 },
+                new() { Id = "token_curiosity", Label = "Curiozitate", Trait = "curiosity", Icon = "🔍", Angle = -Math.PI * 0.35 },
+                new() { Id = "token_thinking", Label = "Gândire", Trait = "thinking", Icon = "🧠", Angle = -Math.PI * 0.55 },
+                new() { Id = "token_creativity", Label = "Creativitate", Trait = "creativity", Icon = "🎨", Angle = -Math.PI * 0.75 },
+                new() { Id = "token_safety", Label = "Siguranță", Trait = "safety", Icon = "🛡️", Angle = -Math.PI * 0.95 }
+            },
+            HeroImages = new List<HeroImageDto>
+            {
+                new() { Id = "hero_brave_puppy", Name = "Cățelul Curajos", Image = "images/heroes/hero0.jpg" },
+                new() { Id = "hero_curious_cat", Name = "Pisica Curioasă", Image = "images/heroes/hero1.jpg" },
+                new() { Id = "hero_wise_owl", Name = "Bufnița Înțeleaptă", Image = "images/heroes/hero2.jpg" },
+                new() { Id = "hero_playful_horse", Name = "Căluțul Jucăuș", Image = "images/hero-tree/herotree1.jpg" },
+                new() { Id = "hero_cautious_hedgehog", Name = "Ariciul Precaut", Image = "images/hero-tree/herotree2.jpg" },
+                new() { Id = "hero_creative_guardian", Name = "Gardianul Creativ", Image = "images/heroes/hybrid_giraffe-cat.jpg" },
+                new() { Id = "hero_alchimalian_dragon", Name = "Dragonul Alchimalian", Image = "images/hero-tree/herotree3.jpg" }
+            },
+            BaseHeroIds = new List<string>
+            {
+                "hero_brave_puppy",
+                "hero_curious_cat", 
+                "hero_wise_owl",
+                "hero_playful_horse",
+                "hero_cautious_hedgehog"
+            },
+            CanonicalHybridByPair = new Dictionary<string, string>
+            {
+                { "hero_cautious_hedgehog|hero_playful_horse", "hero_creative_guardian" }
+            }
+        };
+
+        return Task.FromResult(config);
     }
 }
