@@ -3,20 +3,20 @@ using Microsoft.AspNetCore.Mvc;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure;
 
-namespace XooCreator.BA.Features.TreeOfLight.Endpoints;
+namespace XooCreator.BA.Features.TreeOfHeroes.Endpoints;
 
 [Endpoint]
 public class GetUserTokensEndpoint
 {
-    private readonly ITreeOfLightService _service;
+    private readonly ITreeOfHeroesService _service;
     private readonly IUserContextService _userContext;
-    public GetUserTokensEndpoint(ITreeOfLightService service, IUserContextService userContext)
+    public GetUserTokensEndpoint(ITreeOfHeroesService service, IUserContextService userContext)
     {
         _service = service;
         _userContext = userContext;
     }
 
-    [Route("/api/tree-of-light/tokens")] // GET
+    [Route("/api/tree-of-heroes/tokens")] // GET
     public static async Task<Results<Ok<UserTokensDto>, UnauthorizedHttpResult>> HandleGet([FromServices] GetUserTokensEndpoint ep)
     {
         var userId = await ep._userContext.GetUserIdAsync();

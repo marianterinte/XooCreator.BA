@@ -3,20 +3,20 @@ using Microsoft.AspNetCore.Mvc;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure;
 
-namespace XooCreator.BA.Features.TreeOfLight.Endpoints;
+namespace XooCreator.BA.Features.TreeOfHeroes.Endpoints;
 
 [Endpoint]
 public class TransformToHeroEndpoint
 {
-    private readonly ITreeOfLightService _service;
+    private readonly ITreeOfHeroesService _service;
     private readonly IUserContextService _userContext;
-    public TransformToHeroEndpoint(ITreeOfLightService service, IUserContextService userContext)
+    public TransformToHeroEndpoint(ITreeOfHeroesService service, IUserContextService userContext)
     {
         _service = service;
         _userContext = userContext;
     }
 
-    [Route("/api/tree-of-light/transform-hero")] // POST
+    [Route("/api/tree-of-heroes/transform-hero")] // POST
     public static async Task<Results<Ok<TransformToHeroResponse>, BadRequest<TransformToHeroResponse>, UnauthorizedHttpResult>> HandlePost(
         [FromServices] TransformToHeroEndpoint ep,
         [FromBody] TransformToHeroRequest request)

@@ -9,15 +9,10 @@ public interface ITreeOfLightRepository
 {
     Task<List<TreeProgressDto>> GetTreeProgressAsync(Guid userId);
     Task<List<StoryProgressDto>> GetStoryProgressAsync(Guid userId);
-    Task<UserTokensDto> GetUserTokensAsync(Guid userId);
-    Task<List<HeroDto>> GetHeroProgressAsync(Guid userId);
-    Task<List<HeroTreeNodeDto>> GetHeroTreeProgressAsync(Guid userId);
 
     Task<bool> CompleteStoryAsync(Guid userId, CompleteStoryRequest request, Stories.StoryContentDto? story);
     Task<bool> UnlockRegionAsync(Guid userId, string regionId);
     Task<bool> AwardTokensAsync(Guid userId, int courage = 0, int curiosity = 0, int thinking = 0, int creativity = 0, int safety = 0);
-    Task<bool> UnlockHeroTreeNodeAsync(Guid userId, UnlockHeroTreeNodeRequest request);
-    Task<bool> SpendTokensAsync(Guid userId, int courage = 0, int curiosity = 0, int thinking = 0, int creativity = 0);
     Task ResetUserProgressAsync(Guid userId);
 }
 
@@ -60,64 +55,8 @@ public class TreeOfLightRepository : ITreeOfLightRepository
         }).ToList();
     }
 
-    public async Task<UserTokensDto> GetUserTokensAsync(Guid userId)
-    {
-        var tokens = await _context.UserTokens
-            .FirstOrDefaultAsync(ut => ut.UserId == userId);
 
-        if (tokens == null)
-        {
-            // Create default tokens entry
-            tokens = new UserTokens
-            {
-                UserId = userId,
-                Courage = 0,
-                Curiosity = 0,
-                Thinking = 0,
-                Creativity = 0
-            };
-            _context.UserTokens.Add(tokens);
-            await _context.SaveChangesAsync();
-        }
 
-        return new UserTokensDto
-        {
-            Courage = tokens.Courage,
-            Curiosity = tokens.Curiosity,
-            Thinking = tokens.Thinking,
-            Creativity = tokens.Creativity
-        };
-    }
-
-    public async Task<List<HeroDto>> GetHeroProgressAsync(Guid userId)
-    {
-        return await _context.HeroProgress
-            .Where(hp => hp.UserId == userId)
-            .Select(hp => new HeroDto
-            {
-                HeroId = hp.HeroId,
-                HeroType = hp.HeroType,
-                SourceStoryId = hp.SourceStoryId,
-                UnlockedAt = hp.UnlockedAt
-            })
-            .ToListAsync();
-    }
-
-    public async Task<List<HeroTreeNodeDto>> GetHeroTreeProgressAsync(Guid userId)
-    {
-        return await _context.HeroTreeProgress
-            .Where(htp => htp.UserId == userId)
-            .Select(htp => new HeroTreeNodeDto
-            {
-                NodeId = htp.NodeId,
-                TokensCostCourage = htp.TokensCostCourage,
-                TokensCostCuriosity = htp.TokensCostCuriosity,
-                TokensCostThinking = htp.TokensCostThinking,
-                TokensCostCreativity = htp.TokensCostCreativity,
-                UnlockedAt = htp.UnlockedAt
-            })
-            .ToListAsync();
-    }
 
     public async Task<bool> CompleteStoryAsync(Guid userId, CompleteStoryRequest request, Stories.StoryContentDto? story)
     {
@@ -249,68 +188,7 @@ public class TreeOfLightRepository : ITreeOfLightRepository
     }
 
 
-    public async Task<bool> UnlockHeroTreeNodeAsync(Guid userId, UnlockHeroTreeNodeRequest request)
-    {
-        try
-        {
-            var existingNode = await _context.HeroTreeProgress
-                .FirstOrDefaultAsync(htp => htp.UserId == userId && htp.NodeId == request.NodeId);
 
-            if (existingNode != null)
-            {
-                return false; // Already unlocked
-            }
-
-            var heroTreeProgress = new HeroTreeProgress
-            {
-                UserId = userId,
-                NodeId = request.NodeId,
-                TokensCostCourage = request.TokensCostCourage,
-                TokensCostCuriosity = request.TokensCostCuriosity,
-                TokensCostThinking = request.TokensCostThinking,
-                TokensCostCreativity = request.TokensCostCreativity
-            };
-
-            _context.HeroTreeProgress.Add(heroTreeProgress);
-            await _context.SaveChangesAsync();
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
-    public async Task<bool> SpendTokensAsync(Guid userId, int courage = 0, int curiosity = 0, int thinking = 0, int creativity = 0)
-    {
-        try
-        {
-            var userTokens = await _context.UserTokens
-                .FirstOrDefaultAsync(ut => ut.UserId == userId);
-
-            if (userTokens == null ||
-                userTokens.Courage < courage ||
-                userTokens.Curiosity < curiosity ||
-                userTokens.Thinking < thinking ||
-                userTokens.Creativity < creativity)
-            {
-                return false; // Insufficient tokens
-            }
-
-            userTokens.Courage -= courage;
-            userTokens.Curiosity -= curiosity;
-            userTokens.Thinking -= thinking;
-            userTokens.Creativity -= creativity;
-            userTokens.UpdatedAt = DateTime.UtcNow;
-
-            await _context.SaveChangesAsync();
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
-    }
 
     public async Task ResetUserProgressAsync(Guid userId)
     {

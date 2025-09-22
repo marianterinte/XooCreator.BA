@@ -3,22 +3,22 @@ using Microsoft.AspNetCore.Mvc;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure;
 
-namespace XooCreator.BA.Features.TreeOfLight.Endpoints;
+namespace XooCreator.BA.Features.TreeOfHeroes.Endpoints;
 
 [Endpoint]
-public class UnlockHeroTreeNodeEndpoint
+public class UnlockTreeOfHeroesNodeEndpoint
 {
-    private readonly ITreeOfLightService _service;
+    private readonly ITreeOfHeroesService _service;
     private readonly IUserContextService _userContext;
-    public UnlockHeroTreeNodeEndpoint(ITreeOfLightService service, IUserContextService userContext)
+    public UnlockTreeOfHeroesNodeEndpoint(ITreeOfHeroesService service, IUserContextService userContext)
     {
         _service = service;
         _userContext = userContext;
     }
 
-    [Route("/api/tree-of-light/unlock-hero-tree-node")] // POST
+    [Route("/api/tree-of-heroes/unlock-node")] // POST
     public static async Task<Results<Ok<UnlockHeroTreeNodeResponse>, BadRequest<UnlockHeroTreeNodeResponse>, UnauthorizedHttpResult>> HandlePost(
-        [FromServices] UnlockHeroTreeNodeEndpoint ep,
+        [FromServices] UnlockTreeOfHeroesNodeEndpoint ep,
         [FromBody] UnlockHeroTreeNodeRequest request)
     {
         var userId = await ep._userContext.GetUserIdAsync();

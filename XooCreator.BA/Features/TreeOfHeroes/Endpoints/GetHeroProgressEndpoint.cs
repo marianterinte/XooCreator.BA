@@ -3,20 +3,20 @@ using Microsoft.AspNetCore.Mvc;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure;
 
-namespace XooCreator.BA.Features.TreeOfLight.Endpoints;
+namespace XooCreator.BA.Features.TreeOfHeroes.Endpoints;
 
 [Endpoint]
 public class GetHeroProgressEndpoint
 {
-    private readonly ITreeOfLightService _service;
+    private readonly ITreeOfHeroesService _service;
     private readonly IUserContextService _userContext;
-    public GetHeroProgressEndpoint(ITreeOfLightService service, IUserContextService userContext)
+    public GetHeroProgressEndpoint(ITreeOfHeroesService service, IUserContextService userContext)
     {
         _service = service;
         _userContext = userContext;
     }
 
-    [Route("/api/tree-of-light/heroes")] // GET
+    [Route("/api/tree-of-heroes/heroes")] // GET
     public static async Task<Results<Ok<List<HeroDto>>, UnauthorizedHttpResult>> HandleGet([FromServices] GetHeroProgressEndpoint ep)
     {
         var userId = await ep._userContext.GetUserIdAsync();
