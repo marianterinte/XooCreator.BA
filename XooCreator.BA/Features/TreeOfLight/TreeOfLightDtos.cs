@@ -1,3 +1,5 @@
+using XooCreator.BA.Features.TreeOfHeroes;
+
 namespace XooCreator.BA.Features.TreeOfLight;
 
 public record TreeProgressDto
@@ -95,7 +97,7 @@ public record TreeProgressStateDto
 {
     public List<CompletedStoryDto> CompletedStories { get; init; } = new();
     public List<string> UnlockedRegions { get; init; } = new();
-    public UserTokensDto UserTokens { get; init; } = new() { Courage = 0, Curiosity = 0, Thinking = 0, Creativity = 0 };
+    public UserTokensDto UserTokens { get; init; } = new() { Courage = 0, Curiosity = 0, Thinking = 0, Creativity = 0, Safety = 0 };
 }
 
 public record CompletedStoryDto

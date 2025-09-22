@@ -1,4 +1,5 @@
 using XooCreator.BA.Data;
+using XooCreator.BA.Features.TreeOfHeroes;
 
 namespace XooCreator.BA.Features.TreeOfLight;
 
@@ -28,7 +29,8 @@ public class TreeModelService : ITreeModelService
 
         // Get user progress data
         var completedStories = await _tolRepository.GetStoryProgressAsync(userId);
-        var userTokens = await _tolRepository.GetUserTokensAsync(userId);
+        // User tokens are now handled by TreeOfHeroesService
+        var userTokens = new UserTokensDto { Courage = 0, Curiosity = 0, Thinking = 0, Creativity = 0, Safety = 0 };
         
         // Calculate unlocked regions using rule evaluator
         var unlockedRegions = EvaluateUnlockedRegions(completedStories, unlockRules);

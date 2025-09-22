@@ -12,6 +12,7 @@ public class HeroTreeProgress
     public int TokensCostCuriosity { get; set; }
     public int TokensCostThinking { get; set; }
     public int TokensCostCreativity { get; set; }
+    public int TokensCostSafety { get; set; }
     public DateTime UnlockedAt { get; set; } = DateTime.UtcNow;
     
     // Navigation

@@ -5,6 +5,7 @@ using XooCreator.BA.Data;
 using XooCreator.BA.Data.Repositories;
 using XooCreator.BA.Services;
 using XooCreator.BA.Features.TreeOfLight;
+using XooCreator.BA.Features.TreeOfHeroes;
 using XooCreator.BA.Features.Stories;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Endpoints;
@@ -105,6 +106,10 @@ builder.Services.AddScoped<ITreeOfLightRepository, TreeOfLightRepository>();
 builder.Services.AddScoped<ITreeOfLightService, TreeOfLightService>();
 builder.Services.AddScoped<ITreeModelRepository, TreeModelRepository>();
 builder.Services.AddScoped<ITreeModelService, TreeModelService>();
+
+// Tree of Heroes Services
+builder.Services.AddScoped<ITreeOfHeroesRepository, TreeOfHeroesRepository>();
+builder.Services.AddScoped<ITreeOfHeroesService, TreeOfHeroesService>();
 
 // Stories Services
 builder.Services.AddScoped<IStoriesRepository, StoriesRepository>();

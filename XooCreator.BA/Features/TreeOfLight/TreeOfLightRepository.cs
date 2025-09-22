@@ -12,7 +12,6 @@ public interface ITreeOfLightRepository
 
     Task<bool> CompleteStoryAsync(Guid userId, CompleteStoryRequest request, Stories.StoryContentDto? story);
     Task<bool> UnlockRegionAsync(Guid userId, string regionId);
-    Task<bool> AwardTokensAsync(Guid userId, int courage = 0, int curiosity = 0, int thinking = 0, int creativity = 0, int safety = 0);
     Task ResetUserProgressAsync(Guid userId);
 }
 
@@ -150,42 +149,6 @@ public class TreeOfLightRepository : ITreeOfLightRepository
         }
     }
 
-    public async Task<bool> AwardTokensAsync(Guid userId, int courage = 0, int curiosity = 0, int thinking = 0, int creativity = 0, int safety = 0)
-    {
-        try
-        {
-            var userTokens = await _context.UserTokens
-                .FirstOrDefaultAsync(ut => ut.UserId == userId);
-
-            if (userTokens == null)
-            {
-                userTokens = new UserTokens
-                {
-                    UserId = userId,
-                    Courage = courage,
-                    Curiosity = curiosity,
-                    Thinking = thinking,
-                    Creativity = creativity
-                };
-                _context.UserTokens.Add(userTokens);
-            }
-            else
-            {
-                userTokens.Courage += courage;
-                userTokens.Curiosity += curiosity;
-                userTokens.Thinking += thinking;
-                userTokens.Creativity += creativity;
-                userTokens.UpdatedAt = DateTime.UtcNow;
-            }
-
-            await _context.SaveChangesAsync();
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
-    }
 
 
 
@@ -210,6 +173,7 @@ public class TreeOfLightRepository : ITreeOfLightRepository
                 userTokens.Curiosity = 0;
                 userTokens.Thinking = 0;
                 userTokens.Creativity = 0;
+                userTokens.Safety = 0;
                 userTokens.UpdatedAt = DateTime.UtcNow;
             }
             else
@@ -222,6 +186,7 @@ public class TreeOfLightRepository : ITreeOfLightRepository
                     Curiosity = 0,
                     Thinking = 0,
                     Creativity = 0,
+                    Safety = 0,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 });

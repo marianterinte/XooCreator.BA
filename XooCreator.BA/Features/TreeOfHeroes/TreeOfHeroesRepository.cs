@@ -30,7 +30,7 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
         if (userTokens == null)
         {
             // Create default tokens if user doesn't have any
-            userTokens = new Data.Entities.UserTokens
+            userTokens = new Data.UserTokens
             {
                 UserId = userId,
                 Courage = 0,
@@ -94,7 +94,7 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
             return false; // Already unlocked
         }
 
-        var heroTreeNode = new Data.Entities.HeroTreeProgress
+        var heroTreeNode = new Data.HeroTreeProgress
         {
             UserId = userId,
             NodeId = request.NodeId,
@@ -150,7 +150,7 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
         if (userTokens == null)
         {
             // Create new user tokens if they don't exist
-            userTokens = new Data.Entities.UserTokens
+            userTokens = new Data.UserTokens
             {
                 UserId = userId,
                 Courage = courage,

@@ -1,4 +1,5 @@
 using XooCreator.BA.Features.Stories;
+using XooCreator.BA.Features.TreeOfHeroes;
 
 namespace XooCreator.BA.Features.TreeOfLight;
 
@@ -14,11 +15,13 @@ public class TreeOfLightService : ITreeOfLightService
 {
     private readonly ITreeOfLightRepository _repository;
     private readonly IStoriesRepository _storiesRepository;
+    private readonly ITreeOfHeroesRepository _treeOfHeroesRepository;
 
-    public TreeOfLightService(ITreeOfLightRepository repository, IStoriesRepository storiesRepository)
+    public TreeOfLightService(ITreeOfLightRepository repository, IStoriesRepository storiesRepository, ITreeOfHeroesRepository treeOfHeroesRepository)
     {
         _repository = repository;
         _storiesRepository = storiesRepository;
+        _treeOfHeroesRepository = treeOfHeroesRepository;
     }
 
     public Task<List<TreeProgressDto>> GetTreeProgressAsync(Guid userId)
@@ -74,7 +77,7 @@ public class TreeOfLightService : ITreeOfLightService
             var unlockedRegions = await CheckAndUnlockRegionsAsync(userId, request.StoryId);
             newlyUnlockedRegions.AddRange(unlockedRegions);
 
-            var updatedTokens = await _repository.GetUserTokensAsync(userId);
+            var updatedTokens = await _treeOfHeroesRepository.GetUserTokensAsync(userId);
 
             return new CompleteStoryResponse
             {
@@ -102,19 +105,19 @@ public class TreeOfLightService : ITreeOfLightService
         {
             case "token_courage":
             case "courage":
-                await _repository.AwardTokensAsync(userId, courage: quantity);
+                await _treeOfHeroesRepository.AwardTokensAsync(userId, courage: quantity);
                 break;
             case "token_curiosity":
             case "curiosity":
-                await _repository.AwardTokensAsync(userId, curiosity: quantity);
+                await _treeOfHeroesRepository.AwardTokensAsync(userId, curiosity: quantity);
                 break;
             case "token_thinking":
             case "thinking":
-                await _repository.AwardTokensAsync(userId, thinking: quantity);
+                await _treeOfHeroesRepository.AwardTokensAsync(userId, thinking: quantity);
                 break;
             case "token_creativity":
             case "creativity":
-                await _repository.AwardTokensAsync(userId, creativity: quantity);
+                await _treeOfHeroesRepository.AwardTokensAsync(userId, creativity: quantity);
                 break;
         }
     }
@@ -126,19 +129,19 @@ public class TreeOfLightService : ITreeOfLightService
         switch (reward.ToLower())
         {
             case "token_courage":
-                await _repository.AwardTokensAsync(userId, courage: 1);
+                await _treeOfHeroesRepository.AwardTokensAsync(userId, courage: 1);
                 break;
             case "token_curiosity":
-                await _repository.AwardTokensAsync(userId, curiosity: 1);
+                await _treeOfHeroesRepository.AwardTokensAsync(userId, curiosity: 1);
                 break;
             case "token_thinking":
-                await _repository.AwardTokensAsync(userId, thinking: 1);
+                await _treeOfHeroesRepository.AwardTokensAsync(userId, thinking: 1);
                 break;
             case "token_creativity":
-                await _repository.AwardTokensAsync(userId, creativity: 1);
+                await _treeOfHeroesRepository.AwardTokensAsync(userId, creativity: 1);
                 break;
             case "token_safety":
-                await _repository.AwardTokensAsync(userId, safety: 1);
+                await _treeOfHeroesRepository.AwardTokensAsync(userId, safety: 1);
                 break;
             // For other rewards (like fruits), do nothing - they're handled elsewhere
         }
@@ -167,7 +170,7 @@ public class TreeOfLightService : ITreeOfLightService
                 if (farmCompleted)
                 {
                     // Unlock next regions based on collected tokens
-                    var tokens = await _repository.GetUserTokensAsync(userId);
+                    var tokens = await _treeOfHeroesRepository.GetUserTokensAsync(userId);
                     if (tokens.Courage >= 2)
                     {
                         await _repository.UnlockRegionAsync(userId, "sahara");

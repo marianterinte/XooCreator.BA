@@ -10,6 +10,7 @@ public class UserTokens
     public int Curiosity { get; set; }
     public int Thinking { get; set; }
     public int Creativity { get; set; }
+    public int Safety { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     
