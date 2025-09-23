@@ -1271,7 +1271,7 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("33333333-3333-3333-3333-333333333333"),
                             Amount = 15,
-                            CreatedAt = new DateTime(2025, 9, 21, 20, 45, 5, 732, DateTimeKind.Utc).AddTicks(7999),
+                            CreatedAt = new DateTime(2025, 9, 22, 11, 41, 2, 394, DateTimeKind.Utc).AddTicks(2885),
                             Reference = "test-purchase-marian",
                             Type = 0,
                             UserId = new Guid("22222222-2222-2222-2222-222222222222")
@@ -1280,7 +1280,7 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("44444444-4444-4444-4444-444444444444"),
                             Amount = -5,
-                            CreatedAt = new DateTime(2025, 9, 22, 18, 45, 5, 732, DateTimeKind.Utc).AddTicks(8005),
+                            CreatedAt = new DateTime(2025, 9, 23, 9, 41, 2, 394, DateTimeKind.Utc).AddTicks(2894),
                             Reference = "test-generation",
                             Type = 1,
                             UserId = new Guid("22222222-2222-2222-2222-222222222222")
@@ -1311,14 +1311,14 @@ namespace XooCreator.BA.Migrations
                             UserId = new Guid("11111111-1111-1111-1111-111111111111"),
                             Balance = 5,
                             DiscoveryBalance = 0,
-                            UpdatedAt = new DateTime(2025, 9, 22, 20, 45, 5, 732, DateTimeKind.Utc).AddTicks(7982)
+                            UpdatedAt = new DateTime(2025, 9, 23, 11, 41, 2, 394, DateTimeKind.Utc).AddTicks(2836)
                         },
                         new
                         {
                             UserId = new Guid("22222222-2222-2222-2222-222222222222"),
                             Balance = 10,
                             DiscoveryBalance = 0,
-                            UpdatedAt = new DateTime(2025, 9, 22, 20, 45, 5, 732, DateTimeKind.Utc).AddTicks(7983)
+                            UpdatedAt = new DateTime(2025, 9, 23, 11, 41, 2, 394, DateTimeKind.Utc).AddTicks(2837)
                         });
                 });
 
@@ -2000,7 +2000,7 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
                             Auth0Sub = "test-user-sub",
-                            CreatedAt = new DateTime(2025, 9, 22, 20, 45, 5, 732, DateTimeKind.Utc).AddTicks(7865),
+                            CreatedAt = new DateTime(2025, 9, 23, 11, 41, 2, 394, DateTimeKind.Utc).AddTicks(2708),
                             DisplayName = "Test User",
                             Email = "test@example.com"
                         },
@@ -2008,7 +2008,7 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("22222222-2222-2222-2222-222222222222"),
                             Auth0Sub = "marian-test-sub",
-                            CreatedAt = new DateTime(2025, 9, 22, 20, 45, 5, 732, DateTimeKind.Utc).AddTicks(7867),
+                            CreatedAt = new DateTime(2025, 9, 23, 11, 41, 2, 394, DateTimeKind.Utc).AddTicks(2709),
                             DisplayName = "Marian",
                             Email = "marian@example.com"
                         });
@@ -2096,6 +2096,30 @@ namespace XooCreator.BA.Migrations
                     b.HasKey("UserId");
 
                     b.ToTable("UserTokens");
+
+                    b.HasData(
+                        new
+                        {
+                            UserId = new Guid("11111111-1111-1111-1111-111111111111"),
+                            Courage = 5,
+                            CreatedAt = new DateTime(2025, 9, 23, 11, 41, 2, 394, DateTimeKind.Utc).AddTicks(2863),
+                            Creativity = 5,
+                            Curiosity = 5,
+                            Safety = 5,
+                            Thinking = 5,
+                            UpdatedAt = new DateTime(2025, 9, 23, 11, 41, 2, 394, DateTimeKind.Utc).AddTicks(2864)
+                        },
+                        new
+                        {
+                            UserId = new Guid("22222222-2222-2222-2222-222222222222"),
+                            Courage = 5,
+                            CreatedAt = new DateTime(2025, 9, 23, 11, 41, 2, 394, DateTimeKind.Utc).AddTicks(2865),
+                            Creativity = 5,
+                            Curiosity = 5,
+                            Safety = 5,
+                            Thinking = 5,
+                            UpdatedAt = new DateTime(2025, 9, 23, 11, 41, 2, 394, DateTimeKind.Utc).AddTicks(2866)
+                        });
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.Animal", b =>

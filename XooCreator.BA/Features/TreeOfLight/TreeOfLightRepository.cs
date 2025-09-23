@@ -165,28 +165,28 @@ public class TreeOfLightRepository : ITreeOfLightRepository
             await _context.HeroProgress.Where(hp => hp.UserId == userId).ExecuteDeleteAsync();
             await _context.HeroTreeProgress.Where(htp => htp.UserId == userId).ExecuteDeleteAsync();
 
-            // Reset user tokens to default values
+            // Reset user tokens to default values (5 tokens of each type)
             var userTokens = await _context.UserTokens.FirstOrDefaultAsync(ut => ut.UserId == userId);
             if (userTokens != null)
             {
-                userTokens.Courage = 0;
-                userTokens.Curiosity = 0;
-                userTokens.Thinking = 0;
-                userTokens.Creativity = 0;
-                userTokens.Safety = 0;
+                userTokens.Courage = 5;
+                userTokens.Curiosity = 5;
+                userTokens.Thinking = 5;
+                userTokens.Creativity = 5;
+                userTokens.Safety = 5;
                 userTokens.UpdatedAt = DateTime.UtcNow;
             }
             else
             {
-                // Create default tokens if they don't exist
+                // Create default tokens if they don't exist (5 tokens of each type)
                 _context.UserTokens.Add(new UserTokens
                 {
                     UserId = userId,
-                    Courage = 0,
-                    Curiosity = 0,
-                    Thinking = 0,
-                    Creativity = 0,
-                    Safety = 0,
+                    Courage = 5,
+                    Curiosity = 5,
+                    Thinking = 5,
+                    Creativity = 5,
+                    Safety = 5,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 });

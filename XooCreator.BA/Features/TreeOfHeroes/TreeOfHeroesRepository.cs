@@ -32,15 +32,15 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
 
         if (userTokens == null)
         {
-            // Create default tokens if user doesn't have any
+            // Create default tokens if user doesn't have any - 5 tokens of each type by default
             userTokens = new Data.UserTokens
             {
                 UserId = userId,
-                Courage = 0,
-                Curiosity = 0,
-                Thinking = 0,
-                Creativity = 0,
-                Safety = 0
+                Courage = 5,
+                Curiosity = 5,
+                Thinking = 5,
+                Creativity = 5,
+                Safety = 5
             };
             _context.UserTokens.Add(userTokens);
             await _context.SaveChangesAsync();

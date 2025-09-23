@@ -32,6 +32,20 @@ public class UserRepository : IUserRepository
         };
         _db.UsersAlchimalia.Add(user);
         _db.CreditWallets.Add(new CreditWallet { UserId = user.Id, Balance = 0, UpdatedAt = DateTime.UtcNow });
+        
+        // Create user tokens with 5 tokens of each type by default
+        _db.UserTokens.Add(new UserTokens 
+        { 
+            UserId = user.Id, 
+            Courage = 5, 
+            Curiosity = 5, 
+            Thinking = 5, 
+            Creativity = 5, 
+            Safety = 5,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        });
+        
         await _db.SaveChangesAsync(ct);
         return user;
     }

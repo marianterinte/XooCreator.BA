@@ -322,6 +322,32 @@ public class XooDbContext : DbContext
             }
         );
 
+        // Seed test user tokens (5 tokens of each type by default)
+        modelBuilder.Entity<UserTokens>().HasData(
+            new UserTokens
+            {
+                UserId = testUserId,
+                Courage = 5,
+                Curiosity = 5,
+                Thinking = 5,
+                Creativity = 5,
+                Safety = 5,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            },
+            new UserTokens
+            {
+                UserId = marianUserId,
+                Courage = 5,
+                Curiosity = 5,
+                Thinking = 5,
+                Creativity = 5,
+                Safety = 5,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            }
+        );
+
         // Seed test credit transactions (simulate purchases)
         modelBuilder.Entity<CreditTransaction>().HasData(
             new CreditTransaction
