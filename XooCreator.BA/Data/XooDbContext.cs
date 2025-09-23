@@ -348,6 +348,30 @@ public class XooDbContext : DbContext
             }
         );
 
+        // Note: seed is not unlocked in HeroTreeProgress by default
+        // In the old system, seed was only transformed (in HeroProgress), not unlocked in tree progress
+        // Base heroes get unlocked when seed is transformed
+
+        // Seed test hero progress (seed transformed by default)
+        modelBuilder.Entity<HeroProgress>().HasData(
+            new HeroProgress
+            {
+                Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
+                UserId = testUserId,
+                HeroId = "seed",
+                HeroType = "HERO_TREE_TRANSFORMATION",
+                UnlockedAt = DateTime.UtcNow
+            },
+            new HeroProgress
+            {
+                Id = Guid.Parse("22222222-2222-2222-2222-222222222222"),
+                UserId = marianUserId,
+                HeroId = "seed",
+                HeroType = "HERO_TREE_TRANSFORMATION",
+                UnlockedAt = DateTime.UtcNow
+            }
+        );
+
         // Seed test credit transactions (simulate purchases)
         modelBuilder.Entity<CreditTransaction>().HasData(
             new CreditTransaction

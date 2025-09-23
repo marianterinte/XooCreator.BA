@@ -316,6 +316,9 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
             .Select(htp => htp.NodeId)
             .ToListAsync();
 
+        // Base hero IDs (these are the only heroes that can be unlocked when seed is transformed)
+        var baseHeroIds = new[] { "hero_brave_puppy", "hero_curious_cat", "hero_wise_owl", "hero_playful_horse", "hero_cautious_hedgehog" };
+
         // Check each hero definition to see if it should be unlocked
         foreach (var heroDef in allHeroDefinitions)
         {
@@ -326,31 +329,52 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
             // Parse prerequisites
             var prerequisites = JsonSerializer.Deserialize<List<string>>(heroDef.PrerequisitesJson) ?? new List<string>();
             
-            // Check if all prerequisites are met
-            // For each prerequisite, check if it's either:
-            // 1. Already unlocked in tree progress, OR
-            // 2. User has transformed into it (for base heroes that don't need tree unlock)
-            bool allPrerequisitesMet = prerequisites.All(prereq => 
-                alreadyUnlockedNodes.Contains(prereq) || 
-                userHeroProgress.Contains(prereq));
-            
-            if (allPrerequisitesMet)
+            // Special logic for base heroes: only unlock when seed is transformed
+            if (baseHeroIds.Contains(heroDef.Id))
             {
-                // Unlock this node
-                var heroTreeNode = new Data.HeroTreeProgress
+                if (userHeroProgress.Contains("seed"))
                 {
-                    UserId = userId,
-                    NodeId = heroDef.Id,
-                    TokensCostCourage = heroDef.CourageCost,
-                    TokensCostCuriosity = heroDef.CuriosityCost,
-                    TokensCostThinking = heroDef.ThinkingCost,
-                    TokensCostCreativity = heroDef.CreativityCost,
-                    TokensCostSafety = heroDef.SafetyCost,
-                    UnlockedAt = DateTime.UtcNow
-                };
+                    // Unlock this base hero
+                    var heroTreeNode = new Data.HeroTreeProgress
+                    {
+                        UserId = userId,
+                        NodeId = heroDef.Id,
+                        TokensCostCourage = heroDef.CourageCost,
+                        TokensCostCuriosity = heroDef.CuriosityCost,
+                        TokensCostThinking = heroDef.ThinkingCost,
+                        TokensCostCreativity = heroDef.CreativityCost,
+                        TokensCostSafety = heroDef.SafetyCost,
+                        UnlockedAt = DateTime.UtcNow
+                    };
 
-                _context.HeroTreeProgress.Add(heroTreeNode);
-                newlyUnlockedNodes.Add(heroDef.Id);
+                    _context.HeroTreeProgress.Add(heroTreeNode);
+                    newlyUnlockedNodes.Add(heroDef.Id);
+                }
+            }
+            else
+            {
+                // For hybrids and legendary: check if all prerequisites are TRANSFORMED
+                bool allPrerequisitesMet = prerequisites.All(prereq => 
+                    userHeroProgress.Contains(prereq));
+                
+                if (allPrerequisitesMet)
+                {
+                    // Unlock this node
+                    var heroTreeNode = new Data.HeroTreeProgress
+                    {
+                        UserId = userId,
+                        NodeId = heroDef.Id,
+                        TokensCostCourage = heroDef.CourageCost,
+                        TokensCostCuriosity = heroDef.CuriosityCost,
+                        TokensCostThinking = heroDef.ThinkingCost,
+                        TokensCostCreativity = heroDef.CreativityCost,
+                        TokensCostSafety = heroDef.SafetyCost,
+                        UnlockedAt = DateTime.UtcNow
+                    };
+
+                    _context.HeroTreeProgress.Add(heroTreeNode);
+                    newlyUnlockedNodes.Add(heroDef.Id);
+                }
             }
         }
 
