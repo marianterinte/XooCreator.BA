@@ -73,6 +73,8 @@ public record TransformToHeroResponse
     public bool Success { get; init; }
     public string? ErrorMessage { get; init; }
     public HeroDto? UnlockedHero { get; init; }
+    public List<string>? NewlyUnlockedNodes { get; init; }
+    public UserTokensDto? UpdatedTokens { get; init; }
 }
 
 // New DTOs for UI configuration

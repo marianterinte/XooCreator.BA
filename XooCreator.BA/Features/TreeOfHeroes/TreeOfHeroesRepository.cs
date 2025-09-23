@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 using XooCreator.BA.Data;
 
 namespace XooCreator.BA.Features.TreeOfHeroes;
@@ -14,6 +15,8 @@ public interface ITreeOfHeroesRepository
     Task<bool> UnlockHeroTreeNodeAsync(Guid userId, UnlockHeroTreeNodeRequest request);
     Task<bool> SpendTokensAsync(Guid userId, int courage = 0, int curiosity = 0, int thinking = 0, int creativity = 0, int safety = 0);
     Task<bool> AwardTokensAsync(Guid userId, int courage = 0, int curiosity = 0, int thinking = 0, int creativity = 0, int safety = 0);
+    Task<bool> SaveHeroProgressAsync(Guid userId, string heroId);
+    Task<List<string>> AutoUnlockNodesBasedOnPrerequisitesAsync(Guid userId);
 }
 
 public class TreeOfHeroesRepository : ITreeOfHeroesRepository
@@ -266,5 +269,97 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
         };
 
         return Task.FromResult(config);
+    }
+
+    public async Task<bool> SaveHeroProgressAsync(Guid userId, string heroId)
+    {
+        // Check if hero progress already exists
+        var existingProgress = await _context.HeroProgress
+            .FirstOrDefaultAsync(hp => hp.UserId == userId && hp.HeroId == heroId);
+
+        if (existingProgress != null)
+        {
+            // Hero already transformed, no need to save again
+            return true;
+        }
+
+        // Create new hero progress record
+        var heroProgress = new Data.HeroProgress
+        {
+            UserId = userId,
+            HeroId = heroId,
+            HeroType = "HERO_TREE_TRANSFORMATION",
+            UnlockedAt = DateTime.UtcNow
+        };
+
+        _context.HeroProgress.Add(heroProgress);
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<List<string>> AutoUnlockNodesBasedOnPrerequisitesAsync(Guid userId)
+    {
+        var newlyUnlockedNodes = new List<string>();
+
+        // Get all hero definitions
+        var allHeroDefinitions = await _context.HeroDefinitions.ToListAsync();
+        
+        // Get user's current progress (transformed heroes)
+        var userHeroProgress = await _context.HeroProgress
+            .Where(hp => hp.UserId == userId)
+            .Select(hp => hp.HeroId)
+            .ToListAsync();
+
+        // Get already unlocked nodes
+        var alreadyUnlockedNodes = await _context.HeroTreeProgress
+            .Where(htp => htp.UserId == userId)
+            .Select(htp => htp.NodeId)
+            .ToListAsync();
+
+        // Check each hero definition to see if it should be unlocked
+        foreach (var heroDef in allHeroDefinitions)
+        {
+            // Skip if already unlocked
+            if (alreadyUnlockedNodes.Contains(heroDef.Id))
+                continue;
+
+            // Parse prerequisites
+            var prerequisites = JsonSerializer.Deserialize<List<string>>(heroDef.PrerequisitesJson) ?? new List<string>();
+            
+            // Check if all prerequisites are met
+            // For each prerequisite, check if it's either:
+            // 1. Already unlocked in tree progress, OR
+            // 2. User has transformed into it (for base heroes that don't need tree unlock)
+            bool allPrerequisitesMet = prerequisites.All(prereq => 
+                alreadyUnlockedNodes.Contains(prereq) || 
+                userHeroProgress.Contains(prereq));
+            
+            if (allPrerequisitesMet)
+            {
+                // Unlock this node
+                var heroTreeNode = new Data.HeroTreeProgress
+                {
+                    UserId = userId,
+                    NodeId = heroDef.Id,
+                    TokensCostCourage = heroDef.CourageCost,
+                    TokensCostCuriosity = heroDef.CuriosityCost,
+                    TokensCostThinking = heroDef.ThinkingCost,
+                    TokensCostCreativity = heroDef.CreativityCost,
+                    TokensCostSafety = heroDef.SafetyCost,
+                    UnlockedAt = DateTime.UtcNow
+                };
+
+                _context.HeroTreeProgress.Add(heroTreeNode);
+                newlyUnlockedNodes.Add(heroDef.Id);
+            }
+        }
+
+        // Save all newly unlocked nodes
+        if (newlyUnlockedNodes.Any())
+        {
+            await _context.SaveChangesAsync();
+        }
+
+        return newlyUnlockedNodes;
     }
 }
