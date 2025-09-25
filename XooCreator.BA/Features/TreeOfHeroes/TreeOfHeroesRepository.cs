@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using XooCreator.BA.Data;
+using XooCreator.BA.Features.TreeOfLight;
 
 namespace XooCreator.BA.Features.TreeOfHeroes;
 
@@ -15,6 +16,7 @@ public interface ITreeOfHeroesRepository
     Task<bool> UnlockHeroTreeNodeAsync(Guid userId, UnlockHeroTreeNodeRequest request);
     Task<bool> SpendTokensAsync(Guid userId, int courage = 0, int curiosity = 0, int thinking = 0, int creativity = 0, int safety = 0);
     Task<bool> AwardTokensAsync(Guid userId, int courage = 0, int curiosity = 0, int thinking = 0, int creativity = 0, int safety = 0);
+    Task<bool> AwardTokensAsync(Guid userId, IEnumerable<TokenReward> tokenRewards);
     Task<bool> SaveHeroProgressAsync(Guid userId, string heroId);
     Task<List<string>> AutoUnlockNodesBasedOnPrerequisitesAsync(Guid userId);
 }
@@ -30,32 +32,21 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
 
     public async Task<UserTokensDto> GetUserTokensAsync(Guid userId)
     {
-        var userTokens = await _context.UserTokens
-            .FirstOrDefaultAsync(ut => ut.UserId == userId);
+        // Aggregate balances for the 5 core tokens from the generic ledger
+        var balances = await _context.UserTokenBalances
+            .Where(b => b.UserId == userId && b.Type == "TreeOfHeroes" &&
+                (b.Value == "courage" || b.Value == "curiosity" || b.Value == "thinking" || b.Value == "creativity" || b.Value == "safety"))
+            .ToListAsync();
 
-        if (userTokens == null)
-        {
-            // Create default tokens if user doesn't have any - 5 tokens of each type by default
-            userTokens = new Data.UserTokens
-            {
-                UserId = userId,
-                Courage = 5,
-                Curiosity = 5,
-                Thinking = 5,
-                Creativity = 5,
-                Safety = 5
-            };
-            _context.UserTokens.Add(userTokens);
-            await _context.SaveChangesAsync();
-        }
+        int Sum(string value) => balances.Where(b => b.Value == value).Sum(b => b.Quantity);
 
         return new UserTokensDto
         {
-            Courage = userTokens.Courage,
-            Curiosity = userTokens.Curiosity,
-            Thinking = userTokens.Thinking,
-            Creativity = userTokens.Creativity,
-            Safety = userTokens.Safety
+            Courage = Sum("courage"),
+            Curiosity = Sum("curiosity"),
+            Thinking = Sum("thinking"),
+            Creativity = Sum("creativity"),
+            Safety = Sum("safety")
         };
     }
 
@@ -119,30 +110,28 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
 
     public async Task<bool> SpendTokensAsync(Guid userId, int courage = 0, int curiosity = 0, int thinking = 0, int creativity = 0, int safety = 0)
     {
-        var userTokens = await _context.UserTokens
-            .FirstOrDefaultAsync(ut => ut.UserId == userId);
-
-        if (userTokens == null)
+        // Check balances
+        var current = await GetUserTokensAsync(userId);
+        if (current.Courage < courage || current.Curiosity < curiosity || current.Thinking < thinking || current.Creativity < creativity || current.Safety < safety)
         {
             return false;
         }
 
-        // Check if user has enough tokens
-        if (userTokens.Courage < courage ||
-            userTokens.Curiosity < curiosity ||
-            userTokens.Thinking < thinking ||
-            userTokens.Creativity < creativity ||
-            userTokens.Safety < safety)
+        // Decrement from generic ledger (Type == "TreeOfHeroes" for core tokens)
+        async Task Decrement(string value, int amount)
         {
-            return false;
+            if (amount <= 0) return;
+            var row = await _context.UserTokenBalances.FirstOrDefaultAsync(b => b.UserId == userId && b.Type == "TreeOfHeroes" && b.Value == value);
+            if (row == null) return; // should not happen due to check above
+            row.Quantity -= amount;
+            row.UpdatedAt = DateTime.UtcNow;
         }
 
-        // Spend tokens
-        userTokens.Courage -= courage;
-        userTokens.Curiosity -= curiosity;
-        userTokens.Thinking -= thinking;
-        userTokens.Creativity -= creativity;
-        userTokens.Safety -= safety;
+        await Decrement("courage", courage);
+        await Decrement("curiosity", curiosity);
+        await Decrement("thinking", thinking);
+        await Decrement("creativity", creativity);
+        await Decrement("safety", safety);
 
         await _context.SaveChangesAsync();
         return true;
@@ -150,31 +139,69 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
 
     public async Task<bool> AwardTokensAsync(Guid userId, int courage = 0, int curiosity = 0, int thinking = 0, int creativity = 0, int safety = 0)
     {
-        var userTokens = await _context.UserTokens
-            .FirstOrDefaultAsync(ut => ut.UserId == userId);
+        var list = new List<TokenReward>();
+        if (courage > 0) list.Add(new TokenReward { Type = "TreeOfHeroes", Value = "courage", Quantity = courage });
+        if (curiosity > 0) list.Add(new TokenReward { Type = "TreeOfHeroes", Value = "curiosity", Quantity = curiosity });
+        if (thinking > 0) list.Add(new TokenReward { Type = "TreeOfHeroes", Value = "thinking", Quantity = thinking });
+        if (creativity > 0) list.Add(new TokenReward { Type = "TreeOfHeroes", Value = "creativity", Quantity = creativity });
+        if (safety > 0) list.Add(new TokenReward { Type = "TreeOfHeroes", Value = "safety", Quantity = safety });
+        if (list.Count == 0) return true;
+        return await AwardTokensAsync(userId, list);
+    }
 
-        if (userTokens == null)
+    public async Task<bool> AwardTokensAsync(Guid userId, IEnumerable<TokenReward> tokenRewards)
+    {
+        foreach (var reward in tokenRewards)
         {
-            // Create new user tokens if they don't exist
-            userTokens = new Data.UserTokens
+            var type = reward.Type.Trim();
+            var value = reward.Value.Trim();
+            var qty = reward.Quantity;
+
+            // Map TreeOfHeroes tokens into aggregate UserTokens for backward compatibility
+            if (type == "TreeOfHeroes")
             {
-                UserId = userId,
-                Courage = courage,
-                Curiosity = curiosity,
-                Thinking = thinking,
-                Creativity = creativity,
-                Safety = safety
-            };
-            _context.UserTokens.Add(userTokens);
-        }
-        else
-        {
-            // Add tokens to existing record
-            userTokens.Courage += courage;
-            userTokens.Curiosity += curiosity;
-            userTokens.Thinking += thinking;
-            userTokens.Creativity += creativity;
-            userTokens.Safety += safety;
+                switch (value.ToLower())
+                {
+                    case "courage":
+                        await AwardTokensAsync(userId, courage: qty);
+                        break;
+                    case "curiosity":
+                        await AwardTokensAsync(userId, curiosity: qty);
+                        break;
+                    case "thinking":
+                        await AwardTokensAsync(userId, thinking: qty);
+                        break;
+                    case "creativity":
+                        await AwardTokensAsync(userId, creativity: qty);
+                        break;
+                    case "safety":
+                        await AwardTokensAsync(userId, safety: qty);
+                        break;
+                }
+            }
+
+            // Always persist into generic ledger
+            var balance = await _context.UserTokenBalances
+                .FirstOrDefaultAsync(b => b.UserId == userId && b.Type == type && b.Value == value);
+
+            if (balance == null)
+            {
+                balance = new Data.UserTokenBalance
+                {
+                    UserId = userId,
+                    Type = type,
+                    Value = value,
+                    Quantity = qty,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+                _context.UserTokenBalances.Add(balance);
+            }
+            else
+            {
+                balance.Quantity += qty;
+                balance.UpdatedAt = DateTime.UtcNow;
+            }
         }
 
         await _context.SaveChangesAsync();

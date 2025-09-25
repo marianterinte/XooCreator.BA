@@ -54,23 +54,29 @@ public class TreeOfLightService : ITreeOfLightService
 
             var newlyUnlockedRegions = new List<string>();
 
-            // Load story from database to get the correct tokens
-            if (story != null && !string.IsNullOrEmpty(request.SelectedAnswer))
+            // Award tokens: prefer request.Tokens if provided; otherwise derive from story answer
+            var effectiveTokens = new List<TokenReward>();
+
+            if (request.Tokens != null && request.Tokens.Count > 0)
             {
-                // Find the quiz tile and selected answer
+                effectiveTokens.AddRange(request.Tokens);
+            }
+            else if (story != null && !string.IsNullOrEmpty(request.SelectedAnswer))
+            {
                 var quizTile = story.Tiles.FirstOrDefault(t => t.Type == "quiz");
                 if (quizTile != null)
                 {
                     var selectedAnswer = quizTile.Answers.FirstOrDefault(a => a.Id == request.SelectedAnswer);
                     if (selectedAnswer != null && selectedAnswer.Tokens.Count > 0)
                     {
-                        // Award tokens based on the tokens from database
-                        foreach (var tokenReward in selectedAnswer.Tokens)
-                        {
-                            await AwardTokensByType(userId, tokenReward.TokenType, tokenReward.Quantity);
-                        }
+                        effectiveTokens.AddRange(selectedAnswer.Tokens);
                     }
                 }
+            }
+
+            if (effectiveTokens.Count > 0)
+            {
+                await _treeOfHeroesRepository.AwardTokensAsync(userId, effectiveTokens);
             }
 
             // Check for region unlocks based on story completion rules
@@ -98,28 +104,10 @@ public class TreeOfLightService : ITreeOfLightService
 
 
 
+    // Deprecated: kept for reference; new flow uses AwardTokensAsync(userId, IEnumerable<TokenReward>)
     private async Task AwardTokensByType(Guid userId, string tokenType, int quantity)
     {
-        // Award tokens based on token type
-        switch (tokenType.ToLower())
-        {
-            case "token_courage":
-            case "courage":
-                await _treeOfHeroesRepository.AwardTokensAsync(userId, courage: quantity);
-                break;
-            case "token_curiosity":
-            case "curiosity":
-                await _treeOfHeroesRepository.AwardTokensAsync(userId, curiosity: quantity);
-                break;
-            case "token_thinking":
-            case "thinking":
-                await _treeOfHeroesRepository.AwardTokensAsync(userId, thinking: quantity);
-                break;
-            case "token_creativity":
-            case "creativity":
-                await _treeOfHeroesRepository.AwardTokensAsync(userId, creativity: quantity);
-                break;
-        }
+        await _treeOfHeroesRepository.AwardTokensAsync(userId, new[] { new TokenReward { Type = "TreeOfHeroes", Value = tokenType, Quantity = quantity } });
     }
 
     private async Task AwardTokensByReward(Guid userId, string reward)

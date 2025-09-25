@@ -165,32 +165,24 @@ public class TreeOfLightRepository : ITreeOfLightRepository
             await _context.HeroProgress.Where(hp => hp.UserId == userId).ExecuteDeleteAsync();
             await _context.HeroTreeProgress.Where(htp => htp.UserId == userId).ExecuteDeleteAsync();
 
-            // Reset user tokens to default values (5 tokens of each type)
-            var userTokens = await _context.UserTokens.FirstOrDefaultAsync(ut => ut.UserId == userId);
-            if (userTokens != null)
+            // Reset generic token balances to defaults for the 5 core types
+            var coreValues = new[] { "courage", "curiosity", "thinking", "creativity", "safety" };
+            // Remove existing balances for TreeOfHeroes core values and insert defaults
+            await _context.UserTokenBalances
+                .Where(b => b.UserId == userId && b.Type == "TreeOfHeroes" && coreValues.Contains(b.Value))
+                .ExecuteDeleteAsync();
+
+            var seedRows = coreValues.Select((value, idx) => new UserTokenBalance
             {
-                userTokens.Courage = 5;
-                userTokens.Curiosity = 5;
-                userTokens.Thinking = 5;
-                userTokens.Creativity = 5;
-                userTokens.Safety = 5;
-                userTokens.UpdatedAt = DateTime.UtcNow;
-            }
-            else
-            {
-                // Create default tokens if they don't exist (5 tokens of each type)
-                _context.UserTokens.Add(new UserTokens
-                {
-                    UserId = userId,
-                    Courage = 5,
-                    Curiosity = 5,
-                    Thinking = 5,
-                    Creativity = 5,
-                    Safety = 5,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                });
-            }
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                Type = "TreeOfHeroes",
+                Value = value,
+                Quantity = 5,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            });
+            await _context.UserTokenBalances.AddRangeAsync(seedRows);
 
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
