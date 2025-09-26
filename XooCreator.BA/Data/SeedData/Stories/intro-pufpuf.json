@@ -51,7 +51,7 @@
           "tokens": [
             {
               "tokenType": "token_courage",
-              "quantity": 3
+              "quantity": 1
             }
           ],
           "sortOrder": 1
@@ -62,7 +62,7 @@
           "tokens": [
             {
               "tokenType": "token_curiosity",
-              "quantity": 3
+              "quantity": 1
             }
           ],
           "sortOrder": 2
@@ -73,7 +73,7 @@
           "tokens": [
             {
               "tokenType": "token_thinking",
-              "quantity": 3
+              "quantity": 1
             }
           ],
           "sortOrder": 3
@@ -84,7 +84,7 @@
           "tokens": [
             {
               "tokenType": "token_creativity",
-              "quantity": 3
+              "quantity": 1
             }
           ],
           "sortOrder": 4
@@ -95,7 +95,7 @@
           "tokens": [
             {
               "tokenType": "token_safety",
-              "quantity": 3
+              "quantity": 1
             }
           ],
           "sortOrder": 5
