@@ -665,8 +665,8 @@ namespace XooCreator.BA.Migrations
                 columns: new[] { "Id", "Auth0Sub", "CreatedAt", "DisplayName", "Email" },
                 values: new object[,]
                 {
-                    { new Guid("11111111-1111-1111-1111-111111111111"), "test-user-sub", new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9732), "Test User", "test@example.com" },
-                    { new Guid("22222222-2222-2222-2222-222222222222"), "marian-test-sub", new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9734), "Marian", "marian@example.com" }
+                    { new Guid("11111111-1111-1111-1111-111111111111"), "test-user-sub", new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(2930), "Test User", "test@example.com" },
+                    { new Guid("22222222-2222-2222-2222-222222222222"), "marian-test-sub", new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(2932), "Marian", "marian@example.com" }
                 });
 
             migrationBuilder.InsertData(
@@ -715,8 +715,8 @@ namespace XooCreator.BA.Migrations
                 columns: new[] { "Id", "Amount", "CreatedAt", "Reference", "Type", "UserId" },
                 values: new object[,]
                 {
-                    { new Guid("33333333-3333-3333-3333-333333333333"), 15, new DateTime(2025, 9, 25, 20, 58, 56, 226, DateTimeKind.Utc).AddTicks(11), "test-purchase-marian", 0, new Guid("22222222-2222-2222-2222-222222222222") },
-                    { new Guid("44444444-4444-4444-4444-444444444444"), -5, new DateTime(2025, 9, 26, 18, 58, 56, 226, DateTimeKind.Utc).AddTicks(17), "test-generation", 1, new Guid("22222222-2222-2222-2222-222222222222") }
+                    { new Guid("33333333-3333-3333-3333-333333333333"), 15, new DateTime(2025, 9, 25, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3139), "test-purchase-marian", 0, new Guid("22222222-2222-2222-2222-222222222222") },
+                    { new Guid("44444444-4444-4444-4444-444444444444"), -5, new DateTime(2025, 9, 26, 19, 22, 11, 427, DateTimeKind.Utc).AddTicks(3145), "test-generation", 1, new Guid("22222222-2222-2222-2222-222222222222") }
                 });
 
             migrationBuilder.InsertData(
@@ -724,8 +724,8 @@ namespace XooCreator.BA.Migrations
                 columns: new[] { "UserId", "Balance", "DiscoveryBalance", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { new Guid("11111111-1111-1111-1111-111111111111"), 5, 0, new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9854) },
-                    { new Guid("22222222-2222-2222-2222-222222222222"), 10, 0, new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9855) }
+                    { new Guid("11111111-1111-1111-1111-111111111111"), 5, 0, new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3048) },
+                    { new Guid("22222222-2222-2222-2222-222222222222"), 10, 0, new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3050) }
                 });
 
             migrationBuilder.InsertData(
@@ -733,8 +733,8 @@ namespace XooCreator.BA.Migrations
                 columns: new[] { "Id", "HeroId", "HeroType", "SourceStoryId", "UnlockedAt", "UserId" },
                 values: new object[,]
                 {
-                    { new Guid("11111111-1111-1111-1111-111111111111"), "seed", "HERO_TREE_TRANSFORMATION", "", new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9992), new Guid("11111111-1111-1111-1111-111111111111") },
-                    { new Guid("22222222-2222-2222-2222-222222222222"), "seed", "HERO_TREE_TRANSFORMATION", "", new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9994), new Guid("22222222-2222-2222-2222-222222222222") }
+                    { new Guid("11111111-1111-1111-1111-111111111111"), "seed", "HERO_TREE_TRANSFORMATION", "", new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3122), new Guid("11111111-1111-1111-1111-111111111111") },
+                    { new Guid("22222222-2222-2222-2222-222222222222"), "seed", "HERO_TREE_TRANSFORMATION", "", new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3124), new Guid("22222222-2222-2222-2222-222222222222") }
                 });
 
             migrationBuilder.InsertData(
@@ -742,16 +742,16 @@ namespace XooCreator.BA.Migrations
                 columns: new[] { "Id", "CreatedAt", "Quantity", "Type", "UpdatedAt", "UserId", "Value" },
                 values: new object[,]
                 {
-                    { new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1"), new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9944), 5, "TreeOfHeroes", new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9945), new Guid("11111111-1111-1111-1111-111111111111"), "courage" },
-                    { new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa2"), new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9949), 5, "TreeOfHeroes", new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9949), new Guid("11111111-1111-1111-1111-111111111111"), "curiosity" },
-                    { new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa3"), new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9951), 5, "TreeOfHeroes", new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9951), new Guid("11111111-1111-1111-1111-111111111111"), "thinking" },
-                    { new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa4"), new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9953), 5, "TreeOfHeroes", new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9954), new Guid("11111111-1111-1111-1111-111111111111"), "creativity" },
-                    { new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa5"), new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9956), 5, "TreeOfHeroes", new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9956), new Guid("11111111-1111-1111-1111-111111111111"), "safety" },
-                    { new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1"), new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9958), 5, "TreeOfHeroes", new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9959), new Guid("22222222-2222-2222-2222-222222222222"), "courage" },
-                    { new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb2"), new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9961), 5, "TreeOfHeroes", new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9961), new Guid("22222222-2222-2222-2222-222222222222"), "curiosity" },
-                    { new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb3"), new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9963), 5, "TreeOfHeroes", new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9963), new Guid("22222222-2222-2222-2222-222222222222"), "thinking" },
-                    { new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb4"), new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9965), 5, "TreeOfHeroes", new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9965), new Guid("22222222-2222-2222-2222-222222222222"), "creativity" },
-                    { new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb5"), new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9967), 5, "TreeOfHeroes", new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9968), new Guid("22222222-2222-2222-2222-222222222222"), "safety" }
+                    { new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1"), new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3070), 5, "TreeOfHeroes", new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3071), new Guid("11111111-1111-1111-1111-111111111111"), "courage" },
+                    { new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa2"), new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3075), 5, "TreeOfHeroes", new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3075), new Guid("11111111-1111-1111-1111-111111111111"), "curiosity" },
+                    { new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa3"), new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3077), 5, "TreeOfHeroes", new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3078), new Guid("11111111-1111-1111-1111-111111111111"), "thinking" },
+                    { new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa4"), new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3080), 5, "TreeOfHeroes", new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3080), new Guid("11111111-1111-1111-1111-111111111111"), "creativity" },
+                    { new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa5"), new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3082), 5, "TreeOfHeroes", new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3082), new Guid("11111111-1111-1111-1111-111111111111"), "safety" },
+                    { new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1"), new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3084), 5, "TreeOfHeroes", new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3085), new Guid("22222222-2222-2222-2222-222222222222"), "courage" },
+                    { new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb2"), new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3086), 5, "TreeOfHeroes", new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3087), new Guid("22222222-2222-2222-2222-222222222222"), "curiosity" },
+                    { new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb3"), new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3089), 5, "TreeOfHeroes", new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3089), new Guid("22222222-2222-2222-2222-222222222222"), "thinking" },
+                    { new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb4"), new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3091), 5, "TreeOfHeroes", new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3091), new Guid("22222222-2222-2222-2222-222222222222"), "creativity" },
+                    { new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb5"), new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3093), 5, "TreeOfHeroes", new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3093), new Guid("22222222-2222-2222-2222-222222222222"), "safety" }
                 });
 
             migrationBuilder.InsertData(

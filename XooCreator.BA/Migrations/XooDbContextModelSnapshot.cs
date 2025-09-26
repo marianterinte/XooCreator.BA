@@ -1271,7 +1271,7 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("33333333-3333-3333-3333-333333333333"),
                             Amount = 15,
-                            CreatedAt = new DateTime(2025, 9, 25, 20, 58, 56, 226, DateTimeKind.Utc).AddTicks(11),
+                            CreatedAt = new DateTime(2025, 9, 25, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3139),
                             Reference = "test-purchase-marian",
                             Type = 0,
                             UserId = new Guid("22222222-2222-2222-2222-222222222222")
@@ -1280,7 +1280,7 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("44444444-4444-4444-4444-444444444444"),
                             Amount = -5,
-                            CreatedAt = new DateTime(2025, 9, 26, 18, 58, 56, 226, DateTimeKind.Utc).AddTicks(17),
+                            CreatedAt = new DateTime(2025, 9, 26, 19, 22, 11, 427, DateTimeKind.Utc).AddTicks(3145),
                             Reference = "test-generation",
                             Type = 1,
                             UserId = new Guid("22222222-2222-2222-2222-222222222222")
@@ -1311,14 +1311,14 @@ namespace XooCreator.BA.Migrations
                             UserId = new Guid("11111111-1111-1111-1111-111111111111"),
                             Balance = 5,
                             DiscoveryBalance = 0,
-                            UpdatedAt = new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9854)
+                            UpdatedAt = new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3048)
                         },
                         new
                         {
                             UserId = new Guid("22222222-2222-2222-2222-222222222222"),
                             Balance = 10,
                             DiscoveryBalance = 0,
-                            UpdatedAt = new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9855)
+                            UpdatedAt = new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3050)
                         });
                 });
 
@@ -1468,7 +1468,7 @@ namespace XooCreator.BA.Migrations
                             HeroId = "seed",
                             HeroType = "HERO_TREE_TRANSFORMATION",
                             SourceStoryId = "",
-                            UnlockedAt = new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9992),
+                            UnlockedAt = new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3122),
                             UserId = new Guid("11111111-1111-1111-1111-111111111111")
                         },
                         new
@@ -1477,7 +1477,7 @@ namespace XooCreator.BA.Migrations
                             HeroId = "seed",
                             HeroType = "HERO_TREE_TRANSFORMATION",
                             SourceStoryId = "",
-                            UnlockedAt = new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9994),
+                            UnlockedAt = new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3124),
                             UserId = new Guid("22222222-2222-2222-2222-222222222222")
                         });
                 });
@@ -2049,7 +2049,7 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
                             Auth0Sub = "test-user-sub",
-                            CreatedAt = new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9732),
+                            CreatedAt = new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(2930),
                             DisplayName = "Test User",
                             Email = "test@example.com"
                         },
@@ -2057,7 +2057,7 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("22222222-2222-2222-2222-222222222222"),
                             Auth0Sub = "marian-test-sub",
-                            CreatedAt = new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9734),
+                            CreatedAt = new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(2932),
                             DisplayName = "Marian",
                             Email = "marian@example.com"
                         });
@@ -2155,100 +2155,100 @@ namespace XooCreator.BA.Migrations
                         new
                         {
                             Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1"),
-                            CreatedAt = new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9944),
+                            CreatedAt = new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3070),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9945),
+                            UpdatedAt = new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3071),
                             UserId = new Guid("11111111-1111-1111-1111-111111111111"),
                             Value = "courage"
                         },
                         new
                         {
                             Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa2"),
-                            CreatedAt = new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9949),
+                            CreatedAt = new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3075),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9949),
+                            UpdatedAt = new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3075),
                             UserId = new Guid("11111111-1111-1111-1111-111111111111"),
                             Value = "curiosity"
                         },
                         new
                         {
                             Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa3"),
-                            CreatedAt = new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9951),
+                            CreatedAt = new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3077),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9951),
+                            UpdatedAt = new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3078),
                             UserId = new Guid("11111111-1111-1111-1111-111111111111"),
                             Value = "thinking"
                         },
                         new
                         {
                             Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa4"),
-                            CreatedAt = new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9953),
+                            CreatedAt = new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3080),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9954),
+                            UpdatedAt = new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3080),
                             UserId = new Guid("11111111-1111-1111-1111-111111111111"),
                             Value = "creativity"
                         },
                         new
                         {
                             Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa5"),
-                            CreatedAt = new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9956),
+                            CreatedAt = new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3082),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9956),
+                            UpdatedAt = new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3082),
                             UserId = new Guid("11111111-1111-1111-1111-111111111111"),
                             Value = "safety"
                         },
                         new
                         {
                             Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1"),
-                            CreatedAt = new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9958),
+                            CreatedAt = new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3084),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9959),
+                            UpdatedAt = new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3085),
                             UserId = new Guid("22222222-2222-2222-2222-222222222222"),
                             Value = "courage"
                         },
                         new
                         {
                             Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb2"),
-                            CreatedAt = new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9961),
+                            CreatedAt = new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3086),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9961),
+                            UpdatedAt = new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3087),
                             UserId = new Guid("22222222-2222-2222-2222-222222222222"),
                             Value = "curiosity"
                         },
                         new
                         {
                             Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb3"),
-                            CreatedAt = new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9963),
+                            CreatedAt = new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3089),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9963),
+                            UpdatedAt = new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3089),
                             UserId = new Guid("22222222-2222-2222-2222-222222222222"),
                             Value = "thinking"
                         },
                         new
                         {
                             Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb4"),
-                            CreatedAt = new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9965),
+                            CreatedAt = new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3091),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9965),
+                            UpdatedAt = new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3091),
                             UserId = new Guid("22222222-2222-2222-2222-222222222222"),
                             Value = "creativity"
                         },
                         new
                         {
                             Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb5"),
-                            CreatedAt = new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9967),
+                            CreatedAt = new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3093),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 9, 26, 20, 58, 56, 225, DateTimeKind.Utc).AddTicks(9968),
+                            UpdatedAt = new DateTime(2025, 9, 26, 21, 22, 11, 427, DateTimeKind.Utc).AddTicks(3093),
                             UserId = new Guid("22222222-2222-2222-2222-222222222222"),
                             Value = "safety"
                         });
