@@ -1,7 +1,7 @@
 {
   "storyId": "terra-s2",
   "title": "Iepurele Negru – Lentila Lunii",
-  "coverImageUrl": "images/stories/terra-s2/0.Cover.png",
+  "coverImageUrl": "images/tol/stories/terra-s2/0.Cover.png",
   "category": "terra",
   "sortOrder": 2,
   "tiles": [
@@ -11,7 +11,7 @@
       "sortOrder": 1,
       "caption": "Ținta: Lentila Lunii",
       "text": "Planul pe azi e clar: găsiți Lentila Lunii. Cu ea, cristalul mărește harta și puteți căuta mai adânc ruta spre Kelo-Ketis. Ținta indică spre o zonă cu stânci joase și iarbă înaltă, la marginea unei păduri.",
-      "imageUrl": "images/stories/terra-s2/1.target.png"
+      "imageUrl": "images/tol/stories/terra-s2/1.target.png"
     },
     {
       "tileId": "p2",
@@ -19,7 +19,7 @@
       "sortOrder": 2,
       "caption": "Urme ciudate",
       "text": "În iarbă apar urme mici, în zigzag, care dispar lângă un buștean scobit. Pe lângă ele, cozi de morcov „gustate artistic”.",
-      "imageUrl": "images/stories/terra-s2/2.tracks.png"
+      "imageUrl": "images/tol/stories/terra-s2/2.tracks.png"
     },
     {
       "tileId": "p3",
@@ -27,7 +27,7 @@
       "sortOrder": 3,
       "caption": "Iepurele negru",
       "text": "Din buștean sare un iepure negru, cu blana mată și ochi mari. „Bună! Eu sunt… uneori aici, uneori pe Lunaria. Depinde cum clipești”, spune, apoi râde. „Știu unde e Lentila. Și am nevoie de ajutor să ajung acasă, pe Lunaria. Dacă mă ajutați, vă arăt drumul către Lentilă.”",
-      "imageUrl": "images/stories/terra-s2/3.black-rabbit.png"
+      "imageUrl": "images/tol/stories/terra-s2/3.black-rabbit.png"
     },
     {
       "tileId": "p4",
@@ -35,7 +35,7 @@
       "sortOrder": 4,
       "caption": "Locul lentilei",
       "text": "Ghidați de iepure, ajungeți la o grotă scurtă, rece, cu apă până la gleznă. Pe tavan atârnă cristale palide; pe o stâncă, un disc translucid — Lentila Lunii — prins între două excrescențe de piatră.",
-      "imageUrl": "images/stories/terra-s2/4.cave.png"
+      "imageUrl": "images/tol/stories/terra-s2/4.cave.png"
     },
     {
       "tileId": "p5",
@@ -43,14 +43,14 @@
       "sortOrder": 5,
       "caption": "Problema mică",
       "text": "Când atingi stânca, apa face valuri și intrarea parcă „respiră”, strângându-se ușor. „Grotă sensibilă”, spune iepurele. „Faci bine, primești ieșire. Faci rău, primești duș rece.”",
-      "imageUrl": "images/stories/terra-s2/5.problem.png"
+      "imageUrl": "images/tol/stories/terra-s2/5.problem.png"
     },
     {
       "tileId": "q1",
       "type": "quiz",
       "caption": "Cum procedăm",
       "sortOrder": 6,
-      "imageUrl": "images/stories/terra-s2/6.quiz.png",
+      "imageUrl": "images/tol/stories/terra-s2/6.quiz.png",
       "question": "Alege abordarea ca să scoți Lentila Lunii fără să destabilizezi grota:",
       "answers": [
         {
@@ -121,7 +121,7 @@
       "sortOrder": 7,
       "caption": "Reușita",
       "text": "Lentila iese curat, fără să tulbure grota. Iepurele bate din lăbuțe: „Bravo! Lateral e mai bine decât drept!” Pui Lentila peste cristal, iar imaginea hărții se clarifică. Iepurele te privește hotărât: „Ținem legătura. Vreau acasă, pe Lunaria — promiți că mă ajuți?”",
-      "imageUrl": "images/stories/terra-s2/7.success.png"
+      "imageUrl": "images/tol/stories/terra-s2/7.success.png"
     }
   ]
 }
