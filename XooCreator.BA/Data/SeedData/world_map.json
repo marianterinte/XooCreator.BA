@@ -109,12 +109,6 @@
       "rewardImageUrl": "images/homepage/heroes/hero2.jpg",
       "sortOrder": 2
     },
-    {
-      "storyId": "terra-s3",
-      "regionId": "terra",
-      "rewardImageUrl": "images/homepage/heroes/hero0.jpg",
-      "sortOrder": 3
-    },
 
     {
       "storyId": "lunaria-s1",
@@ -127,12 +121,6 @@
       "regionId": "lunaria",
       "rewardImageUrl": "images/homepage/heroes/hero2.jpg",
       "sortOrder": 2
-    },
-    {
-      "storyId": "lunaria-s3",
-      "regionId": "lunaria",
-      "rewardImageUrl": "images/homepage/heroes/hero0.jpg",
-      "sortOrder": 3
     },
 
     {
@@ -147,12 +135,6 @@
       "rewardImageUrl": "images/homepage/heroes/hero1.jpg",
       "sortOrder": 2
     },
-    {
-      "storyId": "oceanica-s3",
-      "regionId": "oceanica",
-      "rewardImageUrl": "images/homepage/heroes/hero2.jpg",
-      "sortOrder": 3
-    },
 
     {
       "storyId": "sylvaria-s1",
@@ -165,12 +147,6 @@
       "regionId": "sylvaria",
       "rewardImageUrl": "images/homepage/heroes/hero0.jpg",
       "sortOrder": 2
-    },
-    {
-      "storyId": "sylvaria-s3",
-      "regionId": "sylvaria",
-      "rewardImageUrl": "images/homepage/heroes/hero1.jpg",
-      "sortOrder": 3
     },
 
     {
@@ -185,12 +161,6 @@
       "rewardImageUrl": "images/homepage/heroes/hero1.jpg",
       "sortOrder": 2
     },
-    {
-      "storyId": "crystalia-s3",
-      "regionId": "crystalia",
-      "rewardImageUrl": "images/homepage/heroes/hero2.jpg",
-      "sortOrder": 3
-    },
 
     {
       "storyId": "zephyra-s1",
@@ -203,12 +173,6 @@
       "regionId": "zephyra",
       "rewardImageUrl": "images/homepage/heroes/hero0.jpg",
       "sortOrder": 2
-    },
-    {
-      "storyId": "zephyra-s3",
-      "regionId": "zephyra",
-      "rewardImageUrl": "images/homepage/heroes/hero2.jpg",
-      "sortOrder": 3
     },
 
     {
@@ -223,12 +187,6 @@
       "rewardImageUrl": "images/homepage/heroes/hero1.jpg",
       "sortOrder": 2
     },
-    {
-      "storyId": "pyron-s3",
-      "regionId": "pyron",
-      "rewardImageUrl": "images/homepage/heroes/hero0.jpg",
-      "sortOrder": 3
-    },
 
     {
       "storyId": "neptunia-s1",
@@ -242,12 +200,6 @@
       "rewardImageUrl": "images/homepage/heroes/hero1.jpg",
       "sortOrder": 2
     },
-    {
-      "storyId": "neptunia-s3",
-      "regionId": "neptunia",
-      "rewardImageUrl": "images/homepage/heroes/hero2.jpg",
-      "sortOrder": 3
-    },
 
     {
       "storyId": "aetherion-s1",
@@ -260,12 +212,6 @@
       "regionId": "aetherion",
       "rewardImageUrl": "images/homepage/heroes/hero2.jpg",
       "sortOrder": 2
-    },
-    {
-      "storyId": "aetherion-s3",
-      "regionId": "aetherion",
-      "rewardImageUrl": "images/homepage/heroes/hero0.jpg",
-      "sortOrder": 3
     }
   ],
   "unlockRules": [
@@ -281,7 +227,7 @@
       "type": "all",
       "fromId": "terra",
       "toRegionId": "lunaria",
-      "requiredStoriesCsv": "terra-s1,terra-s2,terra-s3",
+      "requiredStoriesCsv": "terra-s1,terra-s2",
       "sortOrder": 2
     },
     {
@@ -296,7 +242,7 @@
       "type": "all",
       "fromId": "lunaria",
       "toRegionId": "oceanica",
-      "requiredStoriesCsv": "lunaria-s1,lunaria-s2,lunaria-s3",
+      "requiredStoriesCsv": "lunaria-s1,lunaria-s2",
       "sortOrder": 4
     },
 
@@ -304,7 +250,7 @@
       "type": "all",
       "fromId": "oceanica",
       "toRegionId": "sylvaria",
-      "requiredStoriesCsv": "oceanica-s1,oceanica-s2,oceanica-s3",
+      "requiredStoriesCsv": "oceanica-s1,oceanica-s2",
       "sortOrder": 5
     },
 
@@ -312,7 +258,7 @@
       "type": "all",
       "fromId": "sylvaria",
       "toRegionId": "crystalia",
-      "requiredStoriesCsv": "sylvaria-s1,sylvaria-s2,sylvaria-s3",
+      "requiredStoriesCsv": "sylvaria-s1,sylvaria-s2",
       "sortOrder": 6
     },
     {
@@ -327,4 +273,40 @@
       "type": "all",
       "fromId": "crystalia",
       "toRegionId": "zephyra",
-      "requiredStoriesCsv": "crystalia-s1,crystalia-s2,crystalia-s
+      "requiredStoriesCsv": "crystalia-s1,crystalia-s2",
+      "sortOrder": 8
+    },
+
+    {
+      "type": "all",
+      "fromId": "zephyra",
+      "toRegionId": "pyron",
+      "requiredStoriesCsv": "zephyra-s1,zephyra-s2",
+      "sortOrder": 9
+    },
+
+    {
+      "type": "all",
+      "fromId": "pyron",
+      "toRegionId": "neptunia",
+      "requiredStoriesCsv": "pyron-s1,pyron-s2",
+      "sortOrder": 10
+    },
+
+    {
+      "type": "all",
+      "fromId": "neptunia",
+      "toRegionId": "aetherion",
+      "requiredStoriesCsv": "neptunia-s1,neptunia-s2",
+      "sortOrder": 11
+    },
+
+    {
+      "type": "all",
+      "fromId": "aetherion",
+      "toRegionId": "kelo-ketis",
+      "requiredStoriesCsv": "aetherion-s1,aetherion-s2",
+      "sortOrder": 12
+    }
+  ]
+}
