@@ -9,6 +9,7 @@ using XooCreator.BA.Features.TreeOfHeroes;
 using XooCreator.BA.Features.Stories;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Endpoints;
+using XooCreator.BA.Infrastructure.Errors;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,7 @@ if (!string.IsNullOrWhiteSpace(portEnv))
 }
 
 // Add services
+builder.Services.AddLogging();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddEndpointDefinitions();
@@ -118,6 +120,9 @@ builder.Services.AddScoped<IStoriesService, StoriesService>();
 
 var app = builder.Build();
 app.UseCors("AllowAll");
+
+// Global exception handler - should be early in the pipeline
+app.UseGlobalExceptionHandling();
 
 // Auto-migrate database on startup + initializare date
 using (var scope = app.Services.CreateScope())
