@@ -28,6 +28,7 @@ public class StoriesRepository : IStoriesRepository
         var stories = await _context.StoryDefinitions
             .Include(s => s.Tiles)
                 .ThenInclude(t => t.Answers)
+                    .ThenInclude(a => a.Tokens)
             .Where(s => s.IsActive)
             .OrderBy(s => s.SortOrder)
             .ToListAsync();
@@ -41,6 +42,7 @@ public class StoriesRepository : IStoriesRepository
     var story = await _context.StoryDefinitions
             .Include(s => s.Tiles)
                 .ThenInclude(t => t.Answers)
+                    .ThenInclude(a => a.Tokens)
             .FirstOrDefaultAsync(s => s.StoryId == storyId && s.IsActive);
 
         return story == null ? null : MapToDto(story);
@@ -221,11 +223,21 @@ public class StoriesRepository : IStoriesRepository
                         {
                             AnswerId = answerSeed.AnswerId,
                             Text = answerSeed.Text,
-                            TokensJson = answerSeed.Tokens != null && answerSeed.Tokens.Count > 0
-                                ? JsonSerializer.Serialize(answerSeed.Tokens)
-                                : null,
+                            TokensJson = null,
                             SortOrder = answerSeed.SortOrder
                         };
+                        if (answerSeed.Tokens != null)
+                        {
+                            foreach (var tk in answerSeed.Tokens)
+                            {
+                                answer.Tokens.Add(new StoryAnswerToken
+                                {
+                                    Type = MapFamily(tk.Type).ToString(),
+                                    Value = tk.Value,
+                                    Quantity = tk.Quantity
+                                });
+                            }
+                        }
                         tile.Answers.Add(answer);
                     }
                 }
@@ -261,9 +273,12 @@ public class StoriesRepository : IStoriesRepository
                         {
                             Id = a.AnswerId,
                             Text = a.Text,
-                            Tokens = !string.IsNullOrEmpty(a.TokensJson)
-                                ? JsonSerializer.Deserialize<List<TokenReward>>(a.TokensJson) ?? new List<TokenReward>()
-                                : new List<TokenReward>()
+                            Tokens = a.Tokens.Select(tok => new TokenReward
+                            {
+                                Type = Enum.TryParse<TokenFamily>(tok.Type, true, out var fam) ? fam : TokenFamily.Personality,
+                                Value = tok.Value,
+                                Quantity = tok.Quantity
+                            }).ToList()
                         }).ToList()
                 }).ToList()
         };
@@ -274,6 +289,20 @@ public class StoriesRepository : IStoriesRepository
         if (string.Equals(storyId, "intro-puf-puf", StringComparison.OrdinalIgnoreCase))
             return "intro-pufpuf";
         return storyId;
+    }
+
+    private static TokenFamily MapFamily(string type)
+    {
+        if (string.IsNullOrWhiteSpace(type)) return TokenFamily.Personality;
+        return type.Trim() switch
+        {
+            "TreeOfHeroes" => TokenFamily.Personality,
+            "Personality" => TokenFamily.Personality,
+            "Alchemy" => TokenFamily.Alchemy,
+            "Discovery" => TokenFamily.Discovery,
+            "Generative" => TokenFamily.Generative,
+            _ => TokenFamily.Personality
+        };
     }
 }
 
@@ -310,6 +339,13 @@ public class AnswerSeedData
 {
     public string AnswerId { get; set; } = string.Empty;
     public string Text { get; set; } = string.Empty;
-    public List<TokenReward>? Tokens { get; set; }
+    public List<TokenSeedData>? Tokens { get; set; }
     public int SortOrder { get; set; }
+}
+
+public class TokenSeedData
+{
+    public string Type { get; set; } = string.Empty; // e.g. "TreeOfHeroes" | "Personality" | "Alchemy"
+    public string Value { get; set; } = string.Empty;
+    public int Quantity { get; set; }
 }

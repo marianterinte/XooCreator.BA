@@ -34,7 +34,7 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
     {
         // Aggregate balances for the 5 core tokens from the generic ledger
         var balances = await _context.UserTokenBalances
-            .Where(b => b.UserId == userId && b.Type == "TreeOfHeroes" &&
+            .Where(b => b.UserId == userId && b.Type == TokenFamily.Personality.ToString() &&
                 (b.Value == "courage" || b.Value == "curiosity" || b.Value == "thinking" || b.Value == "creativity" || b.Value == "safety"))
             .ToListAsync();
 
@@ -117,11 +117,11 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
             return false;
         }
 
-        // Decrement from generic ledger (Type == "TreeOfHeroes" for core tokens)
+        // Decrement from generic ledger (Type == Personality for core tokens)
         async Task Decrement(string value, int amount)
         {
             if (amount <= 0) return;
-            var row = await _context.UserTokenBalances.FirstOrDefaultAsync(b => b.UserId == userId && b.Type == "TreeOfHeroes" && b.Value == value);
+            var row = await _context.UserTokenBalances.FirstOrDefaultAsync(b => b.UserId == userId && b.Type == TokenFamily.Personality.ToString() && b.Value == value);
             if (row == null) return; // should not happen due to check above
             row.Quantity -= amount;
             row.UpdatedAt = DateTime.UtcNow;
@@ -140,11 +140,11 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
     public async Task<bool> AwardTokensAsync(Guid userId, int courage = 0, int curiosity = 0, int thinking = 0, int creativity = 0, int safety = 0)
     {
         var list = new List<TokenReward>();
-        if (courage > 0) list.Add(new TokenReward { Type = "TreeOfHeroes", Value = "courage", Quantity = courage });
-        if (curiosity > 0) list.Add(new TokenReward { Type = "TreeOfHeroes", Value = "curiosity", Quantity = curiosity });
-        if (thinking > 0) list.Add(new TokenReward { Type = "TreeOfHeroes", Value = "thinking", Quantity = thinking });
-        if (creativity > 0) list.Add(new TokenReward { Type = "TreeOfHeroes", Value = "creativity", Quantity = creativity });
-        if (safety > 0) list.Add(new TokenReward { Type = "TreeOfHeroes", Value = "safety", Quantity = safety });
+        if (courage > 0) list.Add(new TokenReward { Type = TokenFamily.Personality, Value = "courage", Quantity = courage });
+        if (curiosity > 0) list.Add(new TokenReward { Type = TokenFamily.Personality, Value = "curiosity", Quantity = curiosity });
+        if (thinking > 0) list.Add(new TokenReward { Type = TokenFamily.Personality, Value = "thinking", Quantity = thinking });
+        if (creativity > 0) list.Add(new TokenReward { Type = TokenFamily.Personality, Value = "creativity", Quantity = creativity });
+        if (safety > 0) list.Add(new TokenReward { Type = TokenFamily.Personality, Value = "safety", Quantity = safety });
         if (list.Count == 0) return true;
         return await AwardTokensAsync(userId, list);
     }
@@ -153,43 +153,21 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
     {
         foreach (var reward in tokenRewards)
         {
-            var type = reward.Type.Trim();
+            var type = reward.Type;
             var value = reward.Value.Trim();
             var qty = reward.Quantity;
 
-            // Map TreeOfHeroes tokens into aggregate UserTokens for backward compatibility
-            if (type == "TreeOfHeroes")
-            {
-                switch (value.ToLower())
-                {
-                    case "courage":
-                        await AwardTokensAsync(userId, courage: qty);
-                        break;
-                    case "curiosity":
-                        await AwardTokensAsync(userId, curiosity: qty);
-                        break;
-                    case "thinking":
-                        await AwardTokensAsync(userId, thinking: qty);
-                        break;
-                    case "creativity":
-                        await AwardTokensAsync(userId, creativity: qty);
-                        break;
-                    case "safety":
-                        await AwardTokensAsync(userId, safety: qty);
-                        break;
-                }
-            }
-
-            // Always persist into generic ledger
+            // Persist into generic ledger once; no recursion
+            var typeString = type.ToString();
             var balance = await _context.UserTokenBalances
-                .FirstOrDefaultAsync(b => b.UserId == userId && b.Type == type && b.Value == value);
+                .FirstOrDefaultAsync(b => b.UserId == userId && b.Type == typeString && b.Value == value);
 
             if (balance == null)
             {
                 balance = new UserTokenBalance
                 {
                     UserId = userId,
-                    Type = type,
+                    Type = typeString,
                     Value = value,
                     Quantity = qty,
                     CreatedAt = DateTime.UtcNow,

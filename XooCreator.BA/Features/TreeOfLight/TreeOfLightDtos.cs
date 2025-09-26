@@ -19,8 +19,8 @@ public record StoryProgressDto
 
 public record TokenReward
 {
-    public required string Type { get; init; }    // e.g., "TreeOfHeroes", "AnimalEvolution"
-    public required string Value { get; init; }  // e.g., "courage", "Karott"
+    public required TokenFamily Type { get; init; }
+    public required string Value { get; init; }
     public required int Quantity { get; init; }
 }
 

@@ -35,6 +35,7 @@ public class XooDbContext : DbContext
     public DbSet<StoryTile> StoryTiles => Set<StoryTile>();
     public DbSet<StoryAnswer> StoryAnswers => Set<StoryAnswer>();
     public DbSet<UserStoryReadProgress> UserStoryReadProgress => Set<UserStoryReadProgress>();
+    public DbSet<StoryAnswerToken> StoryAnswerTokens => Set<StoryAnswerToken>();
 
     // Builder data
     public DbSet<BodyPart> BodyParts => Set<BodyPart>();
@@ -272,6 +273,15 @@ public class XooDbContext : DbContext
             e.Property(x => x.Id).ValueGeneratedOnAdd();
             e.HasIndex(x => new { x.StoryTileId, x.AnswerId }).IsUnique();
             e.HasOne(x => x.StoryTile).WithMany(x => x.Answers).HasForeignKey(x => x.StoryTileId);
+            e.HasMany(x => x.Tokens).WithOne(x => x.StoryAnswer).HasForeignKey(x => x.StoryAnswerId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<StoryAnswerToken>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.Type).HasMaxLength(64).IsRequired();
+            e.Property(x => x.Value).HasMaxLength(128).IsRequired();
         });
 
         modelBuilder.Entity<UserStoryReadProgress>(e =>

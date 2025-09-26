@@ -54,7 +54,7 @@ public class TreeOfLightService : ITreeOfLightService
 
             var newlyUnlockedRegions = new List<string>();
 
-            // Award tokens: prefer request.Tokens if provided; otherwise derive from story answer
+            // Award tokens: derive from story answer only
             var effectiveTokens = new List<TokenReward>();
 
             if (story != null && !string.IsNullOrEmpty(request.SelectedAnswer))
@@ -97,40 +97,7 @@ public class TreeOfLightService : ITreeOfLightService
             };
         }
     }
-
-
-
-    // Deprecated: kept for reference; new flow uses AwardTokensAsync(userId, IEnumerable<TokenReward>)
-    private async Task AwardTokensByType(Guid userId, string tokenType, int quantity)
-    {
-        await _treeOfHeroesRepository.AwardTokensAsync(userId, new[] { new TokenReward { Type = "TreeOfHeroes", Value = tokenType, Quantity = quantity } });
-    }
-
-    private async Task AwardTokensByReward(Guid userId, string reward)
-    {
-        // Convert reward string to token type and quantity
-        // Examples: "token_courage", "token_curiosity", "token_thinking", "token_creativity", "token_safety"
-        switch (reward.ToLower())
-        {
-            case "token_courage":
-                await _treeOfHeroesRepository.AwardTokensAsync(userId, courage: 1);
-                break;
-            case "token_curiosity":
-                await _treeOfHeroesRepository.AwardTokensAsync(userId, curiosity: 1);
-                break;
-            case "token_thinking":
-                await _treeOfHeroesRepository.AwardTokensAsync(userId, thinking: 1);
-                break;
-            case "token_creativity":
-                await _treeOfHeroesRepository.AwardTokensAsync(userId, creativity: 1);
-                break;
-            case "token_safety":
-                await _treeOfHeroesRepository.AwardTokensAsync(userId, safety: 1);
-                break;
-                // For other rewards (like fruits), do nothing - they're handled elsewhere
-        }
-    }
-
+     
     private async Task<List<string>> CheckAndUnlockRegionsAsync(Guid userId, string storyId)
     {
         var newlyUnlockedRegions = new List<string>();

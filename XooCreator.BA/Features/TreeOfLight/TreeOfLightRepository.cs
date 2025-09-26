@@ -47,9 +47,7 @@ public class TreeOfLightRepository : ITreeOfLightRepository
         {
             StoryId = sp.StoryId,
             SelectedAnswer = sp.SelectedAnswer,
-            Tokens = !string.IsNullOrEmpty(sp.TokensJson)
-                ? JsonSerializer.Deserialize<List<TokenReward>>(sp.TokensJson) ?? new List<TokenReward>()
-                : new List<TokenReward>(),
+            Tokens = new List<TokenReward>(),
             CompletedAt = sp.CompletedAt
         }).ToList();
     }
@@ -75,7 +73,7 @@ public class TreeOfLightRepository : ITreeOfLightRepository
                 UserId = userId,
                 StoryId = request.StoryId,
                 SelectedAnswer = request.SelectedAnswer,
-                TokensJson = GetTokens(story, request.SelectedAnswer)
+                TokensJson = null
             };
 
             _context.StoryProgress.Add(storyProgress);
@@ -169,14 +167,14 @@ public class TreeOfLightRepository : ITreeOfLightRepository
             var coreValues = new[] { "courage", "curiosity", "thinking", "creativity", "safety" };
             // Remove existing balances for TreeOfHeroes core values and insert defaults
             await _context.UserTokenBalances
-                .Where(b => b.UserId == userId && b.Type == "TreeOfHeroes" && coreValues.Contains(b.Value))
+                .Where(b => b.UserId == userId && b.Type == TokenFamily.Personality.ToString() && coreValues.Contains(b.Value))
                 .ExecuteDeleteAsync();
 
             var seedRows = coreValues.Select((value, idx) => new UserTokenBalance
             {
                 Id = Guid.NewGuid(),
                 UserId = userId,
-                Type = "TreeOfHeroes",
+                Type = TokenFamily.Personality.ToString(),
                 Value = value,
                 Quantity = 5,
                 CreatedAt = DateTime.UtcNow,
