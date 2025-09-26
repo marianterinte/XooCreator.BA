@@ -186,7 +186,7 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
 
             if (balance == null)
             {
-                balance = new Data.UserTokenBalance
+                balance = new UserTokenBalance
                 {
                     UserId = userId,
                     Type = type,

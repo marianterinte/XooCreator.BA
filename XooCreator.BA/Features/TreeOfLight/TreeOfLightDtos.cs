@@ -17,9 +17,6 @@ public record StoryProgressDto
     public DateTime CompletedAt { get; init; }
 }
 
-
-
-
 public record TokenReward
 {
     public required string Type { get; init; }    // e.g., "TreeOfHeroes", "AnimalEvolution"
@@ -31,7 +28,6 @@ public record CompleteStoryRequest
 {
     public required string StoryId { get; init; }
     public string? SelectedAnswer { get; init; }
-    public List<TokenReward>? Tokens { get; init; }
 }
 
 public record CompleteStoryResponse

@@ -57,11 +57,7 @@ public class TreeOfLightService : ITreeOfLightService
             // Award tokens: prefer request.Tokens if provided; otherwise derive from story answer
             var effectiveTokens = new List<TokenReward>();
 
-            if (request.Tokens != null && request.Tokens.Count > 0)
-            {
-                effectiveTokens.AddRange(request.Tokens);
-            }
-            else if (story != null && !string.IsNullOrEmpty(request.SelectedAnswer))
+            if (story != null && !string.IsNullOrEmpty(request.SelectedAnswer))
             {
                 var quizTile = story.Tiles.FirstOrDefault(t => t.Type == "quiz");
                 if (quizTile != null)
@@ -131,14 +127,14 @@ public class TreeOfLightService : ITreeOfLightService
             case "token_safety":
                 await _treeOfHeroesRepository.AwardTokensAsync(userId, safety: 1);
                 break;
-            // For other rewards (like fruits), do nothing - they're handled elsewhere
+                // For other rewards (like fruits), do nothing - they're handled elsewhere
         }
     }
 
     private async Task<List<string>> CheckAndUnlockRegionsAsync(Guid userId, string storyId)
     {
         var newlyUnlockedRegions = new List<string>();
-        
+
         // Check for region unlock rules based on story completion
         // This could be made more dynamic by loading rules from database
         switch (storyId)
@@ -147,14 +143,14 @@ public class TreeOfLightService : ITreeOfLightService
                 await _repository.UnlockRegionAsync(userId, "farm");
                 newlyUnlockedRegions.Add("farm");
                 break;
-                
+
             case "farm-s1":
             case "farm-s2":
             case "farm-s3":
                 // Check if farm is complete (all 3 stories done)
                 var farmStories = await _repository.GetStoryProgressAsync(userId);
                 var farmCompleted = farmStories.Count(s => s.StoryId.StartsWith("farm-")) >= 3;
-                
+
                 if (farmCompleted)
                 {
                     // Unlock next regions based on collected tokens
@@ -172,7 +168,7 @@ public class TreeOfLightService : ITreeOfLightService
                 }
                 break;
         }
-        
+
         return newlyUnlockedRegions;
     }
 
@@ -182,7 +178,7 @@ public class TreeOfLightService : ITreeOfLightService
         try
         {
             await _repository.ResetUserProgressAsync(userId);
-            
+
             return new ResetProgressResponse
             {
                 Success = true,
