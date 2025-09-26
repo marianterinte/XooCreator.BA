@@ -35,14 +35,6 @@
       ] }
     ] },
 
-    { "storyId": "terra-s3", "title": "Terra – Sâmburele de Lumină", "coverImageUrl": "images/worlds/terra.jpg", "category": "main", "sortOrder": 4, "tiles": [
-        { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Sâmburele", "text": "Găsești un fruct rar: Sparkberry.", "imageUrl": "images/biomes/steppe.jpg" },
-        { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Ce faci cu fructul?", "answers": [
-          { "answerId": "a", "text": "Îl păstrez pentru laboratorul de animale", "reward": "fruit_sparkberry", "sortOrder": 1 },
-        { "answerId": "b", "text": "Îl analizez atent",                     "reward": "token_thinking",  "sortOrder": 2 }
-      ] }
-    ] },
-
     { "storyId": "auroria-s1", "title": "Auroria – Cântecul Zorilor", "coverImageUrl": "images/worlds/terra.jpg", "category": "main", "sortOrder": 4, "tiles": [
       { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Câmpia Aurie", "text": "Soarele pictează spicele în aur. Vântul poartă o melodie străveche.", "imageUrl": "images/biomes/farm.jpg" },
       { "tileId": "p2", "type": "page", "sortOrder": 2, "caption": "Ecoul", "text": "Un turn de piatră trimite înapoi o notă care lipsește din cântec.", "imageUrl": "images/biomes/montain.jpg" },
@@ -64,15 +56,6 @@
       ] }
     ] },
 
-    { "storyId": "auroria-s3", "title": "Auroria – Sâmburele de Soare", "coverImageUrl": "images/worlds/terra.jpg", "category": "main", "sortOrder": 6, "tiles": [
-      { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Rodul", "text": "Găsești Sun-Seed, o sămânță luminoasă ce încălzește inimi.", "imageUrl": "images/biomes/steppe.jpg" },
-      { "tileId": "p2", "type": "page", "sortOrder": 2, "caption": "Proba", "text": "Cine o poartă trebuie să-și păstreze echilibrul între curaj și grijă.", "imageUrl": "images/biomes/forest.jpg" },
-      { "tileId": "q1", "type": "quiz", "sortOrder": 3, "question": "Ce faci cu sămânța?", "answers": [
-        { "answerId": "a", "text": "O plantez în laborator", "reward": "fruit_sun_seed",   "sortOrder": 1 },
-        { "answerId": "b", "text": "O ofer satului",         "reward": "token_safety",    "sortOrder": 2 }
-      ] }
-    ] },
-
     { "storyId": "mechanika-s1", "title": "Mechanika – Inima Angrenajelor", "coverImageUrl": "images/worlds/pyron.jpg", "category": "main", "sortOrder": 6, "tiles": [
       { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Fabrica", "text": "Un oraș-fabrică suspină; motorul central se poticnește.", "imageUrl": "images/biomes/desert.jpg" },
       { "tileId": "p2", "type": "page", "sortOrder": 2, "caption": "Diagnoza", "text": "Conducte, supape, ritmuri; ai nevoie de logică și ascultare.", "imageUrl": "images/biomes/montain.jpg" },
@@ -90,15 +73,6 @@
       { "tileId": "q1", "type": "quiz", "sortOrder": 4, "question": "Ce prioritate alegi?", "answers": [
         { "answerId": "a", "text": "Stabilitate perfectă", "reward": "token_safety",   "sortOrder": 1 },
         { "answerId": "b", "text": "Economie de materiale", "reward": "token_thinking", "sortOrder": 2 }
-      ] }
-    ] },
-
-    { "storyId": "mechanika-s3", "title": "Mechanika – Steaua din Angrenaj", "coverImageUrl": "images/worlds/pyron.jpg", "category": "main", "sortOrder": 8, "tiles": [
-      { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Descoperire", "text": "Găsești Gear-Star, cristal ce stabilizează ritmul mecanic.", "imageUrl": "images/biomes/desert.jpg" },
-      { "tileId": "p2", "type": "page", "sortOrder": 2, "caption": "Test", "text": "Motorul cântă doar dacă ideea este și sigură și clară.", "imageUrl": "images/biomes/forest.jpg" },
-      { "tileId": "q1", "type": "quiz", "sortOrder": 3, "question": "Unde duci cristalul?", "answers": [
-        { "answerId": "a", "text": "Laboratorul de animale", "reward": "fruit_gear_star", "sortOrder": 1 },
-        { "answerId": "b", "text": "Arhiva orașului",       "reward": "token_thinking",  "sortOrder": 2 }
       ] }
     ] },
 
@@ -124,18 +98,9 @@
       ] }
     ] },
 
-    { "storyId": "verdantia-s3", "title": "Verdantia – Rodul Lianei", "coverImageUrl": "images/worlds/sylvaria.jpg", "category": "main", "sortOrder": 11, "tiles": [
-      { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Fructul-Scară", "text": "Culegi Vine-Pearl – întărește orice țesătură vie.", "imageUrl": "images/biomes/forest.jpg" },
-      { "tileId": "p2", "type": "page", "sortOrder": 2, "caption": "Probă", "text": "Creezi o punte mică doar din vlăstari tineri.", "imageUrl": "images/biomes/steppe.jpg" },
-      { "tileId": "q1", "type": "quiz", "sortOrder": 3, "question": "Unde îl duci?", "answers": [
-        { "answerId": "a", "text": "Laborator animale", "reward": "fruit_vine_pearl", "sortOrder": 1 },
-        { "answerId": "b", "text": "Școala grădinarilor", "reward": "token_curiosity",  "sortOrder": 2 }
-      ] }
-    ] },
-
     { "storyId": "nocturna-s1", "title": "Nocturna – Aleea Felinarelor", "coverImageUrl": "images/worlds/neptunia.jpg", "category": "main", "sortOrder": 12, "tiles": [
       { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Amurg", "text": "Orașul aprinde flori-lanternă pe străzile de catifea.", "imageUrl": "images/biomes/montain.jpg" },
-      { "tileId": "p2", "type": "page", "sortOrder": 2, "caption": "Semnale", "text": "Felinarele pulsează coduri pe care trebuie să le citești.", "imageUrl": "images/biomes/forest.jpg" },
+      { "tileId": "p2", "type": "page", "sortOrder": 2, "caption": "Semnale", "text": "Felinarele pulsează coduri pe care trebuie să lecitești.", "imageUrl": "images/biomes/forest.jpg" },
       { "tileId": "p3", "type": "page", "sortOrder": 3, "caption": "Mesajul", "text": "O hartă de stele ascunsă în ritmul luminilor.", "imageUrl": "images/biomes/steppe.jpg" },
       { "tileId": "q1", "type": "quiz", "sortOrder": 4, "question": "Cum decodifici?", "answers": [
         { "answerId": "a", "text": "Grilă logică", "reward": "token_thinking",  "sortOrder": 1 },
@@ -150,15 +115,6 @@
       { "tileId": "q1", "type": "quiz", "sortOrder": 4, "question": "Ce alegi să optimizezi?", "answers": [
         { "answerId": "a", "text": "Siguranța", "reward": "token_safety",   "sortOrder": 1 },
         { "answerId": "b", "text": "Eficiența", "reward": "token_thinking", "sortOrder": 2 }
-      ] }
-    ] },
-
-    { "storyId": "nocturna-s3", "title": "Nocturna – Floarea-Stelată", "coverImageUrl": "images/worlds/neptunia.jpg", "category": "main", "sortOrder": 14, "tiles": [
-      { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Floarea", "text": "Găsești Star-Bloom, floare care luminează cu răbdare.", "imageUrl": "images/biomes/forest.jpg" },
-      { "tileId": "p2", "type": "page", "sortOrder": 2, "caption": "Ritmul", "text": "Îi înveți ritmul: trei pulsuri, pauză, două pulsuri.", "imageUrl": "images/biomes/steppe.jpg" },
-      { "tileId": "q1", "type": "quiz", "sortOrder": 3, "question": "Unde o așezi?", "answers": [
-        { "answerId": "a", "text": "Laborator animale", "reward": "fruit_star_bloom", "sortOrder": 1 },
-        { "answerId": "b", "text": "Turnul de semnal",  "reward": "token_curiosity",  "sortOrder": 2 }
       ] }
     ] },
 
@@ -178,14 +134,6 @@
       ] }
     ] },
 
-    { "storyId": "lunaria-s3", "title": "Lunaria – Darul Lunii", "coverImageUrl": "images/worlds/lunaria.jpg", "category": "main", "sortOrder": 7, "tiles": [
-        { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Lunamelon", "text": "Găsești Moon-Melon – fruct ce luminează întunericul.", "imageUrl": "images/biomes/forest.jpg" },
-        { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Cum îl folosești?", "answers": [
-          { "answerId": "a", "text": "Îl păstrez pentru laborator", "reward": "fruit_moonmelon", "sortOrder": 1 },
-        { "answerId": "b", "text": "Îl ofer Umbrelor",           "reward": "token_courage",   "sortOrder": 2 }
-      ] }
-    ] },
-
     { "storyId": "oceanica-s1", "title": "Oceanica – Coralul Cântător", "coverImageUrl": "images/worlds/oceanica.jpg", "category": "main", "sortOrder": 8, "tiles": [
         { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Rezonanța", "text": "Cântecul coralilor dezvăluie coordonate ascunse.", "imageUrl": "images/biomes/tropical.jpg" },
         { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Ce instrument alegi?", "answers": [
@@ -199,14 +147,6 @@
         { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Cum asiguri podul?", "answers": [
         { "answerId": "a", "text": "Ancore redundante", "reward": "token_safety",    "sortOrder": 1 },
         { "answerId": "b", "text": "Design flexibil",   "reward": "token_creativity", "sortOrder": 2 }
-      ] }
-    ] },
-
-    { "storyId": "oceanica-s3", "title": "Oceanica – Perla Tidelor", "coverImageUrl": "images/worlds/oceanica.jpg", "category": "main", "sortOrder": 10, "tiles": [
-        { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Comoara", "text": "Descoperi Aqua-Pearl, ingredient rar.", "imageUrl": "images/biomes/tropical.jpg" },
-        { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Ce faci cu perla?", "answers": [
-          { "answerId": "a", "text": "O păstrez (animal engineering)", "reward": "fruit_aqua_pearl", "sortOrder": 1 },
-        { "answerId": "b", "text": "O studiez optic",               "reward": "token_thinking",   "sortOrder": 2 }
       ] }
     ] },
 
@@ -226,14 +166,6 @@
       ] }
     ] },
 
-    { "storyId": "sylvaria-s3", "title": "Sylvaria – Zephyr-Plum", "coverImageUrl": "images/worlds/sylvaria.jpg", "category": "main", "sortOrder": 13, "tiles": [
-        { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Fructul Vântului", "text": "Culegi Zephyr-Plum, fruct aerofor.", "imageUrl": "images/biomes/forest.jpg" },
-        { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Cui îl dăruiești?", "answers": [
-          { "answerId": "a", "text": "Laboratorul de animale", "reward": "fruit_zephyr_plum", "sortOrder": 1 },
-        { "answerId": "b", "text": "Gardienilor pădurii",   "reward": "token_safety",     "sortOrder": 2 }
-      ] }
-    ] },
-
     { "storyId": "crystalia-s1", "title": "Crystalia – Ecouri Logice", "coverImageUrl": "images/worlds/crystalia.jpg", "category": "main", "sortOrder": 14, "tiles": [
         { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Sala Prismei", "text": "Ecourile îți verifică raționamentul.", "imageUrl": "images/biomes/montain.jpg" },
         { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Ce verifici întâi?", "answers": [
@@ -250,14 +182,6 @@
         ] }
     ] },
 
-    { "storyId": "crystalia-s3", "title": "Crystalia – Crystal-Pear", "coverImageUrl": "images/worlds/crystalia.jpg", "category": "main", "sortOrder": 16, "tiles": [
-        { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Răsplată", "text": "Primești Crystal-Pear, stabilizator de forme.", "imageUrl": "images/biomes/montain.jpg" },
-        { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Unde îl depozitezi?", "answers": [
-          { "answerId": "a", "text": "Laboratorul de animale", "reward": "fruit_crystal_pear", "sortOrder": 1 },
-        { "answerId": "b", "text": "Arhiva ideilor",         "reward": "token_thinking",   "sortOrder": 2 }
-      ] }
-    ] },
-
     { "storyId": "zephyra-s1", "title": "Zephyra – Poduri de Vânt", "coverImageUrl": "images/worlds/zephyra.jpg", "category": "main", "sortOrder": 17, "tiles": [
         { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Suspensie", "text": "Construiești trasee aeriene sigure.", "imageUrl": "images/biomes/montain.jpg" },
         { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Ce prioritate ai?", "answers": [
@@ -271,14 +195,6 @@
         { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Ce întrebi?", "answers": [
           { "answerId": "a", "text": "Unde bate drumul meu?", "reward": "token_courage", "sortOrder": 1 },
         { "answerId": "b", "text": "Ce riscuri văd?",       "reward": "token_safety",  "sortOrder": 2 }
-      ] }
-    ] },
-
-    { "storyId": "zephyra-s3", "title": "Zephyra – Cheia Aerului", "coverImageUrl": "images/worlds/zephyra.jpg", "category": "main", "sortOrder": 19, "tiles": [
-        { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Cheia", "text": "Primești un filacter care stabilizează curenții.", "imageUrl": "images/biomes/jungle.jpg" },
-        { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Cum o folosești?", "answers": [
-        { "answerId": "a", "text": "Pentru planuri aeriene",     "reward": "token_thinking", "sortOrder": 1 },
-        { "answerId": "b", "text": "Pentru siguranță la înălțime","reward": "token_safety",  "sortOrder": 2 }
       ] }
     ] },
 
@@ -298,14 +214,6 @@
         ] }
     ] },
 
-    { "storyId": "pyron-s3", "title": "Pyron – Pyro-Pomegranate", "coverImageUrl": "images/worlds/pyron.jpg", "category": "main", "sortOrder": 22, "tiles": [
-        { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Rodul Focului", "text": "Culegi Pyro-Pomegranate, fruct energizant.", "imageUrl": "images/biomes/desert.jpg" },
-        { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Unde îl duci?", "answers": [
-          { "answerId": "a", "text": "Laboratorul de animale", "reward": "fruit_pyro_pomegranate", "sortOrder": 1 },
-        { "answerId": "b", "text": "Forjă",                  "reward": "token_courage",        "sortOrder": 2 }
-      ] }
-    ] },
-
     { "storyId": "neptunia-s1", "title": "Neptunia – Gheața care Cântă", "coverImageUrl": "images/worlds/neptunia.jpg", "category": "main", "sortOrder": 23, "tiles": [
         { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Catedrale", "text": "Gheața vibrează în armonii rare.", "imageUrl": "images/biomes/montain.jpg" },
         { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Cum captezi sunetul?", "answers": [
@@ -322,14 +230,6 @@
         ] }
     ] },
 
-    { "storyId": "neptunia-s3", "title": "Neptunia – Perla Nordului", "coverImageUrl": "images/worlds/neptunia.jpg", "category": "main", "sortOrder": 25, "tiles": [
-        { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Descoperire", "text": "Găsești North-Pearl, catalizator rece.", "imageUrl": "images/biomes/montain.jpg" },
-        { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Ce faci cu ea?", "answers": [
-          { "answerId": "a", "text": "Laborator", "reward": "fruit_north_pearl", "sortOrder": 1 },
-        { "answerId": "b", "text": "Arhivă",    "reward": "token_safety",      "sortOrder": 2 }
-      ] }
-    ] },
-
     { "storyId": "aetherion-s1", "title": "Aetherion – Biblioteci de Nori", "coverImageUrl": "images/worlds/aetherion.jpg", "category": "main", "sortOrder": 26, "tiles": [
         { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Citire Aeriană", "text": "Cărți-nori care se rescriu singure.", "imageUrl": "images/biomes/jungle.jpg" },
         { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Cum clasifici ideile?", "answers": [
@@ -344,15 +244,7 @@
           { "answerId": "a", "text": "Aripi ușoare (creativitate)", "reward": "token_creativity", "sortOrder": 1 },
         { "answerId": "b", "text": "Aripi stabile (gândire)",    "reward": "token_thinking",  "sortOrder": 2 }
       ] }
-    ] },
-
-    { "storyId": "aetherion-s3", "title": "Aetherion – Aether-Orchid", "coverImageUrl": "images/worlds/aetherion.jpg", "category": "main", "sortOrder": 28, "tiles": [
-        { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Floarea-Cheie", "text": "Culegi Aether-Orchid, stabilizator de zbor.", "imageUrl": "images/biomes/steppe.jpg" },
-        { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Utilizare?", "answers": [
-          { "answerId": "a", "text": "Laboratorul de animale", "reward": "fruit_aether_orchid", "sortOrder": 1 },
-        { "answerId": "b", "text": "Aripi personale",       "reward": "token_creativity",   "sortOrder": 2 }
-      ] }
-        ] }
+    ] }
   ]
 }
 
