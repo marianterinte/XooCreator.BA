@@ -25,8 +25,9 @@
           "sortOrder": 1,
           "tokens": [
             {
-              "quantity": 3,
-              "tokenType": "token_safety"
+              "value": "safety",
+              "quantity": 1,
+              "type": "TreeOfHeroes"
             }
           ]
         },
@@ -36,12 +37,15 @@
           "sortOrder": 2,
           "tokens": [
             {
-              "quantity": 3,
-              "tokenType": "token_creativity"
+              "value": "creativity",
+              "quantity": 1,
+              "type": "TreeOfHeroes"
             }
           ]
         }
-      ]
+      ],
+      "caption": "Quiz",
+      "imageUrl": "images/biomes/montain.jpg"
     }
   ]
 }

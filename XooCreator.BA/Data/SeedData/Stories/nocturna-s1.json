@@ -41,8 +41,9 @@
           "sortOrder": 1,
           "tokens": [
             {
-              "quantity": 3,
-              "tokenType": "token_thinking"
+              "value": "thinking",
+              "quantity": 1,
+              "type": "TreeOfHeroes"
             }
           ]
         },
@@ -52,12 +53,15 @@
           "sortOrder": 2,
           "tokens": [
             {
-              "quantity": 3,
-              "tokenType": "token_creativity"
+              "value": "creativity",
+              "quantity": 1,
+              "type": "TreeOfHeroes"
             }
           ]
         }
-      ]
+      ],
+      "caption": "Quiz",
+      "imageUrl": "images/biomes/steppe.jpg"
     }
   ]
 }

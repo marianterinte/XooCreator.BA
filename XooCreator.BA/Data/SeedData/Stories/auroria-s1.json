@@ -32,41 +32,28 @@
     {
       "tileId": "q1",
       "type": "quiz",
+      "caption": "Nota Perfectă",
       "sortOrder": 4,
+      "imageUrl": "images/biomes/forest.jpg",
       "question": "Ce notă adaugi?",
       "answers": [
         {
           "answerId": "a",
           "text": "O notă curajoasă",
-          "sortOrder": 1,
-          "tokens": [
-            {
-              "quantity": 3,
-              "tokenType": "token_courage"
-            }
-          ]
+          "tokens": [],
+          "sortOrder": 1
         },
         {
           "answerId": "b",
           "text": "O notă curioasă",
-          "sortOrder": 2,
-          "tokens": [
-            {
-              "quantity": 3,
-              "tokenType": "token_curiosity"
-            }
-          ]
+          "tokens": [],
+          "sortOrder": 2
         },
         {
           "answerId": "c",
           "text": "O notă gândită",
-          "sortOrder": 3,
-          "tokens": [
-            {
-              "quantity": 3,
-              "tokenType": "token_thinking"
-            }
-          ]
+          "tokens": [],
+          "sortOrder": 3
         }
       ]
     }

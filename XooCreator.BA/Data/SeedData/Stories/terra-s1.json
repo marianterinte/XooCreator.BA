@@ -64,6 +64,7 @@
     {
       "tileId": "q1",
       "type": "quiz",
+      "caption": "Ajutorul pentru Pasărea Rănită",
       "sortOrder": 8,
       "imageUrl": "images/stories/terra-s1/8.quiz.png",
       "question": "Cum ajuți pasărea rănită?",
@@ -71,31 +72,31 @@
         {
           "answerId": "a",
           "text": "O încurajezi să se ridice, să-și amintească de puterea ei.",
-          "tokens": [{"tokenType": "token_courage", "quantity": 3}],
+          "tokens": [],
           "sortOrder": 1
         },
         {
           "answerId": "b",
           "text": "O îngrijești cu grijă și răbdare.",
-          "tokens": [{"tokenType": "token_safety", "quantity": 3}],
+          "tokens": [],
           "sortOrder": 2
         },
         {
           "answerId": "c",
           "text": "Îi construiești un plan pentru a-și întinde din nou aripile.",
-          "tokens": [{"tokenType": "token_thinking", "quantity": 3}],
+          "tokens": [],
           "sortOrder": 3
         },
         {
           "answerId": "d",
           "text": "Îți folosești creativitatea și găsești o metodă nouă de vindecare.",
-          "tokens": [{"tokenType": "token_creativity", "quantity": 3}],
+          "tokens": [],
           "sortOrder": 4
         },
         {
           "answerId": "e",
           "text": "Cercetezi semnele luminii de pe penele ei, pentru a descoperi secretul.",
-          "tokens": [{"tokenType": "token_curiosity", "quantity": 3}],
+          "tokens": [],
           "sortOrder": 5
         }
       ]

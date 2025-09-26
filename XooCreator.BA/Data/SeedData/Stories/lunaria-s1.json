@@ -16,30 +16,22 @@
     {
       "tileId": "q1",
       "type": "quiz",
+      "caption": "Comunicarea cu Umbrele",
       "sortOrder": 2,
+      "imageUrl": "images/biomes/montain.jpg",
       "question": "Cum comunici cu umbrele?",
       "answers": [
         {
           "answerId": "a",
           "text": "Întrebări simple",
-          "sortOrder": 1,
-          "tokens": [
-            {
-              "quantity": 3,
-              "tokenType": "token_curiosity"
-            }
-          ]
+          "tokens": [],
+          "sortOrder": 1
         },
         {
           "answerId": "b",
           "text": "Desenez harta",
-          "sortOrder": 2,
-          "tokens": [
-            {
-              "quantity": 3,
-              "tokenType": "token_thinking"
-            }
-          ]
+          "tokens": [],
+          "sortOrder": 2
         }
       ]
     }

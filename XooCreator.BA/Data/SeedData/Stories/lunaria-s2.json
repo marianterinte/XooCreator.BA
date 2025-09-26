@@ -16,30 +16,22 @@
     {
       "tileId": "q1",
       "type": "quiz",
+      "caption": "Întrebarea Potrivită",
       "sortOrder": 2,
+      "imageUrl": "images/biomes/jungle.jpg",
       "question": "Care e întrebarea potrivită?",
       "answers": [
         {
           "answerId": "a",
           "text": "Ce nu înțeleg încă?",
-          "sortOrder": 1,
-          "tokens": [
-            {
-              "quantity": 3,
-              "tokenType": "token_curiosity"
-            }
-          ]
+          "tokens": [],
+          "sortOrder": 1
         },
         {
           "answerId": "b",
           "text": "Ce date îmi lipsesc?",
-          "sortOrder": 2,
-          "tokens": [
-            {
-              "quantity": 3,
-              "tokenType": "token_thinking"
-            }
-          ]
+          "tokens": [],
+          "sortOrder": 2
         }
       ]
     }

@@ -221,8 +221,8 @@ public class StoriesRepository : IStoriesRepository
                         {
                             AnswerId = answerSeed.AnswerId,
                             Text = answerSeed.Text,
-                            TokenReward = answerSeed.Tokens != null && answerSeed.Tokens.Count > 0
-                                ? answerSeed.Tokens
+                            TokensJson = answerSeed.Tokens != null && answerSeed.Tokens.Count > 0
+                                ? JsonSerializer.Serialize(answerSeed.Tokens)
                                 : null,
                             SortOrder = answerSeed.SortOrder
                         };
@@ -261,7 +261,9 @@ public class StoriesRepository : IStoriesRepository
                         {
                             Id = a.AnswerId,
                             Text = a.Text,
-                            Tokens = a.TokenReward ?? new List<TokenReward>()
+                            Tokens = !string.IsNullOrEmpty(a.TokensJson)
+                                ? JsonSerializer.Deserialize<List<TokenReward>>(a.TokensJson) ?? new List<TokenReward>()
+                                : new List<TokenReward>()
                         }).ToList()
                 }).ToList()
         };

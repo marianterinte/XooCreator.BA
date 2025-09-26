@@ -16,25 +16,22 @@
     {
       "tileId": "q1",
       "type": "quiz",
+      "caption": "Depozitarea Crystal-Pear",
       "sortOrder": 2,
+      "imageUrl": "images/biomes/montain.jpg",
       "question": "Unde îl depozitezi?",
       "answers": [
         {
           "answerId": "a",
           "text": "Laboratorul de animale",
-          "sortOrder": 1,
-          "tokens": []
+          "tokens": [],
+          "sortOrder": 1
         },
         {
           "answerId": "b",
           "text": "Arhiva ideilor",
-          "sortOrder": 2,
-          "tokens": [
-            {
-              "quantity": 3,
-              "tokenType": "token_thinking"
-            }
-          ]
+          "tokens": [],
+          "sortOrder": 2
         }
       ]
     }

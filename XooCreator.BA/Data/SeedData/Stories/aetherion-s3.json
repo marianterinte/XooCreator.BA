@@ -16,25 +16,22 @@
     {
       "tileId": "q1",
       "type": "quiz",
+      "caption": "Utilizarea Aether-Orchid",
       "sortOrder": 2,
+      "imageUrl": "images/biomes/steppe.jpg",
       "question": "Utilizare?",
       "answers": [
         {
           "answerId": "a",
           "text": "Laboratorul de animale",
-          "sortOrder": 1,
-          "tokens": []
+          "tokens": [],
+          "sortOrder": 1
         },
         {
           "answerId": "b",
           "text": "Aripi personale",
-          "sortOrder": 2,
-          "tokens": [
-            {
-              "quantity": 3,
-              "tokenType": "token_creativity"
-            }
-          ]
+          "tokens": [],
+          "sortOrder": 2
         }
       ]
     }

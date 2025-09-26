@@ -32,30 +32,22 @@
     {
       "tileId": "q1",
       "type": "quiz",
+      "caption": "Conducerea Orchestrei",
       "sortOrder": 4,
+      "imageUrl": "images/biomes/jungle.jpg",
       "question": "Cum conduci orchestra?",
       "answers": [
         {
           "answerId": "a",
           "text": "Partitură clară",
-          "sortOrder": 1,
-          "tokens": [
-            {
-              "quantity": 3,
-              "tokenType": "token_thinking"
-            }
-          ]
+          "tokens": [],
+          "sortOrder": 1
         },
         {
           "answerId": "b",
           "text": "Improvizație",
-          "sortOrder": 2,
-          "tokens": [
-            {
-              "quantity": 3,
-              "tokenType": "token_creativity"
-            }
-          ]
+          "tokens": [],
+          "sortOrder": 2
         }
       ]
     }

@@ -16,30 +16,22 @@
     {
       "tileId": "q1",
       "type": "quiz",
+      "caption": "Alegerea Structurii",
       "sortOrder": 2,
+      "imageUrl": "images/biomes/desert.jpg",
       "question": "Ce structură alegi?",
       "answers": [
         {
           "answerId": "a",
           "text": "Rețea logică",
-          "sortOrder": 1,
-          "tokens": [
-            {
-              "quantity": 3,
-              "tokenType": "token_thinking"
-            }
-          ]
+          "tokens": [],
+          "sortOrder": 1
         },
         {
           "answerId": "b",
           "text": "Model generativ",
-          "sortOrder": 2,
-          "tokens": [
-            {
-              "quantity": 3,
-              "tokenType": "token_creativity"
-            }
-          ]
+          "tokens": [],
+          "sortOrder": 2
         }
       ]
     }
