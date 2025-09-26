@@ -27,7 +27,7 @@
             {
               "value": "safety",
               "quantity": 1,
-              "type": "TreeOfHeroes"
+              "type": "Personality"
             }
           ]
         },
@@ -39,7 +39,7 @@
             {
               "value": "courage",
               "quantity": 1,
-              "type": "TreeOfHeroes"
+              "type": "Personality"
             }
           ]
         }

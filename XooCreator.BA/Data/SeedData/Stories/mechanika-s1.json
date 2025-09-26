@@ -43,7 +43,7 @@
             {
               "value": "safety",
               "quantity": 1,
-              "type": "TreeOfHeroes"
+              "type": "Personality"
             }
           ]
         },
@@ -55,7 +55,7 @@
             {
               "value": "creativity",
               "quantity": 1,
-              "type": "TreeOfHeroes"
+              "type": "Personality"
             }
           ]
         }

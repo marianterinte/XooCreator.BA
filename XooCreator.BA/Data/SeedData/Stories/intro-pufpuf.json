@@ -50,7 +50,7 @@
           "text": "Dacă aleg drumul cel greu, care e prima probă de curaj și cum pornesc fără să mă răzgândesc?",
           "tokens": [
             {
-              "type": "TreeOfHeroes",
+              "type": "Personality",
               "value": "courage",
               "quantity": 1
             }
@@ -62,7 +62,7 @@
           "text": "Ce taine ascunse poartă ramurile — ființe, povești sau comori de lumină pe care încă nu le vedem?",
           "tokens": [
             {
-              "type": "TreeOfHeroes",
+              "type": "Personality",
               "value": "curiosity",
               "quantity": 1
             }
@@ -74,7 +74,7 @@
           "text": "Care e ordinea logică a nodurilor — ce trebuie activat înaintea celorlalte ca să deschidem calea?",
           "tokens": [
             {
-              "type": "TreeOfHeroes",
+              "type": "Personality",
               "value": "thinking",
               "quantity": 1
             }
@@ -86,7 +86,7 @@
           "text": "Dacă aș putea inventa o cheie din lumină, din ce sunete, culori sau forme ar trebui s-o compun?",
           "tokens": [
             {
-              "type": "TreeOfHeroes",
+              "type": "Personality",
               "value": "creativity",
               "quantity": 1
             }
@@ -98,7 +98,7 @@
           "text": "Ce pericole sunt pe traseu și care este cea mai sigură cale pentru noi și pentru prietenii mai mici?",
           "tokens": [
             {
-              "type": "TreeOfHeroes",
+              "type": "Personality",
               "value": "safety",
               "quantity": 1
             }
