@@ -93,18 +93,26 @@ public class StoriesRepository : IStoriesRepository
 
     public async Task SeedStoriesAsync()
     {
-        // Check if stories already exist
-        var existingCount = await _context.StoryDefinitions.CountAsync();
-        if (existingCount > 0) return;
-
-        var stories = await LoadStoriesFromJsonAsync();
-        
-        foreach (var story in stories)
+        try
         {
-            _context.StoryDefinitions.Add(story);
-        }
+            // Check if stories already exist
+            var existingCount = await _context.StoryDefinitions.CountAsync();
+            if (existingCount > 0) return;
 
-        await _context.SaveChangesAsync();
+            var stories = await LoadStoriesFromJsonAsync();
+
+            foreach (var story in stories)
+            {
+                _context.StoryDefinitions.Add(story);
+            }
+
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+
+            throw ex;
+        }
     }
 
     private static async Task<List<StoryDefinition>> LoadStoriesFromJsonAsync()
@@ -213,8 +221,8 @@ public class StoriesRepository : IStoriesRepository
                         {
                             AnswerId = answerSeed.AnswerId,
                             Text = answerSeed.Text,
-                            TokensJson = answerSeed.Tokens != null && answerSeed.Tokens.Count > 0 
-                                ? JsonSerializer.Serialize(answerSeed.Tokens) 
+                            TokenReward = answerSeed.Tokens != null && answerSeed.Tokens.Count > 0
+                                ? answerSeed.Tokens
                                 : null,
                             SortOrder = answerSeed.SortOrder
                         };
@@ -253,9 +261,7 @@ public class StoriesRepository : IStoriesRepository
                         {
                             Id = a.AnswerId,
                             Text = a.Text,
-                            Tokens = !string.IsNullOrEmpty(a.TokensJson) 
-                                ? JsonSerializer.Deserialize<List<TokenReward>>(a.TokensJson) ?? new List<TokenReward>()
-                                : new List<TokenReward>()
+                            Tokens = a.TokenReward ?? new List<TokenReward>()
                         }).ToList()
                 }).ToList()
         };
