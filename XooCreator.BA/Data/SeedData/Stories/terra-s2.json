@@ -1,51 +1,127 @@
 {
   "storyId": "terra-s2",
-  "title": "Terra – Podul de Răbdare",
-  "coverImageUrl": "images/worlds/terra.jpg",
-  "category": "main",
-  "sortOrder": 3,
+  "title": "Iepurele Negru – Lentila Lunii",
+  "coverImageUrl": "images/stories/terra-s2/0.Cover.png",
+  "category": "terra",
+  "sortOrder": 2,
   "tiles": [
     {
       "tileId": "p1",
       "type": "page",
       "sortOrder": 1,
-      "caption": "Râul",
-      "text": "Construiește un pod simplu cu resurse puține.",
-      "imageUrl": "images/biomes/forest.jpg"
+      "caption": "Ținta: Lentila Lunii",
+      "text": "Planul pe azi e clar: găsiți Lentila Lunii. Cu ea, cristalul mărește harta și puteți căuta mai adânc ruta spre Kelo-Ketis. Ținta indică spre o zonă cu stânci joase și iarbă înaltă, la marginea unei păduri.",
+      "imageUrl": "images/stories/terra-s2/1.target.png"
+    },
+    {
+      "tileId": "p2",
+      "type": "page",
+      "sortOrder": 2,
+      "caption": "Urme ciudate",
+      "text": "În iarbă apar urme mici, în zigzag, care dispar lângă un buștean scobit. Pe lângă ele, cozi de morcov „gustate artistic”.",
+      "imageUrl": "images/stories/terra-s2/2.tracks.png"
+    },
+    {
+      "tileId": "p3",
+      "type": "page",
+      "sortOrder": 3,
+      "caption": "Iepurele negru",
+      "text": "Din buștean sare un iepure negru, cu blana mată și ochi mari. „Bună! Eu sunt… uneori aici, uneori pe Lunaria. Depinde cum clipești”, spune, apoi râde. „Știu unde e Lentila. Și am nevoie de ajutor să ajung acasă, pe Lunaria. Dacă mă ajutați, vă arăt drumul către Lentilă.”",
+      "imageUrl": "images/stories/terra-s2/3.black-rabbit.png"
+    },
+    {
+      "tileId": "p4",
+      "type": "page",
+      "sortOrder": 4,
+      "caption": "Locul lentilei",
+      "text": "Ghidați de iepure, ajungeți la o grotă scurtă, rece, cu apă până la gleznă. Pe tavan atârnă cristale palide; pe o stâncă, un disc translucid — Lentila Lunii — prins între două excrescențe de piatră.",
+      "imageUrl": "images/stories/terra-s2/4.cave.png"
+    },
+    {
+      "tileId": "p5",
+      "type": "page",
+      "sortOrder": 5,
+      "caption": "Problema mică",
+      "text": "Când atingi stânca, apa face valuri și intrarea parcă „respiră”, strângându-se ușor. „Grotă sensibilă”, spune iepurele. „Faci bine, primești ieșire. Faci rău, primești duș rece.”",
+      "imageUrl": "images/stories/terra-s2/5.problem.png"
     },
     {
       "tileId": "q1",
       "type": "quiz",
-      "sortOrder": 2,
-      "question": "Ce material alegi?",
+      "caption": "Cum procedăm",
+      "sortOrder": 6,
+      "imageUrl": "images/stories/terra-s2/6.quiz.png",
+      "question": "Alege abordarea ca să scoți Lentila Lunii fără să destabilizezi grota:",
       "answers": [
         {
           "answerId": "a",
-          "text": "Piatră (siguranță)",
-          "sortOrder": 1,
+          "text": "Te strecori pe pragul îngust și lucrezi rapid, ca să nu lași timp pereților să „respire”.",
           "tokens": [
             {
-              "value": "safety",
-              "quantity": 1,
-              "type": "Personality"
+              "type": "Personality",
+              "value": "courage",
+              "quantity": 1
             }
-          ]
+          ],
+          "sortOrder": 1
         },
         {
           "answerId": "b",
-          "text": "Lemn flexibil (creativitate)",
-          "sortOrder": 2,
+          "text": "Te miști încet, verifici sprijinul la fiecare pas și menții apa cât mai liniștită.",
           "tokens": [
             {
-              "value": "creativity",
-              "quantity": 1,
-              "type": "Personality"
+              "type": "Personality",
+              "value": "safety",
+              "quantity": 1
             }
-          ]
+          ],
+          "sortOrder": 2
+        },
+        {
+          "answerId": "c",
+          "text": "Faci un plan scurt: cine ține lanterna, cine fixează pârghia, ordinea mișcărilor, semn la „stop”.",
+          "tokens": [
+            {
+              "type": "Personality",
+              "value": "thinking",
+              "quantity": 1
+            }
+          ],
+          "sortOrder": 3
+        },
+        {
+          "answerId": "d",
+          "text": "Improvizezi o unealtă: bețișor cu buclă din sfoară ca să tragi lentila de la distanță.",
+          "tokens": [
+            {
+              "type": "Personality",
+              "value": "creativity",
+              "quantity": 1
+            }
+          ],
+          "sortOrder": 4
+        },
+        {
+          "answerId": "e",
+          "text": "Pui mai întâi marcaje și ieșiri sigure: pietre-pas, frânghie la intrare, timp-limită pentru retragere.",
+          "tokens": [
+            {
+              "type": "Personality",
+              "value": "safety",
+              "quantity": 1
+            }
+          ],
+          "sortOrder": 5
         }
-      ],
-      "caption": "Quiz",
-      "imageUrl": "images/biomes/forest.jpg"
+      ]
+    },
+    {
+      "tileId": "p6",
+      "type": "page",
+      "sortOrder": 7,
+      "caption": "Reușita",
+      "text": "Lentila iese curat, fără să tulbure grota. Iepurele bate din lăbuțe: „Bravo! Lateral e mai bine decât drept!” Pui Lentila peste cristal, iar imaginea hărții se clarifică. Iepurele te privește hotărât: „Ținem legătura. Vreau acasă, pe Lunaria — promiți că mă ajuți?”",
+      "imageUrl": "images/stories/terra-s2/7.success.png"
     }
   ]
 }
