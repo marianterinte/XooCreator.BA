@@ -16,7 +16,7 @@ public class GetTreeProgressEndpoint
         _userContext = userContext;
     }
 
-    [Route("/api/tree-of-light/progress")] // GET
+    [Route("/api/{locale}/tree-of-light/progress")] // GET
     public static async Task<Results<Ok<List<TreeProgressDto>>, UnauthorizedHttpResult>> HandleGet([FromServices] GetTreeProgressEndpoint ep)
     {
         var userId = await ep._userContext.GetUserIdAsync();

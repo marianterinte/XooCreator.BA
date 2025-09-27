@@ -21,7 +21,7 @@ public sealed class GetUserBestiaryEndpoint
 
     public record BestiaryResponse(List<DiscoveryBestiaryItemDto> Discovery /*, List<...> TreeOfHeroes, List<...> Generated */);
 
-    [Route("/api/bestiary")] // GET
+    [Route("/api/{locale}/bestiary")] // GET
     public static async Task<Results<Ok<BestiaryResponse>, UnauthorizedHttpResult>> HandleGet(
         [FromServices] GetUserBestiaryEndpoint ep,
         CancellationToken ct)

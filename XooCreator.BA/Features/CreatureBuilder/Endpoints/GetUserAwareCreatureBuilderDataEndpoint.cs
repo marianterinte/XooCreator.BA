@@ -22,7 +22,7 @@ public class GetUserAwareCreatureBuilderDataEndpoint
         _db = db;
     }
 
-    [Route("/api/creature-builder/user-data")] // GET /api/creature-builder/user-data
+    [Route("/api/{locale}/creature-builder/user-data")] // GET /api/{locale}/creature-builder/user-data
     public static async Task<Results<Ok<UserAwareCreatureBuilderDataDto>, UnauthorizedHttpResult>> HandleGet(
         [FromServices] GetUserAwareCreatureBuilderDataEndpoint ep, 
         CancellationToken ct)
@@ -35,7 +35,7 @@ public class GetUserAwareCreatureBuilderDataEndpoint
         return TypedResults.Ok(data);
     }
 
-    [Route("/api/creature-builder/discover")] // POST
+    [Route("/api/{locale}/creature-builder/discover")] // POST
     public static async Task<Results<Ok<DiscoverResponseDto>, UnauthorizedHttpResult, BadRequest<DiscoverResponseDto>>> HandlePost(
         [FromServices] GetUserAwareCreatureBuilderDataEndpoint ep,
         [FromBody] DiscoverRequestDto request,

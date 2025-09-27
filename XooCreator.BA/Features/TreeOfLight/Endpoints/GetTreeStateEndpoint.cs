@@ -7,7 +7,7 @@ namespace XooCreator.BA.Features.TreeOfLight.Endpoints;
 [Endpoint]
 public class GetTreeStateEndpoint
 {
-    [Route("/api/tree-of-light/state")] // GET
+    [Route("/api/{locale}/tree-of-light/state")] // GET
     public static async Task<IResult> HandleGet(
         [FromServices] ITreeModelService treeModelService,
         [FromServices] IUserContextService userContext,

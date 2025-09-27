@@ -16,7 +16,7 @@ public class GetStoryByIdEndpoint
         _userContext = userContext;
     }
 
-    [Route("/api/stories/{storyId}")] // GET /api/stories/{storyId}
+    [Route("/api/{locale}/stories/{storyId}")] // GET /api/{locale}/stories/{storyId}
     public static async Task<Results<Ok<GetStoryByIdResponse>, UnauthorizedHttpResult, NotFound>> HandleGet(
         [FromServices] GetStoryByIdEndpoint ep,
         string storyId)

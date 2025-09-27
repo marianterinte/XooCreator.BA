@@ -7,7 +7,7 @@ namespace XooCreator.BA.Features.System.Endpoints;
 [Endpoint]
 public class DbHealthEndpoint
 {
-    [Route("/api/db/health")] // GET
+    [Route("/api/{locale}/db/health")] // GET
     public static async Task<IResult> HandleGet(
         [FromServices] IDbHealthService health,
         CancellationToken ct)

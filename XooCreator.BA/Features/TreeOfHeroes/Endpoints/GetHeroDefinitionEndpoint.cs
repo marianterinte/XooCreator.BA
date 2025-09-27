@@ -14,7 +14,7 @@ public class GetHeroDefinitionEndpoint
         _service = service;
     }
 
-    [Route("/api/tree-of-heroes/definitions/{heroId}")] // GET
+    [Route("/api/{locale}/tree-of-heroes/definitions/{heroId}")] // GET
     public static async Task<Results<Ok<HeroDefinitionDto>, NotFound, UnauthorizedHttpResult>> HandleGet(
         [FromServices] GetHeroDefinitionEndpoint ep,
         [FromRoute] string heroId)

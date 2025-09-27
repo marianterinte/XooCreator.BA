@@ -17,7 +17,7 @@ public class SpendCreditsEndpoint
         _userContext = userContext;
     }
 
-    [Route("/api/user/spend-credits")] // POST (legacy / generative)
+    [Route("/api/{locale}/user/spend-credits")] // POST (legacy / generative)
     public static async Task<Results<Ok<SpendCreditsResponse>, UnauthorizedHttpResult, BadRequest<SpendCreditsResponse>>> HandlePost(
         [FromServices] SpendCreditsEndpoint ep,
         [FromBody] SpendCreditsRequest request)
@@ -33,7 +33,7 @@ public class SpendCreditsEndpoint
             : TypedResults.BadRequest(result);
     }
 
-    [Route("/api/user/spend-discovery-credits")] // POST
+    [Route("/api/{locale}/user/spend-discovery-credits")] // POST
     public static async Task<Results<Ok<SpendCreditsResponse>, UnauthorizedHttpResult, BadRequest<SpendCreditsResponse>>> HandlePost(
         [FromServices] SpendCreditsEndpoint ep,
         [FromBody] SpendCreditsRequest request,

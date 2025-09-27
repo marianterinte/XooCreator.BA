@@ -4,6 +4,7 @@ public interface IUserContextService
 {
     Task<Guid?> GetUserIdAsync();
     Task<string?> GetUserSubAsync();
+    string GetRequestLocaleOrDefault(string fallback = "ro-ro");
 }
 
 // Temporary implementation - will be replaced with Auth0 integration
@@ -29,5 +30,16 @@ public class UserContextService : IUserContextService
         // For now, return a hardcoded test sub
         // This will be replaced with actual Auth0 sub extraction
         return Task.FromResult<string?>("test-user-sub");
+    }
+
+    public string GetRequestLocaleOrDefault(string fallback = "ro-ro")
+    {
+        var ctx = _httpContextAccessor.HttpContext;
+        if (ctx != null && ctx.Items.TryGetValue(LocaleRoutingExtensions.RequestLocaleItemKey, out var value))
+        {
+            var s = value as string;
+            if (!string.IsNullOrWhiteSpace(s)) return s;
+        }
+        return fallback;
     }
 }

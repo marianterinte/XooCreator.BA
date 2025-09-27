@@ -16,7 +16,7 @@ public class GetTreeOfHeroesProgressEndpoint
         _userContext = userContext;
     }
 
-    [Route("/api/tree-of-heroes")] // GET
+    [Route("/api/{locale}/tree-of-heroes")] // GET
     public static async Task<Results<Ok<List<HeroTreeNodeDto>>, UnauthorizedHttpResult>> HandleGet([FromServices] GetTreeOfHeroesProgressEndpoint ep)
     {
         var userId = await ep._userContext.GetUserIdAsync();

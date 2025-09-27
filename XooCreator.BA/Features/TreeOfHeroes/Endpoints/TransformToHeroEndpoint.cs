@@ -16,7 +16,7 @@ public class TransformToHeroEndpoint
         _userContext = userContext;
     }
 
-    [Route("/api/tree-of-heroes/transform-hero")] // POST
+    [Route("/api/{locale}/tree-of-heroes/transform-hero")] // POST
     public static async Task<Results<Ok<TransformToHeroResponse>, BadRequest<TransformToHeroResponse>, UnauthorizedHttpResult>> HandlePost(
         [FromServices] TransformToHeroEndpoint ep,
         [FromBody] TransformToHeroRequest request)

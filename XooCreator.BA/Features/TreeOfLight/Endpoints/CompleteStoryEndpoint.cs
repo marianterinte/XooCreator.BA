@@ -16,7 +16,7 @@ public class CompleteStoryEndpoint
         _userContext = userContext;
     }
 
-    [Route("/api/tree-of-light/complete-story")] // POST
+    [Route("/api/{locale}/tree-of-light/complete-story")] // POST
     public static async Task<Results<Ok<CompleteStoryResponse>, BadRequest<CompleteStoryResponse>, UnauthorizedHttpResult>> HandlePost(
         [FromServices] CompleteStoryEndpoint ep,
         [FromBody] CompleteStoryRequest request)

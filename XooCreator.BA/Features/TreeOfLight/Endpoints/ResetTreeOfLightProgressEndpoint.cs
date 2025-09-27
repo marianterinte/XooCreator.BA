@@ -16,7 +16,7 @@ public class ResetTreeOfLightProgressEndpoint
         _userContext = userContext;
     }
 
-    [Route("/api/tree-of-light/reset-progress")] // POST
+    [Route("/api/{locale}/tree-of-light/reset-progress")] // POST
     public static async Task<Results<Ok<ResetProgressResponse>, BadRequest<ResetProgressResponse>, UnauthorizedHttpResult>> HandlePost(
         [FromServices] ResetTreeOfLightProgressEndpoint ep)
     {

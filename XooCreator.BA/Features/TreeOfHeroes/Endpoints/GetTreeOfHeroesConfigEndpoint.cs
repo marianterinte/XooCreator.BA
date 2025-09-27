@@ -7,7 +7,7 @@ namespace XooCreator.BA.Features.TreeOfHeroes.Endpoints;
 [Endpoint]
 public class GetTreeOfHeroesConfigEndpoint
 {
-    [Route("/api/tree-of-heroes/config")] // GET
+    [Route("/api/{locale}/tree-of-heroes/config")] // GET
     public static async Task<IResult> HandleGet(
         [FromServices] ITreeOfHeroesService treeOfHeroesService,
         CancellationToken ct)

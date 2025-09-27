@@ -124,6 +124,9 @@ app.UseCors("AllowAll");
 // Global exception handler - should be early in the pipeline
 app.UseGlobalExceptionHandling();
 
+// Rewrite /api/{locale}/... to /api/... and expose locale in HttpContext.Items
+app.UseLocaleInApiPath();
+
 // Auto-migrate database on startup + initializare date
 using (var scope = app.Services.CreateScope())
 {
