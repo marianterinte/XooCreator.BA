@@ -15,7 +15,7 @@ public interface ITreeModelRepository
 public class TreeModelRepository : ITreeModelRepository
 {
     private readonly XooDbContext _context;
-    private const string SeedFilePath = "Data/SeedData/tree-model-seed.json";
+    private const string LegacySeedFilePath = "Data/SeedData/tree-model-seed.json";
 
     public TreeModelRepository(XooDbContext context)
     {
@@ -109,15 +109,23 @@ public class TreeModelRepository : ITreeModelRepository
 
     private static async Task<TreeModelSeedRoot> LoadSeedAsync()
     {
-        if (!File.Exists(SeedFilePath))
+        var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+        var candidates = new[]
         {
-            throw new FileNotFoundException($"Tree model seed file not found at '{SeedFilePath}'.")
+            Path.Combine(baseDir, "Data", "SeedData", "ro-ro", "tree-model-seed.json"),
+            Path.Combine(baseDir, LegacySeedFilePath)
+        };
+
+        string? pathToUse = candidates.FirstOrDefault(File.Exists);
+        if (string.IsNullOrEmpty(pathToUse))
+        {
+            throw new FileNotFoundException($"Tree model seed file not found. Checked: {string.Join(", ", candidates)}")
             {
                 HResult = 404
             };
         }
 
-        var json = await File.ReadAllTextAsync(SeedFilePath);
+        var json = await File.ReadAllTextAsync(pathToUse);
         var data = JsonSerializer.Deserialize<TreeModelSeedRoot>(json, _jsonOptions);
         if (data == null)
         {

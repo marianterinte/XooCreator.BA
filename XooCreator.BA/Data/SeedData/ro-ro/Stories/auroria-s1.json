@@ -1,0 +1,61 @@
+{
+  "storyId": "auroria-s1",
+  "title": "Auroria – Cântecul Zorilor",
+  "coverImageUrl": "images/worlds/terra.jpg",
+  "category": "main",
+  "sortOrder": 4,
+  "tiles": [
+    {
+      "tileId": "p1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Câmpia Aurie",
+      "text": "Soarele pictează spicele în aur. Vântul poartă o melodie străveche.",
+      "imageUrl": "images/biomes/farm.jpg"
+    },
+    {
+      "tileId": "p2",
+      "type": "page",
+      "sortOrder": 2,
+      "caption": "Ecoul",
+      "text": "Un turn de piatră trimite înapoi o notă care lipsește din cântec.",
+      "imageUrl": "images/biomes/montain.jpg"
+    },
+    {
+      "tileId": "p3",
+      "type": "page",
+      "sortOrder": 3,
+      "caption": "Freamătul",
+      "text": "Păsările aurii se așază doar pe acordul potrivit.",
+      "imageUrl": "images/biomes/forest.jpg"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "caption": "Nota Perfectă",
+      "sortOrder": 4,
+      "imageUrl": "images/biomes/forest.jpg",
+      "question": "Ce notă adaugi?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "O notă curajoasă",
+          "tokens": [],
+          "sortOrder": 1
+        },
+        {
+          "answerId": "b",
+          "text": "O notă curioasă",
+          "tokens": [],
+          "sortOrder": 2
+        },
+        {
+          "answerId": "c",
+          "text": "O notă gândită",
+          "tokens": [],
+          "sortOrder": 3
+        }
+      ]
+    }
+  ]
+}

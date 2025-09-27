@@ -1,0 +1,168 @@
+{
+  "storyId": "lunaria-s1",
+  "title": "Linkaro",
+  "coverImageUrl": "images/tol/stories/lunaria-s1/0.Cover.png",
+  "category": "lunaria",
+  "sortOrder": 1,
+  "tiles": [
+    {
+      "tileId": "p1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Portalul și Consiliul Iepurilor",
+      "text": "Puf-Puf fixează lupa peste cristal și prinde la margine pana păsării portocalii pe care a ajutat-o pe Terra. Lumina se adună și se deschide un portal. Intrați tu, Puf-Puf și iepurele negru. La capăt, o piață cu steaguri în semilună. Consiliul Iepurilor vă întâmpină. — „Călători din Copacul Luminii?” întreabă un consilier. — „Puf-Puf, la raport,” zice el scurt. „Suntem aici să ajutăm.” Cei din consiliu explică: „O boală îi slăbește pe ai noștri. Avem nevoie de soluții.” Iepurele negru, tu și Puf-Puf porniți către Muntele Alb.",
+      "imageUrl": "images/tol/stories/lunaria-s1/1.portal-council.png"
+    },
+    {
+      "tileId": "p2",
+      "type": "page",
+      "sortOrder": 2,
+      "caption": "Drumul spre Muntele Alb",
+      "text": "Poteca urcă greu; pietrele alunecă, vântul se schimbă des. După o pantă abruptă, zăriți cu mirare mănăstirea: ziduri albe, linii simple, stegulețe cu semilună.",
+      "imageUrl": "images/tol/stories/lunaria-s1/2.white-mountain-road.png"
+    },
+    {
+      "tileId": "p3",
+      "type": "page",
+      "sortOrder": 3,
+      "caption": "Sala Liniștii",
+      "text": "În curte, călugări pisici și iepuri se antrenează în tăcere. Le spuneți despre boala din oraș. Se privesc mirați: n-au auzit. „Trebuie să vorbiți cu Regina în Exil”, spune un călugăr și vă conduce într-o încăpere luminoasă. O siluetă stă cu spatele, în meditație.",
+      "imageUrl": "images/tol/stories/lunaria-s1/3.silent-hall.png"
+    },
+    {
+      "tileId": "p4",
+      "type": "page",
+      "sortOrder": 4,
+      "caption": "Linkaro, Matzo-Iepurele",
+      "text": "Figura se întoarce. — „E… pisică?” șoptește Puf-Puf. — „Sau iepure?” întrebi tu. — „Linkaro. Sunt un Matzo-Iepure”, zâmbește. Puf-Puf dă din cap: „Am citit despre Matzo-Iepuri în condica mea, pe vremea războaielor dintre pisici și iepuri.” Linkaro: „Războaiele s-au încheiat. Sunt păstrătoarea păcii; eu am semnat ultimul armistițiu. Spuneți problema.” Îi descrieți boala. „Vă trebuie Pietrele Vieții — verzi, cu esență de vindecare. Sunt sub o cornișă expusă. Culegeți-le cu grijă.”",
+      "imageUrl": "images/tol/stories/lunaria-s1/4.linkaro.png"
+    },
+    {
+      "tileId": "p5",
+      "type": "page",
+      "sortOrder": 5,
+      "caption": "Pietrele Vieții",
+      "text": "Pe o creastă îngustă, sub stâncă, licăresc pietre verzi. Curentul de aer le slăbește pulsul dacă miști prea brusc. Puf-Puf: „Aici contează cum te apropii.”",
+      "imageUrl": "images/tol/stories/lunaria-s1/5.life-stones.png"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "caption": "Atingerea potrivită",
+      "sortOrder": 6,
+      "imageUrl": "images/tol/stories/lunaria-s1/6.quiz.png",
+      "question": "Pietrele verzi pulsează sub cornișă. Nu cer forță, ci felul în care te apropii. Cum le culegi fără să le stingi lumina?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "O mișcare hotărâtă.",
+          "tokens": [
+            {
+              "type": "Personality",
+              "value": "courage",
+              "quantity": 1
+            },
+            {
+              "type": "Discovery",
+              "value": "discovery credit",
+              "quantity": 1
+            }
+          ],
+          "sortOrder": 1
+        },
+        {
+          "answerId": "b",
+          "text": "Ascult pulsul, apoi ating.",
+          "tokens": [
+            {
+              "type": "Personality",
+              "value": "curiosity",
+              "quantity": 1
+            },
+            {
+              "type": "Discovery",
+              "value": "discovery credit",
+              "quantity": 1
+            }
+          ],
+          "sortOrder": 2
+        },
+        {
+          "answerId": "c",
+          "text": "Sincronizez ca un ceasornicar.",
+          "tokens": [
+            {
+              "type": "Personality",
+              "value": "thinking",
+              "quantity": 1
+            },
+            {
+              "type": "Discovery",
+              "value": "discovery credit",
+              "quantity": 1
+            }
+          ],
+          "sortOrder": 3
+        },
+        {
+          "answerId": "d",
+          "text": "Buclă moale, fără atingere.",
+          "tokens": [
+            {
+              "type": "Personality",
+              "value": "creativity",
+              "quantity": 1
+            },
+            {
+              "type": "Discovery",
+              "value": "discovery credit",
+              "quantity": 1
+            }
+          ],
+          "sortOrder": 4
+        },
+        {
+          "answerId": "e",
+          "text": "Pași calmi, ritm constant.",
+          "tokens": [
+            {
+              "type": "Personality",
+              "value": "safety",
+              "quantity": 1
+            },
+            {
+              "type": "Discovery",
+              "value": "discovery credit",
+              "quantity": 1
+            }
+          ],
+          "sortOrder": 5
+        }
+      ]
+    },
+    {
+      "tileId": "p6",
+      "type": "page",
+      "sortOrder": 7,
+      "caption": "Rețeta Linkaro",
+      "text": "Înapoi în sala liniștită, Linkaro dictează: „Apă la fiert blând, mult morcov tăiat fin, ierburi locale și Pietrele Vieții puse sub vas, nu înăuntru. Când aburul capătă reflex verde, e gata.”",
+      "imageUrl": "images/tol/stories/lunaria-s1/7.recipe.png"
+    },
+    {
+      "tileId": "p7",
+      "type": "page",
+      "sortOrder": 8,
+      "caption": "Supa în oraș",
+      "text": "Vă întoarceți la Consiliu. În piață, pregătiți vasul mare, așezați pietrele verzi sub el și urmați pașii. Iepurii bolnavi beau pe rând; urechile li se ridică, respirația se reglează, murmurul străzii revine.",
+      "imageUrl": "images/tol/stories/lunaria-s1/8.soup-city.png"
+    },
+    {
+      "tileId": "p8",
+      "type": "page",
+      "sortOrder": 9,
+      "caption": "Semne de vindecare",
+      "text": "Spre seară, cartierele sunt mai liniștite. Un pui de iepure face primul salt fără să șovăie. Linkaro vă conduce până la marginea pieței: „Ați readus echilibrul prim. Mulțumesc.” Puf-Puf: „Notăm: Lunaria răspunde bine la grijă și la plan. Următorul pas îl alegem împreună.”",
+      "imageUrl": "images/tol/stories/lunaria-s1/9.healing.png"
+    }
+  ]
+}

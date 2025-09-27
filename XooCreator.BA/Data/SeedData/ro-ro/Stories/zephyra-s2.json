@@ -1,0 +1,51 @@
+{
+  "storyId": "zephyra-s2",
+  "title": "Zephyra – Zmee-Oracol",
+  "coverImageUrl": "images/worlds/zephyra.jpg",
+  "category": "main",
+  "sortOrder": 18,
+  "tiles": [
+    {
+      "tileId": "p1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Întrebarea Vântului",
+      "text": "Un oracol de pânză răspunde la curaj.",
+      "imageUrl": "images/biomes/steppe.jpg"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "sortOrder": 2,
+      "question": "Ce întrebi?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "Unde bate drumul meu?",
+          "sortOrder": 1,
+          "tokens": [
+            {
+              "value": "courage",
+              "quantity": 1,
+              "type": "Personality"
+            }
+          ]
+        },
+        {
+          "answerId": "b",
+          "text": "Ce riscuri văd?",
+          "sortOrder": 2,
+          "tokens": [
+            {
+              "value": "safety",
+              "quantity": 1,
+              "type": "Personality"
+            }
+          ]
+        }
+      ],
+      "caption": "Quiz",
+      "imageUrl": "images/biomes/steppe.jpg"
+    }
+  ]
+}

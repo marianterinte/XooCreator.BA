@@ -1,0 +1,67 @@
+{
+  "storyId": "nocturna-s2",
+  "title": "Nocturna – Balconul Lunii",
+  "coverImageUrl": "images/worlds/neptunia.jpg",
+  "category": "main",
+  "sortOrder": 13,
+  "tiles": [
+    {
+      "tileId": "p1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Balconul",
+      "text": "Un balcon planta deschide o scenă pentru idei grele.",
+      "imageUrl": "images/biomes/jungle.jpg"
+    },
+    {
+      "tileId": "p2",
+      "type": "page",
+      "sortOrder": 2,
+      "caption": "Contragreutate",
+      "text": "Liane și lumini pun în echilibru o platformă plutitoare.",
+      "imageUrl": "images/biomes/forest.jpg"
+    },
+    {
+      "tileId": "p3",
+      "type": "page",
+      "sortOrder": 3,
+      "caption": "Repere",
+      "text": "Stelele devin repere de navigație urbană nocturnă.",
+      "imageUrl": "images/biomes/montain.jpg"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "sortOrder": 4,
+      "question": "Ce alegi să optimizezi?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "Siguranța",
+          "sortOrder": 1,
+          "tokens": [
+            {
+              "value": "safety",
+              "quantity": 1,
+              "type": "Personality"
+            }
+          ]
+        },
+        {
+          "answerId": "b",
+          "text": "Eficiența",
+          "sortOrder": 2,
+          "tokens": [
+            {
+              "value": "thinking",
+              "quantity": 1,
+              "type": "Personality"
+            }
+          ]
+        }
+      ],
+      "caption": "Quiz",
+      "imageUrl": "images/biomes/montain.jpg"
+    }
+  ]
+}

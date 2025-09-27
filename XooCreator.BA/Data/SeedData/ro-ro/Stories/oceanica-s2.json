@@ -1,0 +1,51 @@
+{
+  "storyId": "oceanica-s2",
+  "title": "Oceanica – Insulele Plutitoare",
+  "coverImageUrl": "images/worlds/oceanica.jpg",
+  "category": "main",
+  "sortOrder": 9,
+  "tiles": [
+    {
+      "tileId": "p1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Navigație",
+      "text": "Leagă insulele cu poduri de alge-oțel.",
+      "imageUrl": "images/biomes/steppe.jpg"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "sortOrder": 2,
+      "question": "Cum asiguri podul?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "Ancore redundante",
+          "sortOrder": 1,
+          "tokens": [
+            {
+              "value": "safety",
+              "quantity": 1,
+              "type": "Personality"
+            }
+          ]
+        },
+        {
+          "answerId": "b",
+          "text": "Design flexibil",
+          "sortOrder": 2,
+          "tokens": [
+            {
+              "value": "creativity",
+              "quantity": 1,
+              "type": "Personality"
+            }
+          ]
+        }
+      ],
+      "caption": "Quiz",
+      "imageUrl": "images/biomes/steppe.jpg"
+    }
+  ]
+}

@@ -17,4 +17,15 @@ public class StoryDefinition
     
     // Navigation
     public List<StoryTile> Tiles { get; set; } = new();
+    public List<StoryDefinitionTranslation> Translations { get; set; } = new();
+}
+
+public class StoryDefinitionTranslation
+{
+    public Guid Id { get; set; }
+    public Guid StoryDefinitionId { get; set; }
+    public string LanguageCode { get; set; } = "ro-ro"; // normalized lower-case
+    public string Title { get; set; } = string.Empty;
+
+    public StoryDefinition StoryDefinition { get; set; } = null!;
 }

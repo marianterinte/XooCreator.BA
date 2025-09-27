@@ -13,4 +13,14 @@ public class Animal
     public Region Region { get; set; } = null!;
 
     public ICollection<AnimalPartSupport> SupportedParts { get; set; } = new List<AnimalPartSupport>();
+    public List<AnimalTranslation> Translations { get; set; } = new();
+}
+
+public class AnimalTranslation
+{
+    public Guid Id { get; set; }
+    public Guid AnimalId { get; set; }
+    public string LanguageCode { get; set; } = "ro-ro";
+    public string Label { get; set; } = string.Empty;
+    public Animal Animal { get; set; } = null!;
 }

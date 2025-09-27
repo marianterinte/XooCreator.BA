@@ -1,0 +1,39 @@
+{
+  "storyId": "crystalia-s1",
+  "title": "Crystalia – Ecouri Logice",
+  "coverImageUrl": "images/worlds/crystalia.jpg",
+  "category": "main",
+  "sortOrder": 14,
+  "tiles": [
+    {
+      "tileId": "p1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Sala Prismei",
+      "text": "Ecourile îți verifică raționamentul.",
+      "imageUrl": "images/biomes/montain.jpg"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "caption": "Verificarea Logică",
+      "sortOrder": 2,
+      "imageUrl": "images/biomes/montain.jpg",
+      "question": "Ce verifici întâi?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "Ipotezele",
+          "tokens": [],
+          "sortOrder": 1
+        },
+        {
+          "answerId": "b",
+          "text": "Riscurile",
+          "tokens": [],
+          "sortOrder": 2
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "baseHeroIds": [
+    "hero_brave_puppy",
+    "hero_curious_cat",
+    "hero_wise_owl",
+    "hero_playful_horse",
+    "hero_cautious_hedgehog"
+  ],
+  "nodes": [
+    {
+      "id": "seed",
+      "name": "Pisica Puf-Puf",
+      "description": "Companionul tău fidel, începutul călătoriei eroice spre Kelo-Ketis.",
+      "type": "node",
+      "costs": { "courage": 0, "curiosity": 0, "thinking": 0, "creativity": 0, "safety": 0 },
+      "prerequisites": [],
+      "rewards": ["Activated Hero Tree"],
+      "isUnlocked": true
+    },
+    { "id": "hero_brave_puppy",     "name": "Cățelul Curajos",       "description": "Un spirit loial și neînfricat.", "type": "hero", "costs": { "courage": 1 }, "prerequisites": ["seed"], "rewards": ["BRAVE_PUPPY Unlock"], "isUnlocked": false },
+    { "id": "hero_curious_cat",     "name": "Pisica Curioasă",       "description": "Explorează necunoscutul.",      "type": "hero", "costs": { "curiosity": 1 }, "prerequisites": ["seed"], "rewards": ["CURIOUS_CAT Unlock"], "isUnlocked": false },
+    { "id": "hero_wise_owl",        "name": "Bufnița Înțeleaptă",    "description": "Păstrătoarea cunoașterii ascunse.", "type": "hero", "costs": { "thinking": 1 }, "prerequisites": ["seed"], "rewards": ["WISE_OWL Unlock"], "isUnlocked": false },
+    { "id": "hero_playful_horse",     "name": "Căluțul Jucăuș",        "description": "Erou de bază alimentat de creativitate și imaginație.", "type": "hero", "costs": { "creativity": 1 }, "prerequisites": ["seed"], "rewards": ["PLAYFUL_HORSE Unlock"], "isUnlocked": false },
+    { "id": "hero_cautious_hedgehog", "name": "Ariciul Precaut",      "description": "Erou de bază alimentat de siguranță și prudență.", "type": "hero", "costs": { "safety": 1 }, "prerequisites": ["seed"], "rewards": ["CAUTIOUS_HEDGEHOG Unlock"], "isUnlocked": false },
+    { "id": "hero_starseeker",      "name": "Căutătorul de Stele",   "description": "Curaj + Curiozitate = explorator interstelar.", "type": "hero", "costs": { "courage": 1, "curiosity": 1 }, "prerequisites": ["hero_brave_puppy","hero_curious_cat"], "rewards": ["STARSEEKER Unlock"], "isUnlocked": false },
+    { "id": "hero_light_guard",     "name": "Gardianul Luminii",     "description": "Curaj + Siguranță = apărător al copacului.",      "type": "hero", "costs": { "courage": 1, "safety": 1 },    "prerequisites": ["hero_brave_puppy","hero_cautious_hedgehog"], "rewards": ["LIGHT_GUARD Unlock"], "isUnlocked": false },
+    { "id": "hero_songweaver",      "name": "Țesătorul de Cântece",  "description": "Creativitate + Curiozitate = artist cosmic.",      "type": "hero", "costs": { "curiosity": 1, "creativity": 1 }, "prerequisites": ["hero_curious_cat","hero_playful_horse"], "rewards": ["SONGWEAVER Unlock"], "isUnlocked": false },
+    { "id": "hero_mind_crafter",    "name": "Arhitectul Minții",     "description": "Gândire + Creativitate = creator de lumi.",        "type": "hero", "costs": { "thinking": 1, "creativity": 1 }, "prerequisites": ["hero_wise_owl","hero_playful_horse"], "rewards": ["MIND_CRAFTER Unlock"], "isUnlocked": false },
+    { "id": "hero_seer_of_winds",   "name": "Vizionarul Vânturilor", "description": "Curiozitate + Gândire = descoperă adevăruri ascunse.", "type": "hero", "costs": { "curiosity": 1, "thinking": 1 }, "prerequisites": ["hero_curious_cat","hero_wise_owl"], "rewards": ["SEER_OF_WINDS Unlock"], "isUnlocked": false },
+    { "id": "hero_dream_alchemist", "name": "Alchimistul Viselor",    "description": "Curaj + Curiozitate + Creativitate = transformă ideile în realitate.", "type": "hero", "costs": { "courage": 1, "curiosity": 1, "creativity": 1 }, "prerequisites": ["hero_brave_puppy","hero_curious_cat","hero_playful_horse"], "rewards": ["DREAM_ALCHEMIST Unlock"], "isUnlocked": false },
+    { "id": "hero_crystal_sage",    "name": "Înțeleptul Cristalin",  "description": "Gândire + Curiozitate + Creativitate = vocea cunoașterii universale.", "type": "hero", "costs": { "thinking": 1, "curiosity": 1, "creativity": 1 }, "prerequisites": ["hero_wise_owl","hero_curious_cat","hero_playful_horse"], "rewards": ["CRYSTAL_SAGE Unlock"], "isUnlocked": false },
+    { "id": "hero_chronos_knight",  "name": "Cavalerul Timpului",     "description": "Curaj + Gândire + Siguranță = stăpânul echilibrului.", "type": "hero", "costs": { "courage": 1, "thinking": 1, "safety": 1 }, "prerequisites": ["hero_brave_puppy","hero_wise_owl","hero_cautious_hedgehog"], "rewards": ["CHRONOS_KNIGHT Unlock"], "isUnlocked": false },
+    { "id": "hero_phoenix_guardian","name": "Phoenixul Strălucirii", "description": "Renaște din flăcările creativității și curajului.", "type": "hero", "costs": { "courage": 2, "creativity": 2 }, "prerequisites": ["hero_brave_puppy","hero_playful_horse"], "rewards": ["PHOENIX_GUARDIAN Unlock"], "isUnlocked": false },
+    { "id": "hero_moon_sentinel",   "name": "Santinela Lunii",       "description": "Protector tăcut al lumilor de vis.",              "type": "hero", "costs": { "safety": 2, "thinking": 2 }, "prerequisites": ["hero_cautious_hedgehog","hero_wise_owl"], "rewards": ["MOON_SENTINEL Unlock"], "isUnlocked": false },
+    { "id": "hero_sky_architect",   "name": "Arhitectul Cerului",     "description": "Curaj + Curiozitate + Gândire + Creativitate = clădește poduri între lumi.", "type": "hero", "costs": { "courage": 1, "curiosity": 1, "thinking": 1, "creativity": 1 }, "prerequisites": ["hero_dream_alchemist","hero_crystal_sage"], "rewards": ["SKY_ARCHITECT Unlock"], "isUnlocked": false },
+    { "id": "hero_eternal_guard",   "name": "Gardianul Etern",        "description": "Siguranță + toate celelalte trăsături = protector universal.", "type": "hero", "costs": { "courage": 1, "curiosity": 1, "thinking": 1, "safety": 2 }, "prerequisites": ["hero_chronos_knight","hero_moon_sentinel"], "rewards": ["ETERNAL_GUARD Unlock"], "isUnlocked": false },
+    { "id": "hero_oceanica_spirit", "name": "Spiritul Oceanica",      "description": "Erou cosmic născut din adâncuri acvatice.",      "type": "hero", "costs": { "courage": 2, "curiosity": 2, "creativity": 1 }, "prerequisites": ["hero_sky_architect"], "rewards": ["OCEANICA_SPIRIT Unlock"], "isUnlocked": false },
+    { "id": "hero_lunaria_oracle",  "name": "Oracolul Lunaria",       "description": "Vizionar cosmic al tainelor lunare.",            "type": "hero", "costs": { "thinking": 2, "curiosity": 2, "safety": 1 }, "prerequisites": ["hero_eternal_guard"], "rewards": ["LUNARIA_ORACLE Unlock"], "isUnlocked": false },
+    { "id": "hero_creative_guardian", "name": "Gardianul Creativ",     "description": "Creativitate + Siguranță = protector al imaginației.", "type": "hero", "costs": { "creativity": 1, "safety": 1 }, "prerequisites": ["hero_playful_horse","hero_cautious_hedgehog"], "rewards": ["CREATIVE_GUARDIAN Unlock"], "isUnlocked": false },
+    { "id": "hero_alchimalian_dragon",  "name": "Dragonul Alchimalian",     "description": "Eroul suprem – întruchiparea tuturor celor cinci trăsături eroice. Doar cei ce au trecut prin toate lumile pot să-l cheme.", "type": "hero", "costs": { "courage": 3, "curiosity": 3, "thinking": 3, "creativity": 3, "safety": 3 }, "prerequisites": ["hero_brave_puppy","hero_curious_cat","hero_wise_owl","hero_playful_horse","hero_cautious_hedgehog"], "rewards": ["ALCHIMALIAN_DRAGON Unlock"], "isUnlocked": false }
+  ]
+}
+
+

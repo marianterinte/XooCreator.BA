@@ -16,7 +16,7 @@ public class GetStoriesEndpoint
         [FromRoute] string locale,
         [FromServices] GetStoriesEndpoint ep)
     {
-        var result = await ep._storiesService.GetAllStoriesAsync();
+        var result = await ep._storiesService.GetAllStoriesAsync(locale);
         return TypedResults.Ok(result);
     }
 }

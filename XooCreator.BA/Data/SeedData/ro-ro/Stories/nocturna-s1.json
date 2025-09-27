@@ -1,0 +1,67 @@
+{
+  "storyId": "nocturna-s1",
+  "title": "Nocturna – Aleea Felinarelor",
+  "coverImageUrl": "images/worlds/neptunia.jpg",
+  "category": "main",
+  "sortOrder": 12,
+  "tiles": [
+    {
+      "tileId": "p1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Amurg",
+      "text": "Orașul aprinde flori-lanternă pe străzile de catifea.",
+      "imageUrl": "images/biomes/montain.jpg"
+    },
+    {
+      "tileId": "p2",
+      "type": "page",
+      "sortOrder": 2,
+      "caption": "Semnale",
+      "text": "Felinarele pulsează coduri pe care trebuie să le citești.",
+      "imageUrl": "images/biomes/forest.jpg"
+    },
+    {
+      "tileId": "p3",
+      "type": "page",
+      "sortOrder": 3,
+      "caption": "Mesajul",
+      "text": "O hartă de stele ascunsă în ritmul luminilor.",
+      "imageUrl": "images/biomes/steppe.jpg"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "sortOrder": 4,
+      "question": "Cum decodifici?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "Grilă logică",
+          "sortOrder": 1,
+          "tokens": [
+            {
+              "value": "thinking",
+              "quantity": 1,
+              "type": "Personality"
+            }
+          ]
+        },
+        {
+          "answerId": "b",
+          "text": "Harta vizuală",
+          "sortOrder": 2,
+          "tokens": [
+            {
+              "value": "creativity",
+              "quantity": 1,
+              "type": "Personality"
+            }
+          ]
+        }
+      ],
+      "caption": "Quiz",
+      "imageUrl": "images/biomes/steppe.jpg"
+    }
+  ]
+}

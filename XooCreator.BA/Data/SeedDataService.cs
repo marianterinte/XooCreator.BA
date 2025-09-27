@@ -8,7 +8,8 @@ public class SeedDataService
 
     public SeedDataService(string? seedDataPath = null)
     {
-        _seedDataPath = seedDataPath ?? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SeedData\\LaboratoryOfImagination");
+        // Default to RO path; callers can instantiate additional services for other locales
+        _seedDataPath = seedDataPath ?? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SeedData", "ro-ro", "LaboratoryOfImagination");
     }
 
     public async Task<List<BodyPart>> LoadBodyPartsAsync()

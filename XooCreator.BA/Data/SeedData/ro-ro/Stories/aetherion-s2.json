@@ -1,0 +1,39 @@
+{
+  "storyId": "aetherion-s2",
+  "title": "Aetherion – Atelierul de Aripi",
+  "coverImageUrl": "images/worlds/aetherion.jpg",
+  "category": "main",
+  "sortOrder": 27,
+  "tiles": [
+    {
+      "tileId": "p1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Prototipare",
+      "text": "Construiești aripi pentru idei grele.",
+      "imageUrl": "images/biomes/forest.jpg"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "caption": "Alegerea Aripi",
+      "sortOrder": 2,
+      "imageUrl": "images/biomes/forest.jpg",
+      "question": "Ce alegi?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "Aripi ușoare (creativitate)",
+          "tokens": [],
+          "sortOrder": 1
+        },
+        {
+          "answerId": "b",
+          "text": "Aripi stabile (gândire)",
+          "tokens": [],
+          "sortOrder": 2
+        }
+      ]
+    }
+  ]
+}

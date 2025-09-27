@@ -1,5 +1,6 @@
 using XooCreator.BA.Features.Stories;
 using XooCreator.BA.Features.TreeOfHeroes;
+using XooCreator.BA.Infrastructure;
 
 namespace XooCreator.BA.Features.TreeOfLight;
 
@@ -16,12 +17,14 @@ public class TreeOfLightService : ITreeOfLightService
     private readonly ITreeOfLightRepository _repository;
     private readonly IStoriesRepository _storiesRepository;
     private readonly ITreeOfHeroesRepository _treeOfHeroesRepository;
+    private readonly IUserContextService _userContext;
 
-    public TreeOfLightService(ITreeOfLightRepository repository, IStoriesRepository storiesRepository, ITreeOfHeroesRepository treeOfHeroesRepository)
+    public TreeOfLightService(ITreeOfLightRepository repository, IStoriesRepository storiesRepository, ITreeOfHeroesRepository treeOfHeroesRepository, IUserContextService userContext)
     {
         _repository = repository;
         _storiesRepository = storiesRepository;
         _treeOfHeroesRepository = treeOfHeroesRepository;
+        _userContext = userContext;
     }
 
     public Task<List<TreeProgressDto>> GetTreeProgressAsync(Guid userId)
@@ -39,8 +42,9 @@ public class TreeOfLightService : ITreeOfLightService
     {
         try
         {
-            // Complete the story
-            var story = await _storiesRepository.GetStoryByIdAsync(request.StoryId);
+            // Complete the story (localized)
+            var locale = _userContext.GetRequestLocaleOrDefault("ro-ro");
+            var story = await _storiesRepository.GetStoryByIdAsync(request.StoryId, locale);
 
             var storyCompleted = await _repository.CompleteStoryAsync(userId, request, story);
             if (!storyCompleted)

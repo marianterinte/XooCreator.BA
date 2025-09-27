@@ -1,0 +1,55 @@
+{
+  "storyId": "auroria-s2",
+  "title": "Auroria – Atelierul de Spice",
+  "coverImageUrl": "images/worlds/terra.jpg",
+  "category": "main",
+  "sortOrder": 5,
+  "tiles": [
+    {
+      "tileId": "p1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Meșteșugul",
+      "text": "Țăranii țes din spic instrumente care prind glas.",
+      "imageUrl": "images/biomes/farm.jpg"
+    },
+    {
+      "tileId": "p2",
+      "type": "page",
+      "sortOrder": 2,
+      "caption": "Învățare",
+      "text": "Fiecare instrument are o structură logică și o inimă creativă.",
+      "imageUrl": "images/biomes/forest.jpg"
+    },
+    {
+      "tileId": "p3",
+      "type": "page",
+      "sortOrder": 3,
+      "caption": "Orchestra",
+      "text": "Cântecul zorilor trebuie să ridice ceața de pe vale.",
+      "imageUrl": "images/biomes/jungle.jpg"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "caption": "Conducerea Orchestrei",
+      "sortOrder": 4,
+      "imageUrl": "images/biomes/jungle.jpg",
+      "question": "Cum conduci orchestra?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "Partitură clară",
+          "tokens": [],
+          "sortOrder": 1
+        },
+        {
+          "answerId": "b",
+          "text": "Improvizație",
+          "tokens": [],
+          "sortOrder": 2
+        }
+      ]
+    }
+  ]
+}

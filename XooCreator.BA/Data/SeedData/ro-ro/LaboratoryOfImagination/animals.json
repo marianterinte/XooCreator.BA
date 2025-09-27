@@ -1,0 +1,240 @@
+[
+  {
+    "id": "00000000-0000-0000-0000-000000000001",
+    "label": "Bunny",
+    "src": "images/animals/base/bunny.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000003",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000002",
+    "label": "Hippo",
+    "src": "images/animals/base/hippo.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000006",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000003",
+    "label": "Giraffe",
+    "src": "images/animals/base/giraffe.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000004",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000004",
+    "label": "Dog",
+    "src": "images/animals/base/dog.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000003",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000005",
+    "label": "Fox",
+    "src": "images/animals/base/fox.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000005",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000006",
+    "label": "Cat",
+    "src": "images/animals/base/cat.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000003",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000007",
+    "label": "Monkey",
+    "src": "images/animals/base/monkey.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000002",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000008",
+    "label": "Camel",
+    "src": "images/animals/base/camel.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000001",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000009",
+    "label": "Deer",
+    "src": "images/animals/base/deer.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000005",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-00000000000a",
+    "label": "Duck",
+    "src": "images/animals/base/duck.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000006",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-00000000000b",
+    "label": "Eagle",
+    "src": "images/animals/base/eagle.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000007",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-00000000000c",
+    "label": "Elephant",
+    "src": "images/animals/base/elephant.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000004",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-00000000000d",
+    "label": "Ostrich",
+    "src": "images/animals/base/ostrich.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000004",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-00000000000e",
+    "label": "Parrot",
+    "src": "images/animals/base/parrot.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000002",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-00000000000f",
+    "label": "Jaguar",
+    "src": "images/animals/base/jaguar.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000002",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000010",
+    "label": "Toucan",
+    "src": "images/animals/base/toucan.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000002",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000011",
+    "label": "Anaconda",
+    "src": "images/animals/base/anaconda.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000002",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000012",
+    "label": "Capuchin Monkey",
+    "src": "images/animals/base/capuchin_monkey.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000002",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000013",
+    "label": "Poison Dart Frog",
+    "src": "images/animals/base/poison_dart_frog.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000002",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000014",
+    "label": "Lion",
+    "src": "images/animals/base/lion.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000004",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000015",
+    "label": "African Elephant",
+    "src": "images/animals/base/african_elephant.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000004",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000016",
+    "label": "Giraffe",
+    "src": "images/animals/base/giraffe.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000004",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000017",
+    "label": "Zebra",
+    "src": "images/animals/base/zebra.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000004",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000018",
+    "label": "Rhinoceros",
+    "src": "images/animals/base/rhinoceros.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000004",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000019",
+    "label": "Bison",
+    "src": "images/animals/base/bison.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000007",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-00000000001a",
+    "label": "Saiga Antelope",
+    "src": "images/animals/base/saiga_antelope.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000004",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-00000000001b",
+    "label": "Gray Wolf",
+    "src": "images/animals/base/gray_wolf.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000005",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-00000000001c",
+    "label": "Przewalski's Horse",
+    "src": "images/animals/base/przewalski_horse.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000007",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-00000000001d",
+    "label": "Steppe Eagle",
+    "src": "images/animals/base/steppe_eagle.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000007",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-00000000001e",
+    "label": "Cow",
+    "src": "images/animals/base/cow.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000003",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-00000000001f",
+    "label": "Sheep",
+    "src": "images/animals/base/sheep.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000003",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000020",
+    "label": "Horse",
+    "src": "images/animals/base/horse.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000003",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000021",
+    "label": "Chicken",
+    "src": "images/animals/base/chicken.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000003",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000022",
+    "label": "Pig",
+    "src": "images/animals/base/pig.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000003",
+    "isHybrid": false
+  }
+]

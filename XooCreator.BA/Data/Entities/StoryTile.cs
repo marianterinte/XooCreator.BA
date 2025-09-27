@@ -26,4 +26,17 @@ public class StoryTile
     // Navigation
     public StoryDefinition StoryDefinition { get; set; } = null!;
     public List<StoryAnswer> Answers { get; set; } = new();
+    public List<StoryTileTranslation> Translations { get; set; } = new();
+}
+
+public class StoryTileTranslation
+{
+    public Guid Id { get; set; }
+    public Guid StoryTileId { get; set; }
+    public string LanguageCode { get; set; } = "ro-ro";
+    public string? Caption { get; set; }
+    public string? Text { get; set; }
+    public string? Question { get; set; }
+
+    public StoryTile StoryTile { get; set; } = null!;
 }

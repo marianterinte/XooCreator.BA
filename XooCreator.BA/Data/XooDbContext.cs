@@ -32,14 +32,18 @@ public class XooDbContext : DbContext
     
     // Story System data
     public DbSet<StoryDefinition> StoryDefinitions => Set<StoryDefinition>();
+    public DbSet<StoryDefinitionTranslation> StoryDefinitionTranslations => Set<StoryDefinitionTranslation>();
     public DbSet<StoryTile> StoryTiles => Set<StoryTile>();
+    public DbSet<StoryTileTranslation> StoryTileTranslations => Set<StoryTileTranslation>();
     public DbSet<StoryAnswer> StoryAnswers => Set<StoryAnswer>();
     public DbSet<UserStoryReadProgress> UserStoryReadProgress => Set<UserStoryReadProgress>();
     public DbSet<StoryAnswerToken> StoryAnswerTokens => Set<StoryAnswerToken>();
 
     // Builder data
     public DbSet<BodyPart> BodyParts => Set<BodyPart>();
+    public DbSet<BodyPartTranslation> BodyPartTranslations => Set<BodyPartTranslation>();
     public DbSet<Animal> Animals => Set<Animal>();
+    public DbSet<AnimalTranslation> AnimalTranslations => Set<AnimalTranslation>();
     public DbSet<AnimalPartSupport> AnimalPartSupports => Set<AnimalPartSupport>();
     public DbSet<BuilderConfig> BuilderConfigs => Set<BuilderConfig>();
     public DbSet<Region> Regions => Set<Region>();
@@ -129,6 +133,18 @@ public class XooDbContext : DbContext
             e.Property(x => x.Image).HasMaxLength(256).IsRequired();
         });
 
+        modelBuilder.Entity<BodyPartTranslation>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.LanguageCode).HasMaxLength(10);
+            e.HasIndex(x => new { x.BodyPartKey, x.LanguageCode }).IsUnique();
+            e.HasOne(x => x.BodyPart)
+                .WithMany(b => b.Translations)
+                .HasForeignKey(x => x.BodyPartKey)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
         modelBuilder.Entity<Region>(e =>
         {
             e.HasKey(x => x.Id);
@@ -143,6 +159,18 @@ public class XooDbContext : DbContext
             e.Property(x => x.Src).HasMaxLength(256).IsRequired();
             e.Property(x => x.IsHybrid).HasDefaultValue(false);
             e.HasOne(x => x.Region).WithMany(x => x.Animals).HasForeignKey(x => x.RegionId);
+        });
+
+        modelBuilder.Entity<AnimalTranslation>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.LanguageCode).HasMaxLength(10);
+            e.HasIndex(x => new { x.AnimalId, x.LanguageCode }).IsUnique();
+            e.HasOne(x => x.Animal)
+                .WithMany(a => a.Translations)
+                .HasForeignKey(x => x.AnimalId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<AnimalPartSupport>(e =>
@@ -258,6 +286,18 @@ public class XooDbContext : DbContext
             e.HasMany(x => x.Tiles).WithOne(x => x.StoryDefinition).HasForeignKey(x => x.StoryDefinitionId).OnDelete(DeleteBehavior.Cascade);
         });
 
+        modelBuilder.Entity<StoryDefinitionTranslation>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.LanguageCode).HasMaxLength(10);
+            e.HasIndex(x => new { x.StoryDefinitionId, x.LanguageCode }).IsUnique();
+            e.HasOne(x => x.StoryDefinition)
+                .WithMany(s => s.Translations)
+                .HasForeignKey(x => x.StoryDefinitionId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
         modelBuilder.Entity<StoryTile>(e =>
         {
             e.HasKey(x => x.Id);
@@ -265,6 +305,18 @@ public class XooDbContext : DbContext
             e.HasIndex(x => new { x.StoryDefinitionId, x.TileId }).IsUnique();
             e.HasOne(x => x.StoryDefinition).WithMany(x => x.Tiles).HasForeignKey(x => x.StoryDefinitionId);
             e.HasMany(x => x.Answers).WithOne(x => x.StoryTile).HasForeignKey(x => x.StoryTileId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<StoryTileTranslation>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.LanguageCode).HasMaxLength(10);
+            e.HasIndex(x => new { x.StoryTileId, x.LanguageCode }).IsUnique();
+            e.HasOne(x => x.StoryTile)
+                .WithMany(t => t.Translations)
+                .HasForeignKey(x => x.StoryTileId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<StoryAnswer>(e =>
@@ -409,7 +461,8 @@ public class XooDbContext : DbContext
     {
         try
         {
-            var seedService = new SeedDataService();
+            // Seed RO (default)
+            var seedService = new SeedDataService(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SeedData", "ro-ro", "LaboratoryOfImagination"));
             
             // Load data synchronously since we're in OnModelCreating
             var bodyParts = LoadDataSync(() => seedService.LoadBodyPartsAsync());
@@ -417,11 +470,40 @@ public class XooDbContext : DbContext
             var animals = LoadDataSync(() => seedService.LoadAnimalsAsync());
             var animalPartSupports = LoadDataSync(() => seedService.LoadAnimalPartSupportsAsync());
 
-            // Seed the data
+            // Seed the data (RO base)
             modelBuilder.Entity<BodyPart>().HasData(bodyParts);
             modelBuilder.Entity<Region>().HasData(regions);
             modelBuilder.Entity<Animal>().HasData(animals);
             modelBuilder.Entity<AnimalPartSupport>().HasData(animalPartSupports);
+
+            // Seed EN translations if folder exists (mirror or translated values)
+            var enPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SeedData", "en-us", "LaboratoryOfImagination");
+            if (Directory.Exists(enPath))
+            {
+                var enSeed = new SeedDataService(enPath);
+                var bodyPartsEn = LoadDataSync(() => enSeed.LoadBodyPartsAsync());
+                var animalsEn = LoadDataSync(() => enSeed.LoadAnimalsAsync());
+
+                // BodyPart translations
+                var bodyPartTranslations = bodyPartsEn.Select(bp => new BodyPartTranslation
+                {
+                    Id = Guid.NewGuid(),
+                    BodyPartKey = bp.Key,
+                    LanguageCode = "en-us",
+                    Name = bp.Name
+                }).ToArray();
+                modelBuilder.Entity<BodyPartTranslation>().HasData(bodyPartTranslations);
+
+                // Animal translations
+                var animalTranslations = animalsEn.Select(a => new AnimalTranslation
+                {
+                    Id = Guid.NewGuid(),
+                    AnimalId = a.Id,
+                    LanguageCode = "en-us",
+                    Label = a.Label
+                }).ToArray();
+                modelBuilder.Entity<AnimalTranslation>().HasData(animalTranslations);
+            }
         }
         catch (Exception ex)
         {

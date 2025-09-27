@@ -25,7 +25,7 @@ public class GetStoryByIdEndpoint
         var userId = await ep._userContext.GetUserIdAsync();
         if (userId == null) return TypedResults.Unauthorized();
 
-        var result = await ep._storiesService.GetStoryByIdAsync(userId.Value, storyId);
+        var result = await ep._storiesService.GetStoryByIdAsync(userId.Value, storyId, locale);
         if (result.Story == null) return TypedResults.NotFound();
         return TypedResults.Ok(result);
     }

@@ -1,0 +1,51 @@
+{
+  "storyId": "sylvaria-s2",
+  "title": "Sylvaria – Sfatul Arborilor",
+  "coverImageUrl": "images/worlds/sylvaria.jpg",
+  "category": "main",
+  "sortOrder": 12,
+  "tiles": [
+    {
+      "tileId": "p1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Consiliul",
+      "text": "Arborii îți cer un plan pentru echilibru.",
+      "imageUrl": "images/biomes/jungle.jpg"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "sortOrder": 2,
+      "question": "Ce plan propui?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "Replantare strategică",
+          "sortOrder": 1,
+          "tokens": [
+            {
+              "value": "thinking",
+              "quantity": 1,
+              "type": "Personality"
+            }
+          ]
+        },
+        {
+          "answerId": "b",
+          "text": "Rețea de polen-drone",
+          "sortOrder": 2,
+          "tokens": [
+            {
+              "value": "creativity",
+              "quantity": 1,
+              "type": "Personality"
+            }
+          ]
+        }
+      ],
+      "caption": "Quiz",
+      "imageUrl": "images/biomes/jungle.jpg"
+    }
+  ]
+}

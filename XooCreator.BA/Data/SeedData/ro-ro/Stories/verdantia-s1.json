@@ -1,0 +1,75 @@
+{
+  "storyId": "verdantia-s1",
+  "title": "Verdantia – Grădinile Suspendate",
+  "coverImageUrl": "images/worlds/sylvaria.jpg",
+  "category": "main",
+  "sortOrder": 9,
+  "tiles": [
+    {
+      "tileId": "p1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Podul de frunze",
+      "text": "Rădăcini împletite se arcuiesc peste prăpastie.",
+      "imageUrl": "images/biomes/forest.jpg"
+    },
+    {
+      "tileId": "p2",
+      "type": "page",
+      "sortOrder": 2,
+      "caption": "Sera vie",
+      "text": "Plantele răspund la cântece; cresc în forme dorite.",
+      "imageUrl": "images/biomes/jungle.jpg"
+    },
+    {
+      "tileId": "p3",
+      "type": "page",
+      "sortOrder": 3,
+      "caption": "Ucenicia",
+      "text": "Învăț cum să ghidez o liană fără s-o rănesc.",
+      "imageUrl": "images/biomes/forest.jpg"
+    },
+    {
+      "tileId": "p4",
+      "type": "page",
+      "sortOrder": 4,
+      "caption": "Polenul-lumină",
+      "text": "Licurici plantați desenează harta grădinii.",
+      "imageUrl": "images/biomes/tropical.jpg"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "sortOrder": 5,
+      "question": "Cum stabilizezi podul verde?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "Noduri simetrice",
+          "sortOrder": 1,
+          "tokens": [
+            {
+              "value": "thinking",
+              "quantity": 1,
+              "type": "Personality"
+            }
+          ]
+        },
+        {
+          "answerId": "b",
+          "text": "Ancoră de pietre",
+          "sortOrder": 2,
+          "tokens": [
+            {
+              "value": "safety",
+              "quantity": 1,
+              "type": "Personality"
+            }
+          ]
+        }
+      ],
+      "caption": "Quiz",
+      "imageUrl": "images/biomes/tropical.jpg"
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "storyId": "neptunia-s2",
+  "title": "Neptunia – Balenele Luminoase",
+  "coverImageUrl": "images/worlds/neptunia.jpg",
+  "category": "main",
+  "sortOrder": 24,
+  "tiles": [
+    {
+      "tileId": "p1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Dialog",
+      "text": "Îți răspund în coduri de lumină.",
+      "imageUrl": "images/biomes/tropical.jpg"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "sortOrder": 2,
+      "question": "Cum traduci?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "Model logic",
+          "sortOrder": 1,
+          "tokens": [
+            {
+              "value": "thinking",
+              "quantity": 1,
+              "type": "Personality"
+            }
+          ]
+        },
+        {
+          "answerId": "b",
+          "text": "Pictograme creative",
+          "sortOrder": 2,
+          "tokens": [
+            {
+              "value": "creativity",
+              "quantity": 1,
+              "type": "Personality"
+            }
+          ]
+        }
+      ],
+      "caption": "Quiz",
+      "imageUrl": "images/biomes/tropical.jpg"
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "storyId": "sylvaria-s1",
+  "title": "Sylvaria – Cărarea Vie",
+  "coverImageUrl": "images/worlds/sylvaria.jpg",
+  "category": "main",
+  "sortOrder": 11,
+  "tiles": [
+    {
+      "tileId": "p1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Drumul care se mișcă",
+      "text": "Pădurea își mută potecile ca să te testeze.",
+      "imageUrl": "images/biomes/forest.jpg"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "sortOrder": 2,
+      "question": "Cum memorezi traseul?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "Note vizuale și repere",
+          "sortOrder": 1,
+          "tokens": [
+            {
+              "value": "thinking",
+              "quantity": 1,
+              "type": "Personality"
+            }
+          ]
+        },
+        {
+          "answerId": "b",
+          "text": "Cântec-busolă",
+          "sortOrder": 2,
+          "tokens": [
+            {
+              "value": "creativity",
+              "quantity": 1,
+              "type": "Personality"
+            }
+          ]
+        }
+      ],
+      "caption": "Quiz",
+      "imageUrl": "images/biomes/forest.jpg"
+    }
+  ]
+}

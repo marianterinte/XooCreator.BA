@@ -1,0 +1,50 @@
+[
+  {
+    "key": "head",
+    "name": "Head",
+    "image": "images/bodyparts/face.webp",
+    "isBaseLocked": false
+  },
+  {
+    "key": "body",
+    "name": "Body",
+    "image": "images/bodyparts/body.webp",
+    "isBaseLocked": false
+  },
+  {
+    "key": "arms",
+    "name": "Arms",
+    "image": "images/bodyparts/hands.webp",
+    "isBaseLocked": false
+  },
+  {
+    "key": "legs",
+    "name": "Legs",
+    "image": "images/bodyparts/legs.webp",
+    "isBaseLocked": true
+  },
+  {
+    "key": "tail",
+    "name": "Tail",
+    "image": "images/bodyparts/tail.webp",
+    "isBaseLocked": true
+  },
+  {
+    "key": "wings",
+    "name": "Wings",
+    "image": "images/bodyparts/wings.webp",
+    "isBaseLocked": true
+  },
+  {
+    "key": "horn",
+    "name": "Horn",
+    "image": "images/bodyparts/horn.webp",
+    "isBaseLocked": true
+  },
+  {
+    "key": "horns",
+    "name": "Horns",
+    "image": "images/bodyparts/horns.webp",
+    "isBaseLocked": true
+  }
+]
