@@ -1,5 +1,6 @@
 using XooCreator.BA.Data;
 using XooCreator.BA.Features.TreeOfHeroes;
+using XooCreator.BA.Infrastructure;
 
 namespace XooCreator.BA.Features.TreeOfLight;
 
@@ -13,11 +14,13 @@ public class TreeModelService : ITreeModelService
 {
     private readonly ITreeModelRepository _treeModelRepository;
     private readonly ITreeOfLightRepository _tolRepository;
+    private readonly IUserContextService _userContext;
 
-    public TreeModelService(ITreeModelRepository treeModelRepository, ITreeOfLightRepository tolRepository)
+    public TreeModelService(ITreeModelRepository treeModelRepository, ITreeOfLightRepository tolRepository, IUserContextService userContext)
     {
         _treeModelRepository = treeModelRepository;
         _tolRepository = tolRepository;
+        _userContext = userContext;
     }
 
     public async Task<TreeStateDto> GetTreeStateAsync(Guid userId)
@@ -51,7 +54,9 @@ public class TreeModelService : ITreeModelService
                 Stories = storyNodes.Select(sn => new TreeStoryDto
                 {
                     Id = sn.StoryId,
-                    Label = sn.StoryDefinition?.Title ?? sn.StoryId,
+                    Label = sn.StoryDefinition?.Translations
+                        ?.FirstOrDefault(t => t.LanguageCode == _userContext.GetRequestLocaleOrDefault("ro-ro"))
+                        ?.Title ?? sn.StoryDefinition?.Title ?? sn.StoryId,
                     RegionId = sn.RegionId,
                     RewardImageUrl = sn.RewardImageUrl,
                     SortOrder = sn.SortOrder

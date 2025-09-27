@@ -26,6 +26,9 @@ public class StoriesRepository : IStoriesRepository
     public async Task<List<StoryContentDto>> GetAllStoriesAsync(string locale)
     {
         var stories = await _context.StoryDefinitions
+            .Include(s => s.Translations)
+            .Include(s => s.Tiles)
+                .ThenInclude(t => t.Translations)
             .Include(s => s.Tiles)
                 .ThenInclude(t => t.Answers)
                     .ThenInclude(a => a.Tokens)
@@ -40,6 +43,9 @@ public class StoriesRepository : IStoriesRepository
     {
     storyId = NormalizeStoryId(storyId);
     var story = await _context.StoryDefinitions
+            .Include(s => s.Translations)
+            .Include(s => s.Tiles)
+                .ThenInclude(t => t.Translations)
             .Include(s => s.Tiles)
                 .ThenInclude(t => t.Answers)
                     .ThenInclude(a => a.Tokens)

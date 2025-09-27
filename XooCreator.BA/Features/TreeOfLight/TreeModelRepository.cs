@@ -34,6 +34,7 @@ public class TreeModelRepository : ITreeModelRepository
         return await _context.TreeStoryNodes
             .Include(sn => sn.Region)
             .Include(sn => sn.StoryDefinition)
+                .ThenInclude(sd => sd.Translations)
             .OrderBy(sn => sn.RegionId)
             .ThenBy(sn => sn.SortOrder)
             .ToListAsync();
