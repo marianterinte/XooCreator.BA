@@ -1,6 +1,6 @@
 {
   "storyId": "terra-s1",
-  "title": "Umbra de la Fermă",
+  "title": "The Shadow at the Farm",
   "coverImageUrl": "images/tol/stories/terra-s1/0.Cover.png",
   "category": "terra",
   "sortOrder": 1,
@@ -9,69 +9,69 @@
       "tileId": "p1",
       "type": "page",
       "sortOrder": 1,
-      "caption": "Sosirea",
-      "text": "Valea de pe Terra respiră aburi subțiri peste câmpurile întinse. Totul pare în ordine, dar oamenii își strâng pălăriile pe frunte și privesc cerul ca pe un oaspete nepoftit. Puf-Puf își încrețește mustățile: „E liniște… dar nu de bine. Hai să vedem de unde ține lumea aerul în piept.”",
+      "caption": "The Arrival",
+      "text": "The valley on Terra breathes thin mists over the vast fields. Everything seems in order, but the people pull their hats down on their foreheads and watch the sky like an unwelcome guest. Puf-Puf twitches his whiskers: \"It's quiet... but not in a good way. Let's see why everyone is holding their breath.\"",
       "imageUrl": "images/tol/stories/terra-s1/1.arrival.png"
     },
     {
       "tileId": "p2",
       "type": "page",
       "sortOrder": 2,
-      "caption": "Tăcerea stranie",
-      "text": "Niciun cocoș nu cântă, niciun câine nu latră, nici greierii nu-și găsesc corul. Liniștea apasă, groasă, ca o pătură udă. Puf-Puf se uită la tine: „E ca și cum natura ar număra până la zece și n-ar îndrăzni să spună zece.”",
+      "caption": "The Strange Silence",
+      "text": "No rooster crows, no dog barks, not even the crickets find their chorus. The silence is oppressive, thick, like a wet blanket. Puf-Puf looks at you: \"It's as if nature were counting to ten and didn't dare say ten.\"",
       "imageUrl": "images/tol/stories/terra-s1/2.silence.png"
     },
     {
       "tileId": "p3",
       "type": "page",
       "sortOrder": 3,
-      "caption": "Șoaptele oamenilor",
-      "text": "Un bătrân se apropie cu pași mărunți. „E… o umbră”, șoptește. „Coboară din cer la apus. Animalele fug, grânele se culcă la pământ. Zicem că-i un blestem.” Puf-Puf clipește rar: „Blestem sau semn, tot o cauză are. Hai să prindem urma.”",
+      "caption": "The People's Whispers",
+      "text": "An old man approaches with small steps. \"It's... a shadow,\" he whispers. \"It descends from the sky at sunset. The animals flee, the crops are flattened. We say it's a curse.\" Puf-Puf blinks slowly: \"Curse or sign, it still has a cause. Let's pick up the trail.\"",
       "imageUrl": "images/tol/stories/terra-s1/3.whispers.png"
     },
     {
       "tileId": "p4",
       "type": "page",
       "sortOrder": 4,
-      "caption": "Prima noapte",
-      "text": "Soarele se scurge după dealuri, iar vântul aduce un foșnet nou, neliniștit. Deasupra norilor, ceva mare se mișcă. Umbră peste câmpuri, iar luna parcă se dă la o parte. Puf-Puf își ține respirația o clipă și zâmbește puțin: „Ok… asta nu e doar vreme schimbătoare.”",
+      "caption": "The First Night",
+      "text": "The sun drains behind the hills, and the wind brings a new, restless rustle. Above the clouds, something large is moving. A shadow over the fields, and the moon seems to step aside. Puf-Puf holds his breath for a moment and smiles slightly: \"Okay... this isn't just changing weather.\"",
       "imageUrl": "images/tol/stories/terra-s1/4.first-night.png"
     },
     {
       "tileId": "p5",
       "type": "page",
       "sortOrder": 5,
-      "caption": "Vibrația pământului",
-      "text": "Pământul tresare, ușor la început, apoi ca un pas greoi. Aerul miroase a fum și a cenușă curată, ca după o scânteie. În lanul culcat, se ghicește o siluetă uriașă care pâlpâie intermitent, ca un far rănit.",
+      "caption": "The Earth's Vibration",
+      "text": "The earth trembles, lightly at first, then like a heavy footstep. The air smells of smoke and clean ash, as if after a spark. In the flattened cornfield, a huge silhouette can be discerned, flickering intermittently, like a wounded beacon.",
       "imageUrl": "images/tol/stories/terra-s1/5.vibration.png"
     },
     {
       "tileId": "p6",
       "type": "page",
       "sortOrder": 6,
-      "caption": "Creatura",
-      "text": "Din umbre iese la iveală o pasăre imensă, cu pene ca jarul și ochi de cristal. Aripa stângă îi atârnă grea; fiecare bătaie ridică scântei care se sting pe apă. Nu e un blestem: e o ființă rătăcită din altă lume, căzută într-un loc care nu o înțelege încă.",
+      "caption": "The Creature",
+      "text": "From the shadows emerges an immense bird, with feathers like embers and crystal eyes. Its left wing hangs heavy; each beat raises sparks that die out on the water. It's not a curse: it's a lost being from another world, fallen into a place that doesn't yet understand it.",
       "imageUrl": "images/tol/stories/terra-s1/6.creature.png"
     },
     {
       "tileId": "p7",
       "type": "page",
       "sortOrder": 7,
-      "caption": "Legătura",
-      "text": "Puf-Puf se apropie încet, îți face semn din cap și apoi îți vorbește pe șoptite: „E din Copacul Luminii. Dacă o ajutăm, ne poate arăta un drum ascuns pe Terra.” Pasărea te privește drept, fără teamă; în ochii ei se văd brazde și stele. „Tu ai mâini bune”, zice Puf-Puf cu un zâmbet. „Și eu am… comentarii utile. Încearcă tu primul.”",
+      "caption": "The Bond",
+      "text": "Puf-Puf approaches slowly, gives you a nod, and then speaks in a whisper: \"It's from the Tree of Light. If we help it, it can show us a hidden path on Terra.\" The bird looks straight at you, without fear; in its eyes, you can see furrows and stars. \"You have good hands,\" says Puf-Puf with a smile. \"And I have... useful commentary. You try first.\"",
       "imageUrl": "images/tol/stories/terra-s1/7.bond.png"
     },
     {
       "tileId": "q1",
       "type": "quiz",
-      "caption": "Ajutorul pentru Pasărea Rănită",
+      "caption": "Helping the Wounded Bird",
       "sortOrder": 8,
       "imageUrl": "images/tol/stories/terra-s1/8.quiz.png",
-      "question": "Cum ajuți pasărea rănită?",
+      "question": "How do you help the wounded bird?",
       "answers": [
         {
           "answerId": "a",
-          "text": "O încurajezi să se ridice, să-și amintească de puterea ei.",
+          "text": "You encourage it to rise, to remember its power.",
           "tokens": [
             {
               "type": "Personality",
@@ -88,7 +88,7 @@
         },
         {
           "answerId": "b",
-          "text": "O îngrijești cu grijă și răbdare.",
+          "text": "You care for it with caution and patience.",
           "tokens": [
             {
               "type": "Personality",
@@ -105,7 +105,7 @@
         },
         {
           "answerId": "c",
-          "text": "Îi construiești un plan pentru a-și întinde din nou aripile.",
+          "text": "You build a plan for it to spread its wings again.",
           "tokens": [
             {
               "type": "Personality",
@@ -122,7 +122,7 @@
         },
         {
           "answerId": "d",
-          "text": "Îți folosești creativitatea și găsești o metodă nouă de vindecare.",
+          "text": "You use your creativity to find a new healing method.",
           "tokens": [
             {
               "type": "Personality",
@@ -139,7 +139,7 @@
         },
         {
           "answerId": "e",
-          "text": "Cercetezi semnele luminii de pe penele ei, pentru a descoperi secretul.",
+          "text": "You research the light signs on its feathers to discover the secret.",
           "tokens": [
             {
               "type": "Personality",
@@ -160,8 +160,8 @@
       "tileId": "p8",
       "type": "page",
       "sortOrder": 9,
-      "caption": "Drumul deschis",
-      "text": "După ajutorul vostru, pasărea își strânge aripa rănită la piept și, cu un efort calm, își întinde cealaltă. O dungă de lumină se desprinde din penele ei și taie câmpul ca o potecă nouă. „Uite-l”, spune Puf-Puf, cu un fel de mândrie jucăușă. „Drumul care n-a existat până acum cinci minute.” Pasărea ridică privirea spre nori, apoi către voi — recunoscătoare — și lumina rămâne, invitându-vă să pășiți.",
+      "caption": "The Path Revealed",
+      "text": "After your help, the bird pulls its injured wing to its chest and, with a calm effort, extends the other. A streak of light detaches from its feathers and cuts through the field like a new path. \"There it is,\" says Puf-Puf, with a sort of playful pride. \"The path that didn't exist five minutes ago.\" The bird looks up at the clouds, then at you—gratefully—and the light remains, inviting you to step forward.",
       "imageUrl": "images/tol/stories/terra-s1/9.path.png"
     }
   ]

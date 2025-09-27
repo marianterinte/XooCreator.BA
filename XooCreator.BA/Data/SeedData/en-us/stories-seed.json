@@ -2,250 +2,1182 @@
   "stories": [
     {
       "storyId": "intro-pufpuf",
-      "title": "Împăratul Puf-Puf – Poarta Deschisă",
+      "title": "Emperor Puf-Puf – The Open Gate",
       "coverImageUrl": "images/tol-intro-story/0.Cover.png",
       "category": "intro",
       "sortOrder": 1,
       "tiles": [
-        { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Chemarea", "text": "Nava lui Puf-Puf e trasă spre Copacul Luminii – o poartă vie între lumi.", "imageUrl": "images/tol-intro-story/1.puf-puf-flying.png" },
-        { "tileId": "p2", "type": "page", "sortOrder": 2, "caption": "Aterizarea", "text": "Pe Terra, cristalul-hartă licărește: drumul spre Kelo-Ketis e presărat cu lumi de explorat.", "imageUrl": "images/tol-intro-story/2.puf-puf-hurt.png" },
-        { "tileId": "p3", "type": "page", "sortOrder": 3, "caption": "Poarta", "text": "Copacul Luminii nu e doar arbore: e un explorator de lumi. Fiecare ramură – un univers.", "imageUrl": "images/tol-intro-story/3.puf-puf-crystal.png" },
-        { "tileId": "p4", "type": "page", "sortOrder": 4, "caption": "Legământul", "text": "Puf-Puf îți cere ajutorul: sari din lume în lume, rezolvă problemele lor și adună tokeni (Curaj, Curiozitate, Gândire, Creativitate, Siguranță) și Fructe speciale pentru Ingineria Animalelor. Cu acești tokeni vei debloca Eroi în Arborele Eroilor. Dacă deblochezi Eroul Luminii, îți va arăta calea către Kelo-Ketis.", "imageUrl": "images/tol-intro-story/puf-puf-home-planet.png" },
-        { "tileId": "q1", "type": "quiz", "sortOrder": 5, "question": "Cum pornești?", "answers": [
-          { "answerId": "a", "text": "Cu ochii deschiși spre mistere", "reward": "token_curiosity", "sortOrder": 1 },
-          { "answerId": "b", "text": "Cu inima hotărâtă",             "reward": "token_courage",   "sortOrder": 2 },
-          { "answerId": "c", "text": "Cu un plan",                    "reward": "token_thinking",  "sortOrder": 3 }
-        ] }
+        {
+          "tileId": "p1",
+          "type": "page",
+          "sortOrder": 1,
+          "caption": "The Calling",
+          "text": "Puf-Puf's ship is drawn towards the Tree of Light – a living gateway between worlds.",
+          "imageUrl": "images/tol-intro-story/1.puf-puf-flying.png"
+        },
+        {
+          "tileId": "p2",
+          "type": "page",
+          "sortOrder": 2,
+          "caption": "The Landing",
+          "text": "On Terra, the crystal-map flickers: the path to Kelo-Ketis is dotted with worlds to explore.",
+          "imageUrl": "images/tol-intro-story/2.puf-puf-hurt.png"
+        },
+        {
+          "tileId": "p3",
+          "type": "page",
+          "sortOrder": 3,
+          "caption": "The Gate",
+          "text": "The Tree of Light is not just a tree: it's an explorer of worlds. Each branch – a universe.",
+          "imageUrl": "images/tol-intro-story/3.puf-puf-crystal.png"
+        },
+        {
+          "tileId": "p4",
+          "type": "page",
+          "sortOrder": 4,
+          "caption": "The Covenant",
+          "text": "Puf-Puf asks for your help: jump from world to world, solve their problems, and gather tokens (Courage, Curiosity, Thinking, Creativity, Safety) and special Fruits for Animal Engineering. With these tokens, you will unlock Heroes in the Hero Tree. If you unlock the Hero of Light, it will show you the way to Kelo-Ketis.",
+          "imageUrl": "images/tol-intro-story/puf-puf-home-planet.png"
+        },
+        {
+          "tileId": "q1",
+          "type": "quiz",
+          "sortOrder": 5,
+          "question": "How do you begin?",
+          "answers": [
+            {
+              "answerId": "a",
+              "text": "With eyes open to mysteries",
+              "reward": "token_curiosity",
+              "sortOrder": 1
+            },
+            {
+              "answerId": "b",
+              "text": "With a determined heart",
+              "reward": "token_courage",
+              "sortOrder": 2
+            },
+            {
+              "answerId": "c",
+              "text": "With a plan",
+              "reward": "token_thinking",
+              "sortOrder": 3
+            }
+          ]
+        }
       ]
     },
-
-    { "storyId": "terra-s1", "title": "Terra – Seminte de Drum", "coverImageUrl": "images/worlds/terra.jpg", "category": "main", "sortOrder": 2, "tiles": [
-        { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Grădina", "text": "Ajută fermierii să salveze recolta de la secetă – găsește canalul ascuns.", "imageUrl": "images/biomes/farm.jpg" },
-        { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Ce alegi să faci întâi?", "answers": [
-          { "answerId": "a", "text": "Studiez harta terenurilor", "reward": "token_thinking", "sortOrder": 1 },
-        { "answerId": "b", "text": "Întreb localnicii",         "reward": "token_curiosity", "sortOrder": 2 }
-      ] }
-    ] },
-
-    { "storyId": "terra-s2", "title": "Terra – Podul de Răbdare", "coverImageUrl": "images/worlds/terra.jpg", "category": "main", "sortOrder": 3, "tiles": [
-        { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Râul", "text": "Construiește un pod simplu cu resurse puține.", "imageUrl": "images/biomes/forest.jpg" },
-        { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Ce material alegi?", "answers": [
-        { "answerId": "a", "text": "Piatră (siguranță)",                 "reward": "token_safety",     "sortOrder": 1 },
-        { "answerId": "b", "text": "Lemn flexibil (creativitate)",      "reward": "token_creativity",  "sortOrder": 2 }
-      ] }
-    ] },
-
-    { "storyId": "auroria-s1", "title": "Auroria – Cântecul Zorilor", "coverImageUrl": "images/worlds/terra.jpg", "category": "main", "sortOrder": 4, "tiles": [
-      { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Câmpia Aurie", "text": "Soarele pictează spicele în aur. Vântul poartă o melodie străveche.", "imageUrl": "images/biomes/farm.jpg" },
-      { "tileId": "p2", "type": "page", "sortOrder": 2, "caption": "Ecoul", "text": "Un turn de piatră trimite înapoi o notă care lipsește din cântec.", "imageUrl": "images/biomes/montain.jpg" },
-      { "tileId": "p3", "type": "page", "sortOrder": 3, "caption": "Freamătul", "text": "Păsările aurii se așază doar pe acordul potrivit.", "imageUrl": "images/biomes/forest.jpg" },
-      { "tileId": "q1", "type": "quiz", "sortOrder": 4, "question": "Ce notă adaugi?", "answers": [
-        { "answerId": "a", "text": "O notă curajoasă", "reward": "token_courage",   "sortOrder": 1 },
-        { "answerId": "b", "text": "O notă curioasă",  "reward": "token_curiosity", "sortOrder": 2 },
-        { "answerId": "c", "text": "O notă gândită",   "reward": "token_thinking",  "sortOrder": 3 }
-      ] }
-    ] },
-
-    { "storyId": "auroria-s2", "title": "Auroria – Atelierul de Spice", "coverImageUrl": "images/worlds/terra.jpg", "category": "main", "sortOrder": 5, "tiles": [
-      { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Meșteșugul", "text": "Țăranii țes din spic instrumente care prind glas.", "imageUrl": "images/biomes/farm.jpg" },
-      { "tileId": "p2", "type": "page", "sortOrder": 2, "caption": "Învățare", "text": "Fiecare instrument are o structură logică și o inimă creativă.", "imageUrl": "images/biomes/forest.jpg" },
-      { "tileId": "p3", "type": "page", "sortOrder": 3, "caption": "Orchestra", "text": "Cântecul zorilor trebuie să ridice ceața de pe vale.", "imageUrl": "images/biomes/jungle.jpg" },
-      { "tileId": "q1", "type": "quiz", "sortOrder": 4, "question": "Cum conduci orchestra?", "answers": [
-        { "answerId": "a", "text": "Partitură clară", "reward": "token_thinking",  "sortOrder": 1 },
-        { "answerId": "b", "text": "Improvizație",    "reward": "token_creativity", "sortOrder": 2 }
-      ] }
-    ] },
-
-    { "storyId": "mechanika-s1", "title": "Mechanika – Inima Angrenajelor", "coverImageUrl": "images/worlds/pyron.jpg", "category": "main", "sortOrder": 6, "tiles": [
-      { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Fabrica", "text": "Un oraș-fabrică suspină; motorul central se poticnește.", "imageUrl": "images/biomes/desert.jpg" },
-      { "tileId": "p2", "type": "page", "sortOrder": 2, "caption": "Diagnoza", "text": "Conducte, supape, ritmuri; ai nevoie de logică și ascultare.", "imageUrl": "images/biomes/montain.jpg" },
-      { "tileId": "p3", "type": "page", "sortOrder": 3, "caption": "Ajustaj", "text": "Un angrenaj lipsește exact din locul unde curge energia.", "imageUrl": "images/biomes/forest.jpg" },
-      { "tileId": "q1", "type": "quiz", "sortOrder": 4, "question": "Cum pornești motorul?", "answers": [
-        { "answerId": "a", "text": "Protocol de siguranță", "reward": "token_safety",    "sortOrder": 1 },
-        { "answerId": "b", "text": "Repornire creativă",   "reward": "token_creativity", "sortOrder": 2 }
-      ] }
-    ] },
-
-    { "storyId": "mechanika-s2", "title": "Mechanika – Podul de Sclipici", "coverImageUrl": "images/worlds/pyron.jpg", "category": "main", "sortOrder": 7, "tiles": [
-      { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Planul", "text": "Două turnuri trebuie unite de un pod ușor și sigur.", "imageUrl": "images/biomes/steppe.jpg" },
-      { "tileId": "p2", "type": "page", "sortOrder": 2, "caption": "Materiale", "text": "Fibre strălucitoare preiau vibrația vântului.", "imageUrl": "images/biomes/jungle.jpg" },
-      { "tileId": "p3", "type": "page", "sortOrder": 3, "caption": "Montaj", "text": "Îmbinările trebuie să respecte o secvență exactă.", "imageUrl": "images/biomes/montain.jpg" },
-      { "tileId": "q1", "type": "quiz", "sortOrder": 4, "question": "Ce prioritate alegi?", "answers": [
-        { "answerId": "a", "text": "Stabilitate perfectă", "reward": "token_safety",   "sortOrder": 1 },
-        { "answerId": "b", "text": "Economie de materiale", "reward": "token_thinking", "sortOrder": 2 }
-      ] }
-    ] },
-
-    { "storyId": "verdantia-s1", "title": "Verdantia – Grădinile Suspendate", "coverImageUrl": "images/worlds/sylvaria.jpg", "category": "main", "sortOrder": 9, "tiles": [
-      { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Podul de frunze", "text": "Rădăcini împletite se arcuiesc peste prăpastie.", "imageUrl": "images/biomes/forest.jpg" },
-      { "tileId": "p2", "type": "page", "sortOrder": 2, "caption": "Sera vie", "text": "Plantele răspund la cântece; cresc în forme dorite.", "imageUrl": "images/biomes/jungle.jpg" },
-      { "tileId": "p3", "type": "page", "sortOrder": 3, "caption": "Ucenicia", "text": "Învăț cum să ghidez o liană fără s-o rănesc.", "imageUrl": "images/biomes/forest.jpg" },
-      { "tileId": "p4", "type": "page", "sortOrder": 4, "caption": "Polenul-lumină", "text": "Licurici plantați desenează harta grădinii.", "imageUrl": "images/biomes/tropical.jpg" },
-      { "tileId": "q1", "type": "quiz", "sortOrder": 5, "question": "Cum stabilizezi podul verde?", "answers": [
-        { "answerId": "a", "text": "Noduri simetrice", "reward": "token_thinking",  "sortOrder": 1 },
-        { "answerId": "b", "text": "Ancoră de pietre", "reward": "token_safety",    "sortOrder": 2 }
-      ] }
-    ] },
-
-    { "storyId": "verdantia-s2", "title": "Verdantia – Apa care Cântă", "coverImageUrl": "images/worlds/sylvaria.jpg", "category": "main", "sortOrder": 10, "tiles": [
-      { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Izvoarele", "text": "Un labirint de canale din rădăcini dirijează apa.", "imageUrl": "images/biomes/steppe.jpg" },
-      { "tileId": "p2", "type": "page", "sortOrder": 2, "caption": "Rezonanța", "text": "Un fluier din bambus deschide o vană naturală.", "imageUrl": "images/biomes/jungle.jpg" },
-      { "tileId": "p3", "type": "page", "sortOrder": 3, "caption": "Echilibru", "text": "Prea mult debit rupe frunzele; prea puțin usucă florile.", "imageUrl": "images/biomes/forest.jpg" },
-      { "tileId": "p4", "type": "page", "sortOrder": 4, "caption": "Harta apelor", "text": "Notezi un program de irigații pentru toată grădina.", "imageUrl": "images/biomes/montain.jpg" },
-      { "tileId": "q1", "type": "quiz", "sortOrder": 5, "question": "Ce reguli aplici?", "answers": [
-        { "answerId": "a", "text": "Repartiție egală", "reward": "token_thinking",  "sortOrder": 1 },
-        { "answerId": "b", "text": "Prioritate răsaduri", "reward": "token_creativity", "sortOrder": 2 }
-      ] }
-    ] },
-
-    { "storyId": "nocturna-s1", "title": "Nocturna – Aleea Felinarelor", "coverImageUrl": "images/worlds/neptunia.jpg", "category": "main", "sortOrder": 12, "tiles": [
-      { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Amurg", "text": "Orașul aprinde flori-lanternă pe străzile de catifea.", "imageUrl": "images/biomes/montain.jpg" },
-      { "tileId": "p2", "type": "page", "sortOrder": 2, "caption": "Semnale", "text": "Felinarele pulsează coduri pe care trebuie să lecitești.", "imageUrl": "images/biomes/forest.jpg" },
-      { "tileId": "p3", "type": "page", "sortOrder": 3, "caption": "Mesajul", "text": "O hartă de stele ascunsă în ritmul luminilor.", "imageUrl": "images/biomes/steppe.jpg" },
-      { "tileId": "q1", "type": "quiz", "sortOrder": 4, "question": "Cum decodifici?", "answers": [
-        { "answerId": "a", "text": "Grilă logică", "reward": "token_thinking",  "sortOrder": 1 },
-        { "answerId": "b", "text": "Harta vizuală", "reward": "token_creativity", "sortOrder": 2 }
-      ] }
-    ] },
-
-    { "storyId": "nocturna-s2", "title": "Nocturna – Balconul Lunii", "coverImageUrl": "images/worlds/neptunia.jpg", "category": "main", "sortOrder": 13, "tiles": [
-      { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Balconul", "text": "Un balcon planta deschide o scenă pentru idei grele.", "imageUrl": "images/biomes/jungle.jpg" },
-      { "tileId": "p2", "type": "page", "sortOrder": 2, "caption": "Contragreutate", "text": "Liane și lumini pun în echilibru o platformă plutitoare.", "imageUrl": "images/biomes/forest.jpg" },
-      { "tileId": "p3", "type": "page", "sortOrder": 3, "caption": "Repere", "text": "Stelele devin repere de navigație urbană nocturnă.", "imageUrl": "images/biomes/montain.jpg" },
-      { "tileId": "q1", "type": "quiz", "sortOrder": 4, "question": "Ce alegi să optimizezi?", "answers": [
-        { "answerId": "a", "text": "Siguranța", "reward": "token_safety",   "sortOrder": 1 },
-        { "answerId": "b", "text": "Eficiența", "reward": "token_thinking", "sortOrder": 2 }
-      ] }
-    ] },
-
-    { "storyId": "lunaria-s1", "title": "Lunaria – Umbre Prietenoase", "coverImageUrl": "images/worlds/lunaria.jpg", "category": "main", "sortOrder": 5, "tiles": [
-        { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Labirintul", "text": "Umbrele te ghidează printr-un oraș argintiu.", "imageUrl": "images/biomes/montain.jpg" },
-        { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Cum comunici cu umbrele?", "answers": [
-          { "answerId": "a", "text": "Întrebări simple", "reward": "token_curiosity", "sortOrder": 1 },
-        { "answerId": "b", "text": "Desenez harta",    "reward": "token_thinking",  "sortOrder": 2 }
-      ] }
-    ] },
-
-    { "storyId": "lunaria-s2", "title": "Lunaria – Lacul de Argint", "coverImageUrl": "images/worlds/lunaria.jpg", "category": "main", "sortOrder": 6, "tiles": [
-        { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Reflexii", "text": "Un lac oglindă prezintă soluții dacă pui întrebarea potrivită.", "imageUrl": "images/biomes/jungle.jpg" },
-        { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Care e întrebarea potrivită?", "answers": [
-          { "answerId": "a", "text": "Ce nu înțeleg încă?", "reward": "token_curiosity", "sortOrder": 1 },
-        { "answerId": "b", "text": "Ce date îmi lipsesc?", "reward": "token_thinking",  "sortOrder": 2 }
-      ] }
-    ] },
-
-    { "storyId": "oceanica-s1", "title": "Oceanica – Coralul Cântător", "coverImageUrl": "images/worlds/oceanica.jpg", "category": "main", "sortOrder": 8, "tiles": [
-        { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Rezonanța", "text": "Cântecul coralilor dezvăluie coordonate ascunse.", "imageUrl": "images/biomes/tropical.jpg" },
-        { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Ce instrument alegi?", "answers": [
-          { "answerId": "a", "text": "Harpa vântului (creativitate)", "reward": "token_creativity", "sortOrder": 1 },
-        { "answerId": "b", "text": "Metronom logic (gândire)",     "reward": "token_thinking",  "sortOrder": 2 }
-      ] }
-    ] },
-
-    { "storyId": "oceanica-s2", "title": "Oceanica – Insulele Plutitoare", "coverImageUrl": "images/worlds/oceanica.jpg", "category": "main", "sortOrder": 9, "tiles": [
-        { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Navigație", "text": "Leagă insulele cu poduri de alge-oțel.", "imageUrl": "images/biomes/steppe.jpg" },
-        { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Cum asiguri podul?", "answers": [
-        { "answerId": "a", "text": "Ancore redundante", "reward": "token_safety",    "sortOrder": 1 },
-        { "answerId": "b", "text": "Design flexibil",   "reward": "token_creativity", "sortOrder": 2 }
-      ] }
-    ] },
-
-    { "storyId": "sylvaria-s1", "title": "Sylvaria – Cărarea Vie", "coverImageUrl": "images/worlds/sylvaria.jpg", "category": "main", "sortOrder": 11, "tiles": [
-        { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Drumul care se mișcă", "text": "Pădurea își mută potecile ca să te testeze.", "imageUrl": "images/biomes/forest.jpg" },
-        { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Cum memorezi traseul?", "answers": [
-        { "answerId": "a", "text": "Note vizuale și repere", "reward": "token_thinking",  "sortOrder": 1 },
-        { "answerId": "b", "text": "Cântec-busolă",         "reward": "token_creativity", "sortOrder": 2 }
-      ] }
-    ] },
-
-    { "storyId": "sylvaria-s2", "title": "Sylvaria – Sfatul Arborilor", "coverImageUrl": "images/worlds/sylvaria.jpg", "category": "main", "sortOrder": 12, "tiles": [
-        { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Consiliul", "text": "Arborii îți cer un plan pentru echilibru.", "imageUrl": "images/biomes/jungle.jpg" },
-        { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Ce plan propui?", "answers": [
-        { "answerId": "a", "text": "Replantare strategică", "reward": "token_thinking",  "sortOrder": 1 },
-        { "answerId": "b", "text": "Rețea de polen-drone",  "reward": "token_creativity", "sortOrder": 2 }
-      ] }
-    ] },
-
-    { "storyId": "crystalia-s1", "title": "Crystalia – Ecouri Logice", "coverImageUrl": "images/worlds/crystalia.jpg", "category": "main", "sortOrder": 14, "tiles": [
-        { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Sala Prismei", "text": "Ecourile îți verifică raționamentul.", "imageUrl": "images/biomes/montain.jpg" },
-        { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Ce verifici întâi?", "answers": [
-          { "answerId": "a", "text": "Ipotezele", "reward": "token_thinking", "sortOrder": 1 },
-        { "answerId": "b", "text": "Riscurile", "reward": "token_safety",   "sortOrder": 2 }
-      ] }
-    ] },
-
-    { "storyId": "crystalia-s2", "title": "Crystalia – Țesătorii de Lumină", "coverImageUrl": "images/worlds/crystalia.jpg", "category": "main", "sortOrder": 15, "tiles": [
-        { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Atelierul", "text": "Înveți să împletești idei în forme.", "imageUrl": "images/biomes/desert.jpg" },
-        { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Ce structură alegi?", "answers": [
-        { "answerId": "a", "text": "Rețea logică",    "reward": "token_thinking",  "sortOrder": 1 },
-          { "answerId": "b", "text": "Model generativ", "reward": "token_creativity", "sortOrder": 2 }
-        ] }
-    ] },
-
-    { "storyId": "zephyra-s1", "title": "Zephyra – Poduri de Vânt", "coverImageUrl": "images/worlds/zephyra.jpg", "category": "main", "sortOrder": 17, "tiles": [
-        { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Suspensie", "text": "Construiești trasee aeriene sigure.", "imageUrl": "images/biomes/montain.jpg" },
-        { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Ce prioritate ai?", "answers": [
-        { "answerId": "a", "text": "Siguranță structurală", "reward": "token_safety",   "sortOrder": 1 },
-        { "answerId": "b", "text": "Eficiență",            "reward": "token_thinking", "sortOrder": 2 }
-      ] }
-    ] },
-
-    { "storyId": "zephyra-s2", "title": "Zephyra – Zmee-Oracol", "coverImageUrl": "images/worlds/zephyra.jpg", "category": "main", "sortOrder": 18, "tiles": [
-        { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Întrebarea Vântului", "text": "Un oracol de pânză răspunde la curaj.", "imageUrl": "images/biomes/steppe.jpg" },
-        { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Ce întrebi?", "answers": [
-          { "answerId": "a", "text": "Unde bate drumul meu?", "reward": "token_courage", "sortOrder": 1 },
-        { "answerId": "b", "text": "Ce riscuri văd?",       "reward": "token_safety",  "sortOrder": 2 }
-      ] }
-    ] },
-
-    { "storyId": "pyron-s1", "title": "Pyron – Nicovala Stelelor", "coverImageUrl": "images/worlds/pyron.jpg", "category": "main", "sortOrder": 20, "tiles": [
-        { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Fierăria", "text": "Test de curaj: apropiere de mările de lavă.", "imageUrl": "images/biomes/desert.jpg" },
-        { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Cum te protejezi?", "answers": [
-        { "answerId": "a", "text": "Echipament sigur",   "reward": "token_safety",  "sortOrder": 1 },
-          { "answerId": "b", "text": "Antrenament mental", "reward": "token_courage", "sortOrder": 2 }
-        ] }
-    ] },
-
-    { "storyId": "pyron-s2", "title": "Pyron – Focul care Creează", "coverImageUrl": "images/worlds/pyron.jpg", "category": "main", "sortOrder": 21, "tiles": [
-        { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Turnare", "text": "Modelezi idei în metal viu.", "imageUrl": "images/biomes/montain.jpg" },
-        { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Ce formă alegi?", "answers": [
-        { "answerId": "a", "text": "Scut",  "reward": "token_safety",    "sortOrder": 1 },
-          { "answerId": "b", "text": "Aripă", "reward": "token_creativity", "sortOrder": 2 }
-        ] }
-    ] },
-
-    { "storyId": "neptunia-s1", "title": "Neptunia – Gheața care Cântă", "coverImageUrl": "images/worlds/neptunia.jpg", "category": "main", "sortOrder": 23, "tiles": [
-        { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Catedrale", "text": "Gheața vibrează în armonii rare.", "imageUrl": "images/biomes/montain.jpg" },
-        { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Cum captezi sunetul?", "answers": [
-        { "answerId": "a", "text": "Dispozitiv optic",   "reward": "token_thinking",  "sortOrder": 1 },
-        { "answerId": "b", "text": "Partitură liberă",   "reward": "token_creativity", "sortOrder": 2 }
-      ] }
-    ] },
-
-    { "storyId": "neptunia-s2", "title": "Neptunia – Balenele Luminoase", "coverImageUrl": "images/worlds/neptunia.jpg", "category": "main", "sortOrder": 24, "tiles": [
-        { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Dialog", "text": "Îți răspund în coduri de lumină.", "imageUrl": "images/biomes/tropical.jpg" },
-        { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Cum traduci?", "answers": [
-        { "answerId": "a", "text": "Model logic",        "reward": "token_thinking",  "sortOrder": 1 },
-          { "answerId": "b", "text": "Pictograme creative", "reward": "token_creativity", "sortOrder": 2 }
-        ] }
-    ] },
-
-    { "storyId": "aetherion-s1", "title": "Aetherion – Biblioteci de Nori", "coverImageUrl": "images/worlds/aetherion.jpg", "category": "main", "sortOrder": 26, "tiles": [
-        { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Citire Aeriană", "text": "Cărți-nori care se rescriu singure.", "imageUrl": "images/biomes/jungle.jpg" },
-        { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Cum clasifici ideile?", "answers": [
-        { "answerId": "a", "text": "Graf de concepte", "reward": "token_thinking",  "sortOrder": 1 },
-        { "answerId": "b", "text": "Hartă vizuală",    "reward": "token_creativity", "sortOrder": 2 }
-      ] }
-    ] },
-
-    { "storyId": "aetherion-s2", "title": "Aetherion – Atelierul de Aripi", "coverImageUrl": "images/worlds/aetherion.jpg", "category": "main", "sortOrder": 27, "tiles": [
-        { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Prototipare", "text": "Construiești aripi pentru idei grele.", "imageUrl": "images/biomes/forest.jpg" },
-        { "tileId": "q1", "type": "quiz", "sortOrder": 2, "question": "Ce alegi?", "answers": [
-          { "answerId": "a", "text": "Aripi ușoare (creativitate)", "reward": "token_creativity", "sortOrder": 1 },
-        { "answerId": "b", "text": "Aripi stabile (gândire)",    "reward": "token_thinking",  "sortOrder": 2 }
-      ] }
-    ] }
+    {
+      "storyId": "terra-s1",
+      "title": "Terra – Seeds of a Path",
+      "coverImageUrl": "images/worlds/terra.jpg",
+      "category": "main",
+      "sortOrder": 2,
+      "tiles": [
+        {
+          "tileId": "p1",
+          "type": "page",
+          "sortOrder": 1,
+          "caption": "The Garden",
+          "text": "Help the farmers save the harvest from drought – find the hidden channel.",
+          "imageUrl": "images/biomes/farm.jpg"
+        },
+        {
+          "tileId": "q1",
+          "type": "quiz",
+          "sortOrder": 2,
+          "question": "What do you choose to do first?",
+          "answers": [
+            {
+              "answerId": "a",
+              "text": "I study the terrain map",
+              "reward": "token_thinking",
+              "sortOrder": 1
+            },
+            {
+              "answerId": "b",
+              "text": "I ask the locals",
+              "reward": "token_curiosity",
+              "sortOrder": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "storyId": "terra-s2",
+      "title": "Terra – The Bridge of Patience",
+      "coverImageUrl": "images/worlds/terra.jpg",
+      "category": "main",
+      "sortOrder": 3,
+      "tiles": [
+        {
+          "tileId": "p1",
+          "type": "page",
+          "sortOrder": 1,
+          "caption": "The River",
+          "text": "Build a simple bridge with few resources.",
+          "imageUrl": "images/biomes/forest.jpg"
+        },
+        {
+          "tileId": "q1",
+          "type": "quiz",
+          "sortOrder": 2,
+          "question": "What material do you choose?",
+          "answers": [
+            {
+              "answerId": "a",
+              "text": "Stone (safety)",
+              "reward": "token_safety",
+              "sortOrder": 1
+            },
+            {
+              "answerId": "b",
+              "text": "Flexible wood (creativity)",
+              "reward": "token_creativity",
+              "sortOrder": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "storyId": "auroria-s1",
+      "title": "Auroria – The Song of Dawn",
+      "coverImageUrl": "images/worlds/terra.jpg",
+      "category": "main",
+      "sortOrder": 4,
+      "tiles": [
+        {
+          "tileId": "p1",
+          "type": "page",
+          "sortOrder": 1,
+          "caption": "The Golden Plain",
+          "text": "The sun paints the wheat stalks in gold. The wind carries an ancient melody.",
+          "imageUrl": "images/biomes/farm.jpg"
+        },
+        {
+          "tileId": "p2",
+          "type": "page",
+          "sortOrder": 2,
+          "caption": "The Echo",
+          "text": "A stone tower sends back a missing note from the song.",
+          "imageUrl": "images/biomes/montain.jpg"
+        },
+        {
+          "tileId": "p3",
+          "type": "page",
+          "sortOrder": 3,
+          "caption": "The Flutter",
+          "text": "The golden birds only perch on the right chord.",
+          "imageUrl": "images/biomes/forest.jpg"
+        },
+        {
+          "tileId": "q1",
+          "type": "quiz",
+          "sortOrder": 4,
+          "question": "What note do you add?",
+          "answers": [
+            {
+              "answerId": "a",
+              "text": "A courageous note",
+              "reward": "token_courage",
+              "sortOrder": 1
+            },
+            {
+              "answerId": "b",
+              "text": "A curious note",
+              "reward": "token_curiosity",
+              "sortOrder": 2
+            },
+            {
+              "answerId": "c",
+              "text": "A thoughtful note",
+              "reward": "token_thinking",
+              "sortOrder": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "storyId": "auroria-s2",
+      "title": "Auroria – The Workshop of Wheat",
+      "coverImageUrl": "images/worlds/terra.jpg",
+      "category": "main",
+      "sortOrder": 5,
+      "tiles": [
+        {
+          "tileId": "p1",
+          "type": "page",
+          "sortOrder": 1,
+          "caption": "The Craft",
+          "text": "Peasants weave instruments from wheat that come to life.",
+          "imageUrl": "images/biomes/farm.jpg"
+        },
+        {
+          "tileId": "p2",
+          "type": "page",
+          "sortOrder": 2,
+          "caption": "Learning",
+          "text": "Each instrument has a logical structure and a creative heart.",
+          "imageUrl": "images/biomes/forest.jpg"
+        },
+        {
+          "tileId": "p3",
+          "type": "page",
+          "sortOrder": 3,
+          "caption": "The Orchestra",
+          "text": "The song of dawn must lift the fog from the valley.",
+          "imageUrl": "images/biomes/jungle.jpg"
+        },
+        {
+          "tileId": "q1",
+          "type": "quiz",
+          "sortOrder": 4,
+          "question": "How do you conduct the orchestra?",
+          "answers": [
+            {
+              "answerId": "a",
+              "text": "Clear score",
+              "reward": "token_thinking",
+              "sortOrder": 1
+            },
+            {
+              "answerId": "b",
+              "text": "Improvisation",
+              "reward": "token_creativity",
+              "sortOrder": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "storyId": "mechanika-s1",
+      "title": "Mechanika – The Heart of Gears",
+      "coverImageUrl": "images/worlds/pyron.jpg",
+      "category": "main",
+      "sortOrder": 6,
+      "tiles": [
+        {
+          "tileId": "p1",
+          "type": "page",
+          "sortOrder": 1,
+          "caption": "The Factory",
+          "text": "A factory-city sighs; the central engine stumbles.",
+          "imageUrl": "images/biomes/desert.jpg"
+        },
+        {
+          "tileId": "p2",
+          "type": "page",
+          "sortOrder": 2,
+          "caption": "Diagnosis",
+          "text": "Pipes, valves, rhythms; you need logic and listening.",
+          "imageUrl": "images/biomes/montain.jpg"
+        },
+        {
+          "tileId": "p3",
+          "type": "page",
+          "sortOrder": 3,
+          "caption": "Adjustment",
+          "text": "A gear is missing precisely where the energy flows.",
+          "imageUrl": "images/biomes/forest.jpg"
+        },
+        {
+          "tileId": "q1",
+          "type": "quiz",
+          "sortOrder": 4,
+          "question": "How do you start the engine?",
+          "answers": [
+            {
+              "answerId": "a",
+              "text": "Safety protocol",
+              "reward": "token_safety",
+              "sortOrder": 1
+            },
+            {
+              "answerId": "b",
+              "text": "Creative restart",
+              "reward": "token_creativity",
+              "sortOrder": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "storyId": "mechanika-s2",
+      "title": "Mechanika – The Bridge of Glitter",
+      "coverImageUrl": "images/worlds/pyron.jpg",
+      "category": "main",
+      "sortOrder": 7,
+      "tiles": [
+        {
+          "tileId": "p1",
+          "type": "page",
+          "sortOrder": 1,
+          "caption": "The Plan",
+          "text": "Two towers must be connected by a light and safe bridge.",
+          "imageUrl": "images/biomes/steppe.jpg"
+        },
+        {
+          "tileId": "p2",
+          "type": "page",
+          "sortOrder": 2,
+          "caption": "Materials",
+          "text": "Shining fibers absorb the wind's vibration.",
+          "imageUrl": "images/biomes/jungle.jpg"
+        },
+        {
+          "tileId": "p3",
+          "type": "page",
+          "sortOrder": 3,
+          "caption": "Assembly",
+          "text": "The joints must follow an exact sequence.",
+          "imageUrl": "images/biomes/montain.jpg"
+        },
+        {
+          "tileId": "q1",
+          "type": "quiz",
+          "sortOrder": 4,
+          "question": "What priority do you choose?",
+          "answers": [
+            {
+              "answerId": "a",
+              "text": "Perfect stability",
+              "reward": "token_safety",
+              "sortOrder": 1
+            },
+            {
+              "answerId": "b",
+              "text": "Material economy",
+              "reward": "token_thinking",
+              "sortOrder": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "storyId": "verdantia-s1",
+      "title": "Verdantia – The Hanging Gardens",
+      "coverImageUrl": "images/worlds/sylvaria.jpg",
+      "category": "main",
+      "sortOrder": 9,
+      "tiles": [
+        {
+          "tileId": "p1",
+          "type": "page",
+          "sortOrder": 1,
+          "caption": "The Leaf Bridge",
+          "text": "Woven roots arch over the chasm.",
+          "imageUrl": "images/biomes/forest.jpg"
+        },
+        {
+          "tileId": "p2",
+          "type": "page",
+          "sortOrder": 2,
+          "caption": "The Living Greenhouse",
+          "text": "Plants respond to songs; they grow into desired shapes.",
+          "imageUrl": "images/biomes/jungle.jpg"
+        },
+        {
+          "tileId": "p3",
+          "type": "page",
+          "sortOrder": 3,
+          "caption": "The Apprenticeship",
+          "text": "Learning how to guide a vine without hurting it.",
+          "imageUrl": "images/biomes/forest.jpg"
+        },
+        {
+          "tileId": "p4",
+          "type": "page",
+          "sortOrder": 4,
+          "caption": "The Light-Pollen",
+          "text": "Planted fireflies draw the map of the garden.",
+          "imageUrl": "images/biomes/tropical.jpg"
+        },
+        {
+          "tileId": "q1",
+          "type": "quiz",
+          "sortOrder": 5,
+          "question": "How do you stabilize the green bridge?",
+          "answers": [
+            {
+              "answerId": "a",
+              "text": "Symmetrical knots",
+              "reward": "token_thinking",
+              "sortOrder": 1
+            },
+            {
+              "answerId": "b",
+              "text": "Stone anchor",
+              "reward": "token_safety",
+              "sortOrder": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "storyId": "verdantia-s2",
+      "title": "Verdantia – The Singing Water",
+      "coverImageUrl": "images/worlds/sylvaria.jpg",
+      "category": "main",
+      "sortOrder": 10,
+      "tiles": [
+        {
+          "tileId": "p1",
+          "type": "page",
+          "sortOrder": 1,
+          "caption": "The Springs",
+          "text": "A labyrinth of root channels directs the water.",
+          "imageUrl": "images/biomes/steppe.jpg"
+        },
+        {
+          "tileId": "p2",
+          "type": "page",
+          "sortOrder": 2,
+          "caption": "The Resonance",
+          "text": "A bamboo flute opens a natural valve.",
+          "imageUrl": "images/biomes/jungle.jpg"
+        },
+        {
+          "tileId": "p3",
+          "type": "page",
+          "sortOrder": 3,
+          "caption": "Balance",
+          "text": "Too much flow breaks the leaves; too little dries the flowers.",
+          "imageUrl": "images/biomes/forest.jpg"
+        },
+        {
+          "tileId": "p4",
+          "type": "page",
+          "sortOrder": 4,
+          "caption": "The Water Map",
+          "text": "You note down an irrigation schedule for the entire garden.",
+          "imageUrl": "images/biomes/montain.jpg"
+        },
+        {
+          "tileId": "q1",
+          "type": "quiz",
+          "sortOrder": 5,
+          "question": "What rules do you apply?",
+          "answers": [
+            {
+              "answerId": "a",
+              "text": "Equal distribution",
+              "reward": "token_thinking",
+              "sortOrder": 1
+            },
+            {
+              "answerId": "b",
+              "text": "Priority to seedlings",
+              "reward": "token_creativity",
+              "sortOrder": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "storyId": "nocturna-s1",
+      "title": "Nocturna – The Alley of Lanterns",
+      "coverImageUrl": "images/worlds/neptunia.jpg",
+      "category": "main",
+      "sortOrder": 12,
+      "tiles": [
+        {
+          "tileId": "p1",
+          "type": "page",
+          "sortOrder": 1,
+          "caption": "Dusk",
+          "text": "The city lights up flower-lanterns on the velvet streets.",
+          "imageUrl": "images/biomes/montain.jpg"
+        },
+        {
+          "tileId": "p2",
+          "type": "page",
+          "sortOrder": 2,
+          "caption": "Signals",
+          "text": "The lanterns pulse codes that you must read.",
+          "imageUrl": "images/biomes/forest.jpg"
+        },
+        {
+          "tileId": "p3",
+          "type": "page",
+          "sortOrder": 3,
+          "caption": "The Message",
+          "text": "A map of stars hidden in the rhythm of the lights.",
+          "imageUrl": "images/biomes/steppe.jpg"
+        },
+        {
+          "tileId": "q1",
+          "type": "quiz",
+          "sortOrder": 4,
+          "question": "How do you decode it?",
+          "answers": [
+            {
+              "answerId": "a",
+              "text": "Logical grid",
+              "reward": "token_thinking",
+              "sortOrder": 1
+            },
+            {
+              "answerId": "b",
+              "text": "Visual map",
+              "reward": "token_creativity",
+              "sortOrder": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "storyId": "nocturna-s2",
+      "title": "Nocturna – The Moon's Balcony",
+      "coverImageUrl": "images/worlds/neptunia.jpg",
+      "category": "main",
+      "sortOrder": 13,
+      "tiles": [
+        {
+          "tileId": "p1",
+          "type": "page",
+          "sortOrder": 1,
+          "caption": "The Balcony",
+          "text": "A plant-filled balcony opens a stage for heavy ideas.",
+          "imageUrl": "images/biomes/jungle.jpg"
+        },
+        {
+          "tileId": "p2",
+          "type": "page",
+          "sortOrder": 2,
+          "caption": "Counterweight",
+          "text": "Vines and lights balance a floating platform.",
+          "imageUrl": "images/biomes/forest.jpg"
+        },
+        {
+          "tileId": "p3",
+          "type": "page",
+          "sortOrder": 3,
+          "caption": "Landmarks",
+          "text": "The stars become landmarks for nocturnal urban navigation.",
+          "imageUrl": "images/biomes/montain.jpg"
+        },
+        {
+          "tileId": "q1",
+          "type": "quiz",
+          "sortOrder": 4,
+          "question": "What do you choose to optimize?",
+          "answers": [
+            {
+              "answerId": "a",
+              "text": "Safety",
+              "reward": "token_safety",
+              "sortOrder": 1
+            },
+            {
+              "answerId": "b",
+              "text": "Efficiency",
+              "reward": "token_thinking",
+              "sortOrder": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "storyId": "lunaria-s1",
+      "title": "Lunaria – Friendly Shadows",
+      "coverImageUrl": "images/worlds/lunaria.jpg",
+      "category": "main",
+      "sortOrder": 5,
+      "tiles": [
+        {
+          "tileId": "p1",
+          "type": "page",
+          "sortOrder": 1,
+          "caption": "The Labyrinth",
+          "text": "The shadows guide you through a silver city.",
+          "imageUrl": "images/biomes/montain.jpg"
+        },
+        {
+          "tileId": "q1",
+          "type": "quiz",
+          "sortOrder": 2,
+          "question": "How do you communicate with the shadows?",
+          "answers": [
+            {
+              "answerId": "a",
+              "text": "Simple questions",
+              "reward": "token_curiosity",
+              "sortOrder": 1
+            },
+            {
+              "answerId": "b",
+              "text": "I draw the map",
+              "reward": "token_thinking",
+              "sortOrder": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "storyId": "lunaria-s2",
+      "title": "Lunaria – The Silver Lake",
+      "coverImageUrl": "images/worlds/lunaria.jpg",
+      "category": "main",
+      "sortOrder": 6,
+      "tiles": [
+        {
+          "tileId": "p1",
+          "type": "page",
+          "sortOrder": 1,
+          "caption": "Reflections",
+          "text": "A mirror-like lake presents solutions if you ask the right question.",
+          "imageUrl": "images/biomes/jungle.jpg"
+        },
+        {
+          "tileId": "q1",
+          "type": "quiz",
+          "sortOrder": 2,
+          "question": "What is the right question?",
+          "answers": [
+            {
+              "answerId": "a",
+              "text": "What do I not yet understand?",
+              "reward": "token_curiosity",
+              "sortOrder": 1
+            },
+            {
+              "answerId": "b",
+              "text": "What data am I missing?",
+              "reward": "token_thinking",
+              "sortOrder": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "storyId": "oceanica-s1",
+      "title": "Oceanica – The Singing Coral",
+      "coverImageUrl": "images/worlds/oceanica.jpg",
+      "category": "main",
+      "sortOrder": 8,
+      "tiles": [
+        {
+          "tileId": "p1",
+          "type": "page",
+          "sortOrder": 1,
+          "caption": "The Resonance",
+          "text": "The song of the corals reveals hidden coordinates.",
+          "imageUrl": "images/biomes/tropical.jpg"
+        },
+        {
+          "tileId": "q1",
+          "type": "quiz",
+          "sortOrder": 2,
+          "question": "What instrument do you choose?",
+          "answers": [
+            {
+              "answerId": "a",
+              "text": "Wind harp (creativity)",
+              "reward": "token_creativity",
+              "sortOrder": 1
+            },
+            {
+              "answerId": "b",
+              "text": "Logical metronome (thinking)",
+              "reward": "token_thinking",
+              "sortOrder": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "storyId": "oceanica-s2",
+      "title": "Oceanica – The Floating Islands",
+      "coverImageUrl": "images/worlds/oceanica.jpg",
+      "category": "main",
+      "sortOrder": 9,
+      "tiles": [
+        {
+          "tileId": "p1",
+          "type": "page",
+          "sortOrder": 1,
+          "caption": "Navigation",
+          "text": "Connect the islands with bridges of steel-algae.",
+          "imageUrl": "images/biomes/steppe.jpg"
+        },
+        {
+          "tileId": "q1",
+          "type": "quiz",
+          "sortOrder": 2,
+          "question": "How do you secure the bridge?",
+          "answers": [
+            {
+              "answerId": "a",
+              "text": "Redundant anchors",
+              "reward": "token_safety",
+              "sortOrder": 1
+            },
+            {
+              "answerId": "b",
+              "text": "Flexible design",
+              "reward": "token_creativity",
+              "sortOrder": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "storyId": "sylvaria-s1",
+      "title": "Sylvaria – The Living Path",
+      "coverImageUrl": "images/worlds/sylvaria.jpg",
+      "category": "main",
+      "sortOrder": 11,
+      "tiles": [
+        {
+          "tileId": "p1",
+          "type": "page",
+          "sortOrder": 1,
+          "caption": "The Moving Path",
+          "text": "The forest shifts its paths to test you.",
+          "imageUrl": "images/biomes/forest.jpg"
+        },
+        {
+          "tileId": "q1",
+          "type": "quiz",
+          "sortOrder": 2,
+          "question": "How do you memorize the route?",
+          "answers": [
+            {
+              "answerId": "a",
+              "text": "Visual notes and landmarks",
+              "reward": "token_thinking",
+              "sortOrder": 1
+            },
+            {
+              "answerId": "b",
+              "text": "Compass-song",
+              "reward": "token_creativity",
+              "sortOrder": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "storyId": "sylvaria-s2",
+      "title": "Sylvaria – The Counsel of Trees",
+      "coverImageUrl": "images/worlds/sylvaria.jpg",
+      "category": "main",
+      "sortOrder": 12,
+      "tiles": [
+        {
+          "tileId": "p1",
+          "type": "page",
+          "sortOrder": 1,
+          "caption": "The Council",
+          "text": "The trees ask for a plan for balance.",
+          "imageUrl": "images/biomes/jungle.jpg"
+        },
+        {
+          "tileId": "q1",
+          "type": "quiz",
+          "sortOrder": 2,
+          "question": "What plan do you propose?",
+          "answers": [
+            {
+              "answerId": "a",
+              "text": "Strategic replanting",
+              "reward": "token_thinking",
+              "sortOrder": 1
+            },
+            {
+              "answerId": "b",
+              "text": "Pollen-drone network",
+              "reward": "token_creativity",
+              "sortOrder": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "storyId": "crystalia-s1",
+      "title": "Crystalia – Logical Echoes",
+      "coverImageUrl": "images/worlds/crystalia.jpg",
+      "category": "main",
+      "sortOrder": 14,
+      "tiles": [
+        {
+          "tileId": "p1",
+          "type": "page",
+          "sortOrder": 1,
+          "caption": "The Prism Hall",
+          "text": "The echoes test your reasoning.",
+          "imageUrl": "images/biomes/montain.jpg"
+        },
+        {
+          "tileId": "q1",
+          "type": "quiz",
+          "sortOrder": 2,
+          "question": "What do you check first?",
+          "answers": [
+            {
+              "answerId": "a",
+              "text": "The hypotheses",
+              "reward": "token_thinking",
+              "sortOrder": 1
+            },
+            {
+              "answerId": "b",
+              "text": "The risks",
+              "reward": "token_safety",
+              "sortOrder": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "storyId": "crystalia-s2",
+      "title": "Crystalia – The Light Weavers",
+      "coverImageUrl": "images/worlds/crystalia.jpg",
+      "category": "main",
+      "sortOrder": 15,
+      "tiles": [
+        {
+          "tileId": "p1",
+          "type": "page",
+          "sortOrder": 1,
+          "caption": "The Workshop",
+          "text": "You learn to weave ideas into forms.",
+          "imageUrl": "images/biomes/desert.jpg"
+        },
+        {
+          "tileId": "q1",
+          "type": "quiz",
+          "sortOrder": 2,
+          "question": "What structure do you choose?",
+          "answers": [
+            {
+              "answerId": "a",
+              "text": "Logical network",
+              "reward": "token_thinking",
+              "sortOrder": 1
+            },
+            {
+              "answerId": "b",
+              "text": "Generative model",
+              "reward": "token_creativity",
+              "sortOrder": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "storyId": "zephyra-s1",
+      "title": "Zephyra – Bridges of Wind",
+      "coverImageUrl": "images/worlds/zephyra.jpg",
+      "category": "main",
+      "sortOrder": 17,
+      "tiles": [
+        {
+          "tileId": "p1",
+          "type": "page",
+          "sortOrder": 1,
+          "caption": "Suspension",
+          "text": "You build safe aerial routes.",
+          "imageUrl": "images/biomes/montain.jpg"
+        },
+        {
+          "tileId": "q1",
+          "type": "quiz",
+          "sortOrder": 2,
+          "question": "What is your priority?",
+          "answers": [
+            {
+              "answerId": "a",
+              "text": "Structural safety",
+              "reward": "token_safety",
+              "sortOrder": 1
+            },
+            {
+              "answerId": "b",
+              "text": "Efficiency",
+              "reward": "token_thinking",
+              "sortOrder": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "storyId": "zephyra-s2",
+      "title": "Zephyra – Oracle-Kites",
+      "coverImageUrl": "images/worlds/zephyra.jpg",
+      "category": "main",
+      "sortOrder": 18,
+      "tiles": [
+        {
+          "tileId": "p1",
+          "type": "page",
+          "sortOrder": 1,
+          "caption": "The Wind's Question",
+          "text": "A canvas oracle responds to courage.",
+          "imageUrl": "images/biomes/steppe.jpg"
+        },
+        {
+          "tileId": "q1",
+          "type": "quiz",
+          "sortOrder": 2,
+          "question": "What do you ask?",
+          "answers": [
+            {
+              "answerId": "a",
+              "text": "Where does my path lead?",
+              "reward": "token_courage",
+              "sortOrder": 1
+            },
+            {
+              "answerId": "b",
+              "text": "What risks do I see?",
+              "reward": "token_safety",
+              "sortOrder": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "storyId": "pyron-s1",
+      "title": "Pyron – The Anvil of Stars",
+      "coverImageUrl": "images/worlds/pyron.jpg",
+      "category": "main",
+      "sortOrder": 20,
+      "tiles": [
+        {
+          "tileId": "p1",
+          "type": "page",
+          "sortOrder": 1,
+          "caption": "The Forge",
+          "text": "A test of courage: approaching the seas of lava.",
+          "imageUrl": "images/biomes/desert.jpg"
+        },
+        {
+          "tileId": "q1",
+          "type": "quiz",
+          "sortOrder": 2,
+          "question": "How do you protect yourself?",
+          "answers": [
+            {
+              "answerId": "a",
+              "text": "Safe equipment",
+              "reward": "token_safety",
+              "sortOrder": 1
+            },
+            {
+              "answerId": "b",
+              "text": "Mental training",
+              "reward": "token_courage",
+              "sortOrder": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "storyId": "pyron-s2",
+      "title": "Pyron – The Fire that Creates",
+      "coverImageUrl": "images/worlds/pyron.jpg",
+      "category": "main",
+      "sortOrder": 21,
+      "tiles": [
+        {
+          "tileId": "p1",
+          "type": "page",
+          "sortOrder": 1,
+          "caption": "Casting",
+          "text": "You shape ideas into living metal.",
+          "imageUrl": "images/biomes/montain.jpg"
+        },
+        {
+          "tileId": "q1",
+          "type": "quiz",
+          "sortOrder": 2,
+          "question": "What shape do you choose?",
+          "answers": [
+            {
+              "answerId": "a",
+              "text": "Shield",
+              "reward": "token_safety",
+              "sortOrder": 1
+            },
+            {
+              "answerId": "b",
+              "text": "Wing",
+              "reward": "token_creativity",
+              "sortOrder": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "storyId": "neptunia-s1",
+      "title": "Neptunia – The Singing Ice",
+      "coverImageUrl": "images/worlds/neptunia.jpg",
+      "category": "main",
+      "sortOrder": 23,
+      "tiles": [
+        {
+          "tileId": "p1",
+          "type": "page",
+          "sortOrder": 1,
+          "caption": "Cathedrals",
+          "text": "The ice vibrates in rare harmonies.",
+          "imageUrl": "images/biomes/montain.jpg"
+        },
+        {
+          "tileId": "q1",
+          "type": "quiz",
+          "sortOrder": 2,
+          "question": "How do you capture the sound?",
+          "answers": [
+            {
+              "answerId": "a",
+              "text": "Optical device",
+              "reward": "token_thinking",
+              "sortOrder": 1
+            },
+            {
+              "answerId": "b",
+              "text": "Free score",
+              "reward": "token_creativity",
+              "sortOrder": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "storyId": "neptunia-s2",
+      "title": "Neptunia – The Luminous Whales",
+      "coverImageUrl": "images/worlds/neptunia.jpg",
+      "category": "main",
+      "sortOrder": 24,
+      "tiles": [
+        {
+          "tileId": "p1",
+          "type": "page",
+          "sortOrder": 1,
+          "caption": "Dialogue",
+          "text": "They answer you in codes of light.",
+          "imageUrl": "images/biomes/tropical.jpg"
+        },
+        {
+          "tileId": "q1",
+          "type": "quiz",
+          "sortOrder": 2,
+          "question": "How do you translate?",
+          "answers": [
+            {
+              "answerId": "a",
+              "text": "Logical model",
+              "reward": "token_thinking",
+              "sortOrder": 1
+            },
+            {
+              "answerId": "b",
+              "text": "Creative pictograms",
+              "reward": "token_creativity",
+              "sortOrder": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "storyId": "aetherion-s1",
+      "title": "Aetherion – Libraries of Clouds",
+      "coverImageUrl": "images/worlds/aetherion.jpg",
+      "category": "main",
+      "sortOrder": 26,
+      "tiles": [
+        {
+          "tileId": "p1",
+          "type": "page",
+          "sortOrder": 1,
+          "caption": "Aerial Reading",
+          "text": "Cloud-books that rewrite themselves.",
+          "imageUrl": "images/biomes/jungle.jpg"
+        },
+        {
+          "tileId": "q1",
+          "type": "quiz",
+          "sortOrder": 2,
+          "question": "How do you classify the ideas?",
+          "answers": [
+            {
+              "answerId": "a",
+              "text": "Concept graph",
+              "reward": "token_thinking",
+              "sortOrder": 1
+            },
+            {
+              "answerId": "b",
+              "text": "Visual map",
+              "reward": "token_creativity",
+              "sortOrder": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "storyId": "aetherion-s2",
+      "title": "Aetherion – The Workshop of Wings",
+      "coverImageUrl": "images/worlds/aetherion.jpg",
+      "category": "main",
+      "sortOrder": 27,
+      "tiles": [
+        {
+          "tileId": "p1",
+          "type": "page",
+          "sortOrder": 1,
+          "caption": "Prototyping",
+          "text": "You build wings for heavy ideas.",
+          "imageUrl": "images/biomes/forest.jpg"
+        },
+        {
+          "tileId": "q1",
+          "type": "quiz",
+          "sortOrder": 2,
+          "question": "What do you choose?",
+          "answers": [
+            {
+              "answerId": "a",
+              "text": "Light wings (creativity)",
+              "reward": "token_creativity",
+              "sortOrder": 1
+            },
+            {
+              "answerId": "b",
+              "text": "Stable wings (thinking)",
+              "reward": "token_thinking",
+              "sortOrder": 2
+            }
+          ]
+        }
+      ]
+    }
   ]
 }
-
-

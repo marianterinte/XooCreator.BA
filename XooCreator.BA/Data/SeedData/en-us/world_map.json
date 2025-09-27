@@ -2,10 +2,10 @@
   "regions": [
     {
       "id": "gateway",
-      "label": "Copacul Luminii",
+      "label": "Tree of Light",
       "level": 0,
       "imageUrl": "images/worlds/gateway.jpg",
-      "pufpufMessage": "Copacul Luminii e o poartă între lumi. Harta se trezește când curajul întâlnește curiozitatea. 🌟",
+      "pufpufMessage": "The Tree of Light is a gateway between worlds. The map awakens when courage meets curiosity. 🌟",
       "sortOrder": 0
     },
     {
@@ -13,7 +13,7 @@
       "label": "Terra",
       "level": 1,
       "imageUrl": "images/worlds/terra.jpg",
-      "pufpufMessage": "Planeta albastră. Aici înveți pașii mici care duc la drumuri mari.",
+      "pufpufMessage": "The blue planet. Here you learn the small steps that lead to great journeys.",
       "sortOrder": 1
     },
     {
@@ -21,7 +21,7 @@
       "label": "Lunaria",
       "level": 2,
       "imageUrl": "images/worlds/lunaria.jpg",
-      "pufpufMessage": "Orașe argintii sub cer translucid. Umbrele te învață să privești atent.",
+      "pufpufMessage": "Silver cities under a translucent sky. The shadows teach you to look closely.",
       "sortOrder": 2
     },
     {
@@ -29,7 +29,7 @@
       "label": "Oceanica",
       "level": 3,
       "imageUrl": "images/worlds/oceanica.jpg",
-      "pufpufMessage": "Arhipelaguri plutitoare, corali inteligenți, valuri care cântă.",
+      "pufpufMessage": "Floating archipelagos, intelligent corals, waves that sing.",
       "sortOrder": 3
     },
     {
@@ -37,7 +37,7 @@
       "label": "Sylvaria",
       "level": 4,
       "imageUrl": "images/worlds/sylvaria.jpg",
-      "pufpufMessage": "Păduri fosforescente și cărări care-și schimbă locul.",
+      "pufpufMessage": "Phosphorescent forests and paths that change their location.",
       "sortOrder": 4
     },
     {
@@ -45,7 +45,7 @@
       "label": "Crystalia",
       "level": 5,
       "imageUrl": "images/worlds/crystalia.jpg",
-      "pufpufMessage": "Caverne de lumină și ecouri care răspund cu idei.",
+      "pufpufMessage": "Caverns of light and echoes that answer with ideas.",
       "sortOrder": 5
     },
     {
@@ -53,7 +53,7 @@
       "label": "Zephyra",
       "level": 6,
       "imageUrl": "images/worlds/zephyra.jpg",
-      "pufpufMessage": "Orașe suspendate în aer, poduri de vânt, zmee-oracol.",
+      "pufpufMessage": "Cities suspended in the air, bridges of wind, oracle-kites.",
       "sortOrder": 6
     },
     {
@@ -61,7 +61,7 @@
       "label": "Pyron",
       "level": 7,
       "imageUrl": "images/worlds/pyron.jpg",
-      "pufpufMessage": "Mări de lavă liniștită și fierari care bat stele la nicovală.",
+      "pufpufMessage": "Seas of calm lava and blacksmiths who forge stars on their anvils.",
       "sortOrder": 7
     },
     {
@@ -69,7 +69,7 @@
       "label": "Neptunia",
       "level": 8,
       "imageUrl": "images/worlds/neptunia.jpg",
-      "pufpufMessage": "Ghețuri adânci și ființe albastre care vorbesc în lumini.",
+      "pufpufMessage": "Deep ice and blue beings that speak in light.",
       "sortOrder": 8
     },
     {
@@ -77,7 +77,7 @@
       "label": "Aetherion",
       "level": 9,
       "imageUrl": "images/worlds/aetherion.jpg",
-      "pufpufMessage": "Biblioteci de nori, idei care prind aripi.",
+      "pufpufMessage": "Libraries of clouds, ideas that take flight.",
       "sortOrder": 9
     },
     {
@@ -85,7 +85,7 @@
       "label": "Kelo-Ketis",
       "level": 10,
       "imageUrl": "images/worlds/kelo-ketis.jpg",
-      "pufpufMessage": "Planeta natală a lui Puf-Puf. Cheia drumului este Eroul Luminii.",
+      "pufpufMessage": "Puf-Puf's home planet. The key to the path is the Hero of Light.",
       "sortOrder": 10
     }
   ],
@@ -96,7 +96,6 @@
       "rewardImageUrl": "images/tol-intro-story/0.Cover.png",
       "sortOrder": 1
     },
-
     {
       "storyId": "terra-s1",
       "regionId": "terra",
@@ -109,7 +108,6 @@
       "rewardImageUrl": "images/homepage/heroes/hero2.jpg",
       "sortOrder": 2
     },
-
     {
       "storyId": "lunaria-s1",
       "regionId": "lunaria",
@@ -122,7 +120,6 @@
       "rewardImageUrl": "images/homepage/heroes/hero2.jpg",
       "sortOrder": 2
     },
-
     {
       "storyId": "oceanica-s1",
       "regionId": "oceanica",
@@ -135,7 +132,6 @@
       "rewardImageUrl": "images/homepage/heroes/hero1.jpg",
       "sortOrder": 2
     },
-
     {
       "storyId": "sylvaria-s1",
       "regionId": "sylvaria",
@@ -148,7 +144,6 @@
       "rewardImageUrl": "images/homepage/heroes/hero0.jpg",
       "sortOrder": 2
     },
-
     {
       "storyId": "crystalia-s1",
       "regionId": "crystalia",
@@ -161,7 +156,6 @@
       "rewardImageUrl": "images/homepage/heroes/hero1.jpg",
       "sortOrder": 2
     },
-
     {
       "storyId": "zephyra-s1",
       "regionId": "zephyra",
@@ -174,7 +168,6 @@
       "rewardImageUrl": "images/homepage/heroes/hero0.jpg",
       "sortOrder": 2
     },
-
     {
       "storyId": "pyron-s1",
       "regionId": "pyron",
@@ -187,7 +180,6 @@
       "rewardImageUrl": "images/homepage/heroes/hero1.jpg",
       "sortOrder": 2
     },
-
     {
       "storyId": "neptunia-s1",
       "regionId": "neptunia",
@@ -200,7 +192,6 @@
       "rewardImageUrl": "images/homepage/heroes/hero1.jpg",
       "sortOrder": 2
     },
-
     {
       "storyId": "aetherion-s1",
       "regionId": "aetherion",
@@ -222,7 +213,6 @@
       "storyId": "intro-pufpuf",
       "sortOrder": 1
     },
-
     {
       "type": "all",
       "fromId": "terra",
@@ -237,7 +227,6 @@
       "requiredTokens": { "curiosity": 1 },
       "sortOrder": 3
     },
-
     {
       "type": "all",
       "fromId": "lunaria",
@@ -245,7 +234,6 @@
       "requiredStoriesCsv": "lunaria-s1,lunaria-s2",
       "sortOrder": 4
     },
-
     {
       "type": "all",
       "fromId": "oceanica",
@@ -253,7 +241,6 @@
       "requiredStoriesCsv": "oceanica-s1,oceanica-s2",
       "sortOrder": 5
     },
-
     {
       "type": "all",
       "fromId": "sylvaria",
@@ -268,7 +255,6 @@
       "requiredTokens": { "thinking": 2 },
       "sortOrder": 7
     },
-
     {
       "type": "all",
       "fromId": "crystalia",
@@ -276,7 +262,6 @@
       "requiredStoriesCsv": "crystalia-s1,crystalia-s2",
       "sortOrder": 8
     },
-
     {
       "type": "all",
       "fromId": "zephyra",
@@ -284,7 +269,6 @@
       "requiredStoriesCsv": "zephyra-s1,zephyra-s2",
       "sortOrder": 9
     },
-
     {
       "type": "all",
       "fromId": "pyron",
@@ -292,7 +276,6 @@
       "requiredStoriesCsv": "pyron-s1,pyron-s2",
       "sortOrder": 10
     },
-
     {
       "type": "all",
       "fromId": "neptunia",
@@ -300,7 +283,6 @@
       "requiredStoriesCsv": "neptunia-s1,neptunia-s2",
       "sortOrder": 11
     },
-
     {
       "type": "all",
       "fromId": "aetherion",

@@ -1,6 +1,6 @@
 {
   "storyId": "terra-s2",
-  "title": "Iepurele Negru – Lentila Lunii",
+  "title": "The Black Rabbit – The Moon Lens",
   "coverImageUrl": "images/tol/stories/terra-s2/0.Cover.png",
   "category": "terra",
   "sortOrder": 2,
@@ -9,53 +9,53 @@
       "tileId": "p1",
       "type": "page",
       "sortOrder": 1,
-      "caption": "Ținta: Lentila Lunii",
-      "text": "Planul pe azi e clar: găsiți Lentila Lunii. Cu ea, cristalul mărește harta și puteți căuta mai adânc ruta spre Kelo-Ketis. Ținta indică spre o zonă cu stânci joase și iarbă înaltă, la marginea unei păduri.",
+      "caption": "Target: The Moon Lens",
+      "text": "Today's plan is clear: find the Moon Lens. With it, the crystal enlarges the map, and you can search deeper for the route to Kelo-Ketis. The target points to an area with low rocks and tall grass, at the edge of a forest.",
       "imageUrl": "images/tol/stories/terra-s2/1.target.png"
     },
     {
       "tileId": "p2",
       "type": "page",
       "sortOrder": 2,
-      "caption": "Urme ciudate",
-      "text": "În iarbă apar urme mici, în zigzag, care dispar lângă un buștean scobit. Pe lângă ele, cozi de morcov „gustate artistic”.",
+      "caption": "Strange Tracks",
+      "text": "Small, zigzag tracks appear in the grass, disappearing near a hollow log. Next to them, carrot tops that have been \"artistically tasted.\"",
       "imageUrl": "images/tol/stories/terra-s2/2.tracks.png"
     },
     {
       "tileId": "p3",
       "type": "page",
       "sortOrder": 3,
-      "caption": "Iepurele negru",
-      "text": "Din buștean sare un iepure negru, cu blana mată și ochi mari. „Bună! Eu sunt… uneori aici, uneori pe Lunaria. Depinde cum clipești”, spune, apoi râde. „Știu unde e Lentila. Și am nevoie de ajutor să ajung acasă, pe Lunaria. Dacă mă ajutați, vă arăt drumul către Lentilă.”",
+      "caption": "The Black Rabbit",
+      "text": "A black rabbit with matte fur and big eyes jumps out of the log. \"Hello! I am... sometimes here, sometimes on Lunaria. It depends on how you blink,\" it says, then laughs. \"I know where the Lens is. And I need help to get home, to Lunaria. If you help me, I'll show you the way to the Lens.\"",
       "imageUrl": "images/tol/stories/terra-s2/3.black-rabbit.png"
     },
     {
       "tileId": "p4",
       "type": "page",
       "sortOrder": 4,
-      "caption": "Locul lentilei",
-      "text": "Ghidați de iepure, ajungeți la o grotă scurtă, rece, cu apă până la gleznă. Pe tavan atârnă cristale palide; pe o stâncă, un disc translucid — Lentila Lunii — prins între două excrescențe de piatră.",
+      "caption": "The Lens's Location",
+      "text": "Guided by the rabbit, you reach a short, cold grotto, with ankle-deep water. Pale crystals hang from the ceiling; on a rock, a translucent disc—the Moon Lens—is caught between two stone growths.",
       "imageUrl": "images/tol/stories/terra-s2/4.cave.png"
     },
     {
       "tileId": "p5",
       "type": "page",
       "sortOrder": 5,
-      "caption": "Problema mică",
-      "text": "Când atingi stânca, apa face valuri și intrarea parcă „respiră”, strângându-se ușor. „Grotă sensibilă”, spune iepurele. „Faci bine, primești ieșire. Faci rău, primești duș rece.”",
+      "caption": "The Small Problem",
+      "text": "When you touch the rock, the water ripples and the entrance seems to \"breathe,\" tightening slightly. \"A sensitive grotto,\" says the rabbit. \"Do good, you get an exit. Do wrong, you get a cold shower.\"",
       "imageUrl": "images/tol/stories/terra-s2/5.problem.png"
     },
     {
       "tileId": "q1",
       "type": "quiz",
-      "caption": "Cum procedăm",
+      "caption": "How to Proceed",
       "sortOrder": 6,
       "imageUrl": "images/tol/stories/terra-s2/6.quiz.png",
-      "question": "Alege abordarea ca să scoți Lentila Lunii fără să destabilizezi grota:",
+      "question": "Choose the approach to remove the Moon Lens without destabilizing the grotto:",
       "answers": [
         {
           "answerId": "a",
-          "text": "Te strecori pe pragul îngust și lucrezi rapid, ca să nu lași timp pereților să „respire”.",
+          "text": "You squeeze through the narrow opening and work quickly, so you don't give the walls time to \"breathe.\"",
           "tokens": [
             {
               "type": "Personality",
@@ -67,7 +67,7 @@
         },
         {
           "answerId": "b",
-          "text": "Te miști încet, verifici sprijinul la fiecare pas și menții apa cât mai liniștită.",
+          "text": "You move slowly, checking your footing with each step, and keep the water as still as possible.",
           "tokens": [
             {
               "type": "Personality",
@@ -79,7 +79,7 @@
         },
         {
           "answerId": "c",
-          "text": "Faci un plan scurt: cine ține lanterna, cine fixează pârghia, ordinea mișcărilor, semn la „stop”.",
+          "text": "You make a quick plan: who holds the flashlight, who sets the lever, the order of movements, a signal for \"stop.\"",
           "tokens": [
             {
               "type": "Personality",
@@ -91,7 +91,7 @@
         },
         {
           "answerId": "d",
-          "text": "Improvizezi o unealtă: bețișor cu buclă din sfoară ca să tragi lentila de la distanță.",
+          "text": "You improvise a tool: a stick with a loop of string to pull the lens from a distance.",
           "tokens": [
             {
               "type": "Personality",
@@ -103,7 +103,7 @@
         },
         {
           "answerId": "e",
-          "text": "Pui mai întâi marcaje și ieșiri sigure: pietre-pas, frânghie la intrare, timp-limită pentru retragere.",
+          "text": "First, you set up markers and safe exits: stepping stones, a rope at the entrance, a time limit for retreat.",
           "tokens": [
             {
               "type": "Personality",
@@ -119,8 +119,8 @@
       "tileId": "p6",
       "type": "page",
       "sortOrder": 7,
-      "caption": "Reușita",
-      "text": "Lentila iese curat, fără să tulbure grota. Iepurele bate din lăbuțe: „Bravo! Lateral e mai bine decât drept!” Pui Lentila peste cristal, iar imaginea hărții se clarifică. Iepurele te privește hotărât: „Ținem legătura. Vreau acasă, pe Lunaria — promiți că mă ajuți?”",
+      "caption": "Success",
+      "text": "The Lens comes out cleanly, without disturbing the grotto. The rabbit claps its paws: \"Well done! Sideways is better than straight on!\" You place the Lens over the crystal, and the map's image becomes clear. The rabbit looks at you resolutely: \"Let's keep in touch. I want to go home, to Lunaria—do you promise to help me?\"",
       "imageUrl": "images/tol/stories/terra-s2/7.success.png"
     }
   ]

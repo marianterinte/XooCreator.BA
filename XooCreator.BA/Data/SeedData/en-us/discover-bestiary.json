@@ -1,425 +1,422 @@
 [
   {
     "Combination": "BunnyGiraffeNone",
-    "Name": "Iepurafa",
-    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a cute bunny and the body of a tall giraffe. The bunny arms are soft, white, and glowing with gentle magical light. The giraffe body is golden with shimmering spots that glow like amber. The character wears a colorful robe with rainbow silk and star patterns. Its eyes shine bright green with playful energy. The scene is a fantasy savanna-meadow filled with glowing flowers and fireflies under a starry sky. The style is vibrant, whimsical, fantasy-themed, cartoonish, like an illustration from a children\u2019s fairy tale.",
-    "Story": "\u00CEn ramurile Copacului Luminii s-a n\u0103scut Iepurafa, o creatur\u0103 unic\u0103, jum\u0103tate iepure, jum\u0103tate giraf\u0103. Bra\u021Bele sale scurte \u0219i sprintene sap\u0103 tuneluri \u0219i aprind focuri vii, iar trupul s\u0103u \u00EEnalt, \u00EEmpodobit cu pete str\u0103lucitoare, vede departe \u00EEn z\u0103ri unde al\u021Bii nu pot ajunge.\n\nLegenda spune c\u0103 Iepurafa s-a ivit atunci c\u00E2nd un iepure mic \u0219i curajos s-a ascuns la r\u0103d\u0103cina unei girafe b\u0103tr\u00E2ne, \u00EEn timp ce \u00EEntunericul devora savana. Din \u00EEmbr\u0103\u021Bi\u0219area lor disperat\u0103, Copacul Luminii a \u00EEmpletit dou\u0103 spirite \u00EEntr-un singur trup.\n\nIepurafa este un paznic al orizonturilor. C\u00E2nd alearg\u0103 prin iarb\u0103, p\u0103m\u00E2ntul tresalt\u0103 de bucurie. C\u00E2nd se ridic\u0103 la lupt\u0103, umbrele fug ru\u0219inate. \u00CEns\u0103 puterea lui nu st\u0103 doar \u00EEn vitez\u0103 sau \u00EEn\u0103l\u021Bime, ci \u00EEn prietenia pe care o ofer\u0103 celor ce r\u0103t\u0103cesc printre ramurile lumilor.\n\nSpiritele vechi spun c\u0103 Iepurafa va fi mereu acolo unde cineva \u00EEncearc\u0103 s\u0103 repare ce a fost rupt, aduc\u00E2nd curaj \u0219i speran\u021B\u0103.",
+    "Name": "Bunniraffe",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a cute bunny and the body of a tall giraffe. The bunny arms are soft, white, and glowing with gentle magical light. The giraffe body is golden with shimmering spots that glow like amber. The character wears a colorful robe with rainbow silk and star patterns. Its eyes shine bright green with playful energy. The scene is a fantasy savanna-meadow filled with glowing flowers and fireflies under a starry sky. The style is vibrant, whimsical, fantasy-themed, cartoonish, like an illustration from a children’s fairy tale.",
+    "Story": "In the branches of the Tree of Light, the Bunniraffe was born, a unique creature, half bunny, half giraffe. Its short, nimble arms dig tunnels and light vivid fires, while its tall body, adorned with glowing spots, sees far into horizons where others cannot reach.\n\nLegend says the Bunniraffe emerged when a small, brave bunny hid at the root of an old giraffe while darkness devoured the savanna. From their desperate embrace, the Tree of Light wove two spirits into a single body.\n\nThe Bunniraffe is a guardian of horizons. When it runs through the grass, the earth leaps with joy. When it rises to fight, shadows flee in shame. But its strength lies not only in speed or height, but in the friendship it offers to those who wander among the branches of the worlds.\n\nAncient spirits say the Bunniraffe will always be there where someone tries to mend what was broken, bringing courage and hope.",
     "ImageFileName": "BunnyGiraffeNone.png"
   },
   {
     "Combination": "BunnyHippoNone",
-    "Name": "Iepopotam",
+    "Name": "Bunnyppo",
     "ImagePrompt": "An anthropomorphic hybrid character with the arms of a bunny and the body of a hippo. The bunny arms are soft, white, glowing with magical light. The hippo body is strong and round, shimmering with a pearly gray glow. The character wears a robe dyed in rainbow hues with wave and flower embroidery. Its eyes are sapphire blue, full of calm joy. The scene is a fantasy pond with glowing lotus flowers, enchanted reeds, and magical koi fish. The style is colorful, whimsical, fantasy-themed, cartoon-like.",
-    "Story": "Iepopotam s-a n\u0103scut atunci c\u00E2nd un iepure \u0219i un hipopotam s-au \u00EEnt\u00E2lnit \u00EEn mijlocul unei furtuni de ape negre. Din prietenia lor nea\u0219teptat\u0103, Copacul Luminii a \u00EEmpletit agilitatea iepurelui cu for\u021Ba hipopotamului. Iepopotamul este bl\u00E2nd \u0219i protector: cu bra\u021Bele sale sprintene sap\u0103 ascunzi\u0219uri, iar cu trupul s\u0103u puternic deschide drumuri prin ape. El aduce lini\u0219te acolo unde e team\u0103 \u0219i ridic\u0103 poduri de \u00EEncredere \u00EEntre lumi.",
+    "Story": "The Bunnyppo was born when a bunny and a hippo met in the midst of a blackwater storm. From their unexpected friendship, the Tree of Light wove the bunny's agility with the hippo's strength. The Bunnyppo is gentle and protective: with its nimble arms, it digs hideouts, and with its powerful body, it opens paths through waters. It brings calm where there is fear and builds bridges of trust between worlds.",
     "ImageFileName": "BunnyHippoNone.png"
   },
   {
     "Combination": "GiraffeHippoNone",
-    "Name": "Girafopotam",
+    "Name": "Giraffoppo",
     "ImagePrompt": "An anthropomorphic hybrid character with the body of a giraffe and the body of a hippo combined, tall yet rounded and solid. The giraffe part is golden with glowing amber spots, while the hippo part is gray and pearly with soft magical ripples. The character wears a cloak patterned with stars and rivers. Its eyes are emerald and blue, showing both wisdom and calm. The scene is a magical grassland by a shimmering river under a starlit sky. The style is fantasy, vibrant, whimsical, cartoon-like.",
-    "Story": "Girafopotam este o creatur\u0103 n\u0103scut\u0103 din visul unei girafe care privea spre stele \u0219i din c\u00E2ntecul unui hipopotam care r\u0103suna sub ape. Copacul Luminii i-a unit \u00EEntr-un singur trup pentru a da echilibru: \u00EEn\u0103l\u021Bimea girafei \u0219i stabilitatea hipopotamului. El vegheaz\u0103 peste savanele de lumin\u0103 \u0219i apele ad\u00E2nci, c\u0103ut\u00E2nd s\u0103 uneasc\u0103 cerul cu p\u0103m\u00E2ntul. Girafopotamul este un mediator \u00EEntre lumi, aduc\u00E2nd \u00EEn\u021Belepciune \u0219i putere bl\u00E2nd\u0103.",
+    "Story": "The Giraffoppo is a creature born from the dream of a giraffe gazing at the stars and the song of a hippo echoing under the waters. The Tree of Light united them into a single body to bring balance: the giraffe's height and the hippo's stability. It watches over the savannas of light and the deep waters, seeking to unite the sky with the earth. The Giraffoppo is a mediator between worlds, bringing wisdom and gentle power.",
     "ImageFileName": "GiraffeHippoNone.png"
   },
   {
     "Combination": "BunnyGiraffeHippo",
-    "Name": "Iepurafopotam",
+    "Name": "Bunniraffoppo",
     "ImagePrompt": "An anthropomorphic hybrid character with the arms of a bunny, the body of a giraffe, and the head of a hippo. The bunny arms are soft and glowing, the giraffe torso tall and golden with glowing spots, and the hippo head round and gray with a calm aura. The character wears a robe embroidered with cosmic spirals and river motifs. Its eyes shine turquoise and sapphire, full of playful kindness. The scene is a magical savanna-river junction glowing with enchanted flowers and fireflies. The style is whimsical, colorful, fantasy-themed, cartoon-like.",
-    "Story": "Iepurafopotam este un erou legendar, n\u0103scut dintr-o alian\u021B\u0103 imposibil\u0103: un iepure, o giraf\u0103 \u0219i un hipopotam care au ales s\u0103-\u0219i uneasc\u0103 destinele. Copacul Luminii a v\u0103zut curajul lor \u0219i le-a dat o singur\u0103 inim\u0103. Cu bra\u021Bele iepurelui, el ajut\u0103 \u0219i protejeaz\u0103. Cu trupul girafei, vede departe. Cu capul hipopotamului, inspir\u0103 lini\u0219te \u0219i \u00EEn\u021Belepciune. El este un simbol al diversit\u0103\u021Bii \u0219i al prieteniei dintre lumi diferite.",
+    "Story": "The Bunniraffoppo is a legendary hero, born from an impossible alliance: a bunny, a giraffe, and a hippo who chose to unite their destinies. The Tree of Light saw their courage and gave them a single heart. With the bunny's arms, it helps and protects. With the giraffe's body, it sees far. With the hippo's head, it inspires tranquility and wisdom. It is a symbol of diversity and friendship between different worlds.",
     "ImageFileName": "BunnyGiraffeHippo.png"
   },
   {
     "Combination": "GiraffeBunnyNone",
-    "Name": "Girafon",
+    "Name": "Girabbit",
     "ImagePrompt": "An anthropomorphic hybrid character with the arms of a giraffe and the body of a bunny. The giraffe arms are long, golden, and patterned with glowing amber spots. The bunny body is small, agile, and shimmering with pastel fur. The character wears a playful robe of rainbow silk with flower embroidery. Its eyes shine bright violet with mischievous curiosity. The scene is a magical meadow filled with glowing mushrooms and starlight fireflies. The style is whimsical, vibrant, fantasy, cartoon-like.",
-    "Story": "Girafon s-a n\u0103scut atunci c\u00E2nd bra\u021Bele unei girafe au \u00EEmbr\u0103\u021Bi\u0219at un iepure mic care tremura \u00EEn noapte. Din acea clip\u0103, Copacul Luminii i-a unit \u00EEntr-un hibrid neobi\u0219nuit. Girafon este juc\u0103u\u0219 \u0219i ne\u00EEnfricat: folose\u0219te bra\u021Bele lungi pentru a aduna stele \u0219i trupul de iepure pentru a s\u0103ri printre umbre. El este un spirit al bucuriei, aduc\u00E2nd r\u00E2sete \u0219i lumin\u0103 oriunde ajunge.",
+    "Story": "The Girabbit was born when a giraffe's arms embraced a small bunny trembling in the night. From that moment, the Tree of Light united them into an unusual hybrid. The Girabbit is playful and fearless: it uses its long arms to gather stars and its bunny body to leap through shadows. It is a spirit of joy, bringing laughter and light wherever it goes.",
     "ImageFileName": "GiraffeBunnyNone.png"
   },
   {
     "Combination": "GiraffeHippoBunny",
-    "Name": "Girafopotaniu",
+    "Name": "Giraffoppit",
     "ImagePrompt": "An anthropomorphic hybrid character with the arms of a giraffe, the body of a hippo, and the head of a bunny. The giraffe arms are tall and golden with glowing amber spots. The hippo torso is massive and pearly gray, glowing with magical ripples. The bunny head is soft, white, with long ears shimmering with pastel light. The character wears a robe embroidered with constellations and river waves. Its eyes shine turquoise and green, playful and wise. The background is a magical meadow by a glowing river under a starry sky. The style is whimsical, colorful, fantasy-themed, cartoon-like.",
-    "Story": "Girafopotaniu s-a n\u0103scut \u00EEn mijlocul unei furtuni de stele, atunci c\u00E2nd o giraf\u0103, un hipopotam \u0219i un iepure au jurat s\u0103 apere Copacul Luminii. Din jur\u0103m\u00E2ntul lor, ramurile au unit trei spirite \u00EEntr-un singur trup. El este un simbol al prieteniei \u00EEntre fiin\u021Be complet diferite. Cu bra\u021Bele girafei ridic\u0103 lumina spre cer, cu trupul hipopotamului protejeaz\u0103 p\u0103m\u00E2ntul, iar cu capul iepurelui aduce z\u00E2mbete \u0219i speran\u021B\u0103. Girafopotaniu este v\u0103zut ca un gardian al echilibrului.",
+    "Story": "The Giraffoppit was born in the midst of a meteor shower, when a giraffe, a hippo, and a bunny swore to protect the Tree of Light. From their oath, the branches united three spirits into a single body. It is a symbol of friendship between completely different beings. With the giraffe's arms, it raises light to the sky; with the hippo's body, it protects the earth; and with the bunny's head, it brings smiles and hope. The Giraffoppit is seen as a guardian of balance.",
     "ImageFileName": "GiraffeHippoBunny.png"
   },
   {
     "Combination": "HippoBunnyNone",
-    "Name": "Hipuril\u0103",
+    "Name": "Hippityhop",
     "ImagePrompt": "An anthropomorphic hybrid character with the arms of a hippo and the body of a bunny. The hippo arms are strong, gray, glowing faintly with magical ripples. The bunny body is small and agile, shimmering with pastel fur. The character wears a robe with rainbow silk embroidered with lotus flowers and moons. Its eyes shine sapphire blue with playful calmness. The background is a whimsical meadow near a glowing pond. The style is vibrant, magical, cartoon-like.",
-    "Story": "Hipuril\u0103 s-a n\u0103scut dintr-un vis juc\u0103u\u0219 \u00EEn care un iepure a cerut puterea unui hipopotam. Copacul Luminii i-a unit \u00EEntr-o fiin\u021B\u0103 echilibrat\u0103: mic\u0103 dar puternic\u0103, bl\u00E2nd\u0103 dar hot\u0103r\u00E2t\u0103. Hipuril\u0103 folose\u0219te bra\u021Bele hipopotamului pentru a proteja \u0219i trupul de iepure pentru a s\u0103ri printre obstacole. El aduce curaj celor mici \u0219i le arat\u0103 c\u0103 m\u0103rimea nu define\u0219te puterea unui suflet.",
+    "Story": "The Hippityhop was born from a playful dream in which a bunny asked for the strength of a hippo. The Tree of Light united them into a balanced being: small but strong, gentle but determined. The Hippityhop uses the hippo's arms to protect and the bunny's body to leap over obstacles. It brings courage to the small and shows them that size does not define the power of a soul.",
     "ImageFileName": "HippoBunnyNone.png"
   },
   {
     "Combination": "HippoGiraffeNone",
-    "Name": "Hipogira",
+    "Name": "Hippiraffe",
     "ImagePrompt": "An anthropomorphic hybrid character with the arms of a hippo and the body of a giraffe. The hippo arms are massive, gray, glowing faintly with magic. The giraffe torso is tall, golden, decorated with glowing amber spots. The character wears a flowing robe with cosmic embroidery of suns and stars. Its eyes are emerald green, full of wisdom. The background is a magical savanna filled with glowing flowers beneath a starlit sky. The style is vibrant, fantasy-themed, cartoon-like.",
-    "Story": "Hipogira s-a n\u0103scut atunci c\u00E2nd un hipopotam a jurat s\u0103 apere o giraf\u0103 r\u0103t\u0103cit\u0103 de \u00EEntuneric. Copacul Luminii i-a unit \u00EEntr-o singur\u0103 fiin\u021B\u0103 pentru a p\u0103stra promisiunea lor. Ea este puternic\u0103 \u0219i \u00EEn\u021Beleapt\u0103, ridic\u00E2nd poduri \u00EEntre cer \u0219i p\u0103m\u00E2nt. Hipogira este cunoscut\u0103 drept spiritul care aduce echilibru \u00EEntre for\u021B\u0103 \u0219i gra\u021Bie.",
+    "Story": "The Hippiraffe was born when a hippo swore to protect a lost giraffe from the darkness. The Tree of Light united them into a single being to keep their promise. It is strong and wise, building bridges between sky and earth. The Hippiraffe is known as the spirit that brings balance between strength and grace.",
     "ImageFileName": "HippoGiraffeNone.png"
   },
   {
     "Combination": "HippoBunnyGiraffe",
-    "Name": "Hipurafon",
+    "Name": "Hippiraffit",
     "ImagePrompt": "An anthropomorphic hybrid character with the arms of a hippo, the body of a bunny, and the head of a giraffe. The hippo arms are powerful and gray, shimmering with magical ripples. The bunny torso is agile, glowing with pastel fur. The giraffe head is tall and golden, decorated with glowing spots and runes. The character wears a robe patterned with moons and stars. Its eyes shine bright jade and turquoise, mixing playfulness and wisdom. The background is a magical clearing where savanna meets enchanted forest. The style is whimsical, colorful, fantasy, cartoon-like.",
-    "Story": "Hipurafon este o creatur\u0103 a contrastelor, n\u0103scut\u0103 atunci c\u00E2nd trei lumi s-au ciocnit \u00EEn Copacul Luminii. Din hipopotam a primit puterea, din iepure agilitatea \u0219i din giraf\u0103 viziunea. El cutreier\u0103 ramurile copacului c\u0103ut\u00E2nd armonia \u00EEntre extreme. Hipurafon este adesea descris ca un spirit care arat\u0103 c\u0103 adev\u0103rata putere vine din unirea celor diferi\u021Bi.",
+    "Story": "The Hippiraffit is a creature of contrasts, born when three worlds collided in the Tree of Light. From the hippo, it received power; from the bunny, agility; and from the giraffe, vision. It roams the branches of the tree seeking harmony between extremes. The Hippiraffit is often described as a spirit that shows that true power comes from uniting the different.",
     "ImageFileName": "HippoBunnyGiraffe.png"
   },
   {
     "Combination": "BunnyHippoGiraffe",
-    "Name": "Iepopotira",
+    "Name": "Bunnypporaffe",
     "ImagePrompt": "An anthropomorphic hybrid character with the arms of a bunny, the body of a hippo, and the head of a giraffe. The bunny arms are small, soft, glowing with gentle magical light. The hippo torso is wide and strong, glowing with pearly gray. The giraffe head is golden with glowing amber patterns. The character wears a robe embroidered with rainbow spirals and celestial motifs. Its eyes shine violet and green, curious and kind. The background is a fantasy pond in a glowing savanna filled with fireflies. The style is vibrant, whimsical, fantasy, cartoonish.",
-    "Story": "Iepopotira s-a n\u0103scut \u00EEn mijlocul unei furtuni de lumin\u0103, atunci c\u00E2nd trei prieteni \u2014 un iepure, un hipopotam \u0219i o giraf\u0103 \u2014 au \u00EEncercat s\u0103 repare o ramur\u0103 rupt\u0103 a Copacului Luminii. Sacrificiul lor a fost transformat \u00EEn magie, \u0219i astfel s-a n\u0103scut aceast\u0103 creatur\u0103 unic\u0103. Iepopotira este un paznic bl\u00E2nd, care poart\u0103 \u00EEn el speran\u021Ba \u0219i curajul prieteniei.",
+    "Story": "The Bunnypporaffe was born in the midst of a storm of light, when three friends — a bunny, a hippo, and a giraffe — tried to mend a broken branch of the Tree of Light. Their sacrifice was transformed into magic, and thus this unique creature was born. The Bunnypporaffe is a gentle guardian, carrying within it the hope and courage of friendship.",
     "ImageFileName": "BunnyHippoGiraffe.png"
   },
   {
     "Combination": "GiraffeNoneHippo",
-    "Name": "Girafopotir",
+    "Name": "Giraffopotir",
     "ImagePrompt": "An anthropomorphic hybrid character with the arms of a giraffe and the head of a hippo, while the body is absent. The giraffe arms are long, golden, patterned with glowing amber spots. The hippo head is round, gray, shimmering with a calm magical aura. The character wears a robe decorated with celestial motifs and river-like embroidery. Its eyes shine sapphire and green, wise and gentle. The background is a magical savanna merging into a glowing pond under a starlit sky. The style is whimsical, vibrant, fantasy, cartoon-like.",
-    "Story": "Girafopotir s-a n\u0103scut dintr-un leg\u0103m\u00E2nt \u00EEntre un hipopotam \u0219i o giraf\u0103 care au vegheat \u00EEmpreun\u0103 asupra unei ramuri c\u0103zute a Copacului Luminii. Copacul le-a unit for\u021Bele \u0219i le-a oferit un singur trup. Girafopotir este un spirit al echilibrului \u00EEntre putere \u0219i bl\u00E2nde\u021Be, purt\u00E2nd \u00EEn el \u00EEn\u021Belepciunea celor dou\u0103 lumi.",
+    "Story": "The Giraffopotir was born from a pact between a hippo and a giraffe who watched together over a fallen branch of the Tree of Light. The Tree united their strengths and gave them a single body. The Giraffopotir is a spirit of balance between power and gentleness, carrying within it the wisdom of both worlds.",
     "ImageFileName": "GiraffeNoneHippo.png"
   },
   {
     "Combination": "BunnyNoneHippo",
-    "Name": "Iepurotam",
+    "Name": "Bunnypotam",
     "ImagePrompt": "An anthropomorphic hybrid character with the arms of a bunny and the head of a hippo, with no torso visible. The bunny arms are soft, glowing with pastel magical light. The hippo head is massive, gray, shimmering with pearly ripples. The character wears a robe patterned with rainbow stars and lotus motifs. Its eyes shine turquoise and sapphire, playful yet calm. The background is a magical pond surrounded by glowing flowers and reeds. The style is whimsical, colorful, fantasy, cartoon-like.",
-    "Story": "Iepurotam s-a ivit atunci c\u00E2nd un iepure \u0219i un hipopotam au stat \u00EEmpreun\u0103 sub furtuna nop\u021Bii. Copacul Luminii i-a \u00EEmpletit \u00EEntr-un singur trup, p\u0103str\u00E2nd agilitatea iepurelui \u0219i \u00EEn\u021Belepciunea hipopotamului. Iepurotam este un simbol al solidarit\u0103\u021Bii \u0219i al prieteniei dintre cei mici \u0219i cei mari.",
+    "Story": "The Bunnypotam emerged when a bunny and a hippo stood together under the storm of the night. The Tree of Light wove them into a single body, preserving the bunny's agility and the hippo's wisdom. The Bunnypotam is a symbol of solidarity and friendship between the small and the great.",
     "ImageFileName": "BunnyNoneHippo.png"
   },
   {
     "Combination": "HippoNoneBunny",
-    "Name": "Hiponel",
+    "Name": "Hipponel",
     "ImagePrompt": "An anthropomorphic hybrid character with the arms of a hippo and the head of a bunny, with no torso present. The hippo arms are gray, powerful, glowing faintly with magic. The bunny head is soft, white, with long ears shimmering with pastel light. The character wears a robe of rainbow silk embroidered with stars and moons. Its eyes shine violet with mischievous curiosity. The background is a fantastical meadow lit by enchanted fireflies. The style is vibrant, whimsical, cartoonish, fantasy.",
-    "Story": "Hiponel a ap\u0103rut atunci c\u00E2nd un iepure a cerut protec\u021Bia unui hipopotam pentru a supravie\u021Bui \u00EEntunericului. Copacul Luminii le-a unit sufletele \u0219i a dat via\u021B\u0103 acestei fiin\u021Be juc\u0103u\u0219e, dar puternice. Hiponel este un protector vesel, aduc\u00E2nd speran\u021B\u0103 acolo unde e team\u0103.",
+    "Story": "The Hipponel appeared when a bunny asked for a hippo's protection to survive the darkness. The Tree of Light united their souls and gave life to this playful yet powerful being. The Hipponel is a cheerful protector, bringing hope where there is fear.",
     "ImageFileName": "HippoNoneBunny.png"
   },
   {
     "Combination": "NoneBunnyHippo",
-    "Name": "Iepuripos",
+    "Name": "Bunnyppos",
     "ImagePrompt": "An anthropomorphic hybrid character with the body of a bunny and the head of a hippo, no arms visible. The bunny torso is small and pastel, glowing with gentle magical light. The hippo head is gray and calm, shimmering with pearly waves. The character wears a cloak embroidered with flowers and constellations. Its eyes shine turquoise and jade, warm and wise. The background is a glowing pond in an enchanted forest. The style is whimsical, colorful, cartoon-like, fantasy.",
-    "Story": "Iepuripos s-a n\u0103scut atunci c\u00E2nd un iepure a visat s\u0103 aib\u0103 puterea unui hipopotam. Copacul Luminii a transformat visul \u00EEn realitate, unind dou\u0103 lumi opuse. Iepuripos este bl\u00E2nd \u0219i pa\u0219nic, dar are o for\u021B\u0103 ascuns\u0103 care se treze\u0219te pentru a ap\u0103ra lumina. El este un simbol al visurilor \u00EEmplinite.",
+    "Story": "The Bunnyppos was born when a bunny dreamed of having the power of a hippo. The Tree of Light turned the dream into reality, uniting two opposite worlds. The Bunnyppos is gentle and peaceful, but has a hidden strength that awakens to defend the light. It is a symbol of dreams fulfilled.",
     "ImageFileName": "NoneBunnyHippo.png"
   },
   {
     "Combination": "NoneGiraffeHippo",
-    "Name": "Girafotam",
+    "Name": "Giraffotam",
     "ImagePrompt": "An anthropomorphic hybrid character with the body of a giraffe and the head of a hippo, without arms. The giraffe torso is tall, golden, glowing with amber spots. The hippo head is massive and gray, shimmering with magical calmness. The character wears a robe embroidered with suns, moons, and river patterns. Its eyes shine sapphire and emerald, wise and steady. The background is a magical savanna next to a glowing lake. The style is whimsical, fantasy, colorful, cartoon-like.",
-    "Story": "Girafotam s-a ivit atunci c\u00E2nd un hipopotam a c\u0103utat \u00EEn\u0103l\u021Bimea unei girafe pentru a veghea peste savan\u0103. Copacul Luminii i-a unit \u0219i le-a oferit un trup comun. Girafotam este un spirit al stabilit\u0103\u021Bii, p\u0103str\u00E2nd echilibrul \u00EEntre ape \u0219i cer. El este un protector al orizonturilor.",
+    "Story": "The Giraffotam emerged when a hippo sought the height of a giraffe to watch over the savanna. The Tree of Light united them and gave them a common body. The Giraffotam is a spirit of stability, maintaining the balance between waters and sky. It is a protector of horizons.",
     "ImageFileName": "NoneGiraffeHippo.png"
   },
   {
     "Combination": "NoneHippoGiraffe",
-    "Name": "Hipogirafon",
+    "Name": "Hippogiraffe",
     "ImagePrompt": "An anthropomorphic hybrid character with the body of a hippo and the head of a giraffe, without arms. The hippo torso is massive, gray, glowing with pearly ripples. The giraffe head is tall, golden, patterned with glowing amber spots. The character wears a cloak embroidered with constellations and lotus flowers. Its eyes shine emerald and turquoise, filled with wisdom. The background is a magical riverbank merging with a glowing savanna. The style is whimsical, vibrant, cartoon-like, fantasy.",
-    "Story": "Hipogirafon s-a n\u0103scut atunci c\u00E2nd un hipopotam a visat s\u0103 priveasc\u0103 mai departe dec\u00E2t orizontul apelor. Copacul Luminii i-a unit cu spiritul unei girafe \u0219i i-a dat trup comun. Hipogirafon este un spirit al viziunii \u0219i al rezisten\u021Bei, unind stabilitatea apelor cu \u00EEn\u0103l\u021Bimea cerului.",
+    "Story": "The Hippogiraffe was born when a hippo dreamed of seeing beyond the horizon of the waters. The Tree of Light united it with the spirit of a giraffe and gave them a common body. The Hippogiraffe is a spirit of vision and endurance, uniting the stability of the waters with the height of the sky.",
     "ImageFileName": "NoneHippoGiraffe.png"
   },
   {
     "Combination": "BunnyNoneGiraffe",
-    "Name": "Iepurafon",
+    "Name": "Bunniraffe",
     "ImagePrompt": "An anthropomorphic hybrid character with the arms of a bunny and the head of a giraffe, without a torso. The bunny arms are soft, glowing with pastel magical light. The giraffe head is tall, golden, patterned with glowing spots. The character wears a robe with rainbow silk embroidered with stars and flowers. Its eyes shine violet and jade, playful yet noble. The background is a magical meadow with enchanted vines under a star-filled sky. The style is whimsical, colorful, cartoonish, fantasy.",
-    "Story": "Iepurafon a fost creat atunci c\u00E2nd un iepure \u0219i o giraf\u0103 au \u00EEncercat \u00EEmpreun\u0103 s\u0103 lumineze o ramur\u0103 c\u0103zut\u0103 a Copacului Luminii. Magia i-a unit \u00EEntr-un singur trup. Iepurafon este un spirit al curajului \u0219i al prieteniei, capabil s\u0103 aduc\u0103 speran\u021B\u0103 \u0219i lumin\u0103 \u00EEn \u00EEntuneric.",
+    "Story": "The Bunniraffe was created when a bunny and a giraffe tried together to light up a fallen branch of the Tree of Light. Magic united them into a single body. The Bunniraffe is a spirit of courage and friendship, capable of bringing hope and light into the darkness.",
     "ImageFileName": "BunnyNoneGiraffe.png"
   },
   {
     "Combination": "GiraffeNoneBunny",
-    "Name": "Girafurel",
+    "Name": "Giraffit",
     "ImagePrompt": "An anthropomorphic hybrid character with the arms of a giraffe and the head of a bunny, without torso. The giraffe arms are long and golden, patterned with glowing amber runes. The bunny head is soft and white, glowing with pastel light. The character wears a cloak embroidered with moons and blossoms. Its eyes shine turquoise and amber, full of curiosity. The background is a magical savanna blending into an enchanted meadow. The style is vibrant, whimsical, cartoon-like.",
-    "Story": "Girafurel s-a ivit din r\u00E2sul unui iepure care s-a ag\u0103\u021Bat de g\u00E2tul unei girafe. Copacul Luminii a g\u0103sit bucuria lor \u0219i le-a dat un trup comun. Girafurel este juc\u0103u\u0219 \u0219i vesel, dar are \u0219i o inim\u0103 mare, gata s\u0103 apere lumina. El este adesea descris ca un spirit al optimismului.",
+    "Story": "The Giraffit emerged from the laughter of a bunny who clung to a giraffe's neck. The Tree of Light found their joy and gave them a common body. The Giraffit is playful and cheerful, but also has a big heart, ready to defend the light. It is often described as a spirit of optimism.",
     "ImageFileName": "GiraffeNoneBunny.png"
   },
   {
     "Combination": "HippoNoneGiraffe",
-    "Name": "Hipofiraf",
+    "Name": "Hippiraf",
     "ImagePrompt": "An anthropomorphic hybrid character with the arms of a hippo and the head of a giraffe, torso absent. The hippo arms are gray and powerful, glowing faintly with magical waves. The giraffe head is golden and noble, patterned with amber runes. The character wears a robe embroidered with river and starlight motifs. Its eyes shine jade and blue, wise and calm. The background is a glowing savanna under enchanted constellations. The style is whimsical, fantasy, colorful, cartoonish.",
-    "Story": "Hipofiraf s-a n\u0103scut c\u00E2nd un hipopotam \u0219i o giraf\u0103 au vegheat \u00EEmpreun\u0103 peste savan\u0103. Copacul Luminii i-a unit \u0219i le-a oferit o inim\u0103 comun\u0103. Hipofiraf este un spirit al vigilen\u021Bei, aduc\u00E2nd echilibru \u00EEntre for\u021B\u0103 \u0219i claritate. El este un protector al nop\u021Bilor \u00EEnstelate.",
+    "Story": "The Hippiraf was born when a hippo and a giraffe watched over the savanna together. The Tree of Light united them and gave them a common heart. The Hippiraf is a spirit of vigilance, bringing balance between strength and clarity. It is a protector of starry nights.",
     "ImageFileName": "HippoNoneGiraffe.png"
   },
   {
     "Combination": "NoneHippoBunny",
-    "Name": "Hiponelu\u0219",
+    "Name": "Hippunny",
     "ImagePrompt": "An anthropomorphic hybrid character with the body of a hippo and the head of a bunny, no arms visible. The hippo torso is massive, glowing with pearly waves. The bunny head is soft, glowing with pastel magical light, with long ears sparkling with runes. The character wears a robe embroidered with spirals and constellations. Its eyes shine violet and jade, mischievous yet kind. The background is a magical pond surrounded by glowing mushrooms. The style is whimsical, vibrant, cartoon-like, fantasy.",
-    "Story": "Hiponelu\u0219 a ap\u0103rut atunci c\u00E2nd un iepure a adormit pe spatele unui hipopotam sub razele Copacului Luminii. Magia i-a unit \u0219i a dat na\u0219tere unei creaturi pa\u0219nice \u0219i curajoase. Hiponelu\u0219 este cunoscut ca un spirit al prieteniei \u0219i al jocului, aduc\u00E2nd z\u00E2mbete oriunde ajunge.",
+    "Story": "The Hippunny appeared when a bunny fell asleep on a hippo's back under the rays of the Tree of Light. Magic united them and gave birth to a peaceful and courageous creature. The Hippunny is known as a spirit of friendship and play, bringing smiles wherever it goes.",
     "ImageFileName": "NoneHippoBunny.png"
   },
   {
     "Combination": "NoneBunnyGiraffe",
-    "Name": "Iepurafira",
+    "Name": "Bunnirafa",
     "ImagePrompt": "An anthropomorphic hybrid character with the body of a bunny and the head of a giraffe, no arms visible. The bunny torso is small, pastel-colored, glowing with gentle magical light. The giraffe head is tall, golden, with glowing amber patterns. The character wears a robe embroidered with rainbow spirals and blossoms. Its eyes shine turquoise and emerald, playful and wise. The background is a magical meadow filled with glowing flowers beneath a starry sky. The style is whimsical, colorful, fantasy, cartoon-like.",
-    "Story": "Iepurafira s-a n\u0103scut atunci c\u00E2nd un iepure a cerut ajutorul unei girafe pentru a veghea peste o poian\u0103. Copacul Luminii le-a unit sufletele \u0219i a creat aceast\u0103 fiin\u021B\u0103 unic\u0103. Iepurafira este un spirit al vigilen\u021Bei \u0219i al compasiunii, mereu prezent pentru a aduce echilibru \u00EEntre fragilitate \u0219i m\u0103re\u021Bie.",
+    "Story": "The Bunnirafa was born when a bunny asked for a giraffe's help to watch over a clearing. The Tree of Light united their souls and created this unique being. The Bunnirafa is a spirit of vigilance and compassion, always present to bring balance between fragility and greatness.",
     "ImageFileName": "NoneBunnyGiraffe.png"
   },
   {
     "Combination": "BunnyHippoGiraffe",
-    "Name": "Iepogiraf",
+    "Name": "Bunnyppogiraffe",
     "ImagePrompt": "An anthropomorphic hybrid character with the arms of a bunny, the body of a hippo, and the head of a giraffe. The bunny arms are soft, glowing with pastel magical light. The hippo torso is massive, gray, glowing with pearly waves. The giraffe head is golden with shimmering amber runes. The character wears a robe embroidered with moons and stars. Its eyes shine violet and jade, filled with curiosity. The background is a magical riverbank under enchanted constellations. The style is whimsical, colorful, cartoonish, fantasy.",
-    "Story": "Iepogiraf este rezultatul unei prietenii \u00EEntre trei creaturi care au luptat \u00EEmpreun\u0103 s\u0103 salveze o ramur\u0103 a Copacului Luminii. Din unitatea lor s-a n\u0103scut o fiin\u021B\u0103 ce poart\u0103 agilitatea iepurelui, puterea hipopotamului \u0219i viziunea girafei. Iepogiraf este un spirit al unit\u0103\u021Bii \u0219i al \u00EEncrederii.",
+    "Story": "The Bunnyppogiraffe is the result of a friendship between three creatures who fought together to save a branch of the Tree of Light. From their unity, a being was born that carries the agility of the bunny, the power of the hippo, and the vision of the giraffe. The Bunnyppogiraffe is a spirit of unity and trust.",
     "ImageFileName": "BunnyHippoGiraffe.png"
   },
   {
     "Combination": "HippoGiraffeBunny",
-    "Name": "Hipogiriel",
+    "Name": "Hippogirabbit",
     "ImagePrompt": "An anthropomorphic hybrid character with the arms of a hippo, the body of a giraffe, and the head of a bunny. The hippo arms are gray, massive, glowing faintly with magical light. The giraffe torso is tall, golden, patterned with glowing amber spots. The bunny head is white, with long glowing ears. The character wears a robe embroidered with rivers and constellations. Its eyes shine turquoise and amber, gentle and curious. The background is a glowing savanna filled with enchanted fireflies. The style is whimsical, vibrant, cartoon-like, fantasy.",
-    "Story": "Hipogiriel s-a n\u0103scut \u00EEn clipa \u00EEn care un hipopotam, o giraf\u0103 \u0219i un iepure au ridicat \u00EEmpreun\u0103 privirea spre lumina Copacului. Spiritele lor s-au unit \u00EEntr-o fiin\u021B\u0103 nou\u0103. Hipogiriel este un spirit al colabor\u0103rii \u0219i al echilibrului, aduc\u00E2nd pace \u0219i \u00EEn\u021Belepciune \u00EEn luptele dintre lumi.",
+    "Story": "The Hippogirabbit was born the moment a hippo, a giraffe, and a bunny looked up together at the light of the Tree. Their spirits united into a new being. The Hippogirabbit is a spirit of collaboration and balance, bringing peace and wisdom in the struggles between worlds.",
     "ImageFileName": "HippoGiraffeBunny.png"
   },
   {
     "Combination": "GiraffeBunnyHippo",
-    "Name": "Girafopam",
+    "Name": "Giraffoppam",
     "ImagePrompt": "An anthropomorphic hybrid character with the arms of a giraffe, the body of a bunny, and the head of a hippo. The giraffe arms are long, golden, patterned with glowing amber runes. The bunny torso is small and pastel, glowing with magical light. The hippo head is gray, calm, and pearly with shimmering ripples. The character wears a cloak decorated with moons and stars. Its eyes shine sapphire and jade, playful yet steady. The background is a magical clearing under an enchanted sky. The style is whimsical, colorful, fantasy, cartoonish.",
-    "Story": "Girafopam a ap\u0103rut atunci c\u00E2nd trei creaturi au jurat s\u0103 apere \u00EEmpreun\u0103 ramurile copacului. Din prietenia lor, Copacul Luminii a creat un trup comun. Girafopam este un spirit al unit\u0103\u021Bii \u0219i al prieteniei, purt\u00E2nd \u00EEn el speran\u021Ba de a uni lumi diferite.",
+    "Story": "The Giraffoppam appeared when three creatures swore to protect the branches of the tree together. From their friendship, the Tree of Light created a common body. The Giraffoppam is a spirit of unity and friendship, carrying within it the hope of uniting different worlds.",
     "ImageFileName": "GiraffeBunnyHippo.png"
   },
   {
     "Combination": "NoneHippoGiraffe",
-    "Name": "Hiporaf",
+    "Name": "Hipporaf",
     "ImagePrompt": "An anthropomorphic hybrid character with the body of a hippo and the head of a giraffe, no arms visible. The hippo torso is strong and gray, shimmering with magical pearly light. The giraffe head is tall, golden, glowing with amber constellations. The character wears a robe patterned with rainbow stars and blossoms. Its eyes shine emerald and turquoise, filled with wisdom. The background is a glowing savanna with enchanted flowers under a starry sky. The style is whimsical, vibrant, fantasy, cartoon-like.",
-    "Story": "Hiporaf s-a n\u0103scut atunci c\u00E2nd un hipopotam a cerut \u00EEn\u0103l\u021Bimea girafei pentru a veghea mai departe. Copacul Luminii a r\u0103spuns unindu-i \u00EEntr-o fiin\u021B\u0103 unic\u0103. Hiporaf este un spirit al vigilen\u021Bei \u0219i al rezisten\u021Bei, aduc\u00E2nd protec\u021Bie \u0219i speran\u021B\u0103.",
+    "Story": "The Hipporaf was born when a hippo requested the height of a giraffe to watch further. The Tree of Light answered by uniting them into a unique being. The Hipporaf is a spirit of vigilance and resilience, bringing protection and hope.",
     "ImageFileName": "NoneHippoGiraffe.png"
   },
   {
     "Combination": "HippoGiraffeNone",
-    "Name": "Hipogaf",
+    "Name": "Hippogaf",
     "ImagePrompt": "An anthropomorphic hybrid character with the arms of a hippo and the body of a giraffe, no head visible. The hippo arms are massive, gray, glowing faintly with magical ripples. The giraffe torso is tall and golden, patterned with glowing amber spots. The character wears a cloak embroidered with moons and lotus flowers. Its eyes shine emerald green, radiating calm strength. The background is a glowing savanna under enchanted stars. The style is whimsical, vibrant, cartoonish, fantasy.",
-    "Story": "Hipogaf s-a n\u0103scut c\u00E2nd un hipopotam \u0219i o giraf\u0103 au ap\u0103rat \u00EEmpreun\u0103 o ramur\u0103 a Copacului Luminii. Din sacrificiul lor, copacul i-a unit \u00EEntr-un singur trup. Hipogaf este un spirit al rezisten\u021Bei \u0219i clarit\u0103\u021Bii, capabil s\u0103 protejeze \u0219i s\u0103 vegheze asupra celor pierdu\u021Bi.",
+    "Story": "The Hippogaf was born when a hippo and a giraffe defended a branch of the Tree of Light together. From their sacrifice, the tree united them into a single body. The Hippogaf is a spirit of resilience and clarity, able to protect and watch over the lost.",
     "ImageFileName": "HippoGiraffeNone.png"
   },
   {
     "Combination": "BunnyNoneGiraffe",
-    "Name": "Iepugaf",
+    "Name": "Bunnygaf",
     "ImagePrompt": "An anthropomorphic hybrid character with the arms of a bunny and the body of a giraffe, no head visible. The bunny arms are small, soft, glowing with pastel magical light. The giraffe torso is tall and golden, shimmering with amber runes. The character wears a robe embroidered with stars and flowers. Its eyes shine turquoise and violet, playful and bright. The background is a magical meadow glowing with enchanted flowers. The style is whimsical, colorful, fantasy, cartoon-like.",
-    "Story": "Iepugaf a ap\u0103rut atunci c\u00E2nd un iepure a dorit s\u0103 vad\u0103 lumea de sus prin ochii unei girafe. Copacul Luminii a unit dorin\u021Ba lor \u00EEntr-un singur trup. Iepugaf este un spirit al curiozit\u0103\u021Bii \u0219i al prieteniei, inspir\u00E2nd pe cei mici s\u0103 viseze mai departe.",
+    "Story": "The Bunnygaf appeared when a bunny wished to see the world from above through the eyes of a giraffe. The Tree of Light united their desire into a single body. The Bunnygaf is a spirit of curiosity and friendship, inspiring the little ones to dream bigger.",
     "ImageFileName": "BunnyNoneGiraffe.png"
   },
   {
     "Combination": "NoneGiraffeBunny",
-    "Name": "Girafunel",
+    "Name": "Giraffunny",
     "ImagePrompt": "An anthropomorphic hybrid character with the body of a giraffe and the head of a bunny, no arms visible. The giraffe torso is golden, tall, glowing with amber constellations. The bunny head is soft, white, glowing with pastel light and long ears sparkling with magical runes. The character wears a cloak embroidered with blossoms and spirals. Its eyes shine jade and turquoise, full of cheer. The background is an enchanted savanna filled with glowing mushrooms. The style is whimsical, colorful, fantasy, cartoonish.",
-    "Story": "Girafunel s-a n\u0103scut atunci c\u00E2nd un iepure s-a urcat pe umerii unei girafe pentru a privi cerul. Copacul Luminii a v\u0103zut bucuria lor \u0219i i-a unit \u00EEntr-un trup comun. Girafunel este un spirit juc\u0103u\u0219 \u0219i prietenos, aduc\u00E2nd veselie \u0219i speran\u021B\u0103 peste tot.",
+    "Story": "The Giraffunny was born when a bunny climbed onto a giraffe's shoulders to look at the sky. The Tree of Light saw their joy and united them into a common body. The Giraffunny is a playful and friendly spirit, bringing cheerfulness and hope everywhere.",
     "ImageFileName": "NoneGiraffeBunny.png"
   },
   {
     "Combination": "HippoBunnyGiraffe",
-    "Name": "Hiponaf",
+    "Name": "Hipponaf",
     "ImagePrompt": "An anthropomorphic hybrid character with the arms of a hippo, the body of a bunny, and the head of a giraffe. The hippo arms are strong and gray, glowing faintly with magic. The bunny torso is agile, glowing pastel. The giraffe head is golden and tall, patterned with glowing amber runes. The character wears a robe embroidered with moons and constellations. Its eyes shine emerald and violet, wise and playful. The background is a fantastical meadow-savana crossing under a starlit sky. The style is whimsical, vibrant, cartoon-like, fantasy.",
-    "Story": "Hiponaf a ap\u0103rut atunci c\u00E2nd un hipopotam, un iepure \u0219i o giraf\u0103 au legat o prietenie imposibil\u0103. Copacul Luminii i-a unit pentru a ar\u0103ta c\u0103 diferen\u021Bele pot deveni puteri. Hiponaf este un spirit al colabor\u0103rii \u0219i al prieteniei, un protector vesel al ramurilor.",
+    "Story": "The Hipponaf appeared when a hippo, a bunny, and a giraffe formed an impossible friendship. The Tree of Light united them to show that differences can become strengths. The Hipponaf is a spirit of collaboration and friendship, a cheerful protector of the branches.",
     "ImageFileName": "HippoBunnyGiraffe.png"
   },
   {
     "Combination": "GiraffeHippoBunny",
-    "Name": "Girafotinel",
+    "Name": "Giraffoppit",
     "ImagePrompt": "An anthropomorphic hybrid character with the arms of a giraffe, the body of a hippo, and the head of a bunny. The giraffe arms are long, golden, glowing with runes. The hippo torso is strong and gray, shimmering with magical ripples. The bunny head is small, white, glowing with pastel ears. The character wears a cloak patterned with flowers and stars. Its eyes shine turquoise and amber, curious and bright. The background is a glowing riverbank blending with a magical savanna. The style is whimsical, colorful, cartoonish, fantasy.",
-    "Story": "Girafotinel s-a n\u0103scut atunci c\u00E2nd o giraf\u0103 \u0219i un hipopotam au protejat un iepure de \u00EEntuneric. Copacul Luminii le-a r\u0103spl\u0103tit prietenia cu un trup comun. Girafotinel este un spirit al protec\u021Biei \u0219i al bucuriei, p\u0103str\u00E2nd echilibrul \u00EEntre for\u021B\u0103 \u0219i bl\u00E2nde\u021Be.",
+    "Story": "The Giraffoppit was born when a giraffe and a hippo protected a bunny from the darkness. The Tree of Light rewarded their friendship with a common body. The Giraffoppit is a spirit of protection and joy, maintaining the balance between strength and gentleness.",
     "ImageFileName": "GiraffeHippoBunny.png"
   },
   {
     "Combination": "BunnyGiraffeHippo",
-    "Name": "Iepogafotam",
+    "Name": "Bunnygiraffoppo",
     "ImagePrompt": "An anthropomorphic hybrid character with the arms of a bunny, the body of a giraffe, and the head of a hippo. The bunny arms are soft and glowing with pastel light. The giraffe torso is tall, golden, patterned with glowing amber spots. The hippo head is gray and calm, shimmering with pearly waves. The character wears a robe decorated with stars and lotus motifs. Its eyes shine turquoise and jade, playful yet wise. The background is a glowing savanna-meadow crossing under enchanted skies. The style is whimsical, colorful, fantasy, cartoonish.",
-    "Story": "Iepogafotam s-a n\u0103scut dintr-o alian\u021B\u0103 \u00EEntre un iepure curajos, o giraf\u0103 \u00EEn\u021Beleapt\u0103 \u0219i un hipopotam puternic. Copacul Luminii i-a unit \u00EEntr-un singur trup pentru a veghea peste ramurile fragile. Iepogafotam este un spirit al unit\u0103\u021Bii \u0219i al speran\u021Bei, aduc\u00E2nd echilibru \u00EEntre vitez\u0103, \u00EEn\u0103l\u021Bime \u0219i for\u021B\u0103.",
+    "Story": "The Bunnygiraffoppo was born from an alliance between a brave bunny, a wise giraffe, and a strong hippo. The Tree of Light united them into a single body to watch over the fragile branches. The Bunnygiraffoppo is a spirit of unity and hope, bringing balance between speed, height, and strength.",
     "ImageFileName": "BunnyGiraffeHippo.png"
   },
   {
     "Combination": "NoneBunnyHippo",
-    "Name": "Iepuripotam",
+    "Name": "Bunnyppotam",
     "ImagePrompt": "An anthropomorphic hybrid character with the body of a bunny and the head of a hippo, no arms visible. The bunny torso is small, pastel, glowing with magical light. The hippo head is gray, massive, glowing with pearly ripples. The character wears a robe embroidered with moons and flowers. Its eyes shine emerald and turquoise, calm and kind. The background is a glowing meadow near a magical pond. The style is whimsical, vibrant, cartoon-like, fantasy.",
-    "Story": "Iepuripotam a ap\u0103rut atunci c\u00E2nd un iepure a cerut protec\u021Bia unui hipopotam pentru a ap\u0103ra poiana sa. Copacul Luminii i-a unit \u00EEntr-un trup comun. Iepuripotam este un spirit protector \u0219i bl\u00E2nd, care aduce lini\u0219te celor \u00EEnfrico\u0219a\u021Bi.",
+    "Story": "The Bunnyppotam appeared when a bunny asked for a hippo's protection to defend its meadow. The Tree of Light united them into a common body. The Bunnyppotam is a protective and gentle spirit, bringing peace to the frightened.",
     "ImageFileName": "NoneBunnyHippo.png"
   },
   {
     "Combination": "GiraffeNoneHippo",
-    "Name": "Girafotamiel",
+    "Name": "Giraffotamiel",
     "ImagePrompt": "An anthropomorphic hybrid character with the arms of a giraffe and the head of a hippo, no torso visible. The giraffe arms are long, golden, glowing with runes. The hippo head is gray, massive, shimmering with magical calmness. The character wears a cloak decorated with starlight and river motifs. Its eyes shine sapphire and jade, steady and gentle. The background is a magical savanna with glowing ponds under constellations. The style is whimsical, colorful, fantasy, cartoon-like.",
-    "Story": "Girafotamiel s-a n\u0103scut atunci c\u00E2nd o giraf\u0103 a ridicat privirea spre stele \u0219i un hipopotam a c\u00E2ntat \u00EEn apele ad\u00E2nci. Copacul Luminii a unit c\u00E2ntecul \u0219i visul lor \u00EEntr-un trup comun. Girafotamiel este un spirit al armoniei \u0219i al lini\u0219tii, aduc\u00E2nd pace \u00EEntre cer \u0219i ap\u0103.",
+    "Story": "The Giraffotamiel was born when a giraffe looked up at the stars and a hippo sang in the deep waters. The Tree of Light united their song and dream into a common body. The Giraffotamiel is a spirit of harmony and tranquility, bringing peace between sky and water.",
     "ImageFileName": "GiraffeNoneHippo.png"
   },
   {
     "Combination": "HippoNoneBunny",
-    "Name": "Hipopurel",
+    "Name": "Hippopurel",
     "ImagePrompt": "An anthropomorphic hybrid character with the arms of a hippo and the head of a bunny, no torso visible. The hippo arms are gray, powerful, glowing faintly with magical light. The bunny head is soft, white, glowing with pastel colors, with long ears shimmering with runes. The character wears a robe embroidered with flowers and constellations. Its eyes shine violet and turquoise, playful and bright. The background is a whimsical meadow with enchanted mushrooms. The style is colorful, whimsical, fantasy, cartoon-like.",
-    "Story": "Hipopurel s-a ivit atunci c\u00E2nd un iepure \u0219i un hipopotam s-au ascuns \u00EEmpreun\u0103 de umbre. Copacul Luminii le-a unit sufletele pentru a crea un protector juc\u0103u\u0219. Hipopurel este un spirit vesel, dar hot\u0103r\u00E2t, gata s\u0103 apere lumina.",
+    "Story": "The Hippopurel emerged when a bunny and a hippo hid together from the shadows. The Tree of Light united their souls to create a playful protector. The Hippopurel is a cheerful but determined spirit, ready to defend the light.",
     "ImageFileName": "HippoNoneBunny.png"
   },
   {
     "Combination": "NoneGiraffeHippo",
-    "Name": "Girafopotir",
+    "Name": "Giraffopotir",
     "ImagePrompt": "An anthropomorphic hybrid character with the body of a giraffe and the head of a hippo, no arms visible. The giraffe torso is tall and golden, patterned with glowing amber spots. The hippo head is gray, shimmering with pearly waves of magic. The character wears a cloak embroidered with suns, moons, and stars. Its eyes shine emerald and sapphire, calm and noble. The background is an enchanted savanna with glowing fireflies. The style is whimsical, vibrant, fantasy, cartoonish.",
-    "Story": "Girafopotir s-a n\u0103scut c\u00E2nd o giraf\u0103 \u0219i un hipopotam au vegheat \u00EEmpreun\u0103 peste ramurile fragile ale Copacului Luminii. Din prietenia lor s-a n\u0103scut aceast\u0103 fiin\u021B\u0103 unic\u0103, un spirit al rezisten\u021Bei \u0219i al stabilit\u0103\u021Bii.",
+    "Story": "The Giraffopotir was born when a giraffe and a hippo watched together over the fragile branches of the Tree of Light. From their friendship, this unique being was born, a spirit of resilience and stability.",
     "ImageFileName": "NoneGiraffeHippo.png"
   },
   {
     "Combination": "HippoBunnyNone",
-    "Name": "Hiponelus",
+    "Name": "Hipponelus",
     "ImagePrompt": "An anthropomorphic hybrid character with the arms of a hippo and the body of a bunny, no head visible. The hippo arms are gray, massive, glowing with faint magical ripples. The bunny torso is small, agile, glowing pastel. The character wears a robe embroidered with moons and rainbow spirals. Its eyes shine violet and jade, playful yet calm. The background is a glowing meadow filled with enchanted flowers. The style is whimsical, vibrant, fantasy, cartoonish.",
-    "Story": "Hiponelus s-a n\u0103scut atunci c\u00E2nd un hipopotam \u0219i un iepure au \u00EEmp\u0103r\u021Bit aceea\u0219i vizuin\u0103 \u00EEn mijlocul furtunii. Copacul Luminii a v\u0103zut solidaritatea lor \u0219i i-a unit \u00EEntr-un trup comun. Hiponelus este un spirit al prieteniei \u0219i al rezisten\u021Bei, mereu prezent acolo unde umbrele se apropie.",
+    "Story": "The Hipponelus was born when a hippo and a bunny shared the same burrow in the middle of a storm. The Tree of Light saw their solidarity and united them into a common body. The Hipponelus is a spirit of friendship and resilience, always present where shadows approach.",
     "ImageFileName": "HippoBunnyNone.png"
   },
   {
     "Combination": "NoneHippoBunny",
-    "Name": "Hipuriel",
+    "Name": "Hippuriel",
     "ImagePrompt": "An anthropomorphic hybrid character with the body of a hippo and the head of a bunny, no arms visible. The hippo torso is massive, gray, shimmering with pearly light. The bunny head is white, glowing with pastel ears that sparkle with magical runes. The character wears a cloak embroidered with constellations and lotus flowers. Its eyes shine turquoise and amber, curious and kind. The background is a whimsical pond glowing with fireflies. The style is colorful, vibrant, fantasy, cartoon-like.",
-    "Story": "Hipuriel a ap\u0103rut atunci c\u00E2nd un iepure \u0219i un hipopotam au c\u00E2ntat \u00EEmpreun\u0103 l\u00E2ng\u0103 un lac luminat de stele. Copacul Luminii le-a \u00EEmpletit c\u00E2ntecul \u0219i r\u00E2sul \u00EEntr-un trup comun. Hipuriel este un spirit al veseliei \u0219i al armoniei, aduc\u00E2nd speran\u021B\u0103 celor care r\u0103t\u0103cesc.",
+    "Story": "The Hippuriel appeared when a bunny and a hippo sang together by a star-lit lake. The Tree of Light wove their song and laughter into a common body. The Hippuriel is a spirit of cheerfulness and harmony, bringing hope to those who wander.",
     "ImageFileName": "NoneHippoBunny.png"
   },
   {
     "Combination": "GiraffeHippoNone",
-    "Name": "Girafopot",
+    "Name": "Giraffopot",
     "ImagePrompt": "An anthropomorphic hybrid character with the arms of a giraffe and the body of a hippo, no head visible. The giraffe arms are long and golden, glowing with amber runes. The hippo torso is strong and gray, shimmering with magical ripples. The character wears a robe embroidered with suns and stars. Its eyes shine emerald and violet, calm and wise. The background is a magical savanna by a glowing river. The style is whimsical, colorful, fantasy, cartoon-like.",
-    "Story": "Girafopot s-a n\u0103scut atunci c\u00E2nd o giraf\u0103 \u0219i un hipopotam au vegheat \u00EEmpreun\u0103 peste o ramur\u0103 c\u0103zut\u0103. Copacul Luminii a v\u0103zut curajul lor \u0219i i-a unit \u00EEntr-un trup comun. Girafopot este un spirit al echilibrului, aduc\u00E2nd protec\u021Bie \u0219i viziune celor care au nevoie.",
+    "Story": "The Giraffopot was born when a giraffe and a hippo watched together over a fallen branch. The Tree of Light saw their courage and united them into a common body. The Giraffopot is a spirit of balance, bringing protection and vision to those in need.",
     "ImageFileName": "GiraffeHippoNone.png"
   },
   {
     "Combination": "BunnyGiraffeNone",
-    "Name": "Iepurafonel",
+    "Name": "Bunniraffel",
     "ImagePrompt": "An anthropomorphic hybrid character with the arms of a bunny and the body of a giraffe, no head visible. The bunny arms are soft and glowing with pastel magical light. The giraffe torso is tall, golden, decorated with glowing amber spots. The character wears a cloak embroidered with moons and blossoms. Its eyes shine turquoise and jade, playful and curious. The background is a glowing meadow-savana crossing under enchanted skies. The style is whimsical, colorful, fantasy, cartoonish.",
-    "Story": "Iepurafonel s-a n\u0103scut atunci c\u00E2nd un iepure a \u00EEncercat s\u0103 salveze o giraf\u0103 blocat\u0103 \u00EEntre umbre. Copacul Luminii a unit sacrificiul lor \u00EEntr-un trup comun. Iepurafonel este un spirit al speran\u021Bei \u0219i al prieteniei, aduc\u00E2nd curaj celor mici.",
+    "Story": "The Bunniraffel was born when a bunny tried to save a giraffe trapped in the shadows. The Tree of Light united their sacrifice into a common body. The Bunniraffel is a spirit of hope and friendship, bringing courage to the little ones.",
     "ImageFileName": "BunnyGiraffeNone.png"
   },
   {
     "Combination": "NoneBunnyGiraffe",
-    "Name": "Iepuragiraf",
+    "Name": "Bunnygiraf",
     "ImagePrompt": "An anthropomorphic hybrid character with the body of a bunny and the head of a giraffe, no arms visible. The bunny torso is small, glowing pastel, agile. The giraffe head is tall and golden, glowing with amber constellations. The character wears a robe embroidered with rainbow spirals and stars. Its eyes shine sapphire and emerald, curious and kind. The background is an enchanted savanna lit by magical fireflies. The style is whimsical, vibrant, fantasy, cartoon-like.",
-    "Story": "Iepuragiraf a ap\u0103rut atunci c\u00E2nd un iepure a dorit s\u0103 vegheze asupra unei savane. Copacul Luminii i-a ascultat dorin\u021Ba \u0219i l-a unit cu spiritul unei girafe. Iepuragiraf este un spirit al responsabilit\u0103\u021Bii \u0219i al bucuriei, purt\u00E2nd \u00EEn el dorin\u021Ba de a proteja.",
+    "Story": "The Bunnygiraf appeared when a bunny wished to watch over a savanna. The Tree of Light heard its wish and united it with the spirit of a giraffe. The Bunnygiraf is a spirit of responsibility and joy, carrying within it the desire to protect.",
     "ImageFileName": "NoneBunnyGiraffe.png"
   },
   {
     "Combination": "HippoNoneGiraffe",
-    "Name": "Hipogiraf",
+    "Name": "Hippogiraf",
     "ImagePrompt": "An anthropomorphic hybrid character with the arms of a hippo and the head of a giraffe, no torso visible. The hippo arms are gray and powerful, glowing faintly with magical ripples. The giraffe head is tall, golden, patterned with glowing amber runes. The character wears a cloak embroidered with moons and lotus motifs. Its eyes shine jade and turquoise, calm and wise. The background is a glowing savanna with enchanted flowers. The style is whimsical, colorful, fantasy, cartoonish.",
-    "Story": "Hipogiraf s-a n\u0103scut atunci c\u00E2nd un hipopotam a dorit s\u0103 priveasc\u0103 lumea prin ochii unei girafe. Copacul Luminii le-a unit visurile \u00EEntr-un trup comun. Hipogiraf este un spirit al viziunii \u0219i al stabilit\u0103\u021Bii, capabil s\u0103 aduc\u0103 echilibru \u00EEntre for\u021B\u0103 \u0219i \u00EEn\u021Belepciune.",
+    "Story": "The Hippogiraf was born when a hippo wished to see the world through the eyes of a giraffe. The Tree of Light united their dreams into a common body. The Hippogiraf is a spirit of vision and stability, able to bring balance between strength and wisdom.",
     "ImageFileName": "HippoNoneGiraffe.png"
   },
   {
     "Combination": "GiraffeNoneBunny",
-    "Name": "Girafiep",
+    "Name": "Giraffit",
     "ImagePrompt": "An anthropomorphic hybrid character with the arms of a giraffe and the head of a bunny, no torso visible. The giraffe arms are long, golden, glowing with amber constellations. The bunny head is white, soft, glowing with pastel ears. The character wears a robe embroidered with stars and blossoms. Its eyes shine violet and emerald, bright and curious. The background is a magical meadow filled with glowing mushrooms under enchanted skies. The style is whimsical, vibrant, fantasy, cartoonish.",
-    "Story": "Girafiep s-a ivit atunci c\u00E2nd un iepure \u0219i o giraf\u0103 au vegheat \u00EEmpreun\u0103 peste o ramur\u0103 c\u0103zut\u0103 a Copacului Luminii. Din prietenia lor a r\u0103s\u0103rit aceast\u0103 creatur\u0103 unic\u0103. Girafiep este un spirit al prieteniei \u0219i al speran\u021Bei, aduc\u00E2nd lumin\u0103 acolo unde umbrele se adun\u0103.",
+    "Story": "The Giraffit emerged when a bunny and a giraffe watched together over a fallen branch of the Tree of Light. From their friendship, this unique creature arose. The Giraffit is a spirit of friendship and hope, bringing light where shadows gather.",
     "ImageFileName": "GiraffeNoneBunny.png"
   },
   {
     "Combination": "GiraffeGiraffeHippo",
-    "Name": "Girafodublu",
+    "Name": "Doublegiraffo",
     "ImagePrompt": "An anthropomorphic hybrid with the arms and body of a giraffe and the head of a hippo. The giraffe parts are tall and golden, glowing with amber constellations, while the hippo head is gray and calm, shimmering with pearly magic. The character wears a cloak embroidered with suns and rivers. Its eyes shine emerald and sapphire. The background is a glowing savanna by a mystical pond. The style is whimsical, colorful, fantasy, cartoon-like.",
-    "Story": "Girafodublu s-a născut când două spirite de girafă au vegheat împreună un hipopotam rătăcit. Copacul Luminii le-a unit într-o ființă unică, înaltă și puternică, dar blândă. Girafodublu este un paznic al orizonturilor, aducând echilibru între forță și viziune.",
+    "Story": "The Doublegiraffo was born when two giraffe spirits watched over a lost hippo together. The Tree of Light united them into a single being, tall and strong, yet gentle. The Doublegiraffo is a guardian of horizons, bringing balance between strength and vision.",
     "ImageFileName": "GiraffeGiraffeHippo.png"
   },
   {
     "Combination": "GiraffeGiraffeBunny",
-    "Name": "Girafurelix",
+    "Name": "Giraffunnix",
     "ImagePrompt": "An anthropomorphic hybrid with the arms and body of a giraffe and the head of a bunny. The giraffe body is golden, patterned with glowing amber spots. The bunny head is soft, white, with long ears glowing pastel. The character wears a robe with star and flower embroidery. Its eyes shine violet and jade. The background is a magical meadow filled with fireflies under enchanted skies. The style is whimsical, fantasy, cartoon-like.",
-    "Story": "Girafurelix s-a ivit atunci când două girafe au dorit să-și împartă înălțimea cu un iepure mic. Copacul Luminii le-a unit într-o creatură a prieteniei și a veseliei. Girafurelix aduce speranță celor mici, arătând că măreția poate fi împărtășită.",
+    "Story": "The Giraffunnix emerged when two giraffes wanted to share their height with a small bunny. The Tree of Light united them into a creature of friendship and joy. The Giraffunnix brings hope to the little ones, showing that greatness can be shared.",
     "ImageFileName": "GiraffeGiraffeBunny.png"
   },
   {
     "Combination": "BunnyBunnyGiraffe",
-    "Name": "Iepurafix",
+    "Name": "Bunniraffix",
     "ImagePrompt": "An anthropomorphic hybrid with the arms and body of a bunny and the head of a giraffe. The bunny parts are small, white, glowing with playful magical light, while the giraffe head is tall, golden, glowing with amber constellations. The character wears a cloak embroidered with moons and blossoms. Its eyes shine turquoise and jade. The background is a glowing meadow with enchanted vines. The style is whimsical, colorful, fantasy, cartoonish.",
-    "Story": "Iepurafix a apărut când doi iepuri au visat împreună să atingă cerul prin ochii unei girafe. Copacul Luminii le-a unit într-o singură ființă. El este un spirit al curiozității și al curajului, sărind între lumi și aducând lumină în umbre.",
+    "Story": "The Bunniraffix appeared when two bunnies dreamed together of reaching the sky through the eyes of a giraffe. The Tree of Light united them into a single being. It is a spirit of curiosity and courage, leaping between worlds and bringing light into the shadows.",
     "ImageFileName": "BunnyBunnyGiraffe.png"
   },
   {
     "Combination": "BunnyBunnyHippo",
-    "Name": "Iepuripotix",
+    "Name": "Bunnyppotix",
     "ImagePrompt": "An anthropomorphic hybrid with the arms and body of a bunny and the head of a hippo. The bunny torso and arms are small, agile, glowing pastel, while the hippo head is massive, gray, shimmering with pearly waves. The character wears a robe decorated with rainbow stars. Its eyes shine sapphire and emerald. The background is a magical pond filled with glowing lotus flowers. The style is whimsical, vibrant, fantasy, cartoonish.",
-    "Story": "Iepuripotix s-a născut din visul a doi iepuri care au cerut forța unui hipopotam pentru a-și apăra prietenii. Copacul Luminii le-a unit sufletele. El este un spirit jucăuș dar protector, aducând curaj celor mici și liniște celor rătăciți.",
+    "Story": "The Bunnyppotix was born from the dream of two bunnies who asked for the strength of a hippo to protect their friends. The Tree of Light united their souls. It is a playful but protective spirit, bringing courage to the small and peace to the lost.",
     "ImageFileName": "BunnyBunnyHippo.png"
   },
   {
     "Combination": "HippoHippoBunny",
-    "Name": "Hiponelix",
+    "Name": "Hipponelix",
     "ImagePrompt": "An anthropomorphic hybrid with the arms and body of a hippo and the head of a bunny. The hippo torso and arms are massive, gray, glowing with magical ripples, while the bunny head is white with long pastel ears. The character wears a robe patterned with lotus and stars. Its eyes shine violet and jade. The background is a magical riverbank with glowing flowers. The style is whimsical, colorful, fantasy, cartoon-like.",
-    "Story": "Hiponelix a apărut când doi hipopotami au jurat să protejeze un iepure. Copacul Luminii le-a unit într-un singur trup. El este un spirit al blândeții și al forței, aducând pace între lumi.",
+    "Story": "The Hipponelix appeared when two hippos swore to protect a bunny. The Tree of Light united them into a single body. It is a spirit of gentleness and strength, bringing peace between worlds.",
     "ImageFileName": "HippoHippoBunny.png"
   },
   {
     "Combination": "HippoHippoGiraffe",
-    "Name": "Hipogafix",
+    "Name": "Hippogaffix",
     "ImagePrompt": "An anthropomorphic hybrid with the arms and body of a hippo and the head of a giraffe. The hippo body is gray, strong, glowing with pearly ripples, while the giraffe head is golden, tall, patterned with glowing amber constellations. The character wears a cloak embroidered with moons and rivers. Its eyes shine emerald and turquoise. The background is a glowing savanna under enchanted stars. The style is whimsical, vibrant, fantasy, cartoon-like.",
-    "Story": "Hipogafix s-a născut atunci când doi hipopotami au căutat înțelepciunea unei girafe. Copacul Luminii i-a unit într-un spirit al stabilității și clarității. El veghează asupra ramurilor, aducând echilibru între apă și cer.",
+    "Story": "The Hippogaffix was born when two hippos sought the wisdom of a giraffe. The Tree of Light united them into a spirit of stability and clarity. It watches over the branches, bringing balance between water and sky.",
     "ImageFileName": "HippoHippoGiraffe.png"
   },
   {
     "Combination": "GiraffeHippoHippo",
-    "Name": "Girafopotix",
+    "Name": "Giraffoppotix",
     "ImagePrompt": "An anthropomorphic hybrid with the arms of a giraffe, the body and head of a hippo. The giraffe arms are long and golden with glowing amber runes, while the hippo torso and head are gray, strong, shimmering with magical waves. The character wears a robe embroidered with constellations. Its eyes shine sapphire and jade. The background is a glowing pond beneath starlit skies. The style is whimsical, colorful, fantasy, cartoon-like.",
-    "Story": "Girafopotix a apărut când o girafă a jurat să vegheze doi hipopotami în mijlocul unei furtuni. Copacul Luminii le-a unit într-un singur trup. El este un spirit al protecției și al prieteniei, purtând în el puterea apelor și viziunea cerului.",
+    "Story": "The Giraffoppotix appeared when a giraffe swore to watch over two hippos in the middle of a storm. The Tree of Light united them into a single body. It is a spirit of protection and friendship, carrying within it the power of the waters and the vision of the sky.",
     "ImageFileName": "GiraffeHippoHippo.png"
   },
   {
     "Combination": "BunnyHippoHippo",
-    "Name": "Iepopotix",
+    "Name": "Bunnyppotix",
     "ImagePrompt": "An anthropomorphic hybrid with the arms of a bunny, the body and head of a hippo. The bunny arms are soft, glowing pastel, while the hippo torso and head are strong, gray, shimmering with pearly magic. The character wears a robe embroidered with lotus flowers and rainbow spirals. Its eyes shine turquoise and emerald. The background is a whimsical pond filled with glowing reeds. The style is vibrant, fantasy, cartoon-like.",
-    "Story": "Iepopotix s-a născut când un iepure a adus bucurie a doi hipopotami. Copacul Luminii le-a unit într-o ființă protectoare și veselă. El este un spirit al prieteniei și al curajului, aducând lumină în întuneric.",
+    "Story": "The Bunnyppotix was born when a bunny brought joy to two hippos. The Tree of Light united them into a protective and cheerful being. It is a spirit of friendship and courage, bringing light into the darkness.",
     "ImageFileName": "BunnyHippoHippo.png"
   },
   {
     "Combination": "BunnyGiraffeGiraffe",
-    "Name": "Iepurogaf",
+    "Name": "Bunnyrogaf",
     "ImagePrompt": "An anthropomorphic hybrid with the arms of a bunny, the body and head of a giraffe. The bunny arms are soft and white, glowing with pastel magic, while the giraffe torso and head are tall, golden, glowing with amber constellations. The character wears a cloak embroidered with moons and stars. Its eyes shine turquoise and jade. The background is a magical meadow with glowing fireflies. The style is whimsical, colorful, fantasy, cartoonish.",
-    "Story": "Iepurogaf a apărut când un iepure a dorit să împărtășească jocul său cu două girafe. Copacul Luminii le-a unit într-o singură ființă. El este un spirit al curiozității și al prieteniei, unind agerimea cu măreția.",
+    "Story": "The Bunnyrogaf appeared when a bunny wanted to share its game with two giraffes. The Tree of Light united them into a single being. It is a spirit of curiosity and friendship, uniting nimbleness with greatness.",
     "ImageFileName": "BunnyGiraffeGiraffe.png"
   },
   {
     "Combination": "HippoGiraffeGiraffe",
-    "Name": "Hipogirafox",
+    "Name": "Hippogiraffox",
     "ImagePrompt": "An anthropomorphic hybrid with the arms of a hippo, the body and head of a giraffe. The hippo arms are gray, glowing faintly with magic, while the giraffe body and head are tall, golden, glowing with amber constellations. The character wears a robe embroidered with suns and rivers. Its eyes shine emerald and turquoise. The background is a glowing savanna beneath enchanted stars. The style is whimsical, vibrant, fantasy, cartoon-like.",
-    "Story": "Hipogirafox s-a ivit atunci când un hipopotam și două girafe au vegheat împreună o ramură a copacului. Din prietenia lor s-a născut această ființă unică, un spirit al echilibrului și al înțelepciunii.",
+    "Story": "The Hippogiraffox emerged when a hippo and two giraffes watched over a branch of the tree together. From their friendship, this unique being was born, a spirit of balance and wisdom.",
     "ImageFileName": "HippoGiraffeGiraffe.png"
   },
   {
     "Combination": "HippoBunnyBunny",
-    "Name": "Hiponepix",
+    "Name": "Hipponepix",
     "ImagePrompt": "An anthropomorphic hybrid with the arms of a hippo, the body and head of a bunny. The hippo arms are strong, gray, shimmering with pearly ripples, while the bunny torso and head are small, white, glowing with pastel light. The character wears a robe embroidered with constellations and blossoms. Its eyes shine sapphire and jade. The background is a whimsical meadow glowing with mushrooms. The style is colorful, vibrant, fantasy, cartoon-like.",
-    "Story": "Hiponepix s-a născut când un hipopotam a protejat doi iepuri înfricoșați de întuneric. Copacul Luminii le-a unit într-un trup comun. El este un spirit al bucuriei și al rezistenței, aducând speranță celor mici.",
+    "Story": "The Hipponepix was born when a hippo protected two bunnies frightened by the darkness. The Tree of Light united them into a common body. It is a spirit of joy and resilience, bringing hope to the little ones.",
     "ImageFileName": "HippoBunnyBunny.png"
   },
   {
     "Combination": "GiraffeBunnyBunny",
-    "Name": "Girafonix",
+    "Name": "Giraffonix",
     "ImagePrompt": "An anthropomorphic hybrid with the arms of a giraffe, the body and head of a bunny. The giraffe arms are long, golden, glowing with runes, while the bunny torso and head are soft, white, glowing with pastel colors. The character wears a cloak embroidered with moons and flowers. Its eyes shine violet and turquoise. The background is a magical meadow filled with glowing mushrooms under enchanted skies. The style is whimsical, colorful, fantasy, cartoon-like.",
-    "Story": "Girafonix a apărut atunci când o girafă a îmbrățișat doi iepuri. Copacul Luminii le-a unit într-o singură ființă. El este un spirit al compasiunii și al jocului, aducând veselie în ramurile lumilor.",
+    "Story": "The Giraffonix appeared when a giraffe embraced two bunnies. The Tree of Light united them into a single being. It is a spirit of compassion and play, bringing cheerfulness into the branches of the worlds.",
     "ImageFileName": "GiraffeBunnyBunny.png"
   },
   {
     "Combination": "BunnyHippoBunny",
-    "Name": "Iepopoturel",
+    "Name": "Bunnyppoturel",
     "ImagePrompt": "An anthropomorphic hybrid character with the arms and head of a bunny and the body of a hippo. The bunny arms are small, soft, glowing pastel, the hippo torso is wide, gray, shimmering with pearly ripples, and the bunny head is white, glowing with magical ears. The character wears a robe embroidered with moons and flowers. Its eyes shine turquoise and violet, full of playful courage. The background is a magical pond with glowing reeds and enchanted fireflies. The style is whimsical, colorful, fantasy, cartoon-like.",
-    "Story": "Iepopoturel s-a născut atunci când un iepure a cerut prietenia unui hipopotam, iar Copacul Luminii le-a unit destinele. Cu brațe agile și cap jucăuș, dar trup solid, el este un spirit al echilibrului între fragilitate și putere, aducând veselie și protecție în ramurile lumilor.",
+    "Story": "The Bunnyppoturel was born when a bunny sought the friendship of a hippo, and the Tree of Light united their destinies. With agile arms and a playful head, but a solid body, it is a spirit of balance between fragility and power, bringing cheerfulness and protection to the branches of the worlds.",
     "ImageFileName": "BunnyHippoBunny.png"
   },
   {
     "Combination": "BunnyGiraffeBunny",
-    "Name": "Iepurafonix",
+    "Name": "Bunniraffonix",
     "ImagePrompt": "An anthropomorphic hybrid with the arms and head of a bunny and the body of a giraffe. The bunny arms and head are white, glowing with pastel magical light, while the giraffe torso is tall and golden, decorated with glowing amber spots. The character wears a robe embroidered with stars and rainbow spirals. Its eyes shine emerald and violet, joyful and curious. The background is a glowing savanna meadow under starlit skies. The style is whimsical, colorful, fantasy, cartoonish.",
-    "Story": "Iepurafonix s-a ivit atunci când doi iepuri și-au dorit să vadă lumea de sus. Copacul Luminii a răspuns și le-a oferit trupul unei girafe, dar i-a păstrat inimile și chipurile jucăușe. El este un spirit al viselor și al speranței, purtând lumina copilăriei în ochii săi.",
+    "Story": "The Bunniraffonix emerged when two bunnies wished to see the world from above. The Tree of Light answered and gave them the body of a giraffe, but kept their playful hearts and faces. It is a spirit of dreams and hope, carrying the light of childhood in its eyes.",
     "ImageFileName": "BunnyGiraffeBunny.png"
   },
   {
     "Combination": "GiraffeHippoGiraffe",
-    "Name": "Girafopotrel",
+    "Name": "Giraffoppotrel",
     "ImagePrompt": "An anthropomorphic hybrid character with the arms and head of a giraffe and the body of a hippo. The giraffe arms are long and golden with glowing constellations, the hippo torso is massive and gray with pearly ripples, and the giraffe head is tall, glowing amber with runes. The character wears a cloak embroidered with rivers and stars. Its eyes shine turquoise and jade. The background is a magical riverbank in a glowing savanna. The style is whimsical, colorful, fantasy, cartoon-like.",
-    "Story": "Girafopotrel a apărut atunci când două girafe au vegheat un hipopotam rătăcit sub lumina stelelor. Copacul Luminii le-a unit pentru a păstra echilibrul între cer și apă. El este un spirit al protecției și al clarității, aducând viziune și putere blândă.",
+    "Story": "The Giraffoppotrel appeared when two giraffes watched over a lost hippo under the starlight. The Tree of Light united them to maintain the balance between sky and water. It is a spirit of protection and clarity, bringing vision and gentle power.",
     "ImageFileName": "GiraffeHippoGiraffe.png"
   },
   {
     "Combination": "GiraffeBunnyGiraffe",
-    "Name": "Girafiepix",
+    "Name": "Giraffiepix",
     "ImagePrompt": "An anthropomorphic hybrid character with the arms and head of a giraffe and the body of a bunny. The giraffe arms are long and golden, the bunny torso is agile and glowing with pastel light, while the giraffe head is tall and noble, decorated with amber runes. The character wears a robe embroidered with moons and flowers. Its eyes shine emerald and violet. The background is a whimsical meadow lit by enchanted fireflies. The style is vibrant, colorful, fantasy, cartoonish.",
-    "Story": "Girafiepix s-a născut atunci când două girafe au protejat un iepure mic. Copacul Luminii i-a unit într-un singur trup, dăruindu-le agilitatea pământului și viziunea cerului. El este un spirit al prieteniei și al înțelepciunii, capabil să unească lumi opuse.",
+    "Story": "The Giraffiepix was born when two giraffes protected a small bunny. The Tree of Light united them into a single body, bestowing upon them the agility of the earth and the vision of the sky. It is a spirit of friendship and wisdom, capable of uniting opposite worlds.",
     "ImageFileName": "GiraffeBunnyGiraffe.png"
   },
   {
     "Combination": "HippoBunnyHippo",
-    "Name": "Hipopoturel",
+    "Name": "Hippoppoturel",
     "ImagePrompt": "An anthropomorphic hybrid character with the arms and head of a hippo and the body of a bunny. The hippo arms are strong, gray, glowing faintly with magic, the bunny torso is small and pastel, agile, while the hippo head is large and calm, shimmering with pearly waves. The character wears a robe embroidered with lotus and constellations. Its eyes shine sapphire and emerald. The background is a magical meadow near a glowing pond. The style is whimsical, colorful, fantasy, cartoon-like.",
-    "Story": "Hipopoturel a apărut atunci când doi hipopotami au dorit să protejeze un iepure fragil. Copacul Luminii i-a unit într-un trup comun, mic dar puternic. El este un spirit al protecției și al curajului, aducând echilibru între joacă și forță.",
+    "Story": "The Hippoppoturel appeared when two hippos wanted to protect a fragile bunny. The Tree of Light united them into a common body, small but strong. It is a spirit of protection and courage, bringing balance between play and strength.",
     "ImageFileName": "HippoBunnyHippo.png"
   },
   {
     "Combination": "HippoGiraffeHippo",
-    "Name": "Hipogafon",
+    "Name": "Hippogaffon",
     "ImagePrompt": "An anthropomorphic hybrid character with the arms and head of a hippo and the body of a giraffe. The hippo arms are massive and gray, shimmering with pearly light, the giraffe torso is tall and golden with glowing amber spots, and the hippo head is large and noble. The character wears a cloak embroidered with rivers and stars. Its eyes shine turquoise and jade. The background is a glowing savanna with enchanted fireflies under starlit skies. The style is whimsical, colorful, fantasy, cartoon-like.",
-    "Story": "Hipogafon s-a născut atunci când doi hipopotami și o girafă și-au împărțit un vis comun: să unească apele și cerul. Copacul Luminii i-a unit într-un singur trup. El este un spirit al stabilității și al înțelepciunii, aducând claritate în mijlocul furtunii.",
+    "Story": "The Hippogaffon was born when two hippos and a giraffe shared a common dream: to unite the waters and the sky. The Tree of Light united them into a single body. It is a spirit of stability and wisdom, bringing clarity in the midst of the storm.",
     "ImageFileName": "HippoGiraffeHippo.png"
   }
-
-
-
 ]
