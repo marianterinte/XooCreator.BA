@@ -9,6 +9,7 @@ public class GetTreeOfHeroesConfigEndpoint
 {
     [Route("/api/{locale}/tree-of-heroes/config")] // GET
     public static async Task<IResult> HandleGet(
+        [FromRoute] string locale,
         [FromServices] ITreeOfHeroesService treeOfHeroesService,
         CancellationToken ct)
     {

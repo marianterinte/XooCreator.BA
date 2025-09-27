@@ -18,6 +18,7 @@ public class TransformToHeroEndpoint
 
     [Route("/api/{locale}/tree-of-heroes/transform-hero")] // POST
     public static async Task<Results<Ok<TransformToHeroResponse>, BadRequest<TransformToHeroResponse>, UnauthorizedHttpResult>> HandlePost(
+        [FromRoute] string locale,
         [FromServices] TransformToHeroEndpoint ep,
         [FromBody] TransformToHeroRequest request)
     {

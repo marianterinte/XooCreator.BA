@@ -35,11 +35,8 @@ public class UserContextService : IUserContextService
     public string GetRequestLocaleOrDefault(string fallback = "ro-ro")
     {
         var ctx = _httpContextAccessor.HttpContext;
-        if (ctx != null && ctx.Items.TryGetValue(LocaleRoutingExtensions.RequestLocaleItemKey, out var value))
-        {
-            var s = value as string;
-            if (!string.IsNullOrWhiteSpace(s)) return s;
-        }
+        var val = ctx?.GetRouteValue("locale") as string;
+        if (!string.IsNullOrWhiteSpace(val)) return val.ToLowerInvariant();
         return fallback;
     }
 }

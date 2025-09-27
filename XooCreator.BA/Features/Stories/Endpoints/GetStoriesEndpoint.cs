@@ -12,7 +12,9 @@ public class GetStoriesEndpoint
     public GetStoriesEndpoint(IStoriesService storiesService) => _storiesService = storiesService;
 
     [Route("/api/{locale}/stories")]
-    public static async Task<Ok<GetStoriesResponse>> HandleGet([FromServices] GetStoriesEndpoint ep)
+    public static async Task<Ok<GetStoriesResponse>> HandleGet(
+        [FromRoute] string locale,
+        [FromServices] GetStoriesEndpoint ep)
     {
         var result = await ep._storiesService.GetAllStoriesAsync();
         return TypedResults.Ok(result);

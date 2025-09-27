@@ -17,7 +17,9 @@ public class GetUserTokensEndpoint
     }
 
     [Route("/api/{locale}/tree-of-heroes/tokens")] // GET
-    public static async Task<Results<Ok<UserTokensDto>, UnauthorizedHttpResult>> HandleGet([FromServices] GetUserTokensEndpoint ep)
+    public static async Task<Results<Ok<UserTokensDto>, UnauthorizedHttpResult>> HandleGet(
+        [FromRoute] string locale,
+        [FromServices] GetUserTokensEndpoint ep)
     {
         var userId = await ep._userContext.GetUserIdAsync();
         if (userId == null) return TypedResults.Unauthorized();

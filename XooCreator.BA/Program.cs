@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using XooCreator.BA.Infrastructure.Swagger;
 using Npgsql;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Repositories;
@@ -33,6 +34,7 @@ builder.Services.AddSwaggerGen(c =>
         Version = "v1.0.0",
         Description = "XooCreator Backend API"
     });
+    c.OperationFilter<LocaleParameterOperationFilter>();
 });
 
 // === CORS: o singură policy super permisivă, valabilă peste tot ===
@@ -124,8 +126,7 @@ app.UseCors("AllowAll");
 // Global exception handler - should be early in the pipeline
 app.UseGlobalExceptionHandling();
 
-// Rewrite /api/{locale}/... to /api/... and expose locale in HttpContext.Items
-app.UseLocaleInApiPath();
+// Locale now part of route templates; no rewrite middleware needed
 
 // Auto-migrate database on startup + initializare date
 using (var scope = app.Services.CreateScope())

@@ -17,7 +17,9 @@ public class GetHeroProgressEndpoint
     }
 
     [Route("/api/{locale}/tree-of-heroes/heroes")] // GET
-    public static async Task<Results<Ok<List<HeroDto>>, UnauthorizedHttpResult>> HandleGet([FromServices] GetHeroProgressEndpoint ep)
+    public static async Task<Results<Ok<List<HeroDto>>, UnauthorizedHttpResult>> HandleGet(
+        [FromRoute] string locale,
+        [FromServices] GetHeroProgressEndpoint ep)
     {
         var userId = await ep._userContext.GetUserIdAsync();
         if (userId == null) return TypedResults.Unauthorized();

@@ -18,8 +18,9 @@ public class GetStoryByIdEndpoint
 
     [Route("/api/{locale}/stories/{storyId}")] // GET /api/{locale}/stories/{storyId}
     public static async Task<Results<Ok<GetStoryByIdResponse>, UnauthorizedHttpResult, NotFound>> HandleGet(
+        [FromRoute] string locale,
         [FromServices] GetStoryByIdEndpoint ep,
-        string storyId)
+        [FromRoute] string storyId)
     {
         var userId = await ep._userContext.GetUserIdAsync();
         if (userId == null) return TypedResults.Unauthorized();

@@ -9,6 +9,7 @@ public class GetTreeStateEndpoint
 {
     [Route("/api/{locale}/tree-of-light/state")] // GET
     public static async Task<IResult> HandleGet(
+        [FromRoute] string locale,
         [FromServices] ITreeModelService treeModelService,
         [FromServices] IUserContextService userContext,
         CancellationToken ct)

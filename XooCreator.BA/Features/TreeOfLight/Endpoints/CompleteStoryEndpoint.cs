@@ -18,6 +18,7 @@ public class CompleteStoryEndpoint
 
     [Route("/api/{locale}/tree-of-light/complete-story")] // POST
     public static async Task<Results<Ok<CompleteStoryResponse>, BadRequest<CompleteStoryResponse>, UnauthorizedHttpResult>> HandlePost(
+        [FromRoute] string locale,
         [FromServices] CompleteStoryEndpoint ep,
         [FromBody] CompleteStoryRequest request)
     {

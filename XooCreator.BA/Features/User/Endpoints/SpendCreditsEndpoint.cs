@@ -19,6 +19,7 @@ public class SpendCreditsEndpoint
 
     [Route("/api/{locale}/user/spend-credits")] // POST (legacy / generative)
     public static async Task<Results<Ok<SpendCreditsResponse>, UnauthorizedHttpResult, BadRequest<SpendCreditsResponse>>> HandlePost(
+        [FromRoute] string locale,
         [FromServices] SpendCreditsEndpoint ep,
         [FromBody] SpendCreditsRequest request)
     {
@@ -35,6 +36,7 @@ public class SpendCreditsEndpoint
 
     [Route("/api/{locale}/user/spend-discovery-credits")] // POST
     public static async Task<Results<Ok<SpendCreditsResponse>, UnauthorizedHttpResult, BadRequest<SpendCreditsResponse>>> HandlePost(
+        [FromRoute] string locale,
         [FromServices] SpendCreditsEndpoint ep,
         [FromBody] SpendCreditsRequest request,
         CancellationToken ct)

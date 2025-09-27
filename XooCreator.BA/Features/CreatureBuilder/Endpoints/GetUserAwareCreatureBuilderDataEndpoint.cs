@@ -24,6 +24,7 @@ public class GetUserAwareCreatureBuilderDataEndpoint
 
     [Route("/api/{locale}/creature-builder/user-data")] // GET /api/{locale}/creature-builder/user-data
     public static async Task<Results<Ok<UserAwareCreatureBuilderDataDto>, UnauthorizedHttpResult>> HandleGet(
+        [FromRoute] string locale,
         [FromServices] GetUserAwareCreatureBuilderDataEndpoint ep, 
         CancellationToken ct)
     {
@@ -37,6 +38,7 @@ public class GetUserAwareCreatureBuilderDataEndpoint
 
     [Route("/api/{locale}/creature-builder/discover")] // POST
     public static async Task<Results<Ok<DiscoverResponseDto>, UnauthorizedHttpResult, BadRequest<DiscoverResponseDto>>> HandlePost(
+        [FromRoute] string locale,
         [FromServices] GetUserAwareCreatureBuilderDataEndpoint ep,
         [FromBody] DiscoverRequestDto request,
         CancellationToken ct)

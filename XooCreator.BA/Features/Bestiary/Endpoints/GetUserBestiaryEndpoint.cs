@@ -23,6 +23,7 @@ public sealed class GetUserBestiaryEndpoint
 
     [Route("/api/{locale}/bestiary")] // GET
     public static async Task<Results<Ok<BestiaryResponse>, UnauthorizedHttpResult>> HandleGet(
+        [FromRoute] string locale,
         [FromServices] GetUserBestiaryEndpoint ep,
         CancellationToken ct)
     {

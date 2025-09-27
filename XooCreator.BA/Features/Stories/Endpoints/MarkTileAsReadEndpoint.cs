@@ -18,6 +18,7 @@ public class MarkTileAsReadEndpoint
 
     [Route("/api/{locale}/stories/mark-tile-read")] // POST /api/{locale}/stories/mark-tile-read
     public static async Task<Results<Ok<MarkTileAsReadResponse>, BadRequest<MarkTileAsReadResponse>, UnauthorizedHttpResult>> HandlePost(
+        [FromRoute] string locale,
         [FromServices] MarkTileAsReadEndpoint ep,
         [FromBody] MarkTileAsReadRequest request)
     {

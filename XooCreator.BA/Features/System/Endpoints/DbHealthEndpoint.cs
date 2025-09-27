@@ -9,6 +9,7 @@ public class DbHealthEndpoint
 {
     [Route("/api/{locale}/db/health")] // GET
     public static async Task<IResult> HandleGet(
+        [FromRoute] string locale,
         [FromServices] IDbHealthService health,
         CancellationToken ct)
     {

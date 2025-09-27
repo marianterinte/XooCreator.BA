@@ -18,7 +18,9 @@ public class GetTreeStoryProgressLegacyEndpoint
 
     [Obsolete("Use /api/{locale}/tree-of-light/user-progress")]
     [Route("/api/{locale}/tree-of-light/stories")] // GET (legacy with locale)
-    public static async Task<Results<Ok<List<StoryProgressDto>>, UnauthorizedHttpResult>> HandleGet([FromServices] GetTreeStoryProgressLegacyEndpoint ep)
+    public static async Task<Results<Ok<List<StoryProgressDto>>, UnauthorizedHttpResult>> HandleGet(
+        [FromRoute] string locale,
+        [FromServices] GetTreeStoryProgressLegacyEndpoint ep)
     {
         var userId = await ep._userContext.GetUserIdAsync();
         if (userId == null) return TypedResults.Unauthorized();
