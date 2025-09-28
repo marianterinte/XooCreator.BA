@@ -107,7 +107,8 @@ public class StoriesRepository : IStoriesRepository
             var existingCount = await _context.StoryDefinitions.CountAsync();
             if (existingCount > 0) return;
 
-            var stories = await LoadStoriesFromJsonAsync();
+            // Load base (RO) stories
+            var stories = await LoadStoriesFromJsonAsync(LanguageCode.RoRo.ToFolder());
 
             foreach (var story in stories)
             {
@@ -116,10 +117,11 @@ public class StoriesRepository : IStoriesRepository
 
             await _context.SaveChangesAsync();
 
-            // Seed translations (English) if present
-            var enTranslations = await LoadStoryTranslationsFromJsonAsync("en-us");
-            if (enTranslations.Count > 0)
+            // Seed translations for all supported languages (except base RO)
+            foreach (var lc in LanguageCodeExtensions.All().Where(x => x != LanguageCode.RoRo))
             {
+                var enTranslations = await LoadStoryTranslationsFromJsonAsync(lc.ToTag());
+                if (enTranslations.Count == 0) continue;
                 foreach (var tr in enTranslations)
                 {
                     var def = await _context.StoryDefinitions
@@ -156,10 +158,9 @@ public class StoriesRepository : IStoriesRepository
                         }
                     }
                 }
-
                 await _context.SaveChangesAsync();
             }
-            else
+            if (!LanguageCodeExtensions.All().Any(x => x != LanguageCode.RoRo))
             {
                 // No EN seed files present -> mirror RO into EN-US as placeholder translations
                 var allDefs = await _context.StoryDefinitions.Include(s => s.Tiles).ToListAsync();

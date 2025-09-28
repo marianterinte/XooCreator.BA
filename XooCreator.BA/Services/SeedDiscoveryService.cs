@@ -21,7 +21,7 @@ public sealed class SeedDiscoveryService : ISeedDiscoveryService
     {
         if (await _db.DiscoveryItems.AnyAsync(ct)) return;
 
-        // Prefer seeding from discover-bestiary.json if available
+        // Prefer seeding from discover-bestiary.json per-locale if available
         var seeded = await TrySeedFromBestiaryJsonAsync(ct);
         if (!seeded)
         {
@@ -44,12 +44,14 @@ public sealed class SeedDiscoveryService : ISeedDiscoveryService
     {
         try
         {
-            var paths = new[]
+            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            var candidates = new List<string>();
+            foreach (var lc in LanguageCodeExtensions.All())
             {
-                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SeedData", "discover-bestiary.json"),
-                Path.Combine(Directory.GetCurrentDirectory(), "Data", "SeedData", "discover-bestiary.json")
-            };
-            string? path = paths.FirstOrDefault(File.Exists);
+                candidates.Add(Path.Combine(baseDir, "Data", "SeedData", lc.ToFolder(), "discover-bestiary.json"));
+            }
+            candidates.Add(Path.Combine(baseDir, "Data", "SeedData", "discover-bestiary.json"));
+            string? path = candidates.FirstOrDefault(File.Exists);
             if (path == null) return false;
 
             var json = await File.ReadAllTextAsync(path, ct);

@@ -33,8 +33,8 @@ public class HeroDefinitionSeedService : IHeroDefinitionSeedService
 
             _logger.LogInformation("Seeding hero definitions...");
 
-            // Load hero definitions from JSON file
-            var heroData = await LoadHeroDefinitionsFromJsonAsync();
+            // Load hero definitions from JSON file (per-locale, prefer RO base for structure)
+            var heroData = await LoadHeroDefinitionsFromJsonAsync(LanguageCode.RoRo);
             
             if (heroData?.Nodes == null || !heroData.Nodes.Any())
             {
@@ -80,11 +80,17 @@ public class HeroDefinitionSeedService : IHeroDefinitionSeedService
         }
     }
 
-    private async Task<HeroTreeData?> LoadHeroDefinitionsFromJsonAsync()
+    private async Task<HeroTreeData?> LoadHeroDefinitionsFromJsonAsync(LanguageCode code)
     {
         try
         {
-            var jsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SeedData", "hero-tree.json");
+            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            var candidates = new[]
+            {
+                Path.Combine(baseDir, "Data", "SeedData", code.ToFolder(), "hero-tree.json"),
+                Path.Combine(baseDir, "Data", "SeedData", "hero-tree.json")
+            };
+            var jsonPath = candidates.FirstOrDefault(File.Exists) ?? candidates.Last();
             
             if (!File.Exists(jsonPath))
             {

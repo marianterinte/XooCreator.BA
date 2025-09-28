@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using XooCreator.BA.Data;
 
 namespace XooCreator.BA.Services;
 
@@ -13,11 +14,13 @@ public sealed class BestiaryFileUpdater : IBestiaryFileUpdater
     public async Task EnsureImageFileNamesAsync(CancellationToken ct = default)
     {
         // Try both output directory and project directory
-        var paths = new[]
+        var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+        var paths = new List<string>();
+        foreach (var lc in Data.LanguageCodeExtensions.All())
         {
-            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SeedData", "discover-bestiary.json"),
-            Path.Combine(Directory.GetCurrentDirectory(), "Data", "SeedData", "discover-bestiary.json")
-        };
+            paths.Add(Path.Combine(baseDir, "Data", "SeedData", lc.ToFolder(), "discover-bestiary.json"));
+        }
+        paths.Add(Path.Combine(baseDir, "Data", "SeedData", "discover-bestiary.json"));
 
         foreach (var path in paths.Distinct())
         {
