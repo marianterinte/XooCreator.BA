@@ -6,9 +6,10 @@ namespace XooCreator.BA.Features.TreeOfLight;
 
 public interface ITreeOfLightService
 {
-    Task<List<TreeProgressDto>> GetTreeProgressAsync(Guid userId);
-    Task<List<StoryProgressDto>> GetStoryProgressAsync(Guid userId);
-    Task<CompleteStoryResponse> CompleteStoryAsync(Guid userId, CompleteStoryRequest request);
+    Task<List<TreeConfigurationDto>> GetAllConfigurationsAsync();
+    Task<List<TreeProgressDto>> GetTreeProgressAsync(Guid userId, string configId);
+    Task<List<StoryProgressDto>> GetStoryProgressAsync(Guid userId, string configId);
+    Task<CompleteStoryResponse> CompleteStoryAsync(Guid userId, CompleteStoryRequest request, string configId);
     Task<ResetProgressResponse> ResetUserProgressAsync(Guid userId);
 }
 
@@ -27,26 +28,31 @@ public class TreeOfLightService : ITreeOfLightService
         _userContext = userContext;
     }
 
-    public Task<List<TreeProgressDto>> GetTreeProgressAsync(Guid userId)
+    public async Task<List<TreeConfigurationDto>> GetAllConfigurationsAsync()
     {
-        return _repository.GetTreeProgressAsync(userId);
+        var configs = await _repository.GetAllConfigurationsAsync();
+        return configs.Select(c => new TreeConfigurationDto { Id = c.Id, Name = c.Name, IsDefault = c.IsDefault }).ToList();
     }
 
-    public Task<List<StoryProgressDto>> GetStoryProgressAsync(Guid userId)
+    public Task<List<TreeProgressDto>> GetTreeProgressAsync(Guid userId, string configId)
     {
-        return _repository.GetStoryProgressAsync(userId);
+        return _repository.GetTreeProgressAsync(userId, configId);
+    }
+
+    public Task<List<StoryProgressDto>> GetStoryProgressAsync(Guid userId, string configId)
+    {
+        return _repository.GetStoryProgressAsync(userId, configId);
     }
 
 
-    public async Task<CompleteStoryResponse> CompleteStoryAsync(Guid userId, CompleteStoryRequest request)
+    public async Task<CompleteStoryResponse> CompleteStoryAsync(Guid userId, CompleteStoryRequest request, string configId)
     {
         try
         {
-            // Complete the story (localized)
             var locale = _userContext.GetRequestLocaleOrDefault("ro-ro");
             var story = await _storiesRepository.GetStoryByIdAsync(request.StoryId, locale);
 
-            var storyCompleted = await _repository.CompleteStoryAsync(userId, request, story);
+            var storyCompleted = await _repository.CompleteStoryAsync(userId, request, story, configId);
             if (!storyCompleted)
             {
                 return new CompleteStoryResponse
@@ -58,7 +64,6 @@ public class TreeOfLightService : ITreeOfLightService
 
             var newlyUnlockedRegions = new List<string>();
 
-            // Award tokens: derive from story answer only
             var effectiveTokens = new List<TokenReward>();
 
             if (story != null && !string.IsNullOrEmpty(request.SelectedAnswer))
@@ -79,8 +84,7 @@ public class TreeOfLightService : ITreeOfLightService
                 await _treeOfHeroesRepository.AwardTokensAsync(userId, effectiveTokens);
             }
 
-            // Check for region unlocks based on story completion rules
-            var unlockedRegions = await CheckAndUnlockRegionsAsync(userId, request.StoryId);
+            var unlockedRegions = await CheckAndUnlockRegionsAsync(userId, request.StoryId, configId);
             newlyUnlockedRegions.AddRange(unlockedRegions);
 
             var updatedTokens = await _treeOfHeroesRepository.GetUserTokensAsync(userId);
@@ -102,38 +106,34 @@ public class TreeOfLightService : ITreeOfLightService
         }
     }
      
-    private async Task<List<string>> CheckAndUnlockRegionsAsync(Guid userId, string storyId)
+    private async Task<List<string>> CheckAndUnlockRegionsAsync(Guid userId, string storyId, string configId)
     {
         var newlyUnlockedRegions = new List<string>();
 
-        // Check for region unlock rules based on story completion
-        // This could be made more dynamic by loading rules from database
         switch (storyId)
         {
             case "root-s1":
-                await _repository.UnlockRegionAsync(userId, "farm");
+                await _repository.UnlockRegionAsync(userId, "farm", configId);
                 newlyUnlockedRegions.Add("farm");
                 break;
 
             case "farm-s1":
             case "farm-s2":
             case "farm-s3":
-                // Check if farm is complete (all 3 stories done)
-                var farmStories = await _repository.GetStoryProgressAsync(userId);
+                var farmStories = await _repository.GetStoryProgressAsync(userId, configId);
                 var farmCompleted = farmStories.Count(s => s.StoryId.StartsWith("farm-")) >= 3;
 
                 if (farmCompleted)
                 {
-                    // Unlock next regions based on collected tokens
                     var tokens = await _treeOfHeroesRepository.GetUserTokensAsync(userId);
                     if (tokens.Courage >= 2)
                     {
-                        await _repository.UnlockRegionAsync(userId, "sahara");
+                        await _repository.UnlockRegionAsync(userId, "sahara", configId);
                         newlyUnlockedRegions.Add("sahara");
                     }
                     if (tokens.Curiosity + tokens.Creativity >= 2)
                     {
-                        await _repository.UnlockRegionAsync(userId, "dreamland");
+                        await _repository.UnlockRegionAsync(userId, "dreamland", configId);
                         newlyUnlockedRegions.Add("dreamland");
                     }
                 }

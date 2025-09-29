@@ -7,11 +7,12 @@ namespace XooCreator.BA.Features.TreeOfLight;
 
 public interface ITreeOfLightRepository
 {
-    Task<List<TreeProgressDto>> GetTreeProgressAsync(Guid userId);
-    Task<List<StoryProgressDto>> GetStoryProgressAsync(Guid userId);
+    Task<List<TreeConfiguration>> GetAllConfigurationsAsync();
+    Task<List<TreeProgressDto>> GetTreeProgressAsync(Guid userId, string configId);
+    Task<List<StoryProgressDto>> GetStoryProgressAsync(Guid userId, string configId);
 
-    Task<bool> CompleteStoryAsync(Guid userId, CompleteStoryRequest request, Stories.StoryContentDto? story);
-    Task<bool> UnlockRegionAsync(Guid userId, string regionId);
+    Task<bool> CompleteStoryAsync(Guid userId, CompleteStoryRequest request, Stories.StoryContentDto? story, string configId);
+    Task<bool> UnlockRegionAsync(Guid userId, string regionId, string configId);
     Task ResetUserProgressAsync(Guid userId);
 }
 
@@ -24,10 +25,15 @@ public class TreeOfLightRepository : ITreeOfLightRepository
         _context = context;
     }
 
-    public async Task<List<TreeProgressDto>> GetTreeProgressAsync(Guid userId)
+    public async Task<List<TreeConfiguration>> GetAllConfigurationsAsync()
+    {
+        return await _context.TreeConfigurations.ToListAsync();
+    }
+
+    public async Task<List<TreeProgressDto>> GetTreeProgressAsync(Guid userId, string configId)
     {
         return await _context.TreeProgress
-            .Where(tp => tp.UserId == userId)
+            .Where(tp => tp.UserId == userId && tp.TreeConfigurationId == configId)
             .Select(tp => new TreeProgressDto
             {
                 RegionId = tp.RegionId,
@@ -37,10 +43,10 @@ public class TreeOfLightRepository : ITreeOfLightRepository
             .ToListAsync();
     }
 
-    public async Task<List<StoryProgressDto>> GetStoryProgressAsync(Guid userId)
+    public async Task<List<StoryProgressDto>> GetStoryProgressAsync(Guid userId, string configId)
     {
         var storyProgresses = await _context.StoryProgress
-            .Where(sp => sp.UserId == userId)
+            .Where(sp => sp.UserId == userId && sp.TreeConfigurationId == configId)
             .ToListAsync();
 
         return storyProgresses.Select(sp => new StoryProgressDto
@@ -55,13 +61,13 @@ public class TreeOfLightRepository : ITreeOfLightRepository
 
 
 
-    public async Task<bool> CompleteStoryAsync(Guid userId, CompleteStoryRequest request, Stories.StoryContentDto? story)
+    public async Task<bool> CompleteStoryAsync(Guid userId, CompleteStoryRequest request, Stories.StoryContentDto? story, string configId)
     {
         try
         {
             // Check if story is already completed
             var existingStory = await _context.StoryProgress
-                .FirstOrDefaultAsync(sp => sp.UserId == userId && sp.StoryId == request.StoryId);
+                .FirstOrDefaultAsync(sp => sp.UserId == userId && sp.StoryId == request.StoryId && sp.TreeConfigurationId == configId);
 
             if (existingStory != null)
             {
@@ -73,7 +79,8 @@ public class TreeOfLightRepository : ITreeOfLightRepository
                 UserId = userId,
                 StoryId = request.StoryId,
                 SelectedAnswer = request.SelectedAnswer,
-                TokensJson = null
+                TokensJson = null,
+                TreeConfigurationId = configId
             };
 
             _context.StoryProgress.Add(storyProgress);
@@ -108,12 +115,12 @@ public class TreeOfLightRepository : ITreeOfLightRepository
         return null;
     }
 
-    public async Task<bool> UnlockRegionAsync(Guid userId, string regionId)
+    public async Task<bool> UnlockRegionAsync(Guid userId, string regionId, string configId)
     {
         try
         {
             var existingRegion = await _context.TreeProgress
-                .FirstOrDefaultAsync(tp => tp.UserId == userId && tp.RegionId == regionId);
+                .FirstOrDefaultAsync(tp => tp.UserId == userId && tp.RegionId == regionId && tp.TreeConfigurationId == configId);
 
             if (existingRegion?.IsUnlocked == true)
             {
@@ -133,7 +140,8 @@ public class TreeOfLightRepository : ITreeOfLightRepository
                     UserId = userId,
                     RegionId = regionId,
                     IsUnlocked = true,
-                    UnlockedAt = DateTime.UtcNow
+                    UnlockedAt = DateTime.UtcNow,
+                    TreeConfigurationId = configId
                 };
                 _context.TreeProgress.Add(treeProgress);
             }

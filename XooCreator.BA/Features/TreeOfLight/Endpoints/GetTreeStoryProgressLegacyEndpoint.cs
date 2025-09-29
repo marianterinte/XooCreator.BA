@@ -20,11 +20,17 @@ public class GetTreeStoryProgressLegacyEndpoint
     [Route("/api/{locale}/tree-of-light/stories")] // GET (legacy with locale)
     public static async Task<Results<Ok<List<StoryProgressDto>>, UnauthorizedHttpResult>> HandleGet(
         [FromRoute] string locale,
+        [FromQuery] string? configId,
         [FromServices] GetTreeStoryProgressLegacyEndpoint ep)
     {
         var userId = await ep._userContext.GetUserIdAsync();
         if (userId == null) return TypedResults.Unauthorized();
-        var stories = await ep._service.GetStoryProgressAsync(userId.Value);
+        if (string.IsNullOrEmpty(configId))
+        {
+            var configs = await ep._service.GetAllConfigurationsAsync();
+            configId = configs.FirstOrDefault(c => c.IsDefault)?.Id ?? configs.First().Id;
+        }
+        var stories = await ep._service.GetStoryProgressAsync(userId.Value, configId);
         return TypedResults.Ok(stories);
     }
 }

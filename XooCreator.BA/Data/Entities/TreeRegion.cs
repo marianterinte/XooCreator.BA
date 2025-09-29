@@ -7,9 +7,11 @@ public class TreeRegion
     public string? ImageUrl { get; set; }
     public string? PufpufMessage { get; set; }
     public int SortOrder { get; set; }
+    public string TreeConfigurationId { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
+    public TreeConfiguration TreeConfiguration { get; set; } = null!;
     public ICollection<TreeStoryNode> Stories { get; set; } = new List<TreeStoryNode>();
     // Note: Removed UnlockRules navigation properties to simplify FK relationships
 }

@@ -11,7 +11,9 @@ public class StoryProgress
     public string? SelectedAnswer { get; set; } // The choice made by user
     public string? TokensJson { get; set; } // JSON serialized list of TokenReward objects
     public DateTime CompletedAt { get; set; } = DateTime.UtcNow;
+    public string TreeConfigurationId { get; set; } = string.Empty;
     
     // Navigation
+    public TreeConfiguration TreeConfiguration { get; set; } = null!;
     public UserAlchimalia User { get; set; } = null!;
 }

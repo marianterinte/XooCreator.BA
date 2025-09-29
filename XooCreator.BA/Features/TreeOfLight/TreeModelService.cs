@@ -6,7 +6,7 @@ namespace XooCreator.BA.Features.TreeOfLight;
 
 public interface ITreeModelService
 {
-    Task<TreeStateDto> GetTreeStateAsync(Guid userId);
+    Task<TreeStateDto> GetTreeStateAsync(Guid userId, string? configId = null);
     Task InitializeTreeModelAsync();
 }
 
@@ -23,23 +23,31 @@ public class TreeModelService : ITreeModelService
         _userContext = userContext;
     }
 
-    public async Task<TreeStateDto> GetTreeStateAsync(Guid userId)
+    public async Task<TreeStateDto> GetTreeStateAsync(Guid userId, string? configId = null)
     {
-        // Get tree model data
-        var regions = await _treeModelRepository.GetAllRegionsAsync();
-        var storyNodes = await _treeModelRepository.GetAllStoryNodesAsync();
-        var unlockRules = await _treeModelRepository.GetAllUnlockRulesAsync();
+        var allConfigs = await _treeModelRepository.GetAllConfigurationsAsync();
+        var config = string.IsNullOrEmpty(configId) 
+            ? allConfigs.FirstOrDefault(c => c.IsDefault) ?? allConfigs.First() 
+            : allConfigs.FirstOrDefault(c => c.Id == configId);
 
-        // Get user progress data
-        var completedStories = await _tolRepository.GetStoryProgressAsync(userId);
-        // User tokens are now handled by TreeOfHeroesService
+        if (config == null)
+        {
+            throw new Exception("Tree configuration not found.");
+        }
+
+        var regions = await _treeModelRepository.GetAllRegionsAsync(config.Id);
+        var storyNodes = await _treeModelRepository.GetAllStoryNodesAsync(config.Id);
+        var unlockRules = await _treeModelRepository.GetAllUnlockRulesAsync(config.Id);
+
+        var completedStories = await _tolRepository.GetStoryProgressAsync(userId, config.Id);
         var userTokens = new UserTokensDto { Courage = 0, Curiosity = 0, Thinking = 0, Creativity = 0, Safety = 0 };
         
-        // Calculate unlocked regions using rule evaluator
         var unlockedRegions = EvaluateUnlockedRegions(completedStories, unlockRules);
 
         return new TreeStateDto
         {
+            Configurations = allConfigs.Select(c => new TreeConfigurationDto { Id = c.Id, Name = c.Name, IsDefault = c.IsDefault }).ToList(),
+            Configuration = new TreeConfigurationDto { Id = config.Id, Name = config.Name, IsDefault = config.IsDefault },
             Model = new TreeModelDto
             {
                 Regions = regions.Select(r => new TreeRegionDto
@@ -97,7 +105,6 @@ public class TreeModelService : ITreeModelService
     private List<string> EvaluateUnlockedRegions(List<StoryProgressDto> completedStories, List<TreeUnlockRule> unlockRules)
     {
         var completedStoryIds = new HashSet<string>(completedStories.Select(cs => cs.StoryId));
-        // Seed model uses 'gateway' as the initial/root region, so unlock it by default
         var unlockedRegions = new HashSet<string> { "gateway" };
         
         bool changed;
@@ -108,7 +115,7 @@ public class TreeModelService : ITreeModelService
             foreach (var rule in unlockRules)
             {
                 if (unlockedRegions.Contains(rule.ToRegionId))
-                    continue; // Already unlocked
+                    continue;
                 
                 bool shouldUnlock = rule.Type switch
                 {

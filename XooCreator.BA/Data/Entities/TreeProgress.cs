@@ -9,10 +9,12 @@ public class TreeProgress
     public Guid UserId { get; set; }
     public string RegionId { get; set; } = string.Empty; // e.g., "root", "farm", "sahara"
     public bool IsUnlocked { get; set; }
+    public string TreeConfigurationId { get; set; } = string.Empty;
     public DateTime UnlockedAt { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     
     // Navigation
+    public TreeConfiguration TreeConfiguration { get; set; } = null!;
     public UserAlchimalia User { get; set; } = null!;
 }

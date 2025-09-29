@@ -19,12 +19,18 @@ public class CompleteStoryEndpoint
     [Route("/api/{locale}/tree-of-light/complete-story")] // POST
     public static async Task<Results<Ok<CompleteStoryResponse>, BadRequest<CompleteStoryResponse>, UnauthorizedHttpResult>> HandlePost(
         [FromRoute] string locale,
+        [FromQuery] string? configId,
         [FromServices] CompleteStoryEndpoint ep,
         [FromBody] CompleteStoryRequest request)
     {
         var userId = await ep._userContext.GetUserIdAsync();
         if (userId == null) return TypedResults.Unauthorized();
-        var result = await ep._service.CompleteStoryAsync(userId.Value, request);
+        if (string.IsNullOrEmpty(configId))
+        {
+            var configs = await ep._service.GetAllConfigurationsAsync();
+            configId = configs.FirstOrDefault(c => c.IsDefault)?.Id ?? configs.First().Id;
+        }
+        var result = await ep._service.CompleteStoryAsync(userId.Value, request, configId);
         return result.Success ? TypedResults.Ok(result) : TypedResults.BadRequest(result);
     }
 }

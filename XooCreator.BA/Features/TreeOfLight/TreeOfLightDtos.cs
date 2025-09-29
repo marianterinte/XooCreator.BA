@@ -52,8 +52,17 @@ public record ResetProgressResponse
 // Tree Model DTOs
 public record TreeStateDto
 {
+    public List<TreeConfigurationDto> Configurations { get; init; } = new();
+    public TreeConfigurationDto Configuration { get; init; }
     public TreeModelDto Model { get; init; } = new();
     public TreeProgressStateDto Progress { get; init; } = new();
+}
+
+public record TreeConfigurationDto
+{
+    public required string Id { get; init; }
+    public required string Name { get; init; }
+    public bool IsDefault { get; init; }
 }
 
 public record TreeModelDto

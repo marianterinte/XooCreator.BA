@@ -29,6 +29,7 @@ public class XooDbContext : DbContext
     public DbSet<TreeRegion> TreeRegions => Set<TreeRegion>();
     public DbSet<TreeStoryNode> TreeStoryNodes => Set<TreeStoryNode>();
     public DbSet<TreeUnlockRule> TreeUnlockRules => Set<TreeUnlockRule>();
+    public DbSet<TreeConfiguration> TreeConfigurations => Set<TreeConfiguration>();
     
     // Story System data
     public DbSet<StoryDefinition> StoryDefinitions => Set<StoryDefinition>();
@@ -194,16 +195,18 @@ public class XooDbContext : DbContext
         {
             e.HasKey(x => x.Id);
             e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.HasIndex(x => new { x.UserId, x.RegionId }).IsUnique();
+            e.HasIndex(x => new { x.UserId, x.RegionId, x.TreeConfigurationId }).IsUnique();
             e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
+            e.HasOne(x => x.TreeConfiguration).WithMany().HasForeignKey(x => x.TreeConfigurationId);
         });
 
         modelBuilder.Entity<StoryProgress>(e =>
         {
             e.HasKey(x => x.Id);
             e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.HasIndex(x => new { x.UserId, x.StoryId }).IsUnique();
+            e.HasIndex(x => new { x.UserId, x.StoryId, x.TreeConfigurationId }).IsUnique();
             e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
+            e.HasOne(x => x.TreeConfiguration).WithMany().HasForeignKey(x => x.TreeConfigurationId);
         });
 
         // Legacy UserTokens removed
@@ -254,7 +257,8 @@ public class XooDbContext : DbContext
             e.HasKey(x => x.Id);
             e.Property(x => x.Id).HasMaxLength(50);
             e.Property(x => x.Label).HasMaxLength(100).IsRequired();
-            e.HasIndex(x => x.Id).IsUnique();
+            e.HasIndex(x => new { x.Id, x.TreeConfigurationId }).IsUnique();
+            e.HasOne(x => x.TreeConfiguration).WithMany().HasForeignKey(x => x.TreeConfigurationId);
         });
 
         modelBuilder.Entity<TreeStoryNode>(e =>
@@ -263,9 +267,10 @@ public class XooDbContext : DbContext
             e.Property(x => x.Id).ValueGeneratedOnAdd();
             e.Property(x => x.StoryId).HasMaxLength(100).IsRequired();
             e.Property(x => x.RegionId).HasMaxLength(50).IsRequired();
-            e.HasIndex(x => new { x.StoryId, x.RegionId }).IsUnique();
+            e.HasIndex(x => new { x.StoryId, x.RegionId, x.TreeConfigurationId }).IsUnique();
             e.HasOne(x => x.Region).WithMany(x => x.Stories).HasForeignKey(x => x.RegionId);
             e.HasOne(x => x.StoryDefinition).WithMany().HasForeignKey(x => x.StoryId).HasPrincipalKey(s => s.StoryId);
+            e.HasOne(x => x.TreeConfiguration).WithMany().HasForeignKey(x => x.TreeConfigurationId);
         });
 
         modelBuilder.Entity<TreeUnlockRule>(e =>
@@ -275,7 +280,14 @@ public class XooDbContext : DbContext
             e.Property(x => x.Type).HasMaxLength(20).IsRequired();
             e.Property(x => x.FromId).HasMaxLength(100).IsRequired();
             e.Property(x => x.ToRegionId).HasMaxLength(50).IsRequired();
+            e.HasOne(x => x.TreeConfiguration).WithMany().HasForeignKey(x => x.TreeConfigurationId);
             // Note: No FK constraints to allow flexible FromId (can be region or story ID)
+        });
+
+        modelBuilder.Entity<TreeConfiguration>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Name).IsRequired();
         });
 
         // Story System configurations

@@ -19,11 +19,17 @@ public class GetTreeProgressEndpoint
     [Route("/api/{locale}/tree-of-light/progress")] // GET
     public static async Task<Results<Ok<List<TreeProgressDto>>, UnauthorizedHttpResult>> HandleGet(
         [FromRoute] string locale,
+        [FromQuery] string? configId,
         [FromServices] GetTreeProgressEndpoint ep)
     {
         var userId = await ep._userContext.GetUserIdAsync();
         if (userId == null) return TypedResults.Unauthorized();
-        var progress = await ep._service.GetTreeProgressAsync(userId.Value);
+        if (string.IsNullOrEmpty(configId))
+        {
+            var configs = await ep._service.GetAllConfigurationsAsync();
+            configId = configs.FirstOrDefault(c => c.IsDefault)?.Id ?? configs.First().Id;
+        }
+        var progress = await ep._service.GetTreeProgressAsync(userId.Value, configId);
         return TypedResults.Ok(progress);
     }
 }
