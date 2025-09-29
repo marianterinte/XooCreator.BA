@@ -9,7 +9,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace XooCreator.BA.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -747,8 +747,8 @@ namespace XooCreator.BA.Migrations
                 columns: new[] { "Id", "Auth0Sub", "CreatedAt", "DisplayName", "Email" },
                 values: new object[,]
                 {
-                    { new Guid("11111111-1111-1111-1111-111111111111"), "test-user-sub", new DateTime(2025, 9, 28, 17, 39, 57, 758, DateTimeKind.Utc).AddTicks(4357), "Test User", "test@example.com" },
-                    { new Guid("22222222-2222-2222-2222-222222222222"), "marian-test-sub", new DateTime(2025, 9, 28, 17, 39, 57, 758, DateTimeKind.Utc).AddTicks(4360), "Marian", "marian@example.com" }
+                    { new Guid("11111111-1111-1111-1111-111111111111"), "test-user-sub", new DateTime(2025, 9, 29, 19, 22, 58, 864, DateTimeKind.Utc).AddTicks(1884), "Test User", "test@example.com" },
+                    { new Guid("22222222-2222-2222-2222-222222222222"), "marian-test-sub", new DateTime(2025, 9, 29, 19, 22, 58, 864, DateTimeKind.Utc).AddTicks(1886), "Marian", "marian@example.com" }
                 });
 
             migrationBuilder.InsertData(
@@ -797,14 +797,14 @@ namespace XooCreator.BA.Migrations
                 columns: new[] { "Id", "BodyPartKey", "LanguageCode", "Name" },
                 values: new object[,]
                 {
-                    { new Guid("079c6653-a45e-4f12-b709-7e7940f3a759"), "wings", "en-us", "Wings" },
-                    { new Guid("2f77c232-553f-4b77-8d12-1fbdaa6a213e"), "arms", "en-us", "Arms" },
-                    { new Guid("59e8fd41-5adb-45c7-aec0-9f6ac772c168"), "horn", "en-us", "Horn" },
-                    { new Guid("62f99aa4-56a3-474e-93e3-09d476ad318a"), "horns", "en-us", "Horns" },
-                    { new Guid("a825a934-24b3-4364-98ba-2767a470213c"), "body", "en-us", "Body" },
-                    { new Guid("bc57ed4d-5a17-4ef7-b594-972394a92432"), "tail", "en-us", "Tail" },
-                    { new Guid("c0806e20-a680-4955-9db3-9aa3369fa62d"), "legs", "en-us", "Legs" },
-                    { new Guid("f738ba90-5d32-42a4-b01d-1534acc5d118"), "head", "en-us", "Head" }
+                    { new Guid("09a73e37-d98c-4c98-bf91-a375b83b9e2a"), "horns", "en-us", "Horns" },
+                    { new Guid("1746207b-af16-4e18-922f-3218a6864b07"), "legs", "en-us", "Legs" },
+                    { new Guid("26cf61f9-87cb-40c9-b6ef-74702349b712"), "head", "en-us", "Head" },
+                    { new Guid("6a49bd94-33e8-4328-bf6e-be39c96c5bdc"), "body", "en-us", "Body" },
+                    { new Guid("75e6699c-7dc4-490b-b891-1f405a34ed66"), "arms", "en-us", "Arms" },
+                    { new Guid("8bc0d730-8273-40b9-b34f-5bec7ff39540"), "wings", "en-us", "Wings" },
+                    { new Guid("ccbd3160-ee63-4cc6-9125-57b0c0997cdf"), "tail", "en-us", "Tail" },
+                    { new Guid("d2e834e6-2b8a-459e-8288-89ae66b1bad3"), "horn", "en-us", "Horn" }
                 });
 
             migrationBuilder.InsertData(
@@ -812,8 +812,8 @@ namespace XooCreator.BA.Migrations
                 columns: new[] { "Id", "Amount", "CreatedAt", "Reference", "Type", "UserId" },
                 values: new object[,]
                 {
-                    { new Guid("33333333-3333-3333-3333-333333333333"), 15, new DateTime(2025, 9, 27, 17, 39, 57, 758, DateTimeKind.Utc).AddTicks(4517), "test-purchase-marian", 0, new Guid("22222222-2222-2222-2222-222222222222") },
-                    { new Guid("44444444-4444-4444-4444-444444444444"), -5, new DateTime(2025, 9, 28, 15, 39, 57, 758, DateTimeKind.Utc).AddTicks(4524), "test-generation", 1, new Guid("22222222-2222-2222-2222-222222222222") }
+                    { new Guid("33333333-3333-3333-3333-333333333333"), 15, new DateTime(2025, 9, 28, 19, 22, 58, 864, DateTimeKind.Utc).AddTicks(2014), "test-purchase-marian", 0, new Guid("22222222-2222-2222-2222-222222222222") },
+                    { new Guid("44444444-4444-4444-4444-444444444444"), -5, new DateTime(2025, 9, 29, 17, 22, 58, 864, DateTimeKind.Utc).AddTicks(2021), "test-generation", 1, new Guid("22222222-2222-2222-2222-222222222222") }
                 });
 
             migrationBuilder.InsertData(
@@ -821,8 +821,8 @@ namespace XooCreator.BA.Migrations
                 columns: new[] { "UserId", "Balance", "DiscoveryBalance", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { new Guid("11111111-1111-1111-1111-111111111111"), 5, 0, new DateTime(2025, 9, 28, 17, 39, 57, 758, DateTimeKind.Utc).AddTicks(4415) },
-                    { new Guid("22222222-2222-2222-2222-222222222222"), 10, 0, new DateTime(2025, 9, 28, 17, 39, 57, 758, DateTimeKind.Utc).AddTicks(4417) }
+                    { new Guid("11111111-1111-1111-1111-111111111111"), 5, 0, new DateTime(2025, 9, 29, 19, 22, 58, 864, DateTimeKind.Utc).AddTicks(1932) },
+                    { new Guid("22222222-2222-2222-2222-222222222222"), 10, 0, new DateTime(2025, 9, 29, 19, 22, 58, 864, DateTimeKind.Utc).AddTicks(1934) }
                 });
 
             migrationBuilder.InsertData(
@@ -830,8 +830,8 @@ namespace XooCreator.BA.Migrations
                 columns: new[] { "Id", "HeroId", "HeroType", "SourceStoryId", "UnlockedAt", "UserId" },
                 values: new object[,]
                 {
-                    { new Guid("11111111-1111-1111-1111-111111111111"), "seed", "HERO_TREE_TRANSFORMATION", "", new DateTime(2025, 9, 28, 17, 39, 57, 758, DateTimeKind.Utc).AddTicks(4500), new Guid("11111111-1111-1111-1111-111111111111") },
-                    { new Guid("22222222-2222-2222-2222-222222222222"), "seed", "HERO_TREE_TRANSFORMATION", "", new DateTime(2025, 9, 28, 17, 39, 57, 758, DateTimeKind.Utc).AddTicks(4501), new Guid("22222222-2222-2222-2222-222222222222") }
+                    { new Guid("11111111-1111-1111-1111-111111111111"), "seed", "HERO_TREE_TRANSFORMATION", "", new DateTime(2025, 9, 29, 19, 22, 58, 864, DateTimeKind.Utc).AddTicks(1997), new Guid("11111111-1111-1111-1111-111111111111") },
+                    { new Guid("22222222-2222-2222-2222-222222222222"), "seed", "HERO_TREE_TRANSFORMATION", "", new DateTime(2025, 9, 29, 19, 22, 58, 864, DateTimeKind.Utc).AddTicks(1999), new Guid("22222222-2222-2222-2222-222222222222") }
                 });
 
             migrationBuilder.InsertData(
@@ -839,16 +839,16 @@ namespace XooCreator.BA.Migrations
                 columns: new[] { "Id", "CreatedAt", "Quantity", "Type", "UpdatedAt", "UserId", "Value" },
                 values: new object[,]
                 {
-                    { new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1"), new DateTime(2025, 9, 28, 17, 39, 57, 758, DateTimeKind.Utc).AddTicks(4440), 5, "TreeOfHeroes", new DateTime(2025, 9, 28, 17, 39, 57, 758, DateTimeKind.Utc).AddTicks(4441), new Guid("11111111-1111-1111-1111-111111111111"), "courage" },
-                    { new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa2"), new DateTime(2025, 9, 28, 17, 39, 57, 758, DateTimeKind.Utc).AddTicks(4444), 5, "TreeOfHeroes", new DateTime(2025, 9, 28, 17, 39, 57, 758, DateTimeKind.Utc).AddTicks(4444), new Guid("11111111-1111-1111-1111-111111111111"), "curiosity" },
-                    { new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa3"), new DateTime(2025, 9, 28, 17, 39, 57, 758, DateTimeKind.Utc).AddTicks(4446), 5, "TreeOfHeroes", new DateTime(2025, 9, 28, 17, 39, 57, 758, DateTimeKind.Utc).AddTicks(4447), new Guid("11111111-1111-1111-1111-111111111111"), "thinking" },
-                    { new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa4"), new DateTime(2025, 9, 28, 17, 39, 57, 758, DateTimeKind.Utc).AddTicks(4449), 5, "TreeOfHeroes", new DateTime(2025, 9, 28, 17, 39, 57, 758, DateTimeKind.Utc).AddTicks(4449), new Guid("11111111-1111-1111-1111-111111111111"), "creativity" },
-                    { new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa5"), new DateTime(2025, 9, 28, 17, 39, 57, 758, DateTimeKind.Utc).AddTicks(4451), 5, "TreeOfHeroes", new DateTime(2025, 9, 28, 17, 39, 57, 758, DateTimeKind.Utc).AddTicks(4452), new Guid("11111111-1111-1111-1111-111111111111"), "safety" },
-                    { new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1"), new DateTime(2025, 9, 28, 17, 39, 57, 758, DateTimeKind.Utc).AddTicks(4454), 5, "TreeOfHeroes", new DateTime(2025, 9, 28, 17, 39, 57, 758, DateTimeKind.Utc).AddTicks(4454), new Guid("22222222-2222-2222-2222-222222222222"), "courage" },
-                    { new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb2"), new DateTime(2025, 9, 28, 17, 39, 57, 758, DateTimeKind.Utc).AddTicks(4456), 5, "TreeOfHeroes", new DateTime(2025, 9, 28, 17, 39, 57, 758, DateTimeKind.Utc).AddTicks(4457), new Guid("22222222-2222-2222-2222-222222222222"), "curiosity" },
-                    { new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb3"), new DateTime(2025, 9, 28, 17, 39, 57, 758, DateTimeKind.Utc).AddTicks(4459), 5, "TreeOfHeroes", new DateTime(2025, 9, 28, 17, 39, 57, 758, DateTimeKind.Utc).AddTicks(4459), new Guid("22222222-2222-2222-2222-222222222222"), "thinking" },
-                    { new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb4"), new DateTime(2025, 9, 28, 17, 39, 57, 758, DateTimeKind.Utc).AddTicks(4461), 5, "TreeOfHeroes", new DateTime(2025, 9, 28, 17, 39, 57, 758, DateTimeKind.Utc).AddTicks(4462), new Guid("22222222-2222-2222-2222-222222222222"), "creativity" },
-                    { new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb5"), new DateTime(2025, 9, 28, 17, 39, 57, 758, DateTimeKind.Utc).AddTicks(4464), 5, "TreeOfHeroes", new DateTime(2025, 9, 28, 17, 39, 57, 758, DateTimeKind.Utc).AddTicks(4464), new Guid("22222222-2222-2222-2222-222222222222"), "safety" }
+                    { new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1"), new DateTime(2025, 9, 29, 19, 22, 58, 864, DateTimeKind.Utc).AddTicks(1954), 5, "TreeOfHeroes", new DateTime(2025, 9, 29, 19, 22, 58, 864, DateTimeKind.Utc).AddTicks(1954), new Guid("11111111-1111-1111-1111-111111111111"), "courage" },
+                    { new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa2"), new DateTime(2025, 9, 29, 19, 22, 58, 864, DateTimeKind.Utc).AddTicks(1957), 5, "TreeOfHeroes", new DateTime(2025, 9, 29, 19, 22, 58, 864, DateTimeKind.Utc).AddTicks(1957), new Guid("11111111-1111-1111-1111-111111111111"), "curiosity" },
+                    { new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa3"), new DateTime(2025, 9, 29, 19, 22, 58, 864, DateTimeKind.Utc).AddTicks(1959), 5, "TreeOfHeroes", new DateTime(2025, 9, 29, 19, 22, 58, 864, DateTimeKind.Utc).AddTicks(1960), new Guid("11111111-1111-1111-1111-111111111111"), "thinking" },
+                    { new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa4"), new DateTime(2025, 9, 29, 19, 22, 58, 864, DateTimeKind.Utc).AddTicks(1961), 5, "TreeOfHeroes", new DateTime(2025, 9, 29, 19, 22, 58, 864, DateTimeKind.Utc).AddTicks(1962), new Guid("11111111-1111-1111-1111-111111111111"), "creativity" },
+                    { new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa5"), new DateTime(2025, 9, 29, 19, 22, 58, 864, DateTimeKind.Utc).AddTicks(1964), 5, "TreeOfHeroes", new DateTime(2025, 9, 29, 19, 22, 58, 864, DateTimeKind.Utc).AddTicks(1964), new Guid("11111111-1111-1111-1111-111111111111"), "safety" },
+                    { new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1"), new DateTime(2025, 9, 29, 19, 22, 58, 864, DateTimeKind.Utc).AddTicks(1966), 5, "TreeOfHeroes", new DateTime(2025, 9, 29, 19, 22, 58, 864, DateTimeKind.Utc).AddTicks(1966), new Guid("22222222-2222-2222-2222-222222222222"), "courage" },
+                    { new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb2"), new DateTime(2025, 9, 29, 19, 22, 58, 864, DateTimeKind.Utc).AddTicks(1968), 5, "TreeOfHeroes", new DateTime(2025, 9, 29, 19, 22, 58, 864, DateTimeKind.Utc).AddTicks(1969), new Guid("22222222-2222-2222-2222-222222222222"), "curiosity" },
+                    { new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb3"), new DateTime(2025, 9, 29, 19, 22, 58, 864, DateTimeKind.Utc).AddTicks(1971), 5, "TreeOfHeroes", new DateTime(2025, 9, 29, 19, 22, 58, 864, DateTimeKind.Utc).AddTicks(1971), new Guid("22222222-2222-2222-2222-222222222222"), "thinking" },
+                    { new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb4"), new DateTime(2025, 9, 29, 19, 22, 58, 864, DateTimeKind.Utc).AddTicks(1973), 5, "TreeOfHeroes", new DateTime(2025, 9, 29, 19, 22, 58, 864, DateTimeKind.Utc).AddTicks(1973), new Guid("22222222-2222-2222-2222-222222222222"), "creativity" },
+                    { new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb5"), new DateTime(2025, 9, 29, 19, 22, 58, 864, DateTimeKind.Utc).AddTicks(1975), 5, "TreeOfHeroes", new DateTime(2025, 9, 29, 19, 22, 58, 864, DateTimeKind.Utc).AddTicks(1975), new Guid("22222222-2222-2222-2222-222222222222"), "safety" }
                 });
 
             migrationBuilder.InsertData(
@@ -1009,40 +1009,40 @@ namespace XooCreator.BA.Migrations
                 columns: new[] { "Id", "AnimalId", "Label", "LanguageCode" },
                 values: new object[,]
                 {
-                    { new Guid("07dca194-cf46-4a26-b479-4eb93342fb16"), new Guid("00000000-0000-0000-0000-00000000001a"), "Saiga Antelope", "en-us" },
-                    { new Guid("0dca6706-c25a-4426-b992-d75691582bfe"), new Guid("00000000-0000-0000-0000-000000000003"), "Giraffe", "en-us" },
-                    { new Guid("0e2daa80-6731-4e4e-83a8-bdea63e568b1"), new Guid("00000000-0000-0000-0000-000000000016"), "Giraffe", "en-us" },
-                    { new Guid("2f873b85-e84c-4f1a-a6c4-7ba9b257e5cc"), new Guid("00000000-0000-0000-0000-00000000001c"), "Przewalski's Horse", "en-us" },
-                    { new Guid("32e51ca8-7910-4489-a549-ab2711727e50"), new Guid("00000000-0000-0000-0000-000000000015"), "African Elephant", "en-us" },
-                    { new Guid("3a8cc59e-58af-4fe5-a816-c88bf1fe8084"), new Guid("00000000-0000-0000-0000-000000000008"), "Camel", "en-us" },
-                    { new Guid("3c12c2c4-7e32-4127-ada3-67572c6a585e"), new Guid("00000000-0000-0000-0000-000000000004"), "Dog", "en-us" },
-                    { new Guid("4f2ceba8-8784-4c65-841a-2b410695a261"), new Guid("00000000-0000-0000-0000-000000000017"), "Zebra", "en-us" },
-                    { new Guid("4f933ea5-3f70-461c-88ae-3e2d605fcc2d"), new Guid("00000000-0000-0000-0000-00000000000a"), "Duck", "en-us" },
-                    { new Guid("55312905-8cde-45fd-a4ae-29354765dc47"), new Guid("00000000-0000-0000-0000-00000000000d"), "Ostrich", "en-us" },
-                    { new Guid("5569deef-3b55-42b9-80b4-76b13a9f9580"), new Guid("00000000-0000-0000-0000-00000000001b"), "Gray Wolf", "en-us" },
-                    { new Guid("59300a8e-4660-4e84-a6fe-9f425addc275"), new Guid("00000000-0000-0000-0000-00000000000c"), "Elephant", "en-us" },
-                    { new Guid("5eae40c6-9cc0-4b33-b8cf-b3bf2b912877"), new Guid("00000000-0000-0000-0000-000000000014"), "Lion", "en-us" },
-                    { new Guid("65b0bdef-c64d-4555-9fd9-f2110e04163e"), new Guid("00000000-0000-0000-0000-000000000005"), "Fox", "en-us" },
-                    { new Guid("6b2a6438-e42f-4c6f-adc4-a827f483624d"), new Guid("00000000-0000-0000-0000-000000000013"), "Poison Dart Frog", "en-us" },
-                    { new Guid("7b0f7d0c-d146-481d-8925-1d78ab77b225"), new Guid("00000000-0000-0000-0000-000000000021"), "Chicken", "en-us" },
-                    { new Guid("881a57a2-4f81-490b-94e0-9dd08e8fa3aa"), new Guid("00000000-0000-0000-0000-000000000019"), "Bison", "en-us" },
-                    { new Guid("93bbfbdf-1ebd-4088-8b30-ee201dc49426"), new Guid("00000000-0000-0000-0000-000000000011"), "Anaconda", "en-us" },
-                    { new Guid("94c2a458-9597-4ec4-8ffa-83d32e76e587"), new Guid("00000000-0000-0000-0000-000000000010"), "Toucan", "en-us" },
-                    { new Guid("9d3b6eb8-f806-4808-a02d-60685c79e591"), new Guid("00000000-0000-0000-0000-00000000000b"), "Eagle", "en-us" },
-                    { new Guid("a7b11365-0359-4fec-9fb2-d8c519a9d950"), new Guid("00000000-0000-0000-0000-000000000018"), "Rhinoceros", "en-us" },
-                    { new Guid("a95bb975-25ce-45cc-b3f8-826cb5084ae8"), new Guid("00000000-0000-0000-0000-00000000001d"), "Steppe Eagle", "en-us" },
-                    { new Guid("a9f1ad7a-4d99-4ea4-a820-17e0c6091992"), new Guid("00000000-0000-0000-0000-000000000012"), "Capuchin Monkey", "en-us" },
-                    { new Guid("aa15e332-0d7e-4a32-8ba0-4baca0462228"), new Guid("00000000-0000-0000-0000-000000000022"), "Pig", "en-us" },
-                    { new Guid("aa9a906e-a554-4a3c-b03f-a16cf0afc3d5"), new Guid("00000000-0000-0000-0000-00000000000f"), "Jaguar", "en-us" },
-                    { new Guid("aeeb9cf2-063f-4600-9332-5fb0898167cf"), new Guid("00000000-0000-0000-0000-000000000009"), "Deer", "en-us" },
-                    { new Guid("b530b81c-7557-4d4d-bdec-9aa2a5b75f94"), new Guid("00000000-0000-0000-0000-00000000001e"), "Cow", "en-us" },
-                    { new Guid("b9a876af-062f-44d8-b129-8cd373e5b685"), new Guid("00000000-0000-0000-0000-000000000006"), "Cat", "en-us" },
-                    { new Guid("d6bf0704-8e86-4ce5-8e5a-6f440fa353fa"), new Guid("00000000-0000-0000-0000-000000000007"), "Monkey", "en-us" },
-                    { new Guid("d8d66d09-b71d-4afa-8a62-30ba394f0d1d"), new Guid("00000000-0000-0000-0000-000000000001"), "Bunny", "en-us" },
-                    { new Guid("dabac035-3dfe-4687-91cf-277c8df06d45"), new Guid("00000000-0000-0000-0000-00000000000e"), "Parrot", "en-us" },
-                    { new Guid("de96a6b9-02e2-41df-a219-5cee32e5719e"), new Guid("00000000-0000-0000-0000-000000000002"), "Hippo", "en-us" },
-                    { new Guid("f19a5c65-538b-42f6-a7fb-27f49f9e4148"), new Guid("00000000-0000-0000-0000-000000000020"), "Horse", "en-us" },
-                    { new Guid("f2089683-1e1c-4f6d-af59-f2a0e2c6f87a"), new Guid("00000000-0000-0000-0000-00000000001f"), "Sheep", "en-us" }
+                    { new Guid("02632575-ed4b-4918-95ee-5fd1c6c01a2f"), new Guid("00000000-0000-0000-0000-000000000011"), "Anaconda", "en-us" },
+                    { new Guid("03944aca-ec9a-4550-8acd-03fcffd25b62"), new Guid("00000000-0000-0000-0000-000000000018"), "Rhinoceros", "en-us" },
+                    { new Guid("0d7ed51a-6a29-4736-a340-8e91be418084"), new Guid("00000000-0000-0000-0000-00000000001e"), "Cow", "en-us" },
+                    { new Guid("12f81ce3-f8ca-47bc-be83-259c67256ab6"), new Guid("00000000-0000-0000-0000-00000000001b"), "Gray Wolf", "en-us" },
+                    { new Guid("178a29c3-2cb6-40a9-8434-c14565a230cd"), new Guid("00000000-0000-0000-0000-00000000001a"), "Saiga Antelope", "en-us" },
+                    { new Guid("22e15477-7923-44a9-b572-d0ffac009d64"), new Guid("00000000-0000-0000-0000-000000000005"), "Fox", "en-us" },
+                    { new Guid("2521c8cb-86ca-4210-9090-0d2d4afee662"), new Guid("00000000-0000-0000-0000-00000000001d"), "Steppe Eagle", "en-us" },
+                    { new Guid("2b80e485-0d16-484c-bb2e-b9f27ce0cbb9"), new Guid("00000000-0000-0000-0000-000000000010"), "Toucan", "en-us" },
+                    { new Guid("34cd021f-461c-4e50-97d6-bd5071152f27"), new Guid("00000000-0000-0000-0000-000000000019"), "Bison", "en-us" },
+                    { new Guid("370251bb-e1bc-41d1-8910-ae092a5f5584"), new Guid("00000000-0000-0000-0000-000000000014"), "Lion", "en-us" },
+                    { new Guid("3905c913-6be2-4d6c-942d-29d623147f5b"), new Guid("00000000-0000-0000-0000-000000000022"), "Pig", "en-us" },
+                    { new Guid("39258107-1df2-4493-8e18-ce595de48666"), new Guid("00000000-0000-0000-0000-00000000001f"), "Sheep", "en-us" },
+                    { new Guid("46adf947-7e4d-49bd-b9ce-bac912597c1e"), new Guid("00000000-0000-0000-0000-00000000000f"), "Jaguar", "en-us" },
+                    { new Guid("4948b51b-5075-41ad-b7af-521a794ed56c"), new Guid("00000000-0000-0000-0000-000000000004"), "Dog", "en-us" },
+                    { new Guid("4ff5bb50-7b73-4015-945e-68ca61906a3f"), new Guid("00000000-0000-0000-0000-000000000015"), "African Elephant", "en-us" },
+                    { new Guid("5064f1e6-8295-4759-8699-7d64bbb2e42e"), new Guid("00000000-0000-0000-0000-000000000003"), "Giraffe", "en-us" },
+                    { new Guid("5a9062b1-5516-4e04-874a-e404a94f1f7c"), new Guid("00000000-0000-0000-0000-000000000007"), "Monkey", "en-us" },
+                    { new Guid("5b842dc9-9917-4a00-8e04-bd3ef0f1087c"), new Guid("00000000-0000-0000-0000-000000000012"), "Capuchin Monkey", "en-us" },
+                    { new Guid("620da3ca-ec0c-40c4-a0e7-087961c7044e"), new Guid("00000000-0000-0000-0000-00000000000c"), "Elephant", "en-us" },
+                    { new Guid("64a1727b-c4b8-450d-b9bc-e6ee984afbca"), new Guid("00000000-0000-0000-0000-000000000013"), "Poison Dart Frog", "en-us" },
+                    { new Guid("6c461dd1-4993-4700-9e38-e815c301b0ae"), new Guid("00000000-0000-0000-0000-00000000000b"), "Eagle", "en-us" },
+                    { new Guid("788ba2c1-7eb7-4773-a9a1-e0293f59ba3a"), new Guid("00000000-0000-0000-0000-000000000006"), "Cat", "en-us" },
+                    { new Guid("7a41ef90-7f57-42b6-9de7-f50a73c3594b"), new Guid("00000000-0000-0000-0000-00000000000e"), "Parrot", "en-us" },
+                    { new Guid("8086d950-61ef-41c0-9655-d8bc758cce89"), new Guid("00000000-0000-0000-0000-000000000008"), "Camel", "en-us" },
+                    { new Guid("8b82b4e9-75bb-4659-8c6d-fbcb0e66e9e2"), new Guid("00000000-0000-0000-0000-000000000016"), "Giraffe", "en-us" },
+                    { new Guid("8d3f7a8a-a539-4f3e-8227-9123d93f9fe7"), new Guid("00000000-0000-0000-0000-000000000017"), "Zebra", "en-us" },
+                    { new Guid("94d27b44-31f5-4e35-ab56-f14a87b9c4cd"), new Guid("00000000-0000-0000-0000-000000000021"), "Chicken", "en-us" },
+                    { new Guid("9647da09-baf3-4cd2-b92e-4cb756caa27d"), new Guid("00000000-0000-0000-0000-000000000009"), "Deer", "en-us" },
+                    { new Guid("9a959f52-a081-4755-94fd-68cbfb173569"), new Guid("00000000-0000-0000-0000-000000000001"), "Bunny", "en-us" },
+                    { new Guid("b33a5b6c-8397-4e48-bf44-9f0a6084b67d"), new Guid("00000000-0000-0000-0000-000000000020"), "Horse", "en-us" },
+                    { new Guid("b52b1ea6-7c63-4a78-a386-266c3b48ea9f"), new Guid("00000000-0000-0000-0000-00000000000d"), "Ostrich", "en-us" },
+                    { new Guid("e0835f1e-2ec0-4f84-9cf3-f57c51e5b29e"), new Guid("00000000-0000-0000-0000-00000000001c"), "Przewalski's Horse", "en-us" },
+                    { new Guid("e14bad82-3b6f-4e4f-992e-ec17353bda22"), new Guid("00000000-0000-0000-0000-000000000002"), "Hippo", "en-us" },
+                    { new Guid("ff4e22d1-f6ea-4ea0-a150-81a47d4103ac"), new Guid("00000000-0000-0000-0000-00000000000a"), "Duck", "en-us" }
                 });
 
             migrationBuilder.CreateIndex(
