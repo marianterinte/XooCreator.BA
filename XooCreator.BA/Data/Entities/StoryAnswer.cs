@@ -18,4 +18,5 @@ public class StoryAnswer
     // Navigation
     public StoryTile StoryTile { get; set; } = null!;
     public List<StoryAnswerToken> Tokens { get; set; } = new();
+    public List<StoryAnswerTranslation> Translations { get; set; } = new();
 }

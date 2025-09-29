@@ -36,6 +36,7 @@ public class XooDbContext : DbContext
     public DbSet<StoryTile> StoryTiles => Set<StoryTile>();
     public DbSet<StoryTileTranslation> StoryTileTranslations => Set<StoryTileTranslation>();
     public DbSet<StoryAnswer> StoryAnswers => Set<StoryAnswer>();
+    public DbSet<StoryAnswerTranslation> StoryAnswerTranslations => Set<StoryAnswerTranslation>();
     public DbSet<UserStoryReadProgress> UserStoryReadProgress => Set<UserStoryReadProgress>();
     public DbSet<StoryAnswerToken> StoryAnswerTokens => Set<StoryAnswerToken>();
 
@@ -326,6 +327,18 @@ public class XooDbContext : DbContext
             e.HasIndex(x => new { x.StoryTileId, x.AnswerId }).IsUnique();
             e.HasOne(x => x.StoryTile).WithMany(x => x.Answers).HasForeignKey(x => x.StoryTileId);
             e.HasMany(x => x.Tokens).WithOne(x => x.StoryAnswer).HasForeignKey(x => x.StoryAnswerId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<StoryAnswerTranslation>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.LanguageCode).HasMaxLength(10);
+            e.HasIndex(x => new { x.StoryAnswerId, x.LanguageCode }).IsUnique();
+            e.HasOne(x => x.StoryAnswer)
+                .WithMany(a => a.Translations)
+                .HasForeignKey(x => x.StoryAnswerId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<StoryAnswerToken>(e =>

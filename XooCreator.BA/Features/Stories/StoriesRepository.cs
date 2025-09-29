@@ -31,6 +31,9 @@ public class StoriesRepository : IStoriesRepository
                 .ThenInclude(t => t.Translations)
             .Include(s => s.Tiles)
                 .ThenInclude(t => t.Answers)
+                    .ThenInclude(a => a.Translations)
+            .Include(s => s.Tiles)
+                .ThenInclude(t => t.Answers)
                     .ThenInclude(a => a.Tokens)
             .Where(s => s.IsActive)
             .OrderBy(s => s.SortOrder)
@@ -49,6 +52,9 @@ public class StoriesRepository : IStoriesRepository
             .Include(s => s.Tiles)
                 .ThenInclude(t => t.Answers)
                     .ThenInclude(a => a.Tokens)
+            .Include(s => s.Tiles)
+                .ThenInclude(t => t.Answers)
+                    .ThenInclude(a => a.Translations)
             .FirstOrDefaultAsync(s => s.StoryId == storyId && s.IsActive);
 
         return story == null ? null : MapToDtoWithLocale(story, locale);
@@ -126,6 +132,7 @@ public class StoriesRepository : IStoriesRepository
                 {
                     var def = await _context.StoryDefinitions
                         .Include(s => s.Tiles)
+                            .ThenInclude(t => t.Answers)
                         .FirstOrDefaultAsync(s => s.StoryId == tr.StoryId);
                     if (def == null) continue;
 
@@ -155,6 +162,22 @@ public class StoriesRepository : IStoriesRepository
                                 Text = t.Text,
                                 Question = t.Question
                             });
+
+                            // Answer translations
+                            if (t.Answers != null)
+                            {
+                                foreach (var answer in t.Answers)
+                                {
+                                    var dbAnswer = dbTile.Answers.FirstOrDefault(x => x.AnswerId == answer.AnswerId);
+                                    if (dbAnswer == null) continue;
+                                    _context.StoryAnswerTranslations.Add(new StoryAnswerTranslation
+                                    {
+                                        StoryAnswerId = dbAnswer.Id,
+                                        LanguageCode = tr.Locale,
+                                        Text = answer.Text
+                                    });
+                                }
+                            }
                         }
                     }
                 }
@@ -357,6 +380,13 @@ public class StoriesRepository : IStoriesRepository
         public string? Caption { get; set; }
         public string? Text { get; set; }
         public string? Question { get; set; }
+        public List<AnswerTranslationSeed>? Answers { get; set; }
+    }
+
+    private sealed class AnswerTranslationSeed
+    {
+        public string AnswerId { get; set; } = string.Empty;
+        public string? Text { get; set; }
     }
 
     private static async Task<List<StoryTranslationSeed>> LoadStoryTranslationsFromJsonAsync(string locale)
@@ -404,7 +434,12 @@ public class StoriesRepository : IStoriesRepository
                         TileId = t.TileId,
                         Caption = t.Caption,
                         Text = t.Text,
-                        Question = t.Question
+                        Question = t.Question,
+                        Answers = t.Answers?.Select(a => new AnswerTranslationSeed
+                        {
+                            AnswerId = a.AnswerId,
+                            Text = a.Text
+                        }).ToList()
                     }).ToList()
                 };
                 results.Add(tr);
@@ -439,7 +474,7 @@ public class StoriesRepository : IStoriesRepository
                         .Select(a => new StoryAnswerDto
                         {
                             Id = a.AnswerId,
-                            Text = a.Text,
+                            Text = TryGetAnswerText(a, lc) ?? a.Text,
                             Tokens = a.Tokens.Select(tok => new TokenReward
                             {
                                 Type = Enum.TryParse<TokenFamily>(tok.Type, true, out var fam) ? fam : TokenFamily.Personality,
@@ -459,6 +494,9 @@ public class StoriesRepository : IStoriesRepository
         => t.Translations?.FirstOrDefault(tr => tr.LanguageCode == lc)?.Text;
     private static string? TryGetQuestion(StoryTile t, string lc)
         => t.Translations?.FirstOrDefault(tr => tr.LanguageCode == lc)?.Question;
+
+    private static string? TryGetAnswerText(StoryAnswer a, string lc)
+        => a.Translations?.FirstOrDefault(tr => tr.LanguageCode == lc)?.Text;
 
     private static string NormalizeStoryId(string storyId)
     {
