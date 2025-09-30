@@ -14,12 +14,14 @@ public class TreeModelService : ITreeModelService
 {
     private readonly ITreeModelRepository _treeModelRepository;
     private readonly ITreeOfLightRepository _tolRepository;
+    private readonly ITreeOfLightTranslationService _translationService;
     private readonly IUserContextService _userContext;
 
-    public TreeModelService(ITreeModelRepository treeModelRepository, ITreeOfLightRepository tolRepository, IUserContextService userContext)
+    public TreeModelService(ITreeModelRepository treeModelRepository, ITreeOfLightRepository tolRepository, ITreeOfLightTranslationService translationService, IUserContextService userContext)
     {
         _treeModelRepository = treeModelRepository;
         _tolRepository = tolRepository;
+        _translationService = translationService;
         _userContext = userContext;
     }
 
@@ -39,6 +41,9 @@ public class TreeModelService : ITreeModelService
         var storyNodes = await _treeModelRepository.GetAllStoryNodesAsync(config.Id);
         var unlockRules = await _treeModelRepository.GetAllUnlockRulesAsync(config.Id);
 
+        var locale = _userContext.GetRequestLocaleOrDefault("ro-ro");
+        var regionTranslations = await _translationService.GetTranslationsAsync(locale);
+
         var completedStories = await _tolRepository.GetStoryProgressAsync(userId, config.Id);
         var userTokens = new UserTokensDto { Courage = 0, Curiosity = 0, Thinking = 0, Creativity = 0, Safety = 0 };
         
@@ -53,9 +58,9 @@ public class TreeModelService : ITreeModelService
                 Regions = regions.Select(r => new TreeRegionDto
                 {
                     Id = r.Id,
-                    Label = r.Label,
+                    Label = regionTranslations.GetValueOrDefault($"region_{r.Id}_label", r.Id),
                     ImageUrl = r.ImageUrl,
-                    PufpufMessage = r.PufpufMessage,
+                    PufpufMessage = regionTranslations.GetValueOrDefault($"region_{r.Id}_pufpufMessage", string.Empty),
                     SortOrder = r.SortOrder
                 }).ToList(),
                 

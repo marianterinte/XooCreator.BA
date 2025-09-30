@@ -107,6 +107,7 @@ builder.Services.AddScoped<IHeroDefinitionSeedService, HeroDefinitionSeedService
 builder.Services.AddScoped<XooCreator.BA.Features.User.IUserProfileService, XooCreator.BA.Features.User.UserProfileService>();
 
 // Tree of Light Services
+builder.Services.AddScoped<ITreeOfLightTranslationService, TreeOfLightTranslationService>();
 builder.Services.AddScoped<ITreeOfLightRepository, TreeOfLightRepository>();
 builder.Services.AddScoped<ITreeOfLightService, TreeOfLightService>();
 builder.Services.AddScoped<ITreeModelRepository, TreeModelRepository>();

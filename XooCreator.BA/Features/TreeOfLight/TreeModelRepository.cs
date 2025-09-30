@@ -76,9 +76,9 @@ public class TreeModelRepository : ITreeModelRepository
                 .Select(r => new TreeRegion
                 {
                     Id = r.Id,
-                    Label = r.Label,
+                    Label = string.Empty,
                     ImageUrl = r.ImageUrl,
-                    PufpufMessage = r.PufpufMessage,
+                    PufpufMessage = string.Empty,
                     SortOrder = r.SortOrder,
                     TreeConfigurationId = config.Id
                 }).ToList();
@@ -127,7 +127,7 @@ public class TreeModelRepository : ITreeModelRepository
     private static async Task<List<TreeModelSeedRoot>> LoadSeedAsync()
     {
         var baseDir = AppDomain.CurrentDomain.BaseDirectory;
-        var configsDir = Path.Combine(baseDir, "Data", "SeedData", "ro-ro", "TreeOfLightConfigs");
+        var configsDir = Path.Combine(baseDir, "Data", "SeedData", "SharedConfigs", "TreeOfLight");
 
         if (!Directory.Exists(configsDir))
         {
@@ -194,9 +194,7 @@ public class TreeModelRepository : ITreeModelRepository
     private class TreeRegionSeed
     {
         public string Id { get; set; } = string.Empty;
-        public string Label { get; set; } = string.Empty;
         public string? ImageUrl { get; set; }
-        public string? PufpufMessage { get; set; }
         public int SortOrder { get; set; }
     }
 
