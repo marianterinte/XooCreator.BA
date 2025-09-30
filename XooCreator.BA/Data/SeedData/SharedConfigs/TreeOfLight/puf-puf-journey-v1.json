@@ -28,6 +28,18 @@
       "level": 2,
       "imageUrl": "images/worlds/pyron.jpg",
       "sortOrder": 3
+    },
+    {
+      "id": "sylvaria",
+      "level": 4,
+      "imageUrl": "images/worlds/sylvaria.jpg",
+      "sortOrder": 4
+    },
+    {
+      "id": "crystalia",
+      "level": 5,
+      "imageUrl": "images/worlds/crystalia.jpg",
+      "sortOrder": 5
     }
   ],
   "storyNodes": [
@@ -60,6 +72,12 @@
       "regionId": "lunaria",
       "rewardImageUrl": "images/homepage/heroes/hero2.jpg",
       "sortOrder": 2
+    },
+    {
+      "storyId": "mechanika-s1",
+      "regionId": "mechanika",
+      "rewardImageUrl": "images/homepage/heroes/hero1.jpg",
+      "sortOrder": 1
     }
   ],
   "unlockRules": [
@@ -83,6 +101,20 @@
       "toRegionId": "mechanika",
       "requiredStoriesCsv": "lunaria-s1,lunaria-s2",
       "sortOrder": 3
+    },
+    {
+      "type": "story",
+      "fromId": "mechanika-s1",
+      "toRegionId": "sylvaria",
+      "storyId": "mechanika-s1",
+      "sortOrder": 4
+    },
+    {
+      "type": "story",
+      "fromId": "mechanika-s1",
+      "toRegionId": "crystalia",
+      "storyId": "mechanika-s1",
+      "sortOrder": 5
     }
   ]
 }

@@ -6,5 +6,9 @@
   "region_lunaria_label": "Lunaria",
   "region_lunaria_pufpufMessage": "Silver cities under a translucent sky. The shadows teach you to look closely.",
   "region_mechanika_label": "Mechanika",
-  "region_mechanika_pufpufMessage": "The valley of gears – every cog holds a story of ingenuity."
+  "region_mechanika_pufpufMessage": "The valley of gears – every cog holds a story of ingenuity.",
+  "region_sylvaria_label": "Sylvaria",
+  "region_sylvaria_pufpufMessage": "Phosphorescent forests and paths that change their location.",
+  "region_crystalia_label": "Crystalia",
+  "region_crystalia_pufpufMessage": "Caverns of light and echoes that answer with ideas."
 }
