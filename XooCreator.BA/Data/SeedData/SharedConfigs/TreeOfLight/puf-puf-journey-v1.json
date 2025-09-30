@@ -52,31 +52,31 @@
     {
       "storyId": "terra-s1",
       "regionId": "terra",
-      "rewardImageUrl": "images/homepage/heroes/hero1.jpg",
+      "rewardImageUrl": "images/tol/stories/terra-s1/0.Cover.png",
       "sortOrder": 1
     },
     {
       "storyId": "terra-s2",
       "regionId": "terra",
-      "rewardImageUrl": "images/homepage/heroes/hero2.jpg",
+      "rewardImageUrl": "images/tol/stories/terra-s2/0.Cover.png",
       "sortOrder": 2
     },
     {
       "storyId": "lunaria-s1",
       "regionId": "lunaria",
-      "rewardImageUrl": "images/homepage/heroes/hero1.jpg",
+      "rewardImageUrl": "images/tol/stories/lunaria-s1/0.Cover.png",
       "sortOrder": 1
     },
     {
       "storyId": "lunaria-s2",
       "regionId": "lunaria",
-      "rewardImageUrl": "images/homepage/heroes/hero2.jpg",
+      "rewardImageUrl": "images/tol/stories/lunaria-s2/0.Cover.png",
       "sortOrder": 2
     },
     {
       "storyId": "mechanika-s1",
       "regionId": "mechanika",
-      "rewardImageUrl": "images/homepage/heroes/hero1.jpg",
+      "rewardImageUrl": "images/worlds/pyron.jpg",
       "sortOrder": 1
     }
   ],
