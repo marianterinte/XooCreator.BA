@@ -10,8 +10,8 @@ public interface ITreeOfHeroesRepository
     Task<UserTokensDto> GetUserTokensAsync(Guid userId);
     Task<List<HeroDto>> GetHeroProgressAsync(Guid userId);
     Task<List<HeroTreeNodeDto>> GetHeroTreeProgressAsync(Guid userId);
-    Task<List<HeroDefinitionDto>> GetHeroDefinitionsAsync();
-    Task<HeroDefinitionDto?> GetHeroDefinitionByIdAsync(string heroId);
+    Task<List<HeroDefinitionDto>> GetHeroDefinitionsAsync(string locale);
+    Task<HeroDefinitionDto?> GetHeroDefinitionByIdAsync(string heroId, string locale);
     Task<TreeOfHeroesConfigDto> GetTreeOfHeroesConfigAsync();
     Task<bool> UnlockHeroTreeNodeAsync(Guid userId, UnlockHeroTreeNodeRequest request);
     Task<bool> SpendTokensAsync(Guid userId, int courage = 0, int curiosity = 0, int thinking = 0, int creativity = 0, int safety = 0);
@@ -186,14 +186,17 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
         return true;
     }
 
-    public async Task<List<HeroDefinitionDto>> GetHeroDefinitionsAsync()
+    public async Task<List<HeroDefinitionDto>> GetHeroDefinitionsAsync(string locale)
     {
         return await _context.HeroDefinitions
+            .Include(hd => hd.Translations)
             .Select(hd => new HeroDefinitionDto
             {
                 Id = hd.Id,
-                Name = hd.Name,
-                Description = hd.Description,
+                Name = hd.Translations.FirstOrDefault(t => t.LanguageCode == locale).Name ?? hd.Id,
+                Description = hd.Translations.FirstOrDefault(t => t.LanguageCode == locale).Description ?? string.Empty,
+                Story = hd.Translations.FirstOrDefault(t => t.LanguageCode == locale).Story ?? string.Empty,
+                Image = hd.Image,
                 Type = hd.Type,
                 CourageCost = hd.CourageCost,
                 CuriosityCost = hd.CuriosityCost,
@@ -209,19 +212,24 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
             .ToListAsync();
     }
 
-    public async Task<HeroDefinitionDto?> GetHeroDefinitionByIdAsync(string heroId)
+    public async Task<HeroDefinitionDto?> GetHeroDefinitionByIdAsync(string heroId, string locale)
     {
         var heroDefinition = await _context.HeroDefinitions
+            .Include(hd => hd.Translations)
             .FirstOrDefaultAsync(hd => hd.Id == heroId);
 
         if (heroDefinition == null)
             return null;
 
+        var translation = heroDefinition.Translations.FirstOrDefault(t => t.LanguageCode == locale);
+
         return new HeroDefinitionDto
         {
             Id = heroDefinition.Id,
-            Name = heroDefinition.Name,
-            Description = heroDefinition.Description,
+            Name = translation?.Name ?? heroDefinition.Id,
+            Description = translation?.Description ?? string.Empty,
+            Story = translation?.Story ?? string.Empty,
+            Image = heroDefinition.Image,
             Type = heroDefinition.Type,
             CourageCost = heroDefinition.CourageCost,
             CuriosityCost = heroDefinition.CuriosityCost,

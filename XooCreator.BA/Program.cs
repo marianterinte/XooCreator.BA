@@ -102,6 +102,9 @@ builder.Services.AddScoped<ICreatureBuilderService, CreatureBuilderService>();
 builder.Services.AddScoped<ISeedDiscoveryService, SeedDiscoveryService>();
 builder.Services.AddScoped<IBestiaryFileUpdater, BestiaryFileUpdater>();
 builder.Services.AddScoped<IHeroDefinitionSeedService, HeroDefinitionSeedService>();
+builder.Services.AddScoped<IHeroTreeProvider, HeroTreeProvider>();
+
+// Add creature builder service
 
 // User Services
 builder.Services.AddScoped<XooCreator.BA.Features.User.IUserProfileService, XooCreator.BA.Features.User.UserProfileService>();

@@ -24,7 +24,7 @@ public class TransformToHeroEndpoint
     {
         var userId = await ep._userContext.GetUserIdAsync();
         if (userId == null) return TypedResults.Unauthorized();
-        var result = await ep._service.TransformToHeroAsync(userId.Value, request);
+        var result = await ep._service.TransformToHeroAsync(userId.Value, request, locale);
         return result.Success ? TypedResults.Ok(result) : TypedResults.BadRequest(result);
     }
 }

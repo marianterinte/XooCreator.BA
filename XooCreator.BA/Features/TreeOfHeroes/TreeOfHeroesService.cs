@@ -5,10 +5,10 @@ public interface ITreeOfHeroesService
     Task<UserTokensDto> GetUserTokensAsync(Guid userId);
     Task<List<HeroDto>> GetHeroProgressAsync(Guid userId);
     Task<List<HeroTreeNodeDto>> GetHeroTreeProgressAsync(Guid userId);
-    Task<List<HeroDefinitionDto>> GetHeroDefinitionsAsync();
-    Task<HeroDefinitionDto?> GetHeroDefinitionByIdAsync(string heroId);
+    Task<List<HeroDefinitionDto>> GetHeroDefinitionsAsync(string locale);
+    Task<HeroDefinitionDto?> GetHeroDefinitionByIdAsync(string heroId, string locale);
     Task<TreeOfHeroesConfigDto> GetTreeOfHeroesConfigAsync();
-    Task<TransformToHeroResponse> TransformToHeroAsync(Guid userId, TransformToHeroRequest request);
+    Task<TransformToHeroResponse> TransformToHeroAsync(Guid userId, TransformToHeroRequest request, string locale);
 }
 
 public class TreeOfHeroesService : ITreeOfHeroesService
@@ -35,14 +35,14 @@ public class TreeOfHeroesService : ITreeOfHeroesService
         return _repository.GetHeroTreeProgressAsync(userId);
     }
 
-    public Task<List<HeroDefinitionDto>> GetHeroDefinitionsAsync()
+    public Task<List<HeroDefinitionDto>> GetHeroDefinitionsAsync(string locale)
     {
-        return _repository.GetHeroDefinitionsAsync();
+        return _repository.GetHeroDefinitionsAsync(locale);
     }
 
-    public Task<HeroDefinitionDto?> GetHeroDefinitionByIdAsync(string heroId)
+    public Task<HeroDefinitionDto?> GetHeroDefinitionByIdAsync(string heroId, string locale)
     {
-        return _repository.GetHeroDefinitionByIdAsync(heroId);
+        return _repository.GetHeroDefinitionByIdAsync(heroId, locale);
     }
 
     public Task<TreeOfHeroesConfigDto> GetTreeOfHeroesConfigAsync()
@@ -51,12 +51,12 @@ public class TreeOfHeroesService : ITreeOfHeroesService
     }
 
 
-    public async Task<TransformToHeroResponse> TransformToHeroAsync(Guid userId, TransformToHeroRequest request)
+    public async Task<TransformToHeroResponse> TransformToHeroAsync(Guid userId, TransformToHeroRequest request, string locale)
     {
         try
         {
             // Get hero definition to check costs
-            var heroDefinition = await _repository.GetHeroDefinitionByIdAsync(request.HeroId);
+            var heroDefinition = await _repository.GetHeroDefinitionByIdAsync(request.HeroId, locale);
             if (heroDefinition == null)
             {
                 return new TransformToHeroResponse
@@ -139,18 +139,4 @@ public class TreeOfHeroesService : ITreeOfHeroesService
         }
     }
 
-    private static bool CanTransformToHero(string heroId, UserTokensDto tokens)
-    {
-        return heroId.ToUpper() switch
-        {
-            "LEO" => tokens.Courage >= 8,
-            "FOX" => tokens.Curiosity >= 8,
-            "OWL" => tokens.Thinking >= 8,
-            "DRAGONFLY" => tokens.Creativity >= 8,
-            "WOLF_SAGE" => tokens.Courage >= 4 && tokens.Thinking >= 4,
-            "TRICKSTER_SPRITE" => tokens.Curiosity >= 4 && tokens.Creativity >= 4,
-            "UNICORN" => tokens.Courage >= 3 && tokens.Curiosity >= 3 && tokens.Thinking >= 3 && tokens.Creativity >= 3,
-            _ => false
-        };
-    }
 }

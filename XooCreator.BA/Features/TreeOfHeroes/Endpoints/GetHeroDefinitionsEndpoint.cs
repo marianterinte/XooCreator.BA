@@ -20,7 +20,7 @@ public class GetHeroDefinitionsEndpoint
         [FromRoute] string locale,
         [FromServices] GetHeroDefinitionsEndpoint ep)
     {
-        var definitions = await ep._service.GetHeroDefinitionsAsync();
+        var definitions = await ep._service.GetHeroDefinitionsAsync(locale);
         return TypedResults.Ok(definitions);
     }
 }

@@ -20,7 +20,7 @@ public class GetHeroDefinitionEndpoint
         [FromServices] GetHeroDefinitionEndpoint ep,
         [FromRoute] string heroId)
     {
-        var definition = await ep._service.GetHeroDefinitionByIdAsync(heroId);
+        var definition = await ep._service.GetHeroDefinitionByIdAsync(heroId, locale);
         
         if (definition == null)
         {

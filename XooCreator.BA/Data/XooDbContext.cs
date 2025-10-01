@@ -24,6 +24,7 @@ public class XooDbContext : DbContext
     public DbSet<HeroProgress> HeroProgress => Set<HeroProgress>();
     public DbSet<HeroTreeProgress> HeroTreeProgress => Set<HeroTreeProgress>();
     public DbSet<HeroDefinition> HeroDefinitions => Set<HeroDefinition>();
+    public DbSet<HeroDefinitionTranslation> HeroDefinitionTranslations => Set<HeroDefinitionTranslation>();
     
     // Tree of Light Model data
     public DbSet<TreeRegion> TreeRegions => Set<TreeRegion>();
@@ -241,14 +242,24 @@ public class XooDbContext : DbContext
         {
             e.HasKey(x => x.Id);
             e.Property(x => x.Id).HasMaxLength(100);
-            e.Property(x => x.Name).HasMaxLength(200).IsRequired();
-            e.Property(x => x.Description).HasMaxLength(1000);
             e.Property(x => x.Type).HasMaxLength(50).IsRequired();
             e.Property(x => x.PrerequisitesJson).HasMaxLength(2000);
             e.Property(x => x.RewardsJson).HasMaxLength(2000);
             e.Property(x => x.PositionX).HasColumnType("decimal(10,6)");
             e.Property(x => x.PositionY).HasColumnType("decimal(10,6)");
             e.HasIndex(x => x.Id).IsUnique();
+        });
+
+        modelBuilder.Entity<HeroDefinitionTranslation>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.LanguageCode).HasMaxLength(10);
+            e.HasIndex(x => new { x.HeroDefinitionId, x.LanguageCode }).IsUnique();
+            e.HasOne(x => x.HeroDefinition)
+                .WithMany(s => s.Translations)
+                .HasForeignKey(x => x.HeroDefinitionId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         // Tree of Light Model configurations
