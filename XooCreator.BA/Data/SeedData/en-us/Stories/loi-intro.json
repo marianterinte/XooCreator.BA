@@ -1,7 +1,7 @@
 {
   "storyId": "lore-origins-matso-iepurele",
   "title": "Mâțo-Iepurele – The Origin of Peace",
-  "coverImageUrl": "images/stories/lore-origins/0.cover.png",
+  "coverImageUrl": "images/lore-origins/0.cover.png",
   "category": "lore",
   "sortOrder": 1,
   "tiles": [
@@ -11,7 +11,7 @@
       "sortOrder": 1,
       "caption": "Two Worlds, Two Sides",
       "text": "In Alchimalia there were two worlds at war. Lunaria — the rabbits’ planet, with carrot fields and burrows. Ketis — the cats’ planet, ruled by an emperor. Borders were cold and bridges were broken.",
-      "imageUrl": "images/stories/lore-origins/1.two-worlds.png"
+      "imageUrl": "images/lore-origins/1.two-worlds.png"
     },
     {
       "tileId": "p2",
@@ -19,7 +19,7 @@
       "sortOrder": 2,
       "caption": "Emperor Pufus Alchimus",
       "text": "On Ketis ruled Emperor Pufus Alchimus, a warrior famed for conquests. The war with the rabbits had lasted long, and weapons spoke louder than stories.",
-      "imageUrl": "images/stories/lore-origins/2.emperor.png"
+      "imageUrl": "images/lore-origins/2.emperor.png"
     },
     {
       "tileId": "p3",
@@ -27,7 +27,7 @@
       "sortOrder": 3,
       "caption": "The Curious Son",
       "text": "A son was born to the emperor: Puf-Puf Alchimus. His father wanted a fighter. But Puf-Puf loved mathematics, playing with the elements, and dreamed of alchemy. More explorer than soldier.",
-      "imageUrl": "images/stories/lore-origins/3.curious-son.png"
+      "imageUrl": "images/lore-origins/3.curious-son.png"
     },
     {
       "tileId": "p4",
@@ -35,7 +35,7 @@
       "sortOrder": 4,
       "caption": "Friends Across the Border",
       "text": "Even in wartime, friendship found a way. A black rabbit and a white cat met in secret and shared their worlds. They didn’t look like enemies. They looked like curious kids.",
-      "imageUrl": "images/stories/lore-origins/4.friends.png"
+      "imageUrl": "images/lore-origins/4.friends.png"
     },
     {
       "tileId": "p5",
@@ -43,7 +43,7 @@
       "sortOrder": 5,
       "caption": "The Stone from Lunaria",
       "text": "One day on Ketis, Puf-Puf caught them gazing at a green stone brought from Lunaria, gleaming like an emerald. “Keep our friendship secret and the stone is yours,” whispered the rabbit. Puf-Puf promised.",
-      "imageUrl": "images/stories/lore-origins/5.lunaria-stone.png"
+      "imageUrl": "images/lore-origins/5.lunaria-stone.png"
     },
     {
       "tileId": "p6",
@@ -51,7 +51,7 @@
       "sortOrder": 6,
       "caption": "The Green-Golden Elixir",
       "text": "With the stone, Puf-Puf brewed an elixir. When it touched metal, the metal turned to gold. Great joy! He shared the elixir with his friends — tiny sips, lots of laughter.",
-      "imageUrl": "images/stories/lore-origins/6.elixir.png"
+      "imageUrl": "images/lore-origins/6.elixir.png"
     },
     {
       "tileId": "p7",
@@ -59,7 +59,7 @@
       "sortOrder": 7,
       "caption": "A Nap Under the Tree",
       "text": "Tired, they fell asleep under a very tall tree. The elixir slowly seeped into the roots. The green stone warmed the earth with a gentle light.",
-      "imageUrl": "images/stories/lore-origins/7.tree-nap.png"
+      "imageUrl": "images/lore-origins/7.tree-nap.png"
     },
     {
       "tileId": "p8",
@@ -67,14 +67,14 @@
       "sortOrder": 8,
       "caption": "Mâțo-Iepurele",
       "text": "When they woke, a strange, beautiful being stood beside them: the Mâțo-Iepurele — with a cat’s grace and a rabbit’s gentleness. It looked at them without fear.",
-      "imageUrl": "images/stories/lore-origins/8.matso-iepurele.png"
+      "imageUrl": "images/lore-origins/8.matso-iepurele.png"
     },
     {
       "tileId": "q1",
       "type": "quiz",
       "sortOrder": 9,
       "caption": "The Choice for Peace",
-      "imageUrl": "images/stories/lore-origins/9.quiz.png",
+      "imageUrl": "images/lore-origins/9.quiz.png",
       "question": "The stone, the elixir, and the friendship have summoned the Mâțo-Iepurele. To keep the peace, what do you do first?",
       "answers": [
         {
@@ -110,7 +110,7 @@
       "sortOrder": 10,
       "caption": "Message of Peace",
       "text": "“I carry the peace between worlds,” said the Mâțo-Iepurele. “From friendship, stone, and elixir a bridge was born. Wars fade when you learn to mix things well.” Puf-Puf understood that alchemy is not only about metals, but also about hearts.",
-      "imageUrl": "images/stories/lore-origins/10.message.png"
+      "imageUrl": "images/lore-origins/10.message.png"
     },
     {
       "tileId": "p10",
@@ -118,7 +118,7 @@
       "sortOrder": 11,
       "caption": "Puf-Puf’s Decision",
       "text": "That day, Puf-Puf chose his path: explorer and alchemist. He would seek ways between worlds, not wars. And the Mâțo-Iepurele would become, someday, the sign that peace can be made, not only found.",
-      "imageUrl": "images/stories/lore-origins/11.choice.png"
+      "imageUrl": "images/lore-origins/11.choice.png"
     }
   ]
 }

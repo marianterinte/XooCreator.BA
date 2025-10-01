@@ -7,4 +7,5 @@ public class UserAlchimalia
     public string DisplayName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public bool HasVisitedImaginationLaboratory { get; set; }
 }
