@@ -38,7 +38,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // === CORS: o singură policy super permisivă, valabilă peste tot ===
-// Dacă ai nevoie de cookies/credențiale, păstrează AllowCredentials + SetIsOriginAllowed(true).
+// Dacă ai nevoie de cookies/credențiale, păstrează AllowCredentials + SetIsOriginAllowed(true).
 // Dacă NU ai nevoie de credențiale, vezi varianta comentată mai jos.
 builder.Services.AddCors(options =>
 {
@@ -142,23 +142,53 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var recreate = builder.Configuration.GetValue<bool>("Database:RecreateOnStart");
-        recreate = true;
+        recreate = true; // Force recreation every time
+
         if (recreate)
         {
-            //await context.Database.EnsureDeletedAsync();
+            Console.WriteLine("🔄 Forcing database recreation...");
+            
+            // Step 1: Try to delete the entire database
+            try
+            {
+                await context.Database.EnsureDeletedAsync();
+                Console.WriteLine("✅ Database deleted successfully");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"⚠️  Database deletion failed (might not exist): {ex.Message}");
+            }
 
-            context.Database.ExecuteSqlRaw("DROP SCHEMA public CASCADE; CREATE SCHEMA public;");
-            context.Database.Migrate();
+            // Step 2: Ensure database is created
+            try
+            {
+                await context.Database.EnsureCreatedAsync();
+                Console.WriteLine("✅ Database created successfully");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Database creation failed: {ex.Message}");
+                throw;
+            }
+        }
+        else
+        {
+            // Normal migration path
+            await context.Database.MigrateAsync();
         }
 
-        await context.Database.MigrateAsync();
+        Console.WriteLine("🌱 Starting data seeding...");
 
         // Seed discovery items (63 combos)
         await discoverySeeder.EnsureSeedAsync();
+        Console.WriteLine("✅ Discovery items seeded");
+
         await bestiaryUpdater.EnsureImageFileNamesAsync();
+        Console.WriteLine("✅ Bestiary images updated");
         
         // Seed hero definitions
         await heroDefinitionSeeder.SeedHeroDefinitionsAsync();
+        Console.WriteLine("✅ Hero definitions seeded");
 
         if (recreate)
         {
@@ -168,14 +198,22 @@ using (var scope = app.Services.CreateScope())
                 if (w.DiscoveryBalance < 10) w.DiscoveryBalance = 10;
             }
             await context.SaveChangesAsync();
+            Console.WriteLine("✅ Credit wallets updated");
         }
 
         await storiesService.InitializeStoriesAsync();
+        Console.WriteLine("✅ Stories initialized");
+
         await treeModelService.InitializeTreeModelAsync();
+        Console.WriteLine("✅ Tree model initialized");
+
+        Console.WriteLine("🎉 Database setup completed successfully!");
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Migration or initialization failed: {ex.Message}");
+        Console.WriteLine($"❌ Migration or initialization failed: {ex.Message}");
+        Console.WriteLine($"Stack trace: {ex.StackTrace}");
+        throw; // Re-throw to prevent app from starting with broken DB
     }
 }
 
