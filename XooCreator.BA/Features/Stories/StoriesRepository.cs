@@ -213,7 +213,6 @@ public class StoriesRepository : IStoriesRepository
         }
         catch (Exception ex)
         {
-
             throw ex;
         }
     }

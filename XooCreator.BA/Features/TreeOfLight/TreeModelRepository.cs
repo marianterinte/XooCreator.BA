@@ -57,63 +57,85 @@ public class TreeModelRepository : ITreeModelRepository
 
     public async Task SeedTreeModelAsync()
     {
-        if (await _context.TreeConfigurations.AnyAsync()) return;
-
-        var seeds = await LoadSeedAsync();
-
-        foreach (var seed in seeds)
+        try
         {
-            var config = new TreeConfiguration
+            if (await _context.TreeConfigurations.AnyAsync()) return;
+
+            var seeds = await LoadSeedAsync();
+
+            foreach (var seed in seeds)
             {
-                Id = seed.Configuration.Id,
-                Name = seed.Configuration.Name,
-                IsDefault = seed.Configuration.IsDefault
-            };
-            _context.TreeConfigurations.Add(config);
-
-            var regions = seed.Regions
-                .OrderBy(r => r.SortOrder)
-                .Select(r => new TreeRegion
+                var config = new TreeConfiguration
                 {
-                    Id = r.Id,
-                    Label = string.Empty,
-                    ImageUrl = r.ImageUrl,
-                    PufpufMessage = string.Empty,
-                    SortOrder = r.SortOrder,
-                    TreeConfigurationId = config.Id
-                }).ToList();
-            _context.TreeRegions.AddRange(regions);
+                    Id = seed.Configuration.Id,
+                    Name = seed.Configuration.Name,
+                    IsDefault = seed.Configuration.IsDefault
+                };
+                _context.TreeConfigurations.Add(config);
 
-            var storyNodes = seed.StoryNodes
-                .OrderBy(sn => sn.RegionId)
-                .ThenBy(sn => sn.SortOrder)
-                .Select(sn => new TreeStoryNode
-                {
-                    StoryId = sn.StoryId,
-                    RegionId = sn.RegionId,
-                    RewardImageUrl = sn.RewardImageUrl,
-                    SortOrder = sn.SortOrder,
-                    TreeConfigurationId = config.Id
-                }).ToList();
-            _context.TreeStoryNodes.AddRange(storyNodes);
+                var regions = seed.Regions
+                    .OrderBy(r => r.SortOrder)
+                    .Select(r => new TreeRegion
+                    {
+                        Id = r.Id,
+                        Label = string.Empty,
+                        ImageUrl = r.ImageUrl,
+                        PufpufMessage = string.Empty,
+                        SortOrder = r.SortOrder,
+                        TreeConfigurationId = config.Id
+                    }).ToList();
+                _context.TreeRegions.AddRange(regions);
 
-            var unlockRules = seed.UnlockRules
-                .OrderBy(ur => ur.SortOrder)
-                .Select(ur => new TreeUnlockRule
+                // Validate that all referenced stories exist before creating TreeStoryNodes
+                var referencedStoryIds = seed.StoryNodes.Select(sn => sn.StoryId).Distinct().ToList();
+                var existingStoryIds = await _context.StoryDefinitions
+                    .Where(sd => referencedStoryIds.Contains(sd.StoryId))
+                    .Select(sd => sd.StoryId)
+                    .ToListAsync();
+
+                var missingStoryIds = referencedStoryIds.Except(existingStoryIds).ToList();
+                if (missingStoryIds.Count > 0)
                 {
-                    Type = ur.Type,
-                    FromId = ur.FromId,
-                    ToRegionId = ur.ToRegionId,
-                    RequiredStoriesCsv = ur.RequiredStoriesCsv,
-                    MinCount = ur.MinCount,
-                    StoryId = ur.StoryId,
-                    SortOrder = ur.SortOrder,
-                    TreeConfigurationId = config.Id
-                }).ToList();
-            _context.TreeUnlockRules.AddRange(unlockRules);
+                    throw new InvalidOperationException(
+                        $"TreeModel references stories that don't exist in StoryDefinitions: {string.Join(", ", missingStoryIds)}. " +
+                        "Make sure StoriesService.InitializeStoriesAsync() is called BEFORE TreeModelService.InitializeTreeModelAsync().");
+                }
+
+                var storyNodes = seed.StoryNodes
+                    .OrderBy(sn => sn.RegionId)
+                    .ThenBy(sn => sn.SortOrder)
+                    .Select(sn => new TreeStoryNode
+                    {
+                        StoryId = sn.StoryId,
+                        RegionId = sn.RegionId,
+                        RewardImageUrl = sn.RewardImageUrl,
+                        SortOrder = sn.SortOrder,
+                        TreeConfigurationId = config.Id
+                    }).ToList();
+                _context.TreeStoryNodes.AddRange(storyNodes);
+
+                var unlockRules = seed.UnlockRules
+                    .OrderBy(ur => ur.SortOrder)
+                    .Select(ur => new TreeUnlockRule
+                    {
+                        Type = ur.Type,
+                        FromId = ur.FromId,
+                        ToRegionId = ur.ToRegionId,
+                        RequiredStoriesCsv = ur.RequiredStoriesCsv,
+                        MinCount = ur.MinCount,
+                        StoryId = ur.StoryId,
+                        SortOrder = ur.SortOrder,
+                        TreeConfigurationId = config.Id
+                    }).ToList();
+                _context.TreeUnlockRules.AddRange(unlockRules);
+            }
+
+            await _context.SaveChangesAsync();
         }
-
-        await _context.SaveChangesAsync();
+        catch (Exception ex)
+        {
+            throw new Exception("Error seeding tree model data: " + ex.Message, ex);
+        }
     }
 
     private static readonly JsonSerializerOptions _jsonOptions = new()

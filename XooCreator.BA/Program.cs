@@ -38,7 +38,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // === CORS: o singură policy super permisivă, valabilă peste tot ===
-// Dacă ai nevoie de cookies/credențiale, păstrează AllowCredentials + SetIsOriginAllowed(true).
+// Dacă ai nevoie de cookies/credențiale, păstrează AllowCredentials + SetIsOriginAllowed(true).
 // Dacă NU ai nevoie de credențiale, vezi varianta comentată mai jos.
 builder.Services.AddCors(options =>
 {
@@ -145,23 +145,70 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var recreate = builder.Configuration.GetValue<bool>("Database:RecreateOnStart");
-        recreate = true;
+        recreate = true; // Force recreation every time during development
+
         if (recreate)
         {
-            //await context.Database.EnsureDeletedAsync();
-
-            context.Database.ExecuteSqlRaw("DROP SCHEMA public CASCADE; CREATE SCHEMA public;");
-            context.Database.Migrate();
+            Console.WriteLine("🔄 Forcing database recreation via schema drop...");
+            
+            try
+            {
+                // Method that works on cloud platforms (Supabase, Railway, etc.)
+                // Drop and recreate the public schema (removes all tables, data, etc.)
+                await context.Database.ExecuteSqlRawAsync("DROP SCHEMA public CASCADE;");
+                Console.WriteLine("✅ Schema dropped successfully");
+                
+                await context.Database.ExecuteSqlRawAsync("CREATE SCHEMA public;");
+                Console.WriteLine("✅ Schema recreated successfully");
+                
+                // Apply migrations to recreate all tables
+                await context.Database.MigrateAsync();
+                Console.WriteLine("✅ Migrations applied successfully");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Schema recreation failed: {ex.Message}");
+                
+                // Fallback: try normal migration in case schema operations failed
+                try
+                {
+                    await context.Database.MigrateAsync();
+                    Console.WriteLine("✅ Fallback migration applied");
+                }
+                catch (Exception migEx)
+                {
+                    Console.WriteLine($"❌ Even fallback migration failed: {migEx.Message}");
+                    throw;
+                }
+            }
+        }
+        else
+        {
+            // Normal migration path for production
+            await context.Database.MigrateAsync();
         }
 
-        await context.Database.MigrateAsync();
+        Console.WriteLine("🌱 Starting data seeding...");
 
         // Seed discovery items (63 combos)
         await discoverySeeder.EnsureSeedAsync();
+        Console.WriteLine("✅ Discovery items seeded");
+
         await bestiaryUpdater.EnsureImageFileNamesAsync();
+        Console.WriteLine("✅ Bestiary images updated");
         
         // Seed hero definitions
         await heroDefinitionSeeder.SeedHeroDefinitionsAsync();
+        Console.WriteLine("✅ Hero definitions seeded");
+
+        // CRITICAL: Stories must be seeded BEFORE TreeModel 
+        // because TreeStoryNodes have FK constraints to StoryDefinitions
+        await storiesService.InitializeStoriesAsync();
+        Console.WriteLine("✅ Stories initialized");
+
+        // Now seed the tree model (which references stories)
+        await treeModelService.InitializeTreeModelAsync();
+        Console.WriteLine("✅ Tree model initialized");
 
         if (recreate)
         {
@@ -171,14 +218,16 @@ using (var scope = app.Services.CreateScope())
                 if (w.DiscoveryBalance < 10) w.DiscoveryBalance = 10;
             }
             await context.SaveChangesAsync();
+            Console.WriteLine("✅ Credit wallets updated");
         }
 
-        await storiesService.InitializeStoriesAsync();
-        await treeModelService.InitializeTreeModelAsync();
+        Console.WriteLine("🎉 Database setup completed successfully!");
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Migration or initialization failed: {ex.Message}");
+        Console.WriteLine($"❌ Migration or initialization failed: {ex.Message}");
+        Console.WriteLine($"Stack trace: {ex.StackTrace}");
+        throw; // Re-throw to prevent app from starting with broken DB
     }
 }
 
