@@ -1103,374 +1103,238 @@ namespace XooCreator.BA.Migrations
                     b.HasData(
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("e2ebe205-84de-4dd1-959e-57ba965ee2c3"),
-=======
-                            Id = new Guid("fcd01b34-015c-4135-93d0-f55ad62192a2"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("8e24c44f-a012-4192-9db3-54dbd390426d"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000001"),
                             Label = "Bunny",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("342acd93-b357-4e9c-bc00-9a227d903fd9"),
-=======
-                            Id = new Guid("e526a3e4-2d8e-420e-b84f-c782afc9758a"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("52ebf99c-0dc5-4718-9ee8-330d6d42067c"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000002"),
                             Label = "Hippo",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("9a3bd95f-2643-408f-a7e7-1d0faa38e2ad"),
-=======
-                            Id = new Guid("791eb8b8-c3ab-4953-94db-cdf3fc4c3daa"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("0a364a93-e4bf-4e06-ad54-f08853ee7831"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000003"),
                             Label = "Giraffe",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("f7e86e07-aa04-471b-9543-19284772132a"),
-=======
-                            Id = new Guid("ad7ec032-8770-434f-b68f-a5e7b704e185"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("9161c10f-5332-4d2e-9394-6e30fb9ccb51"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000004"),
                             Label = "Dog",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("0578fe58-ab62-4d97-8c1c-a09b0fa8ba44"),
-=======
-                            Id = new Guid("0c3d2820-0bc5-4530-bad6-f3093429fda9"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("c92fc4f3-0ce9-4576-bd3c-8b5f6e5398de"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000005"),
                             Label = "Fox",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("6858be88-306c-42e1-bebe-a38b7f373965"),
-=======
-                            Id = new Guid("9275de98-c900-41c2-8327-11fd1efd75d2"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("8be6afd4-9e0b-4dc4-819f-b338cc5388e6"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000006"),
                             Label = "Cat",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("93502c40-97af-4c17-9a8c-b8e6fafebbc2"),
-=======
-                            Id = new Guid("0f29079c-59a4-480f-9e09-a9e0d185f062"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("3b3e4e49-033d-4993-924a-87ef14236805"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000007"),
                             Label = "Monkey",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("c59fe6a6-03e6-45fc-9d78-4cb124ab0622"),
-=======
-                            Id = new Guid("2492b97a-bb24-400b-9ea1-0d906874b59b"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("35b4b16c-fdb9-47b4-8c73-b01338e807b5"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000008"),
                             Label = "Camel",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("3878042a-e036-4c3a-ab42-2861a731e0bf"),
-=======
-                            Id = new Guid("0122380f-f865-4aaf-9ece-88a5696ad63e"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("8223c935-e0fa-4bbd-ac5a-1b5a64a6e11e"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000009"),
                             Label = "Deer",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("2ad42633-b6b0-41a9-9a8c-14ad10505a15"),
-=======
-                            Id = new Guid("1b7d64b2-eac2-4d4d-a477-6c9401fe577f"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("be240047-7fdc-47fa-9619-57f2b93e54df"),
                             AnimalId = new Guid("00000000-0000-0000-0000-00000000000a"),
                             Label = "Duck",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("76a820ee-3fa1-41da-a984-f66d90e1d4d4"),
-=======
-                            Id = new Guid("16fcf46b-d0cc-4094-82e3-f856a74a1b88"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("f55a8951-eb2b-489e-a9fd-7f2410480604"),
                             AnimalId = new Guid("00000000-0000-0000-0000-00000000000b"),
                             Label = "Eagle",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("08d5dc27-7139-4199-9309-4820deb8dbb0"),
-=======
-                            Id = new Guid("9b3fe2de-ed89-4bb5-bc09-e8ffbbc3dad8"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("12e3b22a-b2d1-4bea-8ebb-cbaca7b3de26"),
                             AnimalId = new Guid("00000000-0000-0000-0000-00000000000c"),
                             Label = "Elephant",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("a8be7c2d-91bf-4a7f-b322-793fbbed9e87"),
-=======
-                            Id = new Guid("b14d6488-ad37-48e6-8634-2f33e55a8e0a"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("f986dd58-c0a8-4847-87d9-6b463d20929c"),
                             AnimalId = new Guid("00000000-0000-0000-0000-00000000000d"),
                             Label = "Ostrich",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("6df55b93-4098-4a35-a531-03f54197aa4d"),
-=======
-                            Id = new Guid("ccbe7ad9-d4f1-4286-b1a5-27c31c89aa5c"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("862ad639-6438-4711-ad36-162907c3e051"),
                             AnimalId = new Guid("00000000-0000-0000-0000-00000000000e"),
                             Label = "Parrot",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("8ff21f80-8749-49f3-b4ba-89602408911f"),
-=======
-                            Id = new Guid("042b0204-1615-41eb-bac4-b571da4d19f9"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("3af54404-a447-40f1-86da-ad9bd55d07ee"),
                             AnimalId = new Guid("00000000-0000-0000-0000-00000000000f"),
                             Label = "Jaguar",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("d32e4035-0b87-4f58-81f2-6df0dd49f3c9"),
-=======
-                            Id = new Guid("35f99c94-00d7-47b7-905c-24c405810f67"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("829af37c-e68b-46ab-8719-9499653c95fa"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000010"),
                             Label = "Toucan",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("6c33fe31-f68b-4fa2-9711-0a55db623aa9"),
-=======
-                            Id = new Guid("577bc394-fbad-4c13-8a2e-6fec4e3daa06"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("858dc70d-16d6-4b6b-a87c-205aa525523f"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000011"),
                             Label = "Anaconda",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("fbef07b8-48e9-4c84-871e-5da1a3c2f1a5"),
-=======
-                            Id = new Guid("cc6efaf2-c1a3-425f-9634-ac1c38f9d680"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("4b85ecf7-1e22-424e-ae82-ba16b2543137"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000012"),
                             Label = "Capuchin Monkey",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("0d218922-4bae-4157-ad35-cdd9d1149b61"),
-=======
-                            Id = new Guid("6e582b85-b7fb-4e94-a140-d2b7bca4c939"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("3f084b54-087b-4a99-b1a7-b399cbfc6446"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000013"),
                             Label = "Poison Dart Frog",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("d123c891-0685-4a65-8501-f713096fd09c"),
-=======
-                            Id = new Guid("ae86fb80-cbf3-4b16-aa3e-afec870129bf"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("67bd98e3-3c25-472e-bc32-3ade4459d0d2"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000014"),
                             Label = "Lion",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("97b71f16-c6a5-4633-808a-326c6518f41a"),
-=======
-                            Id = new Guid("90b80c17-beec-4684-bca8-cb9596bc903a"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("e3859b72-af89-4cda-8530-fefc06a8c24a"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000015"),
                             Label = "African Elephant",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("b639a6bc-5112-458e-a9ab-c37b139cddfa"),
-=======
-                            Id = new Guid("408811c1-3e01-4ad8-b617-c362bc6c83b1"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("f57037f6-f2db-44a8-a6e7-8a430782ff1b"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000016"),
                             Label = "Giraffe",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("d2f30ee6-04db-43ce-84df-602c51d10b2a"),
-=======
-                            Id = new Guid("d767a72e-c3fd-4717-9f2c-ad33e8b0e51e"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("9a792afc-79fd-4cc5-a780-b7220cf6bad7"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000017"),
                             Label = "Zebra",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("629ab7f9-cdd7-4cdc-8eec-f9218b698b9e"),
-=======
-                            Id = new Guid("2e56f8b6-a600-45e5-a77f-0e5b2059aaef"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("a6e389c5-7284-4706-ba6f-fd1569eced56"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000018"),
                             Label = "Rhinoceros",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("357326b5-b27d-4481-82bd-a2bc10543054"),
-=======
-                            Id = new Guid("baed949c-18ce-4b23-aff8-a655c25f3cd2"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("bd7571dd-e5e2-416b-ad7e-cb5664bac627"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000019"),
                             Label = "Bison",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("467b5733-f721-4361-b232-cd574e93fda7"),
-=======
-                            Id = new Guid("3d651521-9119-4831-a5f9-576dbb86d52d"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("6488570a-c74d-4285-b1ef-7aa7fa3be56b"),
                             AnimalId = new Guid("00000000-0000-0000-0000-00000000001a"),
                             Label = "Saiga Antelope",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("9bbcd662-5f64-4a6f-9ea0-3641cd4c9baf"),
-=======
-                            Id = new Guid("f12c7232-cd79-4e8b-849d-e4d17236460d"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("88c0ec98-7e38-4dda-a582-613db35be89d"),
                             AnimalId = new Guid("00000000-0000-0000-0000-00000000001b"),
                             Label = "Gray Wolf",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("862a490f-a093-4f1f-8b2d-dacbdfea03cd"),
-=======
-                            Id = new Guid("9dfc4d2f-8edf-45ac-b8a8-0e93c9ccefc2"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("d5b4f86b-3ed3-46c1-b2a3-ed1e544c01c6"),
                             AnimalId = new Guid("00000000-0000-0000-0000-00000000001c"),
                             Label = "Przewalski's Horse",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("03734086-0010-4931-b081-4d16b46e9267"),
-=======
-                            Id = new Guid("34d4a93a-15d7-4bb5-82bd-96bc940e1da2"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("41b29750-71e4-4f0c-9ba0-1ffd95cd6ef2"),
                             AnimalId = new Guid("00000000-0000-0000-0000-00000000001d"),
                             Label = "Steppe Eagle",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("0d81e94a-1236-4327-ab83-899d45c138b1"),
-=======
-                            Id = new Guid("9f31e8c5-a6f7-42e1-b02d-58ea62b9b3fd"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("b1820640-f60b-4852-b077-33f52547b341"),
                             AnimalId = new Guid("00000000-0000-0000-0000-00000000001e"),
                             Label = "Cow",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("71505fca-4314-4663-91cc-2d9b78ecdf4f"),
-=======
-                            Id = new Guid("96ea401c-9747-4cd6-96e8-11eb43945034"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("efb87c66-d7cb-4762-a32d-56f8ecbf7c99"),
                             AnimalId = new Guid("00000000-0000-0000-0000-00000000001f"),
                             Label = "Sheep",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("60580c43-9074-4973-a051-9c0cb0acd079"),
-=======
-                            Id = new Guid("25f4a2db-9399-4d69-b91e-506bef298161"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("6fc673bf-0f49-426f-930e-ec750bd61f8b"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000020"),
                             Label = "Horse",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("629a83c6-2cd5-49af-a100-255713ababd2"),
-=======
-                            Id = new Guid("19ebba97-47aa-4915-b812-35cbc59174b6"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("0e4f8ca5-078d-4f4c-be32-98b96d822751"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000021"),
                             Label = "Chicken",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("944df122-be4a-4efd-a21e-5185799dc8b7"),
-=======
-                            Id = new Guid("a85ce64e-8a68-4979-b151-8e2b93c3b56d"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("9a258df8-8677-4a0b-b530-5a22559e8740"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000022"),
                             Label = "Pig",
                             LanguageCode = "en-us"
@@ -1588,88 +1452,56 @@ namespace XooCreator.BA.Migrations
                     b.HasData(
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("7a4eb70b-c5dd-4b65-8f8a-9198d3411a33"),
-=======
-                            Id = new Guid("6e028cd1-b5e0-4a5b-9e23-90bc8d711aaa"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("d59e39ae-abf6-4b35-b6a4-d2d9ad63cee8"),
                             BodyPartKey = "head",
                             LanguageCode = "en-us",
                             Name = "Head"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("2c50e433-9c35-4a19-b633-f70fe1e46f98"),
-=======
-                            Id = new Guid("dbb11bc8-fce6-49c7-96e9-65252bef0ba0"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("07e3c703-d82e-4c4a-b980-d1c5d45e3f1b"),
                             BodyPartKey = "body",
                             LanguageCode = "en-us",
                             Name = "Body"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("1a65ace1-0dfd-4381-b136-52e79ffa097b"),
-=======
-                            Id = new Guid("e27bc07e-edb5-46eb-beb9-7a5b8c2887ed"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("da47c80b-acb6-48b3-8d53-e2dea7afd69e"),
                             BodyPartKey = "arms",
                             LanguageCode = "en-us",
                             Name = "Arms"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("b242f51c-3edb-44a4-899a-1edc0be39e98"),
-=======
-                            Id = new Guid("911e19ab-03e3-48cc-9a65-aaed1c1088e9"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("06b7bf84-8ca7-40e6-8a9e-7bf54cfbfd3e"),
                             BodyPartKey = "legs",
                             LanguageCode = "en-us",
                             Name = "Legs"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("12aae552-24f5-4815-9425-844e49e8a8a5"),
-=======
-                            Id = new Guid("8880aca3-c20c-453f-8b72-1a1165510420"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("eae5b57e-6363-47d3-a8cb-9b8c9b9ecbeb"),
                             BodyPartKey = "tail",
                             LanguageCode = "en-us",
                             Name = "Tail"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("5ffbfeb5-8511-4bee-bb34-cf35bb2e99c0"),
-=======
-                            Id = new Guid("7215098f-3663-4002-9bf0-0dee6dc95900"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("6bdd3890-1700-4aa5-92fc-764ec4cd22e8"),
                             BodyPartKey = "wings",
                             LanguageCode = "en-us",
                             Name = "Wings"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("0c516295-26b3-497e-86b4-a6d118983469"),
-=======
-                            Id = new Guid("836c1240-b831-4099-89a5-1505cb7f70a6"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("73895ce2-5781-4d03-904c-06bfca74bc0d"),
                             BodyPartKey = "horn",
                             LanguageCode = "en-us",
                             Name = "Horn"
                         },
                         new
                         {
-<<<<<<< HEAD
-                            Id = new Guid("5e6a976b-8177-45c6-b272-ad28481a7746"),
-=======
-                            Id = new Guid("efed1e63-a402-41cf-8672-5560bdb25910"),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            Id = new Guid("5f2a0188-6e9a-4972-9375-f1fdbd9e8aa4"),
                             BodyPartKey = "horns",
                             LanguageCode = "en-us",
                             Name = "Horns"
@@ -1790,11 +1622,7 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("33333333-3333-3333-3333-333333333333"),
                             Amount = 15,
-<<<<<<< HEAD
-                            CreatedAt = new DateTime(2025, 9, 30, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6201),
-=======
-                            CreatedAt = new DateTime(2025, 9, 28, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6683),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            CreatedAt = new DateTime(2025, 10, 1, 5, 57, 0, 376, DateTimeKind.Utc).AddTicks(2241),
                             Reference = "test-purchase-marian",
                             Type = 0,
                             UserId = new Guid("22222222-2222-2222-2222-222222222222")
@@ -1803,11 +1631,7 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("44444444-4444-4444-4444-444444444444"),
                             Amount = -5,
-<<<<<<< HEAD
-                            CreatedAt = new DateTime(2025, 10, 1, 19, 39, 41, 822, DateTimeKind.Utc).AddTicks(6208),
-=======
-                            CreatedAt = new DateTime(2025, 9, 29, 18, 48, 4, 232, DateTimeKind.Utc).AddTicks(6690),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            CreatedAt = new DateTime(2025, 10, 2, 3, 57, 0, 376, DateTimeKind.Utc).AddTicks(2250),
                             Reference = "test-generation",
                             Type = 1,
                             UserId = new Guid("22222222-2222-2222-2222-222222222222")
@@ -1838,22 +1662,14 @@ namespace XooCreator.BA.Migrations
                             UserId = new Guid("11111111-1111-1111-1111-111111111111"),
                             Balance = 5,
                             DiscoveryBalance = 0,
-<<<<<<< HEAD
-                            UpdatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6110)
-=======
-                            UpdatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6541)
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            UpdatedAt = new DateTime(2025, 10, 2, 5, 57, 0, 376, DateTimeKind.Utc).AddTicks(2098)
                         },
                         new
                         {
                             UserId = new Guid("22222222-2222-2222-2222-222222222222"),
                             Balance = 10,
                             DiscoveryBalance = 0,
-<<<<<<< HEAD
-                            UpdatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6112)
-=======
-                            UpdatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6543)
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            UpdatedAt = new DateTime(2025, 10, 2, 5, 57, 0, 376, DateTimeKind.Utc).AddTicks(2100)
                         });
                 });
 
@@ -2032,11 +1848,7 @@ namespace XooCreator.BA.Migrations
                             HeroId = "seed",
                             HeroType = "HERO_TREE_TRANSFORMATION",
                             SourceStoryId = "",
-<<<<<<< HEAD
-                            UnlockedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6179),
-=======
-                            UnlockedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6611),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            UnlockedAt = new DateTime(2025, 10, 2, 5, 57, 0, 376, DateTimeKind.Utc).AddTicks(2218),
                             UserId = new Guid("11111111-1111-1111-1111-111111111111")
                         },
                         new
@@ -2045,11 +1857,7 @@ namespace XooCreator.BA.Migrations
                             HeroId = "seed",
                             HeroType = "HERO_TREE_TRANSFORMATION",
                             SourceStoryId = "",
-<<<<<<< HEAD
-                            UnlockedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6181),
-=======
-                            UnlockedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6613),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            UnlockedAt = new DateTime(2025, 10, 2, 5, 57, 0, 376, DateTimeKind.Utc).AddTicks(2220),
                             UserId = new Guid("22222222-2222-2222-2222-222222222222")
                         });
                 });
@@ -2754,11 +2562,7 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
                             Auth0Sub = "test-user-sub",
-<<<<<<< HEAD
-                            CreatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6061),
-=======
-                            CreatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6486),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            CreatedAt = new DateTime(2025, 10, 2, 5, 57, 0, 376, DateTimeKind.Utc).AddTicks(1909),
                             DisplayName = "Test User",
                             Email = "test@example.com",
                             HasVisitedImaginationLaboratory = false
@@ -2767,11 +2571,7 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("22222222-2222-2222-2222-222222222222"),
                             Auth0Sub = "marian-test-sub",
-<<<<<<< HEAD
-                            CreatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6063),
-=======
-                            CreatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6487),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            CreatedAt = new DateTime(2025, 10, 2, 5, 57, 0, 376, DateTimeKind.Utc).AddTicks(1911),
                             DisplayName = "Marian",
                             Email = "marian@example.com",
                             HasVisitedImaginationLaboratory = false
@@ -2870,170 +2670,100 @@ namespace XooCreator.BA.Migrations
                         new
                         {
                             Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1"),
-<<<<<<< HEAD
-                            CreatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6134),
+                            CreatedAt = new DateTime(2025, 10, 2, 5, 57, 0, 376, DateTimeKind.Utc).AddTicks(2131),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6134),
-=======
-                            CreatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6564),
-                            Quantity = 5,
-                            Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6565),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            UpdatedAt = new DateTime(2025, 10, 2, 5, 57, 0, 376, DateTimeKind.Utc).AddTicks(2131),
                             UserId = new Guid("11111111-1111-1111-1111-111111111111"),
                             Value = "courage"
                         },
                         new
                         {
                             Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa2"),
-<<<<<<< HEAD
-                            CreatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6137),
+                            CreatedAt = new DateTime(2025, 10, 2, 5, 57, 0, 376, DateTimeKind.Utc).AddTicks(2133),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6137),
-=======
-                            CreatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6567),
-                            Quantity = 5,
-                            Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6568),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            UpdatedAt = new DateTime(2025, 10, 2, 5, 57, 0, 376, DateTimeKind.Utc).AddTicks(2134),
                             UserId = new Guid("11111111-1111-1111-1111-111111111111"),
                             Value = "curiosity"
                         },
                         new
                         {
                             Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa3"),
-<<<<<<< HEAD
-                            CreatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6140),
+                            CreatedAt = new DateTime(2025, 10, 2, 5, 57, 0, 376, DateTimeKind.Utc).AddTicks(2136),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6140),
-=======
-                            CreatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6570),
-                            Quantity = 5,
-                            Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6571),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            UpdatedAt = new DateTime(2025, 10, 2, 5, 57, 0, 376, DateTimeKind.Utc).AddTicks(2136),
                             UserId = new Guid("11111111-1111-1111-1111-111111111111"),
                             Value = "thinking"
                         },
                         new
                         {
                             Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa4"),
-<<<<<<< HEAD
-                            CreatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6142),
+                            CreatedAt = new DateTime(2025, 10, 2, 5, 57, 0, 376, DateTimeKind.Utc).AddTicks(2138),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6143),
-=======
-                            CreatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6573),
-                            Quantity = 5,
-                            Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6573),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            UpdatedAt = new DateTime(2025, 10, 2, 5, 57, 0, 376, DateTimeKind.Utc).AddTicks(2139),
                             UserId = new Guid("11111111-1111-1111-1111-111111111111"),
                             Value = "creativity"
                         },
                         new
                         {
                             Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa5"),
-<<<<<<< HEAD
-                            CreatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6145),
+                            CreatedAt = new DateTime(2025, 10, 2, 5, 57, 0, 376, DateTimeKind.Utc).AddTicks(2141),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6145),
-=======
-                            CreatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6575),
-                            Quantity = 5,
-                            Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6576),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            UpdatedAt = new DateTime(2025, 10, 2, 5, 57, 0, 376, DateTimeKind.Utc).AddTicks(2141),
                             UserId = new Guid("11111111-1111-1111-1111-111111111111"),
                             Value = "safety"
                         },
                         new
                         {
                             Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1"),
-<<<<<<< HEAD
-                            CreatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6147),
+                            CreatedAt = new DateTime(2025, 10, 2, 5, 57, 0, 376, DateTimeKind.Utc).AddTicks(2143),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6147),
-=======
-                            CreatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6578),
-                            Quantity = 5,
-                            Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6578),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            UpdatedAt = new DateTime(2025, 10, 2, 5, 57, 0, 376, DateTimeKind.Utc).AddTicks(2143),
                             UserId = new Guid("22222222-2222-2222-2222-222222222222"),
                             Value = "courage"
                         },
                         new
                         {
                             Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb2"),
-<<<<<<< HEAD
-                            CreatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6149),
+                            CreatedAt = new DateTime(2025, 10, 2, 5, 57, 0, 376, DateTimeKind.Utc).AddTicks(2145),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6150),
-=======
-                            CreatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6581),
-                            Quantity = 5,
-                            Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6581),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            UpdatedAt = new DateTime(2025, 10, 2, 5, 57, 0, 376, DateTimeKind.Utc).AddTicks(2146),
                             UserId = new Guid("22222222-2222-2222-2222-222222222222"),
                             Value = "curiosity"
                         },
                         new
                         {
                             Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb3"),
-<<<<<<< HEAD
-                            CreatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6152),
+                            CreatedAt = new DateTime(2025, 10, 2, 5, 57, 0, 376, DateTimeKind.Utc).AddTicks(2148),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6152),
-=======
-                            CreatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6583),
-                            Quantity = 5,
-                            Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6584),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            UpdatedAt = new DateTime(2025, 10, 2, 5, 57, 0, 376, DateTimeKind.Utc).AddTicks(2148),
                             UserId = new Guid("22222222-2222-2222-2222-222222222222"),
                             Value = "thinking"
                         },
                         new
                         {
                             Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb4"),
-<<<<<<< HEAD
-                            CreatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6154),
+                            CreatedAt = new DateTime(2025, 10, 2, 5, 57, 0, 376, DateTimeKind.Utc).AddTicks(2150),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6154),
-=======
-                            CreatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6586),
-                            Quantity = 5,
-                            Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6586),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            UpdatedAt = new DateTime(2025, 10, 2, 5, 57, 0, 376, DateTimeKind.Utc).AddTicks(2150),
                             UserId = new Guid("22222222-2222-2222-2222-222222222222"),
                             Value = "creativity"
                         },
                         new
                         {
                             Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb5"),
-<<<<<<< HEAD
-                            CreatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6156),
+                            CreatedAt = new DateTime(2025, 10, 2, 5, 57, 0, 376, DateTimeKind.Utc).AddTicks(2152),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6157),
-=======
-                            CreatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6588),
-                            Quantity = 5,
-                            Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6588),
->>>>>>> parent of 46ceac6 (added recreation of the db.)
+                            UpdatedAt = new DateTime(2025, 10, 2, 5, 57, 0, 376, DateTimeKind.Utc).AddTicks(2152),
                             UserId = new Guid("22222222-2222-2222-2222-222222222222"),
                             Value = "safety"
                         });
