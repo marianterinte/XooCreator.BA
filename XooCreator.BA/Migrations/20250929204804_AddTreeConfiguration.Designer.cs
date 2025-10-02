@@ -12,12 +12,8 @@ using XooCreator.BA.Data;
 namespace XooCreator.BA.Migrations
 {
     [DbContext(typeof(XooDbContext))]
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-    [Migration("20251001213942_initial")]
-========
-    [Migration("20250929202949_initial")]
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
-    partial class initial
+    [Migration("20250929204804_AddTreeConfiguration")]
+    partial class AddTreeConfiguration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1110,374 +1106,238 @@ namespace XooCreator.BA.Migrations
                     b.HasData(
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("e2ebe205-84de-4dd1-959e-57ba965ee2c3"),
-========
-                            Id = new Guid("63769828-cbf3-42d0-a8a5-98c739130c1f"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("fcd01b34-015c-4135-93d0-f55ad62192a2"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000001"),
                             Label = "Bunny",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("342acd93-b357-4e9c-bc00-9a227d903fd9"),
-========
-                            Id = new Guid("8d4d5dec-0d46-427d-a8f6-7e9c2fd7592a"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("e526a3e4-2d8e-420e-b84f-c782afc9758a"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000002"),
                             Label = "Hippo",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("9a3bd95f-2643-408f-a7e7-1d0faa38e2ad"),
-========
-                            Id = new Guid("6c96b9ae-3e2f-402a-bc41-4397d53bdca4"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("791eb8b8-c3ab-4953-94db-cdf3fc4c3daa"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000003"),
                             Label = "Giraffe",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("f7e86e07-aa04-471b-9543-19284772132a"),
-========
-                            Id = new Guid("86b4b19f-515f-4603-a4a0-66d9baab2043"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("ad7ec032-8770-434f-b68f-a5e7b704e185"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000004"),
                             Label = "Dog",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("0578fe58-ab62-4d97-8c1c-a09b0fa8ba44"),
-========
-                            Id = new Guid("1ddf59ef-d936-4032-8fff-bbd5c060377c"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("0c3d2820-0bc5-4530-bad6-f3093429fda9"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000005"),
                             Label = "Fox",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("6858be88-306c-42e1-bebe-a38b7f373965"),
-========
-                            Id = new Guid("eadbe561-f831-4c8e-80b5-3e57976f61ea"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("9275de98-c900-41c2-8327-11fd1efd75d2"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000006"),
                             Label = "Cat",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("93502c40-97af-4c17-9a8c-b8e6fafebbc2"),
-========
-                            Id = new Guid("58369731-2dff-4199-81f3-534e90e182b4"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("0f29079c-59a4-480f-9e09-a9e0d185f062"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000007"),
                             Label = "Monkey",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("c59fe6a6-03e6-45fc-9d78-4cb124ab0622"),
-========
-                            Id = new Guid("9f46067b-5a24-4902-b9e3-979794587acd"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("2492b97a-bb24-400b-9ea1-0d906874b59b"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000008"),
                             Label = "Camel",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("3878042a-e036-4c3a-ab42-2861a731e0bf"),
-========
-                            Id = new Guid("05270dc2-be9b-4432-876a-aa49c38c8422"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("0122380f-f865-4aaf-9ece-88a5696ad63e"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000009"),
                             Label = "Deer",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("2ad42633-b6b0-41a9-9a8c-14ad10505a15"),
-========
-                            Id = new Guid("8e209614-0148-4772-81df-77e492ab51cc"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("1b7d64b2-eac2-4d4d-a477-6c9401fe577f"),
                             AnimalId = new Guid("00000000-0000-0000-0000-00000000000a"),
                             Label = "Duck",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("76a820ee-3fa1-41da-a984-f66d90e1d4d4"),
-========
-                            Id = new Guid("1647d17a-f7e9-4d37-8bf7-48bd1c03b8cd"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("16fcf46b-d0cc-4094-82e3-f856a74a1b88"),
                             AnimalId = new Guid("00000000-0000-0000-0000-00000000000b"),
                             Label = "Eagle",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("08d5dc27-7139-4199-9309-4820deb8dbb0"),
-========
-                            Id = new Guid("8c9faf2d-63e0-4922-86b7-0ae8aec40e78"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("9b3fe2de-ed89-4bb5-bc09-e8ffbbc3dad8"),
                             AnimalId = new Guid("00000000-0000-0000-0000-00000000000c"),
                             Label = "Elephant",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("a8be7c2d-91bf-4a7f-b322-793fbbed9e87"),
-========
-                            Id = new Guid("e2dacedc-ec7c-4033-a698-7de61345130b"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("b14d6488-ad37-48e6-8634-2f33e55a8e0a"),
                             AnimalId = new Guid("00000000-0000-0000-0000-00000000000d"),
                             Label = "Ostrich",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("6df55b93-4098-4a35-a531-03f54197aa4d"),
-========
-                            Id = new Guid("5fa6bdd2-4f73-43a4-b472-a679a08964b0"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("ccbe7ad9-d4f1-4286-b1a5-27c31c89aa5c"),
                             AnimalId = new Guid("00000000-0000-0000-0000-00000000000e"),
                             Label = "Parrot",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("8ff21f80-8749-49f3-b4ba-89602408911f"),
-========
-                            Id = new Guid("f2f0aec2-6a70-44d1-b276-0753b075836c"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("042b0204-1615-41eb-bac4-b571da4d19f9"),
                             AnimalId = new Guid("00000000-0000-0000-0000-00000000000f"),
                             Label = "Jaguar",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("d32e4035-0b87-4f58-81f2-6df0dd49f3c9"),
-========
-                            Id = new Guid("c875ef69-581a-4d0b-87cb-9535cab72d86"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("35f99c94-00d7-47b7-905c-24c405810f67"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000010"),
                             Label = "Toucan",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("6c33fe31-f68b-4fa2-9711-0a55db623aa9"),
-========
-                            Id = new Guid("85e29b01-cd2b-4429-bef2-8c841b8a6927"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("577bc394-fbad-4c13-8a2e-6fec4e3daa06"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000011"),
                             Label = "Anaconda",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("fbef07b8-48e9-4c84-871e-5da1a3c2f1a5"),
-========
-                            Id = new Guid("e3418255-9c4c-4497-a197-e9593f8f9839"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("cc6efaf2-c1a3-425f-9634-ac1c38f9d680"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000012"),
                             Label = "Capuchin Monkey",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("0d218922-4bae-4157-ad35-cdd9d1149b61"),
-========
-                            Id = new Guid("fb610050-ac3d-405d-97a0-0fe68cec1a47"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("6e582b85-b7fb-4e94-a140-d2b7bca4c939"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000013"),
                             Label = "Poison Dart Frog",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("d123c891-0685-4a65-8501-f713096fd09c"),
-========
-                            Id = new Guid("182cd814-afc0-4057-9b1f-1236f6bcf8be"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("ae86fb80-cbf3-4b16-aa3e-afec870129bf"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000014"),
                             Label = "Lion",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("97b71f16-c6a5-4633-808a-326c6518f41a"),
-========
-                            Id = new Guid("772e70a0-c814-4e99-b3e0-61fc3168f0b2"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("90b80c17-beec-4684-bca8-cb9596bc903a"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000015"),
                             Label = "African Elephant",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("b639a6bc-5112-458e-a9ab-c37b139cddfa"),
-========
-                            Id = new Guid("4dbfee00-d79f-45c4-8a7e-92bfbdfeca06"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("408811c1-3e01-4ad8-b617-c362bc6c83b1"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000016"),
                             Label = "Giraffe",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("d2f30ee6-04db-43ce-84df-602c51d10b2a"),
-========
-                            Id = new Guid("60680c7c-aa84-457d-85a3-14b8ba920f17"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("d767a72e-c3fd-4717-9f2c-ad33e8b0e51e"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000017"),
                             Label = "Zebra",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("629ab7f9-cdd7-4cdc-8eec-f9218b698b9e"),
-========
-                            Id = new Guid("35acb18f-995e-49c9-8b55-f557eb22b641"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("2e56f8b6-a600-45e5-a77f-0e5b2059aaef"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000018"),
                             Label = "Rhinoceros",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("357326b5-b27d-4481-82bd-a2bc10543054"),
-========
-                            Id = new Guid("91fb035e-8cc2-4a8a-b4fb-72f58ff54e57"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("baed949c-18ce-4b23-aff8-a655c25f3cd2"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000019"),
                             Label = "Bison",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("467b5733-f721-4361-b232-cd574e93fda7"),
-========
-                            Id = new Guid("8188a693-fff4-4557-9782-dc5e3d0d33d0"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("3d651521-9119-4831-a5f9-576dbb86d52d"),
                             AnimalId = new Guid("00000000-0000-0000-0000-00000000001a"),
                             Label = "Saiga Antelope",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("9bbcd662-5f64-4a6f-9ea0-3641cd4c9baf"),
-========
-                            Id = new Guid("f401aa4b-a06a-4844-a8e7-3d8332d74946"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("f12c7232-cd79-4e8b-849d-e4d17236460d"),
                             AnimalId = new Guid("00000000-0000-0000-0000-00000000001b"),
                             Label = "Gray Wolf",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("862a490f-a093-4f1f-8b2d-dacbdfea03cd"),
-========
-                            Id = new Guid("4f42d126-1e4b-43dc-907d-14e93fbb818a"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("9dfc4d2f-8edf-45ac-b8a8-0e93c9ccefc2"),
                             AnimalId = new Guid("00000000-0000-0000-0000-00000000001c"),
                             Label = "Przewalski's Horse",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("03734086-0010-4931-b081-4d16b46e9267"),
-========
-                            Id = new Guid("fa04e726-6ad3-4f47-8676-5bdb44bdd1c5"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("34d4a93a-15d7-4bb5-82bd-96bc940e1da2"),
                             AnimalId = new Guid("00000000-0000-0000-0000-00000000001d"),
                             Label = "Steppe Eagle",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("0d81e94a-1236-4327-ab83-899d45c138b1"),
-========
-                            Id = new Guid("7b25fa93-9c75-4562-878e-4a5f069565b1"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("9f31e8c5-a6f7-42e1-b02d-58ea62b9b3fd"),
                             AnimalId = new Guid("00000000-0000-0000-0000-00000000001e"),
                             Label = "Cow",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("71505fca-4314-4663-91cc-2d9b78ecdf4f"),
-========
-                            Id = new Guid("36bf4f66-40fa-4cd1-adcb-319e641e3657"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("96ea401c-9747-4cd6-96e8-11eb43945034"),
                             AnimalId = new Guid("00000000-0000-0000-0000-00000000001f"),
                             Label = "Sheep",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("60580c43-9074-4973-a051-9c0cb0acd079"),
-========
-                            Id = new Guid("e050e189-644c-48f7-9f63-b79f92df34cf"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("25f4a2db-9399-4d69-b91e-506bef298161"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000020"),
                             Label = "Horse",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("629a83c6-2cd5-49af-a100-255713ababd2"),
-========
-                            Id = new Guid("ae2f224e-da0b-4752-9579-66ee977761c3"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("19ebba97-47aa-4915-b812-35cbc59174b6"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000021"),
                             Label = "Chicken",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("944df122-be4a-4efd-a21e-5185799dc8b7"),
-========
-                            Id = new Guid("58b5b398-16c1-42b4-9ff5-47ed5f5185ff"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("a85ce64e-8a68-4979-b151-8e2b93c3b56d"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000022"),
                             Label = "Pig",
                             LanguageCode = "en-us"
@@ -1595,88 +1455,56 @@ namespace XooCreator.BA.Migrations
                     b.HasData(
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("7a4eb70b-c5dd-4b65-8f8a-9198d3411a33"),
-========
-                            Id = new Guid("40434a54-0c19-4886-92fd-5fd2eccd2b29"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("6e028cd1-b5e0-4a5b-9e23-90bc8d711aaa"),
                             BodyPartKey = "head",
                             LanguageCode = "en-us",
                             Name = "Head"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("2c50e433-9c35-4a19-b633-f70fe1e46f98"),
-========
-                            Id = new Guid("6ee3aafa-5220-4637-9291-08dee5d31469"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("dbb11bc8-fce6-49c7-96e9-65252bef0ba0"),
                             BodyPartKey = "body",
                             LanguageCode = "en-us",
                             Name = "Body"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("1a65ace1-0dfd-4381-b136-52e79ffa097b"),
-========
-                            Id = new Guid("7f2db495-ff89-4514-ad84-8d1d1fd0bc2e"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("e27bc07e-edb5-46eb-beb9-7a5b8c2887ed"),
                             BodyPartKey = "arms",
                             LanguageCode = "en-us",
                             Name = "Arms"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("b242f51c-3edb-44a4-899a-1edc0be39e98"),
-========
-                            Id = new Guid("1c562dc9-d53d-478d-8666-22bd5142aad3"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("911e19ab-03e3-48cc-9a65-aaed1c1088e9"),
                             BodyPartKey = "legs",
                             LanguageCode = "en-us",
                             Name = "Legs"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("12aae552-24f5-4815-9425-844e49e8a8a5"),
-========
-                            Id = new Guid("7ee87a7f-a198-4196-af81-0355504bd7cf"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("8880aca3-c20c-453f-8b72-1a1165510420"),
                             BodyPartKey = "tail",
                             LanguageCode = "en-us",
                             Name = "Tail"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("5ffbfeb5-8511-4bee-bb34-cf35bb2e99c0"),
-========
-                            Id = new Guid("c2f98cb1-1184-491e-bf91-35e0fe9933f8"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("7215098f-3663-4002-9bf0-0dee6dc95900"),
                             BodyPartKey = "wings",
                             LanguageCode = "en-us",
                             Name = "Wings"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("0c516295-26b3-497e-86b4-a6d118983469"),
-========
-                            Id = new Guid("920cc90a-ae06-4bc3-8653-00266f7ff562"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("836c1240-b831-4099-89a5-1505cb7f70a6"),
                             BodyPartKey = "horn",
                             LanguageCode = "en-us",
                             Name = "Horn"
                         },
                         new
                         {
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            Id = new Guid("5e6a976b-8177-45c6-b272-ad28481a7746"),
-========
-                            Id = new Guid("8a6c6662-c3bd-4997-9172-47748bd00e12"),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            Id = new Guid("efed1e63-a402-41cf-8672-5560bdb25910"),
                             BodyPartKey = "horns",
                             LanguageCode = "en-us",
                             Name = "Horns"
@@ -1797,11 +1625,7 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("33333333-3333-3333-3333-333333333333"),
                             Amount = 15,
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            CreatedAt = new DateTime(2025, 9, 30, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6201),
-========
-                            CreatedAt = new DateTime(2025, 9, 28, 20, 29, 49, 204, DateTimeKind.Utc).AddTicks(1957),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            CreatedAt = new DateTime(2025, 9, 28, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6683),
                             Reference = "test-purchase-marian",
                             Type = 0,
                             UserId = new Guid("22222222-2222-2222-2222-222222222222")
@@ -1810,11 +1634,7 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("44444444-4444-4444-4444-444444444444"),
                             Amount = -5,
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            CreatedAt = new DateTime(2025, 10, 1, 19, 39, 41, 822, DateTimeKind.Utc).AddTicks(6208),
-========
-                            CreatedAt = new DateTime(2025, 9, 29, 18, 29, 49, 204, DateTimeKind.Utc).AddTicks(1964),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            CreatedAt = new DateTime(2025, 9, 29, 18, 48, 4, 232, DateTimeKind.Utc).AddTicks(6690),
                             Reference = "test-generation",
                             Type = 1,
                             UserId = new Guid("22222222-2222-2222-2222-222222222222")
@@ -1845,22 +1665,14 @@ namespace XooCreator.BA.Migrations
                             UserId = new Guid("11111111-1111-1111-1111-111111111111"),
                             Balance = 5,
                             DiscoveryBalance = 0,
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            UpdatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6110)
-========
-                            UpdatedAt = new DateTime(2025, 9, 29, 20, 29, 49, 204, DateTimeKind.Utc).AddTicks(1825)
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            UpdatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6541)
                         },
                         new
                         {
                             UserId = new Guid("22222222-2222-2222-2222-222222222222"),
                             Balance = 10,
                             DiscoveryBalance = 0,
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            UpdatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6112)
-========
-                            UpdatedAt = new DateTime(2025, 9, 29, 20, 29, 49, 204, DateTimeKind.Utc).AddTicks(1827)
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            UpdatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6543)
                         });
                 });
 
@@ -1921,12 +1733,18 @@ namespace XooCreator.BA.Migrations
                     b.Property<int>("CuriosityCost")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Image")
+                    b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<bool>("IsUnlocked")
                         .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<double>("PositionX")
                         .HasColumnType("decimal(10,6)");
@@ -1964,41 +1782,6 @@ namespace XooCreator.BA.Migrations
                         .IsUnique();
 
                     b.ToTable("HeroDefinitions");
-                });
-
-            modelBuilder.Entity("XooCreator.BA.Data.HeroDefinitionTranslation", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("HeroDefinitionId")
-                        .IsRequired()
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("LanguageCode")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Story")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("HeroDefinitionId", "LanguageCode")
-                        .IsUnique();
-
-                    b.ToTable("HeroDefinitionTranslations");
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.HeroProgress", b =>
@@ -2039,11 +1822,7 @@ namespace XooCreator.BA.Migrations
                             HeroId = "seed",
                             HeroType = "HERO_TREE_TRANSFORMATION",
                             SourceStoryId = "",
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            UnlockedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6179),
-========
-                            UnlockedAt = new DateTime(2025, 9, 29, 20, 29, 49, 204, DateTimeKind.Utc).AddTicks(1935),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            UnlockedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6611),
                             UserId = new Guid("11111111-1111-1111-1111-111111111111")
                         },
                         new
@@ -2052,11 +1831,7 @@ namespace XooCreator.BA.Migrations
                             HeroId = "seed",
                             HeroType = "HERO_TREE_TRANSFORMATION",
                             SourceStoryId = "",
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            UnlockedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6181),
-========
-                            UnlockedAt = new DateTime(2025, 9, 29, 20, 29, 49, 204, DateTimeKind.Utc).AddTicks(1937),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            UnlockedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6613),
                             UserId = new Guid("22222222-2222-2222-2222-222222222222")
                         });
                 });
@@ -2746,9 +2521,6 @@ namespace XooCreator.BA.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
-                    b.Property<bool>("HasVisitedImaginationLaboratory")
-                        .HasColumnType("boolean");
-
                     b.HasKey("Id");
 
                     b.HasIndex("Auth0Sub")
@@ -2761,27 +2533,17 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
                             Auth0Sub = "test-user-sub",
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            CreatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6061),
-========
-                            CreatedAt = new DateTime(2025, 9, 29, 20, 29, 49, 204, DateTimeKind.Utc).AddTicks(1769),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            CreatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6486),
                             DisplayName = "Test User",
-                            Email = "test@example.com",
-                            HasVisitedImaginationLaboratory = false
+                            Email = "test@example.com"
                         },
                         new
                         {
                             Id = new Guid("22222222-2222-2222-2222-222222222222"),
                             Auth0Sub = "marian-test-sub",
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            CreatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6063),
-========
-                            CreatedAt = new DateTime(2025, 9, 29, 20, 29, 49, 204, DateTimeKind.Utc).AddTicks(1771),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            CreatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6487),
                             DisplayName = "Marian",
-                            Email = "marian@example.com",
-                            HasVisitedImaginationLaboratory = false
+                            Email = "marian@example.com"
                         });
                 });
 
@@ -2877,170 +2639,100 @@ namespace XooCreator.BA.Migrations
                         new
                         {
                             Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1"),
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            CreatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6134),
+                            CreatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6564),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6134),
-========
-                            CreatedAt = new DateTime(2025, 9, 29, 20, 29, 49, 204, DateTimeKind.Utc).AddTicks(1879),
-                            Quantity = 5,
-                            Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 9, 29, 20, 29, 49, 204, DateTimeKind.Utc).AddTicks(1879),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            UpdatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6565),
                             UserId = new Guid("11111111-1111-1111-1111-111111111111"),
                             Value = "courage"
                         },
                         new
                         {
                             Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa2"),
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            CreatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6137),
+                            CreatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6567),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6137),
-========
-                            CreatedAt = new DateTime(2025, 9, 29, 20, 29, 49, 204, DateTimeKind.Utc).AddTicks(1883),
-                            Quantity = 5,
-                            Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 9, 29, 20, 29, 49, 204, DateTimeKind.Utc).AddTicks(1883),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            UpdatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6568),
                             UserId = new Guid("11111111-1111-1111-1111-111111111111"),
                             Value = "curiosity"
                         },
                         new
                         {
                             Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa3"),
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            CreatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6140),
+                            CreatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6570),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6140),
-========
-                            CreatedAt = new DateTime(2025, 9, 29, 20, 29, 49, 204, DateTimeKind.Utc).AddTicks(1885),
-                            Quantity = 5,
-                            Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 9, 29, 20, 29, 49, 204, DateTimeKind.Utc).AddTicks(1886),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            UpdatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6571),
                             UserId = new Guid("11111111-1111-1111-1111-111111111111"),
                             Value = "thinking"
                         },
                         new
                         {
                             Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa4"),
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            CreatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6142),
+                            CreatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6573),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6143),
-========
-                            CreatedAt = new DateTime(2025, 9, 29, 20, 29, 49, 204, DateTimeKind.Utc).AddTicks(1888),
-                            Quantity = 5,
-                            Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 9, 29, 20, 29, 49, 204, DateTimeKind.Utc).AddTicks(1888),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            UpdatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6573),
                             UserId = new Guid("11111111-1111-1111-1111-111111111111"),
                             Value = "creativity"
                         },
                         new
                         {
                             Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa5"),
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            CreatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6145),
+                            CreatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6575),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6145),
-========
-                            CreatedAt = new DateTime(2025, 9, 29, 20, 29, 49, 204, DateTimeKind.Utc).AddTicks(1890),
-                            Quantity = 5,
-                            Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 9, 29, 20, 29, 49, 204, DateTimeKind.Utc).AddTicks(1891),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            UpdatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6576),
                             UserId = new Guid("11111111-1111-1111-1111-111111111111"),
                             Value = "safety"
                         },
                         new
                         {
                             Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1"),
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            CreatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6147),
+                            CreatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6578),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6147),
-========
-                            CreatedAt = new DateTime(2025, 9, 29, 20, 29, 49, 204, DateTimeKind.Utc).AddTicks(1893),
-                            Quantity = 5,
-                            Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 9, 29, 20, 29, 49, 204, DateTimeKind.Utc).AddTicks(1893),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            UpdatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6578),
                             UserId = new Guid("22222222-2222-2222-2222-222222222222"),
                             Value = "courage"
                         },
                         new
                         {
                             Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb2"),
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            CreatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6149),
+                            CreatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6581),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6150),
-========
-                            CreatedAt = new DateTime(2025, 9, 29, 20, 29, 49, 204, DateTimeKind.Utc).AddTicks(1895),
-                            Quantity = 5,
-                            Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 9, 29, 20, 29, 49, 204, DateTimeKind.Utc).AddTicks(1896),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            UpdatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6581),
                             UserId = new Guid("22222222-2222-2222-2222-222222222222"),
                             Value = "curiosity"
                         },
                         new
                         {
                             Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb3"),
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            CreatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6152),
+                            CreatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6583),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6152),
-========
-                            CreatedAt = new DateTime(2025, 9, 29, 20, 29, 49, 204, DateTimeKind.Utc).AddTicks(1898),
-                            Quantity = 5,
-                            Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 9, 29, 20, 29, 49, 204, DateTimeKind.Utc).AddTicks(1898),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            UpdatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6584),
                             UserId = new Guid("22222222-2222-2222-2222-222222222222"),
                             Value = "thinking"
                         },
                         new
                         {
                             Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb4"),
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            CreatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6154),
+                            CreatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6586),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6154),
-========
-                            CreatedAt = new DateTime(2025, 9, 29, 20, 29, 49, 204, DateTimeKind.Utc).AddTicks(1900),
-                            Quantity = 5,
-                            Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 9, 29, 20, 29, 49, 204, DateTimeKind.Utc).AddTicks(1900),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            UpdatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6586),
                             UserId = new Guid("22222222-2222-2222-2222-222222222222"),
                             Value = "creativity"
                         },
                         new
                         {
                             Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb5"),
-<<<<<<<< HEAD:XooCreator.BA/Migrations/20251001213942_initial.Designer.cs
-                            CreatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6156),
+                            CreatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6588),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 10, 1, 21, 39, 41, 822, DateTimeKind.Utc).AddTicks(6157),
-========
-                            CreatedAt = new DateTime(2025, 9, 29, 20, 29, 49, 204, DateTimeKind.Utc).AddTicks(1902),
-                            Quantity = 5,
-                            Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 9, 29, 20, 29, 49, 204, DateTimeKind.Utc).AddTicks(1903),
->>>>>>>> parent of 46ceac6 (added recreation of the db.):XooCreator.BA/Migrations/20250929202949_initial.Designer.cs
+                            UpdatedAt = new DateTime(2025, 9, 29, 20, 48, 4, 232, DateTimeKind.Utc).AddTicks(6588),
                             UserId = new Guid("22222222-2222-2222-2222-222222222222"),
                             Value = "safety"
                         });
@@ -3135,17 +2827,6 @@ namespace XooCreator.BA.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("XooCreator.BA.Data.HeroDefinitionTranslation", b =>
-                {
-                    b.HasOne("XooCreator.BA.Data.HeroDefinition", "HeroDefinition")
-                        .WithMany("Translations")
-                        .HasForeignKey("HeroDefinitionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("HeroDefinition");
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.HeroProgress", b =>
@@ -3406,11 +3087,6 @@ namespace XooCreator.BA.Migrations
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.BodyPart", b =>
-                {
-                    b.Navigation("Translations");
-                });
-
-            modelBuilder.Entity("XooCreator.BA.Data.HeroDefinition", b =>
                 {
                     b.Navigation("Translations");
                 });
