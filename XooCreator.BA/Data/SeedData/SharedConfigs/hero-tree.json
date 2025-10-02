@@ -1,4 +1,3 @@
-
 {
   "rootHeroId": "alchimalia_hero",
   "baseHeroIds": [
@@ -30,7 +29,7 @@
       "type": "hero",
       "costs": { "courage": 1, "curiosity": 0, "thinking": 0, "creativity": 0, "safety": 0 },
       "prerequisites": ["alchimalia_hero"],
-      "positionX": -80,
+      "positionX": -150,
       "positionY": -200
     },
     {
@@ -42,7 +41,7 @@
       "type": "hero",
       "costs": { "courage": 0, "curiosity": 1, "thinking": 0, "creativity": 0, "safety": 0 },
       "prerequisites": ["alchimalia_hero"],
-      "positionX": 80,
+      "positionX": 150,
       "positionY": -200
     },
     {
@@ -55,7 +54,7 @@
       "costs": { "courage": 0, "curiosity": 0, "thinking": 1, "creativity": 0, "safety": 0 },
       "prerequisites": ["alchimalia_hero"],
       "positionX": 0,
-      "positionY": -250
+      "positionY": -220
     },
     {
       "id": "hero_playful_horse",
@@ -66,8 +65,8 @@
       "type": "hero",
       "costs": { "courage": 0, "curiosity": 0, "thinking": 0, "creativity": 1, "safety": 0 },
       "prerequisites": ["alchimalia_hero"],
-      "positionX": -80,
-      "positionY": -300
+      "positionX": -200,
+      "positionY": -280
     },
     {
       "id": "hero_cautious_hedgehog",
@@ -78,8 +77,8 @@
       "type": "hero",
       "costs": { "courage": 0, "curiosity": 0, "thinking": 0, "creativity": 0, "safety": 1 },
       "prerequisites": ["alchimalia_hero"],
-      "positionX": 80,
-      "positionY": -300
+      "positionX": 200,
+      "positionY": -280
     },
     {
       "id": "hero_catdog_interstellar",
@@ -91,7 +90,115 @@
       "costs": { "courage": 1, "curiosity": 1, "thinking": 0, "creativity": 0, "safety": 0 },
       "prerequisites": ["hero_brave_puppy", "hero_curious_cat"],
       "positionX": 0,
-      "positionY": -320
+      "positionY": -350
+    },
+    {
+      "id": "hero_brave_sage",
+      "nameKey": "hero_tree_brave_sage_name",
+      "descriptionKey": "hero_tree_brave_sage_desc",
+      "storyKey": "hero_tree_brave_sage_story",
+      "image": "images/heroes/hybrid-elephant-fox.jpg",
+      "type": "hero",
+      "costs": { "courage": 1, "thinking": 1, "creativity": 0, "safety": 0 },
+      "prerequisites": ["hero_brave_puppy", "hero_wise_owl"],
+      "positionX": -180,
+      "positionY": -380
+    },
+    {
+      "id": "hero_brave_artist",
+      "nameKey": "hero_tree_brave_artist_name",
+      "descriptionKey": "hero_tree_brave_artist_desc",
+      "storyKey": "hero_tree_brave_artist_story",
+      "image": "images/heroes/hybrid-rabbit-girafe.jpg",
+      "type": "hero",
+      "costs": { "courage": 1, "creativity": 1, "thinking": 0, "safety": 0 },
+      "prerequisites": ["hero_brave_puppy", "hero_playful_horse"],
+      "positionX": -250,
+      "positionY": -420
+    },
+    {
+      "id": "hero_brave_guardian",
+      "nameKey": "hero_tree_brave_guardian_name",
+      "descriptionKey": "hero_tree_brave_guardian_desc",
+      "storyKey": "hero_tree_brave_guardian_story",
+      "image": "images/heroes/hybrid_giraffe-cat.jpg",
+      "type": "hero",
+      "costs": { "courage": 1, "safety": 1, "thinking": 0, "creativity": 0 },
+      "prerequisites": ["hero_brave_puppy", "hero_cautious_hedgehog"],
+      "positionX": 0,
+      "positionY": -400
+    },
+    {
+      "id": "hero_wise_researcher",
+      "nameKey": "hero_tree_wise_researcher_name",
+      "descriptionKey": "hero_tree_wise_researcher_desc",
+      "storyKey": "hero_tree_wise_researcher_story",
+      "image": "images/heroes/hybrid_duckfox.jpg",
+      "type": "hero",
+      "costs": { "curiosity": 1, "thinking": 1, "creativity": 0, "safety": 0 },
+      "prerequisites": ["hero_curious_cat", "hero_wise_owl"],
+      "positionX": 180,
+      "positionY": -380
+    },
+    {
+      "id": "hero_creative_explorer",
+      "nameKey": "hero_tree_creative_explorer_name",
+      "descriptionKey": "hero_tree_creative_explorer_desc",
+      "storyKey": "hero_tree_creative_explorer_story",
+      "image": "images/heroes/hybrid_giraffe_cat.jpg",
+      "type": "hero",
+      "costs": { "curiosity": 1, "creativity": 1, "thinking": 0, "safety": 0 },
+      "prerequisites": ["hero_curious_cat", "hero_playful_horse"],
+      "positionX": -80,
+      "positionY": -450
+    },
+    {
+      "id": "hero_guard_cat",
+      "nameKey": "hero_tree_guard_cat_name",
+      "descriptionKey": "hero_tree_guard_cat_desc",
+      "storyKey": "hero_tree_guard_cat_story",
+      "image": "images/heroes/hybrid_bunny_cat.jpg",
+      "type": "hero",
+      "costs": { "curiosity": 1, "safety": 1, "thinking": 0, "creativity": 0 },
+      "prerequisites": ["hero_curious_cat", "hero_cautious_hedgehog"],
+      "positionX": 250,
+      "positionY": -420
+    },
+    {
+      "id": "hero_wise_pegasus",
+      "nameKey": "hero_tree_wise_pegasus_name",
+      "descriptionKey": "hero_tree_wise_pegasus_desc",
+      "storyKey": "hero_tree_wise_pegasus_story",
+      "image": "images/heroes/hybrid-giraffe_cat.jpg",
+      "type": "hero",
+      "costs": { "thinking": 1, "creativity": 1, "courage": 0, "safety": 0 },
+      "prerequisites": ["hero_wise_owl", "hero_playful_horse"],
+      "positionX": 80,
+      "positionY": -450
+    },
+    {
+      "id": "hero_thoughtful_guardian",
+      "nameKey": "hero_tree_thoughtful_guardian_name",
+      "descriptionKey": "hero_tree_thoughtful_guardian_desc",
+      "storyKey": "hero_tree_thoughtful_guardian_story",
+      "image": "images/heroes/hybrid-elephant-fox.jpg",
+      "type": "hero",
+      "costs": { "thinking": 1, "safety": 1, "courage": 0, "creativity": 0 },
+      "prerequisites": ["hero_wise_owl", "hero_cautious_hedgehog"],
+      "positionX": 150,
+      "positionY": -500
+    },
+    {
+      "id": "hero_creative_guardian",
+      "nameKey": "hero_tree_creative_guardian_name",
+      "descriptionKey": "hero_tree_creative_guardian_desc",
+      "storyKey": "hero_tree_creative_guardian_story",
+      "image": "images/heroes/hybrid_giraffe-cat.jpg",
+      "type": "hero",
+      "costs": { "creativity": 1, "safety": 1, "courage": 0, "thinking": 0 },
+      "prerequisites": ["hero_playful_horse", "hero_cautious_hedgehog"],
+      "positionX": -150,
+      "positionY": -500
     },
     {
       "id": "hero_alchimalian_dragon",
@@ -109,7 +216,7 @@
         "hero_cautious_hedgehog"
       ],
       "positionX": 0,
-      "positionY": -450
+      "positionY": -600
     }
   ]
 }

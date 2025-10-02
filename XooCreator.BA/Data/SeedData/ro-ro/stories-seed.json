@@ -66,7 +66,7 @@
       ] }
     ] },
 
-    { "storyId": "mechanika-s2", "title": "Mechanika – Podul de Sclipici", "coverImageUrl": "images/worlds/pyron.jpg", "category": "main", "sortOrder": 7, "tiles": [
+    { "storyId": "mechanika-s1", "title": "Mechanika – Podul de Sclipici", "coverImageUrl": "images/worlds/pyron.jpg", "category": "main", "sortOrder": 7, "tiles": [
       { "tileId": "p1", "type": "page", "sortOrder": 1, "caption": "Planul", "text": "Două turnuri trebuie unite de un pod ușor și sigur.", "imageUrl": "images/biomes/steppe.jpg" },
       { "tileId": "p2", "type": "page", "sortOrder": 2, "caption": "Materiale", "text": "Fibre strălucitoare preiau vibrația vântului.", "imageUrl": "images/biomes/jungle.jpg" },
       { "tileId": "p3", "type": "page", "sortOrder": 3, "caption": "Montaj", "text": "Îmbinările trebuie să respecte o secvență exactă.", "imageUrl": "images/biomes/montain.jpg" },

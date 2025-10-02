@@ -109,26 +109,25 @@ public class StoriesRepository : IStoriesRepository
     {
         try
         {
-            // Check if stories already exist
-            var existingCount = await _context.StoryDefinitions.CountAsync();
-            if (existingCount > 0) return;
+            if (await _context.StoryDefinitions.AnyAsync()) return;
 
-            // Load base (RO) stories
             var stories = await LoadStoriesFromJsonAsync(LanguageCode.RoRo.ToFolder());
-
             foreach (var story in stories)
             {
                 _context.StoryDefinitions.Add(story);
             }
-
             await _context.SaveChangesAsync();
 
-            // Seed translations for all supported languages (except base RO)
+            var processedDefTranslations = new HashSet<(Guid, string)>();
+            var processedTileTranslations = new HashSet<(Guid, string)>();
+            var processedAnswerTranslations = new HashSet<(Guid, string)>();
+
             foreach (var lc in LanguageCodeExtensions.All().Where(x => x != LanguageCode.RoRo))
             {
-                var enTranslations = await LoadStoryTranslationsFromJsonAsync(lc.ToTag());
-                if (enTranslations.Count == 0) continue;
-                foreach (var tr in enTranslations)
+                var translations = await LoadStoryTranslationsFromJsonAsync(lc.ToTag());
+                if (translations.Count == 0) continue;
+
+                foreach (var tr in translations)
                 {
                     var def = await _context.StoryDefinitions
                         .Include(s => s.Tiles)
@@ -136,24 +135,31 @@ public class StoriesRepository : IStoriesRepository
                         .FirstOrDefaultAsync(s => s.StoryId == tr.StoryId);
                     if (def == null) continue;
 
-                    // Title translation
                     if (!string.IsNullOrWhiteSpace(tr.Title))
                     {
-                        _context.StoryDefinitionTranslations.Add(new StoryDefinitionTranslation
+                        var key = (def.Id, tr.Locale);
+                        if (!processedDefTranslations.Contains(key))
                         {
-                            StoryDefinitionId = def.Id,
-                            LanguageCode = tr.Locale,
-                            Title = tr.Title!
-                        });
+                            _context.StoryDefinitionTranslations.Add(new StoryDefinitionTranslation
+                            {
+                                StoryDefinitionId = def.Id,
+                                LanguageCode = tr.Locale,
+                                Title = tr.Title!
+                            });
+                            processedDefTranslations.Add(key);
+                        }
                     }
 
-                    // Tile translations
-                    if (tr.Tiles != null)
+                    if (tr.Tiles == null) continue;
+
+                    foreach (var t in tr.Tiles)
                     {
-                        foreach (var t in tr.Tiles)
+                        var dbTile = def.Tiles.FirstOrDefault(x => x.TileId == t.TileId);
+                        if (dbTile == null) continue;
+
+                        var tileKey = (dbTile.Id, tr.Locale);
+                        if (!processedTileTranslations.Contains(tileKey))
                         {
-                            var dbTile = def.Tiles.FirstOrDefault(x => x.TileId == t.TileId);
-                            if (dbTile == null) continue;
                             _context.StoryTileTranslations.Add(new StoryTileTranslation
                             {
                                 StoryTileId = dbTile.Id,
@@ -162,58 +168,37 @@ public class StoriesRepository : IStoriesRepository
                                 Text = t.Text,
                                 Question = t.Question
                             });
+                            processedTileTranslations.Add(tileKey);
+                        }
 
-                            // Answer translations
-                            if (t.Answers != null)
+                        if (t.Answers == null) continue;
+
+                        foreach (var answer in t.Answers)
+                        {
+                            var dbAnswer = dbTile.Answers.FirstOrDefault(x => x.AnswerId == answer.AnswerId);
+                            if (dbAnswer == null) continue;
+
+                            var answerKey = (dbAnswer.Id, tr.Locale);
+                            if (!processedAnswerTranslations.Contains(answerKey))
                             {
-                                foreach (var answer in t.Answers)
+                                _context.StoryAnswerTranslations.Add(new StoryAnswerTranslation
                                 {
-                                    var dbAnswer = dbTile.Answers.FirstOrDefault(x => x.AnswerId == answer.AnswerId);
-                                    if (dbAnswer == null) continue;
-                                    _context.StoryAnswerTranslations.Add(new StoryAnswerTranslation
-                                    {
-                                        StoryAnswerId = dbAnswer.Id,
-                                        LanguageCode = tr.Locale,
-                                        Text = answer.Text
-                                    });
-                                }
+                                    StoryAnswerId = dbAnswer.Id,
+                                    LanguageCode = tr.Locale,
+                                    Text = answer.Text
+                                });
+                                processedAnswerTranslations.Add(answerKey);
                             }
                         }
                     }
                 }
-                await _context.SaveChangesAsync();
             }
-            if (!LanguageCodeExtensions.All().Any(x => x != LanguageCode.RoRo))
-            {
-                // No EN seed files present -> mirror RO into EN-US as placeholder translations
-                var allDefs = await _context.StoryDefinitions.Include(s => s.Tiles).ToListAsync();
-                foreach (var def in allDefs)
-                {
-                    _context.StoryDefinitionTranslations.Add(new StoryDefinitionTranslation
-                    {
-                        StoryDefinitionId = def.Id,
-                        LanguageCode = "en-us",
-                        Title = def.Title
-                    });
-
-                    foreach (var t in def.Tiles)
-                    {
-                        _context.StoryTileTranslations.Add(new StoryTileTranslation
-                        {
-                            StoryTileId = t.Id,
-                            LanguageCode = "en-us",
-                            Caption = t.Caption,
-                            Text = t.Text,
-                            Question = t.Question
-                        });
-                    }
-                }
-                await _context.SaveChangesAsync();
-            }
+            await _context.SaveChangesAsync();
         }
         catch (Exception ex)
         {
-            throw ex;
+            Console.WriteLine($"An error occurred during story seeding: {ex.Message}");
+            throw;
         }
     }
 

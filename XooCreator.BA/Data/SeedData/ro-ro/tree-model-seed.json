@@ -25,7 +25,7 @@
     { "storyId": "auroria-s2",   "regionId": "auroria",  "rewardImageUrl": "images/homepage/heroes/hero2.jpg",   "sortOrder": 2 },
 
     { "storyId": "mechanika-s1", "regionId": "mechanika","rewardImageUrl": "images/homepage/heroes/hero2.jpg",   "sortOrder": 1 },
-    { "storyId": "mechanika-s2", "regionId": "mechanika","rewardImageUrl": "images/homepage/heroes/hero1.jpg",   "sortOrder": 2 },
+    { "storyId": "mechanika-s1", "regionId": "mechanika","rewardImageUrl": "images/homepage/heroes/hero1.jpg",   "sortOrder": 2 },
 
     { "storyId": "verdantia-s1", "regionId": "verdantia","rewardImageUrl": "images/homepage/heroes/hero1.jpg",   "sortOrder": 1 },
     { "storyId": "verdantia-s2", "regionId": "verdantia","rewardImageUrl": "images/homepage/heroes/hero2.jpg",   "sortOrder": 2 },
@@ -55,7 +55,7 @@
     { "type": "story",  "fromId": "terra",        "toRegionId": "auroria",   "storyId": "terra-s1", "sortOrder": 3 },
     { "type": "story",  "fromId": "terra",        "toRegionId": "mechanika", "storyId": "terra-s2", "sortOrder": 4 },
     { "type": "any",    "fromId": "auroria",      "toRegionId": "verdantia", "requiredStoriesCsv": "auroria-s1,auroria-s2", "minCount": 2, "sortOrder": 5 },
-    { "type": "any",    "fromId": "mechanika",    "toRegionId": "nocturna",  "requiredStoriesCsv": "mechanika-s1,mechanika-s2", "minCount": 2, "sortOrder": 6 },
+    { "type": "any",    "fromId": "mechanika",    "toRegionId": "nocturna",  "requiredStoriesCsv": "mechanika-s1,mechanika-s1", "minCount": 2, "sortOrder": 6 },
     { "type": "tokens", "fromId": "terra",        "toRegionId": "lunaria",   "requiredTokens": { "curiosity": 1 }, "sortOrder": 3 },
     { "type": "all",    "fromId": "lunaria",      "toRegionId": "oceanica",  "requiredStoriesCsv": "lunaria-s1,lunaria-s2", "sortOrder": 4 },
     { "type": "all",    "fromId": "oceanica",     "toRegionId": "sylvaria",  "requiredStoriesCsv": "oceanica-s1,oceanica-s2", "sortOrder": 5 },

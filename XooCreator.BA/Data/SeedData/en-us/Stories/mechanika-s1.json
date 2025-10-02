@@ -1,17 +1,17 @@
 {
   "storyId": "mechanika-s1",
-  "title": "The Mecanika-Magnus Telescope",
-  "coverImageUrl": "images/stories/mecanika-s2/0.Cover.png",
-  "category": "mecanika",
+  "title": "The Mechanika-Magnus Telescope",
+  "coverImageUrl": "images/tol/stories/mechanika-s1/0.Cover.png",
+  "category": "mechanika",
   "sortOrder": 2,
   "tiles": [
     {
       "tileId": "p1",
       "type": "page",
       "sortOrder": 1,
-      "caption": "Fog over Mecanika",
-      "text": "You descend into Mecanika through a thick, choking haze — factory smoke, stray sparks, heavy air. City lights are blurry patches, catwalks creak, and geartrains feel their way forward. Puf-Puf switches on his collar lamp: \"Visibility: low to very low. Grubot, do you read?\" You wander a few minutes among pipes and rivets, following the crystal's faint pulse.",
-      "imageUrl": "images/stories/mecanika-s2/1.fog.png"
+      "caption": "Fog over Mechanika",
+      "text": "You descend into Mechanika through a thick, choking haze — factory smoke, stray sparks, heavy air. City lights are blurry patches, catwalks creak, and geartrains feel their way forward. Puf-Puf switches on his collar lamp: \"Visibility: low to very low. Grubot, do you read?\" You wander a few minutes among pipes and rivets, following the crystal's faint pulse.",
+      "imageUrl": "images/tol/stories/mechanika-s1/1.fog.png"
     },
     {
       "tileId": "p2",
@@ -19,15 +19,15 @@
       "sortOrder": 2,
       "caption": "Grubot finds you",
       "text": "A clean ping cuts through the fog, followed by a thin beam. Grubot emerges from the smoke: \"Detected you by the crystal's signature and… a familiar chemical trace. Karott.\" Puf-Puf chuckles: \"Nice digital nose.\" Grubot: \"A promise is a promise. You gave me a pulse; I'll give you sight. To the Control Tower.\"",
-      "imageUrl": "images/stories/mecanika-s2/2.grubot.png"
+      "imageUrl": "images/tol/stories/mechanika-s1/2.grubot.png"
     },
     {
       "tileId": "p3",
       "type": "page",
       "sortOrder": 3,
       "caption": "The Control Tower",
-      "text": "You climb the tower's metal stairs. At the top waits a colossal instrument: the **Mecanika-Magnus Telescope** — tubes, mirrors, gearwork, and a dome that opens like a metal flower. Puf-Puf: \"With this we search for my planet?\"",
-      "imageUrl": "images/stories/mecanika-s2/3.control-tower.png"
+      "text": "You climb the tower's metal stairs. At the top waits a colossal instrument: the **Mechanika-Magnus Telescope** — tubes, mirrors, gearwork, and a dome that opens like a metal flower. Puf-Puf: \"With this we search for my planet?\"",
+      "imageUrl": "images/tol/stories/mechanika-s1/3.control-tower.png"
     },
     {
       "tileId": "p4",
@@ -35,14 +35,14 @@
       "sortOrder": 4,
       "caption": "What's missing",
       "text": "Grubot opens a side panel: \"We're missing two things: (1) a stone from Lunaria for the 'green eye'; (2) stored energy for the focusing coils. There's a reservoir under the tower — charged but unstable. If you have the stone, we mount it; if not, we prep the socket.\"",
-      "imageUrl": "images/stories/mecanika-s2/4.missing.png"
+      "imageUrl": "images/tol/stories/mechanika-s1/4.missing.png"
     },
     {
       "tileId": "q1",
       "type": "quiz",
       "caption": "Charge it—don't scorch it",
       "sortOrder": 5,
-      "imageUrl": "images/stories/mecanika-s2/5.quiz.png",
+      "imageUrl": "images/tol/stories/mechanika-s1/5.quiz.png",
       "question": "The reservoir is charged, but linking it to the coils requires finesse. What's your move to bring the telescope online without stressing it?",
       "answers": [
         {
@@ -138,7 +138,7 @@
       "sortOrder": 6,
       "caption": "Focus",
       "text": "The telescope comes alive. Mirrors align, the dome opens, and branches of light bloom on the display. One path pulses brighter — a thread waiting to be followed. Puf-Puf: \"Show us Kelo-Ketis…\"",
-      "imageUrl": "images/stories/mecanika-s2/6.focus.png"
+      "imageUrl": "images/tol/stories/mechanika-s1/6.focus.png"
     },
     {
       "tileId": "p6",
@@ -146,7 +146,7 @@
       "sortOrder": 7,
       "caption": "The map deepens",
       "text": "Grubot keys in a sequence: \"Signal clear. Locking coordinates and saving a route-schematic for when you open the portal.\" Puf-Puf: \"That's our first big step.\"",
-      "imageUrl": "images/stories/mecanika-s2/7.map-deepens.png"
+      "imageUrl": "images/tol/stories/mechanika-s1/7.map-deepens.png"
     },
     {
       "tileId": "p7",
@@ -154,7 +154,7 @@
       "sortOrder": 8,
       "caption": "Workshop reward",
       "text": "Grubot hands you a parts case: \"Electric circuits — for what's next. They keep real short-circuits at bay… not the conversational ones.\" Puf-Puf snickers: \"Packing the joke too.\"",
-      "imageUrl": "images/stories/mecanika-s2/8.reward.png"
+      "imageUrl": "images/tol/stories/mechanika-s1/8.reward.png"
     },
     {
       "tileId": "p8",
@@ -162,7 +162,7 @@
       "sortOrder": 9,
       "caption": "Eyes forward",
       "text": "The telescope settles into standby; outside, the fog seems thinner. You now have the deepened map and Electric Circuits (Alchemy). Puf-Puf: \"Okay, team. Which branch next?\"",
-      "imageUrl": "images/stories/mecanika-s2/9.ahead.png"
+      "imageUrl": "images/tol/stories/mechanika-s1/9.ahead.png"
     }
   ]
 }
