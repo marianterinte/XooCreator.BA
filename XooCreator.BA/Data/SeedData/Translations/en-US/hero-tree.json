@@ -1,69 +1,69 @@
 {
   "hero_tree_alchimalia_hero_name": "Alchimalia Hero",
   "hero_tree_alchimalia_hero_desc": "The root of all heroes, the source of transformation.",
-  "hero_tree_alchimalia_hero_story": "Your faithful companion, the beginning of the heroic journey",
+  "hero_tree_alchimalia_hero_story": "Your faithful companion, the beginning of the heroic journey.",
 
   "hero_tree_brave_puppy_name": "Brave Puppy",
-  "hero_tree_brave_puppy_desc": "A brave spirit that will give you the power to face any challenge...",
-  "hero_tree_brave_puppy_story": "The Brave Puppy teaches you that true courage is not the absence of fear, but action in spite of it.",
+  "hero_tree_brave_puppy_desc": "A small pup full of courage and determination.",
+  "hero_tree_brave_puppy_story": "This little pup faces challenges head-on, inspiring bravery in everyone.",
 
   "hero_tree_curious_cat_name": "Curious Cat",
-  "hero_tree_curious_cat_desc": "A curious being that will open your eyes to the wonders of the world...",
-  "hero_tree_curious_cat_story": "The Curious Cat guides you through the labyrinth of questions, showing you that every mystery hides a wonder.",
+  "hero_tree_curious_cat_desc": "A curious being that explores every corner of the world.",
+  "hero_tree_curious_cat_story": "The Curious Cat guides you through mysteries and wonders, awakening your curiosity.",
 
   "hero_tree_wise_owl_name": "Wise Owl",
-  "hero_tree_wise_owl_desc": "A wise mentor who will share with you the secrets of knowledge...",
-  "hero_tree_wise_owl_story": "The Wise Owl whispers the secrets of the night to you and opens your eyes to hidden truths.",
+  "hero_tree_wise_owl_desc": "A keen observer, full of knowledge and insight.",
+  "hero_tree_wise_owl_story": "The Wise Owl watches over the world, sharing wisdom and guidance to seekers.",
 
   "hero_tree_playful_horse_name": "Playful Horse",
-  "hero_tree_playful_horse_desc": "A playful companion that will free your imagination without limits...",
-  "hero_tree_playful_horse_story": "The Playful Horse brings you the joy of pure creation, where imagination gallops without reins.",
+  "hero_tree_playful_horse_desc": "A joyful creature, bringing creativity and fun wherever it goes.",
+  "hero_tree_playful_horse_story": "The Playful Horse gallops freely, inspiring imagination and playful ideas.",
 
   "hero_tree_cautious_hedgehog_name": "Cautious Hedgehog",
-  "hero_tree_cautious_hedgehog_desc": "A cautious protector who will offer you safety and balance...",
-  "hero_tree_cautious_hedgehog_story": "The Cautious Hedgehog teaches you that safety does not mean fear, but wisdom.",
+  "hero_tree_cautious_hedgehog_desc": "A careful protector, mindful of danger and safety.",
+  "hero_tree_cautious_hedgehog_story": "The Hedgehog teaches prudence and foresight, keeping everyone safe.",
 
-  "hero_tree_catdog_interstellar_name": "Interstellar CatDog",
-  "hero_tree_catdog_interstellar_desc": "A cosmic explorer born from the union of courage and curiosity...",
-  "hero_tree_catdog_interstellar_story": "Interstellar CatDog combines infinite curiosity with the courage to explore the unknown.",
+  "hero_tree_catdog_interstellar_name": "CatDog Interstellar",
+  "hero_tree_catdog_interstellar_desc": "A hybrid of curiosity and courage, ready for interstellar adventures.",
+  "hero_tree_catdog_interstellar_story": "This heroic hybrid combines the best traits of cat and dog, exploring the cosmos fearlessly.",
 
   "hero_tree_brave_sage_name": "Brave Sage",
-  "hero_tree_brave_sage_desc": "A hero who combines courage with wisdom, acting with thoughtful power.",
-  "hero_tree_brave_sage_story": "The Brave Sage teaches that true strength is not just fighting, but knowing when and why to fight.",
+  "hero_tree_brave_sage_desc": "A mix of wisdom and bravery, guiding heroes with insight.",
+  "hero_tree_brave_sage_story": "The Brave Sage combines intellect and courage to lead others through challenges.",
 
   "hero_tree_brave_artist_name": "Brave Artist",
-  "hero_tree_brave_artist_desc": "A hero who dares to create where others are afraid, opening new horizons with their art.",
-  "hero_tree_brave_artist_story": "The Brave Artist shows that creation is the ultimate act of courage, bringing new worlds to life from nothing.",
+  "hero_tree_brave_artist_desc": "A creative soul with a courageous heart.",
+  "hero_tree_brave_artist_story": "The Brave Artist paints heroic tales with bravery and imagination.",
 
-  "hero_tree_brave_guardian_name": "Brave Guardian",
-  "hero_tree_brave_guardian_desc": "A hero where courage and protection go hand in hand, defending without hesitation, but with wisdom.",
-  "hero_tree_brave_guardian_story": "The Brave Guardian is the shield that does not tremble, protecting the innocent with unwavering resolve.",
+  "hero_tree_brave_guardian_name": "Light Wolf",
+  "hero_tree_brave_guardian_desc": "A guardian of courage, standing firm against all threats.",
+  "hero_tree_brave_guardian_story": "Light Wolf protects the realm, embodying courage and vigilance.",
 
   "hero_tree_wise_researcher_name": "Wise Researcher",
-  "hero_tree_wise_researcher_desc": "A hero who combines an analytical mind with tireless curiosity to uncover hidden truths.",
-  "hero_tree_wise_researcher_story": "The Wise Researcher follows the thread of knowledge through the greatest of labyrinths, finding light in darkness.",
+  "hero_tree_wise_researcher_desc": "Curious and analytical, seeking knowledge in every corner.",
+  "hero_tree_wise_researcher_story": "This hero uncovers secrets and guides others with insightful discoveries.",
 
   "hero_tree_creative_explorer_name": "Creative Explorer",
-  "hero_tree_creative_explorer_desc": "A hero who combines imagination with the desire to know; every step is a new invention.",
-  "hero_tree_creative_explorer_story": "For the Creative Explorer, the map is drawn as it is walked, turning the unknown into a work of art.",
+  "hero_tree_creative_explorer_desc": "Adventurous and inventive, always finding new paths.",
+  "hero_tree_creative_explorer_story": "The Creative Explorer charts unknown lands with imagination and curiosity.",
 
   "hero_tree_guard_cat_name": "Guard Cat",
-  "hero_tree_guard_cat_desc": "An adventurous protector who explores with caution.",
-  "hero_tree_guard_cat_story": "The Guard Cat knows every corner of its territory, ensuring that curiosity is satisfied without compromising safety.",
+  "hero_tree_guard_cat_desc": "A protective hybrid, attentive and vigilant.",
+  "hero_tree_guard_cat_story": "The Guard Cat keeps watch, blending caution and curiosity in every move.",
 
   "hero_tree_wise_pegasus_name": "Wise Pegasus",
-  "hero_tree_wise_pegasus_desc": "A guardian of knowledge who can fly beyond limits.",
-  "hero_tree_wise_pegasus_story": "The Wise Pegasus carries thoughts on its wings, turning abstract ideas into soaring realities.",
+  "hero_tree_wise_pegasus_desc": "A majestic creature of intellect and creativity.",
+  "hero_tree_wise_pegasus_story": "The Wise Pegasus flies through challenges, offering guidance and inspiration.",
 
   "hero_tree_thoughtful_guardian_name": "Thoughtful Guardian",
-  "hero_tree_thoughtful_guardian_desc": "A hero who plans before acting; safety comes from well-thought-out strategies.",
-  "hero_tree_thoughtful_guardian_story": "The Thoughtful Guardian builds fortresses not of stone, but of logic and foresight.",
+  "hero_tree_thoughtful_guardian_desc": "A careful thinker, combining safety with wisdom.",
+  "hero_tree_thoughtful_guardian_story": "This hero balances prudence and intelligence to protect the realm.",
 
   "hero_tree_creative_guardian_name": "Creative Guardian",
-  "hero_tree_creative_guardian_desc": "An inventive protector who finds original solutions to ensure safety.",
-  "hero_tree_creative_guardian_story": "The Creative Guardian protects the world not by building walls, but by imagining a world where they are not needed.",
+  "hero_tree_creative_guardian_desc": "A guardian blending imagination with caution.",
+  "hero_tree_creative_guardian_story": "The Creative Guardian defends while inspiring inventive solutions.",
 
-  "hero_tree_alchimalian_dragon_name": "Legendary Alchimalian Dragon",
-  "hero_tree_alchimalian_dragon_desc": "The legendary dragon that embodies the perfection of all heroic traits...",
-  "hero_tree_alchimalian_dragon_story": "The Legendary Alchimalian Dragon embodies the perfection of cosmic balance."
+  "hero_tree_alchimalian_dragon_name": "Alchimalian Dragon",
+  "hero_tree_alchimalian_dragon_desc": "The ultimate hero, embodying all traits to perfection.",
+  "hero_tree_alchimalian_dragon_story": "This mighty dragon represents the pinnacle of courage, curiosity, thinking, creativity, and safety."
 }

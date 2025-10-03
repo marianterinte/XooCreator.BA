@@ -13,9 +13,15 @@
       "nameKey": "hero_tree_alchimalia_hero_name",
       "descriptionKey": "hero_tree_alchimalia_hero_desc",
       "storyKey": "hero_tree_alchimalia_hero_story",
-      "image": "images/heroes/alchimalia.jpg",
+      "image": "images/toh/heroes/alchimalia_hero.jpg",
       "type": "hero",
-      "costs": { "courage": 0, "curiosity": 0, "thinking": 0, "creativity": 0, "safety": 0 },
+      "costs": {
+        "courage": 0,
+        "curiosity": 0,
+        "thinking": 0,
+        "creativity": 0,
+        "safety": 0
+      },
       "prerequisites": [],
       "positionX": 0,
       "positionY": 0
@@ -25,70 +31,288 @@
       "nameKey": "hero_tree_brave_puppy_name",
       "descriptionKey": "hero_tree_brave_puppy_desc",
       "storyKey": "hero_tree_brave_puppy_story",
-      "image": "images/heroes/hero0.jpg",
+      "image": "images/toh/heroes/hero_brave_puppy.jpg",
       "type": "hero",
-      "costs": { "courage": 1, "curiosity": 0, "thinking": 0, "creativity": 0, "safety": 0 },
-      "prerequisites": ["alchimalia_hero"],
+      "costs": {
+        "courage": 1,
+        "curiosity": 0,
+        "thinking": 0,
+        "creativity": 0,
+        "safety": 0
+      },
+      "prerequisites": [ "alchimalia_hero" ],
       "positionX": -150,
       "positionY": -200
+    },
+    {
+      "id": "hero_brave_pup_lvl2",
+      "nameKey": "hero_tree_brave_pup_lvl2_name",
+      "descriptionKey": "hero_tree_brave_pup_lvl2_desc",
+      "storyKey": "hero_tree_brave_pup_lvl2_story",
+      "image": "images/toh/heroes/hero_brave_pup_lvl2.jpg",
+      "type": "hero",
+      "costs": {
+        "courage": 2,
+        "curiosity": 0,
+        "thinking": 0,
+        "creativity": 0,
+        "safety": 0
+      },
+      "prerequisites": [ "hero_brave_puppy" ],
+      "positionX": -150,
+      "positionY": -280
+    },
+    {
+      "id": "hero_brave_pup_lvl3",
+      "nameKey": "hero_tree_brave_pup_lvl3_name",
+      "descriptionKey": "hero_tree_brave_pup_lvl3_desc",
+      "storyKey": "hero_tree_brave_pup_lvl3_story",
+      "image": "images/toh/heroes/hero_brave_pup_lvl3.jpg",
+      "type": "hero",
+      "costs": {
+        "courage": 3,
+        "curiosity": 0,
+        "thinking": 0,
+        "creativity": 0,
+        "safety": 0
+      },
+      "prerequisites": [ "hero_brave_pup_lvl2" ],
+      "positionX": -150,
+      "positionY": -360
     },
     {
       "id": "hero_curious_cat",
       "nameKey": "hero_tree_curious_cat_name",
       "descriptionKey": "hero_tree_curious_cat_desc",
       "storyKey": "hero_tree_curious_cat_story",
-      "image": "images/heroes/hero1.jpg",
+      "image": "images/toh/heroes/hero_curious_cat.jpg",
       "type": "hero",
-      "costs": { "courage": 0, "curiosity": 1, "thinking": 0, "creativity": 0, "safety": 0 },
-      "prerequisites": ["alchimalia_hero"],
+      "costs": {
+        "courage": 0,
+        "curiosity": 1,
+        "thinking": 0,
+        "creativity": 0,
+        "safety": 0
+      },
+      "prerequisites": [ "alchimalia_hero" ],
       "positionX": 150,
       "positionY": -200
+    },
+    {
+      "id": "hero_curious_cat_lvl2",
+      "nameKey": "hero_tree_curious_cat_lvl2_name",
+      "descriptionKey": "hero_tree_curious_cat_lvl2_desc",
+      "storyKey": "hero_tree_curious_cat_lvl2_story",
+      "image": "images/toh/heroes/hero_curious_cat_lvl2.jpg",
+      "type": "hero",
+      "costs": {
+        "courage": 0,
+        "curiosity": 2,
+        "thinking": 0,
+        "creativity": 0,
+        "safety": 0
+      },
+      "prerequisites": [ "hero_curious_cat" ],
+      "positionX": 150,
+      "positionY": -280
+    },
+    {
+      "id": "hero_curious_cat_lvl3",
+      "nameKey": "hero_tree_curious_cat_lvl3_name",
+      "descriptionKey": "hero_tree_curious_cat_lvl3_desc",
+      "storyKey": "hero_tree_curious_cat_lvl3_story",
+      "image": "images/toh/heroes/hero_curious_cat_lvl3.jpg",
+      "type": "hero",
+      "costs": {
+        "courage": 0,
+        "curiosity": 3,
+        "thinking": 0,
+        "creativity": 0,
+        "safety": 0
+      },
+      "prerequisites": [ "hero_curious_cat_lvl2" ],
+      "positionX": 150,
+      "positionY": -360
     },
     {
       "id": "hero_wise_owl",
       "nameKey": "hero_tree_wise_owl_name",
       "descriptionKey": "hero_tree_wise_owl_desc",
       "storyKey": "hero_tree_wise_owl_story",
-      "image": "images/heroes/hero2.jpg",
+      "image": "images/toh/heroes/hero_wise_owl.jpg",
       "type": "hero",
-      "costs": { "courage": 0, "curiosity": 0, "thinking": 1, "creativity": 0, "safety": 0 },
-      "prerequisites": ["alchimalia_hero"],
+      "costs": {
+        "courage": 0,
+        "curiosity": 0,
+        "thinking": 1,
+        "creativity": 0,
+        "safety": 0
+      },
+      "prerequisites": [ "alchimalia_hero" ],
       "positionX": 0,
       "positionY": -220
     },
+    {
+      "id": "hero_wise_owl_lvl2",
+      "nameKey": "hero_tree_wise_owl_lvl2_name",
+      "descriptionKey": "hero_tree_wise_owl_lvl2_desc",
+      "storyKey": "hero_tree_wise_owl_lvl2_story",
+      "image": "images/toh/heroes/hero_wise_owl_lvl2.jpg",
+      "type": "hero",
+      "costs": {
+        "courage": 0,
+        "curiosity": 0,
+        "thinking": 2,
+        "creativity": 0,
+        "safety": 0
+      },
+      "prerequisites": [ "hero_wise_owl" ],
+      "positionX": 0,
+      "positionY": -300
+    },
+    {
+      "id": "hero_wise_owl_lvl3",
+      "nameKey": "hero_tree_wise_owl_lvl3_name",
+      "descriptionKey": "hero_tree_wise_owl_lvl3_desc",
+      "storyKey": "hero_tree_wise_owl_lvl3_story",
+      "image": "images/toh/heroes/hero_wise_owl_lvl3.jpg",
+      "type": "hero",
+      "costs": {
+        "courage": 0,
+        "curiosity": 0,
+        "thinking": 3,
+        "creativity": 0,
+        "safety": 0
+      },
+      "prerequisites": [ "hero_wise_owl_lvl2" ],
+      "positionX": 0,
+      "positionY": -380
+    },
+
     {
       "id": "hero_playful_horse",
       "nameKey": "hero_tree_playful_horse_name",
       "descriptionKey": "hero_tree_playful_horse_desc",
       "storyKey": "hero_tree_playful_horse_story",
-      "image": "images/hero-tree/herotree1.jpg",
+      "image": "images/toh/heroes/hero_playful_horse.jpg",
       "type": "hero",
-      "costs": { "courage": 0, "curiosity": 0, "thinking": 0, "creativity": 1, "safety": 0 },
-      "prerequisites": ["alchimalia_hero"],
+      "costs": {
+        "courage": 0,
+        "curiosity": 0,
+        "thinking": 0,
+        "creativity": 1,
+        "safety": 0
+      },
+      "prerequisites": [ "alchimalia_hero" ],
       "positionX": -200,
       "positionY": -280
     },
+    {
+      "id": "hero_playful_horse_lvl2",
+      "nameKey": "hero_tree_playful_horse_lvl2_name",
+      "descriptionKey": "hero_tree_playful_horse_lvl2_desc",
+      "storyKey": "hero_tree_playful_horse_lvl2_story",
+      "image": "images/toh/heroes/hero_playful_horse_lvl2.jpg",
+      "type": "hero",
+      "costs": {
+        "courage": 0,
+        "curiosity": 0,
+        "thinking": 0,
+        "creativity": 2,
+        "safety": 0
+      },
+      "prerequisites": [ "hero_playful_horse" ],
+      "positionX": -200,
+      "positionY": -360
+    },
+    {
+      "id": "hero_playful_horse_lvl3",
+      "nameKey": "hero_tree_playful_horse_lvl3_name",
+      "descriptionKey": "hero_tree_playful_horse_lvl3_desc",
+      "storyKey": "hero_tree_playful_horse_lvl3_story",
+      "image": "images/toh/heroes/hero_playful_horse_lvl3.jpg",
+      "type": "hero",
+      "costs": {
+        "courage": 0,
+        "curiosity": 0,
+        "thinking": 0,
+        "creativity": 3,
+        "safety": 0
+      },
+      "prerequisites": [ "hero_playful_horse_lvl2" ],
+      "positionX": -200,
+      "positionY": -440
+    },
+
     {
       "id": "hero_cautious_hedgehog",
       "nameKey": "hero_tree_cautious_hedgehog_name",
       "descriptionKey": "hero_tree_cautious_hedgehog_desc",
       "storyKey": "hero_tree_cautious_hedgehog_story",
-      "image": "images/hero-tree/herotree2.jpg",
+      "image": "images/toh/heroes/hero_cautious_hedgehog.jpg",
       "type": "hero",
-      "costs": { "courage": 0, "curiosity": 0, "thinking": 0, "creativity": 0, "safety": 1 },
-      "prerequisites": ["alchimalia_hero"],
+      "costs": {
+        "courage": 0,
+        "curiosity": 0,
+        "thinking": 0,
+        "creativity": 0,
+        "safety": 1
+      },
+      "prerequisites": [ "alchimalia_hero" ],
       "positionX": 200,
       "positionY": -280
+    },
+    {
+      "id": "hero_shieldquill",
+      "nameKey": "hero_tree_shieldquill_name",
+      "descriptionKey": "hero_tree_shieldquill_desc",
+      "storyKey": "hero_tree_shieldquill_story",
+      "image": "images/toh/heroes/hero_shieldquill.jpg",
+      "type": "hero",
+      "costs": {
+        "courage": 0,
+        "curiosity": 0,
+        "thinking": 0,
+        "creativity": 0,
+        "safety": 2
+      },
+      "prerequisites": [ "hero_cautious_hedgehog" ],
+      "positionX": 200,
+      "positionY": -380
+    },
+    {
+      "id": "hero_wardenspike",
+      "nameKey": "hero_tree_wardenspike_name",
+      "descriptionKey": "hero_tree_wardenspike_desc",
+      "storyKey": "hero_tree_wardenspike_story",
+      "image": "images/toh/heroes/hero_wardenspike.jpg",
+      "type": "hero",
+      "costs": {
+        "courage": 0,
+        "curiosity": 0,
+        "thinking": 0,
+        "creativity": 0,
+        "safety": 3
+      },
+      "prerequisites": [ "hero_shieldquill" ],
+      "positionX": 200,
+      "positionY": -480
     },
     {
       "id": "hero_catdog_interstellar",
       "nameKey": "hero_tree_catdog_interstellar_name",
       "descriptionKey": "hero_tree_catdog_interstellar_desc",
       "storyKey": "hero_tree_catdog_interstellar_story",
-      "image": "images/heroes/hybrid_cat-bunny.jpg",
+      "image": "images/toh/heroes/hero_catdog_interstellar.jpg",
       "type": "hero",
-      "costs": { "courage": 1, "curiosity": 1, "thinking": 0, "creativity": 0, "safety": 0 },
-      "prerequisites": ["hero_brave_puppy", "hero_curious_cat"],
+      "costs": {
+        "courage": 1,
+        "curiosity": 1,
+        "thinking": 0,
+        "creativity": 0,
+        "safety": 0
+      },
+      "prerequisites": [ "hero_brave_puppy", "hero_curious_cat" ],
       "positionX": 0,
       "positionY": -350
     },
@@ -97,10 +321,15 @@
       "nameKey": "hero_tree_brave_sage_name",
       "descriptionKey": "hero_tree_brave_sage_desc",
       "storyKey": "hero_tree_brave_sage_story",
-      "image": "images/heroes/hybrid-elephant-fox.jpg",
+      "image": "images/toh/heroes/hero_brave_sage.jpg",
       "type": "hero",
-      "costs": { "courage": 1, "thinking": 1, "creativity": 0, "safety": 0 },
-      "prerequisites": ["hero_brave_puppy", "hero_wise_owl"],
+      "costs": {
+        "courage": 1,
+        "thinking": 1,
+        "creativity": 0,
+        "safety": 0
+      },
+      "prerequisites": [ "hero_brave_puppy", "hero_wise_owl" ],
       "positionX": -180,
       "positionY": -380
     },
@@ -109,10 +338,15 @@
       "nameKey": "hero_tree_brave_artist_name",
       "descriptionKey": "hero_tree_brave_artist_desc",
       "storyKey": "hero_tree_brave_artist_story",
-      "image": "images/heroes/hybrid-rabbit-girafe.jpg",
+      "image": "images/toh/heroes/hero_brave_artist.jpg",
       "type": "hero",
-      "costs": { "courage": 1, "creativity": 1, "thinking": 0, "safety": 0 },
-      "prerequisites": ["hero_brave_puppy", "hero_playful_horse"],
+      "costs": {
+        "courage": 1,
+        "creativity": 1,
+        "thinking": 0,
+        "safety": 0
+      },
+      "prerequisites": [ "hero_brave_puppy", "hero_playful_horse" ],
       "positionX": -250,
       "positionY": -420
     },
@@ -121,10 +355,15 @@
       "nameKey": "hero_tree_brave_guardian_name",
       "descriptionKey": "hero_tree_brave_guardian_desc",
       "storyKey": "hero_tree_brave_guardian_story",
-      "image": "images/heroes/hybrid_giraffe-cat.jpg",
+      "image": "images/toh/heroes/hero_brave_guardian.jpg",
       "type": "hero",
-      "costs": { "courage": 1, "safety": 1, "thinking": 0, "creativity": 0 },
-      "prerequisites": ["hero_brave_puppy", "hero_cautious_hedgehog"],
+      "costs": {
+        "courage": 1,
+        "safety": 1,
+        "thinking": 0,
+        "creativity": 0
+      },
+      "prerequisites": [ "hero_brave_puppy", "hero_cautious_hedgehog" ],
       "positionX": 0,
       "positionY": -400
     },
@@ -133,10 +372,15 @@
       "nameKey": "hero_tree_wise_researcher_name",
       "descriptionKey": "hero_tree_wise_researcher_desc",
       "storyKey": "hero_tree_wise_researcher_story",
-      "image": "images/heroes/hybrid_duckfox.jpg",
+      "image": "images/toh/heroes/hero_wise_researcher.jpg",
       "type": "hero",
-      "costs": { "curiosity": 1, "thinking": 1, "creativity": 0, "safety": 0 },
-      "prerequisites": ["hero_curious_cat", "hero_wise_owl"],
+      "costs": {
+        "curiosity": 1,
+        "thinking": 1,
+        "creativity": 0,
+        "safety": 0
+      },
+      "prerequisites": [ "hero_curious_cat", "hero_wise_owl" ],
       "positionX": 180,
       "positionY": -380
     },
@@ -145,10 +389,15 @@
       "nameKey": "hero_tree_creative_explorer_name",
       "descriptionKey": "hero_tree_creative_explorer_desc",
       "storyKey": "hero_tree_creative_explorer_story",
-      "image": "images/heroes/hybrid_giraffe_cat.jpg",
+      "image": "images/toh/heroes/hero_creative_explorer.jpg",
       "type": "hero",
-      "costs": { "curiosity": 1, "creativity": 1, "thinking": 0, "safety": 0 },
-      "prerequisites": ["hero_curious_cat", "hero_playful_horse"],
+      "costs": {
+        "curiosity": 1,
+        "creativity": 1,
+        "thinking": 0,
+        "safety": 0
+      },
+      "prerequisites": [ "hero_curious_cat", "hero_playful_horse" ],
       "positionX": -80,
       "positionY": -450
     },
@@ -157,10 +406,15 @@
       "nameKey": "hero_tree_guard_cat_name",
       "descriptionKey": "hero_tree_guard_cat_desc",
       "storyKey": "hero_tree_guard_cat_story",
-      "image": "images/heroes/hybrid_bunny_cat.jpg",
+      "image": "images/toh/heroes/hero_guard_cat.jpg",
       "type": "hero",
-      "costs": { "curiosity": 1, "safety": 1, "thinking": 0, "creativity": 0 },
-      "prerequisites": ["hero_curious_cat", "hero_cautious_hedgehog"],
+      "costs": {
+        "curiosity": 1,
+        "safety": 1,
+        "thinking": 0,
+        "creativity": 0
+      },
+      "prerequisites": [ "hero_curious_cat", "hero_cautious_hedgehog" ],
       "positionX": 250,
       "positionY": -420
     },
@@ -169,10 +423,15 @@
       "nameKey": "hero_tree_wise_pegasus_name",
       "descriptionKey": "hero_tree_wise_pegasus_desc",
       "storyKey": "hero_tree_wise_pegasus_story",
-      "image": "images/heroes/hybrid-giraffe_cat.jpg",
+      "image": "images/toh/heroes/hero_wise_pegasus.jpg",
       "type": "hero",
-      "costs": { "thinking": 1, "creativity": 1, "courage": 0, "safety": 0 },
-      "prerequisites": ["hero_wise_owl", "hero_playful_horse"],
+      "costs": {
+        "thinking": 1,
+        "creativity": 1,
+        "courage": 0,
+        "safety": 0
+      },
+      "prerequisites": [ "hero_wise_owl", "hero_playful_horse" ],
       "positionX": 80,
       "positionY": -450
     },
@@ -181,10 +440,15 @@
       "nameKey": "hero_tree_thoughtful_guardian_name",
       "descriptionKey": "hero_tree_thoughtful_guardian_desc",
       "storyKey": "hero_tree_thoughtful_guardian_story",
-      "image": "images/heroes/hybrid-elephant-fox.jpg",
+      "image": "images/toh/heroes/hero_thoughtful_guardian.jpg",
       "type": "hero",
-      "costs": { "thinking": 1, "safety": 1, "courage": 0, "creativity": 0 },
-      "prerequisites": ["hero_wise_owl", "hero_cautious_hedgehog"],
+      "costs": {
+        "thinking": 1,
+        "safety": 1,
+        "courage": 0,
+        "creativity": 0
+      },
+      "prerequisites": [ "hero_wise_owl", "hero_cautious_hedgehog" ],
       "positionX": 150,
       "positionY": -500
     },
@@ -193,10 +457,15 @@
       "nameKey": "hero_tree_creative_guardian_name",
       "descriptionKey": "hero_tree_creative_guardian_desc",
       "storyKey": "hero_tree_creative_guardian_story",
-      "image": "images/heroes/hybrid_giraffe-cat.jpg",
+      "image": "images/toh/heroes/hero_creative_guardian.jpg",
       "type": "hero",
-      "costs": { "creativity": 1, "safety": 1, "courage": 0, "thinking": 0 },
-      "prerequisites": ["hero_playful_horse", "hero_cautious_hedgehog"],
+      "costs": {
+        "creativity": 1,
+        "safety": 1,
+        "courage": 0,
+        "thinking": 0
+      },
+      "prerequisites": [ "hero_playful_horse", "hero_cautious_hedgehog" ],
       "positionX": -150,
       "positionY": -500
     },
@@ -205,9 +474,15 @@
       "nameKey": "hero_tree_alchimalian_dragon_name",
       "descriptionKey": "hero_tree_alchimalian_dragon_desc",
       "storyKey": "hero_tree_alchimalian_dragon_story",
-      "image": "images/hero-tree/herotree3.jpg",
+      "image": "images/toh/heroes/hero_alchimalian_dragon.jpg",
       "type": "hero",
-      "costs": { "courage": 5, "curiosity": 5, "thinking": 5, "creativity": 5, "safety": 5 },
+      "costs": {
+        "courage": 5,
+        "curiosity": 5,
+        "thinking": 5,
+        "creativity": 5,
+        "safety": 5
+      },
       "prerequisites": [
         "hero_brave_puppy",
         "hero_curious_cat",

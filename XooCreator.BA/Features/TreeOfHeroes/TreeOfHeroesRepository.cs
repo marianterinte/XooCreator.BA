@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using XooCreator.BA.Data;
 using XooCreator.BA.Features.TreeOfLight;
+using XooCreator.BA.Services;
 
 namespace XooCreator.BA.Features.TreeOfHeroes;
 
@@ -24,10 +25,12 @@ public interface ITreeOfHeroesRepository
 public class TreeOfHeroesRepository : ITreeOfHeroesRepository
 {
     private readonly XooDbContext _context;
+    private readonly IHeroTreeProvider _heroTreeProvider;
 
-    public TreeOfHeroesRepository(XooDbContext context)
+    public TreeOfHeroesRepository(XooDbContext context, IHeroTreeProvider heroTreeProvider)
     {
         _context = context;
+        _heroTreeProvider = heroTreeProvider;
     }
 
     public async Task<UserTokensDto> GetUserTokensAsync(Guid userId)
@@ -244,9 +247,31 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
         };
     }
 
-    public Task<TreeOfHeroesConfigDto> GetTreeOfHeroesConfigAsync()
+    public async Task<TreeOfHeroesConfigDto> GetTreeOfHeroesConfigAsync()
     {
-        // Static configuration - can be moved to database later
+        var heroTree = await _heroTreeProvider.GetHeroTree(LanguageCode.RoRo);
+        var heroTreeStructure = await _heroTreeProvider.GetHeroTreeStructure();
+
+        var heroImages = heroTree?.Nodes.Select(n => new HeroImageDto
+        {
+            Id = n.Id,
+            Name = n.Name,
+            Image = n.Image
+        }).ToList() ?? new List<HeroImageDto>();
+
+        var canonicalHybridByPair = new Dictionary<string, string>();
+        if (heroTreeStructure != null)
+        {
+            foreach (var node in heroTreeStructure.Nodes)
+            {
+                if (node.Prerequisites != null && node.Prerequisites.Count == 2)
+                {
+                    var key = string.Join("|", node.Prerequisites.OrderBy(p => p));
+                    canonicalHybridByPair[key] = node.Id;
+                }
+            }
+        }
+
         var config = new TreeOfHeroesConfigDto
         {
             Tokens = new List<TokenConfigDto>
@@ -257,31 +282,12 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
                 new() { Id = "token_creativity", Label = "Creativitate", Trait = "creativity", Icon = "🎨", Angle = -Math.PI * 0.75 },
                 new() { Id = "token_safety", Label = "Siguranță", Trait = "safety", Icon = "🛡️", Angle = -Math.PI * 0.95 }
             },
-            HeroImages = new List<HeroImageDto>
-            {
-                new() { Id = "hero_brave_puppy", Name = "Cățelul Curajos", Image = "images/heroes/hero0.jpg" },
-                new() { Id = "hero_curious_cat", Name = "Pisica Curioasă", Image = "images/heroes/hero1.jpg" },
-                new() { Id = "hero_wise_owl", Name = "Bufnița Înțeleaptă", Image = "images/heroes/hero2.jpg" },
-                new() { Id = "hero_playful_horse", Name = "Căluțul Jucăuș", Image = "images/hero-tree/herotree1.jpg" },
-                new() { Id = "hero_cautious_hedgehog", Name = "Ariciul Precaut", Image = "images/hero-tree/herotree2.jpg" },
-                new() { Id = "hero_creative_guardian", Name = "Gardianul Creativ", Image = "images/heroes/hybrid_giraffe-cat.jpg" },
-                new() { Id = "hero_alchimalian_dragon", Name = "Dragonul Alchimalian", Image = "images/hero-tree/herotree3.jpg" }
-            },
-            BaseHeroIds = new List<string>
-            {
-                "hero_brave_puppy",
-                "hero_curious_cat", 
-                "hero_wise_owl",
-                "hero_playful_horse",
-                "hero_cautious_hedgehog"
-            },
-            CanonicalHybridByPair = new Dictionary<string, string>
-            {
-                { "hero_cautious_hedgehog|hero_playful_horse", "hero_creative_guardian" }
-            }
+            HeroImages = heroImages,
+            BaseHeroIds = heroTree?.BaseHeroIds ?? new List<string>(),
+            CanonicalHybridByPair = canonicalHybridByPair
         };
 
-        return Task.FromResult(config);
+        return config;
     }
 
     public async Task<bool> SaveHeroProgressAsync(Guid userId, string heroId)
