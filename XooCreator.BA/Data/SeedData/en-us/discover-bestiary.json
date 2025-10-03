@@ -133,27 +133,6 @@
     "ImageFileName": "HippoNoneGiraffe.jpg"
   },
   {
-    "Combination": "NoneHippoBunny",
-    "Name": "Hippunny",
-    "ImagePrompt": "An anthropomorphic hybrid character with the body of a hippo and the head of a bunny, no arms visible. The hippo torso is massive, glowing with pearly waves. The bunny head is soft, glowing with pastel magical light, with long ears sparkling with runes. The character wears a robe embroidered with spirals and constellations. Its eyes shine violet and jade, mischievous yet kind. The background is a magical pond surrounded by glowing mushrooms. The style is whimsical, vibrant, cartoon-like, fantasy.",
-    "Story": "The Hippunny appeared when a bunny fell asleep on a hippo's back under the rays of the Tree of Light. Magic united them and gave birth to a peaceful and courageous creature. The Hippunny is known as a spirit of friendship and play, bringing smiles wherever it goes.",
-    "ImageFileName": "NoneHippoBunny.jpg"
-  },
-  {
-    "Combination": "NoneBunnyGiraffe",
-    "Name": "Bunnirafa",
-    "ImagePrompt": "An anthropomorphic hybrid character with the body of a bunny and the head of a giraffe, no arms visible. The bunny torso is small, pastel-colored, glowing with gentle magical light. The giraffe head is tall, golden, with glowing amber patterns. The character wears a robe embroidered with rainbow spirals and blossoms. Its eyes shine turquoise and emerald, playful and wise. The background is a magical meadow filled with glowing flowers beneath a starry sky. The style is whimsical, colorful, fantasy, cartoon-like.",
-    "Story": "The Bunnirafa was born when a bunny asked for a giraffe's help to watch over a clearing. The Tree of Light united their souls and created this unique being. The Bunnirafa is a spirit of vigilance and compassion, always present to bring balance between fragility and greatness.",
-    "ImageFileName": "NoneBunnyGiraffe.jpg"
-  },
-  {
-    "Combination": "BunnyHippoGiraffe",
-    "Name": "Bunnyppogiraffe",
-    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a bunny, the body of a hippo, and the head of a giraffe. The bunny arms are soft, glowing with pastel magical light. The hippo torso is massive, gray, glowing with pearly waves. The giraffe head is golden with shimmering amber runes. The character wears a robe embroidered with moons and stars. Its eyes shine violet and jade, filled with curiosity. The background is a magical riverbank under enchanted constellations. The style is whimsical, colorful, cartoonish, fantasy.",
-    "Story": "The Bunnyppogiraffe is the result of a friendship between three creatures who fought together to save a branch of the Tree of Light. From their unity, a being was born that carries the agility of the bunny, the power of the hippo, and the vision of the giraffe. The Bunnyppogiraffe is a spirit of unity and trust.",
-    "ImageFileName": "BunnyHippoGiraffe.jpg"
-  },
-  {
     "Combination": "HippoGiraffeBunny",
     "Name": "Hippogirabbit",
     "ImagePrompt": "An anthropomorphic hybrid character with the arms of a hippo, the body of a giraffe, and the head of a bunny. The hippo arms are gray, massive, glowing faintly with magical light. The giraffe torso is tall, golden, patterned with glowing amber spots. The bunny head is white, with long glowing ears. The character wears a robe embroidered with rivers and constellations. Its eyes shine turquoise and amber, gentle and curious. The background is a glowing savanna filled with enchanted fireflies. The style is whimsical, vibrant, cartoon-like, fantasy.",
@@ -168,74 +147,11 @@
     "ImageFileName": "GiraffeBunnyHippo.jpg"
   },
   {
-    "Combination": "NoneHippoGiraffe",
-    "Name": "Hipporaf",
-    "ImagePrompt": "An anthropomorphic hybrid character with the body of a hippo and the head of a giraffe, no arms visible. The hippo torso is strong and gray, shimmering with magical pearly light. The giraffe head is tall, golden, glowing with amber constellations. The character wears a robe patterned with rainbow stars and blossoms. Its eyes shine emerald and turquoise, filled with wisdom. The background is a glowing savanna with enchanted flowers under a starry sky. The style is whimsical, vibrant, fantasy, cartoon-like.",
-    "Story": "The Hipporaf was born when a hippo requested the height of a giraffe to watch further. The Tree of Light answered by uniting them into a unique being. The Hipporaf is a spirit of vigilance and resilience, bringing protection and hope.",
-    "ImageFileName": "NoneHippoGiraffe.jpg"
-  },
-  {
-    "Combination": "HippoGiraffeNone",
-    "Name": "Hippogaf",
-    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a hippo and the body of a giraffe, no head visible. The hippo arms are massive, gray, glowing faintly with magical ripples. The giraffe torso is tall and golden, patterned with glowing amber spots. The character wears a cloak embroidered with moons and lotus flowers. Its eyes shine emerald green, radiating calm strength. The background is a glowing savanna under enchanted stars. The style is whimsical, vibrant, cartoonish, fantasy.",
-    "Story": "The Hippogaf was born when a hippo and a giraffe defended a branch of the Tree of Light together. From their sacrifice, the tree united them into a single body. The Hippogaf is a spirit of resilience and clarity, able to protect and watch over the lost.",
-    "ImageFileName": "HippoGiraffeNone.jpg"
-  },
-  {
-    "Combination": "BunnyNoneGiraffe",
-    "Name": "Bunnygaf",
-    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a bunny and the body of a giraffe, no head visible. The bunny arms are small, soft, glowing with pastel magical light. The giraffe torso is tall and golden, shimmering with amber runes. The character wears a robe embroidered with stars and flowers. Its eyes shine turquoise and violet, playful and bright. The background is a magical meadow glowing with enchanted flowers. The style is whimsical, colorful, fantasy, cartoon-like.",
-    "Story": "The Bunnygaf appeared when a bunny wished to see the world from above through the eyes of a giraffe. The Tree of Light united their desire into a single body. The Bunnygaf is a spirit of curiosity and friendship, inspiring the little ones to dream bigger.",
-    "ImageFileName": "BunnyNoneGiraffe.jpg"
-  },
-  {
     "Combination": "NoneGiraffeBunny",
     "Name": "Giraffunny",
     "ImagePrompt": "An anthropomorphic hybrid character with the body of a giraffe and the head of a bunny, no arms visible. The giraffe torso is golden, tall, glowing with amber constellations. The bunny head is soft, white, glowing with pastel light and long ears sparkling with magical runes. The character wears a cloak embroidered with blossoms and spirals. Its eyes shine jade and turquoise, full of cheer. The background is an enchanted savanna filled with glowing mushrooms. The style is whimsical, colorful, fantasy, cartoonish.",
     "Story": "The Giraffunny was born when a bunny climbed onto a giraffe's shoulders to look at the sky. The Tree of Light saw their joy and united them into a common body. The Giraffunny is a playful and friendly spirit, bringing cheerfulness and hope everywhere.",
     "ImageFileName": "NoneGiraffeBunny.jpg"
-  },
-  {
-    "Combination": "HippoBunnyGiraffe",
-    "Name": "Hipponaf",
-    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a hippo, the body of a bunny, and the head of a giraffe. The hippo arms are strong and gray, glowing faintly with magic. The bunny torso is agile, glowing pastel. The giraffe head is golden and tall, patterned with glowing amber runes. The character wears a robe embroidered with moons and constellations. Its eyes shine emerald and violet, wise and playful. The background is a fantastical meadow-savana crossing under a starlit sky. The style is whimsical, vibrant, cartoon-like, fantasy.",
-    "Story": "The Hipponaf appeared when a hippo, a bunny, and a giraffe formed an impossible friendship. The Tree of Light united them to show that differences can become strengths. The Hipponaf is a spirit of collaboration and friendship, a cheerful protector of the branches.",
-    "ImageFileName": "HippoBunnyGiraffe.jpg"
-  },
-  {
-    "Combination": "BunnyGiraffeHippo",
-    "Name": "Bunnygiraffoppo",
-    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a bunny, the body of a giraffe, and the head of a hippo. The bunny arms are soft and glowing with pastel light. The giraffe torso is tall, golden, patterned with glowing amber spots. The hippo head is gray and calm, shimmering with pearly waves. The character wears a robe decorated with stars and lotus motifs. Its eyes shine turquoise and jade, playful yet wise. The background is a glowing savanna-meadow crossing under enchanted skies. The style is whimsical, colorful, fantasy, cartoonish.",
-    "Story": "The Bunnygiraffoppo was born from an alliance between a brave bunny, a wise giraffe, and a strong hippo. The Tree of Light united them into a single body to watch over the fragile branches. The Bunnygiraffoppo is a spirit of unity and hope, bringing balance between speed, height, and strength.",
-    "ImageFileName": "BunnyGiraffeHippo.jpg"
-  },
-  {
-    "Combination": "NoneBunnyHippo",
-    "Name": "Bunnyppotam",
-    "ImagePrompt": "An anthropomorphic hybrid character with the body of a bunny and the head of a hippo, no arms visible. The bunny torso is small, pastel, glowing with magical light. The hippo head is gray, massive, glowing with pearly ripples. The character wears a robe embroidered with moons and flowers. Its eyes shine emerald and turquoise, calm and kind. The background is a glowing meadow near a magical pond. The style is whimsical, vibrant, cartoon-like, fantasy.",
-    "Story": "The Bunnyppotam appeared when a bunny asked for a hippo's protection to defend its meadow. The Tree of Light united them into a common body. The Bunnyppotam is a protective and gentle spirit, bringing peace to the frightened.",
-    "ImageFileName": "NoneBunnyHippo.jpg"
-  },
-  {
-    "Combination": "GiraffeNoneHippo",
-    "Name": "Giraffotamiel",
-    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a giraffe and the head of a hippo, no torso visible. The giraffe arms are long, golden, glowing with runes. The hippo head is gray, massive, shimmering with magical calmness. The character wears a cloak decorated with starlight and river motifs. Its eyes shine sapphire and jade, steady and gentle. The background is a magical savanna with glowing ponds under constellations. The style is whimsical, colorful, fantasy, cartoon-like.",
-    "Story": "The Giraffotamiel was born when a giraffe looked up at the stars and a hippo sang in the deep waters. The Tree of Light united their song and dream into a common body. The Giraffotamiel is a spirit of harmony and tranquility, bringing peace between sky and water.",
-    "ImageFileName": "GiraffeNoneHippo.jpg"
-  },
-  {
-    "Combination": "HippoNoneBunny",
-    "Name": "Hippopurel",
-    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a hippo and the head of a bunny, no torso visible. The hippo arms are gray, powerful, glowing faintly with magical light. The bunny head is soft, white, glowing with pastel colors, with long ears shimmering with runes. The character wears a robe embroidered with flowers and constellations. Its eyes shine violet and turquoise, playful and bright. The background is a whimsical meadow with enchanted mushrooms. The style is colorful, whimsical, fantasy, cartoon-like.",
-    "Story": "The Hippopurel emerged when a bunny and a hippo hid together from the shadows. The Tree of Light united their souls to create a playful protector. The Hippopurel is a cheerful but determined spirit, ready to defend the light.",
-    "ImageFileName": "HippoNoneBunny.jpg"
-  },
-  {
-    "Combination": "HippoBunnyNone",
-    "Name": "Hipponelus",
-    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a hippo and the body of a bunny, no head visible. The hippo arms are gray, massive, glowing with faint magical ripples. The bunny torso is small, agile, glowing pastel. The character wears a robe embroidered with moons and rainbow spirals. Its eyes shine violet and jade, playful yet calm. The background is a glowing meadow filled with enchanted flowers. The style is whimsical, vibrant, fantasy, cartoonish.",
-    "Story": "The Hipponelus was born when a hippo and a bunny shared the same burrow in the middle of a storm. The Tree of Light saw their solidarity and united them into a common body. The Hipponelus is a spirit of friendship and resilience, always present where shadows approach.",
-    "ImageFileName": "HippoBunnyNone.jpg"
   },
   {
     "Combination": "NoneHippoBunny",
@@ -245,32 +161,11 @@
     "ImageFileName": "NoneHippoBunny.jpg"
   },
   {
-    "Combination": "GiraffeHippoNone",
-    "Name": "Giraffopot",
-    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a giraffe and the body of a hippo, no head visible. The giraffe arms are long and golden, glowing with amber runes. The hippo torso is strong and gray, shimmering with magical ripples. The character wears a robe embroidered with suns and stars. Its eyes shine emerald and violet, calm and wise. The background is a magical savanna by a glowing river. The style is whimsical, colorful, fantasy, cartoon-like.",
-    "Story": "The Giraffopot was born when a giraffe and a hippo watched together over a fallen branch. The Tree of Light saw their courage and united them into a common body. The Giraffopot is a spirit of balance, bringing protection and vision to those in need.",
-    "ImageFileName": "GiraffeHippoNone.jpg"
-  },
-  {
-    "Combination": "BunnyGiraffeNone",
-    "Name": "Bunniraffel",
-    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a bunny and the body of a giraffe, no head visible. The bunny arms are soft and glowing with pastel magical light. The giraffe torso is tall, golden, decorated with glowing amber spots. The character wears a cloak embroidered with moons and blossoms. Its eyes shine turquoise and jade, playful and curious. The background is a glowing meadow-savana crossing under enchanted skies. The style is whimsical, colorful, fantasy, cartoonish.",
-    "Story": "The Bunniraffel was born when a bunny tried to save a giraffe trapped in the shadows. The Tree of Light united their sacrifice into a common body. The Bunniraffel is a spirit of hope and friendship, bringing courage to the little ones.",
-    "ImageFileName": "BunnyGiraffeNone.jpg"
-  },
-  {
     "Combination": "NoneBunnyGiraffe",
     "Name": "Bunnygiraf",
     "ImagePrompt": "An anthropomorphic hybrid character with the body of a bunny and the head of a giraffe, no arms visible. The bunny torso is small, glowing pastel, agile. The giraffe head is tall and golden, glowing with amber constellations. The character wears a robe embroidered with rainbow spirals and stars. Its eyes shine sapphire and emerald, curious and kind. The background is an enchanted savanna lit by magical fireflies. The style is whimsical, vibrant, fantasy, cartoon-like.",
     "Story": "The Bunnygiraf appeared when a bunny wished to watch over a savanna. The Tree of Light heard its wish and united it with the spirit of a giraffe. The Bunnygiraf is a spirit of responsibility and joy, carrying within it the desire to protect.",
     "ImageFileName": "NoneBunnyGiraffe.jpg"
-  },
-  {
-    "Combination": "HippoNoneGiraffe",
-    "Name": "Hippogiraf",
-    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a hippo and the head of a giraffe, no torso visible. The hippo arms are gray and powerful, glowing faintly with magical ripples. The giraffe head is tall, golden, patterned with glowing amber runes. The character wears a cloak embroidered with moons and lotus motifs. Its eyes shine jade and turquoise, calm and wise. The background is a glowing savanna with enchanted flowers. The style is whimsical, colorful, fantasy, cartoonish.",
-    "Story": "The Hippogiraf was born when a hippo wished to see the world through the eyes of a giraffe. The Tree of Light united their dreams into a common body. The Hippogiraf is a spirit of vision and stability, able to bring balance between strength and wisdom.",
-    "ImageFileName": "HippoNoneGiraffe.jpg"
   },
   {
     "Combination": "GiraffeGiraffeHippo",
