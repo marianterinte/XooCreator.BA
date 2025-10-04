@@ -422,7 +422,7 @@ public class XooDbContext : DbContext
             new CreditWallet 
             { 
                 UserId = marianUserId, 
-                Balance = 10, 
+                Balance = 5, 
                 UpdatedAt = DateTime.UtcNow 
             }
         );

@@ -215,7 +215,7 @@ using (var scope = app.Services.CreateScope())
             var wallets = await context.CreditWallets.ToListAsync();
             foreach (var w in wallets)
             {
-                if (w.DiscoveryBalance < 10) w.DiscoveryBalance = 10;
+                if (w.DiscoveryBalance < 5) w.DiscoveryBalance = 5;
             }
             await context.SaveChangesAsync();
             Console.WriteLine("✅ Credit wallets updated");
