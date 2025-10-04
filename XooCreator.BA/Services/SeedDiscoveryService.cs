@@ -19,13 +19,13 @@ public sealed class SeedDiscoveryService : ISeedDiscoveryService
 
     public async Task EnsureSeedAsync(CancellationToken ct = default)
     {
-        if (await _db.DiscoveryItems.AnyAsync(ct)) return;
+        if (await _db.BestiaryItems.AnyAsync(ct)) return;
 
         // Prefer seeding from discover-bestiary.json per-locale if available
         var seeded = await TrySeedFromBestiaryJsonAsync(ct);
         if (!seeded)
         {
-            var entries = Get63Combinations().Select(c => new DiscoveryItem
+            var entries = Get63Combinations().Select(c => new BestiaryItem
             {
                 Id = Guid.NewGuid(),
                 ArmsKey = c.Arms,
@@ -35,7 +35,7 @@ public sealed class SeedDiscoveryService : ISeedDiscoveryService
                 Story = string.Empty
             }).ToList();
 
-            _db.DiscoveryItems.AddRange(entries);
+            _db.BestiaryItems.AddRange(entries);
             await _db.SaveChangesAsync(ct);
         }
     }
@@ -64,12 +64,12 @@ public sealed class SeedDiscoveryService : ISeedDiscoveryService
                 return s;
             }
 
-            var entries = new List<DiscoveryItem>(items.Count);
+            var entries = new List<BestiaryItem>(items.Count);
             foreach (var i in items)
             {
                 // i.Combination is like BunnyHippoGiraffe or BunnyGiraffeNone
                 var parts = SplitCombination(i.Combination);
-                entries.Add(new DiscoveryItem
+                entries.Add(new BestiaryItem
                 {
                     Id = Guid.NewGuid(),
                     ArmsKey = Denormalize(parts.Arms),
@@ -80,7 +80,7 @@ public sealed class SeedDiscoveryService : ISeedDiscoveryService
                 });
             }
 
-            await _db.DiscoveryItems.AddRangeAsync(entries, ct);
+            await _db.BestiaryItems.AddRangeAsync(entries, ct);
             await _db.SaveChangesAsync(ct);
             return true;
         }

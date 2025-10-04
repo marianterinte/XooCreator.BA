@@ -1,11 +1,14 @@
 namespace XooCreator.BA.Features.Bestiary;
 
-public record DiscoveryBestiaryItemDto(
+public record BestiaryItemDto(
     Guid Id,
     string Name,
     string ImageUrl,
     string Story,
-    DateTime DiscoveredAt
+    DateTime DiscoveredAt,
+    string BestiaryType
 );
+
+public record BestiaryResponse(List<BestiaryItemDto> Items);
 
 

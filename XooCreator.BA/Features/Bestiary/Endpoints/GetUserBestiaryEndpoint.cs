@@ -19,31 +19,39 @@ public sealed class GetUserBestiaryEndpoint
         _userContext = userContext;
     }
 
-    public record BestiaryResponse(List<DiscoveryBestiaryItemDto> Discovery /*, List<...> TreeOfHeroes, List<...> Generated */);
-
     [Route("/api/{locale}/bestiary")] // GET
     public static async Task<Results<Ok<BestiaryResponse>, UnauthorizedHttpResult>> HandleGet(
         [FromRoute] string locale,
+        [FromQuery] string? bestiaryType,
         [FromServices] GetUserBestiaryEndpoint ep,
         CancellationToken ct)
     {
         var userId = await ep._userContext.GetUserIdAsync();
         if (userId == null) return TypedResults.Unauthorized();
 
-        var discovery = await ep._db.UserDiscoveries
-            .Where(ud => ud.UserId == userId.Value)
-            .Join(ep._db.DiscoveryItems, ud => ud.DiscoveryItemId, di => di.Id, (ud, di) => new { ud, di })
-            .OrderByDescending(x => x.ud.DiscoveredAt)
-            .Select(x => new DiscoveryBestiaryItemDto(
-                x.di.Id,
-                x.di.Name,
-                (x.di.ArmsKey == "—" ? "None" : x.di.ArmsKey) + (x.di.BodyKey == "—" ? "None" : x.di.BodyKey) + (x.di.HeadKey == "—" ? "None" : x.di.HeadKey) + ".jpg",
-                x.di.Story,
-                x.ud.DiscoveredAt
+        var query = ep._db.UserBestiary
+            .Where(ub => ub.UserId == userId.Value);
+
+        // Filter by bestiary type if provided
+        if (!string.IsNullOrEmpty(bestiaryType))
+        {
+            query = query.Where(ub => ub.BestiaryType == bestiaryType);
+        }
+
+        var items = await query
+            .Join(ep._db.BestiaryItems, ub => ub.BestiaryItemId, bi => bi.Id, (ub, bi) => new { ub, bi })
+            .OrderByDescending(x => x.ub.DiscoveredAt)
+            .Select(x => new BestiaryItemDto(
+                x.bi.Id,
+                x.bi.Name,
+                (x.bi.ArmsKey == "—" ? "None" : x.bi.ArmsKey) + (x.bi.BodyKey == "—" ? "None" : x.bi.BodyKey) + (x.bi.HeadKey == "—" ? "None" : x.bi.HeadKey) + ".jpg",
+                x.bi.Story,
+                x.ub.DiscoveredAt,
+                x.ub.BestiaryType
             ))
             .ToListAsync(ct);
 
-        var res = new BestiaryResponse(discovery);
+        var res = new BestiaryResponse(items);
         return TypedResults.Ok(res);
     }
 }

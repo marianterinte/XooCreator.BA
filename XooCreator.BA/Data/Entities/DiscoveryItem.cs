@@ -1,6 +1,6 @@
 namespace XooCreator.BA.Data;
 
-public class DiscoveryItem
+public class BestiaryItem
 {
     public Guid Id { get; set; }
     public string ArmsKey { get; set; } = string.Empty; // e.g., "Bunny" or "—"

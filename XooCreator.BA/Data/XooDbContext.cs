@@ -9,8 +9,8 @@ public class XooDbContext : DbContext
     public DbSet<UserAlchimalia> UsersAlchimalia => Set<UserAlchimalia>();
     public DbSet<CreditWallet> CreditWallets => Set<CreditWallet>();
     public DbSet<CreditTransaction> CreditTransactions => Set<CreditTransaction>();
-    public DbSet<DiscoveryItem> DiscoveryItems => Set<DiscoveryItem>();
-    public DbSet<UserDiscovery> UserDiscoveries => Set<UserDiscovery>();
+    public DbSet<BestiaryItem> BestiaryItems => Set<BestiaryItem>();
+    public DbSet<UserBestiary> UserBestiary => Set<UserBestiary>();
     public DbSet<Tree> Trees => Set<Tree>();
     public DbSet<TreeChoice> TreeChoices => Set<TreeChoice>();
     public DbSet<Creature> Creatures => Set<Creature>();
@@ -71,7 +71,7 @@ public class XooDbContext : DbContext
             e.HasOne(x => x.User).WithOne().HasForeignKey<CreditWallet>(x => x.UserId);
         });
 
-        modelBuilder.Entity<DiscoveryItem>(e =>
+        modelBuilder.Entity<BestiaryItem>(e =>
         {
             e.HasKey(x => x.Id);
             e.Property(x => x.Id).ValueGeneratedOnAdd();
@@ -82,14 +82,15 @@ public class XooDbContext : DbContext
             e.Property(x => x.Story).HasMaxLength(10000);
         });
 
-        modelBuilder.Entity<UserDiscovery>(e =>
+        modelBuilder.Entity<UserBestiary>(e =>
         {
             e.HasKey(x => x.Id);
             e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.HasIndex(x => new { x.UserId, x.DiscoveryItemId }).IsUnique();
+            e.Property(x => x.BestiaryType).HasMaxLength(32).IsRequired();
+            e.HasIndex(x => new { x.UserId, x.BestiaryItemId, x.BestiaryType }).IsUnique();
             e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
-            e.HasOne(x => x.DiscoveryItem).WithMany().HasForeignKey(x => x.DiscoveryItemId);
-            e.ToTable("BestiaryDiscovered"); // rename table
+            e.HasOne(x => x.BestiaryItem).WithMany().HasForeignKey(x => x.BestiaryItemId);
+            e.ToTable("UserBestiary");
         });
 
         modelBuilder.Entity<CreditTransaction>(e =>
