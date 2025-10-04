@@ -44,7 +44,9 @@ public sealed class GetUserBestiaryEndpoint
             .Select(x => new BestiaryItemDto(
                 x.bi.Id,
                 x.bi.Name,
-                (x.bi.ArmsKey == "—" ? "None" : x.bi.ArmsKey) + (x.bi.BodyKey == "—" ? "None" : x.bi.BodyKey) + (x.bi.HeadKey == "—" ? "None" : x.bi.HeadKey) + ".jpg",
+                x.ub.BestiaryType == "treeofheroes" 
+                    ? x.bi.ArmsKey + ".jpg"  // For heroes, use ArmsKey (which contains HeroId) + .jpg
+                    : (x.bi.ArmsKey == "—" ? "None" : x.bi.ArmsKey) + (x.bi.BodyKey == "—" ? "None" : x.bi.BodyKey) + (x.bi.HeadKey == "—" ? "None" : x.bi.HeadKey) + ".jpg",
                 x.bi.Story,
                 x.ub.DiscoveredAt,
                 x.ub.BestiaryType

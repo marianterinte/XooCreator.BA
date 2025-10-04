@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using XooCreator.BA.Data;
+
 namespace XooCreator.BA.Features.TreeOfHeroes;
 
 public interface ITreeOfHeroesService
@@ -14,10 +17,12 @@ public interface ITreeOfHeroesService
 public class TreeOfHeroesService : ITreeOfHeroesService
 {
     private readonly ITreeOfHeroesRepository _repository;
+    private readonly XooDbContext _db;
 
-    public TreeOfHeroesService(ITreeOfHeroesRepository repository)
+    public TreeOfHeroesService(ITreeOfHeroesRepository repository, XooDbContext db)
     {
         _repository = repository;
+        _db = db;
     }
 
     public Task<UserTokensDto> GetUserTokensAsync(Guid userId)
@@ -108,6 +113,61 @@ public class TreeOfHeroesService : ITreeOfHeroesService
                     Success = false,
                     ErrorMessage = "Failed to save hero progress"
                 };
+            }
+
+            // Save hero to bestiary
+            try
+            {
+                // Check if hero already exists in bestiary
+                var existingBestiaryItem = await _db.BestiaryItems
+                    .FirstOrDefaultAsync(bi => bi.Name == heroDefinition.Name);
+                
+                BestiaryItem bestiaryItem;
+                if (existingBestiaryItem == null)
+                {
+                    // Create new bestiary item for this hero
+                    bestiaryItem = new BestiaryItem
+                    {
+                        Id = Guid.NewGuid(),
+                        ArmsKey = request.HeroId, // Use HeroId as the identifier
+                        BodyKey = "—", 
+                        HeadKey = "—",
+                        Name = heroDefinition.Name,
+                        Story = heroDefinition.Story ?? "A hero transformed through the Tree of Heroes.",
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    _db.BestiaryItems.Add(bestiaryItem);
+                }
+                else
+                {
+                    bestiaryItem = existingBestiaryItem;
+                }
+
+                // Check if user already has this hero in their bestiary
+                var existingUserBestiary = await _db.UserBestiary
+                    .FirstOrDefaultAsync(ub => ub.UserId == userId && ub.BestiaryItemId == bestiaryItem.Id && ub.BestiaryType == "treeofheroes");
+
+                if (existingUserBestiary == null)
+                {
+                    // Add to user's bestiary
+                    var userBestiary = new UserBestiary
+                    {
+                        Id = Guid.NewGuid(),
+                        UserId = userId,
+                        BestiaryItemId = bestiaryItem.Id,
+                        BestiaryType = "treeofheroes",
+                        DiscoveredAt = DateTime.UtcNow
+                    };
+                    _db.UserBestiary.Add(userBestiary);
+                }
+
+                await _db.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                // Log error but don't fail the transformation
+                // The hero transformation was successful, bestiary save is secondary
+                Console.WriteLine($"Failed to save hero to bestiary: {ex.Message}");
             }
 
             // Create hero DTO for response
