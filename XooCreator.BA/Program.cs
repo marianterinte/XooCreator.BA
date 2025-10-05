@@ -11,6 +11,9 @@ using XooCreator.BA.Features.Stories;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Errors;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -124,11 +127,39 @@ builder.Services.AddScoped<ITreeOfHeroesService, TreeOfHeroesService>();
 builder.Services.AddScoped<IStoriesRepository, StoriesRepository>();
 builder.Services.AddScoped<IStoriesService, StoriesService>();
 
+// Auth0 JWT Bearer
+var auth0Section = builder.Configuration.GetSection("Auth0");
+var auth0Domain = auth0Section["Domain"];
+var auth0Audience = auth0Section["Audience"];
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.Authority = $"https://{auth0Domain}";
+    options.Audience = auth0Audience;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidIssuer = $"https://{auth0Domain}",
+        ValidateAudience = true,
+        ValidAudience = auth0Audience,
+        ValidateLifetime = true
+    };
+});
+
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
 app.UseCors("AllowAll");
 
 // Global exception handler - should be early in the pipeline
 app.UseGlobalExceptionHandling();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Locale now part of route templates; no rewrite middleware needed
 
@@ -243,5 +274,10 @@ app.UseSwaggerUI(c =>
 
 // Map endpoints (Endpoint Discovery)
 app.MapDiscoveredEndpoints();
+
+// Sample protected minimal endpoint
+app.MapGet("/api/protected/ping", () => Results.Ok(new { ok = true, ts = DateTimeOffset.UtcNow }))
+    .WithTags("Auth")
+    .RequireAuthorization();
 
 app.Run();
