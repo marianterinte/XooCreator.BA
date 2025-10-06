@@ -166,6 +166,8 @@ builder.Services.AddAuthentication(options =>
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(options =>
 {
+    // Keep original JWT claim types (sub, aud, iss) without remapping to WS-* schema
+    options.MapInboundClaims = false;
     options.Authority = $"https://{auth0Domain}";
     options.Audience = auth0Audience;
     options.TokenValidationParameters = new TokenValidationParameters
@@ -175,6 +177,32 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidAudience = auth0Audience,
         ValidateLifetime = true
+    };
+
+    // Temporary diagnostics to understand 401 causes during development
+    options.Events = new JwtBearerEvents
+    {
+        OnAuthenticationFailed = context =>
+        {
+            Console.WriteLine($"[JWT] Authentication failed: {context.Exception.Message}");
+            return Task.CompletedTask;
+        },
+        OnChallenge = context =>
+        {
+            if (context.AuthenticateFailure != null)
+            {
+                Console.WriteLine($"[JWT] Challenge failed: {context.AuthenticateFailure.Message}");
+            }
+            return Task.CompletedTask;
+        },
+        OnTokenValidated = context =>
+        {
+            var iss = context.Principal?.FindFirst("iss")?.Value ?? "<none>";
+            var aud = string.Join(",", context.Principal?.FindAll("aud").Select(c => c.Value) ?? Array.Empty<string>());
+            var sub = context.Principal?.FindFirst("sub")?.Value ?? "<none>";
+            Console.WriteLine($"[JWT] Token validated. iss={iss} aud={aud} sub={sub}");
+            return Task.CompletedTask;
+        }
     };
 });
 

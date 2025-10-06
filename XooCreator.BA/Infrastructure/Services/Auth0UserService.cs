@@ -40,11 +40,9 @@ public class Auth0UserService : IAuth0UserService
         var name = GetClaimValue(httpContext.User, "name") ?? GetClaimValue(httpContext.User, "nickname");
         var picture = GetClaimValue(httpContext.User, "picture");
 
-        if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(name))
-        {
-            // Log warning: missing required claims
-            return null;
-        }
+        // Access tokens often don't include profile claims. Fall back to sensible defaults.
+        if (string.IsNullOrWhiteSpace(name)) name = "Unknown";
+        if (string.IsNullOrWhiteSpace(email)) email = $"{auth0Id.Replace("|", "+") }@unknown.local";
 
         // Ensure user exists and sync profile data
         _cachedUser = await _userRepository.EnsureAsync(auth0Id, name, email, picture, ct);
