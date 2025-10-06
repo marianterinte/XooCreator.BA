@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using XooCreator.BA.Infrastructure.Endpoints;
 
 namespace XooCreator.BA.Features.TreeOfHeroes.Endpoints;
@@ -15,6 +16,7 @@ public class GetHeroDefinitionEndpoint
     }
 
     [Route("/api/{locale}/tree-of-heroes/definitions/{heroId}")] // GET
+    [Authorize]
     public static async Task<Results<Ok<HeroDefinitionDto>, NotFound, UnauthorizedHttpResult>> HandleGet(
         [FromRoute] string locale,
         [FromServices] GetHeroDefinitionEndpoint ep,

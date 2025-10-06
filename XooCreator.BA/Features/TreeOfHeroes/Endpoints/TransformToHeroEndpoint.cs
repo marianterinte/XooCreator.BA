@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure;
 
@@ -17,6 +18,7 @@ public class TransformToHeroEndpoint
     }
 
     [Route("/api/{locale}/tree-of-heroes/transform-hero")] // POST
+    [Authorize]
     public static async Task<Results<Ok<TransformToHeroResponse>, BadRequest<TransformToHeroResponse>, UnauthorizedHttpResult>> HandlePost(
         [FromRoute] string locale,
         [FromServices] TransformToHeroEndpoint ep,

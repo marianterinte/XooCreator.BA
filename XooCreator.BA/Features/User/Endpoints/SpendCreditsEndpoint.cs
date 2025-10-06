@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure;
 
@@ -18,6 +19,7 @@ public class SpendCreditsEndpoint
     }
 
     [Route("/api/{locale}/user/spend-credits")] // POST (legacy / generative)
+    [Authorize]
     public static async Task<Results<Ok<SpendCreditsResponse>, UnauthorizedHttpResult, BadRequest<SpendCreditsResponse>>> HandlePost(
         [FromRoute] string locale,
         [FromServices] SpendCreditsEndpoint ep,
@@ -35,6 +37,7 @@ public class SpendCreditsEndpoint
     }
 
     [Route("/api/{locale}/user/spend-discovery-credits")] // POST
+    [Authorize]
     public static async Task<Results<Ok<SpendCreditsResponse>, UnauthorizedHttpResult, BadRequest<SpendCreditsResponse>>> HandlePost(
         [FromRoute] string locale,
         [FromServices] SpendCreditsEndpoint ep,

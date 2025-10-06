@@ -1,5 +1,6 @@
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using XooCreator.BA.Data;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Endpoints;
@@ -10,6 +11,7 @@ namespace XooCreator.BA.Features.User.Endpoints;
 public class CompleteLabIntroEndpoint
 {
     [Route("/api/{locale}/user/complete-lab-intro")] // POST
+    [Authorize]
     public static async Task<IResult> HandlePost(
         [FromRoute] string locale,
         [FromServices] IUserContextService userContext,

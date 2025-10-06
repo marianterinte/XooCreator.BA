@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure;
 
@@ -17,6 +18,7 @@ public class MarkTileAsReadEndpoint
     }
 
     [Route("/api/{locale}/stories/mark-tile-read")] // POST /api/{locale}/stories/mark-tile-read
+    [Authorize]
     public static async Task<Results<Ok<MarkTileAsReadResponse>, BadRequest<MarkTileAsReadResponse>, UnauthorizedHttpResult>> HandlePost(
         [FromRoute] string locale,
         [FromServices] MarkTileAsReadEndpoint ep,

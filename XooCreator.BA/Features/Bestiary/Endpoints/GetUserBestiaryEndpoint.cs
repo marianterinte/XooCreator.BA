@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
 using XooCreator.BA.Infrastructure.Endpoints;
@@ -20,6 +21,7 @@ public sealed class GetUserBestiaryEndpoint
     }
 
     [Route("/api/{locale}/bestiary")] // GET
+    [Authorize]
     public static async Task<Results<Ok<BestiaryResponse>, UnauthorizedHttpResult>> HandleGet(
         [FromRoute] string locale,
         [FromQuery] string? bestiaryType,

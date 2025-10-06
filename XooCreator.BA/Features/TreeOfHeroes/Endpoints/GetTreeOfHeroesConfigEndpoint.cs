@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Endpoints;
 
@@ -8,6 +9,7 @@ namespace XooCreator.BA.Features.TreeOfHeroes.Endpoints;
 public class GetTreeOfHeroesConfigEndpoint
 {
     [Route("/api/{locale}/tree-of-heroes/config")] // GET
+    [Authorize]
     public static async Task<IResult> HandleGet(
         [FromRoute] string locale,
         [FromServices] ITreeOfHeroesService treeOfHeroesService,

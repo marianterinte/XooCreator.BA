@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure;
 
@@ -12,6 +13,7 @@ public class GetStoriesEndpoint
     public GetStoriesEndpoint(IStoriesService storiesService) => _storiesService = storiesService;
 
     [Route("/api/{locale}/stories")]
+    [Authorize]
     public static async Task<Ok<GetStoriesResponse>> HandleGet(
         [FromRoute] string locale,
         [FromServices] GetStoriesEndpoint ep)

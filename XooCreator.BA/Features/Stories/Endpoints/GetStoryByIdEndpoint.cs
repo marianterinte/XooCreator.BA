@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure;
 
@@ -17,6 +18,7 @@ public class GetStoryByIdEndpoint
     }
 
     [Route("/api/{locale}/stories/{storyId}")] // GET /api/{locale}/stories/{storyId}
+    [Authorize]
     public static async Task<Results<Ok<GetStoryByIdResponse>, UnauthorizedHttpResult, NotFound>> HandleGet(
         [FromRoute] string locale,
         [FromServices] GetStoryByIdEndpoint ep,

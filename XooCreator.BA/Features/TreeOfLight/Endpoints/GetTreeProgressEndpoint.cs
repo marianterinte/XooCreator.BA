@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure;
 
@@ -17,6 +18,7 @@ public class GetTreeProgressEndpoint
     }
 
     [Route("/api/{locale}/tree-of-light/progress")] // GET
+    [Authorize]
     public static async Task<Results<Ok<List<TreeProgressDto>>, UnauthorizedHttpResult>> HandleGet(
         [FromRoute] string locale,
         [FromQuery] string? configId,

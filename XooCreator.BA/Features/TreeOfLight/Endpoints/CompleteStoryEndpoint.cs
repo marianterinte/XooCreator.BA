@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure;
 
@@ -17,6 +18,7 @@ public class CompleteStoryEndpoint
     }
 
     [Route("/api/{locale}/tree-of-light/complete-story")] // POST
+    [Authorize]
     public static async Task<Results<Ok<CompleteStoryResponse>, BadRequest<CompleteStoryResponse>, UnauthorizedHttpResult>> HandlePost(
         [FromRoute] string locale,
         [FromQuery] string? configId,

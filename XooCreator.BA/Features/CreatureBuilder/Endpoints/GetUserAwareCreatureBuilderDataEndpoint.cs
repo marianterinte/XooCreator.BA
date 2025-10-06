@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure;
@@ -23,6 +24,7 @@ public class GetUserAwareCreatureBuilderDataEndpoint
     }
 
     [Route("/api/{locale}/creature-builder/user-data")] // GET /api/{locale}/creature-builder/user-data
+    [Authorize]
     public static async Task<Results<Ok<UserAwareCreatureBuilderDataDto>, UnauthorizedHttpResult>> HandleGet(
         [FromRoute] string locale,
         [FromServices] GetUserAwareCreatureBuilderDataEndpoint ep, 

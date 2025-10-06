@@ -1,5 +1,6 @@
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using XooCreator.BA.Data;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Endpoints;
@@ -16,6 +17,7 @@ public class FirstVisitDto
 public class CheckLabVisitEndpoint
 {
     [Route("/api/{locale}/user/check-lab-visit")] // GET
+    [Authorize]
     public static async Task<IResult> HandleGet(
         [FromRoute] string locale,
         [FromServices] IUserContextService userContext,
