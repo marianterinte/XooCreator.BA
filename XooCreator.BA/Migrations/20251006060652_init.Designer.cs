@@ -12,8 +12,8 @@ using XooCreator.BA.Data;
 namespace XooCreator.BA.Migrations
 {
     [DbContext(typeof(XooDbContext))]
-    [Migration("20251004231100_initial")]
-    partial class initial
+    [Migration("20251006060652_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,6 +25,75 @@ namespace XooCreator.BA.Migrations
 
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "uuid-ossp");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("XooCreator.BA.Data.AlchimaliaUser", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Auth0Id")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<bool>("HasVisitedImaginationLaboratory")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("LastLoginAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Picture")
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Auth0Id")
+                        .IsUnique();
+
+                    b.ToTable("AlchimaliaUsers");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("11111111-1111-1111-1111-111111111111"),
+                            Auth0Id = "test-user-sub",
+                            CreatedAt = new DateTime(2025, 10, 6, 6, 6, 50, 761, DateTimeKind.Utc).AddTicks(1222),
+                            Email = "test@example.com",
+                            HasVisitedImaginationLaboratory = false,
+                            LastLoginAt = new DateTime(2025, 10, 6, 6, 6, 50, 761, DateTimeKind.Utc).AddTicks(1222),
+                            Name = "Test User",
+                            UpdatedAt = new DateTime(2025, 10, 6, 6, 6, 50, 761, DateTimeKind.Utc).AddTicks(1223)
+                        },
+                        new
+                        {
+                            Id = new Guid("22222222-2222-2222-2222-222222222222"),
+                            Auth0Id = "marian-test-sub",
+                            CreatedAt = new DateTime(2025, 10, 6, 6, 6, 50, 761, DateTimeKind.Utc).AddTicks(1225),
+                            Email = "marian@example.com",
+                            HasVisitedImaginationLaboratory = false,
+                            LastLoginAt = new DateTime(2025, 10, 6, 6, 6, 50, 761, DateTimeKind.Utc).AddTicks(1226),
+                            Name = "Marian",
+                            UpdatedAt = new DateTime(2025, 10, 6, 6, 6, 50, 761, DateTimeKind.Utc).AddTicks(1226)
+                        });
+                });
 
             modelBuilder.Entity("XooCreator.BA.Data.Animal", b =>
                 {
@@ -1106,238 +1175,238 @@ namespace XooCreator.BA.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("bc68bdf5-7f1a-4c14-bec8-8cdd5d30fbf9"),
+                            Id = new Guid("4b5d4bef-b349-48cb-885f-1a0221d92000"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000001"),
                             Label = "Bunny",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-                            Id = new Guid("6adca197-08a2-45d8-8dac-e2b0afe370df"),
+                            Id = new Guid("828e5059-64e7-4502-af8c-aa951f289a10"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000002"),
                             Label = "Hippo",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-                            Id = new Guid("b006b50d-7e12-4bc0-84fb-a6a941586f49"),
+                            Id = new Guid("ef9b4311-8d33-4258-bd9d-143e419515ae"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000003"),
                             Label = "Giraffe",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-                            Id = new Guid("3b6a3b7a-8b50-49bc-a9ce-50613c978804"),
+                            Id = new Guid("43a635a3-610c-4778-b613-c606c4988792"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000004"),
                             Label = "Dog",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-                            Id = new Guid("27870587-0b87-48e1-b5c3-b799b0cc5d1d"),
+                            Id = new Guid("a451cfa8-6b7a-4629-b7c0-92fc7baa9dd9"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000005"),
                             Label = "Fox",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-                            Id = new Guid("f2e2c941-9788-437f-b759-290a32d1a8dd"),
+                            Id = new Guid("ba7a972f-8893-429f-8c0f-66df981ada5c"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000006"),
                             Label = "Cat",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-                            Id = new Guid("9b3321a5-01a1-4aee-8478-c874a6704b30"),
+                            Id = new Guid("361703b0-22f0-4770-98dc-4657a1c26a64"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000007"),
                             Label = "Monkey",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-                            Id = new Guid("4763ed44-7f63-4baa-b096-3fe3866e3194"),
+                            Id = new Guid("91066de5-6a1b-479e-aa2a-76e762860179"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000008"),
                             Label = "Camel",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-                            Id = new Guid("584388b9-f3fe-494a-917f-c1077182cfe2"),
+                            Id = new Guid("bd4e92d6-24c9-4df1-b13d-5817cfce8b2b"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000009"),
                             Label = "Deer",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-                            Id = new Guid("86e13bac-19c4-4a63-82ea-8f82423d88fa"),
+                            Id = new Guid("ebbea41c-a06b-426c-8416-d2adf25d7eeb"),
                             AnimalId = new Guid("00000000-0000-0000-0000-00000000000a"),
                             Label = "Duck",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-                            Id = new Guid("8a1dd1df-3be8-491e-9582-3749d4512aa6"),
+                            Id = new Guid("d6e042da-33c1-4fc7-8f9b-22ddddf16e4b"),
                             AnimalId = new Guid("00000000-0000-0000-0000-00000000000b"),
                             Label = "Eagle",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-                            Id = new Guid("317524e4-d36e-40fc-9362-662da3e45809"),
+                            Id = new Guid("4a6dffd6-3732-4ead-a1e7-7ee90cc9a04c"),
                             AnimalId = new Guid("00000000-0000-0000-0000-00000000000c"),
                             Label = "Elephant",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-                            Id = new Guid("3cea14d7-f015-4297-85b9-261e5bf8fac7"),
+                            Id = new Guid("324bf9e9-6380-4563-bc23-8b446f1cd9ad"),
                             AnimalId = new Guid("00000000-0000-0000-0000-00000000000d"),
                             Label = "Ostrich",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-                            Id = new Guid("c5ebca61-40f6-4b4d-b320-4314c2fd0df4"),
+                            Id = new Guid("d27ea4a8-f04e-4a6f-bbc3-8804f86b6003"),
                             AnimalId = new Guid("00000000-0000-0000-0000-00000000000e"),
                             Label = "Parrot",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-                            Id = new Guid("d3c7ace2-1d88-4947-a070-d8f124e0cd90"),
+                            Id = new Guid("a7af0067-a01d-46ac-9fa2-e0d78500563a"),
                             AnimalId = new Guid("00000000-0000-0000-0000-00000000000f"),
                             Label = "Jaguar",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-                            Id = new Guid("0a5a7a02-5d78-4bb3-86b9-2c8498cec596"),
+                            Id = new Guid("6a951e4d-e171-496d-af50-2c36486a35a1"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000010"),
                             Label = "Toucan",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-                            Id = new Guid("264b9e2e-aff4-4b11-9069-8e295e162be9"),
+                            Id = new Guid("3121e614-3806-41f8-b4ba-344e3c456c1f"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000011"),
                             Label = "Anaconda",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-                            Id = new Guid("df10e42a-a6c1-47d3-b358-535b3b6cc5e4"),
+                            Id = new Guid("0a396e99-f674-4b58-b792-b721eb2ea8c0"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000012"),
                             Label = "Capuchin Monkey",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-                            Id = new Guid("385dd22c-5899-45a7-8837-dd3a5d3dafd6"),
+                            Id = new Guid("1f0b1d9f-c3bb-45d3-82aa-c47cb4c5271d"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000013"),
                             Label = "Poison Dart Frog",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-                            Id = new Guid("a57f1e00-8815-4141-9363-c4aa88eee092"),
+                            Id = new Guid("9e7486ea-9be5-4bb2-b0ae-909e57146f85"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000014"),
                             Label = "Lion",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-                            Id = new Guid("9b06f3e0-f3e6-4e6b-9383-c8a81e2991b1"),
+                            Id = new Guid("27fea6bf-104b-440d-99c1-7b6e0bde99a9"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000015"),
                             Label = "African Elephant",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-                            Id = new Guid("997cb9c2-2d5b-41d7-82f4-3333fc3cea6d"),
+                            Id = new Guid("16b9573c-a902-416b-ae6f-1fb98efe3c14"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000016"),
                             Label = "Giraffe",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-                            Id = new Guid("df490b83-73c6-4ce9-8254-3f7bf7111cf0"),
+                            Id = new Guid("26c57c84-f0f9-4ce2-a197-31a12f6b3926"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000017"),
                             Label = "Zebra",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-                            Id = new Guid("5079743a-6c5f-4ae8-8eb2-77cbe507dedc"),
+                            Id = new Guid("ff569db8-03cd-4469-ba9d-e583a5db61ad"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000018"),
                             Label = "Rhinoceros",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-                            Id = new Guid("77d9ec29-d217-439e-88b8-82c1656cc433"),
+                            Id = new Guid("f1dc0764-f015-4cca-b2ea-908465ea9ccd"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000019"),
                             Label = "Bison",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-                            Id = new Guid("e63694b0-c2ea-4005-9993-f06a94c9db23"),
+                            Id = new Guid("aa96b74d-9409-4a76-926a-90f93c2644d8"),
                             AnimalId = new Guid("00000000-0000-0000-0000-00000000001a"),
                             Label = "Saiga Antelope",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-                            Id = new Guid("86529f3b-1293-4b76-835e-86690caf2790"),
+                            Id = new Guid("2a66954e-5a02-4d6f-bdac-3383eec539c5"),
                             AnimalId = new Guid("00000000-0000-0000-0000-00000000001b"),
                             Label = "Gray Wolf",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-                            Id = new Guid("144a6362-0640-46d9-aca0-754db7d56af9"),
+                            Id = new Guid("4c39be89-ed90-41fb-8fd5-82dceedd9992"),
                             AnimalId = new Guid("00000000-0000-0000-0000-00000000001c"),
                             Label = "Przewalski's Horse",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-                            Id = new Guid("a1d2ac33-1b01-4f0e-be23-23bde9930b7f"),
+                            Id = new Guid("b1bd9fe3-cc2a-4f9f-9442-448912368ef8"),
                             AnimalId = new Guid("00000000-0000-0000-0000-00000000001d"),
                             Label = "Steppe Eagle",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-                            Id = new Guid("30a3e0b4-f39c-4215-ad2b-765131f31dc0"),
+                            Id = new Guid("73d26fc3-9917-4e74-9ba4-8eb5488ac085"),
                             AnimalId = new Guid("00000000-0000-0000-0000-00000000001e"),
                             Label = "Cow",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-                            Id = new Guid("fa7df121-b546-4407-bf3d-8f8884163164"),
+                            Id = new Guid("b2db44de-37a4-40f4-a62c-4d8f019e3ed8"),
                             AnimalId = new Guid("00000000-0000-0000-0000-00000000001f"),
                             Label = "Sheep",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-                            Id = new Guid("5e2ab377-9170-4f98-8b6d-86529bfb846d"),
+                            Id = new Guid("a44a8ec4-68bb-4b47-aa07-e0f4c72af2d3"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000020"),
                             Label = "Horse",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-                            Id = new Guid("6e9246a5-2b40-4fbd-8f16-0610a822eeba"),
+                            Id = new Guid("87e9ec4a-ad29-4d9e-b6ba-ae800888cef1"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000021"),
                             Label = "Chicken",
                             LanguageCode = "en-us"
                         },
                         new
                         {
-                            Id = new Guid("3fe17bdc-448f-4489-a516-76ad11ccff5c"),
+                            Id = new Guid("cb5a7f47-9b3e-45f0-9b57-10a619f50be9"),
                             AnimalId = new Guid("00000000-0000-0000-0000-000000000022"),
                             Label = "Pig",
                             LanguageCode = "en-us"
@@ -1494,56 +1563,56 @@ namespace XooCreator.BA.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("e7c8c22b-adc0-4eb3-bf20-32f361d4b678"),
+                            Id = new Guid("f900e1d1-df82-4a8d-bbbd-54bb261c4fdb"),
                             BodyPartKey = "head",
                             LanguageCode = "en-us",
                             Name = "Head"
                         },
                         new
                         {
-                            Id = new Guid("31f426ce-68ef-41d8-ade8-d9a07687f9ab"),
+                            Id = new Guid("dd7b3cc4-d614-4466-bebd-111a839e771b"),
                             BodyPartKey = "body",
                             LanguageCode = "en-us",
                             Name = "Body"
                         },
                         new
                         {
-                            Id = new Guid("c457ea0b-d80b-42ca-902a-0ee4a7a04542"),
+                            Id = new Guid("305e1b60-3479-4e55-9a3a-3e0de632596d"),
                             BodyPartKey = "arms",
                             LanguageCode = "en-us",
                             Name = "Arms"
                         },
                         new
                         {
-                            Id = new Guid("224056ce-0bd4-4507-bd51-4bfed89bd581"),
+                            Id = new Guid("9c8e547a-05de-45d1-bdc3-9befd9664be9"),
                             BodyPartKey = "legs",
                             LanguageCode = "en-us",
                             Name = "Legs"
                         },
                         new
                         {
-                            Id = new Guid("4a1e706e-dccf-46a6-80cf-e408dc041e96"),
+                            Id = new Guid("1ff648bc-980e-4d9f-9484-99c7738db52c"),
                             BodyPartKey = "tail",
                             LanguageCode = "en-us",
                             Name = "Tail"
                         },
                         new
                         {
-                            Id = new Guid("0f58d525-4bdc-4369-b558-64eefd6c052e"),
+                            Id = new Guid("4fcb040e-06c9-44a3-b1c6-bfc59fe63991"),
                             BodyPartKey = "wings",
                             LanguageCode = "en-us",
                             Name = "Wings"
                         },
                         new
                         {
-                            Id = new Guid("f57e6788-dd35-4f22-a537-2e500968c982"),
+                            Id = new Guid("a5a6bdfe-4eae-45af-8787-e54574cfc03d"),
                             BodyPartKey = "horn",
                             LanguageCode = "en-us",
                             Name = "Horn"
                         },
                         new
                         {
-                            Id = new Guid("9b843e2b-7be1-4a5d-aef6-6fe6b02cbdb5"),
+                            Id = new Guid("2b5b2431-62d1-4148-9e57-26dfde8c53c7"),
                             BodyPartKey = "horns",
                             LanguageCode = "en-us",
                             Name = "Horns"
@@ -1664,7 +1733,7 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("33333333-3333-3333-3333-333333333333"),
                             Amount = 15,
-                            CreatedAt = new DateTime(2025, 10, 3, 23, 11, 0, 38, DateTimeKind.Utc).AddTicks(9745),
+                            CreatedAt = new DateTime(2025, 10, 5, 6, 6, 50, 761, DateTimeKind.Utc).AddTicks(1446),
                             Reference = "test-purchase-marian",
                             Type = 0,
                             UserId = new Guid("22222222-2222-2222-2222-222222222222")
@@ -1673,7 +1742,7 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("44444444-4444-4444-4444-444444444444"),
                             Amount = -5,
-                            CreatedAt = new DateTime(2025, 10, 4, 21, 11, 0, 38, DateTimeKind.Utc).AddTicks(9752),
+                            CreatedAt = new DateTime(2025, 10, 6, 4, 6, 50, 761, DateTimeKind.Utc).AddTicks(1455),
                             Reference = "test-generation",
                             Type = 1,
                             UserId = new Guid("22222222-2222-2222-2222-222222222222")
@@ -1704,14 +1773,14 @@ namespace XooCreator.BA.Migrations
                             UserId = new Guid("11111111-1111-1111-1111-111111111111"),
                             Balance = 5,
                             DiscoveryBalance = 0,
-                            UpdatedAt = new DateTime(2025, 10, 4, 23, 11, 0, 38, DateTimeKind.Utc).AddTicks(9627)
+                            UpdatedAt = new DateTime(2025, 10, 6, 6, 6, 50, 761, DateTimeKind.Utc).AddTicks(1322)
                         },
                         new
                         {
                             UserId = new Guid("22222222-2222-2222-2222-222222222222"),
                             Balance = 5,
                             DiscoveryBalance = 0,
-                            UpdatedAt = new DateTime(2025, 10, 4, 23, 11, 0, 38, DateTimeKind.Utc).AddTicks(9629)
+                            UpdatedAt = new DateTime(2025, 10, 6, 6, 6, 50, 761, DateTimeKind.Utc).AddTicks(1323)
                         });
                 });
 
@@ -1851,7 +1920,7 @@ namespace XooCreator.BA.Migrations
                             HeroId = "seed",
                             HeroType = "HERO_TREE_TRANSFORMATION",
                             SourceStoryId = "",
-                            UnlockedAt = new DateTime(2025, 10, 4, 23, 11, 0, 38, DateTimeKind.Utc).AddTicks(9697),
+                            UnlockedAt = new DateTime(2025, 10, 6, 6, 6, 50, 761, DateTimeKind.Utc).AddTicks(1416),
                             UserId = new Guid("11111111-1111-1111-1111-111111111111")
                         },
                         new
@@ -1860,7 +1929,7 @@ namespace XooCreator.BA.Migrations
                             HeroId = "seed",
                             HeroType = "HERO_TREE_TRANSFORMATION",
                             SourceStoryId = "",
-                            UnlockedAt = new DateTime(2025, 10, 4, 23, 11, 0, 38, DateTimeKind.Utc).AddTicks(9699),
+                            UnlockedAt = new DateTime(2025, 10, 6, 6, 6, 50, 761, DateTimeKind.Utc).AddTicks(1418),
                             UserId = new Guid("22222222-2222-2222-2222-222222222222")
                         });
                 });
@@ -2526,61 +2595,6 @@ namespace XooCreator.BA.Migrations
                     b.ToTable("TreeUnlockRules");
                 });
 
-            modelBuilder.Entity("XooCreator.BA.Data.UserAlchimalia", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Auth0Sub")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("DisplayName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
-
-                    b.Property<bool>("HasVisitedImaginationLaboratory")
-                        .HasColumnType("boolean");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Auth0Sub")
-                        .IsUnique();
-
-                    b.ToTable("UsersAlchimalia");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                            Auth0Sub = "test-user-sub",
-                            CreatedAt = new DateTime(2025, 10, 4, 23, 11, 0, 38, DateTimeKind.Utc).AddTicks(9578),
-                            DisplayName = "Test User",
-                            Email = "test@example.com",
-                            HasVisitedImaginationLaboratory = false
-                        },
-                        new
-                        {
-                            Id = new Guid("22222222-2222-2222-2222-222222222222"),
-                            Auth0Sub = "marian-test-sub",
-                            CreatedAt = new DateTime(2025, 10, 4, 23, 11, 0, 38, DateTimeKind.Utc).AddTicks(9580),
-                            DisplayName = "Marian",
-                            Email = "marian@example.com",
-                            HasVisitedImaginationLaboratory = false
-                        });
-                });
-
             modelBuilder.Entity("XooCreator.BA.Data.UserBestiary", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2678,100 +2692,100 @@ namespace XooCreator.BA.Migrations
                         new
                         {
                             Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1"),
-                            CreatedAt = new DateTime(2025, 10, 4, 23, 11, 0, 38, DateTimeKind.Utc).AddTicks(9650),
+                            CreatedAt = new DateTime(2025, 10, 6, 6, 6, 50, 761, DateTimeKind.Utc).AddTicks(1359),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 10, 4, 23, 11, 0, 38, DateTimeKind.Utc).AddTicks(9650),
+                            UpdatedAt = new DateTime(2025, 10, 6, 6, 6, 50, 761, DateTimeKind.Utc).AddTicks(1360),
                             UserId = new Guid("11111111-1111-1111-1111-111111111111"),
                             Value = "courage"
                         },
                         new
                         {
                             Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa2"),
-                            CreatedAt = new DateTime(2025, 10, 4, 23, 11, 0, 38, DateTimeKind.Utc).AddTicks(9653),
+                            CreatedAt = new DateTime(2025, 10, 6, 6, 6, 50, 761, DateTimeKind.Utc).AddTicks(1362),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 10, 4, 23, 11, 0, 38, DateTimeKind.Utc).AddTicks(9653),
+                            UpdatedAt = new DateTime(2025, 10, 6, 6, 6, 50, 761, DateTimeKind.Utc).AddTicks(1363),
                             UserId = new Guid("11111111-1111-1111-1111-111111111111"),
                             Value = "curiosity"
                         },
                         new
                         {
                             Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa3"),
-                            CreatedAt = new DateTime(2025, 10, 4, 23, 11, 0, 38, DateTimeKind.Utc).AddTicks(9656),
+                            CreatedAt = new DateTime(2025, 10, 6, 6, 6, 50, 761, DateTimeKind.Utc).AddTicks(1365),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 10, 4, 23, 11, 0, 38, DateTimeKind.Utc).AddTicks(9656),
+                            UpdatedAt = new DateTime(2025, 10, 6, 6, 6, 50, 761, DateTimeKind.Utc).AddTicks(1366),
                             UserId = new Guid("11111111-1111-1111-1111-111111111111"),
                             Value = "thinking"
                         },
                         new
                         {
                             Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa4"),
-                            CreatedAt = new DateTime(2025, 10, 4, 23, 11, 0, 38, DateTimeKind.Utc).AddTicks(9658),
+                            CreatedAt = new DateTime(2025, 10, 6, 6, 6, 50, 761, DateTimeKind.Utc).AddTicks(1367),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 10, 4, 23, 11, 0, 38, DateTimeKind.Utc).AddTicks(9658),
+                            UpdatedAt = new DateTime(2025, 10, 6, 6, 6, 50, 761, DateTimeKind.Utc).AddTicks(1368),
                             UserId = new Guid("11111111-1111-1111-1111-111111111111"),
                             Value = "creativity"
                         },
                         new
                         {
                             Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa5"),
-                            CreatedAt = new DateTime(2025, 10, 4, 23, 11, 0, 38, DateTimeKind.Utc).AddTicks(9660),
+                            CreatedAt = new DateTime(2025, 10, 6, 6, 6, 50, 761, DateTimeKind.Utc).AddTicks(1370),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 10, 4, 23, 11, 0, 38, DateTimeKind.Utc).AddTicks(9661),
+                            UpdatedAt = new DateTime(2025, 10, 6, 6, 6, 50, 761, DateTimeKind.Utc).AddTicks(1370),
                             UserId = new Guid("11111111-1111-1111-1111-111111111111"),
                             Value = "safety"
                         },
                         new
                         {
                             Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1"),
-                            CreatedAt = new DateTime(2025, 10, 4, 23, 11, 0, 38, DateTimeKind.Utc).AddTicks(9663),
+                            CreatedAt = new DateTime(2025, 10, 6, 6, 6, 50, 761, DateTimeKind.Utc).AddTicks(1372),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 10, 4, 23, 11, 0, 38, DateTimeKind.Utc).AddTicks(9663),
+                            UpdatedAt = new DateTime(2025, 10, 6, 6, 6, 50, 761, DateTimeKind.Utc).AddTicks(1372),
                             UserId = new Guid("22222222-2222-2222-2222-222222222222"),
                             Value = "courage"
                         },
                         new
                         {
                             Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb2"),
-                            CreatedAt = new DateTime(2025, 10, 4, 23, 11, 0, 38, DateTimeKind.Utc).AddTicks(9665),
+                            CreatedAt = new DateTime(2025, 10, 6, 6, 6, 50, 761, DateTimeKind.Utc).AddTicks(1374),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 10, 4, 23, 11, 0, 38, DateTimeKind.Utc).AddTicks(9666),
+                            UpdatedAt = new DateTime(2025, 10, 6, 6, 6, 50, 761, DateTimeKind.Utc).AddTicks(1374),
                             UserId = new Guid("22222222-2222-2222-2222-222222222222"),
                             Value = "curiosity"
                         },
                         new
                         {
                             Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb3"),
-                            CreatedAt = new DateTime(2025, 10, 4, 23, 11, 0, 38, DateTimeKind.Utc).AddTicks(9668),
+                            CreatedAt = new DateTime(2025, 10, 6, 6, 6, 50, 761, DateTimeKind.Utc).AddTicks(1376),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 10, 4, 23, 11, 0, 38, DateTimeKind.Utc).AddTicks(9668),
+                            UpdatedAt = new DateTime(2025, 10, 6, 6, 6, 50, 761, DateTimeKind.Utc).AddTicks(1377),
                             UserId = new Guid("22222222-2222-2222-2222-222222222222"),
                             Value = "thinking"
                         },
                         new
                         {
                             Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb4"),
-                            CreatedAt = new DateTime(2025, 10, 4, 23, 11, 0, 38, DateTimeKind.Utc).AddTicks(9670),
+                            CreatedAt = new DateTime(2025, 10, 6, 6, 6, 50, 761, DateTimeKind.Utc).AddTicks(1378),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 10, 4, 23, 11, 0, 38, DateTimeKind.Utc).AddTicks(9671),
+                            UpdatedAt = new DateTime(2025, 10, 6, 6, 6, 50, 761, DateTimeKind.Utc).AddTicks(1379),
                             UserId = new Guid("22222222-2222-2222-2222-222222222222"),
                             Value = "creativity"
                         },
                         new
                         {
                             Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb5"),
-                            CreatedAt = new DateTime(2025, 10, 4, 23, 11, 0, 38, DateTimeKind.Utc).AddTicks(9673),
+                            CreatedAt = new DateTime(2025, 10, 6, 6, 6, 50, 761, DateTimeKind.Utc).AddTicks(1380),
                             Quantity = 5,
                             Type = "TreeOfHeroes",
-                            UpdatedAt = new DateTime(2025, 10, 4, 23, 11, 0, 38, DateTimeKind.Utc).AddTicks(9673),
+                            UpdatedAt = new DateTime(2025, 10, 6, 6, 6, 50, 761, DateTimeKind.Utc).AddTicks(1381),
                             UserId = new Guid("22222222-2222-2222-2222-222222222222"),
                             Value = "safety"
                         });
@@ -2835,7 +2849,7 @@ namespace XooCreator.BA.Migrations
                         .WithMany()
                         .HasForeignKey("TreeId");
 
-                    b.HasOne("XooCreator.BA.Data.UserAlchimalia", "User")
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2848,7 +2862,7 @@ namespace XooCreator.BA.Migrations
 
             modelBuilder.Entity("XooCreator.BA.Data.CreditTransaction", b =>
                 {
-                    b.HasOne("XooCreator.BA.Data.UserAlchimalia", "User")
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2859,7 +2873,7 @@ namespace XooCreator.BA.Migrations
 
             modelBuilder.Entity("XooCreator.BA.Data.CreditWallet", b =>
                 {
-                    b.HasOne("XooCreator.BA.Data.UserAlchimalia", "User")
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", "User")
                         .WithOne()
                         .HasForeignKey("XooCreator.BA.Data.CreditWallet", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2881,7 +2895,7 @@ namespace XooCreator.BA.Migrations
 
             modelBuilder.Entity("XooCreator.BA.Data.HeroProgress", b =>
                 {
-                    b.HasOne("XooCreator.BA.Data.UserAlchimalia", "User")
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2892,7 +2906,7 @@ namespace XooCreator.BA.Migrations
 
             modelBuilder.Entity("XooCreator.BA.Data.HeroTreeProgress", b =>
                 {
-                    b.HasOne("XooCreator.BA.Data.UserAlchimalia", "User")
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2903,7 +2917,7 @@ namespace XooCreator.BA.Migrations
 
             modelBuilder.Entity("XooCreator.BA.Data.Job", b =>
                 {
-                    b.HasOne("XooCreator.BA.Data.UserAlchimalia", "User")
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2964,7 +2978,7 @@ namespace XooCreator.BA.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("XooCreator.BA.Data.UserAlchimalia", "User")
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2999,7 +3013,7 @@ namespace XooCreator.BA.Migrations
 
             modelBuilder.Entity("XooCreator.BA.Data.Tree", b =>
                 {
-                    b.HasOne("XooCreator.BA.Data.UserAlchimalia", "User")
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -3027,7 +3041,7 @@ namespace XooCreator.BA.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("XooCreator.BA.Data.UserAlchimalia", "User")
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -3096,7 +3110,7 @@ namespace XooCreator.BA.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("XooCreator.BA.Data.UserAlchimalia", "User")
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -3109,7 +3123,7 @@ namespace XooCreator.BA.Migrations
 
             modelBuilder.Entity("XooCreator.BA.Data.UserStoryReadProgress", b =>
                 {
-                    b.HasOne("XooCreator.BA.Data.UserAlchimalia", "User")
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -3120,7 +3134,7 @@ namespace XooCreator.BA.Migrations
 
             modelBuilder.Entity("XooCreator.BA.Data.UserTokenBalance", b =>
                 {
-                    b.HasOne("XooCreator.BA.Data.UserAlchimalia", "User")
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)

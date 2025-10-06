@@ -1,3 +1,5 @@
+using XooCreator.BA.Infrastructure.Services;
+
 namespace XooCreator.BA.Infrastructure;
 
 public interface IUserContextService
@@ -7,29 +9,31 @@ public interface IUserContextService
     string GetRequestLocaleOrDefault(string fallback = "ro-ro");
 }
 
-// Temporary implementation - will be replaced with Auth0 integration
 public class UserContextService : IUserContextService
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IAuth0UserService _auth0UserService;
 
-    public UserContextService(IHttpContextAccessor httpContextAccessor)
+    public UserContextService(IHttpContextAccessor httpContextAccessor, IAuth0UserService auth0UserService)
     {
         _httpContextAccessor = httpContextAccessor;
+        _auth0UserService = auth0UserService;
     }
 
-    public Task<Guid?> GetUserIdAsync()
+    public async Task<Guid?> GetUserIdAsync()
     {
-        // For now, return a hardcoded test user ID
-        // This will be replaced with actual Auth0 user extraction
-        var testUserId = Guid.Parse("11111111-1111-1111-1111-111111111111");
-        return Task.FromResult<Guid?>(testUserId);
+        return await _auth0UserService.GetCurrentUserIdAsync();
     }
 
     public Task<string?> GetUserSubAsync()
     {
-        // For now, return a hardcoded test sub
-        // This will be replaced with actual Auth0 sub extraction
-        return Task.FromResult<string?>("test-user-sub");
+        var httpContext = _httpContextAccessor.HttpContext;
+        if (httpContext?.User?.Identity?.IsAuthenticated != true)
+            return Task.FromResult<string?>(null);
+
+        // Extract Auth0 sub claim
+        var sub = httpContext.User.FindFirst("sub")?.Value;
+        return Task.FromResult(sub);
     }
 
     public string GetRequestLocaleOrDefault(string fallback = "ro-ro")
