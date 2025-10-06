@@ -22,7 +22,7 @@ public class CompleteLabIntroEndpoint
             return Results.Unauthorized();
         }
 
-        var user = await dbContext.UsersAlchimalia.FindAsync(userId.Value);
+        var user = await dbContext.AlchimaliaUsers.FindAsync(userId.Value);
         if (user == null)
         {
             return Results.NotFound("User not found.");

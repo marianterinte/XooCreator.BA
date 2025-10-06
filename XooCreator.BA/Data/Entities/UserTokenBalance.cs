@@ -14,7 +14,7 @@ public class UserTokenBalance
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     // Navigation
-    public UserAlchimalia User { get; set; } = null!;
+    public AlchimaliaUser User { get; set; } = null!;
 }
 
 

@@ -28,7 +28,7 @@ public class UserProfileService : IUserProfileService
     {
         try
         {
-            var user = await _db.UsersAlchimalia
+            var user = await _db.AlchimaliaUsers
                 .Include(u => u == null) // Force explicit loading
                 .FirstOrDefaultAsync(u => u.Id == userId);
 
@@ -80,7 +80,7 @@ public class UserProfileService : IUserProfileService
             var userProfile = new UserProfileDto
             {
                 Id = user.Id.ToString(),
-                DisplayName = user.DisplayName,
+                DisplayName = user.Name,
                 Email = user.Email,
                 CreatedAt = user.CreatedAt,
                 Credits = new UserCreditsDto

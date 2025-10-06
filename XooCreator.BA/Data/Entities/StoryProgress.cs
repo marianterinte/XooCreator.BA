@@ -15,5 +15,5 @@ public class StoryProgress
     
     // Navigation
     public TreeConfiguration TreeConfiguration { get; set; } = null!;
-    public UserAlchimalia User { get; set; } = null!;
+    public AlchimaliaUser User { get; set; } = null!;
 }

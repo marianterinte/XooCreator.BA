@@ -4,7 +4,7 @@ public class Creature
 {
     public Guid Id { get; set; }
     public Guid UserId { get; set; }
-    public UserAlchimalia User { get; set; } = null!;
+    public AlchimaliaUser User { get; set; } = null!;
     public Guid? TreeId { get; set; }
     public Tree? Tree { get; set; }
     public string Name { get; set; } = string.Empty;

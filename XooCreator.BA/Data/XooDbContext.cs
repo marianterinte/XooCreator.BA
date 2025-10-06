@@ -6,7 +6,7 @@ public class XooDbContext : DbContext
 {
     public XooDbContext(DbContextOptions<XooDbContext> options) : base(options) { }
 
-    public DbSet<UserAlchimalia> UsersAlchimalia => Set<UserAlchimalia>();
+    public DbSet<AlchimaliaUser> AlchimaliaUsers => Set<AlchimaliaUser>();
     public DbSet<CreditWallet> CreditWallets => Set<CreditWallet>();
     public DbSet<CreditTransaction> CreditTransactions => Set<CreditTransaction>();
     public DbSet<BestiaryItem> BestiaryItems => Set<BestiaryItem>();
@@ -55,14 +55,15 @@ public class XooDbContext : DbContext
     {
         modelBuilder.HasPostgresExtension("uuid-ossp");
 
-        modelBuilder.Entity<UserAlchimalia>(e =>
+        modelBuilder.Entity<AlchimaliaUser>(e =>
         {
             e.HasKey(x => x.Id);
-            e.HasIndex(x => x.Auth0Sub).IsUnique();
+            e.HasIndex(x => x.Auth0Id).IsUnique();
             e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.DisplayName).HasMaxLength(100).IsRequired();
+            e.Property(x => x.Name).HasMaxLength(100).IsRequired();
             e.Property(x => x.Email).HasMaxLength(256).IsRequired();
-            e.Property(x => x.Auth0Sub).HasMaxLength(256).IsRequired();
+            e.Property(x => x.Auth0Id).HasMaxLength(256).IsRequired();
+            e.Property(x => x.Picture).HasMaxLength(512);
         });
 
         modelBuilder.Entity<CreditWallet>(e =>
@@ -385,22 +386,26 @@ public class XooDbContext : DbContext
         var testUserId = Guid.Parse("11111111-1111-1111-1111-111111111111");
         var marianUserId = Guid.Parse("22222222-2222-2222-2222-222222222222");
         
-        modelBuilder.Entity<UserAlchimalia>().HasData(
-            new UserAlchimalia
+        modelBuilder.Entity<AlchimaliaUser>().HasData(
+            new AlchimaliaUser
             {
                 Id = testUserId,
-                Auth0Sub = "test-user-sub",
-                DisplayName = "Test User",
+                Auth0Id = "test-user-sub",
+                Name = "Test User",
                 Email = "test@example.com",
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                LastLoginAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
             },
-            new UserAlchimalia
+            new AlchimaliaUser
             {
                 Id = marianUserId,
-                Auth0Sub = "marian-test-sub",
-                DisplayName = "Marian",
+                Auth0Id = "marian-test-sub",
+                Name = "Marian",
                 Email = "marian@example.com",
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                LastLoginAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
             }
         );
 

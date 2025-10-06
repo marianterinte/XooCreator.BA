@@ -3,7 +3,7 @@ namespace XooCreator.BA.Data;
 public class CreditWallet
 {
     public Guid UserId { get; set; }
-    public UserAlchimalia User { get; set; } = null!;
+    public AlchimaliaUser User { get; set; } = null!;
     // Generative credits (legacy Balance kept for backwards compatibility)
     public int Balance { get; set; }
     // New: Discovery credits balance

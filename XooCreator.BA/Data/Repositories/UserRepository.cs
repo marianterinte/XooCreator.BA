@@ -5,8 +5,8 @@ namespace XooCreator.BA.Data.Repositories;
 
 public interface IUserRepository
 {
-    Task<UserAlchimalia?> GetByAuth0SubAsync(string sub, CancellationToken ct = default);
-    Task<UserAlchimalia> EnsureAsync(string sub, string displayName, string email, CancellationToken ct = default);
+    Task<AlchimaliaUser?> GetByAuth0IdAsync(string auth0Id, CancellationToken ct = default);
+    Task<AlchimaliaUser> EnsureAsync(string auth0Id, string name, string email, string? picture = null, CancellationToken ct = default);
 }
 
 public class UserRepository : IUserRepository
@@ -15,22 +15,35 @@ public class UserRepository : IUserRepository
 
     public UserRepository(XooDbContext db) => _db = db;
 
-    public Task<UserAlchimalia?> GetByAuth0SubAsync(string sub, CancellationToken ct = default)
-        => _db.UsersAlchimalia.AsNoTracking().FirstOrDefaultAsync(u => u.Auth0Sub == sub, ct);
+    public Task<AlchimaliaUser?> GetByAuth0IdAsync(string auth0Id, CancellationToken ct = default)
+        => _db.AlchimaliaUsers.AsNoTracking().FirstOrDefaultAsync(u => u.Auth0Id == auth0Id, ct);
 
-    public async Task<UserAlchimalia> EnsureAsync(string sub, string displayName, string email, CancellationToken ct = default)
+    public async Task<AlchimaliaUser> EnsureAsync(string auth0Id, string name, string email, string? picture = null, CancellationToken ct = default)
     {
-        var user = await _db.UsersAlchimalia.FirstOrDefaultAsync(u => u.Auth0Sub == sub, ct);
-        if (user != null) return user;
+        var user = await _db.AlchimaliaUsers.FirstOrDefaultAsync(u => u.Auth0Id == auth0Id, ct);
+        if (user != null) 
+        {
+            // Update profile data and last login
+            user.Name = name;
+            user.Email = email;
+            user.Picture = picture;
+            user.LastLoginAt = DateTime.UtcNow;
+            user.UpdatedAt = DateTime.UtcNow;
+            await _db.SaveChangesAsync(ct);
+            return user;
+        }
 
-        user = new UserAlchimalia { 
+        user = new AlchimaliaUser { 
             Id = Guid.NewGuid(), 
-            Auth0Sub = sub, 
-            DisplayName = displayName, 
+            Auth0Id = auth0Id, 
+            Name = name, 
             Email = email,
-            CreatedAt = DateTime.UtcNow 
+            Picture = picture,
+            CreatedAt = DateTime.UtcNow,
+            LastLoginAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
         };
-        _db.UsersAlchimalia.Add(user);
+        _db.AlchimaliaUsers.Add(user);
         _db.CreditWallets.Add(new CreditWallet { UserId = user.Id, Balance = 0, UpdatedAt = DateTime.UtcNow });
         
         // Seed generic balances for the 5 core tokens by default
