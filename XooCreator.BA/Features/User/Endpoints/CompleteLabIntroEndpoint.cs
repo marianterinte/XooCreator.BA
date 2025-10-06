@@ -1,6 +1,7 @@
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Endpoints;
@@ -33,6 +34,40 @@ public class CompleteLabIntroEndpoint
         if (!user.HasVisitedImaginationLaboratory)
         {
             user.HasVisitedImaginationLaboratory = true;
+            
+            // Add 5 discovery credits to user's wallet
+            var wallet = await dbContext.CreditWallets.FirstOrDefaultAsync(w => w.UserId == userId.Value, ct);
+            if (wallet == null)
+            {
+                // Create wallet if it doesn't exist
+                wallet = new CreditWallet
+                {
+                    UserId = userId.Value,
+                    Balance = 0,
+                    DiscoveryBalance = 5,
+                    UpdatedAt = DateTime.UtcNow
+                };
+                dbContext.CreditWallets.Add(wallet);
+            }
+            else
+            {
+                // Add 5 discovery credits to existing wallet
+                wallet.DiscoveryBalance += 5;
+                wallet.UpdatedAt = DateTime.UtcNow;
+            }
+            
+            // Record the credit grant transaction
+            var transaction = new CreditTransaction
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId.Value,
+                Amount = 5,
+                Type = CreditTransactionType.Grant,
+                Reference = "Lab Intro Completion Reward",
+                CreatedAt = DateTime.UtcNow
+            };
+            dbContext.CreditTransactions.Add(transaction);
+            
             await dbContext.SaveChangesAsync(ct);
         }
 
