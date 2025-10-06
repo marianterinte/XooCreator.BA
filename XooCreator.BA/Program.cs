@@ -39,6 +39,32 @@ builder.Services.AddSwaggerGen(c =>
         Description = "XooCreator Backend API"
     });
     c.OperationFilter<LocaleParameterOperationFilter>();
+
+    // Enable JWT Bearer auth in Swagger (Authorize button)
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter 'Bearer {token}'"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
 });
 
 // === CORS: o singură policy super permisivă, valabilă peste tot ===
@@ -145,7 +171,7 @@ builder.Services.AddAuthentication(options =>
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
-        ValidIssuer = $"https://{auth0Domain}",
+        ValidIssuer = $"https://{auth0Domain}/",
         ValidateAudience = true,
         ValidAudience = auth0Audience,
         ValidateLifetime = true
