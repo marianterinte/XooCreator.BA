@@ -65,5 +65,45 @@
 
   "hero_tree_alchimalian_dragon_name": "Alchimalian Dragon",
   "hero_tree_alchimalian_dragon_desc": "The ultimate hero, embodying all traits to perfection.",
-  "hero_tree_alchimalian_dragon_story": "This mighty dragon represents the pinnacle of courage, curiosity, thinking, creativity, and safety."
+  "hero_tree_alchimalian_dragon_story": "This mighty dragon represents the pinnacle of courage, curiosity, thinking, creativity, and safety.",
+
+  "hero_tree_brave_pup_lvl2_name": "Brave Pup (Level 2)",
+  "hero_tree_brave_pup_lvl2_desc": "Closer to true courage, with a steadily stronger heart.",
+  "hero_tree_brave_pup_lvl2_story": "Faces fears with growing confidence, inspiring others to dare.",
+
+  "hero_tree_brave_pup_lvl3_name": "Brave Pup (Level 3)",
+  "hero_tree_brave_pup_lvl3_desc": "Mature courage, ready to lead and protect.",
+  "hero_tree_brave_pup_lvl3_story": "Learns that true strength lies in perseverance and heart.",
+
+  "hero_tree_curious_cat_lvl2_name": "Curious Cat (Level 2)",
+  "hero_tree_curious_cat_lvl2_desc": "Deeper questions, brighter discoveries.",
+  "hero_tree_curious_cat_lvl2_story": "Refines curiosity into clear understanding.",
+
+  "hero_tree_curious_cat_lvl3_name": "Curious Cat (Level 3)",
+  "hero_tree_curious_cat_lvl3_desc": "Master of exploration, seeing patterns where others see chaos.",
+  "hero_tree_curious_cat_lvl3_story": "Every mystery becomes a clarified tale; every question, a new path.",
+
+  "hero_tree_wise_owl_lvl2_name": "Wise Owl (Level 2)",
+  "hero_tree_wise_owl_lvl2_desc": "Deeper knowledge, clearer judgment.",
+  "hero_tree_wise_owl_lvl2_story": "Sharpens thinking and offers guidance that lights the way.",
+
+  "hero_tree_wise_owl_lvl3_name": "Wise Owl (Level 3)",
+  "hero_tree_wise_owl_lvl3_desc": "Perfected wisdom, vision beyond time.",
+  "hero_tree_wise_owl_lvl3_story": "Blends logic and intuition to reveal profound truths.",
+
+  "hero_tree_playful_horse_lvl2_name": "Playful Horse (Level 2)",
+  "hero_tree_playful_horse_lvl2_desc": "Imagination gains speed; ideas flow in waves.",
+  "hero_tree_playful_horse_lvl2_story": "Turns play into creation, giving shape to bold dreams.",
+
+  "hero_tree_playful_horse_lvl3_name": "Playful Horse (Level 3)",
+  "hero_tree_playful_horse_lvl3_desc": "Mature creation, harmony between joy and craft.",
+  "hero_tree_playful_horse_lvl3_story": "From play, entire worlds arise, crafted with skill and enthusiasm.",
+
+  "hero_tree_shieldquill_name": "Shieldquill",
+  "hero_tree_shieldquill_desc": "Careful protection built from prudence and experience.",
+  "hero_tree_shieldquill_story": "Uses its quills as a shield to guard what matters most.",
+
+  "hero_tree_wardenspike_name": "Wardenspike",
+  "hero_tree_wardenspike_desc": "Unyielding sentinel, determined to uphold safety.",
+  "hero_tree_wardenspike_story": "Turns vigilance into an art, keeping watch at the world's edges."
 }

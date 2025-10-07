@@ -65,5 +65,45 @@
 
   "hero_tree_alchimalian_dragon_name": "Legendarul Dragon Alchimalian",
   "hero_tree_alchimalian_dragon_desc": "Legendarul dragon care încorporează perfecțiunea tuturor trăsăturilor eroice...",
-  "hero_tree_alchimalian_dragon_story": "Legendarul Dragon Alchimalian încorporează perfecțiunea echilibrului cosmic."
+  "hero_tree_alchimalian_dragon_story": "Legendarul Dragon Alchimalian încorporează perfecțiunea echilibrului cosmic.",
+
+  "hero_tree_brave_pup_lvl2_name": "Cățelul Curajos (Nivel 2)",
+  "hero_tree_brave_pup_lvl2_desc": "Un pas mai aproape de curajul adevărat, cu inimă tot mai hotărâtă.",
+  "hero_tree_brave_pup_lvl2_story": "Își înfruntă temerile cu mai multă încredere, inspirându-i pe ceilalți să îndrăznească.",
+
+  "hero_tree_brave_pup_lvl3_name": "Cățelul Curajos (Nivel 3)",
+  "hero_tree_brave_pup_lvl3_desc": "Curaj matur, gata să conducă și să protejeze.",
+  "hero_tree_brave_pup_lvl3_story": "A învățat că adevărata forță stă în perseverență și inimă.",
+
+  "hero_tree_curious_cat_lvl2_name": "Pisica Curioasă (Nivel 2)",
+  "hero_tree_curious_cat_lvl2_desc": "Întrebări mai profunde, descoperiri mai luminoase.",
+  "hero_tree_curious_cat_lvl2_story": "Își rafinează curiozitatea, transformând-o în înțelegere clară.",
+
+  "hero_tree_curious_cat_lvl3_name": "Pisica Curioasă (Nivel 3)",
+  "hero_tree_curious_cat_lvl3_desc": "Maestră a explorării, vede legături acolo unde alții văd haos.",
+  "hero_tree_curious_cat_lvl3_story": "Fiecare mister devine o poveste lămurită, fiecare întrebare – un nou drum.",
+
+  "hero_tree_wise_owl_lvl2_name": "Bufnița Înțeleaptă (Nivel 2)",
+  "hero_tree_wise_owl_lvl2_desc": "Cunoaștere mai adâncă, judecată mai limpede.",
+  "hero_tree_wise_owl_lvl2_story": "Își ascuțește gândirea și dă sfaturi care luminează calea.",
+
+  "hero_tree_wise_owl_lvl3_name": "Bufnița Înțeleaptă (Nivel 3)",
+  "hero_tree_wise_owl_lvl3_desc": "Înțelepciune desăvârșită, viziune peste timp.",
+  "hero_tree_wise_owl_lvl3_story": "Îmbină logica și intuiția pentru a dezvălui adevăruri profunde.",
+
+  "hero_tree_playful_horse_lvl2_name": "Căluțul Jucăuș (Nivel 2)",
+  "hero_tree_playful_horse_lvl2_desc": "Imaginația prinde viteză, ideile curg în valuri.",
+  "hero_tree_playful_horse_lvl2_story": "Transformă joaca în creație, dând formă viselor îndrăznețe.",
+
+  "hero_tree_playful_horse_lvl3_name": "Căluțul Jucăuș (Nivel 3)",
+  "hero_tree_playful_horse_lvl3_desc": "Creație matură, armonie între bucurie și meșteșug.",
+  "hero_tree_playful_horse_lvl3_story": "Din joc se nasc lumi întregi, lucrate cu măiestrie și entuziasm.",
+
+  "hero_tree_shieldquill_name": "Ariciul Scut-Spini",
+  "hero_tree_shieldquill_desc": "Protecție atentă, construită din prudență și experiență.",
+  "hero_tree_shieldquill_story": "Își folosește spinii ca scut pentru a apăra ceea ce contează cel mai mult.",
+
+  "hero_tree_wardenspike_name": "Paznicul Țepușă",
+  "hero_tree_wardenspike_desc": "Strajă de neclintit, hotărâtă să mențină siguranța.",
+  "hero_tree_wardenspike_story": "Transformă vigilența în artă, stând de veghe la hotarele lumii."
 }
