@@ -6,6 +6,8 @@ public interface IStoriesService
     Task<GetStoryByIdResponse> GetStoryByIdAsync(Guid userId, string storyId, string locale);
     Task<MarkTileAsReadResponse> MarkTileAsReadAsync(Guid userId, MarkTileAsReadRequest request);
     Task InitializeStoriesAsync();
+    Task<EditableStoryDto?> GetStoryForEditAsync(string storyId, string locale);
+    Task<SaveEditedStoryResponse> SaveEditedStoryAsync(string locale, EditableStoryDto story);
 }
 
 public class StoriesService : IStoriesService
@@ -70,4 +72,90 @@ public class StoriesService : IStoriesService
     {
         await _repository.SeedStoriesAsync();
     }
+
+    public async Task<EditableStoryDto?> GetStoryForEditAsync(string storyId, string locale)
+    {
+        var story = await _repository.GetStoryByIdAsync(storyId, locale);
+        if (story == null) return null;
+        return new EditableStoryDto
+        {
+            Id = story.Id,
+            Title = story.Title,
+            CoverImageUrl = story.CoverImageUrl ?? string.Empty,
+            Tiles = story.Tiles.Select(t => new EditableTileDto
+            {
+                Type = t.Type,
+                Id = t.Id,
+                Caption = t.Caption ?? string.Empty,
+                Text = t.Text,
+                ImageUrl = t.ImageUrl,
+                AudioUrl = t.AudioUrl,
+                Question = t.Question,
+                Answers = (t.Answers ?? new()).Select(a => new EditableAnswerDto
+                {
+                    Id = a.Id,
+                    Text = a.Text ?? string.Empty,
+                    Tokens = (a.Tokens ?? new()).Select(tok => new EditableTokenDto
+                    {
+                        Type = (int)tok.Type,
+                        Value = tok.Value,
+                        Quantity = tok.Quantity
+                    }).ToList()
+                }).ToList()
+            }).ToList()
+        };
+    }
+
+    public async Task<SaveEditedStoryResponse> SaveEditedStoryAsync(string locale, EditableStoryDto story)
+    {
+        try
+        {
+            var ok = await _repository.UpdateStoryAsync(locale, story);
+            return new SaveEditedStoryResponse { Success = ok };
+        }
+        catch (Exception ex)
+        {
+            return new SaveEditedStoryResponse { Success = false, Error = ex.Message };
+        }
+    }
+}
+
+public class EditableStoryDto
+{
+    public string Id { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
+    public string CoverImageUrl { get; set; } = string.Empty;
+    public List<EditableTileDto> Tiles { get; set; } = new();
+}
+
+public class EditableTileDto
+{
+    public string Type { get; set; } = "page";
+    public string Id { get; set; } = string.Empty;
+    public string? Caption { get; set; }
+    public string? Text { get; set; }
+    public string? ImageUrl { get; set; }
+    public string? AudioUrl { get; set; }
+    public string? Question { get; set; }
+    public List<EditableAnswerDto> Answers { get; set; } = new();
+}
+
+public class EditableAnswerDto
+{
+    public string Id { get; set; } = string.Empty;
+    public string Text { get; set; } = string.Empty;
+    public List<EditableTokenDto> Tokens { get; set; } = new();
+}
+
+public class EditableTokenDto
+{
+    public int Type { get; set; }
+    public string Value { get; set; } = string.Empty;
+    public int Quantity { get; set; }
+}
+
+public class SaveEditedStoryResponse
+{
+    public bool Success { get; set; }
+    public string? Error { get; set; }
 }

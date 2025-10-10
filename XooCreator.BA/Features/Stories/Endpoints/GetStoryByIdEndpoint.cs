@@ -31,4 +31,34 @@ public class GetStoryByIdEndpoint
         if (result.Story == null) return TypedResults.NotFound();
         return TypedResults.Ok(result);
     }
+
+    [Route("/api/{locale}/stories/{storyId}/edit")] // GET editable story
+    [Authorize]
+    public static async Task<Results<Ok<EditableStoryDto>, NotFound, UnauthorizedHttpResult>> HandleGetEditable(
+        [FromRoute] string locale,
+        [FromServices] GetStoryByIdEndpoint ep,
+        [FromRoute] string storyId)
+    {
+        var userId = await ep._userContext.GetUserIdAsync();
+        if (userId == null) return TypedResults.Unauthorized();
+        var editable = await ep._storiesService.GetStoryForEditAsync(storyId, locale);
+        if (editable == null) return TypedResults.NotFound();
+        return TypedResults.Ok(editable);
+    }
+
+    [Route("/api/{locale}/stories/{storyId}/edit")] // PUT save edited story
+    [Authorize]
+    [HttpPut]
+    public static async Task<Results<Ok<SaveEditedStoryResponse>, UnauthorizedHttpResult>> HandleSaveEditable(
+        [FromRoute] string locale,
+        [FromServices] GetStoryByIdEndpoint ep,
+        [FromRoute] string storyId,
+        [FromBody] EditableStoryDto story)
+    {
+        var userId = await ep._userContext.GetUserIdAsync();
+        if (userId == null) return TypedResults.Unauthorized();
+        story.Id = storyId;
+        var result = await ep._storiesService.SaveEditedStoryAsync(locale, story);
+        return TypedResults.Ok(result);
+    }
 }

@@ -12,6 +12,7 @@ public interface IStoriesRepository
     Task<List<UserStoryProgressDto>> GetUserStoryProgressAsync(Guid userId, string storyId);
     Task<bool> MarkTileAsReadAsync(Guid userId, string storyId, string tileId);
     Task SeedStoriesAsync();
+    Task<bool> UpdateStoryAsync(string locale, EditableStoryDto story);
 }
 
 public class StoriesRepository : IStoriesRepository
@@ -200,6 +201,89 @@ public class StoriesRepository : IStoriesRepository
             Console.WriteLine($"An error occurred during story seeding: {ex.Message}");
             throw;
         }
+    }
+
+    public async Task<bool> UpdateStoryAsync(string locale, EditableStoryDto story)
+    {
+        // Minimal implementation: update translated fields and base image urls.
+        // Assumes story id and tile ids exist.
+        var db = await _context.StoryDefinitions
+            .Include(s => s.Translations)
+            .Include(s => s.Tiles)
+                .ThenInclude(t => t.Translations)
+            .Include(s => s.Tiles)
+                .ThenInclude(t => t.Answers)
+                    .ThenInclude(a => a.Translations)
+            .Include(s => s.Tiles)
+                .ThenInclude(t => t.Answers)
+                    .ThenInclude(a => a.Tokens)
+            .FirstOrDefaultAsync(s => s.StoryId == story.Id);
+
+        if (db == null) return false;
+
+        db.Title = string.IsNullOrWhiteSpace(story.Title) ? db.Title : story.Title;
+        db.CoverImageUrl = story.CoverImageUrl ?? db.CoverImageUrl;
+
+        var lc = (locale ?? "ro-ro").ToLowerInvariant();
+
+        foreach (var tileDto in story.Tiles)
+        {
+            var dbTile = db.Tiles.FirstOrDefault(t => t.TileId == tileDto.Id);
+            if (dbTile == null) continue;
+
+            if (!string.IsNullOrWhiteSpace(tileDto.ImageUrl)) dbTile.ImageUrl = tileDto.ImageUrl;
+            if (!string.IsNullOrWhiteSpace(tileDto.AudioUrl)) dbTile.AudioUrl = tileDto.AudioUrl;
+
+            // Upsert translation for tile (caption/text/question)
+            var tr = dbTile.Translations?.FirstOrDefault(x => x.LanguageCode == lc);
+            if (tr == null)
+            {
+                tr = new StoryTileTranslation { StoryTileId = dbTile.Id, LanguageCode = lc };
+                _context.StoryTileTranslations.Add(tr);
+            }
+            tr.Caption = tileDto.Caption;
+            tr.Text = tileDto.Text;
+            tr.Question = tileDto.Question;
+
+            // Answers
+            if (tileDto.Answers != null && tileDto.Answers.Count > 0)
+            {
+                foreach (var aDto in tileDto.Answers)
+                {
+                    var dbAnswer = dbTile.Answers.FirstOrDefault(a => a.AnswerId == aDto.Id);
+                    if (dbAnswer == null)
+                    {
+                        dbAnswer = new StoryAnswer { AnswerId = aDto.Id, SortOrder = dbTile.Answers.Count + 1 };
+                        dbTile.Answers.Add(dbAnswer);
+                    }
+                    var aTr = dbAnswer.Translations?.FirstOrDefault(x => x.LanguageCode == lc);
+                    if (aTr == null)
+                    {
+                        aTr = new StoryAnswerTranslation { StoryAnswerId = dbAnswer.Id, LanguageCode = lc };
+                        _context.StoryAnswerTranslations.Add(aTr);
+                    }
+                    aTr.Text = aDto.Text;
+
+                    // Replace tokens list
+                    dbAnswer.Tokens.Clear();
+                    if (aDto.Tokens != null)
+                    {
+                        foreach (var tk in aDto.Tokens)
+                        {
+                            dbAnswer.Tokens.Add(new StoryAnswerToken
+                            {
+                                Type = TokenFamily.Personality.ToString(),
+                                Value = tk.Value,
+                                Quantity = tk.Quantity
+                            });
+                        }
+                    }
+                }
+            }
+        }
+
+        await _context.SaveChangesAsync();
+        return true;
     }
 
     private static async Task<List<StoryDefinition>> LoadStoriesFromJsonAsync(string baseLocale = "ro-ro")
