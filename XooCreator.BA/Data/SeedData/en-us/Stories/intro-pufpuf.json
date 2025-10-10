@@ -1,7 +1,7 @@
 {
   "storyId": "intro-pufpuf",
   "title": "Emperor Puf-Puf – The Open Gate",
-  "coverImageUrl": "images/tol-intro-story/0.Cover.png",
+  "coverImageUrl": "images/tol/stories/intro-pufpuf/0.Cover.png",
   "category": "intro",
   "sortOrder": 1,
   "tiles": [
@@ -11,7 +11,7 @@
       "sortOrder": 1,
       "caption": "The Calling",
       "text": "Puf-Puf was traveling through the depths of the universe when the cosmic silence was broken by a strange roar — like a sigh of the stars. The instruments flickered, and the star compass drew meaningless spirals. With his paw on the quartz windshield, he felt (more than heard) someone calling his name from a very, very old place.",
-      "imageUrl": "images/tol-intro-story/1.puf-puf-flying.png"
+      "imageUrl": "images/tol/stories/intro-pufpuf/1.puf-puf-flying.png"
     },
     {
       "tileId": "p2",
@@ -19,7 +19,7 @@
       "sortOrder": 2,
       "caption": "The Crash",
       "text": "A flash of light swallowed the ship and threw it into a blinding vortex. The plasma lightning rods melted, the rudder jammed, and the hull split the clouds before biting into the damp earth. When the silence returned, the air smelled of resin and fresh rain. Puf-Puf touched his scratched ear, looked at the huge trees and… he didn't know where he was. Only that he had arrived in a strange place that was looking back at him.",
-      "imageUrl": "images/tol-intro-story/2.puf-puf-hurt.png"
+      "imageUrl": "images/tol/stories/intro-pufpuf/2.puf-puf-hurt.png"
     },
     {
       "tileId": "p3",
@@ -27,7 +27,7 @@
       "sortOrder": 3,
       "caption": "The SOS Crystal",
       "text": "On board, in the SOS module, an ancient crystal pulsed like a sleeping heart. Puf-Puf opened the panel, and its light projected a living map into the air: branches of light, paths that intertwined infinitely. Some paths were extinguished, others sparkled like signs. They all converge in a single node: the Tree of Light.",
-      "imageUrl": "images/tol-intro-story/3.puf-puf-crystal.png"
+      "imageUrl": "images/tol/stories/intro-pufpuf/3.puf-puf-crystal.png"
     },
     {
       "tileId": "p4",
@@ -35,14 +35,14 @@
       "sortOrder": 4,
       "caption": "The Meeting",
       "text": "The leaves of the Tree rustled like a whisper when Puf-Puf comes your way and smiles at you. 'Hey, you. Yes, I'm talking to you. I'm Puf-Puf, talking cat, slightly battered ship, the spirit… still high. The Tree has brought us face to face and, honestly, you seem the type who knows what they're doing. I mean, you have that look of ‘I’ve repaired a world or two on a Tuesday evening’. If you want, we can go together: you talk to the crystal, I'll keep the rhythm and not step on sensitive branches. Will you help me?'",
-      "imageUrl": "images/tol-intro-story/puf-puf-home-planet.png"
+      "imageUrl": "images/tol/stories/intro-pufpuf/puf-puf-home-planet.png"
     },
     {
       "tileId": "q1",
       "type": "quiz",
       "caption": "The Choice",
       "sortOrder": 5,
-      "imageUrl": "images/tol-intro-story/TreeOfLight.png",
+      "imageUrl": "images/tol/stories/intro-pufpuf/TreeOfLight.png",
       "question": "The crystal lights up when we talk to it — it seems intelligent and responds to good intentions. What should we ask it first?",
       "answers": [
         {

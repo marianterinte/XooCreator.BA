@@ -17,7 +17,7 @@
     { "id": "kelo-ketis","label": "Kelo-Ketis",      "level": 10, "imageUrl": "images/worlds/kelo-ketis.jpg","pufpufMessage": "Planeta natală a lui Puf-Puf. Cheia drumului este Eroul Luminii.", "sortOrder": 10 }
   ],
   "storyNodes": [
-    { "storyId": "intro-pufpuf", "regionId": "gateway",  "rewardImageUrl": "images/tol-intro-story/0.Cover.png", "sortOrder": 1 },
+    { "storyId": "intro-pufpuf", "regionId": "gateway",  "rewardImageUrl": "images/tol/stories/intro-pufpuf/0.Cover.png", "sortOrder": 1 },
     { "storyId": "terra-s1",     "regionId": "terra",    "rewardImageUrl": "images/homepage/heroes/hero1.jpg",   "sortOrder": 1 },
     { "storyId": "terra-s2",     "regionId": "terra",    "rewardImageUrl": "images/homepage/heroes/hero2.jpg",   "sortOrder": 2 },
 

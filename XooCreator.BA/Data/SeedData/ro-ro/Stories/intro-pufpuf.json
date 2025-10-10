@@ -1,7 +1,7 @@
 {
   "storyId": "intro-pufpuf",
   "title": "Împăratul Puf-Puf – Poarta Deschisă",
-  "coverImageUrl": "images/tol-intro-story/0.Cover.png",
+  "coverImageUrl": "images/tol/stories/intro-pufpuf/0.Cover.png",
   "category": "intro",
   "sortOrder": 1,
   "tiles": [
@@ -11,7 +11,7 @@
       "sortOrder": 1,
       "caption": "Chemarea",
       "text": "Puf-Puf călătorea prin adâncul universului când liniștea cosmică fu spartă de un vuiet straniu — ca un oftat al stelelor. Instrumentele pâlpâiră, iar busola stelară desenă spirale fără sens. Cu lăbuța pe parbrizul de cuarț, el simți (mai mult decât auzi) că cineva îl cheamă pe nume dintr-un loc foarte, foarte vechi.",
-      "imageUrl": "images/tol-intro-story/1.puf-puf-flying.png"
+      "imageUrl": "images/tol/stories/intro-pufpuf/1.puf-puf-flying.png"
     },
     {
       "tileId": "p2",
@@ -19,7 +19,7 @@
       "sortOrder": 2,
       "caption": "Prăbușirea",
       "text": "Un fulger de lumină înghiți nava și o azvârli într-un vârtej orbitor. Paratrăsnetele de plasmă se topiră, cârma se bloca, iar carena spintecă norii înainte să muște din pământul umed. Când tăcerea reveni, aerul mirosea a rășină și ploaie proaspătă. Puf-Puf își atinse urechea zgâriată, privi copacii uriași și… nu știa unde se afla. Doar că ajunsese într-un loc străin care îl privea înapoi.",
-      "imageUrl": "images/tol-intro-story/2.puf-puf-hurt.png"
+      "imageUrl": "images/tol/stories/intro-pufpuf/2.puf-puf-hurt.png"
     },
     {
       "tileId": "p3",
@@ -27,7 +27,7 @@
       "sortOrder": 3,
       "caption": "Cristalul SOS",
       "text": "La bord, în modulul SOS, un cristal străvechi pulsa ca o inimă adormită. Puf-Puf deschise panoul, iar lumina lui proiectă în aer o hartă vie: ramuri de lumină, poteci care se împleteau la infinit. Unele căi erau stinse, altele scânteiau ca semne. Toate converg într-un singur nod: Copacul Luminii.",
-      "imageUrl": "images/tol-intro-story/3.puf-puf-crystal.png"
+      "imageUrl": "images/tol/stories/intro-pufpuf/3.puf-puf-crystal.png"
     },
     {
       "tileId": "p4",
@@ -35,14 +35,14 @@
       "sortOrder": 4,
       "caption": "Întâlnirea",
       "text": "Frunzele Copacului foșneau ca o șoaptă când Puf-Puf îți iese în cale și îți zâmbește. „Hei, tu. Da, ție îți vorbesc. Eu sunt Puf-Puf, pisică vorbitoare, navă puțin șifonată, spiritul… încă sus. Copacul ne-a pus față în față și, sincer, tu pari genul care să știe ce face. Adică ai privirea aia de ‘am mai reparat două-trei lumi marțea seara’. Dacă vrei, mergem împreună: tu vorbești cu cristalul, eu țin ritmul și nu calc pe crengi sensibile. Mă ajuți?”",
-      "imageUrl": "images/tol-intro-story/puf-puf-home-planet.png"
+      "imageUrl": "images/tol/stories/intro-pufpuf/puf-puf-home-planet.png"
     },
     {
       "tileId": "q1",
       "type": "quiz",
       "caption": "Alegerea",
       "sortOrder": 5,
-      "imageUrl": "images/tol-intro-story/TreeOfLight.png",
+      "imageUrl": "images/tol/stories/intro-pufpuf/TreeOfLight.png",
       "question": "Cristalul luminează când vorbim cu el — pare inteligent și răspunde la intenții bune. Oare ce să-l întrebăm mai întâi?",
       "answers": [
         {
