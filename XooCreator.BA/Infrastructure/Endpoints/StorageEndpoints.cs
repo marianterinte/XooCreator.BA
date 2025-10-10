@@ -2,7 +2,6 @@ using Azure.Storage.Blobs;
 using Azure.Storage.Sas;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using XooCreator.BA.Infrastructure.Endpoints;
 
 namespace XooCreator.BA.Infrastructure.Endpoints;
 
@@ -15,14 +14,14 @@ public class StorageEndpoints
         _config = config;
     }
 
-    private record SasUploadRequest(string Container, string BlobName, string ContentType);
-    private record SasResponse(string SasUrl);
-    private record SasDeleteRequest(string Container, string BlobName);
+    public record SasUploadRequest(string Container, string BlobName, string ContentType);
+    public record SasResponse(string SasUrl);
+    public record SasDeleteRequest(string Container, string BlobName);
 
     [Route("/api/storage/blob/sas-upload")]
     [Authorize]
     [HttpPost]
-    public static Results<Ok<SasResponse>, BadRequest<string>> GetUploadSas(
+    public static IResult GetUploadSas(
         [FromServices] StorageEndpoints ep,
         [FromBody] SasUploadRequest request)
     {
@@ -49,7 +48,7 @@ public class StorageEndpoints
     [Route("/api/storage/blob/sas-delete")]
     [Authorize]
     [HttpPost]
-    public static Results<Ok<SasResponse>, BadRequest<string>> GetDeleteSas(
+    public static IResult GetDeleteSas(
         [FromServices] StorageEndpoints ep,
         [FromBody] SasDeleteRequest request)
     {
