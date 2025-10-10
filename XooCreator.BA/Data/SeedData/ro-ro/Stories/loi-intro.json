@@ -1,7 +1,7 @@
 {
-  "storyId": "lore-origins-matso-iepurele",
-  "title": "Mâțo-Iepurele – Originea Păcii",
-  "coverImageUrl": "images/lore-origins/0.cover.png",
+  "storyId": "loi-intro",
+  "title": "Originea Păcii",
+  "coverImageUrl": "images/tol/stories/loi-intro/0.cover.png",
   "category": "lore",
   "sortOrder": 1,
   "tiles": [
@@ -11,7 +11,7 @@
       "sortOrder": 1,
       "caption": "Două lumi, două tabere",
       "text": "În Alchimalia existau două lumi aflate în război. Lunaria — planeta iepurilor, cu câmpii de morcovi și vizuini. Ketis — planeta pisicilor, condusă de un împărat. Granițele erau reci, iar podurile, rupte.",
-      "imageUrl": "images/lore-origins/1.two-worlds.png"
+      "imageUrl": "images/tol/stories/loi-intro/1.two-worlds.png"
     },
     {
       "tileId": "p2",
@@ -19,7 +19,7 @@
       "sortOrder": 2,
       "caption": "Împăratul Pufus Alchimus",
       "text": "Pe Ketis domnea Împăratul Pufus Alchimus, un războinic cunoscut pentru cuceriri. Războiul cu iepurii ținea de mult, iar armele vorbeau mai tare decât poveștile.",
-      "imageUrl": "images/lore-origins/2.emperor.png"
+      "imageUrl": "images/tol/stories/loi-intro/2.emperor.png"
     },
     {
       "tileId": "p3",
@@ -27,7 +27,7 @@
       "sortOrder": 3,
       "caption": "Fiul cel curios",
       "text": "Împăratului i s-a născut un fiu: Puf-Puf Alchimus. Tatăl voia un luptător. Dar Puf-Puf iubea matematica, jocurile cu elemente și visa la alchemie. Mai mult explorator decât soldat.",
-      "imageUrl": "images/lore-origins/3.curious-son.png"
+      "imageUrl": "images/tol/stories/loi-intro/3.curious-son.png"
     },
     {
       "tileId": "p4",
@@ -35,7 +35,7 @@
       "sortOrder": 4,
       "caption": "Prieteni peste graniță",
       "text": "Deși război, prietenia își găsea drum. Un iepure negru și o pisică albă se întâlneau în secret și își povesteau lumea. Nu semănau a dușmani. Semănau a copii curioși.",
-      "imageUrl": "images/lore-origins/4.friends.png"
+      "imageUrl": "images/tol/stories/loi-intro/4.friends.png"
     },
     {
       "tileId": "p5",
@@ -43,7 +43,7 @@
       "sortOrder": 5,
       "caption": "Piatra din Lunaria",
       "text": "Pe Ketis, Puf-Puf i-a surprins privind o piatră verde adusă din Lunaria, lucind ca un smarald. „Ține-ne secretul prieteniei și îți dăm piatra”, i-a șoptit iepurele. Puf-Puf a promis.",
-      "imageUrl": "images/lore-origins/5.lunaria-stone.png"
+      "imageUrl": "images/tol/stories/loi-intro/5.lunaria-stone.png"
     },
     {
       "tileId": "p6",
@@ -51,7 +51,7 @@
       "sortOrder": 6,
       "caption": "Licoarea verde-aurie",
       "text": "Cu piatra, Puf-Puf a făcut o licoare. Când atingea metalul, acesta devenea aur. Bucurie mare! A împărțit licoarea cu prietenii — mici înghițituri, multe râsete.",
-      "imageUrl": "images/lore-origins/6.elixir.png"
+      "imageUrl": "images/tol/stories/loi-intro/6.elixir.png"
     },
     {
       "tileId": "p7",
@@ -59,7 +59,7 @@
       "sortOrder": 7,
       "caption": "Somn la umbra copacului",
       "text": "Obosiți, au adormit la umbra unui copac foarte înalt. Licoarea s-a scurs încet la rădăcini. Piatra verde încălzea pământul cu o lumină blândă.",
-      "imageUrl": "images/lore-origins/7.tree-nap.png"
+      "imageUrl": "images/tol/stories/loi-intro/7.tree-nap.png"
     },
     {
       "tileId": "p8",
@@ -67,14 +67,14 @@
       "sortOrder": 8,
       "caption": "Mâțo-Iepurele",
       "text": "Când s-au trezit, lângă ei stătea o ființă ciudată, frumoasă: Mâțo-Iepurele — cu grația unei pisici și blândețea unui iepure. Se uita la ei fără teamă.",
-      "imageUrl": "images/lore-origins/8.matso-iepurele.png"
+      "imageUrl": "images/tol/stories/loi-intro/8.matso-iepurele.png"
     },
     {
       "tileId": "q1",
       "type": "quiz",
       "sortOrder": 9,
       "caption": "Alegerea pentru pace",
-      "imageUrl": "images/lore-origins/9.quiz.png",
+      "imageUrl": "images/tol/stories/loi-intro/9.quiz.png",
       "question": "Piatra, licoarea și prietenia au chemat Mâțo-Iepurele. Ca să rămână pacea, ce faceți mai întâi?",
       "answers": [
         {
@@ -110,7 +110,7 @@
       "sortOrder": 10,
       "caption": "Mesajul păcii",
       "text": "„Eu port pacea dintre lumi”, a spus Mâțo-Iepurele. „Din prietenie, piatră și licoare s-a născut un pod. Războaiele se sting când înveți să amesteci bine lucrurile.” Puf-Puf a înțeles că alchimia nu e doar despre metale, ci și despre inimi.",
-      "imageUrl": "images/lore-origins/10.message.png"
+      "imageUrl": "images/tol/stories/loi-intro/10.message.png"
     },
     {
       "tileId": "p10",
@@ -118,7 +118,7 @@
       "sortOrder": 11,
       "caption": "Hotărârea lui Puf-Puf",
       "text": "În acea zi, Puf-Puf a ales drumul lui: explorator și alchimist. Va căuta căi între lumi, nu războaie. Iar Mâțo-Iepurele avea să devină, cândva, semnul că pacea poate fi creată, nu doar găsită.",
-      "imageUrl": "images/lore-origins/11.choice.png"
+      "imageUrl": "images/tol/stories/loi-intro/11.choice.png"
     }
   ]
 }
