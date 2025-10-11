@@ -1,20 +1,20 @@
 {
   "storyId": "terra-s2",
-  "title": "Iepurele Negru – Lentila Lunii",
+  "title": "Un nou prieten",
   "coverImageUrl": "images/tol/stories/terra-s2/0.Cover.png",
   "category": "terra",
-  "sortOrder": 2,
+  "sortOrder": 1,
   "tiles": [
     {
-      "tileId": "p1",
+      "tileId": "1",
       "type": "page",
       "sortOrder": 1,
       "caption": "Ținta: Lentila Lunii",
-      "text": "Planul pe azi e clar: găsiți Lentila Lunii. Cu ea, cristalul mărește harta și puteți căuta mai adânc ruta spre Kelo-Ketis. Ținta indică spre o zonă cu stânci joase și iarbă înaltă, la marginea unei păduri.",
+      "text": "Împăratul Puf-Puf nu și-a reparat nava, iar despre Pământ habar nu are unde se află față de Kelo-Ketis. A auzit, în schimb, de un artefact rar: Lentila Lunii. Cu ea, cristalul mărește harta și puteți căuta mai adânc ruta spre Kelo-Ketis. Ținta indică o zonă cu stânci joase și iarbă înaltă, la marginea unei păduri.",
       "imageUrl": "images/tol/stories/terra-s2/1.target.png"
     },
     {
-      "tileId": "p2",
+      "tileId": "2",
       "type": "page",
       "sortOrder": 2,
       "caption": "Urme ciudate",
@@ -22,7 +22,7 @@
       "imageUrl": "images/tol/stories/terra-s2/2.tracks.png"
     },
     {
-      "tileId": "p3",
+      "tileId": "3",
       "type": "page",
       "sortOrder": 3,
       "caption": "Iepurele negru",
@@ -30,7 +30,7 @@
       "imageUrl": "images/tol/stories/terra-s2/3.black-rabbit.png"
     },
     {
-      "tileId": "p4",
+      "tileId": "4",
       "type": "page",
       "sortOrder": 4,
       "caption": "Locul lentilei",
@@ -38,7 +38,7 @@
       "imageUrl": "images/tol/stories/terra-s2/4.cave.png"
     },
     {
-      "tileId": "p5",
+      "tileId": "5",
       "type": "page",
       "sortOrder": 5,
       "caption": "Problema mică",
@@ -46,12 +46,12 @@
       "imageUrl": "images/tol/stories/terra-s2/5.problem.png"
     },
     {
-      "tileId": "q1",
+      "tileId": "6",
       "type": "quiz",
-      "caption": "Cum procedăm",
       "sortOrder": 6,
+      "caption": "",
+      "text": "",
       "imageUrl": "images/tol/stories/terra-s2/6.quiz.png",
-      "question": "Alege abordarea ca să scoți Lentila Lunii fără să destabilizezi grota:",
       "answers": [
         {
           "answerId": "a",
@@ -113,14 +113,15 @@
           ],
           "sortOrder": 5
         }
-      ]
+      ],
+      "question": "Alege abordarea ca să scoți Lentila Lunii fără să destabilizezi grota:"
     },
     {
       "tileId": "p6",
       "type": "page",
       "sortOrder": 7,
       "caption": "Reușita",
-      "text": "Lentila iese curat, fără să tulbure grota. Iepurele bate din lăbuțe: „Bravo! Lateral e mai bine decât drept!” Pui Lentila peste cristal, iar imaginea hărții se clarifică. Iepurele te privește hotărât: „Ținem legătura. Vreau acasă, pe Lunaria — promiți că mă ajuți?”",
+      "text": "Lentila iese curat, fără să tulbure grota. Iepurele bate din lăbuțe: „Bravo! Lateral e mai bine decât drept!” Pui Lentila peste cristal, iar imaginea hărții se clarifică. Iepurele te privește hotărât: „Ținem legătura. Vreau acasă, pe Lunaria — promiți că mă ajuți?”\nAcum știți unde e Lunaria: nu, nu e Luna, ci o planetă îndepărtată de Pământ. Dacă am avea o sursă de energie, poate că am putea repara nava împreună…",
       "imageUrl": "images/tol/stories/terra-s2/7.success.png"
     }
   ]

@@ -1,16 +1,16 @@
 {
   "storyId": "terra-s2",
-  "title": "The Black Rabbit – The Moon Lens",
+  "title": "A New Friend",
   "coverImageUrl": "images/tol/stories/terra-s2/0.Cover.png",
   "category": "terra",
-  "sortOrder": 2,
+  "sortOrder": 1,
   "tiles": [
     {
       "tileId": "p1",
       "type": "page",
       "sortOrder": 1,
       "caption": "Target: The Moon Lens",
-      "text": "Today's plan is clear: find the Moon Lens. With it, the crystal enlarges the map, and you can search deeper for the route to Kelo-Ketis. The target points to an area with low rocks and tall grass, at the edge of a forest.",
+      "text": "Emperor Puf-Puf hasn’t repaired his ship, and as for Earth, he has no idea where it is in relation to Kelo-Ketis. He has heard, however, of a rare artifact: the Moon Lens. With it, the crystal enlarges the map and you can search deeper for the route to Kelo-Ketis. The target points to an area of low rocks and tall grass at the edge of a forest.",
       "imageUrl": "images/tol/stories/terra-s2/1.target.png"
     },
     {
@@ -18,7 +18,7 @@
       "type": "page",
       "sortOrder": 2,
       "caption": "Strange Tracks",
-      "text": "Small, zigzag tracks appear in the grass, disappearing near a hollow log. Next to them, carrot tops that have been \"artistically tasted.\"",
+      "text": "In the grass appear small zigzagging tracks that disappear near a hollowed log. Beside them, carrot tails ‘artistically nibbled’.",
       "imageUrl": "images/tol/stories/terra-s2/2.tracks.png"
     },
     {
@@ -26,36 +26,37 @@
       "type": "page",
       "sortOrder": 3,
       "caption": "The Black Rabbit",
-      "text": "A black rabbit with matte fur and big eyes jumps out of the log. \"Hello! I am... sometimes here, sometimes on Lunaria. It depends on how you blink,\" it says, then laughs. \"I know where the Lens is. And I need help to get home, to Lunaria. If you help me, I'll show you the way to the Lens.\"",
+      "text": "From the log leaps a black rabbit, with matte fur and big eyes. ‘Hello! I’m… sometimes here, sometimes on Lunaria. Depends how you blink,’ it says, then laughs. ‘I know where the Lens is. And I need help getting home to Lunaria. If you help me, I’ll show you the way to the Lens.’",
       "imageUrl": "images/tol/stories/terra-s2/3.black-rabbit.png"
     },
     {
       "tileId": "p4",
       "type": "page",
       "sortOrder": 4,
-      "caption": "The Lens's Location",
-      "text": "Guided by the rabbit, you reach a short, cold grotto, with ankle-deep water. Pale crystals hang from the ceiling; on a rock, a translucent disc—the Moon Lens—is caught between two stone growths.",
+      "caption": "Where the Lens Is",
+      "text": "Guided by the rabbit, you reach a short, cold grotto, with ankle-deep water. Pale crystals hang from the ceiling; on a rock rests a translucent disc — the Moon Lens — wedged between two stone outgrowths.",
       "imageUrl": "images/tol/stories/terra-s2/4.cave.png"
     },
     {
       "tileId": "p5",
       "type": "page",
       "sortOrder": 5,
-      "caption": "The Small Problem",
-      "text": "When you touch the rock, the water ripples and the entrance seems to \"breathe,\" tightening slightly. \"A sensitive grotto,\" says the rabbit. \"Do good, you get an exit. Do wrong, you get a cold shower.\"",
+      "caption": "A Small Problem",
+      "text": "When you touch the rock, the water ripples and the entrance seems to ‘breathe’, narrowing slightly. ‘Sensitive grotto,’ says the rabbit. ‘Do good, you get an exit. Do wrong, you get a cold shower.’",
       "imageUrl": "images/tol/stories/terra-s2/5.problem.png"
     },
     {
       "tileId": "q1",
       "type": "quiz",
-      "caption": "How to Proceed",
       "sortOrder": 6,
+      "caption": "",
+      "text": "",
       "imageUrl": "images/tol/stories/terra-s2/6.quiz.png",
-      "question": "Choose the approach to remove the Moon Lens without destabilizing the grotto:",
+      "question": "Choose how to extract the Moon Lens without destabilizing the grotto:",
       "answers": [
         {
           "answerId": "a",
-          "text": "You squeeze through the narrow opening and work quickly, so you don't give the walls time to \"breathe.\"",
+          "text": "Slip over the narrow threshold and work quickly, giving the walls no time to ‘breathe’.",
           "tokens": [
             {
               "type": "Personality",
@@ -67,7 +68,7 @@
         },
         {
           "answerId": "b",
-          "text": "You move slowly, checking your footing with each step, and keep the water as still as possible.",
+          "text": "Move slowly, check your footing at each step, and keep the water as calm as possible.",
           "tokens": [
             {
               "type": "Personality",
@@ -79,7 +80,7 @@
         },
         {
           "answerId": "c",
-          "text": "You make a quick plan: who holds the flashlight, who sets the lever, the order of movements, a signal for \"stop.\"",
+          "text": "Make a short plan: who holds the flashlight, who sets the lever, the order of moves, and a ‘stop’ signal.",
           "tokens": [
             {
               "type": "Personality",
@@ -91,7 +92,7 @@
         },
         {
           "answerId": "d",
-          "text": "You improvise a tool: a stick with a loop of string to pull the lens from a distance.",
+          "text": "Improvise a tool: a stick with a loop of string to pull the Lens from a distance.",
           "tokens": [
             {
               "type": "Personality",
@@ -103,7 +104,7 @@
         },
         {
           "answerId": "e",
-          "text": "First, you set up markers and safe exits: stepping stones, a rope at the entrance, a time limit for retreat.",
+          "text": "First set markers and safe exits: stepping stones, a rope at the entrance, and a time limit for retreat.",
           "tokens": [
             {
               "type": "Personality",
@@ -120,7 +121,7 @@
       "type": "page",
       "sortOrder": 7,
       "caption": "Success",
-      "text": "The Lens comes out cleanly, without disturbing the grotto. The rabbit claps its paws: \"Well done! Sideways is better than straight on!\" You place the Lens over the crystal, and the map's image becomes clear. The rabbit looks at you resolutely: \"Let's keep in touch. I want to go home, to Lunaria—do you promise to help me?\"",
+      "text": "The Lens comes out cleanly, without disturbing the grotto. The rabbit claps its little paws: ‘Bravo! Sideways is better than straight!’ You place the Lens over the crystal and the map’s image sharpens. The rabbit looks at you, determined: ‘Let’s keep in touch. I want to go home to Lunaria — do you promise to help?’ Now you know where Lunaria is: not the Moon, but a planet far from Earth. If we had a source of energy, maybe we could repair the ship together…",
       "imageUrl": "images/tol/stories/terra-s2/7.success.png"
     }
   ]
