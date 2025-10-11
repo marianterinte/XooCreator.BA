@@ -1,111 +1,94 @@
 {
   "storyId": "intro-pufpuf",
-  "title": "Emperor Puf-Puf – The Open Gate",
+  "title": "Marea Aventura",
   "coverImageUrl": "images/tol/stories/intro-pufpuf/0.Cover.png",
-  "category": "intro",
+  "category": "terra",
   "sortOrder": 1,
   "tiles": [
     {
-      "tileId": "p1",
+      "tileId": "1",
       "type": "page",
       "sortOrder": 1,
-      "caption": "The Calling",
-      "text": "Puf-Puf was traveling through the depths of the universe when the cosmic silence was broken by a strange roar — like a sigh of the stars. The instruments flickered, and the star compass drew meaningless spirals. With his paw on the quartz windshield, he felt (more than heard) someone calling his name from a very, very old place.",
-      "imageUrl": "images/tol/stories/intro-pufpuf/1.puf-puf-flying.png"
+      "caption": "Chemarea",
+      "text": "Puf-Puf călătorea prin adâncul universului când liniștea cosmică fu spartă de un vuiet straniu — ca un oftat al stelelor. Instrumentele pâlpâiră, iar busola stelară desenă spirale fără sens. Cu lăbuța pe parbrizul de cuarț, el simți (mai mult decât auzi) că cineva îl cheamă pe nume dintr-un loc foarte, foarte vechi.",
+      "imageUrl": "images/tol/stories/intro-pufpuf/1.puf-puf-flying.png",
+      "question": ""
     },
     {
-      "tileId": "p2",
+      "tileId": "2",
       "type": "page",
       "sortOrder": 2,
-      "caption": "The Crash",
-      "text": "A flash of light swallowed the ship and threw it into a blinding vortex. The plasma lightning rods melted, the rudder jammed, and the hull split the clouds before biting into the damp earth. When the silence returned, the air smelled of resin and fresh rain. Puf-Puf touched his scratched ear, looked at the huge trees and… he didn't know where he was. Only that he had arrived in a strange place that was looking back at him.",
-      "imageUrl": "images/tol/stories/intro-pufpuf/2.puf-puf-hurt.png"
+      "caption": "Prăbușirea",
+      "text": "Un fulger de lumină înghiți nava și o azvârli într-un vârtej orbitor. Paratrăsnetele de plasmă se topiră, cârma se bloca, iar carena spintecă norii înainte să muște din pământul umed. Când tăcerea reveni, aerul mirosea a uscat si arsita. Puf-Puf își atinse urechea zgâriată, privi copacii uriași și… nu știa unde se afla. Doar că ajunsese într-un loc străin care ii starnea curiozitatea.",
+      "imageUrl": "images/tol/stories/intro-pufpuf/2.puf-puf-hurt.png",
+      "question": ""
     },
     {
-      "tileId": "p3",
+      "tileId": "3",
       "type": "page",
       "sortOrder": 3,
-      "caption": "The SOS Crystal",
-      "text": "On board, in the SOS module, an ancient crystal pulsed like a sleeping heart. Puf-Puf opened the panel, and its light projected a living map into the air: branches of light, paths that intertwined infinitely. Some paths were extinguished, others sparkled like signs. They all converge in a single node: the Tree of Light.",
-      "imageUrl": "images/tol/stories/intro-pufpuf/3.puf-puf-crystal.png"
+      "caption": "Cristalul SOS",
+      "text": "La bord, în modulul SOS, un cristal străvechi pulsa ca o inimă adormită. Puf-Puf deschise panoul, iar lumina lui proiectă în aer o hartă vie: ramuri de lumină, poteci care se împleteau la infinit. Unele căi erau stinse, altele scânteiau ca semne. Toate converg într-un singur nod: Copacul Luminii.",
+      "imageUrl": "images/tol/stories/intro-pufpuf/3.puf-puf-crystal.png",
+      "question": ""
     },
     {
-      "tileId": "p4",
+      "tileId": "4",
       "type": "page",
       "sortOrder": 4,
-      "caption": "The Meeting",
-      "text": "The leaves of the Tree rustled like a whisper when Puf-Puf comes your way and smiles at you. 'Hey, you. Yes, I'm talking to you. I'm Puf-Puf, talking cat, slightly battered ship, the spirit… still high. The Tree has brought us face to face and, honestly, you seem the type who knows what they're doing. I mean, you have that look of ‘I’ve repaired a world or two on a Tuesday evening’. If you want, we can go together: you talk to the crystal, I'll keep the rhythm and not step on sensitive branches. Will you help me?'",
-      "imageUrl": "images/tol/stories/intro-pufpuf/puf-puf-home-planet.png"
+      "caption": "Întâlnirea",
+      "text": "Frunzele Copacului foșneau ca o șoaptă când Puf-Puf îți iese în cale și îți zâmbește. „Hei, tu. Da, ție îți vorbesc. Eu sunt Puf-Puf, pisică vorbitoare de pe planeta Kelo-Ketis... navă puțin șifonată, spiritul… încă sus. Copacul ne-a pus față în față și, sincer, tu pari genul care să știe ce face. Adică ai privirea aia de ‘am mai reparat două-trei nave spatiale marțea seara’. Ma poti ajuta te rog sa imi repar nava si sa ma intorc acasa? Cristalul este cheia. Trebuie sa il descifram.",
+      "imageUrl": "images/tol/stories/intro-pufpuf/puf-puf-home-planet.png",
+      "question": ""
     },
     {
-      "tileId": "q1",
+      "tileId": "5",
       "type": "quiz",
-      "caption": "The Choice",
       "sortOrder": 5,
-      "imageUrl": "images/tol/stories/intro-pufpuf/TreeOfLight.png",
-      "question": "The crystal lights up when we talk to it — it seems intelligent and responds to good intentions. What should we ask it first?",
+      "caption": "",
+      "text": "",
+      "imageUrl": "images/tol/stories/intro-pufpuf/4.TreeOfLight.png",
+      "question": "Puf-Puf îți cere ajutorul să vorbești cu cristalul SOS care arată harta. Ce ar fi cel mai important lucru de întrebat la început?\n",
       "answers": [
         {
           "answerId": "a",
-          "text": "If I choose the hard path, what is the first test of courage and how do I start without changing my mind?",
-          "tokens": [
-            {
-              "type": "Personality",
-              "value": "courage",
-              "quantity": 1
-            }
-          ],
+          "text": "Ce drum de pe harta cosmică duce cel mai repede acasă?",
+          "tokens": [],
           "sortOrder": 1
         },
         {
           "answerId": "b",
-          "text": "What hidden secrets do the branches carry — beings, stories, or treasures of light that we don't yet see?",
-          "tokens": [
-            {
-              "type": "Personality",
-              "value": "curiosity",
-              "quantity": 1
-            }
-          ],
+          "text": "Oare cate lumi arata harta?",
+          "tokens": [],
           "sortOrder": 2
         },
         {
           "answerId": "c",
-          "text": "What is the logical order of the nodes — what needs to be activated before the others to open the way?",
-          "tokens": [
-            {
-              "type": "Personality",
-              "value": "thinking",
-              "quantity": 1
-            }
-          ],
+          "text": "Imi arati calea catre Kelo-Ketis?",
+          "tokens": [],
           "sortOrder": 3
         },
         {
           "answerId": "d",
-          "text": "If I could invent a key of light, what sounds, colors, or shapes should I compose it from?",
-          "tokens": [
-            {
-              "type": "Personality",
-              "value": "creativity",
-              "quantity": 1
-            }
-          ],
+          "text": "Ce as putea sa folosesc pentru a repara nava?",
+          "tokens": [],
           "sortOrder": 4
         },
         {
           "answerId": "e",
-          "text": "What dangers are on the route and what is the safest path for us and for our smaller friends?",
-          "tokens": [
-            {
-              "type": "Personality",
-              "value": "safety",
-              "quantity": 1
-            }
-          ],
+          "text": "Care e cel mai sigur durm spre casa?",
+          "tokens": [],
           "sortOrder": 5
         }
       ]
+    },
+    {
+      "tileId": "6",
+      "type": "page",
+      "sortOrder": 6,
+      "caption": "Curaj",
+      "text": "Sa mergem mai aproape, o vom rezolva noi, ma bucur ca te-am gasit, spuse Puf-Puf. Amandoi pasiti cu pasi mici catre copac.",
+      "imageUrl": "images/tol/stories/intro-pufpuf/5.puf-puf-tree-of-light.png"
     }
   ]
 }
