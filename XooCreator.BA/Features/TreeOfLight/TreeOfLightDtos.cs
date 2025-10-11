@@ -79,6 +79,7 @@ public record TreeRegionDto
     public string? ImageUrl { get; init; }
     public string? PufpufMessage { get; init; }
     public int SortOrder { get; init; }
+    public bool IsLocked { get; init; }
 }
 
 public record TreeStoryDto

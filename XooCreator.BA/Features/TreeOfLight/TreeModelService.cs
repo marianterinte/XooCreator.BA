@@ -61,7 +61,8 @@ public class TreeModelService : ITreeModelService
                     Label = regionTranslations.GetValueOrDefault($"region_{r.Id}_label", r.Id),
                     ImageUrl = r.ImageUrl,
                     PufpufMessage = regionTranslations.GetValueOrDefault($"region_{r.Id}_pufpufMessage", string.Empty),
-                    SortOrder = r.SortOrder
+                    SortOrder = r.SortOrder,
+                    IsLocked = r.IsLocked
                 }).ToList(),
                 
                 Stories = storyNodes.Select(sn => new TreeStoryDto

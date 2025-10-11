@@ -82,6 +82,7 @@ public class TreeModelRepository : ITreeModelRepository
                         ImageUrl = r.ImageUrl,
                         PufpufMessage = string.Empty,
                         SortOrder = r.SortOrder,
+                        IsLocked = r.IsLocked,
                         TreeConfigurationId = config.Id
                     }).ToList();
                 _context.TreeRegions.AddRange(regions);
@@ -218,6 +219,7 @@ public class TreeModelRepository : ITreeModelRepository
         public string Id { get; set; } = string.Empty;
         public string? ImageUrl { get; set; }
         public int SortOrder { get; set; }
+        public bool IsLocked { get; set; } = false;
     }
 
     private class TreeStoryNodeSeed

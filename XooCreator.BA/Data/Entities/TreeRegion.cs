@@ -7,6 +7,7 @@ public class TreeRegion
     public string? ImageUrl { get; set; }
     public string? PufpufMessage { get; set; }
     public int SortOrder { get; set; }
+    public bool IsLocked { get; set; } = false;
     public string TreeConfigurationId { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;

@@ -9,37 +9,43 @@
       "id": "gateway",
       "level": 0,
       "imageUrl": "images/worlds/gateway.jpg",
-      "sortOrder": 0
+      "sortOrder": 0,
+      "isLocked": false
     },
     {
       "id": "terra",
       "level": 1,
       "imageUrl": "images/worlds/terra.jpg",
-      "sortOrder": 1
+      "sortOrder": 1,
+      "isLocked": false
     },
     {
       "id": "lunaria",
       "level": 2,
       "imageUrl": "images/worlds/lunaria.jpg",
-      "sortOrder": 2
+      "sortOrder": 2,
+      "isLocked": false
     },
     {
       "id": "mechanika",
       "level": 2,
       "imageUrl": "images/worlds/pyron.jpg",
-      "sortOrder": 3
+      "sortOrder": 3,
+      "isLocked": false
     },
     {
       "id": "sylvaria",
       "level": 4,
       "imageUrl": "images/worlds/sylvaria.jpg",
-      "sortOrder": 4
+      "sortOrder": 4,
+      "isLocked": true
     },
     {
       "id": "crystalia",
       "level": 5,
       "imageUrl": "images/worlds/crystalia.jpg",
-      "sortOrder": 5
+      "sortOrder": 5,
+      "isLocked": true
     }
   ],
   "storyNodes": [
@@ -77,6 +83,18 @@
       "storyId": "mechanika-s1",
       "regionId": "mechanika",
       "rewardImageUrl": "images/worlds/pyron.jpg",
+      "sortOrder": 1
+    },
+    {
+      "storyId": "sylvaria-s1",
+      "regionId": "sylvaria",
+      "rewardImageUrl": "images/worlds/sylvaria.jpg",
+      "sortOrder": 1
+    },
+    {
+      "storyId": "crystalia-s1",
+      "regionId": "crystalia",
+      "rewardImageUrl": "images/worlds/crystalia.jpg",
       "sortOrder": 1
     }
   ],
