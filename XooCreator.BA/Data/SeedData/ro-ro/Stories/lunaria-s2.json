@@ -50,7 +50,7 @@
           "text": "Il montez si demontez pe tot.",
           "tokens": [
             {
-              "type": "Alchemy"
+              "type": "Alchemy",
               "value": "Karott",
               "quantity": 1
             },
@@ -72,7 +72,7 @@
               "quantity": 1
             },
             {
-              "type": "Alchemy"
+              "type": "Alchemy",
               "value": "Karott",
               "quantity": 1
             }
@@ -84,7 +84,7 @@
           "text": "Fac un plan bun cu tot ce e de facut si apoi actionez.",
           "tokens": [
             {
-              "type": "Alchemy"
+              "type": "Alchemy",
               "value": "Karott",
               "quantity": 1
             },
@@ -101,7 +101,7 @@
           "text": "Creez o inima artificiala",
           "tokens": [
             {
-              "type": "Alchemy"
+              "type": "Alchemy",
               "value": "Karott",
               "quantity": 1
             },
@@ -123,7 +123,7 @@
               "quantity": 1
             },
             {
-              "type": "Alchemy"
+              "type": "Alchemy",
               "value": "Karott",
               "quantity": 1
             }

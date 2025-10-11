@@ -1,6 +1,6 @@
 {
   "storyId": "lunaria-s2",
-  "title": "The Signal",
+  "title": "Semnalul",
   "coverImageUrl": "images/tol/stories/lunaria-s2/0.Cover.png",
   "category": "terra",
   "sortOrder": 1,
@@ -9,49 +9,32 @@
       "tileId": "1",
       "type": "page",
       "sortOrder": 1,
-      "caption": "Landing at the Edge of the City",
-      "text": "The portal fades out behind you. In the valley, orange fields full of carrots stretch out, but the place is unusually quiet. Puf-Puf sets his magnifying glass on the crystal:\nPuf-Puf: "
-      "Too",
-      "quiet",
-      "for" "Lunaria...",
-      "ears" "up.\"\\nThe black rabbit nods: \"We'll go slowly.\"\",",
+      "caption": "Aterizare la marginea orașului",
+      "text": "Portalul se stinge în spatele vostru. În vale se văd campuri portocalii pline de morcovi, dar locul e neobișnuit de tăcut. Puf-Puf își fixează lupa pe cristal: \nPuf-Puf:„- Prea liniște pentru Lunaria… stăm cu urechile ciulite.” \nIepurele negru dă din cap: „Mergem încet.”",
       "imageUrl": "images/tol/stories/lunaria-s2/1.arrival.png"
     },
     {
       "tileId": "2",
       "type": "page",
       "sortOrder": 2,
-      "caption": "Ping from the Carrot Plains",
-      "text": "The crystal flickers rhythmically, like a distant ping. A light flashes briefly among the carrot rows, then goes dark.\nPuf-Puf: "
-      "Technical",
-      "signal",
-      "not" "animal.",
-      "There.\"\"",
+      "caption": "Ping din campiile de morcovi",
+      "text": "Cristalul pâlpâie ritmic, ca un ping îndepărtat. În rândurile de morcovi strălucește pe scurt o lumină și se stinge. \nPuf-Puf: „-Semnal tehnic, nu animal. Acolo.”",
       "imageUrl": "images/tol/stories/lunaria-s2/2.ping.png"
     },
     {
       "tileId": "3",
       "type": "page",
       "sortOrder": 3,
-      "caption": "Under the Moon Tree",
-      "text": "In the shade of a strange little tree lies a robot with a tin-like shell, short ears like two antennas, and dark, dimmed eyes. An LED blinks: "
-      "...Gru...bot...\" \\nPuf-Puf, reading in a whisper: \"Rabbit",
-      "model.",
-      "Gentle",
-      "but" "down.\"\"",
+      "caption": "Sub copăcelul de lună",
+      "text": "La umbra unui copăcel straniu se află un robot cu carcasă ca din tinichea, urechi scurte ca două antene și ochi negri stinși. Un led clipește: „…Gru…bot…”. \nPuf-Puf, citeste în șoaptă: „- Model iepure. Blând, dar căzut.”",
       "imageUrl": "images/tol/stories/lunaria-s2/3.moon-tree.png"
     },
     {
       "tileId": "4",
       "type": "page",
       "sortOrder": 4,
-      "caption": "Broken Circuit",
-      "text": "The front panel is ajar. Inside, a cracked circuit sizzles faintly and smells of ozone. The black rabbit pulls out a carrot and laughs: "
-      "On",
-      "Lunaria",
-      "carrots" "don't fix robots.\"\\nPuf-Puf: \"Not directly. But Lunkarot fiber (a special Lunaria carrot) can make a soft jumper, and its juice cools circuits beautifully. It's",
-      "about" "rhythm",
-      "not" "force.\"\"",
+      "caption": "Circuitul întrerupt",
+      "text": "Panoul frontal e întredeschis. Înăuntru, un circuit fisurat pârâie slab și miroase a ozon. Iepurele negru scoate un morcov și râde: „Pe Lunaria, morcovii nu repară roboți.” \nPuf-Puf: „- Nu direct. Dar fibra de Lunkarot (un morcov special de pe lunaria) poate crea un jumper, iar sucul răcește excelent circuitele. Contează ritmul, nu forța.”",
       "imageUrl": "images/tol/stories/lunaria-s2/4.broken-circuit.png"
     },
     {
@@ -64,7 +47,7 @@
       "answers": [
         {
           "answerId": "a",
-          "text": "I take it all apart and put it back together.",
+          "text": "Il montez si demontez pe tot.",
           "tokens": [
             {
               "type": "Alchemy",
@@ -81,7 +64,7 @@
         },
         {
           "answerId": "b",
-          "text": "First, I ask what's inside.",
+          "text": "Intai ma intreb ce of i inauntru",
           "tokens": [
             {
               "type": "Personality",
@@ -98,7 +81,7 @@
         },
         {
           "answerId": "c",
-          "text": "I make a solid plan of everything to do, then act.",
+          "text": "Fac un plan bun cu tot ce e de facut si apoi actionez.",
           "tokens": [
             {
               "type": "Alchemy",
@@ -115,7 +98,7 @@
         },
         {
           "answerId": "d",
-          "text": "I create an artificial heart.",
+          "text": "Creez o inima artificiala",
           "tokens": [
             {
               "type": "Alchemy",
@@ -132,7 +115,7 @@
         },
         {
           "answerId": "e",
-          "text": "Everything with caution — we don't want to break it.",
+          "text": "Totul cu precautie, nu vrem sa-l stricam.",
           "tokens": [
             {
               "type": "Personality",
@@ -148,54 +131,22 @@
           "sortOrder": 5
         }
       ],
-      "question": "The circuit needs rhythm, not force. You have Lunkarot to make a soft jumper, and its juice to cool the traces. What's your move to repair it without worsening the crack?\n\n"
+      "question": "Circuitul cere ritm, nu împingere. Aveți Lunkarot pentru un jumper moale sucul care raceste. Care e mișcarea ta aici, ca să-l repari, fără să agravezi fisura?\n\n"
     },
     {
       "tileId": "6",
       "type": "page",
       "sortOrder": 6,
-      "caption": "Grubot Finds His Voice",
-      "text": "The sound evens out, and the dark eyes light up.\nGrubot: "
-      "System...",
-      "stable.",
-      "Name": "**Grubot**.",
-      "Model": "rabbit.",
-      "Status": "active",
-      "consciousness",
-      "experimental" "humor.\" \\nPuf-Puf smiles: \"Life",
-      "looks" "good",
-      "on" "you",
-      "again.\" \\nGrubot: \"Thank" "you.",
-      "I" "wandered",
-      "off" "after",
-      "a" "magnetic",
-      "field" "storm.",
-      "My" "home",
-      "is" "**Mechanika**.",
-      "I" "can",
-      "fly",
-      "then" "recharge.\"\\nGrubot: \"Saving",
-      "coordinates." "When",
-      "you" "open",
-      "the" "route",
-      "**I'll be waiting there**.\"\",": null,
+      "caption": "Grubot își găsește vocea",
+      "text": "Sunetul devine uniform, ochii negri se aprind. \nGrubot: „- Sistem… stabil. Nume: **Grubot**. Model: iepure. Stare: conștiință activă, umor experimental.” Puf-Puf zâmbește: „- Îți stă bine cu viața înapoi.” Grubot: „Mulțumesc. Am rătăcit după o furtună de câmp magnetic. Casa mea e **Mechanika**. Pot zbura, apoi încărcare.”\nGrubot: „- Salvez coordonatele. Când deschideți ruta, **vă aștept acolo**.”",
       "imageUrl": "images/tol/stories/lunaria-s2/6.grubot-talks.png"
     },
     {
       "tileId": "7",
       "type": "page",
       "sortOrder": 7,
-      "caption": "Departure",
-      "text": "Grubot's thrusters hiss softly. He rises above the orange plains, loops once, and heads for the horizon. Puf-Puf: "
-      "A",
-      "new",
-      "friend",
-      "a" "future",
-      "route." "We",
-      "continue.\" \\nThe black rabbit smiles: \"The" "path",
-      "is" "clear",
-      "—" "forward",
-      "for" "us.\"\"",
+      "caption": "Plecarea",
+      "text": "Propulsorii lui Grubot şuieră ușor. Se ridică deasupra campiilor portocalii, face o voltă și pornește spre orizont. Puf-Puf: „Un prieten nou, o rută viitoare. Continuăm.” \nIepurele negru zâmbește: „- Drumul e clar — pentru noi, înainte.”",
       "imageUrl": "images/tol/stories/lunaria-s2/7.departure.png"
     }
   ]
