@@ -1,72 +1,15 @@
-using Azure.Storage.Blobs;
-using Azure.Storage.Sas;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace XooCreator.BA.Infrastructure.Endpoints;
 
 [Endpoint]
-public class StorageEndpoints
+public class HealthEndpoints
 {
-    private readonly IConfiguration _config;
-    public StorageEndpoints(IConfiguration config)
+    [Route("/api/{locale?}/health")]
+    [HttpGet]
+    public static IResult HandleGet()
     {
-        _config = config;
-    }
-
-    public record SasUploadRequest(string Container, string BlobName, string ContentType);
-    public record SasResponse(string SasUrl);
-    public record SasDeleteRequest(string Container, string BlobName);
-
-    [Route("/api/storage/blob/sas-upload")]
-    [Authorize]
-    [HttpPost]
-    public static IResult GetUploadSas(
-        [FromServices] StorageEndpoints ep,
-        [FromBody] SasUploadRequest request)
-    {
-        var conn = ep._config.GetConnectionString("AzureBlob");
-        if (string.IsNullOrWhiteSpace(conn)) return TypedResults.BadRequest("Missing AzureBlob connection string");
-
-        var blobUriBuilder = new BlobUriBuilder(new Uri($"https://{new BlobServiceClient(conn).AccountName}.blob.core.windows.net/{request.Container}/{request.BlobName}"));
-        var blobClient = new BlobClient(conn, request.Container, request.BlobName);
-
-        var sasBuilder = new BlobSasBuilder
-        {
-            BlobContainerName = request.Container,
-            BlobName = request.BlobName,
-            Resource = "b",
-            ExpiresOn = DateTimeOffset.UtcNow.AddMinutes(15)
-        };
-        sasBuilder.SetPermissions(BlobSasPermissions.Create | BlobSasPermissions.Write | BlobSasPermissions.Read);
-        sasBuilder.ContentType = request.ContentType;
-
-        var sasUri = blobClient.GenerateSasUri(sasBuilder);
-        return TypedResults.Ok(new SasResponse(sasUri.ToString()));
-    }
-
-    [Route("/api/storage/blob/sas-delete")]
-    [Authorize]
-    [HttpPost]
-    public static IResult GetDeleteSas(
-        [FromServices] StorageEndpoints ep,
-        [FromBody] SasDeleteRequest request)
-    {
-        var conn = ep._config.GetConnectionString("AzureBlob");
-        if (string.IsNullOrWhiteSpace(conn)) return TypedResults.BadRequest("Missing AzureBlob connection string");
-
-        var blobClient = new BlobClient(conn, request.Container, request.BlobName);
-        var sasBuilder = new BlobSasBuilder
-        {
-            BlobContainerName = request.Container,
-            BlobName = request.BlobName,
-            Resource = "b",
-            ExpiresOn = DateTimeOffset.UtcNow.AddMinutes(15)
-        };
-        sasBuilder.SetPermissions(BlobSasPermissions.Delete);
-
-        var sasUri = blobClient.GenerateSasUri(sasBuilder);
-        return TypedResults.Ok(new SasResponse(sasUri.ToString()));
+        return TypedResults.Ok(new { status = "healthy", timestamp = DateTimeOffset.UtcNow });
     }
 }
 

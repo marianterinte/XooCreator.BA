@@ -46,19 +46,4 @@ public class GetStoryByIdEndpoint
         return TypedResults.Ok(editable);
     }
 
-    [Route("/api/{locale}/stories/{storyId}/edit")] // PUT save edited story
-    [Authorize]
-    [HttpPut]
-    public static async Task<Results<Ok<SaveEditedStoryResponse>, UnauthorizedHttpResult>> HandleSaveEditable(
-        [FromRoute] string locale,
-        [FromServices] GetStoryByIdEndpoint ep,
-        [FromRoute] string storyId,
-        [FromBody] EditableStoryDto story)
-    {
-        var userId = await ep._userContext.GetUserIdAsync();
-        if (userId == null) return TypedResults.Unauthorized();
-        story.Id = storyId;
-        var result = await ep._storiesService.SaveEditedStoryAsync(locale, story);
-        return TypedResults.Ok(result);
-    }
 }

@@ -7,7 +7,6 @@ public interface IStoriesService
     Task<MarkTileAsReadResponse> MarkTileAsReadAsync(Guid userId, MarkTileAsReadRequest request);
     Task InitializeStoriesAsync();
     Task<EditableStoryDto?> GetStoryForEditAsync(string storyId, string locale);
-    Task<SaveEditedStoryResponse> SaveEditedStoryAsync(string locale, EditableStoryDto story);
 }
 
 public class StoriesService : IStoriesService
@@ -106,18 +105,6 @@ public class StoriesService : IStoriesService
         };
     }
 
-    public async Task<SaveEditedStoryResponse> SaveEditedStoryAsync(string locale, EditableStoryDto story)
-    {
-        try
-        {
-            var ok = await _repository.UpdateStoryAsync(locale, story);
-            return new SaveEditedStoryResponse { Success = ok };
-        }
-        catch (Exception ex)
-        {
-            return new SaveEditedStoryResponse { Success = false, Error = ex.Message };
-        }
-    }
 }
 
 public class EditableStoryDto
@@ -154,8 +141,3 @@ public class EditableTokenDto
     public int Quantity { get; set; }
 }
 
-public class SaveEditedStoryResponse
-{
-    public bool Success { get; set; }
-    public string? Error { get; set; }
-}
