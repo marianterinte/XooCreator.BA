@@ -1,6 +1,6 @@
 {
   "storyId": "intro-pufpuf",
-  "title": "Marea Aventura",
+  "title": "Marea Aventură",
   "coverImageUrl": "images/tol/stories/intro-pufpuf/0.Cover.png",
   "category": "terra",
   "sortOrder": 1,
@@ -19,7 +19,7 @@
       "type": "page",
       "sortOrder": 2,
       "caption": "Prăbușirea",
-      "text": "Un fulger de lumină înghiți nava și o azvârli într-un vârtej orbitor. Paratrăsnetele de plasmă se topiră, cârma se bloca, iar carena spintecă norii înainte să muște din pământul umed. Când tăcerea reveni, aerul mirosea a uscat si arsita. Puf-Puf își atinse urechea zgâriată, privi copacii uriași și… nu știa unde se afla. Doar că ajunsese într-un loc străin care ii starnea curiozitatea.",
+      "text": "Un fulger de lumină înghiți nava și o azvârli într-un vârtej orbitor. Paratrăsnetele de plasmă se topiră, cârma se blocă, iar carena spintecă norii înainte să muște din pământul umed. Când tăcerea reveni, aerul mirosea a uscăciune și arșiță. Puf-Puf își atinse urechea zgâriată, privi copacii uriași și… nu știa unde se afla. Doar că ajunsese într-un loc străin care îi stârnea curiozitatea.",
       "imageUrl": "images/tol/stories/intro-pufpuf/2.puf-puf-hurt.png",
       "question": ""
     },
@@ -28,7 +28,7 @@
       "type": "page",
       "sortOrder": 3,
       "caption": "Cristalul SOS",
-      "text": "La bord, în modulul SOS, un cristal străvechi pulsa ca o inimă adormită. Puf-Puf deschise panoul, iar lumina lui proiectă în aer o hartă vie: ramuri de lumină, poteci care se împleteau la infinit. Unele căi erau stinse, altele scânteiau ca semne. Toate converg într-un singur nod: Copacul Luminii.",
+      "text": "La bord, în modulul SOS, un cristal străvechi pulsa ca o inimă adormită. Puf-Puf deschise panoul, iar lumina lui proiectă în aer o hartă vie: ramuri de lumină, poteci care se împleteau la infinit. Unele căi erau stinse, altele scânteiau ca semne. Toate convergeau într-un singur nod: Copacul Luminii.",
       "imageUrl": "images/tol/stories/intro-pufpuf/3.puf-puf-crystal.png",
       "question": ""
     },
@@ -37,7 +37,7 @@
       "type": "page",
       "sortOrder": 4,
       "caption": "Întâlnirea",
-      "text": "Frunzele Copacului foșneau ca o șoaptă când Puf-Puf îți iese în cale și îți zâmbește. „Hei, tu. Da, ție îți vorbesc. Eu sunt Puf-Puf, pisică vorbitoare de pe planeta Kelo-Ketis... navă puțin șifonată, spiritul… încă sus. Copacul ne-a pus față în față și, sincer, tu pari genul care să știe ce face. Adică ai privirea aia de ‘am mai reparat două-trei nave spatiale marțea seara’. Ma poti ajuta te rog sa imi repar nava si sa ma intorc acasa? Cristalul este cheia. Trebuie sa il descifram.",
+      "text": "Frunzele Copacului foșneau ca o șoaptă când Puf-Puf îți iese în cale și îți zâmbește. „Hei, tu. Da, ție îți vorbesc. Eu sunt Puf-Puf, pisică vorbitoare de pe planeta Kelo-Ketis... navă puțin șifonată, spiritul… încă sus. Copacul ne-a pus față în față și, sincer, tu pari genul care să știe ce face. Adică ai privirea aia de «am mai reparat două-trei nave spațiale marțea seara». Mă poți ajuta, te rog, să îmi repar nava și să mă întorc acasă? Cristalul este cheia. Trebuie să îl descifrăm.”",
       "imageUrl": "images/tol/stories/intro-pufpuf/puf-puf-home-planet.png",
       "question": ""
     },
@@ -48,7 +48,7 @@
       "caption": "",
       "text": "",
       "imageUrl": "images/tol/stories/intro-pufpuf/4.TreeOfLight.png",
-      "question": "Puf-Puf îți cere ajutorul să vorbești cu cristalul SOS care arată harta. Ce ar fi cel mai important lucru de întrebat la început?\n",
+      "question": "Puf-Puf îți cere ajutorul să vorbești cu cristalul SOS care arată harta. Ce ar fi cel mai important lucru de întrebat la început?",
       "answers": [
         {
           "answerId": "a",
@@ -58,25 +58,25 @@
         },
         {
           "answerId": "b",
-          "text": "Oare cate lumi arata harta?",
+          "text": "Oare câte lumi arată harta?",
           "tokens": [],
           "sortOrder": 2
         },
         {
           "answerId": "c",
-          "text": "Imi arati calea catre Kelo-Ketis?",
+          "text": "Îmi arăți calea către Kelo-Ketis?",
           "tokens": [],
           "sortOrder": 3
         },
         {
           "answerId": "d",
-          "text": "Ce as putea sa folosesc pentru a repara nava?",
+          "text": "Ce aș putea să folosesc pentru a repara nava?",
           "tokens": [],
           "sortOrder": 4
         },
         {
           "answerId": "e",
-          "text": "Care e cel mai sigur durm spre casa?",
+          "text": "Care e cel mai sigur drum spre casă?",
           "tokens": [],
           "sortOrder": 5
         }
@@ -87,7 +87,7 @@
       "type": "page",
       "sortOrder": 6,
       "caption": "Curaj",
-      "text": "Sa mergem mai aproape, o vom rezolva noi, ma bucur ca te-am gasit, spuse Puf-Puf. Amandoi pasiti cu pasi mici catre copac.",
+      "text": "„Să mergem mai aproape, o vom rezolva noi; mă bucur că te-am găsit”, spuse Puf-Puf. Amândoi pășiră cu pași mici către copac.",
       "imageUrl": "images/tol/stories/intro-pufpuf/5.puf-puf-tree-of-light.png"
     }
   ]

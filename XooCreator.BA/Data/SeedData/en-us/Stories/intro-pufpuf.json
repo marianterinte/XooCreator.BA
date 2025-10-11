@@ -1,6 +1,6 @@
 {
   "storyId": "intro-pufpuf",
-  "title": "Marea Aventura",
+  "title": "The Great Adventure",
   "coverImageUrl": "images/tol/stories/intro-pufpuf/0.Cover.png",
   "category": "terra",
   "sortOrder": 1,
@@ -9,8 +9,8 @@
       "tileId": "1",
       "type": "page",
       "sortOrder": 1,
-      "caption": "Chemarea",
-      "text": "Puf-Puf călătorea prin adâncul universului când liniștea cosmică fu spartă de un vuiet straniu — ca un oftat al stelelor. Instrumentele pâlpâiră, iar busola stelară desenă spirale fără sens. Cu lăbuța pe parbrizul de cuarț, el simți (mai mult decât auzi) că cineva îl cheamă pe nume dintr-un loc foarte, foarte vechi.",
+      "caption": "The Call",
+      "text": "Puf-Puf was traveling through the depths of the universe when the cosmic silence was broken by a strange roar — like a sigh of the stars. The instruments flickered, and the stellar compass traced senseless spirals. With his paw on the quartz windshield, he felt (more than heard) someone calling his name from a place very, very old.",
       "imageUrl": "images/tol/stories/intro-pufpuf/1.puf-puf-flying.png",
       "question": ""
     },
@@ -18,8 +18,8 @@
       "tileId": "2",
       "type": "page",
       "sortOrder": 2,
-      "caption": "Prăbușirea",
-      "text": "Un fulger de lumină înghiți nava și o azvârli într-un vârtej orbitor. Paratrăsnetele de plasmă se topiră, cârma se bloca, iar carena spintecă norii înainte să muște din pământul umed. Când tăcerea reveni, aerul mirosea a uscat si arsita. Puf-Puf își atinse urechea zgâriată, privi copacii uriași și… nu știa unde se afla. Doar că ajunsese într-un loc străin care ii starnea curiozitatea.",
+      "caption": "The Crash",
+      "text": "A flash of light swallowed the ship and hurled it into a blinding whirl. The plasma lightning rods melted, the rudder jammed, and the hull slit the clouds before biting into the damp earth. When silence returned, the air smelled of dryness and scorching heat. Puf-Puf touched his scratched ear, looked at the towering trees and… he didn’t know where he was. Only that he had arrived in a strange place that stirred his curiosity.",
       "imageUrl": "images/tol/stories/intro-pufpuf/2.puf-puf-hurt.png",
       "question": ""
     },
@@ -27,8 +27,8 @@
       "tileId": "3",
       "type": "page",
       "sortOrder": 3,
-      "caption": "Cristalul SOS",
-      "text": "La bord, în modulul SOS, un cristal străvechi pulsa ca o inimă adormită. Puf-Puf deschise panoul, iar lumina lui proiectă în aer o hartă vie: ramuri de lumină, poteci care se împleteau la infinit. Unele căi erau stinse, altele scânteiau ca semne. Toate converg într-un singur nod: Copacul Luminii.",
+      "caption": "The SOS Crystal",
+      "text": "On board, in the SOS module, an ancient crystal pulsed like a sleeping heart. Puf-Puf opened the panel, and its light projected a living map into the air: branches of light, paths that intertwined infinitely. Some routes were dim, others sparkled like signs. They all converged to a single node: the Tree of Light.",
       "imageUrl": "images/tol/stories/intro-pufpuf/3.puf-puf-crystal.png",
       "question": ""
     },
@@ -36,8 +36,8 @@
       "tileId": "4",
       "type": "page",
       "sortOrder": 4,
-      "caption": "Întâlnirea",
-      "text": "Frunzele Copacului foșneau ca o șoaptă când Puf-Puf îți iese în cale și îți zâmbește. „Hei, tu. Da, ție îți vorbesc. Eu sunt Puf-Puf, pisică vorbitoare de pe planeta Kelo-Ketis... navă puțin șifonată, spiritul… încă sus. Copacul ne-a pus față în față și, sincer, tu pari genul care să știe ce face. Adică ai privirea aia de ‘am mai reparat două-trei nave spatiale marțea seara’. Ma poti ajuta te rog sa imi repar nava si sa ma intorc acasa? Cristalul este cheia. Trebuie sa il descifram.",
+      "caption": "The Meeting",
+      "text": "The Tree’s leaves rustled like a whisper as Puf-Puf steps into your path and smiles. ‘Hey, you. Yes, I’m talking to you. I’m Puf-Puf, a talking cat from the planet Kelo-Ketis… ship a bit rumpled, spirit… still high. The Tree brought us face to face and, honestly, you seem like the kind who knows what they’re doing. I mean, you’ve got that look of “I’ve fixed two or three spaceships on a Tuesday evening.” Can you help me repair my ship and get back home, please? The crystal is the key. We have to decipher it.’",
       "imageUrl": "images/tol/stories/intro-pufpuf/puf-puf-home-planet.png",
       "question": ""
     },
@@ -48,35 +48,35 @@
       "caption": "",
       "text": "",
       "imageUrl": "images/tol/stories/intro-pufpuf/4.TreeOfLight.png",
-      "question": "Puf-Puf îți cere ajutorul să vorbești cu cristalul SOS care arată harta. Ce ar fi cel mai important lucru de întrebat la început?\n",
+      "question": "Puf-Puf asks for your help to speak to the SOS crystal showing the map. What would be the most important thing to ask first?",
       "answers": [
         {
           "answerId": "a",
-          "text": "Ce drum de pe harta cosmică duce cel mai repede acasă?",
+          "text": "Which route on the cosmic map gets us home the fastest?",
           "tokens": [],
           "sortOrder": 1
         },
         {
           "answerId": "b",
-          "text": "Oare cate lumi arata harta?",
+          "text": "How many worlds does the map show?",
           "tokens": [],
           "sortOrder": 2
         },
         {
           "answerId": "c",
-          "text": "Imi arati calea catre Kelo-Ketis?",
+          "text": "Can you show me the path to Kelo-Ketis?",
           "tokens": [],
           "sortOrder": 3
         },
         {
           "answerId": "d",
-          "text": "Ce as putea sa folosesc pentru a repara nava?",
+          "text": "What could I use to repair the ship?",
           "tokens": [],
           "sortOrder": 4
         },
         {
           "answerId": "e",
-          "text": "Care e cel mai sigur durm spre casa?",
+          "text": "What is the safest route home?",
           "tokens": [],
           "sortOrder": 5
         }
@@ -86,8 +86,8 @@
       "tileId": "6",
       "type": "page",
       "sortOrder": 6,
-      "caption": "Curaj",
-      "text": "Sa mergem mai aproape, o vom rezolva noi, ma bucur ca te-am gasit, spuse Puf-Puf. Amandoi pasiti cu pasi mici catre copac.",
+      "caption": "Courage",
+      "text": "‘Let’s get closer, we’ll figure it out. I’m glad I found you,’ said Puf-Puf. The two of you stepped with small steps toward the tree.",
       "imageUrl": "images/tol/stories/intro-pufpuf/5.puf-puf-tree-of-light.png"
     }
   ]
