@@ -2,23 +2,23 @@
   "storyId": "lunaria-s1",
   "title": "Linkaro",
   "coverImageUrl": "images/tol/stories/lunaria-s1/0.Cover.png",
-  "category": "lunaria",
+  "category": "terra",
   "sortOrder": 1,
   "tiles": [
     {
       "tileId": "p1",
       "type": "page",
       "sortOrder": 1,
-      "caption": "The Portal and the Rabbit Council",
-      "text": "Puf-Puf adjusts the magnifying glass over the crystal and catches the feather of the orange bird he helped on Terra at the edge. The light gathers and a portal opens. You, Puf-Puf, and the black rabbit step through. At the other end, a market square with crescent-moon flags. The Rabbit Council greets you. — \"Travelers from the Tree of Light?\" asks a councilor. — \"Puf-Puf, reporting,\" he says curtly. \"We're here to help.\" The council explains: \"A disease is weakening our people. We need solutions.\" The black rabbit, you, and Puf-Puf set off towards the White Mountain.",
+      "caption": "The Portal and the Rabbits’ Council",
+      "text": "Puf-Puf sets the magnifier over the crystal and clips to its edge the feather of the orange bird he helped on Terra. The light gathers and a portal opens. In you go: you, Puf-Puf, and the black rabbit. At the end, a square with crescent flags.\nThe Rabbits’ Council greets you. ‘Travelers from the Tree of Light?’ asks a councilor. ‘Puf-Puf, reporting,’ he says briefly. ‘We’re here to help.’\nThe council explains: ‘An illness weakens our people. We need solutions.’\nThe black rabbit: ‘I’ve heard of this, and I know what we can do! On White Mountain there’s a mysterious monastery, and the monks there can heal any illness.’\nYou, the black rabbit, and Puf-Puf set off toward White Mountain.",
       "imageUrl": "images/tol/stories/lunaria-s1/1.portal-council.png"
     },
     {
       "tileId": "p2",
       "type": "page",
       "sortOrder": 2,
-      "caption": "The Road to the White Mountain",
-      "text": "The path ascends with difficulty; the stones are slippery, the wind changes often. After a steep slope, you spot the monastery with wonder: white walls, simple lines, small flags with crescent moons.",
+      "caption": "Road to White Mountain",
+      "text": "The path climbs hard; stones slip, the wind shifts often. After a steep slope, you glimpse the monastery with wonder: white walls, simple lines, little crescent flags.",
       "imageUrl": "images/tol/stories/lunaria-s1/2.white-mountain-road.png"
     },
     {
@@ -26,15 +26,15 @@
       "type": "page",
       "sortOrder": 3,
       "caption": "The Hall of Silence",
-      "text": "In the courtyard, cat and rabbit monks train in silence. You tell them about the disease in the city. They look at each other in surprise: they haven't heard. \"You must speak with the Queen in Exile,\" says a monk, leading you into a bright room. A silhouette sits with its back to you, meditating.",
+      "text": "In the courtyard, cat and rabbit monks train in silence. You tell them about the illness in the city. They look at one another, surprised: they haven’t heard.\n‘You must speak to the grand master,’ says a monk, leading you into a bright room. A figure sits with its back turned, meditating.",
       "imageUrl": "images/tol/stories/lunaria-s1/3.silent-hall.png"
     },
     {
       "tileId": "p4",
       "type": "page",
       "sortOrder": 4,
-      "caption": "Linkaro, the Matzo-Rabbit",
-      "text": "The figure turns. — \"Is it... a cat?\" whispers Puf-Puf. — \"Or a rabbit?\" you ask. — \"Linkaro. I am a Matzo-Rabbit,\" she smiles. Puf-Puf nods: \"I read about Matzo-Rabbits in my logbook, from the time of the wars between cats and rabbits.\" Linkaro: \"The wars are over. I am the keeper of peace; I signed the last armistice. State your problem.\" You describe the disease to her. \"You need the Stones of Life—green, with a healing essence. They are under an exposed ledge. Gather them with care.\"",
+      "caption": "Linkaro, the Cat-Rabbit",
+      "text": "The figure turns.\n— ‘Is it… a cat?’ whispers Puf-Puf.\n— ‘Or a rabbit?’ you ask.\n— ‘Linkaro. I’m a Cat-Rabbit,’ she smiles.\nPuf-Puf nods: ‘I know, I once met a Cat-Rabbit, back in the cat–rabbit wars.’\nLinkaro: ‘The wars are over. I am the keeper of peace; I signed the last armistice. State your problem.’\nYou describe the illness.\nLinkaro: ‘You need the Stones of Life, with a healing essence. They’re under an exposed ledge. Gather them carefully.’",
       "imageUrl": "images/tol/stories/lunaria-s1/4.linkaro.png"
     },
     {
@@ -42,20 +42,20 @@
       "type": "page",
       "sortOrder": 5,
       "caption": "The Stones of Life",
-      "text": "On a narrow ridge, under the rock, green stones flicker. The air current weakens their pulse if you move too suddenly. Puf-Puf: \"How you approach matters here.\"",
+      "text": "On a narrow ridge beneath the rock, green stones glimmer. A draft weakens their pulse if you move too abruptly.\nPuf-Puf: ‘Here, how you approach matters! I knew about the stones on Lunaria.’",
       "imageUrl": "images/tol/stories/lunaria-s1/5.life-stones.png"
     },
     {
       "tileId": "q1",
       "type": "quiz",
-      "caption": "The Right Touch",
       "sortOrder": 6,
+      "caption": "",
+      "text": "",
       "imageUrl": "images/tol/stories/lunaria-s1/6.quiz.png",
-      "question": "The green stones pulse under the ledge. They don't require strength, but the right approach. How do you collect them without extinguishing their light?",
       "answers": [
         {
           "answerId": "a",
-          "text": "A decisive movement.",
+          "text": "A decisive move.",
           "tokens": [
             {
               "type": "Personality",
@@ -72,16 +72,16 @@
         },
         {
           "answerId": "b",
-          "text": "I listen to the pulse, then touch.",
+          "text": "Listen to the pulse, then touch.",
           "tokens": [
-            {
-              "type": "Personality",
-              "value": "curiosity",
-              "quantity": 1
-            },
             {
               "type": "Discovery",
               "value": "discovery credit",
+              "quantity": 1
+            },
+            {
+              "type": "Personality",
+              "value": "curiosity",
               "quantity": 1
             }
           ],
@@ -89,16 +89,16 @@
         },
         {
           "answerId": "c",
-          "text": "I synchronize like a watchmaker.",
+          "text": "Synchronize like a watchmaker.",
           "tokens": [
-            {
-              "type": "Personality",
-              "value": "thinking",
-              "quantity": 1
-            },
             {
               "type": "Discovery",
               "value": "discovery credit",
+              "quantity": 1
+            },
+            {
+              "type": "Personality",
+              "value": "thinking",
               "quantity": 1
             }
           ],
@@ -106,16 +106,16 @@
         },
         {
           "answerId": "d",
-          "text": "A soft loop, without touching.",
+          "text": "Soft loop, no touch.",
           "tokens": [
-            {
-              "type": "Personality",
-              "value": "creativity",
-              "quantity": 1
-            },
             {
               "type": "Discovery",
               "value": "discovery credit",
+              "quantity": 1
+            },
+            {
+              "type": "Personality",
+              "value": "creativity",
               "quantity": 1
             }
           ],
@@ -123,37 +123,38 @@
         },
         {
           "answerId": "e",
-          "text": "Calm steps, constant rhythm.",
+          "text": "Calm steps, steady rhythm.",
           "tokens": [
-            {
-              "type": "Personality",
-              "value": "safety",
-              "quantity": 1
-            },
             {
               "type": "Discovery",
               "value": "discovery credit",
+              "quantity": 1
+            },
+            {
+              "type": "Personality",
+              "value": "safety",
               "quantity": 1
             }
           ],
           "sortOrder": 5
         }
-      ]
+      ],
+      "question": "The green stones pulse beneath the ledge. They don’t ask for force, but for how you approach. How do you pick them without dimming their light?"
     },
     {
       "tileId": "p6",
       "type": "page",
       "sortOrder": 7,
-      "caption": "Linkaro's Recipe",
-      "text": "Back in the quiet hall, Linkaro dictates: \"Water at a gentle boil, plenty of finely chopped carrot, local herbs, and the Stones of Life placed under the pot, not inside. When the steam gains a green reflection, it's ready.\"",
+      "caption": "Linkaro’s Recipe",
+      "text": "Back in the quiet hall, Linkaro dictates: ‘Gentle boiling water, plenty of finely sliced carrot, local herbs, and the Stones of Life placed under the pot, not inside. When the steam takes on a green sheen, it’s ready.’",
       "imageUrl": "images/tol/stories/lunaria-s1/7.recipe.png"
     },
     {
       "tileId": "p7",
       "type": "page",
       "sortOrder": 8,
-      "caption": "Soup in the City",
-      "text": "You return to the Council. In the market square, you prepare the large pot, place the green stones under it, and follow the steps. The sick rabbits drink one by one; their ears perk up, their breathing regulates, the murmur of the street returns.",
+      "caption": "Soup in the Square",
+      "text": "You return to the Council. In the square, you prepare the big pot, place the green stones beneath it, and follow the steps. The sick rabbits drink in turn; their ears lift, their breathing settles, and the street’s murmur returns.",
       "imageUrl": "images/tol/stories/lunaria-s1/8.soup-city.png"
     },
     {
@@ -161,7 +162,7 @@
       "type": "page",
       "sortOrder": 9,
       "caption": "Signs of Healing",
-      "text": "Towards evening, the districts are quieter. A baby rabbit makes its first leap without hesitation. Linkaro leads you to the edge of the market: \"You have restored the primary balance. Thank you.\" Puf-Puf: \"Noted: Lunaria responds well to care and planning. We'll choose the next step together.\"",
+      "text": "Toward evening, the neighborhoods are calmer. A rabbit kit makes its first leap without hesitation. Linkaro walks you to the edge of the square: ‘You have restored the first balance. Thank you.’ Puf-Puf: ‘Noted: Lunaria responds well to care and a plan. We choose the next step together.’",
       "imageUrl": "images/tol/stories/lunaria-s1/9.healing.png"
     }
   ]
