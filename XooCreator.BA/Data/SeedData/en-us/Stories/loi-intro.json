@@ -2,122 +2,128 @@
   "storyId": "loi-intro",
   "title": "The Origin of Peace",
   "coverImageUrl": "images/tol/stories/loi-intro/0.cover.png",
-  "category": "lore",
+  "category": "terra",
   "sortOrder": 1,
   "tiles": [
     {
-      "tileId": "p1",
+      "tileId": "1",
       "type": "page",
       "sortOrder": 1,
       "caption": "Two Worlds, Two Sides",
-      "text": "In Alchimalia there were two worlds at war. Lunaria — the rabbits’ planet, with carrot fields and burrows. Ketis — the cats’ planet, ruled by an emperor. Borders were cold and bridges were broken.",
+      "text": "In Alchimalia there were two very close worlds, but at war. Lunaria — the rabbits’ planet, with carrot fields and burrows. Kelo-Ketis — the cats’ planet, ruled by an emperor. Borders were cold, and bridges were broken.",
       "imageUrl": "images/tol/stories/loi-intro/1.two-worlds.png"
     },
     {
-      "tileId": "p2",
+      "tileId": "2",
       "type": "page",
       "sortOrder": 2,
       "caption": "Emperor Pufus Alchimus",
-      "text": "On Ketis ruled Emperor Pufus Alchimus, a warrior famed for conquests. The war with the rabbits had lasted long, and weapons spoke louder than stories.",
+      "text": "On Ketis ruled Emperor Pufus Alchimus, a warrior known for conquests. The war with the rabbits had lasted long, and weapons spoke louder than stories.",
       "imageUrl": "images/tol/stories/loi-intro/2.emperor.png"
     },
     {
-      "tileId": "p3",
+      "tileId": "3",
       "type": "page",
       "sortOrder": 3,
       "caption": "The Curious Son",
-      "text": "A son was born to the emperor: Puf-Puf Alchimus. His father wanted a fighter. But Puf-Puf loved mathematics, playing with the elements, and dreamed of alchemy. More explorer than soldier.",
+      "text": "A son was born to the emperor: Puf-Puf Alchimus. His father wanted a fighter. But Puf-Puf loved mathematics, games with the elements, and dreamed of alchemy. He was more explorer than soldier.",
       "imageUrl": "images/tol/stories/loi-intro/3.curious-son.png"
     },
     {
-      "tileId": "p4",
+      "tileId": "4",
       "type": "page",
       "sortOrder": 4,
       "caption": "Friends Across the Border",
-      "text": "Even in wartime, friendship found a way. A black rabbit and a white cat met in secret and shared their worlds. They didn’t look like enemies. They looked like curious kids.",
+      "text": "Though there was war, friendship found a way. A black rabbit and a white cat met in secret and shared their worlds. They didn’t look like enemies. They looked like curious children.",
       "imageUrl": "images/tol/stories/loi-intro/4.friends.png"
     },
     {
-      "tileId": "p5",
+      "tileId": "5",
       "type": "page",
       "sortOrder": 5,
       "caption": "The Stone from Lunaria",
-      "text": "One day on Ketis, Puf-Puf caught them gazing at a green stone brought from Lunaria, gleaming like an emerald. “Keep our friendship secret and the stone is yours,” whispered the rabbit. Puf-Puf promised.",
+      "text": "On Ketis, Puf-Puf caught them looking at a green stone brought from Lunaria, gleaming like an emerald. ‘Keep the secret of our friendship and we’ll give you the stone,’ whispered the rabbit. Puf-Puf promised.",
       "imageUrl": "images/tol/stories/loi-intro/5.lunaria-stone.png"
     },
     {
-      "tileId": "p6",
+      "tileId": "6",
       "type": "page",
       "sortOrder": 6,
       "caption": "The Green-Golden Elixir",
-      "text": "With the stone, Puf-Puf brewed an elixir. When it touched metal, the metal turned to gold. Great joy! He shared the elixir with his friends — tiny sips, lots of laughter.",
+      "text": "With the stone, Puf-Puf made an elixir. When it touched metal, the metal became gold. Great joy! He shared the elixir with his friends — small sips, lots of laughter.",
       "imageUrl": "images/tol/stories/loi-intro/6.elixir.png"
     },
     {
-      "tileId": "p7",
+      "tileId": "7",
       "type": "page",
       "sortOrder": 7,
       "caption": "A Nap Under the Tree",
-      "text": "Tired, they fell asleep under a very tall tree. The elixir slowly seeped into the roots. The green stone warmed the earth with a gentle light.",
+      "text": "Tired, they fell asleep under a very tall tree. The elixir slowly seeped to the roots. The green stone warmed the earth with a gentle light.",
       "imageUrl": "images/tol/stories/loi-intro/7.tree-nap.png"
     },
     {
-      "tileId": "p8",
+      "tileId": "8",
       "type": "page",
       "sortOrder": 8,
       "caption": "Cat-Rabbit",
-      "text": "When they woke, a strange, beautiful being stood beside them: the Cat-Rabbit — with a cat’s grace and a rabbit’s gentleness. It looked at them without fear.",
+      "text": "When they woke, a strange, beautiful being stood beside them: with a cat’s grace and a rabbit’s gentleness. It looked at them without fear. ‘Hello, I’m the Cat-Rabbit!’",
       "imageUrl": "images/tol/stories/loi-intro/8.matso-iepurele.png"
     },
     {
       "tileId": "q1",
       "type": "quiz",
       "sortOrder": 9,
-      "caption": "The Choice for Peace",
+      "caption": "Question",
+      "text": "",
       "imageUrl": "images/tol/stories/loi-intro/9.quiz.png",
-      "question": "The stone, the elixir, and the friendship have summoned the Cat-Rabbit. To keep the peace, what do you do first?",
+      "question": "The stone, the elixir, and the friendship have summoned the Cat-Rabbit to bring peace. What do you do first?",
       "answers": [
         {
           "answerId": "a",
-          "text": "Tell the truth about the friendship.",
+          "text": "We will encourage him.",
+          "tokens": [],
           "sortOrder": 1
         },
         {
           "answerId": "b",
-          "text": "Share only as much elixir as helps.",
+          "text": "We will pour the elixir at each tree.",
+          "tokens": [],
           "sortOrder": 2
         },
         {
           "answerId": "c",
-          "text": "Promise: talk first, don’t fight.",
+          "text": "We will protect the Cat-Rabbit.",
+          "tokens": [],
           "sortOrder": 3
         },
         {
           "answerId": "d",
-          "text": "Plant a peace tree in both worlds.",
+          "text": "We plant a tree of peace in both worlds.",
+          "tokens": [],
           "sortOrder": 4
         },
         {
           "answerId": "e",
-          "text": "Write a recipe: respect + courage.",
+          "text": "We keep the peace at any cost.",
+          "tokens": [],
           "sortOrder": 5
         }
       ]
     },
     {
-      "tileId": "p9",
+      "tileId": "9",
       "type": "page",
       "sortOrder": 10,
       "caption": "Message of Peace",
-      "text": "“I carry the peace between worlds,” said the Cat-Rabbit. “From friendship, stone, and elixir a bridge was born. Wars fade when you learn to mix things well.” Puf-Puf understood that alchemy is not only about metals, but also about hearts.",
+      "text": "‘I carry the peace between worlds,’ said the Cat-Rabbit. ‘From friendship, stone, and elixir a bridge was born,’ said Puf-Puf. ‘Wars fade when you learn to mix things well.’ Puf-Puf understood that alchemy is not only about metals, but also about hearts.",
       "imageUrl": "images/tol/stories/loi-intro/10.message.png"
     },
     {
-      "tileId": "p10",
+      "tileId": "10",
       "type": "page",
       "sortOrder": 11,
       "caption": "Puf-Puf’s Decision",
-      "text": "That day, Puf-Puf chose his path: explorer and alchemist. He would seek ways between worlds, not wars. And the Cat-Rabbit would become, someday, the sign that peace can be made, not only found.",
+      "text": "That day, Puf-Puf chose his path: explorer and alchemist. He would seek ways between worlds, not wars. And the Cat-Rabbit would, someday, become the sign that peace can be created, not only found.",
       "imageUrl": "images/tol/stories/loi-intro/11.choice.png"
     }
   ]
