@@ -6,63 +6,63 @@
   "sortOrder": 1,
   "tiles": [
     {
-      "tileId": "p1",
+      "tileId": "1",
       "type": "page",
       "sortOrder": 1,
-      "caption": "The Arrival",
-      "text": "The valley on Terra breathes thin mists over the vast fields. Everything seems in order, but the people pull their hats down on their foreheads and watch the sky like an unwelcome guest. Puf-Puf twitches his whiskers: \"It's quiet... but not in a good way. Let's see why everyone is holding their breath.\"",
+      "caption": "Arrival",
+      "text": "The valley on Terra breathes thin mist over the wide fields. Everything seems in order, but people pull their hats down and watch the sky like an unwelcome guest. Puf-Puf twitches his whiskers: ‘It’s quiet… but not in a good way. Let’s see why everyone is holding their breath.’",
       "imageUrl": "images/tol/stories/terra-s1/1.arrival.png"
     },
     {
-      "tileId": "p2",
+      "tileId": "2",
       "type": "page",
       "sortOrder": 2,
-      "caption": "The Strange Silence",
-      "text": "No rooster crows, no dog barks, not even the crickets find their chorus. The silence is oppressive, thick, like a wet blanket. Puf-Puf looks at you: \"It's as if nature were counting to ten and didn't dare say ten.\"",
+      "caption": "Strange Silence",
+      "text": "No rooster crows, no dog barks, not even the crickets find their chorus. The silence presses, thick, like a wet blanket. Puf-Puf looks at you: ‘It’s as if nature were counting to ten and didn’t dare say ten.’",
       "imageUrl": "images/tol/stories/terra-s1/2.silence.png"
     },
     {
-      "tileId": "p3",
+      "tileId": "3",
       "type": "page",
       "sortOrder": 3,
-      "caption": "The People's Whispers",
-      "text": "An old man approaches with small steps. \"It's... a shadow,\" he whispers. \"It descends from the sky at sunset. The animals flee, the crops are flattened. We say it's a curse.\" Puf-Puf blinks slowly: \"Curse or sign, it still has a cause. Let's pick up the trail.\"",
+      "caption": "Whispers of the People",
+      "text": "An old man approaches with small steps. ‘It’s… a shadow,’ he whispers. ‘It comes down from the sky at sunset. The animals flee, the grain lies flat. We say it’s a curse.’ Puf-Puf blinks slowly: ‘Curse or sign, it still has a cause. Let’s track it.’",
       "imageUrl": "images/tol/stories/terra-s1/3.whispers.png"
     },
     {
-      "tileId": "p4",
+      "tileId": "4",
       "type": "page",
       "sortOrder": 4,
       "caption": "The First Night",
-      "text": "The sun drains behind the hills, and the wind brings a new, restless rustle. Above the clouds, something large is moving. A shadow over the fields, and the moon seems to step aside. Puf-Puf holds his breath for a moment and smiles slightly: \"Okay... this isn't just changing weather.\"",
+      "text": "The sun sinks behind the hills, and the wind brings a new, restless rustle. Above the clouds, something large moves. A shadow across the fields, and the moon seems to step aside. Puf-Puf holds his breath for a moment and smiles a little: ‘OK… this isn’t just changing weather.’",
       "imageUrl": "images/tol/stories/terra-s1/4.first-night.png"
     },
     {
-      "tileId": "p5",
+      "tileId": "5",
       "type": "page",
       "sortOrder": 5,
-      "caption": "The Earth's Vibration",
-      "text": "The earth trembles, lightly at first, then like a heavy footstep. The air smells of smoke and clean ash, as if after a spark. In the flattened cornfield, a huge silhouette can be discerned, flickering intermittently, like a wounded beacon.",
+      "caption": "The Earth’s Vibration",
+      "text": "The ground shivers, lightly at first, then like a heavy footstep. The air smells of smoke and clean ash, like after a spark. In the flattened field, a huge silhouette can be made out, flickering on and off like a wounded beacon.",
       "imageUrl": "images/tol/stories/terra-s1/5.vibration.png"
     },
     {
-      "tileId": "p6",
+      "tileId": "6",
       "type": "page",
       "sortOrder": 6,
       "caption": "The Creature",
-      "text": "From the shadows emerges an immense bird, with feathers like embers and crystal eyes. Its left wing hangs heavy; each beat raises sparks that die out on the water. It's not a curse: it's a lost being from another world, fallen into a place that doesn't yet understand it.",
+      "text": "From the shadows emerges a massive bird, with ember-like feathers and crystal eyes. Its left wing hangs heavy; each flap throws up sparks that fizzle on the water. It’s not a curse: it’s a lost being from another world, fallen into a place that doesn’t understand it yet.",
       "imageUrl": "images/tol/stories/terra-s1/6.creature.png"
     },
     {
-      "tileId": "p7",
+      "tileId": "7",
       "type": "page",
       "sortOrder": 7,
       "caption": "The Bond",
-      "text": "Puf-Puf approaches slowly, gives you a nod, and then speaks in a whisper: \"It's from the Tree of Light. If we help it, it can show us a hidden path on Terra.\" The bird looks straight at you, without fear; in its eyes, you can see furrows and stars. \"You have good hands,\" says Puf-Puf with a smile. \"And I have... useful commentary. You try first.\"",
+      "text": "Puf-Puf approaches slowly, nods at you, then whispers: ‘It’s from the Tree of Light. If we help it, it can show us a hidden path on Terra.’ The bird looks straight at you, unafraid; in its eyes are furrows and stars. ‘You’ve got good hands,’ says Puf-Puf with a smile. ‘And I have… useful commentary. You try first.’",
       "imageUrl": "images/tol/stories/terra-s1/7.bond.png"
     },
     {
-      "tileId": "q1",
+      "tileId": "8",
       "type": "quiz",
       "caption": "Helping the Wounded Bird",
       "sortOrder": 8,
@@ -71,16 +71,16 @@
       "answers": [
         {
           "answerId": "a",
-          "text": "You encourage it to rise, to remember its power.",
+          "text": "Encourage it to rise and remember its strength.",
           "tokens": [
-            {
-              "type": "Personality",
-              "value": "courage",
-              "quantity": 1
-            },
             {
               "type": "Discovery",
               "value": "discovery credit",
+              "quantity": 1
+            },
+            {
+              "type": "Personality",
+              "value": "courage",
               "quantity": 1
             }
           ],
@@ -88,7 +88,7 @@
         },
         {
           "answerId": "b",
-          "text": "You care for it with caution and patience.",
+          "text": "Care for it with patience and care.",
           "tokens": [
             {
               "type": "Personality",
@@ -105,16 +105,16 @@
         },
         {
           "answerId": "c",
-          "text": "You build a plan for it to spread its wings again.",
+          "text": "Build a plan so it can stretch its wings again.",
           "tokens": [
-            {
-              "type": "Personality",
-              "value": "thinking",
-              "quantity": 1
-            },
             {
               "type": "Discovery",
               "value": "discovery credit",
+              "quantity": 1
+            },
+            {
+              "type": "Personality",
+              "value": "thinking",
               "quantity": 1
             }
           ],
@@ -122,7 +122,7 @@
         },
         {
           "answerId": "d",
-          "text": "You use your creativity to find a new healing method.",
+          "text": "Use your creativity and find a new way to heal.",
           "tokens": [
             {
               "type": "Personality",
@@ -139,7 +139,7 @@
         },
         {
           "answerId": "e",
-          "text": "You research the light signs on its feathers to discover the secret.",
+          "text": "Study the light markings on its feathers to uncover the secret.",
           "tokens": [
             {
               "type": "Personality",
@@ -157,11 +157,11 @@
       ]
     },
     {
-      "tileId": "p8",
+      "tileId": "9",
       "type": "page",
       "sortOrder": 9,
-      "caption": "The Path Revealed",
-      "text": "After your help, the bird pulls its injured wing to its chest and, with a calm effort, extends the other. A streak of light detaches from its feathers and cuts through the field like a new path. \"There it is,\" says Puf-Puf, with a sort of playful pride. \"The path that didn't exist five minutes ago.\" The bird looks up at the clouds, then at you—gratefully—and the light remains, inviting you to step forward.",
+      "caption": "The Path Opens",
+      "text": "After your help, the bird tucks its injured wing to its chest and, with a calm effort, stretches the other. A strip of light slips from its feathers and cuts the field like a new path. ‘There it is,’ says Puf-Puf with a playful pride. ‘A path that didn’t exist five minutes ago.’ The bird lifts its gaze to the clouds, then to you. Puf-Puf receives a feather in gratitude and knows that the bird will become the village’s protector from now on. The great, magical feather feeds an unexpected energy.",
       "imageUrl": "images/tol/stories/terra-s1/9.path.png"
     }
   ]

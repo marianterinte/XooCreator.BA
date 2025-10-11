@@ -6,7 +6,7 @@
   "sortOrder": 1,
   "tiles": [
     {
-      "tileId": "p1",
+      "tileId": "1",
       "type": "page",
       "sortOrder": 1,
       "caption": "Sosirea",
@@ -14,7 +14,7 @@
       "imageUrl": "images/tol/stories/terra-s1/1.arrival.png"
     },
     {
-      "tileId": "p2",
+      "tileId": "2",
       "type": "page",
       "sortOrder": 2,
       "caption": "Tăcerea stranie",
@@ -22,7 +22,7 @@
       "imageUrl": "images/tol/stories/terra-s1/2.silence.png"
     },
     {
-      "tileId": "p3",
+      "tileId": "3",
       "type": "page",
       "sortOrder": 3,
       "caption": "Șoaptele oamenilor",
@@ -30,15 +30,15 @@
       "imageUrl": "images/tol/stories/terra-s1/3.whispers.png"
     },
     {
-      "tileId": "p4",
+      "tileId": "4",
       "type": "page",
       "sortOrder": 4,
       "caption": "Prima noapte",
-      "text": "Soarele se scurge după dealuri, iar vântul aduce un foșnet nou, neliniștit. Deasupra norilor, ceva mare se mișcă. Umbră peste câmpuri, iar luna parcă se dă la o parte. Puf-Puf își ține respirația o clipă și zâmbește puțin: „Ok… asta nu e doar vreme schimbătoare.”",
+      "text": "Soarele se scurge după dealuri, iar vântul aduce un foșnet nou, neliniștit. Deasupra norilor, ceva mare se mișcă. Umbră peste câmpuri, iar luna parcă se dă la o parte. Puf-Puf își ține respirația o clipă și zâmbește puțin: „OK… asta nu e doar vreme schimbătoare.”",
       "imageUrl": "images/tol/stories/terra-s1/4.first-night.png"
     },
     {
-      "tileId": "p5",
+      "tileId": "5",
       "type": "page",
       "sortOrder": 5,
       "caption": "Vibrația pământului",
@@ -46,7 +46,7 @@
       "imageUrl": "images/tol/stories/terra-s1/5.vibration.png"
     },
     {
-      "tileId": "p6",
+      "tileId": "6",
       "type": "page",
       "sortOrder": 6,
       "caption": "Creatura",
@@ -54,7 +54,7 @@
       "imageUrl": "images/tol/stories/terra-s1/6.creature.png"
     },
     {
-      "tileId": "p7",
+      "tileId": "7",
       "type": "page",
       "sortOrder": 7,
       "caption": "Legătura",
@@ -62,25 +62,25 @@
       "imageUrl": "images/tol/stories/terra-s1/7.bond.png"
     },
     {
-      "tileId": "q1",
+      "tileId": "8",
       "type": "quiz",
-      "caption": "Ajutorul pentru Pasărea Rănită",
       "sortOrder": 8,
+      "caption": "",
+      "text": "",
       "imageUrl": "images/tol/stories/terra-s1/8.quiz.png",
-      "question": "Cum ajuți pasărea rănită?",
       "answers": [
         {
           "answerId": "a",
           "text": "O încurajezi să se ridice, să-și amintească de puterea ei.",
           "tokens": [
             {
-              "type": "Personality",
-              "value": "courage",
+              "type": "Discovery",
+              "value": "discovery credit",
               "quantity": 1
             },
             {
-              "type": "Discovery",
-              "value": "discovery credit",
+              "type": "Personality",
+              "value": "courage",
               "quantity": 1
             }
           ],
@@ -108,13 +108,13 @@
           "text": "Îi construiești un plan pentru a-și întinde din nou aripile.",
           "tokens": [
             {
-              "type": "Personality",
-              "value": "thinking",
+              "type": "Discovery",
+              "value": "discovery credit",
               "quantity": 1
             },
             {
-              "type": "Discovery",
-              "value": "discovery credit",
+              "type": "Personality",
+              "value": "thinking",
               "quantity": 1
             }
           ],
@@ -142,26 +142,27 @@
           "text": "Cercetezi semnele luminii de pe penele ei, pentru a descoperi secretul.",
           "tokens": [
             {
-              "type": "Personality",
-              "value": "curiosity",
+              "type": "Discovery",
+              "value": "discovery credit",
               "quantity": 1
             },
             {
-              "type": "Discovery",
-              "value": "discovery credit",
+              "type": "Personality",
+              "value": "curiosity",
               "quantity": 1
             }
           ],
           "sortOrder": 5
         }
-      ]
+      ],
+      "question": "Cum ajuți pasărea rănită?"
     },
     {
-      "tileId": "p8",
+      "tileId": "9",
       "type": "page",
       "sortOrder": 9,
       "caption": "Drumul deschis",
-      "text": "După ajutorul vostru, pasărea își strânge aripa rănită la piept și, cu un efort calm, își întinde cealaltă. O dungă de lumină se desprinde din penele ei și taie câmpul ca o potecă nouă. „Uite-l”, spune Puf-Puf, cu un fel de mândrie jucăușă. „Drumul care n-a existat până acum cinci minute.” Pasărea ridică privirea spre nori, apoi către voi — recunoscătoare — și lumina rămâne, invitându-vă să pășiți.",
+      "text": "După ajutorul vostru, pasărea își strânge aripa rănită la piept și, cu un efort calm, își întinde cealaltă. O dungă de lumină se desprinde din penele ei și taie câmpul ca o potecă nouă. „Uite-l”, spune Puf-Puf, cu un fel de mândrie jucăușă. „Drumul care n-a existat până acum cinci minute.” Pasărea ridică privirea spre nori, apoi către voi. Puf-Puf primește o pană, în semn de recunoștință, și știe că pasărea va deveni, de acum înainte, protectoarea satului. Pana cea mare, magică, alimentează o energie nebănuită.",
       "imageUrl": "images/tol/stories/terra-s1/9.path.png"
     }
   ]
