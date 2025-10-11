@@ -10,14 +10,14 @@
       "type": "page",
       "sortOrder": 1,
       "caption": "Portalul și Consiliul Iepurilor",
-      "text": "Puf-Puf fixează lupa peste cristal și prinde, la margine, pana păsării portocalii pe care a ajutat-o pe Terra. Lumina se adună și se deschide un portal. Intrați: tu, Puf-Puf și iepurele negru. La capăt, o piață cu steaguri în semilună. \nConsiliul Iepurilor vă întâmpină. „Călători din Copacul Luminii?”, întreabă un consilier. „Puf-Puf, la raport”, zice el scurt. „Suntem aici să ajutăm.” \nCei din consiliu explică: „O boală îi slăbește pe ai noștri. Avem nevoie de soluții.”\nIepurele negru: „Am auzit de așa ceva, știu și ce putem face! Pe Muntele Alb se află o mănăstire misterioasă, iar călugării de acolo vindecă orice boală.” \nIepurele negru, tu și Puf-Puf porniți către Muntele Alb.",
+      "text": "Puf-Puf fixează lupa peste cristal și prinde, la margine, pana păsării portocalii pe care a ajutat-o pe Terra. Lumina se adună și se deschide un portal. Intrați: tu, Puf-Puf și iepurele negru. La capăt, o piață cu steaguri în semilună. \nConsiliul Iepurilor vă întâmpină. „Călători din Copacul Luminii?”, întreabă un consilier. „Puf-Puf, la raport”, zice el scurt. „Suntem aici să ajutăm.” \nCei din consiliu explică: „O boală îi slăbește pe ai noștri. Avem nevoie de soluții.”\nIepurele negru: „Am auzit de așa ceva, știu și ce putem face! Pe Muntele Negru se află o mănăstire misterioasă, iar călugării de acolo vindecă orice boală.” \nIepurele negru, tu și Puf-Puf porniți către Muntele Negru.",
       "imageUrl": "images/tol/stories/lunaria-s1/1.portal-council.png"
     },
     {
       "tileId": "p2",
       "type": "page",
       "sortOrder": 2,
-      "caption": "Drumul spre Muntele Alb",
+      "caption": "Drumul spre Muntele Negru",
       "text": "Poteca se urcă greu; pietrele alunecă, vântul se schimbă des. După o pantă abruptă, zăriți cu mirare mănăstirea: ziduri albe, linii simple, stegulețe cu semilună.",
       "imageUrl": "images/tol/stories/lunaria-s1/2.white-mountain-road.png"
     },

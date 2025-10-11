@@ -10,14 +10,14 @@
       "type": "page",
       "sortOrder": 1,
       "caption": "The Portal and the Rabbits’ Council",
-      "text": "Puf-Puf sets the magnifier over the crystal and clips to its edge the feather of the orange bird he helped on Terra. The light gathers and a portal opens. In you go: you, Puf-Puf, and the black rabbit. At the end, a square with crescent flags.\nThe Rabbits’ Council greets you. ‘Travelers from the Tree of Light?’ asks a councilor. ‘Puf-Puf, reporting,’ he says briefly. ‘We’re here to help.’\nThe council explains: ‘An illness weakens our people. We need solutions.’\nThe black rabbit: ‘I’ve heard of this, and I know what we can do! On White Mountain there’s a mysterious monastery, and the monks there can heal any illness.’\nYou, the black rabbit, and Puf-Puf set off toward White Mountain.",
+      "text": "Puf-Puf sets the magnifier over the crystal and clips to its edge the feather of the orange bird he helped on Terra. The light gathers and a portal opens. In you go: you, Puf-Puf, and the black rabbit. At the end, a square with crescent flags.\nThe Rabbits’ Council greets you. ‘Travelers from the Tree of Light?’ asks a councilor. ‘Puf-Puf, reporting,’ he says briefly. ‘We’re here to help.’\nThe council explains: ‘An illness weakens our people. We need solutions.’\nThe black rabbit: ‘I’ve heard of this, and I know what we can do! On Black Mountain there’s a mysterious monastery, and the monks there can heal any illness.’\nYou, the black rabbit, and Puf-Puf set off toward Black Mountain.",
       "imageUrl": "images/tol/stories/lunaria-s1/1.portal-council.png"
     },
     {
       "tileId": "p2",
       "type": "page",
       "sortOrder": 2,
-      "caption": "Road to White Mountain",
+      "caption": "Road to Black Mountain",
       "text": "The path climbs hard; stones slip, the wind shifts often. After a steep slope, you glimpse the monastery with wonder: white walls, simple lines, little crescent flags.",
       "imageUrl": "images/tol/stories/lunaria-s1/2.white-mountain-road.png"
     },
