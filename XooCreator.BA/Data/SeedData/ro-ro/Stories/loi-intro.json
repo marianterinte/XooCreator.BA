@@ -73,7 +73,7 @@
       "tileId": "q1",
       "type": "quiz",
       "sortOrder": 9,
-      "caption": "Intrebare",
+      "caption": "",
       "text": "",
       "imageUrl": "images/tol/stories/loi-intro/9.quiz.png",
       "answers": [
@@ -125,6 +125,22 @@
       "caption": "Hotărârea lui Puf-Puf",
       "text": "În acea zi, Puf-Puf a ales drumul lui: explorator și alchimist. Va căuta căi între lumi, nu războaie. Iar Mâțo-Iepurele avea să devină, cândva, semnul că pacea poate fi creată, nu doar găsită.",
       "imageUrl": "images/tol/stories/loi-intro/11.choice.png"
+    },
+    {
+      "tileId": "12",
+      "type": "page",
+      "sortOrder": 12,
+      "caption": "Vraja",
+      "text": "Cand totul era linistit o vraja misterioasa facu ca Lunaria sa se desprinda Kelo-Ketis si sa dispara pentru todeauna.\nPuf-Puf: \"-Trebuie sa aflu ce s-a intamplat, voi pleca int-o calatorie!\"",
+      "imageUrl": "images/tol/stories/loi-intro/12.the-spell.png"
+    },
+    {
+      "tileId": "13",
+      "type": "page",
+      "sortOrder": 13,
+      "caption": "...",
+      "text": "To be continued...",
+      "imageUrl": "images/tol/stories/loi-intro/13.tobecontinued.png"
     }
   ]
 }

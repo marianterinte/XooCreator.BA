@@ -125,6 +125,22 @@
       "caption": "Puf-Puf’s Decision",
       "text": "That day, Puf-Puf chose his path: explorer and alchemist. He would seek ways between worlds, not wars. And the Cat-Rabbit would, someday, become the sign that peace can be created, not only found.",
       "imageUrl": "images/tol/stories/loi-intro/11.choice.png"
+    },
+    {
+      "tileId": "12",
+      "type": "page",
+      "sortOrder": 12,
+      "caption": "The Spell",
+      "text": "When all was quiet, a mysterious spell caused Lunaria to break away from Kelo-Ketis and disappear forever.\nPuf-Puf: ‘I must find out what happened. I will set out on a journey!’",
+      "imageUrl": "images/tol/stories/loi-intro/12.the-spell.png"
+    },
+    {
+      "tileId": "13",
+      "type": "page",
+      "sortOrder": 13,
+      "caption": "...",
+      "text": "To be continued...",
+      "imageUrl": "images/tol/stories/loi-intro/13.tobecontinued.png"
     }
   ]
 }
