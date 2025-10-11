@@ -1,62 +1,62 @@
 {
   "storyId": "mechanika-s1",
-  "title": "Telescopul Mechanika-Magnus",
+  "title": "Magnus",
   "coverImageUrl": "images/tol/stories/mechanika-s1/0.Cover.png",
-  "category": "mechanika",
-  "sortOrder": 2,
+  "category": "terra",
+  "sortOrder": 1,
   "tiles": [
     {
-      "tileId": "p1",
+      "tileId": "1",
       "type": "page",
       "sortOrder": 1,
       "caption": "Ceață peste Mechanika",
-      "text": "Coborâți în Mechanika printr-o pâclă groasă, înecăcioasă — fum de uzine, scântei pierdute, aer greu. Luminile orașului sunt pete încețoșate, pasarelele scârțâie, iar roțile dințate merg pe bâjbâite. Puf-Puf își aprinde lampa de guler: \"Vizibilitate: mică spre foarte mică. Grubot, ne auzi?\" Rătăciți câteva minute printre conducte și nituri, urmărind pulsul slab al cristalului.",
+      "text": "Coborâți în Mechanika printr-o pâclă groasă, înecăcioasă — fum de uzine, scântei pierdute, aer greu. Luminile orașului sunt pete încețoșate, pasarelele scârțâie, iar roțile dințate merg pe bâjbâite. \nPuf-Puf își aprinde lampa de guler.\n\"- Vizibilitate: mică spre foarte mică. Grubot, ne auzi?\" Rătăciți câteva minute printre conducte și nituri, urmărind pulsul slab al cristalului.",
       "imageUrl": "images/tol/stories/mechanika-s1/1.fog.png"
     },
     {
-      "tileId": "p2",
+      "tileId": "2",
       "type": "page",
       "sortOrder": 2,
       "caption": "Grubot vă găsește",
-      "text": "Un ping curat taie ceața, urmat de o rază subțire. Din fum apare Grubot: \"V-am detectat după semnătura cristalului și… o urmă chimică familiară. Karott.\" Puf-Puf râde: \"Bun nas digital ai.\" Grubot: \"Promisiunea rămâne promisiune. Mi-ați dat puls; eu vă dau vedere. La Turnul de control.\"",
+      "text": "Un semnal curat taie ceața, urmat de o rază subțire. Din fum apare ceva.\nGrubot: \"- V-am detectat după semnătura cristalului și… o urmă chimică familiară. LunKarot.\" \nPuf-Puf râde: \"- Bun nas digital ai.\" \nGrubot: \"- Promisiunea rămâne promisiune. Mi-ați dat puls; eu vă dau vedere. La Turnul de control.\"\n",
       "imageUrl": "images/tol/stories/mechanika-s1/2.grubot.png"
     },
     {
-      "tileId": "p3",
+      "tileId": "3",
       "type": "page",
       "sortOrder": 3,
       "caption": "Turnul de control",
-      "text": "Urcați scările metalice ale turnului. Sus, vă așteaptă un instrument uriaș: Telescopul Mechanika-Magnus — tuburi, oglinzi, angrenaje, o cupolă care se deschide ca o floare de metal. Puf-Puf: \"Cu ăsta căutăm planeta mea?\"",
+      "text": "Urcați scările metalice ale turnului. Sus, vă așteaptă un instrument uriaș: Telescopul Mechanika-Magnus — tuburi, oglinzi, angrenaje, o cupolă care se deschide ca o floare de metal. \nPuf-Puf: \"Cu ăsta căutăm planeta mea?\"",
       "imageUrl": "images/tol/stories/mechanika-s1/3.control-tower.png"
     },
     {
-      "tileId": "p4",
+      "tileId": "4",
       "type": "page",
       "sortOrder": 4,
       "caption": "Ce lipsește",
-      "text": "Grubot deschide panoul lateral: \"Ne lipsesc două lucruri: (1) o piatră din Lunaria pentru 'ochiul verde'; (2) energie stocată pentru bobinele de focalizare. Avem un rezervor sub turn — încărcat, dar instabil. Dacă aveți piatra, o montăm; altfel, pregătim locașul.\"",
+      "text": "Grubot deschide panoul lateral: \"- Ne lipsesc două lucruri: (1) o piatră din Lunaria pentru 'ochiul verde'; (2) energie stocată pentru bobinele de focalizare. Avem un rezervor sub turn — încărcat, dar instabil. Dacă aveți piatra, o montăm; altfel, pregătim locașul.\"",
       "imageUrl": "images/tol/stories/mechanika-s1/4.missing.png"
     },
     {
-      "tileId": "q1",
+      "tileId": "5",
       "type": "quiz",
-      "caption": "Încărcare fără să-l arzi",
       "sortOrder": 5,
+      "caption": "",
+      "text": "",
       "imageUrl": "images/tol/stories/mechanika-s1/5.quiz.png",
-      "question": "Rezervorul are energie, dar conexiunea la bobine cere finețe. Ce mișcare alegi ca să pornești telescopul fără să forțezi?",
       "answers": [
         {
           "answerId": "a",
-          "text": "Contact scurt și hotărât.",
+          "text": "Lipesc piatra cu mana mea.",
           "tokens": [
             {
-              "type": "Personality",
-              "value": "courage",
+               "type": "Alchemy",
+              "value": "circuite electrice",
               "quantity": 1
             },
             {
-              "type": "Alchemy",
-              "value": "circuite electrice",
+              "type": "Personality",
+              "value": "courage",
               "quantity": 1
             }
           ],
@@ -64,7 +64,7 @@
         },
         {
           "answerId": "b",
-          "text": "Urmăresc punctul cel mai liniștit.",
+          "text": "a intreb oare cum pot lega piatra si ce se va intampla dupa",
           "tokens": [
             {
               "type": "Personality",
@@ -72,7 +72,7 @@
               "quantity": 1
             },
             {
-              "type": "Alchemy",
+               "type": "Alchemy",
               "value": "circuite electrice",
               "quantity": 1
             }
@@ -81,7 +81,7 @@
         },
         {
           "answerId": "c",
-          "text": "Ordine: rezervor → regulator → bobine.",
+          "text": "Ma gandesc intai sa pun piatra, il pornesc dupa daca nu merge fac alt plan.",
           "tokens": [
             {
               "type": "Personality",
@@ -89,7 +89,7 @@
               "quantity": 1
             },
             {
-              "type": "Alchemy",
+               "type": "Alchemy",
               "value": "circuite electrice",
               "quantity": 1
             }
@@ -98,16 +98,16 @@
         },
         {
           "answerId": "d",
-          "text": "Tampon din bobine vechi.",
+          "text": "Improvizez o sursa de energie a pietrei si a penei de pe tera de la pasare.",
           "tokens": [
             {
-              "type": "Personality",
-              "value": "creativity",
+               "type": "Alchemy",
+              "value": "circuite electrice",
               "quantity": 1
             },
             {
-              "type": "Alchemy",
-              "value": "circuite electrice",
+              "type": "Personality",
+              "value": "creativity",
               "quantity": 1
             }
           ],
@@ -115,7 +115,7 @@
         },
         {
           "answerId": "e",
-          "text": "Siguranțe și trepte scurte.",
+          "text": "Intai montez piatra, vad daca se strica, dupa dau inainte, pas cu pas.",
           "tokens": [
             {
               "type": "Personality",
@@ -123,45 +123,46 @@
               "quantity": 1
             },
             {
-              "type": "Alchemy",
+               "type": "Alchemy",
               "value": "circuite electrice",
               "quantity": 1
             }
           ],
           "sortOrder": 5
         }
-      ]
+      ],
+      "question": "Rezervorul are energie, dar conexiunea la bobine cere finețe. Ce mișcare alegi ca să pornești telescopul fără să forțezi?"
     },
     {
-      "tileId": "p5",
+      "tileId": "6",
       "type": "page",
       "sortOrder": 6,
       "caption": "Focalizare",
-      "text": "Telescopul prinde viață. Oglinzile se aliniază, cupola se deschide, iar pe ecran apar ramuri de lumină. Un traseu pulsează mai tare — un fir care așteaptă să fie urmat. Puf-Puf: \"Arată-ne Kelo-Ketis…\"",
+      "text": "Telescopul prinde viață. Oglinzile se aliniază, hologramele adiacente se aprind, pe ele apar ramuri de lumină. Un traseu pulsează mai tare — un fir care așteaptă să fie urmat. Puf-Puf: \"Arată-ne Kelo-Ketis…\"",
       "imageUrl": "images/tol/stories/mechanika-s1/6.focus.png"
     },
     {
-      "tileId": "p6",
+      "tileId": "7",
       "type": "page",
       "sortOrder": 7,
       "caption": "Harta se adâncește",
-      "text": "Grubot tastează: \"Semnal clar. Fixez coordonatele și salvez ruta-schemă pentru deschiderea portalului.\" Puf-Puf: \"Primul pas mare e bifat.\"",
+      "text": "Grubot tastează: \"Semnal clar. Fixez coordonatele și salvez ruta-schemă pentru deschiderea portalului.\"\nPuf-Puf: \"Primul pas mare e bifat.\"",
       "imageUrl": "images/tol/stories/mechanika-s1/7.map-deepens.png"
     },
     {
-      "tileId": "p7",
+      "tileId": "8",
       "type": "page",
       "sortOrder": 8,
       "caption": "Recompensa de atelier",
-      "text": "Grubot vă întinde o casetă cu piese: \"Circuite electrice — pentru ce urmează. Țin departe scurtcircuitele… tehnice.\" Puf-Puf chicotește: \"Le pun lângă biscuiții pentru motivație.\"",
+      "text": "Grubot vă întinde o casetă cu piese: \"Circuite electrice — pentru ce urmează.\" \nPuf-Puf chicotește: \"Le pun lângă biscuiții pentru motivație.\"",
       "imageUrl": "images/tol/stories/mechanika-s1/8.reward.png"
     },
     {
-      "tileId": "p8",
+      "tileId": "9",
       "type": "page",
       "sortOrder": 9,
       "caption": "Privirea înainte",
-      "text": "Telescopul intră în repaus, iar ceața de afară pare mai subțire. Aveți harta adâncită și Circuite electrice (Alchemy). Puf-Puf: \"Ok, echipă. Următoarea ramură?\"",
+      "text": "Telescopul intră în repaus, iar ceața de afară pare mai subțire. Aveți harta adâncită și Circuite electrice\n Puf-Puf: \"Ok, echipă. Următoarea ramură?\"",
       "imageUrl": "images/tol/stories/mechanika-s1/9.ahead.png"
     }
   ]
