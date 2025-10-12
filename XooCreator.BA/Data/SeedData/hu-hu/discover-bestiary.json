@@ -1,0 +1,37 @@
+[
+  {
+    "Combination": "BunnyGiraffeNone",
+    "Name": "Nyuszi-zsiráf",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a cute bunny and the body of a tall giraffe. The bunny arms are soft, white, and glowing with gentle magical light. The giraffe body is golden with shimmering spots that glow like amber. The character wears a colorful robe with rainbow silk and star patterns. Its eyes shine bright green with playful energy. The scene is a fantasy savanna-meadow filled with glowing flowers and fireflies under a starry sky. The style is vibrant, whimsical, fantasy-themed, cartoonish, like an illustration from a children's fairy tale.",
+    "Story": "A Fény Fája ágai között született a Nyuszi-zsiráf, egy egyedi lény, félig nyuszi, félig zsiráf. Rövid, fürge karjai alagutakat ásnak és élő tüzeket gyújtanak, míg magas, csillogó foltokkal díszített teste messzire lát a horizontokon, ahol mások nem érhetnek el.\n\nA legenda szerint a Nyuszi-zsiráf akkor jelent meg, amikor egy kis, bátor nyuszi egy öreg zsiráf gyökereihez bújt, miközben a sötétség felfalta a szavannát. Kétségbeesett ölelésükből a Fény Fája két lelket szőtt egyetlen testbe.\n\nA Nyuszi-zsiráf a horizontok őre. Amikor a füvön szalad, a föld örömtől ugrál. Amikor harcra kel, az árnyékok rémülten menekülnek. Igaz ereje nem csak a sebességben vagy magasságban rejlik, hanem a barátságban, amit azoknak ajánl, akik a világok ágai között kóborolnak.\n\nA régi lelkek azt mondják, a Nyuszi-zsiráf mindig ott lesz, ahol valaki megpróbálja helyreállítani azt, ami eltört, bátorságot és reményt hozva.",
+    "ImageFileName": "BunnyGiraffeNone.png"
+  },
+  {
+    "Combination": "BunnyHippoNone",
+    "Name": "Nyuszi-vizi",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a bunny and the body of a hippo. The bunny arms are soft, white, glowing with magical light. The hippo body is strong and round, shimmering with a pearly gray glow. The character wears a robe dyed in rainbow hues with wave and flower embroidery. Its eyes are sapphire blue, full of calm joy. The scene is a fantasy pond with glowing lotus flowers, enchanted reeds, and magical koi fish. The style is colorful, whimsical, fantasy-themed, cartoon-like.",
+    "Story": "A Nyuszi-vizi akkor született, amikor egy nyuszi és egy víziló találkozott egy fekete víz vihar közepén. Váratlan barátságukból a Fény Fája összefonva a nyuszi fürgeségét a víziló erejével. A Nyuszi-vizi szelíd és védelmező: rövid karjaival rejtekhelyeket ás, erős testével pedig utakat nyit a vizeken keresztül. Békét hoz oda, ahol félelem van, és bizalmi hidakat épít a világok között.",
+    "ImageFileName": "BunnyHippoNone.png"
+  },
+  {
+    "Combination": "GiraffeHippoNone",
+    "Name": "Zsiráf-vizi",
+    "ImagePrompt": "An anthropomorphic hybrid character with the body of a giraffe and the body of a hippo combined, tall yet rounded and solid. The giraffe part is golden with glowing amber spots, while the hippo part is gray and pearly with soft magical ripples. The character wears a cloak patterned with stars and rivers. Its eyes are emerald and blue, showing both wisdom and calm. The scene is a magical grassland by a shimmering river under a starlit sky. The style is fantasy, vibrant, whimsical, cartoon-like.",
+    "Story": "A Zsiráf-vizi egy lény, amely egy zsiráf álmából született, aki a csillagokra nézett, és egy víziló énekéből, amely a vizek alatt zeng. A Fény Fája egyetlen testbe egyesítette őket, hogy egyensúlyt adjon: a zsiráf magasságát és a víziló stabilitását. A fény szavannákat és mély vizeket őriz, igyekszik összekapcsolni az eget a földdel. A Zsiráf-vizi egy közvetítő a világok között, bölcsességet és szelíd erőt hozva.",
+    "ImageFileName": "GiraffeHippoNone.png"
+  },
+  {
+    "Combination": "BunnyGiraffeHippo",
+    "Name": "Nyuszi-zsiráf-vizi",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a bunny, the body of a giraffe, and the head of a hippo. The bunny arms are soft and glowing, the giraffe torso tall and golden with glowing spots, and the hippo head round and gray with a calm aura. The character wears a robe embroidered with cosmic spirals and river motifs. Its eyes shine turquoise and sapphire, full of playful kindness. The scene is a magical savanna-river junction glowing with enchanted flowers and fireflies. The style is whimsical, colorful, fantasy-themed, cartoon-like.",
+    "Story": "A Nyuszi-zsiráf-vizi egy legendás hős, aki egy lehetetlen szövetségből született: egy nyuszi, egy zsiráf és egy víziló, akik úgy döntöttek, hogy egyesítik sorsukat. A Fény Fája látta bátorságukat és egyetlen szívet adott nekik. A nyuszi karjaival segít és véd. A zsiráf testével messzire lát. A víziló fejével békét és bölcsességet lehel. A különböző világok közötti sokszínűség és barátság szimbóluma.",
+    "ImageFileName": "BunnyGiraffeHippo.png"
+  },
+  {
+    "Combination": "GiraffeBunnyNone",
+    "Name": "Zsiráf-nyuszi",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a giraffe and the body of a bunny. The giraffe arms are long, golden, and patterned with glowing amber spots. The bunny body is small, agile, and shimmering with pastel fur. The character wears a playful robe of rainbow silk with flower embroidery. Its eyes shine bright violet with mischievous curiosity. The scene is a magical meadow filled with glowing mushrooms and starlight fireflies. The style is whimsical, vibrant, fantasy, cartoon-like.",
+    "Story": "A Zsiráf-nyuszi akkor született, amikor egy zsiráf karjai megöleltek egy kis nyuszit, aki éjszaka remegett. Abban a pillanatban a Fény Fája egyetlen testbe egyesítette őket egy szokatlan hibridben. A Zsiráf-nyuszi játékos és rettenthetetlen: hosszú karjait használja csillagok gyűjtésére, nyuszi testét pedig árnyékok között ugrálásra. A boldogság lelke, aki nevetést és fényt hoz bárhová, ahová ér.",
+    "ImageFileName": "GiraffeBunnyNone.png"
+  }
+]

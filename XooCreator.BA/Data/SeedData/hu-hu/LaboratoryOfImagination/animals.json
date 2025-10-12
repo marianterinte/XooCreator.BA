@@ -1,0 +1,51 @@
+[
+  {
+    "id": "00000000-0000-0000-0000-000000000001",
+    "label": "Nyuszi",
+    "src": "images/animals/base/bunny.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000003",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000002",
+    "label": "Víziló",
+    "src": "images/animals/base/hippo.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000006",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000003",
+    "label": "Zsiráf",
+    "src": "images/animals/base/giraffe.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000004",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000004",
+    "label": "Kutya",
+    "src": "images/animals/base/dog.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000003",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000005",
+    "label": "Róka",
+    "src": "images/animals/base/fox.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000005",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000006",
+    "label": "Macska",
+    "src": "images/animals/base/cat.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000003",
+    "isHybrid": false
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000007",
+    "label": "Majom",
+    "src": "images/animals/base/monkey.jpg",
+    "regionId": "10000000-0000-0000-0000-000000000002",
+    "isHybrid": false
+  }
+]

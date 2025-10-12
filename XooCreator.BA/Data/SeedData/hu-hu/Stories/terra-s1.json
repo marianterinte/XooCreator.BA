@@ -1,0 +1,169 @@
+{
+  "storyId": "terra-s1",
+  "title": "A Farm Árnyéka",
+  "coverImageUrl": "images/tol/stories/terra-s1/0.Cover.png",
+  "category": "terra",
+  "sortOrder": 1,
+  "tiles": [
+    {
+      "tileId": "1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Érkezés",
+      "text": "A Terra völgye vékony gőzöket lélegzik a tágas mezők felett. Minden rendben tűnik, de az emberek homlokukra húzzák a kalapjukat és úgy néznek az égre, mint egy nem kívánt vendégre. Puf-Puf összeráncolja a bajuszát: „Csend van... de nem jó értelemben. Nézzük meg, honnan tartja a világ a levegőt a mellkasában."",
+      "imageUrl": "images/tol/stories/terra-s1/1.arrival.png"
+    },
+    {
+      "tileId": "2",
+      "type": "page",
+      "sortOrder": 2,
+      "caption": "A furcsa csend",
+      "text": "Egy kakas sem kukorékol, egy kutya sem ugat, a tücskök sem találják a kórusukat. A csend nyomja, vastag, mint egy nedves takaró. Puf-Puf rád néz: „Mintha a természet tízig számolna és nem merne tízre mondani."",
+      "imageUrl": "images/tol/stories/terra-s1/2.silence.png"
+    },
+    {
+      "tileId": "3",
+      "type": "page",
+      "sortOrder": 3,
+      "caption": "Az emberek suttogása",
+      "text": "Egy öregember apró lépésekkel közeledik. „Ez... egy árnyék", suttogja. „Lejön az égből napnyugtakor. Az állatok menekülnek, a gabonák a földre fekszenek. Azt mondjuk, hogy átok." Puf-Puf ritkán pislog: „Átok vagy jel, minden okkal van. Fogjuk meg a nyomát."",
+      "imageUrl": "images/tol/stories/terra-s1/3.whispers.png"
+    },
+    {
+      "tileId": "4",
+      "type": "page",
+      "sortOrder": 4,
+      "caption": "Az első éjszaka",
+      "text": "A nap a dombok mögé csorog, és a szél új, nyugtalan zörgést hoz. A felhők felett valami nagy mozog. Árnyék a mezők felett, és a hold mintha félrehúzódna. Puf-Puf egy pillanatra visszatartja a lélegzetét és kissé mosolyog: „OK... ez nem csak változékony időjárás."",
+      "imageUrl": "images/tol/stories/terra-s1/4.first-night.png"
+    },
+    {
+      "tileId": "5",
+      "type": "page",
+      "sortOrder": 5,
+      "caption": "A föld rezgése",
+      "text": "A föld megremeg, először könnyedén, majd mint egy nehéz lépés. A levegő füst és tiszta hamu szagát árasztja, mint egy szikra után. A lefektetett kalásztengerben egy hatalmas sziluett sejlik, amely szaggatottan villog, mint egy sérült világítótorony.",
+      "imageUrl": "images/tol/stories/terra-s1/5.vibration.png"
+    },
+    {
+      "tileId": "6",
+      "type": "page",
+      "sortOrder": 6,
+      "caption": "A lény",
+      "text": "Az árnyékokból egy hatalmas madár tűnik elő, tollakkal, mint a parázs, és kristály szemekkel. A bal szárnya nehezen lóg; minden csapása szikrákat emel, amelyek a vízen kialszanak. Ez nem átok: egy másik világból tévedt lény, aki egy olyan helyre esett, amely még nem érti meg.",
+      "imageUrl": "images/tol/stories/terra-s1/6.creature.png"
+    },
+    {
+      "tileId": "7",
+      "type": "page",
+      "sortOrder": 7,
+      "caption": "A kapcsolat",
+      "text": "Puf-Puf lassan közeledik, bólint, majd suttogva szól hozzád: „A Fény Fájából való. Ha segítünk neki, megmutathat egy rejtett utat a Terán." A madár egyenesen néz rád, félelem nélkül; a szemében barázdák és csillagok látszanak. „Neked jó kezeid vannak", mondja Puf-Puf mosolyogva. „És nekem... hasznos megjegyzéseim. Próbáld te először."",
+      "imageUrl": "images/tol/stories/terra-s1/7.bond.png"
+    },
+    {
+      "tileId": "8",
+      "type": "quiz",
+      "sortOrder": 8,
+      "caption": "",
+      "text": "",
+      "imageUrl": "images/tol/stories/terra-s1/8.quiz.png",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "Bátorítod, hogy felkeljen, emlékezzen az erejére.",
+          "tokens": [
+            {
+              "type": "Discovery",
+              "value": "discovery credit",
+              "quantity": 1
+            },
+            {
+              "type": "Personality",
+              "value": "courage",
+              "quantity": 1
+            }
+          ],
+          "sortOrder": 1
+        },
+        {
+          "answerId": "b",
+          "text": "Gondosan és türelemmel ápolod.",
+          "tokens": [
+            {
+              "type": "Personality",
+              "value": "safety",
+              "quantity": 1
+            },
+            {
+              "type": "Discovery",
+              "value": "discovery credit",
+              "quantity": 1
+            }
+          ],
+          "sortOrder": 2
+        },
+        {
+          "answerId": "c",
+          "text": "Tervet készítesz neki, hogy újra kinyithassa a szárnyait.",
+          "tokens": [
+            {
+              "type": "Discovery",
+              "value": "discovery credit",
+              "quantity": 1
+            },
+            {
+              "type": "Personality",
+              "value": "thinking",
+              "quantity": 1
+            }
+          ],
+          "sortOrder": 3
+        },
+        {
+          "answerId": "d",
+          "text": "A kreativitásodat használod és új gyógyítási módszert találsz.",
+          "tokens": [
+            {
+              "type": "Personality",
+              "value": "creativity",
+              "quantity": 1
+            },
+            {
+              "type": "Discovery",
+              "value": "discovery credit",
+              "quantity": 1
+            }
+          ],
+          "sortOrder": 4
+        },
+        {
+          "answerId": "e",
+          "text": "Megvizsgálod a tollain lévő fény jeleit, hogy felfedezd a titkot.",
+          "tokens": [
+            {
+              "type": "Discovery",
+              "value": "discovery credit",
+              "quantity": 1
+            },
+            {
+              "type": "Personality",
+              "value": "curiosity",
+              "quantity": 1
+            }
+          ],
+          "sortOrder": 5
+        }
+      ],
+      "question": "Hogyan segítesz a sérült madáron?"
+    },
+    {
+      "tileId": "9",
+      "type": "page",
+      "sortOrder": 9,
+      "caption": "A megnyílt út",
+      "text": "A segítségetek után a madár a mellkasához húzza a sérült szárnyát, és nyugodt erőfeszítéssel kinyújtja a másikat. Egy fénycsík szakad ki a tollai közül és új ösvényként vágja át a mezőt. „Nézd", mondja Puf-Puf egyfajta játékos büszkeséggel. „Az út, amely öt perccel ezelőtt még nem létezett." A madár felnéz a felhőkre, majd rátok. Puf-Puf egy tollat kap hálából, és tudja, hogy a madár mostantól a falu védelmezője lesz. A nagy, mágikus toll ismeretlen energiát táplál.",
+      "imageUrl": "images/tol/stories/terra-s1/9.path.png"
+    }
+  ]
+}

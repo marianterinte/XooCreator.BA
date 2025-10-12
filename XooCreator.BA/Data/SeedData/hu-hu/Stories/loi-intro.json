@@ -1,0 +1,146 @@
+{
+  "storyId": "loi-intro",
+  "title": "A Béke Eredete",
+  "coverImageUrl": "images/tol/stories/loi-intro/0.cover.png",
+  "category": "terra",
+  "sortOrder": 1,
+  "tiles": [
+    {
+      "tileId": "1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Két világ, két tábor",
+      "text": "Alchimaliában két világ létezett, nagyon közel egymáshoz, de háborúban. Lunaria — a nyuszik bolygója, sárgarépa mezőkkel és üregekkel. Kelo-Ketis — a macskák bolygója, egy császár által vezetve. A határok hidegek voltak, a hidak pedig eltörtek.",
+      "imageUrl": "images/tol/stories/loi-intro/1.two-worlds.png"
+    },
+    {
+      "tileId": "2",
+      "type": "page",
+      "sortOrder": 2,
+      "caption": "Pufus Alchimus Császár",
+      "text": "Ketisen Pufus Alchimus Császár uralkodott, egy harcos, aki hódításairól volt ismert. A háború a nyuszikkal már régóta tartott, és a fegyverek hangosabban szóltak, mint a történetek.",
+      "imageUrl": "images/tol/stories/loi-intro/2.emperor.png"
+    },
+    {
+      "tileId": "3",
+      "type": "page",
+      "sortOrder": 3,
+      "caption": "A kíváncsi fiú",
+      "text": "A császárnak egy fia született: Puf-Puf Alchimus. Az apa egy harcost akart. De Puf-Puf szerette a matematikát, az elemekkel való játékokat és az alkímiáról álmodott. Inkább felfedező volt, mint katona.",
+      "imageUrl": "images/tol/stories/loi-intro/3.curious-son.png"
+    },
+    {
+      "tileId": "4",
+      "type": "page",
+      "sortOrder": 4,
+      "caption": "Barátok a határon túl",
+      "text": "Bár háború volt, a barátság megtalálta az útját. Egy fekete nyuszi és egy fehér macska titokban találkoztak és elmesélték egymásnak a világukat. Nem ellenségeknek tűntek. Kíváncsi gyerekeknek tűntek.",
+      "imageUrl": "images/tol/stories/loi-intro/4.friends.png"
+    },
+    {
+      "tileId": "5",
+      "type": "page",
+      "sortOrder": 5,
+      "caption": "A Lunaria kő",
+      "text": "Ketisen Puf-Puf meglepetten látta, ahogy egy zöld követ néz, amit Lunariáról hoztak, smaragdként csillogva.\n„- Tartsd titokban a barátságunkat, és odaadjuk a követ", suttogta a nyuszi. Puf-Puf megígérte.",
+      "imageUrl": "images/tol/stories/loi-intro/5.lunaria-stone.png"
+    },
+    {
+      "tileId": "6",
+      "type": "page",
+      "sortOrder": 6,
+      "caption": "A zöld-arany folyadék",
+      "text": "A kővel Puf-Puf egy elixírt készített. Amikor a fémet érintette, arannyá vált. Nagy öröm! Megosztotta a folyadékot a barátaival — kis kortyok, sok nevetés.",
+      "imageUrl": "images/tol/stories/loi-intro/6.elixir.png"
+    },
+    {
+      "tileId": "7",
+      "type": "page",
+      "sortOrder": 7,
+      "caption": "Alvás a fa árnyékában",
+      "text": "Fáradtan elaludtak egy nagyon magas fa árnyékában. A folyadék lassan a gyökerekhez csorgott. A zöld kő enyhe fénnyel melegítette a földet.",
+      "imageUrl": "images/tol/stories/loi-intro/7.tree-nap.png"
+    },
+    {
+      "tileId": "8",
+      "type": "page",
+      "sortOrder": 8,
+      "caption": "Macska-Nyuszi",
+      "text": "Amikor felébredtek, mellettük egy furcsa, szép lény állt: macska gracióval és nyuszi szelídséggel. Félelem nélkül nézett rájuk.\n- Szia, én Macska-Nyuszi vagyok!",
+      "imageUrl": "images/tol/stories/loi-intro/8.matso-iepurele.png"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "sortOrder": 9,
+      "caption": "",
+      "text": "",
+      "imageUrl": "images/tol/stories/loi-intro/9.quiz.png",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "Bátorítjuk",
+          "tokens": [],
+          "sortOrder": 1
+        },
+        {
+          "answerId": "b",
+          "text": "Minden fára elixírt teszünk.",
+          "tokens": [],
+          "sortOrder": 2
+        },
+        {
+          "answerId": "c",
+          "text": "Megvédjük Macska-Nyuszit.",
+          "tokens": [],
+          "sortOrder": 3
+        },
+        {
+          "answerId": "d",
+          "text": "Mindkét világban béke fát ültetünk.",
+          "tokens": [],
+          "sortOrder": 4
+        },
+        {
+          "answerId": "e",
+          "text": "Bármi áron megtartjuk a békét.",
+          "tokens": [],
+          "sortOrder": 5
+        }
+      ],
+      "question": "A kő, a folyadék és a barátság Macska-Nyuszit hívta, hogy békét hozzon. mit csinálsz először?\n\nBármi áron megtartjuk a békét.\n"
+    },
+    {
+      "tileId": "9",
+      "type": "page",
+      "sortOrder": 10,
+      "caption": "A béke üzenete",
+      "text": "„Én hordom a békét a világok között", mondta Macska-Nyuszi. „Barátságból, kőből és folyadékból született egy híd", mondta Puf-Puf.\nA háborúk kialszanak, amikor megtanulod jól keverni a dolgokat."\nPuf-Puf megértette, hogy az alkímia nem csak a fémekről szól, hanem a szívekről is.",
+      "imageUrl": "images/tol/stories/loi-intro/10.message.png"
+    },
+    {
+      "tileId": "10",
+      "type": "page",
+      "sortOrder": 11,
+      "caption": "Puf-Puf döntése",
+      "text": "Aznap Puf-Puf a saját útját választotta: felfedező és alkimista. Világok közötti utakat fog keresni, nem háborúkat. És Macska-Nyuszi egyszer a jelképévé válik, hogy a béke nem csak megtalálható, hanem létrehozható is.",
+      "imageUrl": "images/tol/stories/loi-intro/11.choice.png"
+    },
+    {
+      "tileId": "12",
+      "type": "page",
+      "sortOrder": 12,
+      "caption": "A varázslat",
+      "text": "Amikor minden csendes volt, egy titokzatos varázslat miatt Lunaria elszakadt Kelo-Ketistől és örökre eltűnt.\nPuf-Puf: \"-Meg kell tudnom, mi történt, elindulok egy utazásra!\"",
+      "imageUrl": "images/tol/stories/loi-intro/12.the-spell.png"
+    },
+    {
+      "tileId": "13",
+      "type": "page",
+      "sortOrder": 13,
+      "caption": "...",
+      "text": "Folytatjuk...",
+      "imageUrl": "images/tol/stories/loi-intro/13.tobecontinued.png"
+    }
+  ]
+}

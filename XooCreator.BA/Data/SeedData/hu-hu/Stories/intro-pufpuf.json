@@ -1,0 +1,71 @@
+{
+  "storyId": "intro-pufpuf",
+  "title": "A Nagy Kaland",
+  "coverImageUrl": "images/tol/stories/intro-pufpuf/0.Cover.png",
+  "category": "terra",
+  "sortOrder": 1,
+  "tiles": [
+    {
+      "tileId": "1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "A hívás",
+      "text": "Puf-Puf az univerzum mélységében utazott, amikor a kozmikus csendet egy furcsa zúgás törte meg — mint a csillagok sóhaja. A műszerek villogtak, a csillagiránytű értelmetlen spirálokat rajzolt. A mancsával a kvarc szélvédőn érezte (inkább, mint hallotta), hogy valaki a nevén szólít egy nagyon, nagyon régi helyről.",
+      "imageUrl": "images/tol/stories/intro-pufpuf/1.puf-puf-flying.png",
+      "question": ""
+    },
+    {
+      "tileId": "2",
+      "type": "page",
+      "sortOrder": 2,
+      "caption": "A zuhanás",
+      "text": "Egy villámlás elnyelte a hajót és egy káprázatos örvénybe hajította. A plazma villámhárítók megolvadtak, a kormány beragadt, és a hajótest szétszaggatta a felhőket, mielőtt beleharapott a nedves földbe. Amikor a csend visszatért, a levegő szárazság és égetés szagát árasztotta. Puf-Puf megérintette a karcolt fülét, megnézte a hatalmas fákat és... nem tudta, hol van. Csak annyit, hogy egy idegen helyre került, ami felkeltette a kíváncsiságát.",
+      "imageUrl": "images/tol/stories/intro-pufpuf/2.puf-puf-hurt.png",
+      "question": ""
+    },
+    {
+      "tileId": "3",
+      "type": "page",
+      "sortOrder": 3,
+      "caption": "Az SOS kristály",
+      "text": "A fedélzeten, az SOS modulban egy ősi kristály dobbant, mint egy alvó szív. Puf-Puf kinyitotta a panelt, és fénye egy élő térképet vetített a levegőbe: fény ágak, ösvények, amelyek a végtelenségig fonódtak. Néhány út kialudt, mások szikráztak, mint jelek. Mindegyik egyetlen csomópontba futott össze: a Fény Fájába.",
+      "imageUrl": "images/tol/stories/intro-pufpuf/3.puf-puf-crystal.png",
+      "question": ""
+    },
+    {
+      "tileId": "4",
+      "type": "page",
+      "sortOrder": 4,
+      "caption": "A találkozás",
+      "text": "A Fa levelei suttogva susogtak, amikor Puf-Puf eléd lépett és mosolygott. „Hé, te. Igen, veled beszélek. Én Puf-Puf vagyok, beszélő macska a Kelo-Ketis bolygóról... hajó egy kicsit összegyűrve, a lélek... még mindig fent. A Fa szemtől szemben állított minket, és őszintén, te úgy nézel ki, mint aki tudja, mit csinál. Vagyis van az a tekinteted, hogy «már javítottam két-három űrhajót kedden este». Segíthetsz nekem, kérlek, hogy megjavítsam a hajómat és hazajussak? A kristály a kulcs. Meg kell fejtenünk.”",
+      "imageUrl": "images/tol/stories/intro-pufpuf/puf-puf-home-planet.png",
+      "question": ""
+    },
+    {
+      "tileId": "5",
+      "type": "quiz",
+      "sortOrder": 5,
+      "caption": "",
+      "text": "",
+      "imageUrl": "images/tol/stories/intro-pufpuf/4.TreeOfLight.png",
+      "question": "Mit mond Puf-Puf a Fény Fájáról?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "Ez egy kapu a világok között",
+          "isCorrect": true
+        },
+        {
+          "answerId": "b", 
+          "text": "Ez egy hatalmas fa",
+          "isCorrect": false
+        },
+        {
+          "answerId": "c",
+          "text": "Ez egy térkép",
+          "isCorrect": false
+        }
+      ]
+    }
+  ]
+}

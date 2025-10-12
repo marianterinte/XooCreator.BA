@@ -1,0 +1,169 @@
+{
+  "storyId": "lunaria-s1",
+  "title": "Linkaro",
+  "coverImageUrl": "images/tol/stories/lunaria-s1/0.Cover.png",
+  "category": "terra",
+  "sortOrder": 1,
+  "tiles": [
+    {
+      "tileId": "1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "A portál és a Nyuszik Tanácsa",
+      "text": "Puf-Puf rögzíti a nagyítót a kristályra és megfogja a szélén a narancssárga madár tollát, akit a Terán segített. A fény összegyűlik és egy portál nyílik. Beléptek: te, Puf-Puf és a fekete nyuszi. A végén egy tér félhold zászlókkal.\nA Nyuszik Tanácsa fogad titeket. „Utazók a Fény Fájából?", kérdezi egy tanácsos. „Puf-Puf, jelentkezz", mondja röviden. „Itt vagyunk, hogy segítsünk."\nA tanácsosok elmagyarázzák: „Egy betegség gyengíti a mieinket. Megoldásokra van szükségünk."\nA fekete nyuszi: „Hallottam ilyesmiről, tudom, mit tehetünk! A Fekete Hegyen van egy titokzatos kolostor, és a szerzetesek ott minden betegséget meggyógyítanak."\nA fekete nyuszi, te és Puf-Puf elindultok a Fekete Hegy felé.",
+      "imageUrl": "images/tol/stories/lunaria-s1/1.portal-council.png"
+    },
+    {
+      "tileId": "p2",
+      "type": "page",
+      "sortOrder": 2,
+      "caption": "Az út a Fekete Hegy felé",
+      "text": "Az ösvény nehezen emelkedik; a kövek csúsznak, a szél gyakran változik. Egy meredek lejtő után csodálkozva meglátjátok a kolostort: fehér falak, egyszerű vonalak, félhold zászlócskák.",
+      "imageUrl": "images/tol/stories/lunaria-s1/2.white-mountain-road.png"
+    },
+    {
+      "tileId": "3",
+      "type": "page",
+      "sortOrder": 3,
+      "caption": "A Csend Csarnoka",
+      "text": "Az udvaron macska és nyuszi szerzetesek csendben gyakorolnak. Elmesélitek nekik a város betegségét. Csodálkozva néznek egymásra: nem hallottak róla.\n„A nagy mesterrel kell beszélnetek", mondja egy szerzetes és egy világos helyiségbe vezet. Egy sziluett hátat fordítva meditál.",
+      "imageUrl": "images/tol/stories/lunaria-s1/3.silent-hall.png"
+    },
+    {
+      "tileId": "4",
+      "type": "page",
+      "sortOrder": 4,
+      "caption": "Linkaro, Macska-Nyuszi",
+      "text": "A figura megfordul.\n— „Ez... macska?", suttogja Puf-Puf.\n— „Vagy nyuszi?", kérdezed te.\n— „Linkaro. Macska-Nyuszi vagyok", mosolyog.\nPuf-Puf bólint: „Tudom, találkoztam egy Macska-Nyuszival, a macskák és nyuszik közötti háborúk idején."\nLinkaro: „A háborúk véget értek. Én vagyok a béke őre; én írtam alá az utolsó fegyverszünetet. Mondjátok el a problémát."\nElmagyarázzátok a betegséget.\nLinkaro: „Az Élet Köveire van szükségetek, gyógyító esszenciával. Egy kiugró párkány alatt vannak. Óvatosan szedjétek le őket."",
+      "imageUrl": "images/tol/stories/lunaria-s1/4.linkaro.png"
+    },
+    {
+      "tileId": "5",
+      "type": "page",
+      "sortOrder": 5,
+      "caption": "Az Élet Kövei",
+      "text": "Egy keskeny gerincen, szikla alatt zöld kövek csillognak. A légáramlat gyengíti a pulzusukat, ha túl hirtelen mozogsz.\nPuf-Puf: „Itt számít, hogyan közeledsz! Tudtam a Lunaria köveiről."",
+      "imageUrl": "images/tol/stories/lunaria-s1/5.life-stones.png"
+    },
+    {
+      "tileId": "6",
+      "type": "quiz",
+      "sortOrder": 6,
+      "caption": "",
+      "text": "",
+      "imageUrl": "images/tol/stories/lunaria-s1/6.quiz.png",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "Határozott mozgás.",
+          "tokens": [
+            {
+              "type": "Personality",
+              "value": "courage",
+              "quantity": 1
+            },
+            {
+              "type": "Discovery",
+              "value": "discovery credit",
+              "quantity": 1
+            }
+          ],
+          "sortOrder": 1
+        },
+        {
+          "answerId": "b",
+          "text": "Hallgatom a pulzust, aztán érintem.",
+          "tokens": [
+            {
+              "type": "Discovery",
+              "value": "discovery credit",
+              "quantity": 1
+            },
+            {
+              "type": "Personality",
+              "value": "curiosity",
+              "quantity": 1
+            }
+          ],
+          "sortOrder": 2
+        },
+        {
+          "answerId": "c",
+          "text": "Órási módon szinkronizálok.",
+          "tokens": [
+            {
+              "type": "Discovery",
+              "value": "discovery credit",
+              "quantity": 1
+            },
+            {
+              "type": "Personality",
+              "value": "thinking",
+              "quantity": 1
+            }
+          ],
+          "sortOrder": 3
+        },
+        {
+          "answerId": "d",
+          "text": "Puha hurok, érintés nélkül.",
+          "tokens": [
+            {
+              "type": "Discovery",
+              "value": "discovery credit",
+              "quantity": 1
+            },
+            {
+              "type": "Personality",
+              "value": "creativity",
+              "quantity": 1
+            }
+          ],
+          "sortOrder": 4
+        },
+        {
+          "answerId": "e",
+          "text": "Nyugodt lépések, állandó ritmus.",
+          "tokens": [
+            {
+              "type": "Discovery",
+              "value": "discovery credit",
+              "quantity": 1
+            },
+            {
+              "type": "Personality",
+              "value": "safety",
+              "quantity": 1
+            }
+          ],
+          "sortOrder": 5
+        }
+      ],
+      "question": "A zöld kövek pulzálnak a párkány alatt. Nem erőt kérnek, hanem a megközelítés módját. Hogyan szeded le őket anélkül, hogy kioltnád a fényüket?"
+    },
+    {
+      "tileId": "p6",
+      "type": "page",
+      "sortOrder": 7,
+      "caption": "Linkaro receptje",
+      "text": "Vissza a csendes csarnokba, Linkaro diktálja:\n„Lágy forralású víz, sok finomra vágott sárgarépa, helyi füvek és az Élet Kövei a fazék alá, nem belé. Amikor a gőz zöld fényt ver, kész."",
+      "imageUrl": "images/tol/stories/lunaria-s1/7.recipe.png"
+    },
+    {
+      "tileId": "p7",
+      "type": "page",
+      "sortOrder": 8,
+      "caption": "Leves a városban",
+      "text": "Visszatértek a Tanácshoz. A téren felkészítitek a nagy fazekat, a zöld köveket alá helyezitek és követitek a lépéseket. A beteg nyuszik sorban isznak; a füleik felemelkednek, a légzésük rendbe jön, az utca zúgása visszatér.",
+      "imageUrl": "images/tol/stories/lunaria-s1/8.soup-city.png"
+    },
+    {
+      "tileId": "p8",
+      "type": "page",
+      "sortOrder": 9,
+      "caption": "Gyógyulás jelei",
+      "text": "Estére a negyedek csendesebbek. Egy nyuszi kölyök először ugrik habozás nélkül.\nLinkaro a tér széléig vezet titeket: „Visszahoztátok az eredeti egyensúlyt. Köszönöm.\nPuf-Puf: „Jegyezzük: Lunaria jól reagál a gondoskodásra és a tervre. A következő lépést együtt választjuk."",
+      "imageUrl": "images/tol/stories/lunaria-s1/9.healing.png"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+[
+  {
+    "key": "head",
+    "name": "Fej",
+    "image": "images/bodyparts/face.webp",
+    "isBaseLocked": false
+  },
+  {
+    "key": "body",
+    "name": "Test",
+    "image": "images/bodyparts/body.webp",
+    "isBaseLocked": false
+  },
+  {
+    "key": "arms",
+    "name": "Karok",
+    "image": "images/bodyparts/hands.webp",
+    "isBaseLocked": false
+  },
+  {
+    "key": "legs",
+    "name": "Lábak",
+    "image": "images/bodyparts/legs.webp",
+    "isBaseLocked": true
+  },
+  {
+    "key": "tail",
+    "name": "Farok",
+    "image": "images/bodyparts/tail.webp",
+    "isBaseLocked": true
+  }
+]
