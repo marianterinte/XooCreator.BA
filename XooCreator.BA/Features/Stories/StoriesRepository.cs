@@ -402,32 +402,40 @@ public class StoriesRepository : IStoriesRepository
 
             foreach (var file in files)
             {
-                var json = await File.ReadAllTextAsync(file);
-                var seed = JsonSerializer.Deserialize<StorySeedData>(json, jsonOptions);
-                if (seed == null || string.IsNullOrWhiteSpace(seed.StoryId))
+                try
                 {
-                    continue;
-                }
-
-                var tr = new StoryTranslationSeed
-                {
-                    Locale = locale.ToLowerInvariant(),
-                    StoryId = seed.StoryId,
-                    Title = seed.Title,
-                    Tiles = seed.Tiles?.Select(t => new TileTranslationSeed
+                    var json = await File.ReadAllTextAsync(file);
+                    var seed = JsonSerializer.Deserialize<StorySeedData>(json, jsonOptions);
+                    if (seed == null || string.IsNullOrWhiteSpace(seed.StoryId))
                     {
-                        TileId = t.TileId,
-                        Caption = t.Caption,
-                        Text = t.Text,
-                        Question = t.Question,
-                        Answers = t.Answers?.Select(a => new AnswerTranslationSeed
+                        continue;
+                    }
+
+                    var tr = new StoryTranslationSeed
+                    {
+                        Locale = locale.ToLowerInvariant(),
+                        StoryId = seed.StoryId,
+                        Title = seed.Title,
+                        Tiles = seed.Tiles?.Select(t => new TileTranslationSeed
                         {
-                            AnswerId = a.AnswerId,
-                            Text = a.Text
+                            TileId = t.TileId,
+                            Caption = t.Caption,
+                            Text = t.Text,
+                            Question = t.Question,
+                            Answers = t.Answers?.Select(a => new AnswerTranslationSeed
+                            {
+                                AnswerId = a.AnswerId,
+                                Text = a.Text
+                            }).ToList()
                         }).ToList()
-                    }).ToList()
-                };
-                results.Add(tr);
+                    };
+                    results.Add(tr);
+                }
+                catch (Exception ex)
+                {
+
+                    throw ex;
+                }
             }
         }
 

@@ -18,7 +18,7 @@
       "type": "page",
       "sortOrder": 2,
       "caption": "Furcsa nyomok",
-      "text": "A füvben kis, cikkcakkos nyomok tűnnek fel, amelyek egy üreges rönk mellett tűnnek el. Mellettük „művészien megkóstolt" sárgarépa farkok.",
+      "text": "A füvben kis, cikkcakkos nyomok tűnnek fel, amelyek egy üreges rönk mellett tűnnek el. Mellettük \"művészien megkóstolt\" sárgarépa farkok.",
       "imageUrl": "images/tol/stories/terra-s2/2.tracks.png"
     },
     {
@@ -26,7 +26,7 @@
       "type": "page",
       "sortOrder": 3,
       "caption": "A fekete nyuszi",
-      "text": "A rönkből egy fekete nyuszi ugrik ki, matt bundával és nagy szemekkel. „Szia! Én... néha itt vagyok, néha Lunarián. Attól függ, hogyan pislogsz", mondja, majd nevet. „Tudom, hol van a Lencse. És segítségre van szükségem, hogy hazajussak Lunariára. Ha segítetek, megmutatom az utat a Lencséhez."\nPuf-Puf: „Lunaria? mintha ismerném ezt a bolygót... menjünk..."",
+      "text": "A rönkből egy fekete nyuszi ugrik ki, matt bundával és nagy szemekkel. \"Szia! Én... néha itt vagyok, néha Lunarián. Attól függ, hogyan pislogsz\", mondja, majd nevet. \"Tudom, hol van a Lencse. És segítségre van szükségem, hogy hazajussak Lunariára. Ha segítetek, megmutatom az utat a Lencséhez.\"\nPuf-Puf: \"Lunaria? mintha ismerném ezt a bolygót... menjünk...\"",
       "imageUrl": "images/tol/stories/terra-s2/3.black-rabbit.png"
     },
     {
@@ -42,7 +42,7 @@
       "type": "page",
       "sortOrder": 5,
       "caption": "A kis probléma",
-      "text": "Amikor megérinted a sziklát, a víz hullámokat csinál és a bejárat mintha „lélegzik", kissé összehúzódva. „Érzékeny barlang", mondja a nyuszi. „Jól csinálod, kijáratot kapsz. Rosszul csinálod, hideg zuhanyt kapsz."",
+      "text": "Amikor megérinted a sziklát, a víz hullámokat csinál és a bejárat mintha \"lélegzik\", kissé összehúzódva. \"Érzékeny barlang\", mondja a nyuszi. \"Jól csinálod, kijáratot kapsz. Rosszul csinálod, hideg zuhanyt kapsz.\"",
       "imageUrl": "images/tol/stories/terra-s2/5.problem.png"
     },
     {
@@ -55,7 +55,7 @@
       "answers": [
         {
           "answerId": "a",
-          "text": "Átcsúszol a keskeny küszöbön és gyorsan dolgozol, hogy ne hagyj időt a falaknak „lélegzeni".",
+          "text": "Átcsúszol a keskeny küszöbön és gyorsan dolgozol, hogy ne hagyj időt a falaknak \"lélegzeni\".",
           "tokens": [
             {
               "type": "Personality",
@@ -79,7 +79,7 @@
         },
         {
           "answerId": "c",
-          "text": "Rövid tervet készítesz: ki tartja a lámpát, ki rögzíti a emelőt, a mozgások sorrendje, „stop" jel.",
+          "text": "Rövid tervet készítesz: ki tartja a lámpát, ki rögzíti a emelőt, a mozgások sorrendje, \"stop\" jel.",
           "tokens": [
             {
               "type": "Personality",
@@ -121,7 +121,7 @@
       "type": "page",
       "sortOrder": 7,
       "caption": "A siker",
-      "text": "A Lencse tiszta, anélkül, hogy megzavarná a barlangot. A nyuszi tapsol: „Bravó! Oldalirányban jobb, mint egyenesen!" A Lencsét a kristályra teszed, és a térkép képe tisztul. A nyuszi határozottan rád néz: „Tartjuk a kapcsolatot. Haza akarok menni Lunariára — megígéred, hogy segítesz?"\nMost már tudjátok, hol van Lunaria: nem, nem a Hold, hanem egy távoli bolygó a Földtől. Ha lenne energiaforrásunk, talán együtt megjavíthatnánk a hajót...",
+      "text": "A Lencse tiszta, anélkül, hogy megzavarná a barlangot. A nyuszi tapsol: \"Bravó! Oldalirányban jobb, mint egyenesen!\" A Lencsét a kristályra teszed, és a térkép képe tisztul. A nyuszi határozottan rád néz: \"Tartjuk a kapcsolatot. Haza akarok menni Lunariára — megígéred, hogy segítesz?\"\nMost már tudjátok, hol van Lunaria: nem, nem a Hold, hanem egy távoli bolygó a Földtől. Ha lenne energiaforrásunk, talán együtt megjavíthatnánk a hajót...",
       "imageUrl": "images/tol/stories/terra-s2/7.success.png"
     }
   ]

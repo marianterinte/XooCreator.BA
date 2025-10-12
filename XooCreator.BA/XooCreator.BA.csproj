@@ -27,4 +27,10 @@
     <Folder Include="Features\Builder\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="Data\SeedData\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Data\SeedData\**\*.csv" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Resources\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

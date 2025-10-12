@@ -18,7 +18,7 @@
       "type": "page",
       "sortOrder": 2,
       "caption": "Grubot megtalál titeket",
-      "text": "Egy tiszta jel vágja át a ködöt, majd egy vékony sugár követi. A füstből valami tűnik elő.\nGrubot: \"- A kristály aláírása és... egy ismerős kémiai nyom után észleltem titeket. LunKarot."\nPuf-Puf nevet: \"- Jó digitális orrod van."\nGrubot: \"- Az ígéret ígéret marad. Adtatok nekem pulzust; én látást adok. A Vezérlő toronyhoz."\n",
+      "text": "Egy tiszta jel vágja át a ködöt, majd egy vékony sugár követi. A füstből valami tűnik elő.\nGrubot: \"- A kristály aláírása és... egy ismerős kémiai nyom után észleltem titeket. LunKarot.\"\nPuf-Puf nevet: \"- Jó digitális orrod van.\"\nGrubot: \"- Az ígéret ígéret marad. Adtatok nekem pulzust; én látást adok. A Vezérlő toronyhoz.\"\n",
       "imageUrl": "images/tol/stories/mechanika-s1/2.grubot.png"
     },
     {
@@ -26,7 +26,7 @@
       "type": "page",
       "sortOrder": 3,
       "caption": "A vezérlő torony",
-      "text": "Felmászol a torony fém lépcsőin. Fent egy hatalmas műszer vár: a Mechanika-Magnus Teleszkóp — csövek, tükrök, fogaskerekek, egy kupola, amely fém virágként nyílik ki.\nPuf-Puf: \"Ezzel keressük a bolygómat?"",
+      "text": "Felmászol a torony fém lépcsőin. Fent egy hatalmas műszer vár: a Mechanika-Magnus Teleszkóp — csövek, tükrök, fogaskerekek, egy kupola, amely fém virágként nyílik ki.\nPuf-Puf: \"Ezzel keressük a bolygómat?\"",
       "imageUrl": "images/tol/stories/mechanika-s1/3.control-tower.png"
     },
     {
@@ -34,7 +34,7 @@
       "type": "page",
       "sortOrder": 4,
       "caption": "Mi hiányzik",
-      "text": "Grubot kinyitja az oldalsó panelt: \"- Két dolog hiányzik: (1) egy kő Lunariáról a 'zöld szemhez'; (2) tárolt energia a fókuszáló tekercsekhez. Van egy tartály a torony alatt — feltöltve, de instabil. Ha van a kötök, felrakjuk; különben előkészítjük a helyét."",
+      "text": "Grubot kinyitja az oldalsó panelt: \"- Két dolog hiányzik: (1) egy kő Lunariáról a 'zöld szemhez'; (2) tárolt energia a fókuszáló tekercsekhez. Van egy tartály a torony alatt — feltöltve, de instabil. Ha van a kötök, felrakjuk; különben előkészítjük a helyét.\"",
       "imageUrl": "images/tol/stories/mechanika-s1/4.missing.png"
     },
     {
@@ -138,7 +138,7 @@
       "type": "page",
       "sortOrder": 6,
       "caption": "Fókuszálás",
-      "text": "A teleszkóp életre kel. A tükrök igazodnak, a szomszédos hologramok kigyulladnak, fény ágak jelennek meg rajtuk. Egy útvonal erősebben pulzál — egy szál, amely arra vár, hogy kövessék. Puf-Puf: \"Mutasd meg a Kelo-Ketist..."",
+      "text": "A teleszkóp életre kel. A tükrök igazodnak, a szomszédos hologramok kigyulladnak, fény ágak jelennek meg rajtuk. Egy útvonal erősebben pulzál — egy szál, amely arra vár, hogy kövessék. Puf-Puf: \"Mutasd meg a Kelo-Ketist...\"",
       "imageUrl": "images/tol/stories/mechanika-s1/6.focus.png"
     },
     {
@@ -146,7 +146,7 @@
       "type": "page",
       "sortOrder": 7,
       "caption": "A térkép mélyül",
-      "text": "Grubot gépel: \"Tiszta jel. Rögzítem a koordinátákat és mentem az útvonal-sémát a portál megnyitásához."\nPuf-Puf: \"Az első nagy lépés kipipálva."",
+      "text": "Grubot gépel: \"Tiszta jel. Rögzítem a koordinátákat és mentem az útvonal-sémát a portál megnyitásához.\"\nPuf-Puf: \"Az első nagy lépés kipipálva.\"",
       "imageUrl": "images/tol/stories/mechanika-s1/7.map-deepens.png"
     },
     {
@@ -154,7 +154,7 @@
       "type": "page",
       "sortOrder": 8,
       "caption": "A műhely jutalma",
-      "text": "Grubot egy dobozt nyújt át alkatrészekkel: \"Elektromos áramkörök — a következőkre."\nPuf-Puf kuncog: \"A motivációs kekszek mellé teszem őket."",
+      "text": "Grubot egy dobozt nyújt át alkatrészekkel: \"Elektromos áramkörök — a következőkre.\"\nPuf-Puf kuncog: \"A motivációs kekszek mellé teszem őket.\"",
       "imageUrl": "images/tol/stories/mechanika-s1/8.reward.png"
     },
     {
@@ -162,7 +162,7 @@
       "type": "page",
       "sortOrder": 9,
       "caption": "Előre tekintés",
-      "text": "A teleszkóp pihenőbe megy, és a kinti köd vékonyabbnak tűnik. Van a mélyült térképetek és Elektromos áramkörök\n Puf-Puf: \"Oké, csapat. A következő ág?"",
+      "text": "A teleszkóp pihenőbe megy, és a kinti köd vékonyabbnak tűnik. Van a mélyült térképetek és Elektromos áramkörök\n Puf-Puf: \"Oké, csapat. A következő ág?\"",
       "imageUrl": "images/tol/stories/mechanika-s1/9.ahead.png"
     }
   ]

@@ -4,6 +4,7 @@ namespace XooCreator.BA.Data
     {
         RoRo, // ro-ro
         EnUs, // en-us
+        HuHu, // hu-hu
     }
 
     public static class LanguageCodeExtensions
@@ -14,6 +15,7 @@ namespace XooCreator.BA.Data
             {
                 LanguageCode.RoRo => "ro-ro",
                 LanguageCode.EnUs => "en-us",
+                LanguageCode.HuHu => "hu-hu",
                 _ => "ro-ro"
             };
         }
@@ -24,6 +26,7 @@ namespace XooCreator.BA.Data
             {
                 LanguageCode.RoRo => "ro-ro",
                 LanguageCode.EnUs => "en-us",
+                LanguageCode.HuHu => "hu-hu",
                 _ => "ro-ro"
             };
         }
@@ -32,6 +35,7 @@ namespace XooCreator.BA.Data
         {
             yield return LanguageCode.RoRo;
             yield return LanguageCode.EnUs;
+            yield return LanguageCode.HuHu;
         }
     }
 }
