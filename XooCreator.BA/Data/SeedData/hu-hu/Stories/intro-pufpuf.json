@@ -53,31 +53,86 @@
         {
           "answerId": "a",
           "text": "Melyik út vezetne a kozmikus térképen a leggyorsabban haza?",
-          "tokens": [],
+          "tokens": [
+            {
+              "type": "Personality",
+              "value": "courage",
+              "quantity": 1
+            },
+            {
+              "type": "Discovery",
+              "value": "discovery credit",
+              "quantity": 1
+            }
+          ],
           "sortOrder": 1
         },
         {
           "answerId": "b",
           "text": "Hány világot mutat a térkép?",
-          "tokens": [],
+          "tokens": [
+            {
+              "type": "Personality",
+              "value": "curiosity",
+              "quantity": 1
+            },
+            {
+              "type": "Discovery",
+              "value": "discovery credit",
+              "quantity": 1
+            }
+          ],
           "sortOrder": 2
         },
         {
           "answerId": "c",
           "text": "Meg tudod mutatni az utat Kelo-Ketis felé?",
-          "tokens": [],
+          "tokens": [
+            {
+              "type": "Personality",
+              "value": "thinking",
+              "quantity": 1
+            },
+            {
+              "type": "Discovery",
+              "value": "discovery credit",
+              "quantity": 1
+            }
+          ],
           "sortOrder": 3
         },
         {
           "answerId": "d",
           "text": "Mit használhatnék a hajó megjavításához?",
-          "tokens": [],
+          "tokens": [
+            {
+              "type": "Personality",
+              "value": "creativity",
+              "quantity": 1
+            },
+            {
+              "type": "Discovery",
+              "value": "discovery credit",
+              "quantity": 1
+            }
+          ],
           "sortOrder": 4
         },
         {
           "answerId": "e",
           "text": "Melyik a legbiztonságosabb út hazafelé?",
-          "tokens": [],
+          "tokens": [
+            {
+              "type": "Personality",
+              "value": "safety",
+              "quantity": 1
+            },
+            {
+              "type": "Discovery",
+              "value": "discovery credit",
+              "quantity": 1
+            }
+          ],
           "sortOrder": 5
         }
       ]

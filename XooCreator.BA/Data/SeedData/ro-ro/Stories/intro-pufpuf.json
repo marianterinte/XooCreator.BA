@@ -53,31 +53,86 @@
         {
           "answerId": "a",
           "text": "Ce drum de pe harta cosmică duce cel mai repede acasă?",
-          "tokens": [],
+          "tokens": [
+            {
+              "type": "Personality",
+              "value": "courage",
+              "quantity": 1
+            },
+            {
+              "type": "Discovery",
+              "value": "discovery credit",
+              "quantity": 1
+            }
+          ],
           "sortOrder": 1
         },
         {
           "answerId": "b",
           "text": "Oare câte lumi arată harta?",
-          "tokens": [],
+          "tokens": [
+            {
+              "type": "Personality",
+              "value": "curiosity",
+              "quantity": 1
+            },
+            {
+              "type": "Discovery",
+              "value": "discovery credit",
+              "quantity": 1
+            }
+          ],
           "sortOrder": 2
         },
         {
           "answerId": "c",
           "text": "Îmi arăți calea către Kelo-Ketis?",
-          "tokens": [],
+          "tokens": [
+            {
+              "type": "Personality",
+              "value": "thinking",
+              "quantity": 1
+            },
+            {
+              "type": "Discovery",
+              "value": "discovery credit",
+              "quantity": 1
+            }
+          ],
           "sortOrder": 3
         },
         {
           "answerId": "d",
           "text": "Ce aș putea să folosesc pentru a repara nava?",
-          "tokens": [],
+          "tokens": [
+            {
+              "type": "Personality",
+              "value": "creativity",
+              "quantity": 1
+            },
+            {
+              "type": "Discovery",
+              "value": "discovery credit",
+              "quantity": 1
+            }
+          ],
           "sortOrder": 4
         },
         {
           "answerId": "e",
           "text": "Care e cel mai sigur drum spre casă?",
-          "tokens": [],
+          "tokens": [
+            {
+              "type": "Personality",
+              "value": "safety",
+              "quantity": 1
+            },
+            {
+              "type": "Discovery",
+              "value": "discovery credit",
+              "quantity": 1
+            }
+          ],
           "sortOrder": 5
         }
       ]

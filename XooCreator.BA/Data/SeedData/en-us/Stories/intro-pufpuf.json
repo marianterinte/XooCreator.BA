@@ -53,31 +53,86 @@
         {
           "answerId": "a",
           "text": "Which route on the cosmic map gets us home the fastest?",
-          "tokens": [],
+          "tokens": [
+            {
+              "type": "Personality",
+              "value": "courage",
+              "quantity": 1
+            },
+            {
+              "type": "Discovery",
+              "value": "discovery credit",
+              "quantity": 1
+            }
+          ],
           "sortOrder": 1
         },
         {
           "answerId": "b",
           "text": "How many worlds does the map show?",
-          "tokens": [],
+          "tokens": [
+            {
+              "type": "Personality",
+              "value": "curiosity",
+              "quantity": 1
+            },
+            {
+              "type": "Discovery",
+              "value": "discovery credit",
+              "quantity": 1
+            }
+          ],
           "sortOrder": 2
         },
         {
           "answerId": "c",
           "text": "Can you show me the path to Kelo-Ketis?",
-          "tokens": [],
+          "tokens": [
+            {
+              "type": "Personality",
+              "value": "thinking",
+              "quantity": 1
+            },
+            {
+              "type": "Discovery",
+              "value": "discovery credit",
+              "quantity": 1
+            }
+          ],
           "sortOrder": 3
         },
         {
           "answerId": "d",
           "text": "What could I use to repair the ship?",
-          "tokens": [],
+          "tokens": [
+            {
+              "type": "Personality",
+              "value": "creativity",
+              "quantity": 1
+            },
+            {
+              "type": "Discovery",
+              "value": "discovery credit",
+              "quantity": 1
+            }
+          ],
           "sortOrder": 4
         },
         {
           "answerId": "e",
           "text": "What is the safest route home?",
-          "tokens": [],
+          "tokens": [
+            {
+              "type": "Personality",
+              "value": "safety",
+              "quantity": 1
+            },
+            {
+              "type": "Discovery",
+              "value": "discovery credit",
+              "quantity": 1
+            }
+          ],
           "sortOrder": 5
         }
       ]
