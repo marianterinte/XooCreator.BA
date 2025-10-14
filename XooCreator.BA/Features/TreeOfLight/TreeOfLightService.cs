@@ -1,6 +1,8 @@
 using XooCreator.BA.Features.Stories;
 using XooCreator.BA.Features.TreeOfHeroes;
 using XooCreator.BA.Infrastructure;
+using XooCreator.BA.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace XooCreator.BA.Features.TreeOfLight;
 
@@ -19,13 +21,15 @@ public class TreeOfLightService : ITreeOfLightService
     private readonly IStoriesRepository _storiesRepository;
     private readonly ITreeOfHeroesRepository _treeOfHeroesRepository;
     private readonly IUserContextService _userContext;
+    private readonly XooDbContext _dbContext;
 
-    public TreeOfLightService(ITreeOfLightRepository repository, IStoriesRepository storiesRepository, ITreeOfHeroesRepository treeOfHeroesRepository, IUserContextService userContext)
+    public TreeOfLightService(ITreeOfLightRepository repository, IStoriesRepository storiesRepository, ITreeOfHeroesRepository treeOfHeroesRepository, IUserContextService userContext, XooDbContext dbContext)
     {
         _repository = repository;
         _storiesRepository = storiesRepository;
         _treeOfHeroesRepository = treeOfHeroesRepository;
         _userContext = userContext;
+        _dbContext = dbContext;
     }
 
     public async Task<List<TreeConfigurationDto>> GetAllConfigurationsAsync()
@@ -82,6 +86,14 @@ public class TreeOfLightService : ITreeOfLightService
             if (effectiveTokens.Count > 0)
             {
                 await _treeOfHeroesRepository.AwardTokensAsync(userId, effectiveTokens);
+                
+                // Check for Discovery type tokens and update wallet
+                var discoveryTokens = effectiveTokens.Where(t => t.Type == TokenFamily.Discovery).ToList();
+                if (discoveryTokens.Count > 0)
+                {
+                    var totalDiscoveryCredits = discoveryTokens.Sum(t => t.Quantity);
+                    await UpdateDiscoveryCreditsAsync(userId, totalDiscoveryCredits, request.StoryId);
+                }
             }
 
             var unlockedRegions = await CheckAndUnlockRegionsAsync(userId, request.StoryId, configId);
@@ -143,6 +155,43 @@ public class TreeOfLightService : ITreeOfLightService
         return newlyUnlockedRegions;
     }
 
+    private async Task UpdateDiscoveryCreditsAsync(Guid userId, int discoveryCredits, string storyId)
+    {
+        // Get or create user's wallet
+        var wallet = await _dbContext.CreditWallets.FirstOrDefaultAsync(w => w.UserId == userId);
+        if (wallet == null)
+        {
+            // Create wallet if it doesn't exist
+            wallet = new CreditWallet
+            {
+                UserId = userId,
+                Balance = 0,
+                DiscoveryBalance = discoveryCredits,
+                UpdatedAt = DateTime.UtcNow
+            };
+            _dbContext.CreditWallets.Add(wallet);
+        }
+        else
+        {
+            // Add discovery credits to existing wallet
+            wallet.DiscoveryBalance += discoveryCredits;
+            wallet.UpdatedAt = DateTime.UtcNow;
+        }
+        
+        // Record the credit grant transaction
+        var transaction = new CreditTransaction
+        {
+            Id = Guid.NewGuid(),
+            UserId = userId,
+            Amount = discoveryCredits,
+            Type = CreditTransactionType.Grant,
+            Reference = $"Story Completion Reward - {storyId}",
+            CreatedAt = DateTime.UtcNow
+        };
+        _dbContext.CreditTransactions.Add(transaction);
+        
+        await _dbContext.SaveChangesAsync();
+    }
 
     public async Task<ResetProgressResponse> ResetUserProgressAsync(Guid userId)
     {
