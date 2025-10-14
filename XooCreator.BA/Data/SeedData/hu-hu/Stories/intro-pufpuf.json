@@ -10,7 +10,7 @@
       "type": "page",
       "sortOrder": 1,
       "caption": "A hívás",
-      "text": "Puf-Puf az univerzum mélységében utazott, amikor a kozmikus csendet egy furcsa zúgás törte meg — mint a csillagok sóhaja. A műszerek villogtak, a csillagiránytű értelmetlen spirálokat rajzolt. A mancsával a kvarc szélvédőn érezte (inkább, mint hallotta), hogy valaki a nevén szólít egy nagyon, nagyon régi helyről.",
+      "text": "Puf-Puf az univerzum mélységében utazott, amikor a kozmikus csendet egy furcsa zúgás törte meg — mint a csillagok sóhaja. A műszerek villogtak, a csillagiránytű értelmetlen spirálokat rajzolt. A mancsával a kvarc szélvédőn érezte (inkább, mint hallotta), hogy valaki a nevén szólítja egy nagyon, nagyon régi helyről.",
       "imageUrl": "images/tol/stories/intro-pufpuf/1.puf-puf-flying.png",
       "question": ""
     },
@@ -48,24 +48,47 @@
       "caption": "",
       "text": "",
       "imageUrl": "images/tol/stories/intro-pufpuf/4.TreeOfLight.png",
-      "question": "Mit mond Puf-Puf a Fény Fájáról?",
+      "question": "Puf-Puf azt kéri, hogy segíts beszélni a térképet mutató SOS kristállyal. Mi lenne az első, legfontosabb kérdés?",
       "answers": [
         {
           "answerId": "a",
-          "text": "Ez egy kapu a világok között",
-          "isCorrect": true
+          "text": "Melyik út vezetne a kozmikus térképen a leggyorsabban haza?",
+          "tokens": [],
+          "sortOrder": 1
         },
         {
-          "answerId": "b", 
-          "text": "Ez egy hatalmas fa",
-          "isCorrect": false
+          "answerId": "b",
+          "text": "Hány világot mutat a térkép?",
+          "tokens": [],
+          "sortOrder": 2
         },
         {
           "answerId": "c",
-          "text": "Ez egy térkép",
-          "isCorrect": false
+          "text": "Meg tudod mutatni az utat Kelo-Ketis felé?",
+          "tokens": [],
+          "sortOrder": 3
+        },
+        {
+          "answerId": "d",
+          "text": "Mit használhatnék a hajó megjavításához?",
+          "tokens": [],
+          "sortOrder": 4
+        },
+        {
+          "answerId": "e",
+          "text": "Melyik a legbiztonságosabb út hazafelé?",
+          "tokens": [],
+          "sortOrder": 5
         }
       ]
+    },
+    {
+      "tileId": "6",
+      "type": "page",
+      "sortOrder": 6,
+      "caption": "Bátorság",
+      "text": "„Menjünk közelebb, rá fogunk jönni. Örülök, hogy megtaláltalak” — mondta Puf-Puf. Ketten apró léptekkel a fához indultatok.",
+      "imageUrl": "images/tol/stories/intro-pufpuf/5.puf-puf-tree-of-light.png"
     }
   ]
 }
