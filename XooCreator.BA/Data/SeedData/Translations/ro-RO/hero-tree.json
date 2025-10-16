@@ -67,37 +67,37 @@
   "hero_tree_alchimalian_dragon_desc": "Legendarul dragon care încorporează perfecțiunea tuturor trăsăturilor eroice...",
   "hero_tree_alchimalian_dragon_story": "Legendarul Dragon Alchimalian încorporează perfecțiunea echilibrului cosmic.",
 
-  "hero_tree_brave_pup_lvl2_name": "Cățelul Curajos (Nivel 2)",
-  "hero_tree_brave_pup_lvl2_desc": "Un pas mai aproape de curajul adevărat, cu inimă tot mai hotărâtă.",
-  "hero_tree_brave_pup_lvl2_story": "Își înfruntă temerile cu mai multă încredere, inspirându-i pe ceilalți să îndrăznească.",
+  "hero_tree_guardian_dog_name": "Câinele Gardian",
+  "hero_tree_guardian_dog_desc": "Un protector loial cu curaj neclintit și devotament de neclintit.",
+  "hero_tree_guardian_dog_story": "Câinele Gardian stă de veghe, apărându-i pe cei în nevoie cu hotărâre curajoasă.",
 
-  "hero_tree_brave_pup_lvl3_name": "Cățelul Curajos (Nivel 3)",
-  "hero_tree_brave_pup_lvl3_desc": "Curaj matur, gata să conducă și să protejeze.",
-  "hero_tree_brave_pup_lvl3_story": "A învățat că adevărata forță stă în perseverență și inimă.",
+  "hero_tree_legendary_dog_name": "Câinele Legendar",
+  "hero_tree_legendary_dog_desc": "Un erou legendar de curaj fără egal și spirit nobil.",
+  "hero_tree_legendary_dog_story": "Câinele Legendar inspiră legende, întruchipând forma cea mai pură a curajului eroic.",
 
-  "hero_tree_curious_cat_lvl2_name": "Pisica Curioasă (Nivel 2)",
-  "hero_tree_curious_cat_lvl2_desc": "Întrebări mai profunde, descoperiri mai luminoase.",
-  "hero_tree_curious_cat_lvl2_story": "Își rafinează curiozitatea, transformând-o în înțelegere clară.",
+  "hero_tree_explorer_cat_name": "Pisica Exploratoare",
+  "hero_tree_explorer_cat_desc": "O exploratoare neînfricată condusă de curiozitate și minunărie nesfârșite.",
+  "hero_tree_explorer_cat_story": "Pisica Exploratoare se aventurează în teritorii necunoscute, descoperind secrete ascunse și mistere.",
 
-  "hero_tree_curious_cat_lvl3_name": "Pisica Curioasă (Nivel 3)",
-  "hero_tree_curious_cat_lvl3_desc": "Maestră a explorării, vede legături acolo unde alții văd haos.",
-  "hero_tree_curious_cat_lvl3_story": "Fiecare mister devine o poveste lămurită, fiecare întrebare – un nou drum.",
+  "hero_tree_oracle_cat_name": "Pisica Oracol",
+  "hero_tree_oracle_cat_desc": "O văzătoare mistică cu înțelegere profundă și înțelepciune profetică.",
+  "hero_tree_oracle_cat_story": "Pisica Oracol vede dincolo de vălul realității, dezvăluind adevăruri ascunse de ochiul obișnuit.",
 
-  "hero_tree_wise_owl_lvl2_name": "Bufnița Înțeleaptă (Nivel 2)",
-  "hero_tree_wise_owl_lvl2_desc": "Cunoaștere mai adâncă, judecată mai limpede.",
-  "hero_tree_wise_owl_lvl2_story": "Își ascuțește gândirea și dă sfaturi care luminează calea.",
+  "hero_tree_scholar_owl_name": "Bufnița Savantă",
+  "hero_tree_scholar_owl_desc": "O savantă învățată cu cunoaștere profundă și gândire analitică.",
+  "hero_tree_scholar_owl_story": "Bufnița Savantă studiază misterele lumii, împărtășind înțelepciunea prin analiză atentă.",
 
-  "hero_tree_wise_owl_lvl3_name": "Bufnița Înțeleaptă (Nivel 3)",
-  "hero_tree_wise_owl_lvl3_desc": "Înțelepciune desăvârșită, viziune peste timp.",
-  "hero_tree_wise_owl_lvl3_story": "Îmbină logica și intuiția pentru a dezvălui adevăruri profunde.",
+  "hero_tree_ancient_owl_name": "Bufnița Antică",
+  "hero_tree_ancient_owl_desc": "O înțeleaptă antică cu înțelepciune atemporală și cunoaștere eternă.",
+  "hero_tree_ancient_owl_story": "Bufnița Antică a fost martoră la epoci, păstrând cele mai profunde secrete ale universului.",
 
-  "hero_tree_playful_horse_lvl2_name": "Căluțul Jucăuș (Nivel 2)",
-  "hero_tree_playful_horse_lvl2_desc": "Imaginația prinde viteză, ideile curg în valuri.",
-  "hero_tree_playful_horse_lvl2_story": "Transformă joaca în creație, dând formă viselor îndrăznețe.",
+  "hero_tree_artistic_horse_name": "Calul Artistic",
+  "hero_tree_artistic_horse_desc": "Un artist creativ care exprimă frumusețea prin imaginație și măiestrie.",
+  "hero_tree_artistic_horse_story": "Calul Artistic creează capodopere, aducând visele la viață prin expresie creativă.",
 
-  "hero_tree_playful_horse_lvl3_name": "Căluțul Jucăuș (Nivel 3)",
-  "hero_tree_playful_horse_lvl3_desc": "Creație matură, armonie între bucurie și meșteșug.",
-  "hero_tree_playful_horse_lvl3_story": "Din joc se nasc lumi întregi, lucrate cu măiestrie și entuziasm.",
+  "hero_tree_genius_horse_name": "Calul Geniu",
+  "hero_tree_genius_horse_desc": "Un geniu creativ cu viziune artistică și inovație fără egal.",
+  "hero_tree_genius_horse_story": "Calul Geniu transcende creativitatea obișnuită, creând opere de pură strălucire artistică.",
 
   "hero_tree_shieldquill_name": "Ariciul Scut-Spini",
   "hero_tree_shieldquill_desc": "Protecție atentă, construită din prudență și experiență.",
@@ -105,5 +105,65 @@
 
   "hero_tree_wardenspike_name": "Paznicul Țepușă",
   "hero_tree_wardenspike_desc": "Strajă de neclintit, hotărâtă să mențină siguranța.",
-  "hero_tree_wardenspike_story": "Transformă vigilența în artă, stând de veghe la hotarele lumii."
+  "hero_tree_wardenspike_story": "Transformă vigilența în artă, stând de veghe la hotarele lumii.",
+
+  "hero_tree_wise_lion_sage_name": "Leul Înțelept Savant",
+  "hero_tree_wise_lion_sage_desc": "Un leu măreț care îmbină curajul, curiozitatea și înțelepciunea.",
+  "hero_tree_wise_lion_sage_story": "Leul Înțelept Savant conduce cu atât putere cât și înțelegere, inspirându-i pe alții prin exemplul nobil.",
+
+  "hero_tree_brave_lion_artist_name": "Leul Curajos Artist",
+  "hero_tree_brave_lion_artist_desc": "Un leu curajos care exprimă creativitatea prin viziune artistică îndrăzneață.",
+  "hero_tree_brave_lion_artist_story": "Leul Curajos Artist creează capodopere care inspiră curaj și imaginație în toți cei care le văd.",
+
+  "hero_tree_guardian_lion_name": "Leul Gardian",
+  "hero_tree_guardian_lion_desc": "Un leu protector care îmbină curajul, curiozitatea și siguranța.",
+  "hero_tree_guardian_lion_story": "Leul Gardian veghează asupra regatului, asigurând siguranța în timp ce încurajează explorarea și descoperirea.",
+
+  "hero_tree_brave_sage_artist_name": "Artistul Înțelept Curajos",
+  "hero_tree_brave_sage_artist_desc": "Un artist înțelept care îmbină curajul, gândirea și creativitatea.",
+  "hero_tree_brave_sage_artist_story": "Artistul Înțelept Curajos creează opere profunde care combină adâncimea intelectuală cu frumusețea artistică.",
+
+  "hero_tree_brave_sage_guardian_name": "Gardianul Înțelept Curajos",
+  "hero_tree_brave_sage_guardian_desc": "Un gardian protector care îmbină curajul, înțelepciunea și siguranța.",
+  "hero_tree_brave_sage_guardian_story": "Gardianul Înțelept Curajos se apără cu atât putere cât și înțelepciune, asigurând siguranța prin protecție gândită.",
+
+  "hero_tree_brave_artist_guardian_name": "Gardianul Artist Curajos",
+  "hero_tree_brave_artist_guardian_desc": "Un gardian creativ care îmbină curajul, creativitatea și siguranța.",
+  "hero_tree_brave_artist_guardian_story": "Gardianul Artist Curajos protejează prin soluții creative, combinând viziunea artistică cu grija vigilentă.",
+
+  "hero_tree_wise_explorer_artist_name": "Artistul Explorator Înțelept",
+  "hero_tree_wise_explorer_artist_desc": "Un artist intelectual care îmbină curiozitatea, gândirea și creativitatea.",
+  "hero_tree_wise_explorer_artist_story": "Artistul Explorator Înțelept descoperă noi frontiere artistice prin explorare gândită și expresie creativă.",
+
+  "hero_tree_wise_guardian_explorer_name": "Exploratorul Gardian Înțelept",
+  "hero_tree_wise_guardian_explorer_desc": "Un explorator protector care îmbină curiozitatea, înțelepciunea și siguranța.",
+  "hero_tree_wise_guardian_explorer_story": "Exploratorul Gardian Înțelept se aventurează în siguranță în teritorii necunoscute, ghidat de înțelepciune și protejat de precauție.",
+
+  "hero_tree_creative_guardian_explorer_name": "Exploratorul Gardian Creativ",
+  "hero_tree_creative_guardian_explorer_desc": "Un explorator inventiv care îmbină curiozitatea, creativitatea și siguranța.",
+  "hero_tree_creative_guardian_explorer_story": "Exploratorul Gardian Creativ descoperă lumi noi prin soluții imaginare în timp ce asigură trecerea în siguranță.",
+
+  "hero_tree_wise_creative_guardian_name": "Gardianul Creativ Înțelept",
+  "hero_tree_wise_creative_guardian_desc": "Un gardian gânditor care îmbină înțelepciunea, creativitatea și siguranța.",
+  "hero_tree_wise_creative_guardian_story": "Gardianul Creativ Înțelept protejează prin soluții inovatoare, îmbinând înțelegerea intelectuală cu viziunea artistică.",
+
+  "hero_tree_master_lion_artist_name": "Maestrul Leul Artist",
+  "hero_tree_master_lion_artist_desc": "Leul artistic suprem, maestru al curajului, curiozității, înțelepciunii și creativității.",
+  "hero_tree_master_lion_artist_story": "Maestrul Leul Artist creează opere legendare care inspiră toți cei care asistă la geniul său artistic și spiritul nobil.",
+
+  "hero_tree_master_guardian_lion_name": "Maestrul Leul Gardian",
+  "hero_tree_master_guardian_lion_desc": "Leul protector suprem, maestru al curajului, curiozității, înțelepciunii și siguranței.",
+  "hero_tree_master_guardian_lion_story": "Maestrul Leul Gardian stă ca protectorul suprem, asigurând siguranța în timp ce încurajează explorarea și creșterea.",
+
+  "hero_tree_master_explorer_lion_name": "Maestrul Leul Explorator",
+  "hero_tree_master_explorer_lion_desc": "Leul explorator suprem, maestru al curajului, curiozității, creativității și siguranței.",
+  "hero_tree_master_explorer_lion_story": "Maestrul Leul Explorator se aventurează în cele mai provocatoare teritorii, descoperind minunății în timp ce asigură trecerea în siguranță.",
+
+  "hero_tree_master_sage_guardian_name": "Maestrul Gardian Înțelept",
+  "hero_tree_master_sage_guardian_desc": "Gardianul înțelept suprem, maestru al curajului, gândirii, creativității și siguranței.",
+  "hero_tree_master_sage_guardian_story": "Maestrul Gardian Înțelept combină înțelepciunea profundă cu protecția creativă, asigurând siguranța prin ghidare iluminată.",
+
+  "hero_tree_master_creative_explorer_name": "Maestrul Explorator Creativ",
+  "hero_tree_master_creative_explorer_desc": "Exploratorul creativ suprem, maestru al curiozității, gândirii, creativității și siguranței.",
+  "hero_tree_master_creative_explorer_story": "Maestrul Explorator Creativ descoperă noi regnuri ale posibilității prin gândire inovatoare și viziune artistică."
 }

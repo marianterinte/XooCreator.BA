@@ -67,37 +67,37 @@
   "hero_tree_alchimalian_dragon_desc": "The ultimate hero, embodying all traits to perfection.",
   "hero_tree_alchimalian_dragon_story": "This mighty dragon represents the pinnacle of courage, curiosity, thinking, creativity, and safety.",
 
-  "hero_tree_brave_pup_lvl2_name": "Brave Pup (Level 2)",
-  "hero_tree_brave_pup_lvl2_desc": "Closer to true courage, with a steadily stronger heart.",
-  "hero_tree_brave_pup_lvl2_story": "Faces fears with growing confidence, inspiring others to dare.",
+  "hero_tree_guardian_dog_name": "Guardian Dog",
+  "hero_tree_guardian_dog_desc": "A loyal protector with unwavering courage and devotion.",
+  "hero_tree_guardian_dog_story": "The Guardian Dog stands watch, defending those in need with brave determination.",
 
-  "hero_tree_brave_pup_lvl3_name": "Brave Pup (Level 3)",
-  "hero_tree_brave_pup_lvl3_desc": "Mature courage, ready to lead and protect.",
-  "hero_tree_brave_pup_lvl3_story": "Learns that true strength lies in perseverance and heart.",
+  "hero_tree_legendary_dog_name": "Legendary Dog",
+  "hero_tree_legendary_dog_desc": "A legendary hero of unmatched courage and noble spirit.",
+  "hero_tree_legendary_dog_story": "The Legendary Dog inspires legends, embodying the purest form of heroic courage.",
 
-  "hero_tree_curious_cat_lvl2_name": "Curious Cat (Level 2)",
-  "hero_tree_curious_cat_lvl2_desc": "Deeper questions, brighter discoveries.",
-  "hero_tree_curious_cat_lvl2_story": "Refines curiosity into clear understanding.",
+  "hero_tree_explorer_cat_name": "Explorer Cat",
+  "hero_tree_explorer_cat_desc": "A fearless explorer driven by endless curiosity and wonder.",
+  "hero_tree_explorer_cat_story": "The Explorer Cat ventures into unknown territories, discovering hidden secrets and mysteries.",
 
-  "hero_tree_curious_cat_lvl3_name": "Curious Cat (Level 3)",
-  "hero_tree_curious_cat_lvl3_desc": "Master of exploration, seeing patterns where others see chaos.",
-  "hero_tree_curious_cat_lvl3_story": "Every mystery becomes a clarified tale; every question, a new path.",
+  "hero_tree_oracle_cat_name": "Oracle Cat",
+  "hero_tree_oracle_cat_desc": "A mystical seer with profound insight and prophetic wisdom.",
+  "hero_tree_oracle_cat_story": "The Oracle Cat sees beyond the veil of reality, revealing truths hidden from ordinary sight.",
 
-  "hero_tree_wise_owl_lvl2_name": "Wise Owl (Level 2)",
-  "hero_tree_wise_owl_lvl2_desc": "Deeper knowledge, clearer judgment.",
-  "hero_tree_wise_owl_lvl2_story": "Sharpens thinking and offers guidance that lights the way.",
+  "hero_tree_scholar_owl_name": "Scholar Owl",
+  "hero_tree_scholar_owl_desc": "A learned scholar with deep knowledge and analytical thinking.",
+  "hero_tree_scholar_owl_story": "The Scholar Owl studies the mysteries of the world, sharing wisdom through careful analysis.",
 
-  "hero_tree_wise_owl_lvl3_name": "Wise Owl (Level 3)",
-  "hero_tree_wise_owl_lvl3_desc": "Perfected wisdom, vision beyond time.",
-  "hero_tree_wise_owl_lvl3_story": "Blends logic and intuition to reveal profound truths.",
+  "hero_tree_ancient_owl_name": "Ancient Owl",
+  "hero_tree_ancient_owl_desc": "An ancient sage with timeless wisdom and eternal knowledge.",
+  "hero_tree_ancient_owl_story": "The Ancient Owl has witnessed the ages, holding the deepest secrets of the universe.",
 
-  "hero_tree_playful_horse_lvl2_name": "Playful Horse (Level 2)",
-  "hero_tree_playful_horse_lvl2_desc": "Imagination gains speed; ideas flow in waves.",
-  "hero_tree_playful_horse_lvl2_story": "Turns play into creation, giving shape to bold dreams.",
+  "hero_tree_artistic_horse_name": "Artistic Horse",
+  "hero_tree_artistic_horse_desc": "A creative artist expressing beauty through imagination and skill.",
+  "hero_tree_artistic_horse_story": "The Artistic Horse creates masterpieces, bringing dreams to life through creative expression.",
 
-  "hero_tree_playful_horse_lvl3_name": "Playful Horse (Level 3)",
-  "hero_tree_playful_horse_lvl3_desc": "Mature creation, harmony between joy and craft.",
-  "hero_tree_playful_horse_lvl3_story": "From play, entire worlds arise, crafted with skill and enthusiasm.",
+  "hero_tree_genius_horse_name": "Genius Horse",
+  "hero_tree_genius_horse_desc": "A creative genius with unparalleled artistic vision and innovation.",
+  "hero_tree_genius_horse_story": "The Genius Horse transcends ordinary creativity, crafting works of pure artistic brilliance.",
 
   "hero_tree_shieldquill_name": "Shieldquill",
   "hero_tree_shieldquill_desc": "Careful protection built from prudence and experience.",
@@ -105,5 +105,65 @@
 
   "hero_tree_wardenspike_name": "Wardenspike",
   "hero_tree_wardenspike_desc": "Unyielding sentinel, determined to uphold safety.",
-  "hero_tree_wardenspike_story": "Turns vigilance into an art, keeping watch at the world's edges."
+  "hero_tree_wardenspike_story": "Turns vigilance into an art, keeping watch at the world's edges.",
+
+  "hero_tree_wise_lion_sage_name": "Wise Lion Sage",
+  "hero_tree_wise_lion_sage_desc": "A majestic lion combining courage, curiosity, and wisdom.",
+  "hero_tree_wise_lion_sage_story": "The Wise Lion Sage leads with both strength and insight, inspiring others through noble example.",
+
+  "hero_tree_brave_lion_artist_name": "Brave Lion Artist",
+  "hero_tree_brave_lion_artist_desc": "A courageous lion expressing creativity through bold artistic vision.",
+  "hero_tree_brave_lion_artist_story": "The Brave Lion Artist creates masterpieces that inspire courage and imagination in all who see them.",
+
+  "hero_tree_guardian_lion_name": "Guardian Lion",
+  "hero_tree_guardian_lion_desc": "A protective lion combining courage, curiosity, and safety.",
+  "hero_tree_guardian_lion_story": "The Guardian Lion watches over the realm, ensuring safety while encouraging exploration and discovery.",
+
+  "hero_tree_brave_sage_artist_name": "Brave Sage Artist",
+  "hero_tree_brave_sage_artist_desc": "A wise artist blending courage, thinking, and creativity.",
+  "hero_tree_brave_sage_artist_story": "The Brave Sage Artist creates profound works that combine intellectual depth with artistic beauty.",
+
+  "hero_tree_brave_sage_guardian_name": "Brave Sage Guardian",
+  "hero_tree_brave_sage_guardian_desc": "A protective sage combining courage, wisdom, and safety.",
+  "hero_tree_brave_sage_guardian_story": "The Brave Sage Guardian defends with both strength and wisdom, ensuring safety through thoughtful protection.",
+
+  "hero_tree_brave_artist_guardian_name": "Brave Artist Guardian",
+  "hero_tree_brave_artist_guardian_desc": "A creative guardian blending courage, creativity, and safety.",
+  "hero_tree_brave_artist_guardian_story": "The Brave Artist Guardian protects through creative solutions, combining artistic vision with vigilant care.",
+
+  "hero_tree_wise_explorer_artist_name": "Wise Explorer Artist",
+  "hero_tree_wise_explorer_artist_desc": "An intellectual artist combining curiosity, thinking, and creativity.",
+  "hero_tree_wise_explorer_artist_story": "The Wise Explorer Artist discovers new artistic frontiers through thoughtful exploration and creative expression.",
+
+  "hero_tree_wise_guardian_explorer_name": "Wise Guardian Explorer",
+  "hero_tree_wise_guardian_explorer_desc": "A protective explorer combining curiosity, wisdom, and safety.",
+  "hero_tree_wise_guardian_explorer_story": "The Wise Guardian Explorer ventures safely into unknown territories, guided by wisdom and protected by caution.",
+
+  "hero_tree_creative_guardian_explorer_name": "Creative Guardian Explorer",
+  "hero_tree_creative_guardian_explorer_desc": "An inventive explorer combining curiosity, creativity, and safety.",
+  "hero_tree_creative_guardian_explorer_story": "The Creative Guardian Explorer discovers new worlds through imaginative solutions while ensuring safe passage.",
+
+  "hero_tree_wise_creative_guardian_name": "Wise Creative Guardian",
+  "hero_tree_wise_creative_guardian_desc": "A thoughtful guardian combining wisdom, creativity, and safety.",
+  "hero_tree_wise_creative_guardian_story": "The Wise Creative Guardian protects through innovative solutions, blending intellectual insight with artistic vision.",
+
+  "hero_tree_master_lion_artist_name": "Master Lion Artist",
+  "hero_tree_master_lion_artist_desc": "The ultimate artistic lion, master of courage, curiosity, wisdom, and creativity.",
+  "hero_tree_master_lion_artist_story": "The Master Lion Artist creates legendary works that inspire all who witness their artistic genius and noble spirit.",
+
+  "hero_tree_master_guardian_lion_name": "Master Guardian Lion",
+  "hero_tree_master_guardian_lion_desc": "The ultimate protective lion, master of courage, curiosity, wisdom, and safety.",
+  "hero_tree_master_guardian_lion_story": "The Master Guardian Lion stands as the ultimate protector, ensuring safety while encouraging exploration and growth.",
+
+  "hero_tree_master_explorer_lion_name": "Master Explorer Lion",
+  "hero_tree_master_explorer_lion_desc": "The ultimate exploring lion, master of courage, curiosity, creativity, and safety.",
+  "hero_tree_master_explorer_lion_story": "The Master Explorer Lion ventures into the most challenging territories, discovering wonders while ensuring safe passage.",
+
+  "hero_tree_master_sage_guardian_name": "Master Sage Guardian",
+  "hero_tree_master_sage_guardian_desc": "The ultimate wise guardian, master of courage, thinking, creativity, and safety.",
+  "hero_tree_master_sage_guardian_story": "The Master Sage Guardian combines profound wisdom with creative protection, ensuring safety through enlightened guidance.",
+
+  "hero_tree_master_creative_explorer_name": "Master Creative Explorer",
+  "hero_tree_master_creative_explorer_desc": "The ultimate creative explorer, master of curiosity, thinking, creativity, and safety.",
+  "hero_tree_master_creative_explorer_story": "The Master Creative Explorer discovers new realms of possibility through innovative thinking and artistic vision."
 }

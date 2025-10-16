@@ -29,5 +29,142 @@
 
   "hero_tree_brave_sage_name": "Bátor Bölcs",
   "hero_tree_brave_sage_desc": "Egy bölcs lélek, aki bátorságot és bölcsességet egyesít...",
-  "hero_tree_brave_sage_story": "A Bátor Bölcs megmutatja, hogy az igazi erő a tudás és a bátorság harmóniájában rejlik."
+  "hero_tree_brave_sage_story": "A Bátor Bölcs megmutatja, hogy az igazi erő a tudás és a bátorság harmóniájában rejlik.",
+
+  "hero_tree_brave_artist_name": "Bátor Művész",
+  "hero_tree_brave_artist_desc": "Egy hős, aki mer alkotni ott, ahol mások félnek, új horizontokat nyitva művészetével.",
+  "hero_tree_brave_artist_story": "A Bátor Művész megmutatja, hogy az alkotás cselekedete a legfőbb bátorság, új világokat életre hozva a semmiből.",
+
+  "hero_tree_brave_guardian_name": "Bátor Őrző",
+  "hero_tree_brave_guardian_desc": "Egy hős, ahol a bátorság és védelem kéz a kézben jár, védve habozás nélkül, de bölcsen.",
+  "hero_tree_brave_guardian_story": "A Bátor Őrző a remegtetlen pajzs, megvédve az ártatlanokat rendíthetetlen elszántsággal.",
+
+  "hero_tree_wise_researcher_name": "Bölcs Kutató",
+  "hero_tree_wise_researcher_desc": "Egy hős, aki egyesíti az analitikus elmét a fáradhatatlan kíváncsisággal, hogy rejtett igazságokat fedezzen fel.",
+  "hero_tree_wise_researcher_story": "A Bölcs Kutató követi a tudás fonalát a legnagyobb labirintusokon keresztül, fényt találva a sötétségben.",
+
+  "hero_tree_creative_explorer_name": "Kreatív Felfedező",
+  "hero_tree_creative_explorer_desc": "Egy hős, aki egyesíti a képzeletet a megismerés vágyával; minden lépés egy új találmány.",
+  "hero_tree_creative_explorer_story": "A Kreatív Felfedező számára a térkép rajzolódik ki, ahogy bejárja, az ismeretlent művészeti alkotássá alakítva.",
+
+  "hero_tree_guard_cat_name": "Őrző Macska",
+  "hero_tree_guard_cat_desc": "Egy kalandos védelmező, aki óvatosan felfedez.",
+  "hero_tree_guard_cat_story": "Az Őrző Macska ismeri területének minden szögletét, biztosítva, hogy minden kíváncsiság kielégüljön a biztonság veszélyeztetése nélkül.",
+
+  "hero_tree_wise_pegasus_name": "Bölcs Pegazus",
+  "hero_tree_wise_pegasus_desc": "A tudás őrzője, aki a határokon túl tud repülni.",
+  "hero_tree_wise_pegasus_story": "A Bölcs Pegazus gondolatokat visz szárnyain, az absztrakt ötleteket repülő valóságokká alakítva.",
+
+  "hero_tree_thoughtful_guardian_name": "Gondolkodó Őrző",
+  "hero_tree_thoughtful_guardian_desc": "Egy hős, aki cselekvés előtt tervez; a biztonság jól megfontolt stratégiákból ered.",
+  "hero_tree_thoughtful_guardian_story": "A Gondolkodó Őrző nem kőből épít erődöket, hanem logikából és előrelátásból.",
+
+  "hero_tree_creative_guardian_name": "Kreatív Őrző",
+  "hero_tree_creative_guardian_desc": "Egy találékony védelmező, aki eredeti megoldásokat talál a biztonság biztosítására.",
+  "hero_tree_creative_guardian_story": "A Kreatív Őrző nem falakat épít, hanem egy olyan világot képzel el, ahol ezek nem szükségesek.",
+
+  "hero_tree_alchimalian_dragon_name": "Legendás Alchimalia Sárkány",
+  "hero_tree_alchimalian_dragon_desc": "A legendás sárkány, aki a hősies tulajdonságok tökéletességét testesíti meg...",
+  "hero_tree_alchimalian_dragon_story": "A Legendás Alchimalia Sárkány a kozmikus egyensúly tökéletességét testesíti meg.",
+
+  "hero_tree_guardian_dog_name": "Őrző Kutya",
+  "hero_tree_guardian_dog_desc": "Egy hűséges védelmező rendíthetetlen bátorsággal és odaadással.",
+  "hero_tree_guardian_dog_story": "Az Őrző Kutya őrködik, megvédve a szükségben lévőket bátor elszántsággal.",
+
+  "hero_tree_legendary_dog_name": "Legendás Kutya",
+  "hero_tree_legendary_dog_desc": "Egy legendás hős páratlan bátorsággal és nemes szellemmel.",
+  "hero_tree_legendary_dog_story": "A Legendás Kutya legendákat inspirál, a hősies bátorság legtisztább formáját megtestesítve.",
+
+  "hero_tree_explorer_cat_name": "Felfedező Macska",
+  "hero_tree_explorer_cat_desc": "Egy rettenthetetlen felfedező, akit végtelen kíváncsiság és csodálat vezet.",
+  "hero_tree_explorer_cat_story": "A Felfedező Macska ismeretlen területekre merészkedik, rejtett titkokat és rejtélyeket fedezve fel.",
+
+  "hero_tree_oracle_cat_name": "Jósló Macska",
+  "hero_tree_oracle_cat_desc": "Egy misztikus látnok mély megértéssel és prófétai bölcsességgel.",
+  "hero_tree_oracle_cat_story": "A Jósló Macska a valóság fátyla mögé lát, igazságokat tárva fel, amelyek a hétköznapi szemnek rejtve maradnak.",
+
+  "hero_tree_scholar_owl_name": "Tudós Bagoly",
+  "hero_tree_scholar_owl_desc": "Egy tanult tudós mély tudással és analitikus gondolkodással.",
+  "hero_tree_scholar_owl_story": "A Tudós Bagoly a világ rejtélyeit tanulmányozza, bölcsességet osztva meg gondos elemzésen keresztül.",
+
+  "hero_tree_ancient_owl_name": "Ősi Bagoly",
+  "hero_tree_ancient_owl_desc": "Egy ősi bölcs időtlen bölcsességgel és örök tudással.",
+  "hero_tree_ancient_owl_story": "Az Ősi Bagoly tanúja volt a koroknak, a világegyetem legmélyebb titkait őrizve.",
+
+  "hero_tree_artistic_horse_name": "Művészi Ló",
+  "hero_tree_artistic_horse_desc": "Egy kreatív művész, aki szépséget fejez ki képzelet és mesterség révén.",
+  "hero_tree_artistic_horse_story": "A Művészi Ló remekműveket alkot, álmokat életre hozva kreatív kifejezésen keresztül.",
+
+  "hero_tree_genius_horse_name": "Zseni Ló",
+  "hero_tree_genius_horse_desc": "Egy kreatív zseni páratlan művészi látomással és innovációval.",
+  "hero_tree_genius_horse_story": "A Zseni Ló túlmutat a hétköznapi kreativitáson, tiszta művészi ragyogás műveket alkotva.",
+
+  "hero_tree_shieldquill_name": "Pajzs-Tüskés",
+  "hero_tree_shieldquill_desc": "Gondos védelem, óvatosságból és tapasztalatból építve.",
+  "hero_tree_shieldquill_story": "Tüskéit pajzsként használja, hogy megvédje, ami a legfontosabb.",
+
+  "hero_tree_wardenspike_name": "Őrző Tüske",
+  "hero_tree_wardenspike_desc": "Rendíthetetlen őrszem, elszántan a biztonság fenntartására.",
+  "hero_tree_wardenspike_story": "Az őrséget művészetté alakítja, a világ határain őrködve.",
+
+  "hero_tree_wise_lion_sage_name": "Bölcs Oroszlán Bölcs",
+  "hero_tree_wise_lion_sage_name": "Bölcs Oroszlán Bölcs",
+  "hero_tree_wise_lion_sage_desc": "Egy fenséges oroszlán, aki egyesíti a bátorságot, kíváncsiságot és bölcsességet.",
+  "hero_tree_wise_lion_sage_story": "A Bölcs Oroszlán Bölcs erővel és megértéssel vezet, másokat inspirálva nemes példájával.",
+
+  "hero_tree_brave_lion_artist_name": "Bátor Oroszlán Művész",
+  "hero_tree_brave_lion_artist_desc": "Egy bátor oroszlán, aki kreativitást fejez ki merész művészi látomáson keresztül.",
+  "hero_tree_brave_lion_artist_story": "A Bátor Oroszlán Művész remekműveket alkot, amelyek bátorságot és képzeletet inspirálnak mindenki számára, aki látja őket.",
+
+  "hero_tree_guardian_lion_name": "Őrző Oroszlán",
+  "hero_tree_guardian_lion_desc": "Egy védelmező oroszlán, aki egyesíti a bátorságot, kíváncsiságot és biztonságot.",
+  "hero_tree_guardian_lion_story": "Az Őrző Oroszlán a birodalom felett őrködik, biztonságot biztosítva, miközben felfedezést és megismerést ösztönöz.",
+
+  "hero_tree_brave_sage_artist_name": "Bátor Bölcs Művész",
+  "hero_tree_brave_sage_artist_desc": "Egy bölcs művész, aki egyesíti a bátorságot, gondolkodást és kreativitást.",
+  "hero_tree_brave_sage_artist_story": "A Bátor Bölcs Művész mély műveket alkot, amelyek egyesítik az intellektuális mélységet a művészi szépséggel.",
+
+  "hero_tree_brave_sage_guardian_name": "Bátor Bölcs Őrző",
+  "hero_tree_brave_sage_guardian_desc": "Egy védelmező bölcs, aki egyesíti a bátorságot, bölcsességet és biztonságot.",
+  "hero_tree_brave_sage_guardian_story": "A Bátor Bölcs Őrző erővel és bölcsességgel véd, biztonságot biztosítva gondos védelemmel.",
+
+  "hero_tree_brave_artist_guardian_name": "Bátor Művész Őrző",
+  "hero_tree_brave_artist_guardian_desc": "Egy kreatív őrző, aki egyesíti a bátorságot, kreativitást és biztonságot.",
+  "hero_tree_brave_artist_guardian_story": "A Bátor Művész Őrző kreatív megoldásokkal véd, művészi látomást kombinálva figyelmes gondossággal.",
+
+  "hero_tree_wise_explorer_artist_name": "Bölcs Felfedező Művész",
+  "hero_tree_wise_explorer_artist_desc": "Egy intellektuális művész, aki egyesíti a kíváncsiságot, gondolkodást és kreativitást.",
+  "hero_tree_wise_explorer_artist_story": "A Bölcs Felfedező Művész új művészi határokat fedez fel gondos felfedezésen és kreatív kifejezésen keresztül.",
+
+  "hero_tree_wise_guardian_explorer_name": "Bölcs Őrző Felfedező",
+  "hero_tree_wise_guardian_explorer_desc": "Egy védelmező felfedező, aki egyesíti a kíváncsiságot, bölcsességet és biztonságot.",
+  "hero_tree_wise_guardian_explorer_story": "A Bölcs Őrző Felfedező biztonságosan merészkedik ismeretlen területekre, bölcsesség vezetésével és óvatosság védelmével.",
+
+  "hero_tree_creative_guardian_explorer_name": "Kreatív Őrző Felfedező",
+  "hero_tree_creative_guardian_explorer_desc": "Egy találékony felfedező, aki egyesíti a kíváncsiságot, kreativitást és biztonságot.",
+  "hero_tree_creative_guardian_explorer_story": "A Kreatív Őrző Felfedező új világokat fedez fel képzeletbeli megoldásokon keresztül, miközben biztonságos átkelést biztosít.",
+
+  "hero_tree_wise_creative_guardian_name": "Bölcs Kreatív Őrző",
+  "hero_tree_wise_creative_guardian_desc": "Egy gondolkodó őrző, aki egyesíti a bölcsességet, kreativitást és biztonságot.",
+  "hero_tree_wise_creative_guardian_story": "A Bölcs Kreatív Őrző innovatív megoldásokkal véd, intellektuális megértést kombinálva művészi látomással.",
+
+  "hero_tree_master_lion_artist_name": "Mester Oroszlán Művész",
+  "hero_tree_master_lion_artist_desc": "A végső művészi oroszlán, a bátorság, kíváncsiság, bölcsesség és kreativitás mestere.",
+  "hero_tree_master_lion_artist_story": "A Mester Oroszlán Művész legendás műveket alkot, amelyek mindenkit inspirálnak, aki tanúja művészi zsenialitásának és nemes szellemének.",
+
+  "hero_tree_master_guardian_lion_name": "Mester Őrző Oroszlán",
+  "hero_tree_master_guardian_lion_desc": "A végső védelmező oroszlán, a bátorság, kíváncsiság, bölcsesség és biztonság mestere.",
+  "hero_tree_master_guardian_lion_story": "A Mester Őrző Oroszlán a végső védelmezőként áll, biztonságot biztosítva, miközben felfedezést és növekedést ösztönöz.",
+
+  "hero_tree_master_explorer_lion_name": "Mester Felfedező Oroszlán",
+  "hero_tree_master_explorer_lion_desc": "A végső felfedező oroszlán, a bátorság, kíváncsiság, kreativitás és biztonság mestere.",
+  "hero_tree_master_explorer_lion_story": "A Mester Felfedező Oroszlán a legkihívóbb területekre merészkedik, csodákat fedezve fel, miközben biztonságos átkelést biztosít.",
+
+  "hero_tree_master_sage_guardian_name": "Mester Bölcs Őrző",
+  "hero_tree_master_sage_guardian_desc": "A végső bölcs őrző, a bátorság, gondolkodás, kreativitás és biztonság mestere.",
+  "hero_tree_master_sage_guardian_story": "A Mester Bölcs Őrző mély bölcsességet kombinál kreatív védelemmel, biztonságot biztosítva megvilágosodott vezetéssel.",
+
+  "hero_tree_master_creative_explorer_name": "Mester Kreatív Felfedező",
+  "hero_tree_master_creative_explorer_desc": "A végső kreatív felfedező, a kíváncsiság, gondolkodás, kreativitás és biztonság mestere.",
+  "hero_tree_master_creative_explorer_story": "A Mester Kreatív Felfedező új lehetőségek birodalmait fedez fel innovatív gondolkodáson és művészi látomáson keresztül."
 }
