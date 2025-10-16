@@ -46,10 +46,10 @@
     },
     {
       "id": "hero_brave_pup_lvl2",
-      "nameKey": "hero_tree_brave_pup_lvl2_name",
-      "descriptionKey": "hero_tree_brave_pup_lvl2_desc",
-      "storyKey": "hero_tree_brave_pup_lvl2_story",
-      "image": "images/toh/heroes/hero_brave_pup_lvl2.jpg",
+      "nameKey": "hero_tree_guardian_dog_name",
+      "descriptionKey": "hero_tree_guardian_dog_desc",
+      "storyKey": "hero_tree_guardian_dog_story",
+      "image": "images/toh/heroes/hero_guardian_dog.jpg",
       "type": "hero",
       "costs": {
         "courage": 2,
@@ -64,10 +64,10 @@
     },
     {
       "id": "hero_brave_pup_lvl3",
-      "nameKey": "hero_tree_brave_pup_lvl3_name",
-      "descriptionKey": "hero_tree_brave_pup_lvl3_desc",
-      "storyKey": "hero_tree_brave_pup_lvl3_story",
-      "image": "images/toh/heroes/hero_brave_pup_lvl3.jpg",
+      "nameKey": "hero_tree_legendary_dog_name",
+      "descriptionKey": "hero_tree_legendary_dog_desc",
+      "storyKey": "hero_tree_legendary_dog_story",
+      "image": "images/toh/heroes/hero_legendary_dog.jpg",
       "type": "hero",
       "costs": {
         "courage": 3,
@@ -100,10 +100,10 @@
     },
     {
       "id": "hero_curious_cat_lvl2",
-      "nameKey": "hero_tree_curious_cat_lvl2_name",
-      "descriptionKey": "hero_tree_curious_cat_lvl2_desc",
-      "storyKey": "hero_tree_curious_cat_lvl2_story",
-      "image": "images/toh/heroes/hero_curious_cat_lvl2.jpg",
+      "nameKey": "hero_tree_explorer_cat_name",
+      "descriptionKey": "hero_tree_explorer_cat_desc",
+      "storyKey": "hero_tree_explorer_cat_story",
+      "image": "images/toh/heroes/hero_explorer_cat.jpg",
       "type": "hero",
       "costs": {
         "courage": 0,
@@ -118,10 +118,10 @@
     },
     {
       "id": "hero_curious_cat_lvl3",
-      "nameKey": "hero_tree_curious_cat_lvl3_name",
-      "descriptionKey": "hero_tree_curious_cat_lvl3_desc",
-      "storyKey": "hero_tree_curious_cat_lvl3_story",
-      "image": "images/toh/heroes/hero_curious_cat_lvl3.jpg",
+      "nameKey": "hero_tree_oracle_cat_name",
+      "descriptionKey": "hero_tree_oracle_cat_desc",
+      "storyKey": "hero_tree_oracle_cat_story",
+      "image": "images/toh/heroes/hero_oracle_cat.jpg",
       "type": "hero",
       "costs": {
         "courage": 0,
@@ -154,10 +154,10 @@
     },
     {
       "id": "hero_wise_owl_lvl2",
-      "nameKey": "hero_tree_wise_owl_lvl2_name",
-      "descriptionKey": "hero_tree_wise_owl_lvl2_desc",
-      "storyKey": "hero_tree_wise_owl_lvl2_story",
-      "image": "images/toh/heroes/hero_wise_owl_lvl2.jpg",
+      "nameKey": "hero_tree_scholar_owl_name",
+      "descriptionKey": "hero_tree_scholar_owl_desc",
+      "storyKey": "hero_tree_scholar_owl_story",
+      "image": "images/toh/heroes/hero_scholar_owl.jpg",
       "type": "hero",
       "costs": {
         "courage": 0,
@@ -172,10 +172,10 @@
     },
     {
       "id": "hero_wise_owl_lvl3",
-      "nameKey": "hero_tree_wise_owl_lvl3_name",
-      "descriptionKey": "hero_tree_wise_owl_lvl3_desc",
-      "storyKey": "hero_tree_wise_owl_lvl3_story",
-      "image": "images/toh/heroes/hero_wise_owl_lvl3.jpg",
+      "nameKey": "hero_tree_ancient_owl_name",
+      "descriptionKey": "hero_tree_ancient_owl_desc",
+      "storyKey": "hero_tree_ancient_owl_story",
+      "image": "images/toh/heroes/hero_ancient_owl.jpg",
       "type": "hero",
       "costs": {
         "courage": 0,
@@ -209,10 +209,10 @@
     },
     {
       "id": "hero_playful_horse_lvl2",
-      "nameKey": "hero_tree_playful_horse_lvl2_name",
-      "descriptionKey": "hero_tree_playful_horse_lvl2_desc",
-      "storyKey": "hero_tree_playful_horse_lvl2_story",
-      "image": "images/toh/heroes/hero_playful_horse_lvl2.jpg",
+      "nameKey": "hero_tree_artistic_horse_name",
+      "descriptionKey": "hero_tree_artistic_horse_desc",
+      "storyKey": "hero_tree_artistic_horse_story",
+      "image": "images/toh/heroes/hero_artistic_horse.jpg",
       "type": "hero",
       "costs": {
         "courage": 0,
@@ -227,10 +227,10 @@
     },
     {
       "id": "hero_playful_horse_lvl3",
-      "nameKey": "hero_tree_playful_horse_lvl3_name",
-      "descriptionKey": "hero_tree_playful_horse_lvl3_desc",
-      "storyKey": "hero_tree_playful_horse_lvl3_story",
-      "image": "images/toh/heroes/hero_playful_horse_lvl3.jpg",
+      "nameKey": "hero_tree_genius_horse_name",
+      "descriptionKey": "hero_tree_genius_horse_desc",
+      "storyKey": "hero_tree_genius_horse_story",
+      "image": "images/toh/heroes/hero_genius_horse.jpg",
       "type": "hero",
       "costs": {
         "courage": 0,
@@ -263,7 +263,7 @@
       "positionY": -280
     },
     {
-      "id": "hero_shieldquill",
+      "id": "hero_cautious_hedgehog_lvl2",
       "nameKey": "hero_tree_shieldquill_name",
       "descriptionKey": "hero_tree_shieldquill_desc",
       "storyKey": "hero_tree_shieldquill_story",
@@ -281,7 +281,7 @@
       "positionY": -380
     },
     {
-      "id": "hero_wardenspike",
+      "id": "hero_cautious_hedgehog_lvl3",
       "nameKey": "hero_tree_wardenspike_name",
       "descriptionKey": "hero_tree_wardenspike_desc",
       "storyKey": "hero_tree_wardenspike_story",
@@ -294,7 +294,7 @@
         "creativity": 0,
         "safety": 3
       },
-      "prerequisites": [ "hero_shieldquill" ],
+      "prerequisites": [ "hero_cautious_hedgehog_lvl2" ],
       "positionX": 200,
       "positionY": -480
     },
