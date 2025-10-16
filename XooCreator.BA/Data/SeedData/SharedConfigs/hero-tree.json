@@ -470,6 +470,276 @@
       "positionY": -500
     },
     {
+      "id": "hero_brave_curious_wise",
+      "nameKey": "hero_tree_wise_lion_sage_name",
+      "descriptionKey": "hero_tree_wise_lion_sage_desc",
+      "storyKey": "hero_tree_wise_lion_sage_story",
+      "image": "images/toh/heroes/hero_wise_lion_sage.jpg",
+      "type": "hero",
+      "costs": {
+        "courage": 1,
+        "curiosity": 1,
+        "thinking": 1,
+        "creativity": 0,
+        "safety": 0
+      },
+      "prerequisites": [ "hero_brave_curious", "hero_wise_owl" ],
+      "positionX": -100,
+      "positionY": -500
+    },
+    {
+      "id": "hero_brave_curious_creative",
+      "nameKey": "hero_tree_brave_lion_artist_name",
+      "descriptionKey": "hero_tree_brave_lion_artist_desc",
+      "storyKey": "hero_tree_brave_lion_artist_story",
+      "image": "images/toh/heroes/hero_brave_lion_artist.jpg",
+      "type": "hero",
+      "costs": {
+        "courage": 1,
+        "curiosity": 1,
+        "thinking": 0,
+        "creativity": 1,
+        "safety": 0
+      },
+      "prerequisites": [ "hero_brave_curious", "hero_playful_horse" ],
+      "positionX": -200,
+      "positionY": -500
+    },
+    {
+      "id": "hero_brave_curious_safe",
+      "nameKey": "hero_tree_guardian_lion_name",
+      "descriptionKey": "hero_tree_guardian_lion_desc",
+      "storyKey": "hero_tree_guardian_lion_story",
+      "image": "images/toh/heroes/hero_guardian_lion.jpg",
+      "type": "hero",
+      "costs": {
+        "courage": 1,
+        "curiosity": 1,
+        "thinking": 0,
+        "creativity": 0,
+        "safety": 1
+      },
+      "prerequisites": [ "hero_brave_curious", "hero_cautious_hedgehog" ],
+      "positionX": 0,
+      "positionY": -500
+    },
+    {
+      "id": "hero_brave_wise_creative",
+      "nameKey": "hero_tree_brave_sage_artist_name",
+      "descriptionKey": "hero_tree_brave_sage_artist_desc",
+      "storyKey": "hero_tree_brave_sage_artist_story",
+      "image": "images/toh/heroes/hero_brave_sage_artist.jpg",
+      "type": "hero",
+      "costs": {
+        "courage": 1,
+        "curiosity": 0,
+        "thinking": 1,
+        "creativity": 1,
+        "safety": 0
+      },
+      "prerequisites": [ "hero_brave_wise", "hero_playful_horse" ],
+      "positionX": -300,
+      "positionY": -500
+    },
+    {
+      "id": "hero_brave_wise_safe",
+      "nameKey": "hero_tree_brave_sage_guardian_name",
+      "descriptionKey": "hero_tree_brave_sage_guardian_desc",
+      "storyKey": "hero_tree_brave_sage_guardian_story",
+      "image": "images/toh/heroes/hero_brave_sage_guardian.jpg",
+      "type": "hero",
+      "costs": {
+        "courage": 1,
+        "curiosity": 0,
+        "thinking": 1,
+        "creativity": 0,
+        "safety": 1
+      },
+      "prerequisites": [ "hero_brave_wise", "hero_cautious_hedgehog" ],
+      "positionX": -100,
+      "positionY": -550
+    },
+    {
+      "id": "hero_brave_creative_safe",
+      "nameKey": "hero_tree_brave_artist_guardian_name",
+      "descriptionKey": "hero_tree_brave_artist_guardian_desc",
+      "storyKey": "hero_tree_brave_artist_guardian_story",
+      "image": "images/toh/heroes/hero_brave_artist_guardian.jpg",
+      "type": "hero",
+      "costs": {
+        "courage": 1,
+        "curiosity": 0,
+        "thinking": 0,
+        "creativity": 1,
+        "safety": 1
+      },
+      "prerequisites": [ "hero_brave_creative", "hero_cautious_hedgehog" ],
+      "positionX": -200,
+      "positionY": -550
+    },
+    {
+      "id": "hero_curious_wise_creative",
+      "nameKey": "hero_tree_wise_explorer_artist_name",
+      "descriptionKey": "hero_tree_wise_explorer_artist_desc",
+      "storyKey": "hero_tree_wise_explorer_artist_story",
+      "image": "images/toh/heroes/hero_wise_explorer_artist.jpg",
+      "type": "hero",
+      "costs": {
+        "courage": 0,
+        "curiosity": 1,
+        "thinking": 1,
+        "creativity": 1,
+        "safety": 0
+      },
+      "prerequisites": [ "hero_curious_wise", "hero_playful_horse" ],
+      "positionX": 100,
+      "positionY": -500
+    },
+    {
+      "id": "hero_curious_wise_safe",
+      "nameKey": "hero_tree_wise_guardian_explorer_name",
+      "descriptionKey": "hero_tree_wise_guardian_explorer_desc",
+      "storyKey": "hero_tree_wise_guardian_explorer_story",
+      "image": "images/toh/heroes/hero_wise_guardian_explorer.jpg",
+      "type": "hero",
+      "costs": {
+        "courage": 0,
+        "curiosity": 1,
+        "thinking": 1,
+        "creativity": 0,
+        "safety": 1
+      },
+      "prerequisites": [ "hero_curious_wise", "hero_cautious_hedgehog" ],
+      "positionX": 0,
+      "positionY": -550
+    },
+    {
+      "id": "hero_curious_creative_safe",
+      "nameKey": "hero_tree_creative_guardian_explorer_name",
+      "descriptionKey": "hero_tree_creative_guardian_explorer_desc",
+      "storyKey": "hero_tree_creative_guardian_explorer_story",
+      "image": "images/toh/heroes/hero_creative_guardian_explorer.jpg",
+      "type": "hero",
+      "costs": {
+        "courage": 0,
+        "curiosity": 1,
+        "thinking": 0,
+        "creativity": 1,
+        "safety": 1
+      },
+      "prerequisites": [ "hero_curious_creative", "hero_cautious_hedgehog" ],
+      "positionX": 200,
+      "positionY": -500
+    },
+    {
+      "id": "hero_wise_creative_safe",
+      "nameKey": "hero_tree_wise_creative_guardian_name",
+      "descriptionKey": "hero_tree_wise_creative_guardian_desc",
+      "storyKey": "hero_tree_wise_creative_guardian_story",
+      "image": "images/toh/heroes/hero_wise_creative_guardian.jpg",
+      "type": "hero",
+      "costs": {
+        "courage": 0,
+        "curiosity": 0,
+        "thinking": 1,
+        "creativity": 1,
+        "safety": 1
+      },
+      "prerequisites": [ "hero_wise_creative", "hero_cautious_hedgehog" ],
+      "positionX": 100,
+      "positionY": -550
+    },
+    {
+      "id": "hero_brave_curious_wise_creative",
+      "nameKey": "hero_tree_master_lion_artist_name",
+      "descriptionKey": "hero_tree_master_lion_artist_desc",
+      "storyKey": "hero_tree_master_lion_artist_story",
+      "image": "images/toh/heroes/hero_master_lion_artist.jpg",
+      "type": "hero",
+      "costs": {
+        "courage": 1,
+        "curiosity": 1,
+        "thinking": 1,
+        "creativity": 1,
+        "safety": 0
+      },
+      "prerequisites": [ "hero_brave_curious_wise", "hero_playful_horse" ],
+      "positionX": -150,
+      "positionY": -600
+    },
+    {
+      "id": "hero_brave_curious_wise_safe",
+      "nameKey": "hero_tree_master_guardian_lion_name",
+      "descriptionKey": "hero_tree_master_guardian_lion_desc",
+      "storyKey": "hero_tree_master_guardian_lion_story",
+      "image": "images/toh/heroes/hero_master_guardian_lion.jpg",
+      "type": "hero",
+      "costs": {
+        "courage": 1,
+        "curiosity": 1,
+        "thinking": 1,
+        "creativity": 0,
+        "safety": 1
+      },
+      "prerequisites": [ "hero_brave_curious_wise", "hero_cautious_hedgehog" ],
+      "positionX": -50,
+      "positionY": -600
+    },
+    {
+      "id": "hero_brave_curious_creative_safe",
+      "nameKey": "hero_tree_master_explorer_lion_name",
+      "descriptionKey": "hero_tree_master_explorer_lion_desc",
+      "storyKey": "hero_tree_master_explorer_lion_story",
+      "image": "images/toh/heroes/hero_master_explorer_lion.jpg",
+      "type": "hero",
+      "costs": {
+        "courage": 1,
+        "curiosity": 1,
+        "thinking": 0,
+        "creativity": 1,
+        "safety": 1
+      },
+      "prerequisites": [ "hero_brave_curious_creative", "hero_cautious_hedgehog" ],
+      "positionX": -100,
+      "positionY": -600
+    },
+    {
+      "id": "hero_brave_wise_creative_safe",
+      "nameKey": "hero_tree_master_sage_guardian_name",
+      "descriptionKey": "hero_tree_master_sage_guardian_desc",
+      "storyKey": "hero_tree_master_sage_guardian_story",
+      "image": "images/toh/heroes/hero_master_sage_guardian.jpg",
+      "type": "hero",
+      "costs": {
+        "courage": 1,
+        "curiosity": 0,
+        "thinking": 1,
+        "creativity": 1,
+        "safety": 1
+      },
+      "prerequisites": [ "hero_brave_wise_creative", "hero_cautious_hedgehog" ],
+      "positionX": -200,
+      "positionY": -600
+    },
+    {
+      "id": "hero_curious_wise_creative_safe",
+      "nameKey": "hero_tree_master_creative_explorer_name",
+      "descriptionKey": "hero_tree_master_creative_explorer_desc",
+      "storyKey": "hero_tree_master_creative_explorer_story",
+      "image": "images/toh/heroes/hero_master_creative_explorer.jpg",
+      "type": "hero",
+      "costs": {
+        "courage": 0,
+        "curiosity": 1,
+        "thinking": 1,
+        "creativity": 1,
+        "safety": 1
+      },
+      "prerequisites": [ "hero_curious_wise_creative", "hero_cautious_hedgehog" ],
+      "positionX": 50,
+      "positionY": -600
+    },
+    {
       "id": "hero_alchimalian_dragon",
       "nameKey": "hero_tree_alchimalian_dragon_name",
       "descriptionKey": "hero_tree_alchimalian_dragon_desc",
