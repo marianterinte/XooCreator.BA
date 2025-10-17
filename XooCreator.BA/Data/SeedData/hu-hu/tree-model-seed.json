@@ -1,7 +1,7 @@
 {
   "regions": [
     { "id": "gateway",   "label": "A Fény Fája", "level": 0,  "imageUrl": "images/worlds/gateway.jpg",  "pufpufMessage": "A Fény Fája egy kapu a világok között. A térkép akkor ébred életre, amikor a bátorság találkozik a kíváncsisággal. 🌟", "sortOrder": 0 },
-    { "id": "terra",     "label": "Terra",           "level": 1,  "imageUrl": "images/worlds/terra.jpg",    "pufpufMessage": "A kék bolygó. Itt tanulod meg a kis lépéseket, amelyek nagy utakra vezetnek.", "sortOrder": 1 },
+    { "id": "terra",     "label": "Terra",           "level": 1,  "imageUrl": "images/worlds/terra.jpg",    "pufpufMessage": "Planeta voastră. Itt tanulod meg a kis lépéseket, amelyek nagy utakra vezetnek.", "sortOrder": 1 },
     { "id": "auroria",   "label": "Auroria",         "level": 2,  "imageUrl": "images/worlds/terra.jpg",    "pufpufMessage": "A Hajnalok Mezői, ahol a fény énekel és az ötletek életre kelnek.", "sortOrder": 2 },
     { "id": "mechanika", "label": "Mechanika",       "level": 2,  "imageUrl": "images/worlds/pyron.jpg",    "pufpufMessage": "A Fogaskerekek Völgye – minden kis kerék egy találékonyság történetét rejti.", "sortOrder": 3 },
     { "id": "verdantia", "label": "Verdantia",       "level": 3,  "imageUrl": "images/worlds/sylvaria.jpg", "pufpufMessage": "Függő kertek és gyökerek, amelyek élő hidakat szőnek.", "sortOrder": 4 },

@@ -1,7 +1,7 @@
 {
   "regions": [
     { "id": "gateway",   "label": "Copacul Luminii", "level": 0,  "imageUrl": "images/worlds/gateway.jpg",  "pufpufMessage": "Copacul Luminii e o poartă între lumi. Harta se trezește când curajul întâlnește curiozitatea. 🌟", "sortOrder": 0 },
-    { "id": "terra",     "label": "Terra",           "level": 1,  "imageUrl": "images/worlds/terra.jpg",    "pufpufMessage": "Planeta albastră. Aici înveți pașii mici care duc la drumuri mari.", "sortOrder": 1 },
+    { "id": "terra",     "label": "Terra",           "level": 1,  "imageUrl": "images/worlds/terra.jpg",    "pufpufMessage": "Planeta voastră. Aici înveți pașii mici care duc la drumuri mari.", "sortOrder": 1 },
     { "id": "auroria",   "label": "Auroria",         "level": 2,  "imageUrl": "images/worlds/terra.jpg",    "pufpufMessage": "Câmpiile Zorilor, unde lumina cântă și ideile prind viață.", "sortOrder": 2 },
     { "id": "mechanika", "label": "Mechanika",       "level": 2,  "imageUrl": "images/worlds/pyron.jpg",    "pufpufMessage": "Valea angrenajelor – fiecare rotiță ascunde o poveste de ingeniozitate.", "sortOrder": 3 },
     { "id": "verdantia", "label": "Verdantia",       "level": 3,  "imageUrl": "images/worlds/sylvaria.jpg", "pufpufMessage": "Grădini suspendate și rădăcini care împletesc punți vii.", "sortOrder": 4 },
