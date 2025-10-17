@@ -10,7 +10,7 @@
       "type": "page",
       "sortOrder": 1,
       "caption": "Două lumi, două tabere",
-      "text": "În Alchimalia existau două lumi foarte apropiate, dar aflate în război. Lunaria — planeta iepurilor, cu câmpii de morcovi și vizuini. Kelo-Ketis — planeta pisicilor, condusă de un împărat. Granițele erau reci, iar podurile, rupte.",
+      "text": "În Alchimalia existau două lumi foarte apropiate, dar aflate în război. \nLunaria, planeta iepurilor, cu câmpii de morcovi și vizuini cat vezi cu ochii si  \nKelo-Ketis, planeta pisicilor, condusă de un împărat razboinic. Granițele erau reci, iar podurile, rupte, desi erau atat de aproape pisicile si iepurii erau dusmani.",
       "imageUrl": "images/tol/stories/loi-intro/1.two-worlds.png"
     },
     {
@@ -18,7 +18,7 @@
       "type": "page",
       "sortOrder": 2,
       "caption": "Împăratul Pufus Alchimus",
-      "text": "Pe Ketis domnea Împăratul Pufus Alchimus, un războinic cunoscut pentru cuceriri. Războiul cu iepurii ținea de mult, iar armele vorbeau mai tare decât poveștile.",
+      "text": "Pe Kelo-Ketis domnea Împăratul Pufus Alchimus, un războinic cunoscut pentru cuceriri si pentru setea de lupta. Războiul cu iepurii ținea de mult, iar armele vorbeau mai tare decât poveștile.",
       "imageUrl": "images/tol/stories/loi-intro/2.emperor.png"
     },
     {
@@ -26,7 +26,7 @@
       "type": "page",
       "sortOrder": 3,
       "caption": "Fiul cel curios",
-      "text": "Împăratului i s-a născut un fiu: Puf-Puf Alchimus. Tatăl voia un luptător. Dar Puf-Puf iubea matematica, jocurile cu elemente și visa la alchemie. Era mai mult explorator decât soldat.",
+      "text": "Împăratului i s-a născut un fiu: Puf-Puf Alchimus, a fost numit. \nTatăl voia un luptător, dar Puf-Puf iubea matematica, jocurile cu elemente și visa la alchemie. Era mai mult explorator decât soldat. Petrece tot timpul in laboratorul sau unde incerca diverse combinatii intre elemente si citea o gramada de scrieri si retete stravechi.",
       "imageUrl": "images/tol/stories/loi-intro/3.curious-son.png"
     },
     {
@@ -34,7 +34,7 @@
       "type": "page",
       "sortOrder": 4,
       "caption": "Prieteni peste graniță",
-      "text": "Deși război, prietenia își găsea drum. Un iepure negru și o pisică albă se întâlneau în secret și își povesteau lumea. Nu semănau a dușmani. Semănau a copii curioși.",
+      "text": "Deși război, prietenia își găsea drum. Un iepure negru și o pisică albă se întâlneau în secret și își povesteau lumea, se jucau cand pe Lunaria cand pe Ketis. Nu semănau a dușmani. Semănau a copii curioși.",
       "imageUrl": "images/tol/stories/loi-intro/4.friends.png"
     },
     {
@@ -42,7 +42,7 @@
       "type": "page",
       "sortOrder": 5,
       "caption": "Piatra din Lunaria",
-      "text": "Pe Ketis, Puf-Puf i-a surprins privind o piatră verde adusă de pe Lunaria, lucind ca un smarald. \n„ - Ține-ne secretul prieteniei și îți dăm piatra”, i-a șoptit iepurele. Puf-Puf a promis.",
+      "text": "Pe Ketis, Puf-Puf i-a surprins privind o piatră verde adusă de pe Lunaria, lucind ca un smarald. \n„ - Ține-ne secretul prieteniei și îți dăm piatra”, i-a șoptit iepurele. \nPuf-Puf a promis.",
       "imageUrl": "images/tol/stories/loi-intro/5.lunaria-stone.png"
     },
     {
@@ -50,7 +50,7 @@
       "type": "page",
       "sortOrder": 6,
       "caption": "Licoarea verde-aurie",
-      "text": "Cu piatra, Puf-Puf a făcut un elixir. Când atingea metalul, acesta devenea aur. Bucurie mare! A împărțit licoarea cu prietenii — mici înghițituri, multe râsete.",
+      "text": "Cu piatra, Puf-Puf a făcut un elixir. Când atingea metalul, acesta devenea aur. Bucurie mare! S-au gandit sa si bea, descoperind ca acesta are un gust bun, a împărțit licoarea cu prietenii — mici înghițituri, multe râsete.",
       "imageUrl": "images/tol/stories/loi-intro/6.elixir.png"
     },
     {
@@ -66,7 +66,7 @@
       "type": "page",
       "sortOrder": 8,
       "caption": "Mâțo-Iepurele",
-      "text": "Când s-au trezit, lângă ei stătea o ființă ciudată, frumoasă:cu grația unei pisici și blândețea unui iepure. Se uita la ei fără teamă.\n- Buna eu sunt Mâțo-Iepurele!",
+      "text": "Când s-au trezit, lângă ei stătea o ființă ciudată, frumoasă:cu grația unei pisici și blândețea unui iepure. Se uita la ei fără teamă.\n- Buna eu sunt Mâțo-Iepurele! Am venit sa aduc Pacea...",
       "imageUrl": "images/tol/stories/loi-intro/8.matso-iepurele.png"
     },
     {
@@ -123,7 +123,7 @@
       "type": "page",
       "sortOrder": 11,
       "caption": "Hotărârea lui Puf-Puf",
-      "text": "În acea zi, Puf-Puf a ales drumul lui: explorator și alchimist. Va căuta căi între lumi, nu războaie. Iar Mâțo-Iepurele avea să devină, cândva, semnul că pacea poate fi creată, nu doar găsită.",
+      "text": "În acea zi, Puf-Puf era bucuruos ca alesese sa fie un alchimist. Va căuta căi între lumi, nu războaie. Iar Mâțo-Iepurele avea să devină, cândva, semnul că pacea poate fi creată, nu doar găsită.",
       "imageUrl": "images/tol/stories/loi-intro/11.choice.png"
     },
     {
@@ -131,7 +131,7 @@
       "type": "page",
       "sortOrder": 12,
       "caption": "Vraja",
-      "text": "Cand totul era linistit o vraja misterioasa facu ca Lunaria sa se desprinda Kelo-Ketis si sa dispara pentru todeauna.\nPuf-Puf: \"-Trebuie sa aflu ce s-a intamplat, voi pleca int-o calatorie!\"",
+      "text": "Puf-Puf statu chiar la granita dintre planete cand iepurele pasi inapoi pe Lunaria, vrand sa il conduca acasa in secret.\nCand totul era linistit o vraja misterioasa facu ca Lunaria sa se desprinda Kelo-Ketis si sa dispara pentru todeauna. Mâțo-Iepurele disparuse si el\nPuf-Puf: \"-Trebuie sa aflu ce s-a intamplat si cu pasi grabiti merse dinnou spre copac\"",
       "imageUrl": "images/tol/stories/loi-intro/12.the-spell.png"
     },
     {
@@ -139,8 +139,24 @@
       "type": "page",
       "sortOrder": 13,
       "caption": "...",
-      "text": "To be continued...",
+      "text": "Ruptura dintre lumi era plina de mister, Puf-Puf ajunse repede in dreptul copacului care se transforamsera incredibil in ceva plin de lumina si mister.",
       "imageUrl": "images/tol/stories/loi-intro/13.tobecontinued.png"
+    },
+    {
+      "tileId": "14",
+      "type": "page",
+      "sortOrder": 14,
+      "caption": "Copacul luminii",
+      "text": "In fata lui Puf-Puf avea ceva atat de frumos si totodata de nerecunoscut. Marele copac devenise plin de lumina, iar de ici de colo se auzeau soapte. \n\"Trebuie sa cauti pacea...cristalul este cheia...\" se auzi de undeva din radacina copacului. \nPuf-Puf sapa la radacina copacului si gasi un cristal care parea sa comunice cu el. \n",
+      "imageUrl": ""
+    },
+    {
+      "tileId": "15",
+      "type": "page",
+      "sortOrder": 15,
+      "caption": "Plecarea",
+      "text": "Ii spuse tatalui sau ca trebuie sa plece, sa exploreze, nu putea sa ii spuna imparatului ca vrea sa aduca tocmai pacea, dupa atata munca de cucerire, numai asa nu isi dorea marele Pufus Alchimus sa auda. \nSe urca in una dintre navele spatiale a imperiului si pleca...\n",
+      "imageUrl": ""
     }
   ]
 }
