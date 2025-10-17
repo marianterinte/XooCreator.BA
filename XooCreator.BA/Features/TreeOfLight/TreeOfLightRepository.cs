@@ -171,24 +171,10 @@ public class TreeOfLightRepository : ITreeOfLightRepository
             await _context.HeroProgress.Where(hp => hp.UserId == userId).ExecuteDeleteAsync();
             await _context.HeroTreeProgress.Where(htp => htp.UserId == userId).ExecuteDeleteAsync();
 
-            // Reset generic token balances to defaults for the 5 core types
-            var coreValues = new[] { "courage", "curiosity", "thinking", "creativity", "safety" };
-            // Remove existing balances for TreeOfHeroes core values and insert defaults
+            // Remove all existing token balances for this user
             await _context.UserTokenBalances
-                .Where(b => b.UserId == userId && b.Type == TokenFamily.Personality.ToString() && coreValues.Contains(b.Value))
+                .Where(b => b.UserId == userId)
                 .ExecuteDeleteAsync();
-
-            var seedRows = coreValues.Select((value, idx) => new UserTokenBalance
-            {
-                Id = Guid.NewGuid(),
-                UserId = userId,
-                Type = TokenFamily.Personality.ToString(),
-                Value = value,
-                Quantity = 5,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            });
-            await _context.UserTokenBalances.AddRangeAsync(seedRows);
 
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();

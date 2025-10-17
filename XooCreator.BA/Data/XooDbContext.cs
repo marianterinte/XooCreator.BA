@@ -433,19 +433,6 @@ public class XooDbContext : DbContext
             }
         );
 
-        // Seed generic balances instead of legacy fixed tokens
-        modelBuilder.Entity<UserTokenBalance>().HasData(
-            new UserTokenBalance { Id = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1"), UserId = testUserId, Type = "TreeOfHeroes", Value = "courage", Quantity = 5, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow },
-            new UserTokenBalance { Id = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa2"), UserId = testUserId, Type = "TreeOfHeroes", Value = "curiosity", Quantity = 5, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow },
-            new UserTokenBalance { Id = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa3"), UserId = testUserId, Type = "TreeOfHeroes", Value = "thinking", Quantity = 5, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow },
-            new UserTokenBalance { Id = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa4"), UserId = testUserId, Type = "TreeOfHeroes", Value = "creativity", Quantity = 5, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow },
-            new UserTokenBalance { Id = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa5"), UserId = testUserId, Type = "TreeOfHeroes", Value = "safety", Quantity = 5, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow },
-            new UserTokenBalance { Id = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1"), UserId = marianUserId, Type = "TreeOfHeroes", Value = "courage", Quantity = 5, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow },
-            new UserTokenBalance { Id = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb2"), UserId = marianUserId, Type = "TreeOfHeroes", Value = "curiosity", Quantity = 5, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow },
-            new UserTokenBalance { Id = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb3"), UserId = marianUserId, Type = "TreeOfHeroes", Value = "thinking", Quantity = 5, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow },
-            new UserTokenBalance { Id = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb4"), UserId = marianUserId, Type = "TreeOfHeroes", Value = "creativity", Quantity = 5, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow },
-            new UserTokenBalance { Id = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb5"), UserId = marianUserId, Type = "TreeOfHeroes", Value = "safety", Quantity = 5, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow }
-        );
 
         // Note: seed is not unlocked in HeroTreeProgress by default
         // In the old system, seed was only transformed (in HeroProgress), not unlocked in tree progress

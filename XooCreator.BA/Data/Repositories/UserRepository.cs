@@ -46,16 +46,6 @@ public class UserRepository : IUserRepository
         _db.AlchimaliaUsers.Add(user);
         _db.CreditWallets.Add(new CreditWallet { UserId = user.Id, Balance = 0, UpdatedAt = DateTime.UtcNow });
         
-        // Seed generic balances for the 5 core tokens by default
-        _db.UserTokenBalances.AddRange(new []
-        {
-            new UserTokenBalance { Id = Guid.NewGuid(), UserId = user.Id, Type = "TreeOfHeroes", Value = "courage", Quantity = 5, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow },
-            new UserTokenBalance { Id = Guid.NewGuid(), UserId = user.Id, Type = "TreeOfHeroes", Value = "curiosity", Quantity = 5, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow },
-            new UserTokenBalance { Id = Guid.NewGuid(), UserId = user.Id, Type = "TreeOfHeroes", Value = "thinking", Quantity = 5, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow },
-            new UserTokenBalance { Id = Guid.NewGuid(), UserId = user.Id, Type = "TreeOfHeroes", Value = "creativity", Quantity = 5, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow },
-            new UserTokenBalance { Id = Guid.NewGuid(), UserId = user.Id, Type = "TreeOfHeroes", Value = "safety", Quantity = 5, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow }
-        });
-        
         await _db.SaveChangesAsync(ct);
         return user;
     }
