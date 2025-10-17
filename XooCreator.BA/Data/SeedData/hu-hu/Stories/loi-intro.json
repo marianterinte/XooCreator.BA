@@ -66,7 +66,7 @@
       "type": "page",
       "sortOrder": 8,
       "caption": "Macska-Nyuszi",
-      "text": "Amikor felébredtek, mellettük egy furcsa, szép lény állt: macska gracióval és nyuszi szelídséggel. Félelem nélkül nézett rájuk.\n- Szia, én Macska-Nyuszi vagyok!",
+      "text": "Amikor felébredtek, mellettük egy furcsa, szép lény állt: macska grációval és nyuszi szelídséggel. Félelem nélkül nézett rájuk.\n- Szia, én Macska-Nyuszi vagyok! A békét hoztam...",
       "imageUrl": "images/tol/stories/loi-intro/8.matso-iepurele.png"
     },
     {
@@ -141,6 +141,22 @@
       "caption": "...",
       "text": "Folytatjuk...",
       "imageUrl": "images/tol/stories/loi-intro/13.tobecontinued.png"
+    },
+    {
+      "tileId": "14",
+      "type": "page",
+      "sortOrder": 14,
+      "caption": "A Fény Fája",
+      "text": "Puf-Puf előtt valami gyönyörű és mégis felismerhetetlen állt. A nagy fa fénnyel telt meg, és innen-onnan suttogások hallatszottak. \"A békét kell keresned... a kristály a kulcs...\" — szólt egy hang a gyökerek felől. Puf-Puf a gyökereknél ásott, és talált egy kristályt, amely mintha beszélt volna hozzá.",
+      "imageUrl": "images/tol/stories/loi-intro/14.tol.png"
+    },
+    {
+      "tileId": "15",
+      "type": "page",
+      "sortOrder": 15,
+      "caption": "Indulás",
+      "text": "Elmondta az apjának, hogy el kell mennie, felfedezni. Nem mondhatta el a császárnak, hogy békét akar hozni — ennyi hódítás után ez volt az utolsó, amit a nagy Pufus Alchimus hallani akart. Felszállt a birodalom egyik űrhajójára és elindult...",
+      "imageUrl": "images/tol/stories/loi-intro/15.leavingkk.png"
     }
   ]
 }

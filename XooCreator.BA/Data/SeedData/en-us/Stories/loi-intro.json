@@ -66,7 +66,7 @@
       "type": "page",
       "sortOrder": 8,
       "caption": "Cat-Rabbit",
-      "text": "When they woke, a strange, beautiful being stood beside them: with a cat’s grace and a rabbit’s gentleness. It looked at them without fear. ‘Hello, I’m the Cat-Rabbit!’",
+      "text": "When they woke, a strange, beautiful being stood beside them: with a cat’s grace and a rabbit’s gentleness. It looked at them without fear. ‘Hello, I’m the Cat-Rabbit! I have come to bring Peace...’",
       "imageUrl": "images/tol/stories/loi-intro/8.matso-iepurele.png"
     },
     {
@@ -141,6 +141,22 @@
       "caption": "...",
       "text": "To be continued...",
       "imageUrl": "images/tol/stories/loi-intro/13.tobecontinued.png"
+    },
+    {
+      "tileId": "14",
+      "type": "page",
+      "sortOrder": 14,
+      "caption": "Tree of Light",
+      "text": "In front of Puf-Puf stood something so beautiful and yet unrecognizable. The great tree had become full of light, and whispers could be heard here and there. ‘You must seek peace... the crystal is the key...’ came a voice from the tree’s roots. Puf-Puf dug at the roots and found a crystal that seemed to communicate with him.",
+      "imageUrl": "images/tol/stories/loi-intro/14.tol.png"
+    },
+    {
+      "tileId": "15",
+      "type": "page",
+      "sortOrder": 15,
+      "caption": "Departure",
+      "text": "He told his father that he had to leave, to explore. He could not tell the emperor he wished to bring peace — after so much conquest, that was the last thing the great Pufus Alchimus wanted to hear. He boarded one of the empire’s spaceships and left...",
+      "imageUrl": "images/tol/stories/loi-intro/15.leavingkk.png"
     }
   ]
 }
