@@ -3,6 +3,7 @@ using XooCreator.BA.Features.TreeOfHeroes;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace XooCreator.BA.Features.TreeOfLight;
 
@@ -67,6 +68,7 @@ public class TreeOfLightService : ITreeOfLightService
             }
 
             var newlyUnlockedRegions = new List<string>();
+            var newlyUnlockedHeroes = new List<UnlockedHeroDto>();
 
             var effectiveTokens = new List<TokenReward>();
 
@@ -99,12 +101,16 @@ public class TreeOfLightService : ITreeOfLightService
             var unlockedRegions = await CheckAndUnlockRegionsAsync(userId, request.StoryId, configId);
             newlyUnlockedRegions.AddRange(unlockedRegions);
 
+            var unlockedHeroes = await CheckAndUnlockHeroesAsync(userId, request.StoryId);
+            newlyUnlockedHeroes.AddRange(unlockedHeroes);
+
             var updatedTokens = await _treeOfHeroesRepository.GetUserTokensAsync(userId);
 
             return new CompleteStoryResponse
             {
                 Success = true,
                 NewlyUnlockedRegions = newlyUnlockedRegions,
+                NewlyUnlockedHeroes = newlyUnlockedHeroes,
                 UpdatedTokens = updatedTokens
             };
         }
@@ -153,6 +159,55 @@ public class TreeOfLightService : ITreeOfLightService
         }
 
         return newlyUnlockedRegions;
+    }
+
+    private async Task<List<UnlockedHeroDto>> CheckAndUnlockHeroesAsync(Guid userId, string storyId)
+    {
+        var newlyUnlockedHeroes = new List<UnlockedHeroDto>();
+
+        // Get all story heroes and their unlock conditions
+        var storyHeroes = await _repository.GetStoryHeroesAsync();
+        
+        foreach (var storyHero in storyHeroes)
+        {
+            // Check if user has already unlocked this hero
+            var isAlreadyUnlocked = await _repository.IsHeroUnlockedAsync(userId, storyHero.HeroId);
+            if (isAlreadyUnlocked)
+            {
+                continue;
+            }
+
+            // Check unlock conditions
+            var unlockConditions = JsonSerializer.Deserialize<UnlockConditions>(storyHero.UnlockConditionJson);
+            if (unlockConditions?.Type == "story_completion" && unlockConditions.RequiredStories != null)
+            {
+                // Check if the current story is one of the required stories
+                if (unlockConditions.RequiredStories.Contains(storyId))
+                {
+                    // Get all completed stories for this user
+                    var completedStories = await _repository.GetStoryProgressAsync(userId, "puf-puf-journey-v1"); // Use default config
+                    var completedStoryIds = new HashSet<string>(completedStories.Select(cs => cs.StoryId));
+                    
+                    // Check if all required stories are completed
+                    var allRequiredStoriesCompleted = unlockConditions.RequiredStories.All(requiredStoryId => completedStoryIds.Contains(requiredStoryId));
+                    if (allRequiredStoriesCompleted)
+                    {
+                        // Unlock the hero
+                        var unlocked = await _repository.UnlockHeroAsync(userId, storyHero.HeroId, "STORY_COMPLETION");
+                        if (unlocked)
+                        {
+                            newlyUnlockedHeroes.Add(new UnlockedHeroDto
+                            {
+                                HeroId = storyHero.HeroId,
+                                ImageUrl = storyHero.ImageUrl
+                            });
+                        }
+                    }
+                }
+            }
+        }
+
+        return newlyUnlockedHeroes;
     }
 
     private async Task UpdateDiscoveryCreditsAsync(Guid userId, int discoveryCredits, string storyId)

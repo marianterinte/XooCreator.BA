@@ -119,6 +119,7 @@ public class SeedDataService
         {
             Id = GetFixedStoryHeroId(sh.HeroId), // Use fixed IDs for seeding
             HeroId = sh.HeroId,
+            ImageUrl = sh.ImageUrl,
             UnlockConditionJson = JsonSerializer.Serialize(sh.UnlockConditions),
             IsActive = true,
             CreatedAt = DateTime.UtcNow,
@@ -204,6 +205,7 @@ public class StoryHeroSeedData
 {
     public string Id { get; set; } = string.Empty;
     public string HeroId { get; set; } = string.Empty;
+    public string ImageUrl { get; set; } = string.Empty;
     public UnlockConditions UnlockConditions { get; set; } = new();
 }
 

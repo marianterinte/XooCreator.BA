@@ -1,3 +1,4 @@
+using System.Text.Json;
 using XooCreator.BA.Data;
 using XooCreator.BA.Features.TreeOfHeroes;
 using XooCreator.BA.Infrastructure;
@@ -48,6 +49,7 @@ public class TreeModelService : ITreeModelService
         var userTokens = new UserTokensDto { Courage = 0, Curiosity = 0, Thinking = 0, Creativity = 0, Safety = 0 };
         
         var unlockedRegions = EvaluateUnlockedRegions(completedStories, unlockRules);
+        var unlockedHeroes = await EvaluateUnlockedHeroesAsync(userId, completedStories);
 
         return new TreeStateDto
         {
@@ -98,6 +100,7 @@ public class TreeModelService : ITreeModelService
                 }).ToList(),
                 
                 UnlockedRegions = unlockedRegions,
+                UnlockedHeroes = unlockedHeroes,
                 UserTokens = userTokens
             }
         };
@@ -143,5 +146,48 @@ public class TreeModelService : ITreeModelService
         while (changed);
         
         return unlockedRegions.ToList();
+    }
+
+    private async Task<List<UnlockedHeroDto>> EvaluateUnlockedHeroesAsync(Guid userId, List<StoryProgressDto> completedStories)
+    {
+        var completedStoryIds = new HashSet<string>(completedStories.Select(cs => cs.StoryId));
+        var unlockedHeroes = new List<UnlockedHeroDto>();
+
+        // Get all story heroes and their unlock conditions
+        var storyHeroes = await _tolRepository.GetStoryHeroesAsync();
+        
+        foreach (var storyHero in storyHeroes)
+        {
+            // Check if user has already unlocked this hero
+            var isAlreadyUnlocked = await _tolRepository.IsHeroUnlockedAsync(userId, storyHero.HeroId);
+            if (isAlreadyUnlocked)
+            {
+                unlockedHeroes.Add(new UnlockedHeroDto
+                {
+                    HeroId = storyHero.HeroId,
+                    ImageUrl = storyHero.ImageUrl
+                });
+                continue;
+            }
+
+            // Check unlock conditions
+            var unlockConditions = JsonSerializer.Deserialize<UnlockConditions>(storyHero.UnlockConditionJson);
+            if (unlockConditions?.Type == "story_completion" && unlockConditions.RequiredStories != null)
+            {
+                var allRequiredStoriesCompleted = unlockConditions.RequiredStories.All(storyId => completedStoryIds.Contains(storyId));
+                if (allRequiredStoriesCompleted)
+                {
+                    // Unlock the hero
+                    await _tolRepository.UnlockHeroAsync(userId, storyHero.HeroId, "STORY_COMPLETION");
+                    unlockedHeroes.Add(new UnlockedHeroDto
+                    {
+                        HeroId = storyHero.HeroId,
+                        ImageUrl = storyHero.ImageUrl
+                    });
+                }
+            }
+        }
+
+        return unlockedHeroes;
     }
 }

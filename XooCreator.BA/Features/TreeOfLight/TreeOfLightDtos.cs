@@ -35,6 +35,7 @@ public record CompleteStoryResponse
     public bool Success { get; init; }
     public string? ErrorMessage { get; init; }
     public List<string> NewlyUnlockedRegions { get; init; } = new();
+    public List<UnlockedHeroDto> NewlyUnlockedHeroes { get; init; } = new();
     public UserTokensDto? UpdatedTokens { get; init; }
 }
 
@@ -105,7 +106,14 @@ public record TreeProgressStateDto
 {
     public List<CompletedStoryDto> CompletedStories { get; init; } = new();
     public List<string> UnlockedRegions { get; init; } = new();
+    public List<UnlockedHeroDto> UnlockedHeroes { get; init; } = new();
     public UserTokensDto UserTokens { get; init; } = new() { Courage = 0, Curiosity = 0, Thinking = 0, Creativity = 0, Safety = 0 };
+}
+
+public record UnlockedHeroDto
+{
+    public required string HeroId { get; init; }
+    public required string ImageUrl { get; init; }
 }
 
 public record CompletedStoryDto

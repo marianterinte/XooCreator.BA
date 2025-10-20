@@ -395,6 +395,7 @@ public class XooDbContext : DbContext
             e.HasKey(x => x.Id);
             e.Property(x => x.Id).ValueGeneratedOnAdd();
             e.Property(x => x.HeroId).HasMaxLength(100).IsRequired();
+            e.Property(x => x.ImageUrl).HasMaxLength(500);
             e.Property(x => x.UnlockConditionJson).HasMaxLength(2000);
             e.HasIndex(x => x.HeroId).IsUnique();
             e.HasMany(x => x.StoryUnlocks).WithOne(x => x.StoryHero).HasForeignKey(x => x.StoryHeroId).OnDelete(DeleteBehavior.Cascade);

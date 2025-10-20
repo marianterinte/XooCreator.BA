@@ -3,6 +3,7 @@
     {
       "id": "linkaro",
       "heroId": "linkaro",
+      "imageUrl": "images/tol/stories/lunaria-s1/heroes/linkaro.png",
       "unlockConditions": {
         "type": "story_completion",
         "requiredStories": ["lunaria-s1"],
@@ -11,7 +12,8 @@
     },
     {
       "id": "grubot",
-      "heroId": "grubot", 
+      "heroId": "grubot",
+      "imageUrl": "images/tol/stories/mechanika-s1/heroes/grubot.png",
       "unlockConditions": {
         "type": "story_completion",
         "requiredStories": ["mechanika-s1"],
