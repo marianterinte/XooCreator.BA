@@ -58,6 +58,11 @@
               "type": "Personality",
               "value": "courage",
               "quantity": 1
+            },
+            {
+              "type": "Personality",
+              "value": "curiosity",
+              "quantity": 2
             }
           ],
           "sortOrder": 1
@@ -69,6 +74,11 @@
             {
               "type": "Personality",
               "value": "curiosity",
+              "quantity": 1
+            },
+            {
+              "type": "Personality",
+              "value": "courage",
               "quantity": 1
             },
             {
@@ -86,6 +96,16 @@
             {
               "type": "Personality",
               "value": "thinking",
+              "quantity": 1
+            },
+            {
+              "type": "Personality",
+              "value": "courage",
+              "quantity": 1
+            },
+            {
+              "type": "Personality",
+              "value": "curiosity",
               "quantity": 1
             },
             {
@@ -109,6 +129,16 @@
               "type": "Personality",
               "value": "creativity",
               "quantity": 1
+            },
+            {
+              "type": "Personality",
+              "value": "courage",
+              "quantity": 1
+            },
+            {
+              "type": "Personality",
+              "value": "curiosity",
+              "quantity": 1
             }
           ],
           "sortOrder": 4
@@ -120,6 +150,16 @@
             {
               "type": "Personality",
               "value": "safety",
+              "quantity": 1
+            },
+            {
+              "type": "Personality",
+              "value": "courage",
+              "quantity": 1
+            },
+            {
+              "type": "Personality",
+              "value": "curiosity",
               "quantity": 1
             },
             {
