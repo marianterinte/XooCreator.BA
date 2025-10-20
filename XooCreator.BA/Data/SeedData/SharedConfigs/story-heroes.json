@@ -1,0 +1,22 @@
+{
+  "storyHeroes": [
+    {
+      "id": "linkaro",
+      "heroId": "linkaro",
+      "unlockConditions": {
+        "type": "story_completion",
+        "requiredStories": ["lunaria-s1"],
+        "minProgress": 100
+      }
+    },
+    {
+      "id": "grubot",
+      "heroId": "grubot", 
+      "unlockConditions": {
+        "type": "story_completion",
+        "requiredStories": ["mechanika-s1"],
+        "minProgress": 100
+      }
+    }
+  ]
+}

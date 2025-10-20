@@ -100,6 +100,69 @@ public class SeedDataService
             PartKey = aps.PartKey
         }).ToList() ?? new List<AnimalPartSupport>();
     }
+
+    public async Task<List<StoryHero>> LoadStoryHeroesAsync()
+    {
+        var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SeedData", "SharedConfigs", "story-heroes.json");
+        if (!File.Exists(filePath))
+        {
+            throw new FileNotFoundException($"StoryHeroes seed data file not found: {filePath}");
+        }
+
+        var json = await File.ReadAllTextAsync(filePath);
+        var storyHeroesData = JsonSerializer.Deserialize<StoryHeroesSeedData>(json, new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        });
+
+        return storyHeroesData?.StoryHeroes?.Select((sh, index) => new StoryHero
+        {
+            Id = GetFixedStoryHeroId(sh.HeroId), // Use fixed IDs for seeding
+            HeroId = sh.HeroId,
+            UnlockConditionJson = JsonSerializer.Serialize(sh.UnlockConditions),
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        }).ToList() ?? new List<StoryHero>();
+    }
+
+    public async Task<List<StoryHeroUnlock>> LoadStoryHeroUnlocksAsync()
+    {
+        var storyHeroes = await LoadStoryHeroesAsync();
+        var unlocks = new List<StoryHeroUnlock>();
+
+        foreach (var storyHero in storyHeroes)
+        {
+            var unlockConditions = JsonSerializer.Deserialize<UnlockConditions>(storyHero.UnlockConditionJson);
+            if (unlockConditions?.RequiredStories != null)
+            {
+                foreach (var storyId in unlockConditions.RequiredStories)
+                {
+                    unlocks.Add(new StoryHeroUnlock
+                    {
+                        Id = Guid.NewGuid(),
+                        StoryHeroId = storyHero.Id,
+                        StoryId = storyId,
+                        UnlockOrder = 1,
+                        CreatedAt = DateTime.UtcNow
+                    });
+                }
+            }
+        }
+
+        return unlocks;
+    }
+
+    private static Guid GetFixedStoryHeroId(string heroId)
+    {
+        // Use fixed GUIDs for seeding to ensure consistency
+        return heroId switch
+        {
+            "linkaro" => Guid.Parse("11111111-1111-1111-1111-111111111100"),
+            "grubot" => Guid.Parse("22222222-2222-2222-2222-222222222200"),
+            _ => Guid.NewGuid()
+        };
+    }
 }
 
 // DTOs for seed data deserialization
@@ -130,4 +193,23 @@ public class AnimalPartSupportSeedData
 {
     public string AnimalId { get; set; } = string.Empty;
     public string PartKey { get; set; } = string.Empty;
+}
+
+public class StoryHeroesSeedData
+{
+    public List<StoryHeroSeedData> StoryHeroes { get; set; } = new();
+}
+
+public class StoryHeroSeedData
+{
+    public string Id { get; set; } = string.Empty;
+    public string HeroId { get; set; } = string.Empty;
+    public UnlockConditions UnlockConditions { get; set; } = new();
+}
+
+public class UnlockConditions
+{
+    public string Type { get; set; } = string.Empty;
+    public List<string> RequiredStories { get; set; } = new();
+    public int MinProgress { get; set; }
 }

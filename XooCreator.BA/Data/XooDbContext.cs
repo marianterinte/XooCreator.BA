@@ -41,6 +41,8 @@ public class XooDbContext : DbContext
     public DbSet<StoryAnswerTranslation> StoryAnswerTranslations => Set<StoryAnswerTranslation>();
     public DbSet<UserStoryReadProgress> UserStoryReadProgress => Set<UserStoryReadProgress>();
     public DbSet<StoryAnswerToken> StoryAnswerTokens => Set<StoryAnswerToken>();
+    public DbSet<StoryHero> StoryHeroes => Set<StoryHero>();
+    public DbSet<StoryHeroUnlock> StoryHeroUnlocks => Set<StoryHeroUnlock>();
 
     // Builder data
     public DbSet<BodyPart> BodyParts => Set<BodyPart>();
@@ -192,6 +194,12 @@ public class XooDbContext : DbContext
 
         // Seed builder data from JSON files
         SeedBuilderDataFromJson(modelBuilder);
+
+        // Seed story heroes data from JSON files
+        SeedStoryHeroesDataFromJson(modelBuilder);
+        
+        // Seed HeroDefinition entries for story heroes
+        SeedStoryHeroDefinitions(modelBuilder);
 
         // Tree of Light configurations
         modelBuilder.Entity<TreeProgress>(e =>
@@ -382,6 +390,25 @@ public class XooDbContext : DbContext
             e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
         });
 
+        modelBuilder.Entity<StoryHero>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.HeroId).HasMaxLength(100).IsRequired();
+            e.Property(x => x.UnlockConditionJson).HasMaxLength(2000);
+            e.HasIndex(x => x.HeroId).IsUnique();
+            e.HasMany(x => x.StoryUnlocks).WithOne(x => x.StoryHero).HasForeignKey(x => x.StoryHeroId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<StoryHeroUnlock>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.StoryId).HasMaxLength(100).IsRequired();
+            e.HasIndex(x => new { x.StoryHeroId, x.StoryId }).IsUnique();
+            e.HasOne(x => x.StoryHero).WithMany(x => x.StoryUnlocks).HasForeignKey(x => x.StoryHeroId);
+        });
+
         // Seed test users
         var testUserId = Guid.Parse("11111111-1111-1111-1111-111111111111");
         var marianUserId = Guid.Parse("22222222-2222-2222-2222-222222222222");
@@ -545,5 +572,73 @@ public class XooDbContext : DbContext
     private static T LoadDataSync<T>(Func<Task<T>> asyncOperation)
     {
         return Task.Run(async () => await asyncOperation()).GetAwaiter().GetResult();
+    }
+
+    private void SeedStoryHeroesDataFromJson(ModelBuilder modelBuilder)
+    {
+        try
+        {
+            var seedService = new SeedDataService();
+            
+            // Load story heroes first
+            var storyHeroes = LoadDataSync(() => seedService.LoadStoryHeroesAsync());
+            
+            // Seed StoryHero entities first (parent entities)
+            modelBuilder.Entity<StoryHero>().HasData(storyHeroes);
+            
+            // Then load and seed StoryHeroUnlock entities (child entities)
+            var storyHeroUnlocks = LoadDataSync(() => seedService.LoadStoryHeroUnlocksAsync());
+            modelBuilder.Entity<StoryHeroUnlock>().HasData(storyHeroUnlocks);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("Failed to load story heroes seed data from JSON files", ex);
+        }
+    }
+
+    private void SeedStoryHeroDefinitions(ModelBuilder modelBuilder)
+    {
+        // Seed HeroDefinition entries for story heroes
+        var heroDefinitions = new List<HeroDefinition>
+        {
+            new HeroDefinition
+            {
+                Id = "linkaro",
+                Type = "STORY_HERO",
+                CourageCost = 0,
+                CuriosityCost = 0,
+                ThinkingCost = 0,
+                CreativityCost = 0,
+                SafetyCost = 0,
+                PrerequisitesJson = "[]",
+                RewardsJson = "[]",
+                IsUnlocked = false,
+                PositionX = 0,
+                PositionY = 0,
+                Image = "images/heroes/linkaro.png",
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            },
+            new HeroDefinition
+            {
+                Id = "grubot",
+                Type = "STORY_HERO",
+                CourageCost = 0,
+                CuriosityCost = 0,
+                ThinkingCost = 0,
+                CreativityCost = 0,
+                SafetyCost = 0,
+                PrerequisitesJson = "[]",
+                RewardsJson = "[]",
+                IsUnlocked = false,
+                PositionX = 0,
+                PositionY = 0,
+                Image = "images/heroes/grubot.png",
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            }
+        };
+
+        modelBuilder.Entity<HeroDefinition>().HasData(heroDefinitions);
     }
 }
