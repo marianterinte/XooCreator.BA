@@ -14,6 +14,10 @@ public interface ITreeOfLightService
     Task<List<StoryProgressDto>> GetStoryProgressAsync(Guid userId, string configId);
     Task<CompleteStoryResponse> CompleteStoryAsync(Guid userId, CompleteStoryRequest request, string configId);
     Task<ResetProgressResponse> ResetUserProgressAsync(Guid userId);
+    
+    // Hero Messages methods
+    Task<HeroMessageDto?> GetHeroMessageAsync(string heroId, string regionId);
+    Task<HeroClickMessageDto?> GetHeroClickMessageAsync(string heroId);
 }
 
 public class TreeOfLightService : ITreeOfLightService
@@ -23,14 +27,16 @@ public class TreeOfLightService : ITreeOfLightService
     private readonly ITreeOfHeroesRepository _treeOfHeroesRepository;
     private readonly IUserContextService _userContext;
     private readonly XooDbContext _dbContext;
+    private readonly ITreeOfLightTranslationService _translationService;
 
-    public TreeOfLightService(ITreeOfLightRepository repository, IStoriesRepository storiesRepository, ITreeOfHeroesRepository treeOfHeroesRepository, IUserContextService userContext, XooDbContext dbContext)
+    public TreeOfLightService(ITreeOfLightRepository repository, IStoriesRepository storiesRepository, ITreeOfHeroesRepository treeOfHeroesRepository, IUserContextService userContext, XooDbContext dbContext, ITreeOfLightTranslationService translationService)
     {
         _repository = repository;
         _storiesRepository = storiesRepository;
         _treeOfHeroesRepository = treeOfHeroesRepository;
         _userContext = userContext;
         _dbContext = dbContext;
+        _translationService = translationService;
     }
 
     public async Task<List<TreeConfigurationDto>> GetAllConfigurationsAsync()
@@ -268,5 +274,42 @@ public class TreeOfLightService : ITreeOfLightService
                 ErrorMessage = ex.Message
             };
         }
+    }
+
+    public async Task<HeroMessageDto?> GetHeroMessageAsync(string heroId, string regionId)
+    {
+        var heroMessage = await _repository.GetHeroMessageAsync(heroId, regionId);
+        if (heroMessage == null) return null;
+
+        var locale = _userContext.GetRequestLocaleOrDefault("ro-ro");
+        var translations = await _translationService.GetTranslationsAsync(locale);
+        
+        var message = translations.GetValueOrDefault(heroMessage.MessageKey, string.Empty);
+        if (string.IsNullOrEmpty(message)) return null;
+
+        return new HeroMessageDto
+        {
+            HeroId = heroMessage.HeroId,
+            RegionId = heroMessage.RegionId,
+            Message = message
+        };
+    }
+
+    public async Task<HeroClickMessageDto?> GetHeroClickMessageAsync(string heroId)
+    {
+        var heroClickMessage = await _repository.GetHeroClickMessageAsync(heroId);
+        if (heroClickMessage == null) return null;
+
+        var locale = _userContext.GetRequestLocaleOrDefault("ro-ro");
+        var translations = await _translationService.GetTranslationsAsync(locale);
+        
+        var message = translations.GetValueOrDefault(heroClickMessage.MessageKey, string.Empty);
+        if (string.IsNullOrEmpty(message)) return null;
+
+        return new HeroClickMessageDto
+        {
+            HeroId = heroClickMessage.HeroId,
+            Message = message
+        };
     }
 }

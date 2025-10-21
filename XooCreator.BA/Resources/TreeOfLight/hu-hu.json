@@ -1,14 +1,33 @@
 {
   "region_gateway_label": "A Fény Fája",
-  "region_gateway_pufpufMessage": "A Fény Fája... csodálatos! Gyere velem, hogy felfedezzük! Azt mondják, hogy törzsében ezer alvó világ rejtőzik, amelyek arra várnak, hogy felébredjenek.",
   "region_terra_label": "Terra",
-  "region_terra_pufpufMessage": "Ó, a ti bolygótok! Remélem, vendégszerető, ó... haza akarok jutni.",
   "region_lunaria_label": "Lunaria",
-  "region_lunaria_pufpufMessage": "Emlékszem, miért indultam el! Lunaria az elveszett bolygó, egyszer a Kelo-Ketis otthonom szomszédbolygója volt!",
   "region_mechanika_label": "Mechanika",
-  "region_mechanika_pufpufMessage": "Mindig szerettem a robotokat, de nem a levegőt itt...keresem a vezérlő tornyot, hogy kibővítsem a fa térképét",
+  "region_oceanica_label": "Oceanica",
   "region_sylvaria_label": "Sylvaria",
-  "region_sylvaria_pufpufMessage": "Foszforeszkáló erdők és ösvények, amelyek helyet cserélnek.",
   "region_crystalia_label": "Crystalia",
-  "region_crystalia_pufpufMessage": "Fény barlangok és visszhangok, amelyek ötletekkel válaszolnak."
+  "region_zephyra_label": "Zephyra",
+  "region_pyron_label": "Pyron",
+  "region_neptunia_label": "Neptunia",
+  "region_aetherion_label": "Aetherion",
+  "region_kelo_ketis_label": "Kelo-Ketis",
+  
+  "hero_pufpuf_region_gateway_message": "A Fény Fája egy kapu a világok között. A térkép akkor ébred életre, amikor a bátorság találkozik a kíváncsisággal. 🌟",
+  "hero_pufpuf_region_terra_message": "Planeta voastră. Itt tanulod meg a kis lépéseket, amelyek nagy utakra vezetnek.",
+  "hero_pufpuf_region_lunaria_message": "Ezüst városok áttetsző égbolt alatt. Az árnyékok megtanítanak figyelmesen nézni.",
+  "hero_pufpuf_region_oceanica_message": "Úszó szigetcsoportok, intelligens korallok, daloló hullámok.",
+  "hero_pufpuf_region_sylvaria_message": "Foszforeszkáló erdők és ösvények, amelyek helyet cserélnek.",
+  "hero_pufpuf_region_crystalia_message": "Fény barlangok és visszhangok, amelyek ötletekkel válaszolnak.",
+  "hero_pufpuf_region_zephyra_message": "Léggel függesztett városok, szél hidak, sárkány-jósló.",
+  "hero_pufpuf_region_pyron_message": "Csendes lávatengerek és kovácsok, akik csillagokat kalapálnak az üllőn.",
+  "hero_pufpuf_region_neptunia_message": "Mély jég és kék lények, akik fényekben beszélnek.",
+  "hero_pufpuf_region_aetherion_message": "Felhő könyvtárak, ötletek, amelyek szárnyakat kapnak.",
+  "hero_pufpuf_region_kelo_ketis_message": "Puf-Puf szülőbolygója. Az út kulcsa a Fény Hőse.",
+  "hero_pufpuf_click_message": "Helló, utazó! Én vagyok Puf-Puf Császár, a vezetőd a Fény Fája útján.",
+  
+  "hero_linkaro_region_lunaria_message": "Üdvözöllek Lunariában, ahol az ezüst fény felfedi a rejtett igazságokat.",
+  "hero_linkaro_click_message": "Én vagyok Linkaro, a béke őrzője. Az Élet Köveivel gyógyítok.",
+  
+  "hero_grubot_region_mechanika_message": "Üdvözöllek Mechanikában, ahol a technológia találkozik a mágiával.",
+  "hero_grubot_click_message": "Én vagyok Grubot, a mechanikus őr. Digitális orrom minden rejtélyt észlel."
 }

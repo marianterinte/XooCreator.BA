@@ -1,14 +1,33 @@
 {
   "region_gateway_label": "Copacul Luminii",
-  "region_gateway_pufpufMessage": "Copacul luminii… e uluitor! Vino cu mine să îl explorăm! Se spune că în trunchiul lui se ascund mii de lumi adormite ce așteaptă să fie trezite.",
   "region_terra_label": "Terra",
-  "region_terra_pufpufMessage": "Oh, planeta voastră! Sper să fie primitoare, oh..vreau să ajung acasă.",
   "region_lunaria_label": "Lunaria",
-  "region_lunaria_pufpufMessage": "Îmi aduc aminte de ce am plecat! Lunaria planeta pierdută, odată era planeta vecină casei mele Kelo-Ketis!",
   "region_mechanika_label": "Mechanika",
-  "region_mechanika_pufpufMessage": "Întotdeauna mi-au plăcut roboții, nu și aerul de aici...căutăm turnul de control pentru a mări harta copacului",
+  "region_oceanica_label": "Oceanica",
   "region_sylvaria_label": "Sylvaria",
-  "region_sylvaria_pufpufMessage": "Păduri fosforescente și cărări ce își schimbă locul.",
   "region_crystalia_label": "Crystalia",
-  "region_crystalia_pufpufMessage": "Peșteri de lumină și ecouri ce răspund cu idei."
+  "region_zephyra_label": "Zephyra",
+  "region_pyron_label": "Pyron",
+  "region_neptunia_label": "Neptunia",
+  "region_aetherion_label": "Aetherion",
+  "region_kelo_ketis_label": "Kelo-Ketis",
+  
+  "hero_pufpuf_region_gateway_message": "Copacul Luminii e o poartă între lumi. Harta se trezește când curajul întâlnește curiozitatea. 🌟",
+  "hero_pufpuf_region_terra_message": "Planeta voastră. Aici înveți pașii mici care duc la drumuri mari.",
+  "hero_pufpuf_region_lunaria_message": "Orașe argintii sub cer translucid. Umbrele te învață să privești atent.",
+  "hero_pufpuf_region_oceanica_message": "Arhipelaguri plutitoare, corali inteligenți, valuri care cântă.",
+  "hero_pufpuf_region_sylvaria_message": "Păduri fosforescente și cărări care-și schimbă locul.",
+  "hero_pufpuf_region_crystalia_message": "Caverne de lumină și ecouri care răspund cu idei.",
+  "hero_pufpuf_region_zephyra_message": "Orașe suspendate în aer, poduri de vânt, zmee-oracol.",
+  "hero_pufpuf_region_pyron_message": "Mări de lavă liniștită și fierari care bat stele la nicovală.",
+  "hero_pufpuf_region_neptunia_message": "Ghețuri adânci și ființe albastre care vorbesc în lumini.",
+  "hero_pufpuf_region_aetherion_message": "Biblioteci de nori, idei care prind aripi.",
+  "hero_pufpuf_region_kelo_ketis_message": "Planeta natală a lui Puf-Puf. Cheia drumului este Eroul Luminii.",
+  "hero_pufpuf_click_message": "Salut, călătorule! Eu sunt Împăratul Puf-Puf, ghidul tău prin Copacul Luminii.",
+  
+  "hero_linkaro_region_lunaria_message": "Bine ai venit în Lunaria, unde lumina argintie dezvăluie adevăruri ascunse.",
+  "hero_linkaro_click_message": "Eu sunt Linkaro, păstrătorul păcii. Vindec cu Pietrele Vieții.",
+  
+  "hero_grubot_region_mechanika_message": "Bine ai venit în Mechanika, unde tehnologia întâlnește magia.",
+  "hero_grubot_click_message": "Eu sunt Grubot, gardianul mecanic. Nasul meu digital detectează toate misterele."
 }

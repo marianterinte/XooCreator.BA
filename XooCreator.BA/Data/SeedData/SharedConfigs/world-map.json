@@ -2,90 +2,68 @@
   "regions": [
     {
       "id": "gateway",
-      "label": "A Fény Fája",
       "level": 0,
       "imageUrl": "images/worlds/gateway.jpg",
-      "pufpufMessage": "A Fény Fája egy kapu a világok között. A térkép akkor ébred életre, amikor a bátorság találkozik a kíváncsisággal. 🌟",
       "sortOrder": 0
     },
     {
       "id": "terra",
-      "label": "Terra",
       "level": 1,
       "imageUrl": "images/worlds/terra.jpg",
-      "pufpufMessage": "Planeta voastră. Itt tanulod meg a kis lépéseket, amelyek nagy utakra vezetnek.",
       "sortOrder": 1
     },
     {
       "id": "lunaria",
-      "label": "Lunaria",
       "level": 2,
       "imageUrl": "images/worlds/lunaria.jpg",
-      "pufpufMessage": "Ezüst városok áttetsző égbolt alatt. Az árnyékok megtanítanak figyelmesen nézni.",
       "sortOrder": 2
     },
     {
       "id": "oceanica",
-      "label": "Oceanica",
       "level": 3,
       "imageUrl": "images/worlds/oceanica.jpg",
-      "pufpufMessage": "Úszó szigetcsoportok, intelligens korallok, daloló hullámok.",
       "sortOrder": 3
     },
     {
       "id": "sylvaria",
-      "label": "Sylvaria",
       "level": 4,
       "imageUrl": "images/worlds/sylvaria.jpg",
-      "pufpufMessage": "Foszforeszkáló erdők és ösvények, amelyek helyet cserélnek.",
       "sortOrder": 4
     },
     {
       "id": "crystalia",
-      "label": "Crystalia",
       "level": 5,
       "imageUrl": "images/worlds/crystalia.jpg",
-      "pufpufMessage": "Fény barlangok és visszhangok, amelyek ötletekkel válaszolnak.",
       "sortOrder": 5
     },
     {
       "id": "zephyra",
-      "label": "Zephyra",
       "level": 6,
       "imageUrl": "images/worlds/zephyra.jpg",
-      "pufpufMessage": "Léggel függesztett városok, szél hidak, sárkány-jósló.",
       "sortOrder": 6
     },
     {
       "id": "pyron",
-      "label": "Pyron",
       "level": 7,
       "imageUrl": "images/worlds/pyron.jpg",
-      "pufpufMessage": "Csendes lávatengerek és kovácsok, akik csillagokat kalapálnak az üllőn.",
       "sortOrder": 7
     },
     {
       "id": "neptunia",
-      "label": "Neptunia",
       "level": 8,
       "imageUrl": "images/worlds/neptunia.jpg",
-      "pufpufMessage": "Mély jég és kék lények, akik fényekben beszélnek.",
       "sortOrder": 8
     },
     {
       "id": "aetherion",
-      "label": "Aetherion",
       "level": 9,
       "imageUrl": "images/worlds/aetherion.jpg",
-      "pufpufMessage": "Felhő könyvtárak, ötletek, amelyek szárnyakat kapnak.",
       "sortOrder": 9
     },
     {
       "id": "kelo-ketis",
-      "label": "Kelo-Ketis",
       "level": 10,
       "imageUrl": "images/worlds/kelo-ketis.jpg",
-      "pufpufMessage": "Puf-Puf szülőbolygója. Az út kulcsa a Fény Hőse.",
       "sortOrder": 10
     }
   ],
@@ -96,7 +74,6 @@
       "rewardImageUrl": "images/tol/stories/intro-pufpuf/0.Cover.png",
       "sortOrder": 1
     },
-
     {
       "storyId": "terra-s1",
       "regionId": "terra",
@@ -109,7 +86,6 @@
       "rewardImageUrl": "images/homepage/heroes/hero2.jpg",
       "sortOrder": 2
     },
-
     {
       "storyId": "lunaria-s1",
       "regionId": "lunaria",
@@ -122,7 +98,6 @@
       "rewardImageUrl": "images/homepage/heroes/hero2.jpg",
       "sortOrder": 2
     },
-
     {
       "storyId": "oceanica-s1",
       "regionId": "oceanica",
@@ -135,7 +110,6 @@
       "rewardImageUrl": "images/homepage/heroes/hero1.jpg",
       "sortOrder": 2
     },
-
     {
       "storyId": "sylvaria-s1",
       "regionId": "sylvaria",
@@ -148,7 +122,6 @@
       "rewardImageUrl": "images/homepage/heroes/hero0.jpg",
       "sortOrder": 2
     },
-
     {
       "storyId": "crystalia-s1",
       "regionId": "crystalia",
@@ -161,7 +134,6 @@
       "rewardImageUrl": "images/homepage/heroes/hero1.jpg",
       "sortOrder": 2
     },
-
     {
       "storyId": "zephyra-s1",
       "regionId": "zephyra",
@@ -174,7 +146,6 @@
       "rewardImageUrl": "images/homepage/heroes/hero0.jpg",
       "sortOrder": 2
     },
-
     {
       "storyId": "pyron-s1",
       "regionId": "pyron",
@@ -187,7 +158,6 @@
       "rewardImageUrl": "images/homepage/heroes/hero1.jpg",
       "sortOrder": 2
     },
-
     {
       "storyId": "neptunia-s1",
       "regionId": "neptunia",
@@ -200,7 +170,6 @@
       "rewardImageUrl": "images/homepage/heroes/hero1.jpg",
       "sortOrder": 2
     },
-
     {
       "storyId": "aetherion-s1",
       "regionId": "aetherion",
@@ -222,7 +191,6 @@
       "storyId": "intro-pufpuf",
       "sortOrder": 1
     },
-
     {
       "type": "all",
       "fromId": "terra",
@@ -237,7 +205,6 @@
       "requiredTokens": { "curiosity": 1 },
       "sortOrder": 3
     },
-
     {
       "type": "all",
       "fromId": "lunaria",
@@ -245,7 +212,6 @@
       "requiredStoriesCsv": "lunaria-s1,lunaria-s2",
       "sortOrder": 4
     },
-
     {
       "type": "all",
       "fromId": "oceanica",
@@ -253,7 +219,6 @@
       "requiredStoriesCsv": "oceanica-s1,oceanica-s2",
       "sortOrder": 5
     },
-
     {
       "type": "all",
       "fromId": "sylvaria",
@@ -268,7 +233,6 @@
       "requiredTokens": { "thinking": 2 },
       "sortOrder": 7
     },
-
     {
       "type": "all",
       "fromId": "crystalia",
@@ -276,7 +240,6 @@
       "requiredStoriesCsv": "crystalia-s1,crystalia-s2",
       "sortOrder": 8
     },
-
     {
       "type": "all",
       "fromId": "zephyra",
@@ -284,7 +247,6 @@
       "requiredStoriesCsv": "zephyra-s1,zephyra-s2",
       "sortOrder": 9
     },
-
     {
       "type": "all",
       "fromId": "pyron",
@@ -292,7 +254,6 @@
       "requiredStoriesCsv": "pyron-s1,pyron-s2",
       "sortOrder": 10
     },
-
     {
       "type": "all",
       "fromId": "neptunia",
@@ -300,7 +261,6 @@
       "requiredStoriesCsv": "neptunia-s1,neptunia-s2",
       "sortOrder": 11
     },
-
     {
       "type": "all",
       "fromId": "aetherion",

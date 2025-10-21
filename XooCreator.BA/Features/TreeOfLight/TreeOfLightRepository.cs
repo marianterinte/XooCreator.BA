@@ -19,6 +19,12 @@ public interface ITreeOfLightRepository
     Task<List<StoryHero>> GetStoryHeroesAsync();
     Task<bool> IsHeroUnlockedAsync(Guid userId, string heroId);
     Task<bool> UnlockHeroAsync(Guid userId, string heroId, string heroType);
+    
+    // Hero Messages methods
+    Task<List<HeroMessage>> GetHeroMessagesAsync();
+    Task<List<HeroClickMessage>> GetHeroClickMessagesAsync();
+    Task<HeroMessage?> GetHeroMessageAsync(string heroId, string regionId);
+    Task<HeroClickMessage?> GetHeroClickMessageAsync(string heroId);
 }
 
 public class TreeOfLightRepository : ITreeOfLightRepository
@@ -230,5 +236,31 @@ public class TreeOfLightRepository : ITreeOfLightRepository
         await _context.SaveChangesAsync();
         
         return true;
+    }
+
+    public async Task<List<HeroMessage>> GetHeroMessagesAsync()
+    {
+        return await _context.HeroMessages
+            .Where(hm => hm.IsActive)
+            .ToListAsync();
+    }
+
+    public async Task<List<HeroClickMessage>> GetHeroClickMessagesAsync()
+    {
+        return await _context.HeroClickMessages
+            .Where(hcm => hcm.IsActive)
+            .ToListAsync();
+    }
+
+    public async Task<HeroMessage?> GetHeroMessageAsync(string heroId, string regionId)
+    {
+        return await _context.HeroMessages
+            .FirstOrDefaultAsync(hm => hm.HeroId == heroId && hm.RegionId == regionId && hm.IsActive);
+    }
+
+    public async Task<HeroClickMessage?> GetHeroClickMessageAsync(string heroId)
+    {
+        return await _context.HeroClickMessages
+            .FirstOrDefaultAsync(hcm => hcm.HeroId == heroId && hcm.IsActive);
     }
 }

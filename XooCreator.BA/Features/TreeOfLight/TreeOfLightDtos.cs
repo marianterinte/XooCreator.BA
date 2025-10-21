@@ -78,7 +78,6 @@ public record TreeRegionDto
     public required string Id { get; init; }
     public required string Label { get; init; }
     public string? ImageUrl { get; init; }
-    public string? PufpufMessage { get; init; }
     public int SortOrder { get; init; }
     public bool IsLocked { get; init; }
 }
@@ -107,6 +106,7 @@ public record TreeProgressStateDto
     public List<CompletedStoryDto> CompletedStories { get; init; } = new();
     public List<string> UnlockedRegions { get; init; } = new();
     public List<UnlockedHeroDto> UnlockedHeroes { get; init; } = new();
+    public string? SelectedHeroId { get; init; }
     public UserTokensDto UserTokens { get; init; } = new() { Courage = 0, Curiosity = 0, Thinking = 0, Creativity = 0, Safety = 0 };
 }
 
@@ -122,4 +122,18 @@ public record CompletedStoryDto
     public string? SelectedAnswer { get; init; }
     public List<TokenReward> Tokens { get; init; } = new();
     public DateTime CompletedAt { get; init; }
+}
+
+// Hero Messages DTOs
+public record HeroMessageDto
+{
+    public required string HeroId { get; init; }
+    public required string RegionId { get; init; }
+    public required string Message { get; init; }
+}
+
+public record HeroClickMessageDto
+{
+    public required string HeroId { get; init; }
+    public required string Message { get; init; }
 }

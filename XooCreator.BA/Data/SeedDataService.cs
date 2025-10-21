@@ -154,11 +154,89 @@ public class SeedDataService
         return unlocks;
     }
 
+    public async Task<List<HeroMessage>> LoadHeroMessagesAsync()
+    {
+        var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SeedData", "SharedConfigs", "hero-messages.json");
+        if (!File.Exists(filePath))
+        {
+            throw new FileNotFoundException($"HeroMessages seed data file not found: {filePath}");
+        }
+
+        var json = await File.ReadAllTextAsync(filePath);
+        var heroMessagesData = JsonSerializer.Deserialize<HeroMessagesSeedData>(json, new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        });
+
+        var heroMessages = new List<HeroMessage>();
+        
+        if (heroMessagesData?.HeroMessages != null)
+        {
+            foreach (var heroMessageData in heroMessagesData.HeroMessages)
+            {
+                foreach (var regionMessage in heroMessageData.RegionMessages)
+                {
+                    heroMessages.Add(new HeroMessage
+                    {
+                        Id = Guid.NewGuid(),
+                        HeroId = heroMessageData.HeroId,
+                        RegionId = regionMessage.RegionId,
+                        MessageKey = regionMessage.MessageKey,
+                        IsActive = true,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow
+                    });
+                }
+            }
+        }
+
+        return heroMessages;
+    }
+
+    public async Task<List<HeroClickMessage>> LoadHeroClickMessagesAsync()
+    {
+        var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SeedData", "SharedConfigs", "hero-messages.json");
+        if (!File.Exists(filePath))
+        {
+            throw new FileNotFoundException($"HeroMessages seed data file not found: {filePath}");
+        }
+
+        var json = await File.ReadAllTextAsync(filePath);
+        var heroMessagesData = JsonSerializer.Deserialize<HeroMessagesSeedData>(json, new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        });
+
+        var heroClickMessages = new List<HeroClickMessage>();
+        
+        if (heroMessagesData?.HeroMessages != null)
+        {
+            foreach (var heroMessageData in heroMessagesData.HeroMessages)
+            {
+                foreach (var clickMessage in heroMessageData.ClickMessages)
+                {
+                    heroClickMessages.Add(new HeroClickMessage
+                    {
+                        Id = Guid.NewGuid(),
+                        HeroId = heroMessageData.HeroId,
+                        MessageKey = clickMessage.MessageKey,
+                        IsActive = true,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow
+                    });
+                }
+            }
+        }
+
+        return heroClickMessages;
+    }
+
     private static Guid GetFixedStoryHeroId(string heroId)
     {
         // Use fixed GUIDs for seeding to ensure consistency
         return heroId switch
         {
+            "pufpuf" => Guid.Parse("00000000-0000-0000-0000-000000000100"),
             "linkaro" => Guid.Parse("11111111-1111-1111-1111-111111111100"),
             "grubot" => Guid.Parse("22222222-2222-2222-2222-222222222200"),
             _ => Guid.NewGuid()
@@ -214,4 +292,27 @@ public class UnlockConditions
     public string Type { get; set; } = string.Empty;
     public List<string> RequiredStories { get; set; } = new();
     public int MinProgress { get; set; }
+}
+
+public class HeroMessagesSeedData
+{
+    public List<HeroMessageSeedData> HeroMessages { get; set; } = new();
+}
+
+public class HeroMessageSeedData
+{
+    public string HeroId { get; set; } = string.Empty;
+    public List<RegionMessageSeedData> RegionMessages { get; set; } = new();
+    public List<ClickMessageSeedData> ClickMessages { get; set; } = new();
+}
+
+public class RegionMessageSeedData
+{
+    public string RegionId { get; set; } = string.Empty;
+    public string MessageKey { get; set; } = string.Empty;
+}
+
+public class ClickMessageSeedData
+{
+    public string MessageKey { get; set; } = string.Empty;
 }

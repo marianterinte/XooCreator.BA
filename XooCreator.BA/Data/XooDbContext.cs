@@ -43,6 +43,8 @@ public class XooDbContext : DbContext
     public DbSet<StoryAnswerToken> StoryAnswerTokens => Set<StoryAnswerToken>();
     public DbSet<StoryHero> StoryHeroes => Set<StoryHero>();
     public DbSet<StoryHeroUnlock> StoryHeroUnlocks => Set<StoryHeroUnlock>();
+    public DbSet<HeroMessage> HeroMessages => Set<HeroMessage>();
+    public DbSet<HeroClickMessage> HeroClickMessages => Set<HeroClickMessage>();
 
     // Builder data
     public DbSet<BodyPart> BodyParts => Set<BodyPart>();
@@ -197,6 +199,9 @@ public class XooDbContext : DbContext
 
         // Seed story heroes data from JSON files
         SeedStoryHeroesDataFromJson(modelBuilder);
+        
+        // Seed hero messages data from JSON files
+        SeedHeroMessagesDataFromJson(modelBuilder);
         
         // Seed HeroDefinition entries for story heroes
         SeedStoryHeroDefinitions(modelBuilder);
@@ -410,6 +415,25 @@ public class XooDbContext : DbContext
             e.HasOne(x => x.StoryHero).WithMany(x => x.StoryUnlocks).HasForeignKey(x => x.StoryHeroId);
         });
 
+        modelBuilder.Entity<HeroMessage>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.HeroId).HasMaxLength(100).IsRequired();
+            e.Property(x => x.RegionId).HasMaxLength(50).IsRequired();
+            e.Property(x => x.MessageKey).HasMaxLength(200).IsRequired();
+            e.HasIndex(x => new { x.HeroId, x.RegionId }).IsUnique();
+        });
+
+        modelBuilder.Entity<HeroClickMessage>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.HeroId).HasMaxLength(100).IsRequired();
+            e.Property(x => x.MessageKey).HasMaxLength(200).IsRequired();
+            e.HasIndex(x => x.HeroId).IsUnique();
+        });
+
         // Seed test users
         var testUserId = Guid.Parse("11111111-1111-1111-1111-111111111111");
         var marianUserId = Guid.Parse("22222222-2222-2222-2222-222222222222");
@@ -597,11 +621,49 @@ public class XooDbContext : DbContext
         }
     }
 
+    private void SeedHeroMessagesDataFromJson(ModelBuilder modelBuilder)
+    {
+        try
+        {
+            var seedService = new SeedDataService();
+            
+            // Load hero messages
+            var heroMessages = LoadDataSync(() => seedService.LoadHeroMessagesAsync());
+            modelBuilder.Entity<HeroMessage>().HasData(heroMessages);
+            
+            // Load hero click messages
+            var heroClickMessages = LoadDataSync(() => seedService.LoadHeroClickMessagesAsync());
+            modelBuilder.Entity<HeroClickMessage>().HasData(heroClickMessages);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("Failed to load hero messages seed data from JSON files", ex);
+        }
+    }
+
     private void SeedStoryHeroDefinitions(ModelBuilder modelBuilder)
     {
         // Seed HeroDefinition entries for story heroes
         var heroDefinitions = new List<HeroDefinition>
         {
+            new HeroDefinition
+            {
+                Id = "pufpuf",
+                Type = "STORY_HERO",
+                CourageCost = 0,
+                CuriosityCost = 0,
+                ThinkingCost = 0,
+                CreativityCost = 0,
+                SafetyCost = 0,
+                PrerequisitesJson = "[]",
+                RewardsJson = "[]",
+                IsUnlocked = false,
+                PositionX = 0,
+                PositionY = 0,
+                Image = "images/heroes/pufpuf.png",
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            },
             new HeroDefinition
             {
                 Id = "linkaro",

@@ -1,6 +1,16 @@
 {
   "storyHeroes": [
     {
+      "id": "pufpuf",
+      "heroId": "pufpuf",
+      "imageUrl": "images/tol/stories/intro-pufpuf/heroes/pufpuf.png",
+      "unlockConditions": {
+        "type": "story_completion",
+        "requiredStories": ["intro-pufpuf"],
+        "minProgress": 100
+      }
+    },
+    {
       "id": "linkaro",
       "heroId": "linkaro",
       "imageUrl": "images/tol/stories/lunaria-s1/heroes/linkaro.png",

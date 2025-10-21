@@ -1,0 +1,86 @@
+{
+  "heroMessages": [
+    {
+      "heroId": "pufpuf",
+      "regionMessages": [
+        {
+          "regionId": "gateway",
+          "messageKey": "hero_pufpuf_region_gateway_message"
+        },
+        {
+          "regionId": "terra",
+          "messageKey": "hero_pufpuf_region_terra_message"
+        },
+        {
+          "regionId": "lunaria",
+          "messageKey": "hero_pufpuf_region_lunaria_message"
+        },
+        {
+          "regionId": "oceanica",
+          "messageKey": "hero_pufpuf_region_oceanica_message"
+        },
+        {
+          "regionId": "sylvaria",
+          "messageKey": "hero_pufpuf_region_sylvaria_message"
+        },
+        {
+          "regionId": "crystalia",
+          "messageKey": "hero_pufpuf_region_crystalia_message"
+        },
+        {
+          "regionId": "zephyra",
+          "messageKey": "hero_pufpuf_region_zephyra_message"
+        },
+        {
+          "regionId": "pyron",
+          "messageKey": "hero_pufpuf_region_pyron_message"
+        },
+        {
+          "regionId": "neptunia",
+          "messageKey": "hero_pufpuf_region_neptunia_message"
+        },
+        {
+          "regionId": "aetherion",
+          "messageKey": "hero_pufpuf_region_aetherion_message"
+        },
+        {
+          "regionId": "kelo-ketis",
+          "messageKey": "hero_pufpuf_region_kelo_ketis_message"
+        }
+      ],
+      "clickMessages": [
+        {
+          "messageKey": "hero_pufpuf_click_message"
+        }
+      ]
+    },
+    {
+      "heroId": "linkaro",
+      "regionMessages": [
+        {
+          "regionId": "lunaria",
+          "messageKey": "hero_linkaro_region_lunaria_message"
+        }
+      ],
+      "clickMessages": [
+        {
+          "messageKey": "hero_linkaro_click_message"
+        }
+      ]
+    },
+    {
+      "heroId": "grubot",
+      "regionMessages": [
+        {
+          "regionId": "mechanika",
+          "messageKey": "hero_grubot_region_mechanika_message"
+        }
+      ],
+      "clickMessages": [
+        {
+          "messageKey": "hero_grubot_click_message"
+        }
+      ]
+    }
+  ]
+}
