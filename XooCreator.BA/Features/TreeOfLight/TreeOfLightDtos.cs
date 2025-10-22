@@ -130,10 +130,12 @@ public record HeroMessageDto
     public required string HeroId { get; init; }
     public required string RegionId { get; init; }
     public required string Message { get; init; }
+    public string? AudioUrl { get; init; }
 }
 
 public record HeroClickMessageDto
 {
     public required string HeroId { get; init; }
     public required string Message { get; init; }
+    public string? AudioUrl { get; init; }
 }

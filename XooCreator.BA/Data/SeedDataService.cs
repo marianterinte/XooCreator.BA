@@ -182,6 +182,7 @@ public class SeedDataService
                         HeroId = heroMessageData.HeroId,
                         RegionId = regionMessage.RegionId,
                         MessageKey = regionMessage.MessageKey,
+                        AudioUrl = regionMessage.AudioUrl,
                         IsActive = true,
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = DateTime.UtcNow
@@ -220,6 +221,7 @@ public class SeedDataService
                         Id = Guid.NewGuid(),
                         HeroId = heroMessageData.HeroId,
                         MessageKey = clickMessage.MessageKey,
+                        AudioUrl = clickMessage.AudioUrl,
                         IsActive = true,
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = DateTime.UtcNow
@@ -310,9 +312,11 @@ public class RegionMessageSeedData
 {
     public string RegionId { get; set; } = string.Empty;
     public string MessageKey { get; set; } = string.Empty;
+    public string? AudioUrl { get; set; }
 }
 
 public class ClickMessageSeedData
 {
     public string MessageKey { get; set; } = string.Empty;
+    public string? AudioUrl { get; set; }
 }

@@ -291,7 +291,8 @@ public class TreeOfLightService : ITreeOfLightService
         {
             HeroId = heroMessage.HeroId,
             RegionId = heroMessage.RegionId,
-            Message = message
+            Message = message,
+            AudioUrl = heroMessage.AudioUrl
         };
     }
 
@@ -309,7 +310,8 @@ public class TreeOfLightService : ITreeOfLightService
         return new HeroClickMessageDto
         {
             HeroId = heroClickMessage.HeroId,
-            Message = message
+            Message = message,
+            AudioUrl = heroClickMessage.AudioUrl
         };
     }
 }

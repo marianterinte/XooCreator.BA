@@ -5,52 +5,64 @@
       "regionMessages": [
         {
           "regionId": "gateway",
-          "messageKey": "hero_pufpuf_region_gateway_message"
+          "messageKey": "hero_pufpuf_region_gateway_message",
+          "audioUrl": "audio/tol/heroes/pufpuf/gateway.wav"
         },
         {
           "regionId": "terra",
-          "messageKey": "hero_pufpuf_region_terra_message"
+          "messageKey": "hero_pufpuf_region_terra_message",
+          "audioUrl": "audio/tol/heroes/pufpuf/terra.wav"
         },
         {
           "regionId": "lunaria",
-          "messageKey": "hero_pufpuf_region_lunaria_message"
+          "messageKey": "hero_pufpuf_region_lunaria_message",
+          "audioUrl": "audio/tol/heroes/pufpuf/lunaria.wav"
         },
         {
           "regionId": "oceanica",
-          "messageKey": "hero_pufpuf_region_oceanica_message"
+          "messageKey": "hero_pufpuf_region_oceanica_message",
+          "audioUrl": "audio/tol/heroes/pufpuf/oceanica.wav"
         },
         {
           "regionId": "sylvaria",
-          "messageKey": "hero_pufpuf_region_sylvaria_message"
+          "messageKey": "hero_pufpuf_region_sylvaria_message",
+          "audioUrl": "audio/tol/heroes/pufpuf/sylvaria.wav"
         },
         {
           "regionId": "crystalia",
-          "messageKey": "hero_pufpuf_region_crystalia_message"
+          "messageKey": "hero_pufpuf_region_crystalia_message",
+          "audioUrl": "audio/tol/heroes/pufpuf/crystalia.wav"
         },
         {
           "regionId": "zephyra",
-          "messageKey": "hero_pufpuf_region_zephyra_message"
+          "messageKey": "hero_pufpuf_region_zephyra_message",
+          "audioUrl": "audio/tol/heroes/pufpuf/zephyra.wav"
         },
         {
           "regionId": "pyron",
-          "messageKey": "hero_pufpuf_region_pyron_message"
+          "messageKey": "hero_pufpuf_region_pyron_message",
+          "audioUrl": "audio/tol/heroes/pufpuf/pyron.wav"
         },
         {
           "regionId": "neptunia",
-          "messageKey": "hero_pufpuf_region_neptunia_message"
+          "messageKey": "hero_pufpuf_region_neptunia_message",
+          "audioUrl": "audio/tol/heroes/pufpuf/neptunia.wav"
         },
         {
           "regionId": "aetherion",
-          "messageKey": "hero_pufpuf_region_aetherion_message"
+          "messageKey": "hero_pufpuf_region_aetherion_message",
+          "audioUrl": "audio/tol/heroes/pufpuf/aetherion.wav"
         },
         {
           "regionId": "kelo-ketis",
-          "messageKey": "hero_pufpuf_region_kelo_ketis_message"
+          "messageKey": "hero_pufpuf_region_kelo_ketis_message",
+          "audioUrl": "audio/tol/heroes/pufpuf/kelo-ketis.wav"
         }
       ],
       "clickMessages": [
         {
-          "messageKey": "hero_pufpuf_click_message"
+          "messageKey": "hero_pufpuf_click_message",
+          "audioUrl": "audio/tol/heroes/pufpuf/click.wav"
         }
       ]
     },
@@ -58,13 +70,70 @@
       "heroId": "linkaro",
       "regionMessages": [
         {
+          "regionId": "gateway",
+          "messageKey": "hero_linkaro_region_gateway_message",
+          "audioUrl": "audio/tol/heroes/linkaro/gateway.wav"
+        },
+        {
+          "regionId": "terra",
+          "messageKey": "hero_linkaro_region_terra_message",
+          "audioUrl": "audio/tol/heroes/linkaro/terra.wav"
+        },
+        {
           "regionId": "lunaria",
-          "messageKey": "hero_linkaro_region_lunaria_message"
+          "messageKey": "hero_linkaro_region_lunaria_message",
+          "audioUrl": "audio/tol/heroes/linkaro/lunaria.wav"
+        },
+        {
+          "regionId": "mechanika",
+          "messageKey": "hero_linkaro_region_mechanika_message",
+          "audioUrl": "audio/tol/heroes/linkaro/mechanika.wav"
+        },
+        {
+          "regionId": "oceanica",
+          "messageKey": "hero_linkaro_region_oceanica_message",
+          "audioUrl": "audio/tol/heroes/linkaro/oceanica.wav"
+        },
+        {
+          "regionId": "sylvaria",
+          "messageKey": "hero_linkaro_region_sylvaria_message",
+          "audioUrl": "audio/tol/heroes/linkaro/sylvaria.wav"
+        },
+        {
+          "regionId": "crystalia",
+          "messageKey": "hero_linkaro_region_crystalia_message",
+          "audioUrl": "audio/tol/heroes/linkaro/crystalia.wav"
+        },
+        {
+          "regionId": "zephyra",
+          "messageKey": "hero_linkaro_region_zephyra_message",
+          "audioUrl": "audio/tol/heroes/linkaro/zephyra.wav"
+        },
+        {
+          "regionId": "pyron",
+          "messageKey": "hero_linkaro_region_pyron_message",
+          "audioUrl": "audio/tol/heroes/linkaro/pyron.wav"
+        },
+        {
+          "regionId": "neptunia",
+          "messageKey": "hero_linkaro_region_neptunia_message",
+          "audioUrl": "audio/tol/heroes/linkaro/neptunia.wav"
+        },
+        {
+          "regionId": "aetherion",
+          "messageKey": "hero_linkaro_region_aetherion_message",
+          "audioUrl": "audio/tol/heroes/linkaro/aetherion.wav"
+        },
+        {
+          "regionId": "kelo-ketis",
+          "messageKey": "hero_linkaro_region_kelo_ketis_message",
+          "audioUrl": "audio/tol/heroes/linkaro/kelo-ketis.wav"
         }
       ],
       "clickMessages": [
         {
-          "messageKey": "hero_linkaro_click_message"
+          "messageKey": "hero_linkaro_click_message",
+          "audioUrl": "audio/tol/heroes/linkaro/click.wav"
         }
       ]
     },
@@ -72,13 +141,70 @@
       "heroId": "grubot",
       "regionMessages": [
         {
+          "regionId": "gateway",
+          "messageKey": "hero_grubot_region_gateway_message",
+          "audioUrl": "audio/tol/heroes/grubot/gateway.wav"
+        },
+        {
+          "regionId": "terra",
+          "messageKey": "hero_grubot_region_terra_message",
+          "audioUrl": "audio/tol/heroes/grubot/terra.wav"
+        },
+        {
+          "regionId": "lunaria",
+          "messageKey": "hero_grubot_region_lunaria_message",
+          "audioUrl": "audio/tol/heroes/grubot/lunaria.wav"
+        },
+        {
           "regionId": "mechanika",
-          "messageKey": "hero_grubot_region_mechanika_message"
+          "messageKey": "hero_grubot_region_mechanika_message",
+          "audioUrl": "audio/tol/heroes/grubot/mechanika.wav"
+        },
+        {
+          "regionId": "oceanica",
+          "messageKey": "hero_grubot_region_oceanica_message",
+          "audioUrl": "audio/tol/heroes/grubot/oceanica.wav"
+        },
+        {
+          "regionId": "sylvaria",
+          "messageKey": "hero_grubot_region_sylvaria_message",
+          "audioUrl": "audio/tol/heroes/grubot/sylvaria.wav"
+        },
+        {
+          "regionId": "crystalia",
+          "messageKey": "hero_grubot_region_crystalia_message",
+          "audioUrl": "audio/tol/heroes/grubot/crystalia.wav"
+        },
+        {
+          "regionId": "zephyra",
+          "messageKey": "hero_grubot_region_zephyra_message",
+          "audioUrl": "audio/tol/heroes/grubot/zephyra.wav"
+        },
+        {
+          "regionId": "pyron",
+          "messageKey": "hero_grubot_region_pyron_message",
+          "audioUrl": "audio/tol/heroes/grubot/pyron.wav"
+        },
+        {
+          "regionId": "neptunia",
+          "messageKey": "hero_grubot_region_neptunia_message",
+          "audioUrl": "audio/tol/heroes/grubot/neptunia.wav"
+        },
+        {
+          "regionId": "aetherion",
+          "messageKey": "hero_grubot_region_aetherion_message",
+          "audioUrl": "audio/tol/heroes/grubot/aetherion.wav"
+        },
+        {
+          "regionId": "kelo-ketis",
+          "messageKey": "hero_grubot_region_kelo_ketis_message",
+          "audioUrl": "audio/tol/heroes/grubot/kelo-ketis.wav"
         }
       ],
       "clickMessages": [
         {
-          "messageKey": "hero_grubot_click_message"
+          "messageKey": "hero_grubot_click_message",
+          "audioUrl": "audio/tol/heroes/grubot/click.wav"
         }
       ]
     }
