@@ -1,4 +1,8 @@
 {
+  "hero_tree_seed_name": "Hősies Mag",
+  "hero_tree_seed_desc": "A mag, amelyből minden hős nő. Kattints, hogy felfedezd hősies potenciálodat.",
+  "hero_tree_seed_story": "A szívedben egy hősiesség magja dobog. Kattints rá, hogy felfedezd első hőseidet és kezdd el hősies utadat.",
+
   "hero_tree_alchimalia_hero_name": "Alchimalia Hőse",
   "hero_tree_alchimalia_hero_desc": "Minden hős gyökere, az átalakulás forrása.",
   "hero_tree_alchimalia_hero_story": "Hűséges társad, a hősies út kezdete",

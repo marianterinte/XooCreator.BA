@@ -28,23 +28,65 @@
     },
     {
       "id": "mechanika",
-      "level": 2,
+      "level": 3,
       "imageUrl": "images/worlds/pyron.jpg",
       "sortOrder": 3,
       "isLocked": false
     },
     {
-      "id": "sylvaria",
+      "id": "oceanica",
       "level": 4,
-      "imageUrl": "images/worlds/sylvaria.jpg",
+      "imageUrl": "images/worlds/oceanica.jpg",
       "sortOrder": 4,
       "isLocked": true
     },
     {
-      "id": "crystalia",
+      "id": "sylvaria",
       "level": 5,
-      "imageUrl": "images/worlds/crystalia.jpg",
+      "imageUrl": "images/worlds/sylvaria.jpg",
       "sortOrder": 5,
+      "isLocked": true
+    },
+    {
+      "id": "crystalia",
+      "level": 6,
+      "imageUrl": "images/worlds/crystalia.jpg",
+      "sortOrder": 6,
+      "isLocked": true
+    },
+    {
+      "id": "zephyra",
+      "level": 7,
+      "imageUrl": "images/worlds/zephyra.jpg",
+      "sortOrder": 7,
+      "isLocked": true
+    },
+    {
+      "id": "pyron",
+      "level": 8,
+      "imageUrl": "images/worlds/pyron.jpg",
+      "sortOrder": 8,
+      "isLocked": true
+    },
+    {
+      "id": "neptunia",
+      "level": 9,
+      "imageUrl": "images/worlds/neptunia.jpg",
+      "sortOrder": 9,
+      "isLocked": true
+    },
+    {
+      "id": "aetherion",
+      "level": 10,
+      "imageUrl": "images/worlds/aetherion.jpg",
+      "sortOrder": 10,
+      "isLocked": true
+    },
+    {
+      "id": "kelo-ketis",
+      "level": 11,
+      "imageUrl": "images/worlds/kelo-ketis.jpg",
+      "sortOrder": 11,
       "isLocked": true
     }
   ],
@@ -101,7 +143,7 @@
   "unlockRules": [
     {
       "type": "story",
-      "fromId": "intro-pufpuf",
+      "fromId": "gateway",
       "toRegionId": "terra",
       "storyId": "intro-pufpuf",
       "sortOrder": 1
@@ -122,14 +164,14 @@
     },
     {
       "type": "story",
-      "fromId": "mechanika-s1",
+      "fromId": "mechanika",
       "toRegionId": "sylvaria",
       "storyId": "mechanika-s1",
       "sortOrder": 4
     },
     {
       "type": "story",
-      "fromId": "mechanika-s1",
+      "fromId": "mechanika",
       "toRegionId": "crystalia",
       "storyId": "mechanika-s1",
       "sortOrder": 5

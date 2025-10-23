@@ -1,0 +1,34 @@
+{
+  "storyHeroes": [
+    {
+      "id": "pufpuf",
+      "heroId": "pufpuf",
+      "imageUrl": "images/tol/stories/intro-pufpuf/heroes/pufpuf.png",
+      "unlockConditions": {
+        "type": "story_completion",
+        "requiredStories": ["intro-pufpuf"],
+        "minProgress": 100
+      }
+    },
+    {
+      "id": "linkaro",
+      "heroId": "linkaro",
+      "imageUrl": "images/tol/stories/lunaria-s1/heroes/linkaro.png",
+      "unlockConditions": {
+        "type": "story_completion",
+        "requiredStories": ["lunaria-s1"],
+        "minProgress": 100
+      }
+    },
+    {
+      "id": "grubot",
+      "heroId": "grubot",
+      "imageUrl": "images/tol/stories/mechanika-s1/heroes/grubot.png",
+      "unlockConditions": {
+        "type": "story_completion",
+        "requiredStories": ["mechanika-s1"],
+        "minProgress": 100
+      }
+    }
+  ]
+}

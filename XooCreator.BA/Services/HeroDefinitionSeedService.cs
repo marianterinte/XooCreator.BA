@@ -26,9 +26,10 @@ public class HeroDefinitionSeedService : IHeroDefinitionSeedService
     {
         try
         {
-            if (await _context.HeroDefinitions.AnyAsync())
+            // Check if we have any non-STORY_HERO definitions (the main hero tree)
+            if (await _context.HeroDefinitions.AnyAsync(h => h.Type != "STORY_HERO"))
             {
-                _logger.LogInformation("Hero definitions already seeded, skipping...");
+                _logger.LogInformation("Main hero definitions already seeded, skipping...");
                 return;
             }
 
