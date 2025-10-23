@@ -4,7 +4,7 @@
   "coverImageUrl": "images/tol/stories/intro-pufpuf/0.Cover.png",
   "category": "terra",
   "sortOrder": 1,
-  "unlockedStoryHeroes": ["pufpuf"],
+  "unlockedStoryHeroes": ["puf-puf"],
   "tiles": [
     {
       "tileId": "1",

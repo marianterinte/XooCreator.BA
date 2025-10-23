@@ -1,9 +1,9 @@
 {
   "storyHeroes": [
     {
-      "id": "pufpuf",
-      "heroId": "pufpuf",
-      "imageUrl": "images/tol/stories/intro-pufpuf/heroes/pufpuf.png",
+      "id": "puf-puf",
+      "heroId": "puf-puf",
+      "imageUrl": "images/tol/stories/intro-pufpuf/heroes/puf-puf.png",
       "unlockConditions": {
         "type": "story_completion",
         "requiredStories": ["intro-pufpuf"],

@@ -238,7 +238,7 @@ public class SeedDataService
         // Use fixed GUIDs for seeding to ensure consistency
         return heroId switch
         {
-            "pufpuf" => Guid.Parse("00000000-0000-0000-0000-000000000100"),
+            "puf-puf" => Guid.Parse("00000000-0000-0000-0000-000000000100"),
             "linkaro" => Guid.Parse("11111111-1111-1111-1111-111111111100"),
             "grubot" => Guid.Parse("22222222-2222-2222-2222-222222222200"),
             _ => Guid.NewGuid()

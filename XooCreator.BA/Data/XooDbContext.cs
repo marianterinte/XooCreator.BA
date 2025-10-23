@@ -648,7 +648,7 @@ public class XooDbContext : DbContext
         {
             new HeroDefinition
             {
-                Id = "pufpuf",
+                Id = "puf-puf",
                 Type = "STORY_HERO",
                 CourageCost = 0,
                 CuriosityCost = 0,
@@ -660,7 +660,7 @@ public class XooDbContext : DbContext
                 IsUnlocked = false,
                 PositionX = 0,
                 PositionY = 0,
-                Image = "images/heroes/pufpuf.png",
+                Image = "images/heroes/puf-puf.png",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             },
