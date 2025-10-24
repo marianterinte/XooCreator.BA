@@ -62,9 +62,9 @@ public sealed class GetUserBestiaryEndpoint
 
         var items = rawItems.Select(item => new BestiaryItemDto(
             item.Id,
-            ep.TranslateText(item.Name, item.BestiaryType, locale, translations),
+            ep.TranslateText(item.Name, item.BestiaryType, locale, translations, item.ArmsKey, item.BodyKey, item.HeadKey),
             ep.GetImageUrl(item.BestiaryType, item.ArmsKey, item.BodyKey, item.HeadKey),
-            ep.TranslateText(item.Story, item.BestiaryType, locale, translations),
+            ep.TranslateText(item.Story, item.BestiaryType, locale, translations, item.ArmsKey, item.BodyKey, item.HeadKey),
             item.DiscoveredAt,
             item.BestiaryType
         )).ToList();
@@ -114,7 +114,7 @@ public sealed class GetUserBestiaryEndpoint
         return $"images/tol/stories/heroes/{heroId}.png"; // Fallback
     }
 
-    private string TranslateText(string text, string bestiaryType, string locale, Dictionary<string, string> translations)
+    private string TranslateText(string text, string bestiaryType, string locale, Dictionary<string, string> translations, string? armsKey = null, string? bodyKey = null, string? headKey = null)
     {
         if (bestiaryType == "storyhero" && text.StartsWith("story_hero_"))
         {
@@ -127,6 +127,10 @@ public sealed class GetUserBestiaryEndpoint
                 
                 return GetStoryHeroTranslation(heroId, field, locale);
             }
+        }
+        else if (bestiaryType == "discovery")
+        {
+            return GetDiscoveryTranslation(text, locale, armsKey, bodyKey, headKey);
         }
         
         return text;
@@ -223,6 +227,82 @@ public sealed class GetUserBestiaryEndpoint
 
         return $"story_hero_{heroId}_{field}"; // Fallback to key
     }
+
+    private string GetDiscoveryTranslation(string text, string locale, string? armsKey, string? bodyKey, string? headKey)
+    {
+        try
+        {
+            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            
+            // Build the combination from the keys
+            var combination = BuildCombination(armsKey, bodyKey, headKey);
+            if (string.IsNullOrEmpty(combination))
+            {
+                return text; // If we can't build the combination, return original text
+            }
+            
+            // Try to get the translation for the requested locale
+            var discoveryFilePath = Path.Combine(baseDir, "Data", "SeedData", "Discovery", "i18n", locale, "discover-bestiary.json");
+            
+            if (File.Exists(discoveryFilePath))
+            {
+                var json = File.ReadAllText(discoveryFilePath);
+                var discoveryData = JsonSerializer.Deserialize<List<DiscoveryCreature>>(json, new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    PropertyNameCaseInsensitive = true
+                });
+
+                // Find the creature by combination
+                var creature = discoveryData?.FirstOrDefault(c => c.Combination == combination);
+                if (creature != null)
+                {
+                    // Return name or story based on what we're translating
+                    return text == creature.Name ? creature.Name : creature.Story;
+                }
+            }
+            
+            // If not found in requested locale, try English fallback
+            if (locale != "en-us")
+            {
+                var fallbackFilePath = Path.Combine(baseDir, "Data", "SeedData", "Discovery", "i18n", "en-us", "discover-bestiary.json");
+                
+                if (File.Exists(fallbackFilePath))
+                {
+                    var json = File.ReadAllText(fallbackFilePath);
+                    var discoveryData = JsonSerializer.Deserialize<List<DiscoveryCreature>>(json, new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        PropertyNameCaseInsensitive = true
+                    });
+
+                    // Find the creature by combination in English
+                    var creature = discoveryData?.FirstOrDefault(c => c.Combination == combination);
+                    if (creature != null)
+                    {
+                        // Return name or story based on what we're translating
+                        return text == creature.Name ? creature.Name : creature.Story;
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error reading discovery translation for {text}: {ex.Message}");
+        }
+
+        return text; // Fallback to original text
+    }
+
+    private string BuildCombination(string? armsKey, string? bodyKey, string? headKey)
+    {
+        // Convert "—" back to "None" to match the combination format
+        var arms = armsKey == "—" ? "None" : armsKey ?? "None";
+        var body = bodyKey == "—" ? "None" : bodyKey ?? "None";
+        var head = headKey == "—" ? "None" : headKey ?? "None";
+        
+        return $"{arms}{body}{head}";
+    }
 }
 
 // Helper classes for JSON deserialization
@@ -237,6 +317,15 @@ public class StoryHeroConfig
     public string HeroId { get; set; } = string.Empty;
     public string ImageUrl { get; set; } = string.Empty;
     public object? UnlockConditions { get; set; }
+}
+
+public class DiscoveryCreature
+{
+    public string Combination { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string ImagePrompt { get; set; } = string.Empty;
+    public string Story { get; set; } = string.Empty;
+    public string ImageFileName { get; set; } = string.Empty;
 }
 
 
