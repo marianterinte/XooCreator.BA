@@ -4,13 +4,14 @@
   "coverImageUrl": "images/tol/stories/terra-s1/0.Cover.png",
   "category": "terra",
   "sortOrder": 1,
+  "unlockedStoryHeroes": [],
   "tiles": [
     {
       "tileId": "1",
       "type": "page",
       "sortOrder": 1,
       "caption": "Sosirea",
-      "text": "Valea de pe Terra respiră aburi subțiri peste câmpurile întinse. Totul pare în ordine, dar oamenii își strâng pălăriile pe frunte și privesc cerul ca pe un oaspete nepoftit. Puf-Puf își încrețește mustățile: „E liniște… dar nu de bine. Hai să vedem de unde ține lumea aerul în piept.”",
+      "text": "Puf-Puf decide sa exploreze planeta pe care tocmai a aterizat. Mergeti impreuna si dupa cateva ore, o ferma, unde sunt mai multi sateni, va iese in cale. Totul pare în ordine o perioada, dar oamenii își sunt ingrijorati și privesc cerul ca pe un oaspete nepoftit. \nPuf-Puf își încrețește mustățile.\nPuf-Puf: - Oare de ce e lumea asa de speriata? De ce toti stau de parca isi tin respiratia?",
       "imageUrl": "images/tol/stories/terra-s1/1.arrival.png"
     },
     {
@@ -18,7 +19,7 @@
       "type": "page",
       "sortOrder": 2,
       "caption": "Tăcerea stranie",
-      "text": "Niciun cocoș nu cântă, niciun câine nu latră, nici greierii nu-și găsesc corul. Liniștea apasă, groasă, ca o pătură udă. Puf-Puf se uită la tine: „E ca și cum natura ar număra până la zece și n-ar îndrăzni să spună zece.”",
+      "text": "Niciun cocoș nu cântă, niciun câine nu latră, nici greierii nu-și găsesc corul. Liniștea apasă, groasă, ca o pătură udă. Puf-Puf se uită la tine.\nPuf-Puf: - E ca și cum natura ar număra până la zece și n-ar îndrăzni să spună: zece!",
       "imageUrl": "images/tol/stories/terra-s1/2.silence.png"
     },
     {
@@ -26,7 +27,7 @@
       "type": "page",
       "sortOrder": 3,
       "caption": "Șoaptele oamenilor",
-      "text": "Un bătrân se apropie cu pași mărunți. „E… o umbră”, șoptește. „Coboară din cer la apus. Animalele fug, grânele se culcă la pământ. Zicem că-i un blestem.” Puf-Puf clipește rar: „Blestem sau semn, tot o cauză are. Hai să prindem urma.”",
+      "text": "Un bătrân se apropie cu pași mărunți.\nBatranul: -E… o umbră... coboară din cer la apus. Animalele fug, grânele se culcă la pământ. Zicem că-i un blestem. \nPuf-Puf: - Blestem sau semn, tot o cauză are. Hai să prindem urma!",
       "imageUrl": "images/tol/stories/terra-s1/3.whispers.png"
     },
     {
@@ -34,7 +35,7 @@
       "type": "page",
       "sortOrder": 4,
       "caption": "Prima noapte",
-      "text": "Soarele se scurge după dealuri, iar vântul aduce un foșnet nou, neliniștit. Deasupra norilor, ceva mare se mișcă. Umbră peste câmpuri, iar luna parcă se dă la o parte. Puf-Puf își ține respirația o clipă și zâmbește puțin: „OK… asta nu e doar vreme schimbătoare.”",
+      "text": "Soarele se scurge după dealuri, iar vântul aduce un foșnet nou, neliniștit. Deasupra norilor, ceva mare se mișcă. Umbră peste câmpuri, iar luna parcă se dă la o parte. Puf-Puf își ține respirația o clipă și zâmbește puțin: \nPuf-Puf:- OK… asta nu e doar vreme schimbătoare.",
       "imageUrl": "images/tol/stories/terra-s1/4.first-night.png"
     },
     {
@@ -58,7 +59,7 @@
       "type": "page",
       "sortOrder": 7,
       "caption": "Legătura",
-      "text": "Puf-Puf se apropie încet, îți face semn din cap și apoi îți vorbește pe șoptite: „E din Copacul Luminii. Dacă o ajutăm, ne poate arăta un drum ascuns pe Terra.” Pasărea te privește drept, fără teamă; în ochii ei se văd brazde și stele. „Tu ai mâini bune”, zice Puf-Puf cu un zâmbet. „Și eu am… comentarii utile. Încearcă tu primul.”",
+      "text": "Puf-Puf se apropie încet, îți face semn din cap și apoi îți vorbește pe șoptite.\nPuf-Puf: - E din Copacul Luminii! Dacă o ajutăm, ne poate arăta un drum ascuns pe Terra. \nPasărea te privește drept, fără teamă; în ochii ei se văd brazde și stele. \nPuf-Puf: - Tu ai mâini bune, zice Puf-Puf cu un zâmbet. \nPuf-Puf: - Și eu am… comentarii utile. Încearcă tu primul!",
       "imageUrl": "images/tol/stories/terra-s1/7.bond.png"
     },
     {
@@ -108,13 +109,13 @@
           "text": "Îi construiești un plan pentru a-și întinde din nou aripile.",
           "tokens": [
             {
-              "type": "Discovery",
-              "value": "discovery credit",
+              "type": "Personality",
+              "value": "thinking",
               "quantity": 1
             },
             {
-              "type": "Personality",
-              "value": "thinking",
+              "type": "Discovery",
+              "value": "discovery credit",
               "quantity": 1
             }
           ],
@@ -125,13 +126,13 @@
           "text": "Îți folosești creativitatea și găsești o metodă nouă de vindecare.",
           "tokens": [
             {
-              "type": "Personality",
-              "value": "creativity",
+              "type": "Discovery",
+              "value": "discovery credit",
               "quantity": 1
             },
             {
-              "type": "Discovery",
-              "value": "discovery credit",
+              "type": "Personality",
+              "value": "creativity",
               "quantity": 1
             }
           ],
@@ -142,13 +143,13 @@
           "text": "Cercetezi semnele luminii de pe penele ei, pentru a descoperi secretul.",
           "tokens": [
             {
-              "type": "Discovery",
-              "value": "discovery credit",
+              "type": "Personality",
+              "value": "curiosity",
               "quantity": 1
             },
             {
-              "type": "Personality",
-              "value": "curiosity",
+              "type": "Discovery",
+              "value": "discovery credit",
               "quantity": 1
             }
           ],
@@ -162,7 +163,7 @@
       "type": "page",
       "sortOrder": 9,
       "caption": "Drumul deschis",
-      "text": "După ajutorul vostru, pasărea își strânge aripa rănită la piept și, cu un efort calm, își întinde cealaltă. O dungă de lumină se desprinde din penele ei și taie câmpul ca o potecă nouă. „Uite-l”, spune Puf-Puf, cu un fel de mândrie jucăușă. „Drumul care n-a existat până acum cinci minute.” Pasărea ridică privirea spre nori, apoi către voi. Puf-Puf primește o pană, în semn de recunoștință, și știe că pasărea va deveni, de acum înainte, protectoarea satului. Pana cea mare, magică, alimentează o energie nebănuită.",
+      "text": "După ajutorul vostru, pasărea își strânge aripa rănită la piept și, cu un efort calm, își întinde cealaltă. O dungă de lumină se desprinde din penele ei și taie câmpul ca o potecă nouă. \nPuf-Puf: - Uite-l!, spune Puf-Puf, cu un fel de mândrie jucăușă. \nPuf-Pif: - Drumul care n-a existat până acum cinci minute.\nPasărea ridică privirea spre nori, apoi către voi. Puf-Puf primește o pană, în semn de recunoștință, și știe că pasărea va deveni, de acum înainte, protectoarea satului. Pana cea mare, magică, alimentează o energie nebănuită.",
       "imageUrl": "images/tol/stories/terra-s1/9.path.png"
     }
   ]
