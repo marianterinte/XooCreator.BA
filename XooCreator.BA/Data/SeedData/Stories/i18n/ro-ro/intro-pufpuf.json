@@ -11,7 +11,7 @@
       "type": "page",
       "sortOrder": 1,
       "caption": "Chemarea",
-      "text": "Puf-Puf călătorea prin adâncul universului când liniștea cosmică fu spartă de un vuiet straniu — ca un oftat al stelelor. \nInstrumentele pâlpâiră, iar busola stelară desenă spirale fără sens. \nCu lăbuța pe parbrizul de cuarț, el simți (mai mult decât auzi) că cineva îl cheamă pe nume dintr-un loc foarte, foarte vechi.",
+      "text": "Puf-Puf călătorea prin adâncul universului când liniștea cosmică fu spartă de un vuiet straniu, ca un oftat al stelelor. \nInstrumentele pâlpâiră, iar busola stelară desenă spirale fără sens. \nCu lăbuța pe parbrizul de cuarț, el simți mai mult, decât auzi, că cineva îl cheamă pe nume dintr-un loc foarte, foarte vechi.",
       "imageUrl": "images/tol/stories/intro-pufpuf/1.puf-puf-flying.png"
     },
     {
@@ -27,7 +27,7 @@
       "type": "page",
       "sortOrder": 3,
       "caption": "Cristalul SOS",
-      "text": "La bord, în modulul SOS, un cristal străvechi pulsa ca o inimă adormită. Puf-Puf deschise panoul, iar lumina lui proiectă în aer o hartă vie: ramuri de lumină, poteci care se împleteau la infinit. Unele căi erau stinse, altele scânteiau ca semne. \nToate convergeau într-un singur nod: Copacul Luminii.",
+      "text": "La bord, în modulul SOS, un cristal străvechi pulsa ca o inimă adormită. \nPuf-Puf deschise panoul, iar lumina  cristalului proiectă în aer o hartă parca vie.\nRamuri de lumină, poteci care se împleteau la infinit, unele căi erau stinse, altele scânteiau ca semne. \nToate convergeau într-un singur nod: Copacul Luminii.",
       "imageUrl": "images/tol/stories/intro-pufpuf/3.puf-puf-crystal.png"
     },
     {
@@ -35,7 +35,7 @@
       "type": "page",
       "sortOrder": 4,
       "caption": "Întâlnirea",
-      "text": "Frunzele Copacului foșneau ca o șoaptă când Puf-Puf îți iese în cale și îți zâmbește parca amindindu-si ceva, putin cate putin. Puf-Puf „-Hei, tu. Da, ție îți vorbesc. Eu sunt Puf-Puf, o pisică vorbitoare de pe planeta Kelo-Ketis... nava mea e puțin șifonată, moralul insa e inca sus. \nCopacul ne-a pus față în față și, sincer, tu pari genul care să știe ce face. Adică ai privirea aia de «am mai reparat două-trei nave spațiale marțea seara». \nMă poți ajuta, te rog, să îmi repar nava și să mă întorc acasă? Cristalul este cheia. Trebuie să îl descifrăm.”\nCristalul parea sa proiecteze intr-o o holograma, aproape vie, un copac luminos, plin de mistere. ",
+      "text": "Frunzele Copacului foșneau ca o șoaptă când Puf-Puf îți iese în cale și îți zâmbește parca amindindu-si ceva, putin cate putin. Puf-Puf „-Hei, tu. Da, ție îți vorbesc. Eu sunt Puf-Puf, o pisică vorbitoare de pe planeta Kelo-Ketis... nava mea e puțin șifonată, moralul insa e inca sus. \nCopacul ne-a pus față în față și, sincer, tu pari genul care să știe ce face. Adică ai privirea aia de ai mai reparat două-trei nave spațiale marțea seara. \nMă poți ajuta, te rog, să îmi repar nava și să mă întorc acasă? Cristalul este cheia. Trebuie să îl descifrăm.”\nCristalul parea sa proiecteze intr-o o holograma, aproape vie, un copac luminos, plin de mistere. ",
       "imageUrl": "images/tol/stories/intro-pufpuf/puf-puf-home-planet.png"
     },
     {
@@ -85,13 +85,13 @@
           "text": "Îmi arăți calea către Kelo-Ketis?",
           "tokens": [
             {
-              "type": "Discovery",
-              "value": "discovery credit",
+              "type": "Personality",
+              "value": "thinking",
               "quantity": 1
             },
             {
-              "type": "Personality",
-              "value": "thinking",
+              "type": "Discovery",
+              "value": "discovery credit",
               "quantity": 1
             }
           ],
@@ -102,13 +102,13 @@
           "text": "Ce aș putea să folosesc pentru a repara nava?",
           "tokens": [
             {
-              "type": "Discovery",
-              "value": "discovery credit",
+              "type": "Personality",
+              "value": "creativity",
               "quantity": 1
             },
             {
-              "type": "Personality",
-              "value": "creativity",
+              "type": "Discovery",
+              "value": "discovery credit",
               "quantity": 1
             }
           ],
@@ -119,13 +119,13 @@
           "text": "Care e cel mai sigur drum spre casă?",
           "tokens": [
             {
-              "type": "Discovery",
-              "value": "discovery credit",
+              "type": "Personality",
+              "value": "safety",
               "quantity": 1
             },
             {
-              "type": "Personality",
-              "value": "safety",
+              "type": "Discovery",
+              "value": "discovery credit",
               "quantity": 1
             }
           ],
@@ -139,7 +139,7 @@
       "type": "page",
       "sortOrder": 6,
       "caption": "Curaj",
-      "text": "„Să mergem mai aproape, o vom rezolva noi; mă bucur că te-am găsit”, spuse Puf-Puf. Amândoi mergeti cu pași mici către copac.",
+      "text": "Puf-Puf: - Să mergem mai aproape, o vom rezolva noi. Mă bucur că te-am găsit.\nAmândoi mergeti cu pași mici către copac.",
       "imageUrl": "images/tol/stories/intro-pufpuf/5.puf-puf-tree-of-light.png"
     }
   ]
