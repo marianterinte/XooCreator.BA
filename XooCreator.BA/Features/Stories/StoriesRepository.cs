@@ -44,25 +44,25 @@ public class StoriesRepository : IStoriesRepository
 
     public async Task<StoryContentDto?> GetStoryByIdAsync(string storyId, string locale)
     {
-    storyId = NormalizeStoryId(storyId);
-    var story = await _context.StoryDefinitions
-            .Include(s => s.Translations)
-            .Include(s => s.Tiles)
-                .ThenInclude(t => t.Translations)
-            .Include(s => s.Tiles)
-                .ThenInclude(t => t.Answers)
-                    .ThenInclude(a => a.Tokens)
-            .Include(s => s.Tiles)
-                .ThenInclude(t => t.Answers)
-                    .ThenInclude(a => a.Translations)
-            .FirstOrDefaultAsync(s => s.StoryId == storyId && s.IsActive);
+        storyId = NormalizeStoryId(storyId);
+        var story = await _context.StoryDefinitions
+                .Include(s => s.Translations)
+                .Include(s => s.Tiles)
+                    .ThenInclude(t => t.Translations)
+                .Include(s => s.Tiles)
+                    .ThenInclude(t => t.Answers)
+                        .ThenInclude(a => a.Tokens)
+                .Include(s => s.Tiles)
+                    .ThenInclude(t => t.Answers)
+                        .ThenInclude(a => a.Translations)
+                .FirstOrDefaultAsync(s => s.StoryId == storyId && s.IsActive);
 
         return story == null ? null : MapToDtoWithLocale(story, locale);
     }
 
     public async Task<List<UserStoryProgressDto>> GetUserStoryProgressAsync(Guid userId, string storyId)
     {
-    storyId = NormalizeStoryId(storyId);
+        storyId = NormalizeStoryId(storyId);
         var progress = await _context.UserStoryReadProgress
             .Where(p => p.UserId == userId && p.StoryId == storyId)
             .ToListAsync();
@@ -440,6 +440,7 @@ public class StoriesRepository : IStoriesRepository
             Id = story.StoryId,
             Title = defTitle,
             CoverImageUrl = story.CoverImageUrl,
+            UnlockedStoryHeroes = GetUnlockedHeroesFromSeed(story.StoryId),
             Tiles = story.Tiles
                 .OrderBy(t => t.SortOrder)
                 .Select(t => new StoryTileDto
@@ -466,6 +467,42 @@ public class StoriesRepository : IStoriesRepository
                         }).ToList()
                 }).ToList()
         };
+    }
+
+    private static List<string> GetUnlockedHeroesFromSeed(string storyId)
+    {
+        try
+        {
+            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            var candidates = new[]
+            {
+                Path.Combine(baseDir, "Data", "SeedData", "en-us", "Stories", $"{storyId}.json"),
+                Path.Combine(baseDir, "Data", "SeedData", "ro-ro", "Stories", $"{storyId}.json"),
+                Path.Combine(baseDir, "Data", "SeedData", "hu-hu", "Stories", $"{storyId}.json")
+            };
+
+            foreach (var file in candidates)
+            {
+                if (!File.Exists(file)) continue;
+                var json = File.ReadAllText(file);
+                var data = JsonSerializer.Deserialize<StoryJsonProbe>(json, new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    PropertyNameCaseInsensitive = true
+                });
+                if (data?.UnlockedStoryHeroes != null && data.UnlockedStoryHeroes.Count > 0)
+                {
+                    return data.UnlockedStoryHeroes;
+                }
+            }
+        }
+        catch { }
+        return new List<string>();
+    }
+
+    private sealed class StoryJsonProbe
+    {
+        public List<string> UnlockedStoryHeroes { get; set; } = new();
     }
 
     private static string? TryGetTitle(StoryDefinition def, string lc)
