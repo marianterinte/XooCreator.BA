@@ -138,7 +138,8 @@ public sealed class GetUserBestiaryEndpoint
         {
             var baseDir = AppDomain.CurrentDomain.BaseDirectory;
             
-            var heroFilePath = Path.Combine(baseDir, "Resources", "BookOfHeroes", locale, $"{heroId}.json");
+            // First try the individual hero files in BookOfHeroes/i18n
+            var heroFilePath = Path.Combine(baseDir, "Data", "SeedData", "BookOfHeroes", "i18n", locale, $"{heroId}.json");
             
             if (File.Exists(heroFilePath))
             {
@@ -155,13 +156,34 @@ public sealed class GetUserBestiaryEndpoint
                 }
             }
             
+            // If not found, try the consolidated story-heroes.json file
+            var storyHeroesFilePath = Path.Combine(baseDir, "Data", "SeedData", "Translations", locale, "story-heroes.json");
+            
+            if (File.Exists(storyHeroesFilePath))
+            {
+                var json = File.ReadAllText(storyHeroesFilePath);
+                var translations = JsonSerializer.Deserialize<Dictionary<string, string>>(json, new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    PropertyNameCaseInsensitive = true
+                });
+
+                var key = $"story_hero_{heroId}_{field}";
+                if (translations?.ContainsKey(key) == true)
+                {
+                    return translations[key];
+                }
+            }
+            
+            // Fallback to English if not found in requested locale
             if (locale != "en-us")
             {
-                var fallbackFilePath = Path.Combine(baseDir, "Resources", "BookOfHeroes", "en-us", $"{heroId}.json");
+                // Try English individual hero file
+                var fallbackHeroFilePath = Path.Combine(baseDir, "Data", "SeedData", "BookOfHeroes", "i18n", "en-us", $"{heroId}.json");
                 
-                if (File.Exists(fallbackFilePath))
+                if (File.Exists(fallbackHeroFilePath))
                 {
-                    var json = File.ReadAllText(fallbackFilePath);
+                    var json = File.ReadAllText(fallbackHeroFilePath);
                     var heroData = JsonSerializer.Deserialize<Dictionary<string, string>>(json, new JsonSerializerOptions
                     {
                         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -171,6 +193,25 @@ public sealed class GetUserBestiaryEndpoint
                     if (heroData?.ContainsKey(field) == true)
                     {
                         return heroData[field];
+                    }
+                }
+                
+                // Try English consolidated story-heroes.json file
+                var fallbackStoryHeroesFilePath = Path.Combine(baseDir, "Data", "SeedData", "Translations", "en-us", "story-heroes.json");
+                
+                if (File.Exists(fallbackStoryHeroesFilePath))
+                {
+                    var json = File.ReadAllText(fallbackStoryHeroesFilePath);
+                    var translations = JsonSerializer.Deserialize<Dictionary<string, string>>(json, new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        PropertyNameCaseInsensitive = true
+                    });
+
+                    var key = $"story_hero_{heroId}_{field}";
+                    if (translations?.ContainsKey(key) == true)
+                    {
+                        return translations[key];
                     }
                 }
             }
