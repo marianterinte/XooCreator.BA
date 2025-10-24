@@ -1,6 +1,6 @@
 {
   "storyId": "intro-pufpuf",
-  "title": "The Great Adventure",
+  "title": "The Great Journey",
   "coverImageUrl": "images/tol/stories/intro-pufpuf/0.Cover.png",
   "category": "terra",
   "sortOrder": 1,
@@ -20,7 +20,7 @@
       "type": "page",
       "sortOrder": 2,
       "caption": "The Crash",
-      "text": "A flash of light swallowed the ship and hurled it into a blinding whirl. The plasma lightning rods melted, the rudder jammed, and the hull slit the clouds before biting into the damp earth. When silence returned, the air smelled of dryness and scorching heat. Puf-Puf touched his scratched ear, looked at the towering trees and… he didn’t know where he was, where he had come from, or why. He only knew he had arrived in a strange place that stirred his curiosity.",
+      "text": "A flash of light swallowed the ship and hurled it into a blinding whirl. The plasma lightning rods melted, the rudder jammed, and the hull slit the clouds before biting into the dry earth. When silence returned, the air smelled of dryness and scorching heat. Puf-Puf touched his scratched ear, looked at the towering trees and… he didn't know where he was, where he had come from, or why. He only knew he had arrived in a strange place that stirred his curiosity.",
       "imageUrl": "images/tol/stories/intro-pufpuf/2.puf-puf-hurt.png",
       "question": ""
     },
@@ -29,7 +29,7 @@
       "type": "page",
       "sortOrder": 3,
       "caption": "The SOS Crystal",
-      "text": "On board, in the SOS module, an ancient crystal pulsed like a sleeping heart. Puf-Puf opened the panel, and its light projected a living map into the air: branches of light, paths that intertwined infinitely. Some routes were dim, others sparkled like signs. They all converged to a single node: the Tree of Light.",
+      "text": "On board, in the SOS module, an ancient crystal pulsed like a sleeping heart. Puf-Puf opened the panel, and its light projected a map that seemed almost alive into the air: branches of light, paths that intertwined infinitely. Some routes were dim, others sparkled like signs. They all converged to a single node: the Tree of Light.",
       "imageUrl": "images/tol/stories/intro-pufpuf/3.puf-puf-crystal.png",
       "question": ""
     },
@@ -38,7 +38,7 @@
       "type": "page",
       "sortOrder": 4,
       "caption": "The Meeting",
-      "text": "The Tree’s leaves rustled like a whisper as Puf-Puf steps into your path and smiles, as if remembering something, little by little. ‘Hey, you. Yes, I’m talking to you. I’m Puf-Puf, a talking cat from the planet Kelo-Ketis… ship a bit rumpled, spirit… still high. The Tree brought us face to face and, honestly, you seem like the kind who knows what they’re doing. I mean, you’ve got that look of “I’ve fixed two or three spaceships on a Tuesday evening.” Can you help me repair my ship and get back home, please? The crystal is the key. We have to decipher it.’ The crystal seemed to project, in an almost living hologram, a luminous tree full of mysteries.",
+      "text": "The Tree's leaves rustled like a whisper as Puf-Puf steps into your path and smiles, as if remembering something, little by little. 'Hey, you. Yes, I'm talking to you. I'm Puf-Puf, a talking cat from the planet Kelo-Ketis… my ship is a bit rumpled, but my spirit is still high. The Tree brought us face to face and, honestly, you seem like the kind who knows what they're doing. I mean, you've got that look of \"I've fixed two or three spaceships on a Tuesday evening.\" Can you help me repair my ship and get back home, please? The crystal is the key. We have to decipher it.' The crystal seemed to project, in an almost living hologram, a luminous tree full of mysteries.",
       "imageUrl": "images/tol/stories/intro-pufpuf/puf-puf-home-planet.png",
       "question": ""
     },
@@ -143,7 +143,7 @@
       "type": "page",
       "sortOrder": 6,
       "caption": "Courage",
-      "text": "‘Let’s get closer, we’ll figure it out. I’m glad I found you,’ said Puf-Puf. The two of you stepped with small steps toward the tree.",
+      "text": "Puf-Puf: 'Let's get closer, we'll figure it out. I'm glad I found you.' Both of you walked with small steps toward the tree.",
       "imageUrl": "images/tol/stories/intro-pufpuf/5.puf-puf-tree-of-light.png"
     }
   ]

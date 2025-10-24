@@ -1,6 +1,6 @@
 {
   "storyId": "intro-pufpuf",
-  "title": "A Nagy Kaland",
+  "title": "A Nagy Utazás",
   "coverImageUrl": "images/tol/stories/intro-pufpuf/0.Cover.png",
   "category": "terra",
   "sortOrder": 1,
@@ -20,7 +20,7 @@
       "type": "page",
       "sortOrder": 2,
       "caption": "A zuhanás",
-      "text": "Egy villanásnyi fény elnyelte a hajót és egy vakító örvénybe hajította. A plazma villámhárítók megolvadtak, a kormány beragadt, és a hajótest szétvágta a felhőket, mielőtt beleharapott a nedves földbe. Amikor a csend visszatért, a levegő szárazság és perzselő hőség szagát árasztotta. Puf-Puf megérintette a megkarcolt fülét, a hatalmas fákat nézte, és… nem tudta, hol van, honnan jött, és miért. Csak annyit tudott, hogy egy idegen helyre érkezett, ami felkeltette a kíváncsiságát.",
+      "text": "Egy villanásnyi fény elnyelte a hajót és egy vakító örvénybe hajította. A plazma villámhárítók megolvadtak, a kormány beragadt, és a hajótest szétvágta a felhőket, mielőtt beleharapott a száraz földbe. Amikor a csend visszatért, a levegő szárazság és perzselő hőség szagát árasztotta. Puf-Puf megérintette a megkarcolt fülét, a hatalmas fákat nézte, és… nem tudta, hol van, honnan jött, és miért. Csak annyit tudott, hogy egy idegen helyre érkezett, ami felkeltette a kíváncsiságát.",
       "imageUrl": "images/tol/stories/intro-pufpuf/2.puf-puf-hurt.png",
       "question": ""
     },
@@ -29,7 +29,7 @@
       "type": "page",
       "sortOrder": 3,
       "caption": "Az SOS kristály",
-      "text": "A fedélzeten, az SOS modulban egy ősi kristály dobbant, mint egy alvó szív. Puf-Puf kinyitotta a panelt, és fénye egy élő térképet vetített a levegőbe: fény ágak, ösvények, amelyek a végtelenségig fonódtak. Néhány út kialudt, mások szikráztak, mint jelek. Mindegyik egyetlen csomópontba futott össze: a Fény Fájába.",
+      "text": "A fedélzeten, az SOS modulban egy ősi kristály dobbant, mint egy alvó szív. Puf-Puf kinyitotta a panelt, és fénye egy majdnem élő térképet vetített a levegőbe: fény ágak, ösvények, amelyek a végtelenségig fonódtak. Néhány út kialudt, mások szikráztak, mint jelek. Mindegyik egyetlen csomópontba futott össze: a Fény Fájába.",
       "imageUrl": "images/tol/stories/intro-pufpuf/3.puf-puf-crystal.png",
       "question": ""
     },
@@ -38,7 +38,7 @@
       "type": "page",
       "sortOrder": 4,
       "caption": "A találkozás",
-      "text": "A Fa levelei suttogva susogtak, amikor Puf-Puf eléd lépett és mosolygott, mintha apránként eszébe jutna valami. „Hé, te. Igen, veled beszélek. Én Puf-Puf vagyok, beszélő macska a Kelo-Ketis bolygóról... a hajó egy kicsit összegyűrve, a lélek... még mindig fent. A Fa szemtől szemben állított minket, és őszintén, te úgy nézel ki, mint aki tudja, mit csinál. Vagyis van az a tekinteted, hogy «már javítottam két-három űrhajót kedden este». Segíthetsz nekem, kérlek, hogy megjavítsam a hajómat és hazajussak? A kristály a kulcs. Meg kell fejtenünk.” A kristály mintha egy majdnem élő hologramban vetített volna egy fényes, titkokkal teli fát.",
+      "text": "A Fa levelei suttogva susogtak, amikor Puf-Puf eléd lépett és mosolygott, mintha apránként eszébe jutna valami. „Hé, te. Igen, veled beszélek. Én Puf-Puf vagyok, beszélő macska a Kelo-Ketis bolygóról... a hajóm egy kicsit összegyűrve, de a lelkem még mindig fent van. A Fa szemtől szemben állított minket, és őszintén, te úgy nézel ki, mint aki tudja, mit csinál. Vagyis van az a tekinteted, hogy \\\"már javítottam két-három űrhajót kedden este\\\". Segíthetsz nekem, kérlek, hogy megjavítsam a hajómat és hazajussak? A kristály a kulcs. Meg kell fejtenünk.\\\" A kristály mintha egy majdnem élő hologramban vetített volna egy fényes, titkokkal teli fát.",
       "imageUrl": "images/tol/stories/intro-pufpuf/puf-puf-home-planet.png",
       "question": ""
     },
@@ -143,7 +143,7 @@
       "type": "page",
       "sortOrder": 6,
       "caption": "Bátorság",
-      "text": "„Menjünk közelebb, rá fogunk jönni. Örülök, hogy megtaláltalak” — mondta Puf-Puf. Ketten apró léptekkel a fához indultatok.",
+      "text": "Puf-Puf: \\\"Menjünk közelebb, rá fogunk jönni. Örülök, hogy megtaláltalak.\\\" Mindketten apró léptekkel a fához indultatok.",
       "imageUrl": "images/tol/stories/intro-pufpuf/5.puf-puf-tree-of-light.png"
     }
   ]
