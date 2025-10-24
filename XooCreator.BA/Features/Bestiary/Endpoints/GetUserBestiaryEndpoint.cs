@@ -38,7 +38,6 @@ public sealed class GetUserBestiaryEndpoint
         var query = ep._db.UserBestiary
             .Where(ub => ub.UserId == userId.Value);
 
-        // Filter by bestiary type if provided
         if (!string.IsNullOrEmpty(bestiaryType))
         {
             query = query.Where(ub => ub.BestiaryType == bestiaryType);
@@ -59,10 +58,8 @@ public sealed class GetUserBestiaryEndpoint
             })
             .ToListAsync(ct);
 
-        // Get translations for the current locale
         var translations = await ep._translationService.GetTranslationsAsync(locale);
 
-        // Process image URLs and translations in memory (after EF query)
         var items = rawItems.Select(item => new BestiaryItemDto(
             item.Id,
             ep.TranslateText(item.Name, item.BestiaryType, locale, translations),
@@ -119,10 +116,8 @@ public sealed class GetUserBestiaryEndpoint
 
     private string TranslateText(string text, string bestiaryType, string locale, Dictionary<string, string> translations)
     {
-        // For storyhero type, check if the text is a translation key
         if (bestiaryType == "storyhero" && text.StartsWith("story_hero_"))
         {
-            // Extract hero ID from key (e.g., "story_hero_puf-puf_name" -> "puf-puf")
             var keyParts = text.Split('_');
             
             if (keyParts.Length >= 4)
@@ -134,7 +129,6 @@ public sealed class GetUserBestiaryEndpoint
             }
         }
         
-        // For other types, return the text as-is (already translated)
         return text;
     }
 
@@ -144,7 +138,6 @@ public sealed class GetUserBestiaryEndpoint
         {
             var baseDir = AppDomain.CurrentDomain.BaseDirectory;
             
-            // Try current locale first
             var heroFilePath = Path.Combine(baseDir, "Resources", "BookOfHeroes", locale, $"{heroId}.json");
             
             if (File.Exists(heroFilePath))
@@ -162,7 +155,6 @@ public sealed class GetUserBestiaryEndpoint
                 }
             }
             
-            // Fallback to en-us if current locale not found
             if (locale != "en-us")
             {
                 var fallbackFilePath = Path.Combine(baseDir, "Resources", "BookOfHeroes", "en-us", $"{heroId}.json");

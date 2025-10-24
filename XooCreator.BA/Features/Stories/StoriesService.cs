@@ -29,10 +29,6 @@ public class StoriesService : IStoriesService
 
     public async Task<GetStoryByIdResponse> GetStoryByIdAsync(Guid userId, string storyId, string locale)
     {
-        // NOTE: Currently fetching user read-progress together with story content.
-        // For clarity & performance we keep business rule minimal: if caller only wants content
-        // we could add a lighter method that does not touch progress.
-        // A dedicated endpoint now exists (/api/tree-of-light/user-progress) for completion status.
         var story = await _repository.GetStoryByIdAsync(storyId, locale);
         var userProgress = story != null
             ? await _repository.GetUserStoryProgressAsync(userId, storyId)

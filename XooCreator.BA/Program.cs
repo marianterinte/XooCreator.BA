@@ -18,14 +18,12 @@ using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Bind port from PORT env var (Railway) if provided
 var portEnv = Environment.GetEnvironmentVariable("PORT");
 if (!string.IsNullOrWhiteSpace(portEnv))
 {
     builder.WebHost.UseUrls($"http://0.0.0.0:{portEnv}");
 }
 
-// Add services
 builder.Services.AddLogging();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -40,7 +38,6 @@ builder.Services.AddSwaggerGen(c =>
     });
     c.OperationFilter<LocaleParameterOperationFilter>();
 
-    // Enable JWT Bearer auth in Swagger (Authorize button)
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -67,9 +64,6 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// === CORS: o singură policy super permisivă, valabilă peste tot ===
-// Dacă ai nevoie de cookies/credențiale, păstrează AllowCredentials + SetIsOriginAllowed(true).
-// Dacă NU ai nevoie de credențiale, vezi varianta comentată mai jos.
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -81,20 +75,10 @@ builder.Services.AddCors(options =>
             .SetPreflightMaxAge(TimeSpan.FromHours(24))
     );
 
-    // VARIANTĂ FĂRĂ CREDENȚIALE (înlocuiește policy-ul de mai sus dacă nu folosești cookies):
-    // options.AddPolicy("AllowAll", policy =>
-    //     policy
-    //         .AllowAnyOrigin()
-    //         .AllowAnyMethod()
-    //         .AllowAnyHeader()
-    //         .SetPreflightMaxAge(TimeSpan.FromHours(24))
-    // );
 });
 
-// EF Core PostgreSQL
 builder.Services.AddDbContext<XooDbContext>(options =>
 {
-    // Railway provides DATABASE_URL in URL form: postgres://user:pass@host:port/db
     var dbUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
     string cs;
     if (!string.IsNullOrWhiteSpace(dbUrl))
@@ -121,10 +105,8 @@ builder.Services.AddDbContext<XooDbContext>(options =>
     options.UseNpgsql(cs);
 });
 
-// Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
-// Services
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IAuth0UserService, Auth0UserService>();
 builder.Services.AddScoped<IUserContextService, UserContextService>();
@@ -135,27 +117,21 @@ builder.Services.AddScoped<IBestiaryFileUpdater, BestiaryFileUpdater>();
 builder.Services.AddScoped<IHeroDefinitionSeedService, HeroDefinitionSeedService>();
 builder.Services.AddScoped<IHeroTreeProvider, HeroTreeProvider>();
 
-// Add creature builder service
 
-// User Services
 builder.Services.AddScoped<XooCreator.BA.Features.User.IUserProfileService, XooCreator.BA.Features.User.UserProfileService>();
 
-// Tree of Light Services
 builder.Services.AddScoped<ITreeOfLightTranslationService, TreeOfLightTranslationService>();
 builder.Services.AddScoped<ITreeOfLightRepository, TreeOfLightRepository>();
 builder.Services.AddScoped<ITreeOfLightService, TreeOfLightService>();
 builder.Services.AddScoped<ITreeModelRepository, TreeModelRepository>();
 builder.Services.AddScoped<ITreeModelService, TreeModelService>();
 
-// Tree of Heroes Services
 builder.Services.AddScoped<ITreeOfHeroesRepository, TreeOfHeroesRepository>();
 builder.Services.AddScoped<ITreeOfHeroesService, TreeOfHeroesService>();
 
-// Stories Services
 builder.Services.AddScoped<IStoriesRepository, StoriesRepository>();
 builder.Services.AddScoped<IStoriesService, StoriesService>();
 
-// Auth0 JWT Bearer
 var auth0Section = builder.Configuration.GetSection("Auth0");
 var auth0Domain = auth0Section["Domain"];
 var auth0Audience = auth0Section["Audience"];
@@ -166,7 +142,6 @@ builder.Services.AddAuthentication(options =>
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(options =>
 {
-    // Keep original JWT claim types (sub, aud, iss) without remapping to WS-* schema
     options.MapInboundClaims = false;
     options.Authority = $"https://{auth0Domain}";
     options.Audience = auth0Audience;
@@ -179,7 +154,6 @@ builder.Services.AddAuthentication(options =>
         ValidateLifetime = true
     };
 
-    // Temporary diagnostics to understand 401 causes during development
     options.Events = new JwtBearerEvents
     {
         OnAuthenticationFailed = context =>
@@ -211,13 +185,11 @@ builder.Services.AddAuthorization();
 var app = builder.Build();
 app.UseCors("AllowAll");
 
-// Global exception handler - should be early in the pipeline
 app.UseGlobalExceptionHandling();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Locale now part of route templates; no rewrite middleware needed
 
 // Auto-migrate database on startup + initializare date
 using (var scope = app.Services.CreateScope())

@@ -23,7 +23,6 @@ public class UserRepository : IUserRepository
         var user = await _db.AlchimaliaUsers.FirstOrDefaultAsync(u => u.Auth0Id == auth0Id, ct);
         if (user != null) 
         {
-            // Update profile data and last login
             user.Name = name;
             user.Email = email;
             user.Picture = picture;

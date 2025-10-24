@@ -87,7 +87,6 @@ public class TreeModelRepository : ITreeModelRepository
                     }).ToList();
                 _context.TreeRegions.AddRange(regions);
 
-                // Validate that all referenced stories exist before creating TreeStoryNodes
                 var referencedStoryIds = seed.StoryNodes.Select(sn => sn.StoryId).Distinct().ToList();
                 var existingStoryIds = await _context.StoryDefinitions
                     .Where(sd => referencedStoryIds.Contains(sd.StoryId))

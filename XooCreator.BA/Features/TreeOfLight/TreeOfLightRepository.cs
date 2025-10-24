@@ -15,12 +15,10 @@ public interface ITreeOfLightRepository
     Task<bool> UnlockRegionAsync(Guid userId, string regionId, string configId);
     Task ResetUserProgressAsync(Guid userId);
     
-    // Story Heroes methods
     Task<List<StoryHero>> GetStoryHeroesAsync();
     Task<bool> IsHeroUnlockedAsync(Guid userId, string heroId);
     Task<bool> UnlockHeroAsync(Guid userId, string heroId, string heroType);
     
-    // Hero Messages methods
     Task<List<HeroMessage>> GetHeroMessagesAsync();
     Task<List<HeroClickMessage>> GetHeroClickMessagesAsync();
     Task<HeroMessage?> GetHeroMessageAsync(string heroId, string regionId);
@@ -76,7 +74,6 @@ public class TreeOfLightRepository : ITreeOfLightRepository
     {
         try
         {
-            // Check if story is already completed
             var existingStory = await _context.StoryProgress
                 .FirstOrDefaultAsync(sp => sp.UserId == userId && sp.StoryId == request.StoryId && sp.TreeConfigurationId == configId);
 
@@ -176,13 +173,11 @@ public class TreeOfLightRepository : ITreeOfLightRepository
 
         try
         {
-            // Delete all user progress records
             await _context.TreeProgress.Where(tp => tp.UserId == userId).ExecuteDeleteAsync();
             await _context.StoryProgress.Where(sp => sp.UserId == userId).ExecuteDeleteAsync();
             await _context.HeroProgress.Where(hp => hp.UserId == userId).ExecuteDeleteAsync();
             await _context.HeroTreeProgress.Where(htp => htp.UserId == userId).ExecuteDeleteAsync();
 
-            // Remove all existing token balances for this user
             await _context.UserTokenBalances
                 .Where(b => b.UserId == userId)
                 .ExecuteDeleteAsync();
@@ -212,7 +207,6 @@ public class TreeOfLightRepository : ITreeOfLightRepository
 
     public async Task<bool> UnlockHeroAsync(Guid userId, string heroId, string heroType)
     {
-        // Check if already unlocked
         var existingProgress = await _context.HeroProgress
             .FirstOrDefaultAsync(hp => hp.UserId == userId && hp.HeroId == heroId);
         
@@ -221,7 +215,6 @@ public class TreeOfLightRepository : ITreeOfLightRepository
             return false; // Already unlocked
         }
 
-        // Create new hero progress entry
         var heroProgress = new HeroProgress
         {
             Id = Guid.NewGuid(),

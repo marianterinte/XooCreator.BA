@@ -15,7 +15,6 @@ public interface ITreeOfLightService
     Task<CompleteStoryResponse> CompleteStoryAsync(Guid userId, CompleteStoryRequest request, string configId);
     Task<ResetProgressResponse> ResetUserProgressAsync(Guid userId);
     
-    // Hero Messages methods
     Task<HeroMessageDto?> GetHeroMessageAsync(string heroId, string regionId);
     Task<HeroClickMessageDto?> GetHeroClickMessageAsync(string heroId);
 }
@@ -95,7 +94,6 @@ public class TreeOfLightService : ITreeOfLightService
             {
                 await _treeOfHeroesRepository.AwardTokensAsync(userId, effectiveTokens);
                 
-                // Check for Discovery type tokens and update wallet
                 var discoveryTokens = effectiveTokens.Where(t => t.Type == TokenFamily.Discovery).ToList();
                 if (discoveryTokens.Count > 0)
                 {
@@ -171,25 +169,20 @@ public class TreeOfLightService : ITreeOfLightService
     {
         var newlyUnlockedHeroes = new List<UnlockedHeroDto>();
 
-        // First, check for heroes unlocked directly from story JSON (unlockedStoryHeroes field)
         var storyUnlockedHeroes = await GetUnlockedHeroesFromStoryJsonAsync(storyId);
         foreach (var heroId in storyUnlockedHeroes)
         {
-            // Check if user has already unlocked this hero
             var isAlreadyUnlocked = await _repository.IsHeroUnlockedAsync(userId, heroId);
             if (isAlreadyUnlocked)
             {
                 continue;
             }
 
-            // Unlock the hero and save to bestiary
             var unlocked = await _repository.UnlockHeroAsync(userId, heroId, "STORY_COMPLETION");
             if (unlocked)
             {
-                // Save hero to bestiary with StoryHero category
                 await SaveStoryHeroToBestiaryAsync(userId, heroId);
                 
-                // Get hero image URL from story heroes configuration
                 var heroImageUrl = await GetStoryHeroImageUrlAsync(heroId);
                 
                 newlyUnlockedHeroes.Add(new UnlockedHeroDto
@@ -200,38 +193,30 @@ public class TreeOfLightService : ITreeOfLightService
             }
         }
 
-        // Also check the existing story heroes system for backward compatibility
         var storyHeroes = await _repository.GetStoryHeroesAsync();
         
         foreach (var storyHero in storyHeroes)
         {
-            // Check if user has already unlocked this hero
             var isAlreadyUnlocked = await _repository.IsHeroUnlockedAsync(userId, storyHero.HeroId);
             if (isAlreadyUnlocked)
             {
                 continue;
             }
 
-            // Check unlock conditions
             var unlockConditions = JsonSerializer.Deserialize<UnlockConditions>(storyHero.UnlockConditionJson);
             if (unlockConditions?.Type == "story_completion" && unlockConditions.RequiredStories != null)
             {
-                // Check if the current story is one of the required stories
                 if (unlockConditions.RequiredStories.Contains(storyId))
                 {
-                    // Get all completed stories for this user
                     var completedStories = await _repository.GetStoryProgressAsync(userId, "puf-puf-journey-v1"); // Use default config
                     var completedStoryIds = new HashSet<string>(completedStories.Select(cs => cs.StoryId));
                     
-                    // Check if all required stories are completed
                     var allRequiredStoriesCompleted = unlockConditions.RequiredStories.All(requiredStoryId => completedStoryIds.Contains(requiredStoryId));
                     if (allRequiredStoriesCompleted)
                     {
-                        // Unlock the hero
                         var unlocked = await _repository.UnlockHeroAsync(userId, storyHero.HeroId, "STORY_COMPLETION");
                         if (unlocked)
                         {
-                            // Save hero to bestiary with StoryHero category
                             await SaveStoryHeroToBestiaryAsync(userId, storyHero.HeroId);
                             
                             newlyUnlockedHeroes.Add(new UnlockedHeroDto
@@ -287,18 +272,15 @@ public class TreeOfLightService : ITreeOfLightService
     {
         try
         {
-            // Use translation keys instead of translated text
             var heroNameKey = $"story_hero_{heroId}_name";
             var heroStoryKey = $"story_hero_{heroId}_story";
 
-            // Check if hero already exists in bestiary
             var existingBestiaryItem = await _dbContext.BestiaryItems
                 .FirstOrDefaultAsync(bi => bi.ArmsKey == heroId);
 
             BestiaryItem bestiaryItem;
             if (existingBestiaryItem == null)
             {
-                // Create new bestiary item for this hero
                 bestiaryItem = new BestiaryItem
                 {
                     Id = Guid.NewGuid(),
@@ -316,13 +298,11 @@ public class TreeOfLightService : ITreeOfLightService
                 bestiaryItem = existingBestiaryItem;
             }
 
-            // Check if user already has this hero in their bestiary
             var existingUserBestiary = await _dbContext.UserBestiary
                 .FirstOrDefaultAsync(ub => ub.UserId == userId && ub.BestiaryItemId == bestiaryItem.Id && ub.BestiaryType == "storyhero");
 
             if (existingUserBestiary == null)
             {
-                // Add to user's bestiary
                 var userBestiary = new UserBestiary
                 {
                     Id = Guid.NewGuid(),
@@ -440,11 +420,9 @@ public class TreeOfLightService : ITreeOfLightService
 
     private async Task UpdateDiscoveryCreditsAsync(Guid userId, int discoveryCredits, string storyId)
     {
-        // Get or create user's wallet
         var wallet = await _dbContext.CreditWallets.FirstOrDefaultAsync(w => w.UserId == userId);
         if (wallet == null)
         {
-            // Create wallet if it doesn't exist
             wallet = new CreditWallet
             {
                 UserId = userId,
@@ -456,12 +434,10 @@ public class TreeOfLightService : ITreeOfLightService
         }
         else
         {
-            // Add discovery credits to existing wallet
             wallet.DiscoveryBalance += discoveryCredits;
             wallet.UpdatedAt = DateTime.UtcNow;
         }
         
-        // Record the credit grant transaction
         var transaction = new CreditTransaction
         {
             Id = Guid.NewGuid(),

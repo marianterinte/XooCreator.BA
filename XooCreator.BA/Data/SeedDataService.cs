@@ -8,7 +8,6 @@ public class SeedDataService
 
     public SeedDataService(string? seedDataPath = null)
     {
-        // Default to RO path; callers can instantiate additional services for other locales
         _seedDataPath = seedDataPath ?? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SeedData", "ro-ro", "LaboratoryOfImagination");
     }
 
@@ -235,7 +234,6 @@ public class SeedDataService
 
     private static Guid GetFixedStoryHeroId(string heroId)
     {
-        // Use fixed GUIDs for seeding to ensure consistency
         return heroId switch
         {
             "puf-puf" => Guid.Parse("00000000-0000-0000-0000-000000000100"),

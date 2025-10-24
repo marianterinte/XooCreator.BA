@@ -26,7 +26,6 @@ public class HeroDefinitionSeedService : IHeroDefinitionSeedService
     {
         try
         {
-            // Check if we have any non-STORY_HERO definitions (the main hero tree)
             if (await _context.HeroDefinitions.AnyAsync(h => h.Type != "STORY_HERO"))
             {
                 _logger.LogInformation("Main hero definitions already seeded, skipping...");
@@ -66,7 +65,6 @@ public class HeroDefinitionSeedService : IHeroDefinitionSeedService
 
             _logger.LogInformation("Successfully seeded {Count} hero definitions", heroDefinitions.Count);
 
-            // Seed translations
             foreach (var languageCode in LanguageCodeExtensions.All())
             {
                 var heroTreeData = await _heroTreeProvider.GetHeroTree(languageCode);

@@ -205,12 +205,6 @@ public class StoriesRepository : IStoriesRepository
 
     private static async Task<List<StoryDefinition>> LoadStoriesFromJsonAsync(string baseLocale = "ro-ro")
     {
-        // Preferred per-locale sources (one story per file):
-        //   Data/SeedData/<locale>/Stories/*.json
-        //   Data/SeedData/Stories/<locale>/*.json
-        // Backward compatibility:
-        //   Data/SeedData/Stories/*.json
-        //   Data/SeedData/stories-seed.json
 
         var baseDir = AppDomain.CurrentDomain.BaseDirectory;
         var localeLc = (baseLocale ?? "ro-ro").ToLowerInvariant();
@@ -218,7 +212,6 @@ public class StoriesRepository : IStoriesRepository
         {
             Path.Combine(baseDir, "Data", "SeedData", localeLc, "Stories"),
             Path.Combine(baseDir, "Data", "SeedData", "Stories", localeLc),
-            // Fallback non-locale folder
             Path.Combine(baseDir, "Data", "SeedData", "Stories")
         };
         var legacyPath = Path.Combine(baseDir, "Data", "SeedData", "stories-seed.json");
@@ -250,7 +243,6 @@ public class StoriesRepository : IStoriesRepository
                 var def = MapFromSeedData(seed);
                 storyMap[def.StoryId] = def;
             }
-            // Stop at first matching folder that contains files
             if (files.Count > 0) break;
         }
 
@@ -376,9 +368,6 @@ public class StoriesRepository : IStoriesRepository
 
     private static async Task<List<StoryTranslationSeed>> LoadStoryTranslationsFromJsonAsync(string locale)
     {
-        // Supported patterns:
-        // Data/SeedData/<locale>/Stories/*.json
-        // Data/SeedData/Stories/<locale>/*.json
         var results = new List<StoryTranslationSeed>();
         var candidates = new[]
         {

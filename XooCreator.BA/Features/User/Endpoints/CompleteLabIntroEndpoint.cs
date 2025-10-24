@@ -35,11 +35,9 @@ public class CompleteLabIntroEndpoint
         {
             user.HasVisitedImaginationLaboratory = true;
             
-            // Add 5 discovery credits to user's wallet
             var wallet = await dbContext.CreditWallets.FirstOrDefaultAsync(w => w.UserId == userId.Value, ct);
             if (wallet == null)
             {
-                // Create wallet if it doesn't exist
                 wallet = new CreditWallet
                 {
                     UserId = userId.Value,
@@ -51,12 +49,10 @@ public class CompleteLabIntroEndpoint
             }
             else
             {
-                // Add 5 discovery credits to existing wallet
                 wallet.DiscoveryBalance += 5;
                 wallet.UpdatedAt = DateTime.UtcNow;
             }
             
-            // Record the credit grant transaction
             var transaction = new CreditTransaction
             {
                 Id = Guid.NewGuid(),
