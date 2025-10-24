@@ -93,7 +93,7 @@ public class HeroTreeProvider : IHeroTreeProvider
     {
         try
         {
-            var jsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SeedData", "Translations", languageCode.ToFolder(), "hero-tree.json");
+            var jsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SeedData", "BookOfHeroes", "i18n", languageCode.ToFolder(), "hero-tree.json");
             if (!File.Exists(jsonPath))
             {
                 _logger.LogWarning("Hero tree translation file not found for language {Language} at path: {Path}", languageCode, jsonPath);

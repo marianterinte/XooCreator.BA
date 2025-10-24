@@ -11,7 +11,7 @@ public class TreeOfLightTranslationService : ITreeOfLightTranslationService
 
     public TreeOfLightTranslationService()
     {
-        _resourcesPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "TreeOfLight");
+        _resourcesPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SeedData", "TreeOfLight", "i18n");
     }
 
     public async Task<Dictionary<string, string>> GetTranslationsAsync(string locale)

@@ -149,7 +149,7 @@ public class TreeModelRepository : ITreeModelRepository
     private static async Task<List<TreeModelSeedRoot>> LoadSeedAsync()
     {
         var baseDir = AppDomain.CurrentDomain.BaseDirectory;
-        var configsDir = Path.Combine(baseDir, "Data", "SeedData", "SharedConfigs", "TreeOfLight");
+        var configsDir = Path.Combine(baseDir, "Data", "SeedData", "TreeOfLight");
 
         if (!Directory.Exists(configsDir))
         {

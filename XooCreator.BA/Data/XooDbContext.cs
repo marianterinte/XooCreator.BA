@@ -517,7 +517,7 @@ public class XooDbContext : DbContext
     {
         try
         {
-            var seedService = new SeedDataService(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SeedData", "ro-ro", "LaboratoryOfImagination"));
+            var seedService = new SeedDataService(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SeedData", "LaboratoryOfImagination", "i18n", "ro-ro"));
             
             var bodyParts = LoadDataSync(() => seedService.LoadBodyPartsAsync());
             var regions = LoadDataSync(() => seedService.LoadRegionsAsync());
@@ -529,7 +529,7 @@ public class XooDbContext : DbContext
             modelBuilder.Entity<Animal>().HasData(animals);
             modelBuilder.Entity<AnimalPartSupport>().HasData(animalPartSupports);
 
-            var enPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SeedData", "en-us", "LaboratoryOfImagination");
+            var enPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SeedData", "LaboratoryOfImagination", "i18n", "en-us");
             if (Directory.Exists(enPath))
             {
                 var enSeed = new SeedDataService(enPath);

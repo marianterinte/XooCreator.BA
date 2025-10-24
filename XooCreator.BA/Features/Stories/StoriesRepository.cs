@@ -210,9 +210,7 @@ public class StoriesRepository : IStoriesRepository
         var localeLc = (baseLocale ?? "ro-ro").ToLowerInvariant();
         var candidates = new[]
         {
-            Path.Combine(baseDir, "Data", "SeedData", localeLc, "Stories"),
-            Path.Combine(baseDir, "Data", "SeedData", "Stories", localeLc),
-            Path.Combine(baseDir, "Data", "SeedData", "Stories")
+            Path.Combine(baseDir, "Data", "SeedData", "Stories", "i18n", localeLc)
         };
         var legacyPath = Path.Combine(baseDir, "Data", "SeedData", "stories-seed.json");
 
@@ -371,8 +369,7 @@ public class StoriesRepository : IStoriesRepository
         var results = new List<StoryTranslationSeed>();
         var candidates = new[]
         {
-            Path.Combine("Data", "SeedData", locale, "Stories"),
-            Path.Combine("Data", "SeedData", "Stories", locale)
+            Path.Combine("Data", "SeedData", "Stories", "i18n", locale)
         };
 
         var jsonOptions = new JsonSerializerOptions
@@ -476,9 +473,9 @@ public class StoriesRepository : IStoriesRepository
             var baseDir = AppDomain.CurrentDomain.BaseDirectory;
             var candidates = new[]
             {
-                Path.Combine(baseDir, "Data", "SeedData", "en-us", "Stories", $"{storyId}.json"),
-                Path.Combine(baseDir, "Data", "SeedData", "ro-ro", "Stories", $"{storyId}.json"),
-                Path.Combine(baseDir, "Data", "SeedData", "hu-hu", "Stories", $"{storyId}.json")
+                Path.Combine(baseDir, "Data", "SeedData", "Stories", "i18n", "en-us", $"{storyId}.json"),
+                Path.Combine(baseDir, "Data", "SeedData", "Stories", "i18n", "ro-ro", $"{storyId}.json"),
+                Path.Combine(baseDir, "Data", "SeedData", "Stories", "i18n", "hu-hu", $"{storyId}.json")
             };
 
             foreach (var file in candidates)

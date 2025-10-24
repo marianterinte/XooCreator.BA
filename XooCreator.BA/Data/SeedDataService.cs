@@ -8,7 +8,7 @@ public class SeedDataService
 
     public SeedDataService(string? seedDataPath = null)
     {
-        _seedDataPath = seedDataPath ?? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SeedData", "ro-ro", "LaboratoryOfImagination");
+        _seedDataPath = seedDataPath ?? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SeedData", "LaboratoryOfImagination", "i18n", "ro-ro");
     }
 
     public async Task<List<BodyPart>> LoadBodyPartsAsync()
@@ -155,7 +155,7 @@ public class SeedDataService
 
     public async Task<List<HeroMessage>> LoadHeroMessagesAsync()
     {
-        var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SeedData", "SharedConfigs", "hero-messages.json");
+        var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SeedData", "BookOfHeroes", "hero-messages.json");
         if (!File.Exists(filePath))
         {
             throw new FileNotFoundException($"HeroMessages seed data file not found: {filePath}");
@@ -195,7 +195,7 @@ public class SeedDataService
 
     public async Task<List<HeroClickMessage>> LoadHeroClickMessagesAsync()
     {
-        var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SeedData", "SharedConfigs", "hero-messages.json");
+        var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SeedData", "BookOfHeroes", "hero-messages.json");
         if (!File.Exists(filePath))
         {
             throw new FileNotFoundException($"HeroMessages seed data file not found: {filePath}");

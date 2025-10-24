@@ -48,7 +48,7 @@ public sealed class SeedDiscoveryService : ISeedDiscoveryService
             var candidates = new List<string>();
             foreach (var lc in LanguageCodeExtensions.All())
             {
-                candidates.Add(Path.Combine(baseDir, "Data", "SeedData", lc.ToFolder(), "discover-bestiary.json"));
+                candidates.Add(Path.Combine(baseDir, "Data", "SeedData", "Discovery", "i18n", lc.ToFolder(), "discover-bestiary.json"));
             }
             candidates.Add(Path.Combine(baseDir, "Data", "SeedData", "discover-bestiary.json"));
             string? path = candidates.FirstOrDefault(File.Exists);
