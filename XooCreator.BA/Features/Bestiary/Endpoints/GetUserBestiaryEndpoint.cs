@@ -132,6 +132,10 @@ public sealed class GetUserBestiaryEndpoint
         {
             return GetDiscoveryTranslation(text, locale, armsKey, bodyKey, headKey);
         }
+        else if (bestiaryType == "treeofheroes")
+        {
+            return GetTreeOfHeroesTranslation(text, locale, armsKey);
+        }
         
         return text;
     }
@@ -257,8 +261,10 @@ public sealed class GetUserBestiaryEndpoint
                 var creature = discoveryData?.FirstOrDefault(c => c.Combination == combination);
                 if (creature != null)
                 {
-                    // Return name or story based on what we're translating
-                    return text == creature.Name ? creature.Name : creature.Story;
+                    // Return the appropriate field from the translation file
+                    // We need to determine if we're translating name or story
+                    // by checking if the original text matches the name pattern
+                    return GetTranslatedField(text, creature);
                 }
             }
             
@@ -280,8 +286,8 @@ public sealed class GetUserBestiaryEndpoint
                     var creature = discoveryData?.FirstOrDefault(c => c.Combination == combination);
                     if (creature != null)
                     {
-                        // Return name or story based on what we're translating
-                        return text == creature.Name ? creature.Name : creature.Story;
+                        // Return the appropriate field from the translation file
+                        return GetTranslatedField(text, creature);
                     }
                 }
             }
@@ -294,6 +300,88 @@ public sealed class GetUserBestiaryEndpoint
         return text; // Fallback to original text
     }
 
+    private string GetTreeOfHeroesTranslation(string text, string locale, string? armsKey)
+    {
+        try
+        {
+            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            
+            // For tree of heroes, armsKey contains the hero ID
+            var heroId = armsKey;
+            if (string.IsNullOrEmpty(heroId))
+            {
+                return text; // If we can't get the hero ID, return original text
+            }
+            
+            // Try to get the translation for the requested locale
+            var heroTreeFilePath = Path.Combine(baseDir, "Data", "SeedData", "BookOfHeroes", "i18n", locale, "hero-tree.json");
+            
+            if (File.Exists(heroTreeFilePath))
+            {
+                var json = File.ReadAllText(heroTreeFilePath);
+                var heroTreeData = JsonSerializer.Deserialize<Dictionary<string, string>>(json, new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    PropertyNameCaseInsensitive = true
+                });
+
+                // Determine if we're translating name or story
+                var field = GetTreeOfHeroesField(text);
+                var key = $"hero_tree_{heroId}_{field}";
+                
+                if (heroTreeData?.ContainsKey(key) == true)
+                {
+                    return heroTreeData[key];
+                }
+            }
+            
+            // If not found in requested locale, try English fallback
+            if (locale != "en-us")
+            {
+                var fallbackFilePath = Path.Combine(baseDir, "Data", "SeedData", "BookOfHeroes", "i18n", "en-us", "hero-tree.json");
+                
+                if (File.Exists(fallbackFilePath))
+                {
+                    var json = File.ReadAllText(fallbackFilePath);
+                    var heroTreeData = JsonSerializer.Deserialize<Dictionary<string, string>>(json, new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        PropertyNameCaseInsensitive = true
+                    });
+
+                    // Determine if we're translating name or story
+                    var field = GetTreeOfHeroesField(text);
+                    var key = $"hero_tree_{heroId}_{field}";
+                    
+                    if (heroTreeData?.ContainsKey(key) == true)
+                    {
+                        return heroTreeData[key];
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error reading tree of heroes translation for {text}: {ex.Message}");
+        }
+
+        return text; // Fallback to original text
+    }
+
+    private string GetTreeOfHeroesField(string text)
+    {
+        // Simple heuristic: if the text is relatively short (likely a name), return "name"
+        // Otherwise, return "story"
+        if (text.Length < 50) // Names are typically shorter
+        {
+            return "name";
+        }
+        else
+        {
+            return "story";
+        }
+    }
+
     private string BuildCombination(string? armsKey, string? bodyKey, string? headKey)
     {
         // Convert "—" back to "None" to match the combination format
@@ -302,6 +390,27 @@ public sealed class GetUserBestiaryEndpoint
         var head = headKey == "—" ? "None" : headKey ?? "None";
         
         return $"{arms}{body}{head}";
+    }
+
+    private string GetTranslatedField(string originalText, DiscoveryCreature creature)
+    {
+        // We need to determine if we're translating name or story
+        // The original text comes from the database and could be in any language
+        // We need to check which field it matches better
+        
+        // If the original text is shorter and matches the name pattern, it's likely a name
+        // If it's longer and contains more descriptive text, it's likely a story
+        
+        // Simple heuristic: if the text is relatively short (likely a name), return the name
+        // Otherwise, return the story
+        if (originalText.Length < 50) // Names are typically shorter
+        {
+            return creature.Name;
+        }
+        else
+        {
+            return creature.Story;
+        }
     }
 }
 

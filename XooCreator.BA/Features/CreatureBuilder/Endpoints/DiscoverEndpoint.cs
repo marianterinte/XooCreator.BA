@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure;
+using XooCreator.BA.Features.TreeOfLight;
+using System.Text.Json;
 
 namespace XooCreator.BA.Features.CreatureBuilder.Endpoints;
 
@@ -13,11 +15,13 @@ public sealed class DiscoverEndpoint
 {
     private readonly XooDbContext _db;
     private readonly IUserContextService _userContext;
+    private readonly ITreeOfLightTranslationService _translationService;
 
-    public DiscoverEndpoint(XooDbContext db, IUserContextService userContext)
+    public DiscoverEndpoint(XooDbContext db, IUserContextService userContext, ITreeOfLightTranslationService translationService)
     {
         _db = db;
         _userContext = userContext;
+        _translationService = translationService;
     }
 
     [Route("/api/{locale}/creature-builder/discover")] // POST
@@ -78,11 +82,15 @@ public sealed class DiscoverEndpoint
         string normalize(string s) => s == "—" ? "None" : s;
         string imageUrl = $"{normalize(item.ArmsKey)}{normalize(item.BodyKey)}{normalize(item.HeadKey)}.jpg";
 
+        // Translate the creature name and story based on locale
+        var translatedName = ep.TranslateDiscoveryCreature(item.Name, locale, item.ArmsKey, item.BodyKey, item.HeadKey);
+        var translatedStory = ep.TranslateDiscoveryCreature(item.Story, locale, item.ArmsKey, item.BodyKey, item.HeadKey);
+
         var responseItem = new DiscoverItemDto(
             item.Id,
-            item.Name,
+            translatedName,
             imageUrl,
-            item.Story
+            translatedStory
         );
 
         // Get updated wallet balance
@@ -91,4 +99,111 @@ public sealed class DiscoverEndpoint
 
         return TypedResults.Ok(new DiscoverResponseDto(true, alreadyDiscovered, responseItem, null, updatedBalance));
     }
+
+    private string TranslateDiscoveryCreature(string text, string locale, string? armsKey, string? bodyKey, string? headKey)
+    {
+        try
+        {
+            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            
+            // Build the combination from the keys
+            var combination = BuildCombination(armsKey, bodyKey, headKey);
+            if (string.IsNullOrEmpty(combination))
+            {
+                return text; // If we can't build the combination, return original text
+            }
+            
+            // Try to get the translation for the requested locale
+            var discoveryFilePath = Path.Combine(baseDir, "Data", "SeedData", "Discovery", "i18n", locale, "discover-bestiary.json");
+            
+            if (File.Exists(discoveryFilePath))
+            {
+                var json = File.ReadAllText(discoveryFilePath);
+                var discoveryData = JsonSerializer.Deserialize<List<DiscoveryCreature>>(json, new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    PropertyNameCaseInsensitive = true
+                });
+
+                // Find the creature by combination
+                var creature = discoveryData?.FirstOrDefault(c => c.Combination == combination);
+                if (creature != null)
+                {
+                    // Return the appropriate field from the translation file
+                    return GetTranslatedField(text, creature);
+                }
+            }
+            
+            // If not found in requested locale, try English fallback
+            if (locale != "en-us")
+            {
+                var fallbackFilePath = Path.Combine(baseDir, "Data", "SeedData", "Discovery", "i18n", "en-us", "discover-bestiary.json");
+                
+                if (File.Exists(fallbackFilePath))
+                {
+                    var json = File.ReadAllText(fallbackFilePath);
+                    var discoveryData = JsonSerializer.Deserialize<List<DiscoveryCreature>>(json, new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        PropertyNameCaseInsensitive = true
+                    });
+
+                    // Find the creature by combination in English
+                    var creature = discoveryData?.FirstOrDefault(c => c.Combination == combination);
+                    if (creature != null)
+                    {
+                        // Return the appropriate field from the translation file
+                        return GetTranslatedField(text, creature);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error reading discovery translation for {text}: {ex.Message}");
+        }
+
+        return text; // Fallback to original text
+    }
+
+    private string BuildCombination(string? armsKey, string? bodyKey, string? headKey)
+    {
+        // Convert "—" back to "None" to match the combination format
+        var arms = armsKey == "—" ? "None" : armsKey ?? "None";
+        var body = bodyKey == "—" ? "None" : bodyKey ?? "None";
+        var head = headKey == "—" ? "None" : headKey ?? "None";
+        
+        return $"{arms}{body}{head}";
+    }
+
+    private string GetTranslatedField(string originalText, DiscoveryCreature creature)
+    {
+        // We need to determine if we're translating name or story
+        // The original text comes from the database and could be in any language
+        // We need to check which field it matches better
+        
+        // If the original text is shorter and matches the name pattern, it's likely a name
+        // If it's longer and contains more descriptive text, it's likely a story
+        
+        // Simple heuristic: if the text is relatively short (likely a name), return the name
+        // Otherwise, return the story
+        if (originalText.Length < 50) // Names are typically shorter
+        {
+            return creature.Name;
+        }
+        else
+        {
+            return creature.Story;
+        }
+    }
+}
+
+// Helper class for JSON deserialization
+public class DiscoveryCreature
+{
+    public string Combination { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string ImagePrompt { get; set; } = string.Empty;
+    public string Story { get; set; } = string.Empty;
+    public string ImageFileName { get; set; } = string.Empty;
 }
