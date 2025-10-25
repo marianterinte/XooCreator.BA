@@ -132,6 +132,10 @@ builder.Services.AddScoped<ITreeOfHeroesService, TreeOfHeroesService>();
 builder.Services.AddScoped<IStoriesRepository, StoriesRepository>();
 builder.Services.AddScoped<IStoriesService, StoriesService>();
 
+// Story Marketplace Services
+builder.Services.AddScoped<IStoriesMarketplaceRepository, StoriesMarketplaceRepository>();
+builder.Services.AddScoped<IStoriesMarketplaceService, StoriesMarketplaceService>();
+
 var auth0Section = builder.Configuration.GetSection("Auth0");
 var auth0Domain = auth0Section["Domain"];
 var auth0Audience = auth0Section["Audience"];

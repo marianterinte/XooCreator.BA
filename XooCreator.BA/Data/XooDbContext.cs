@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace XooCreator.BA.Data;
 
@@ -49,6 +50,10 @@ public class XooDbContext : DbContext
     public DbSet<AnimalPartSupport> AnimalPartSupports => Set<AnimalPartSupport>();
     public DbSet<BuilderConfig> BuilderConfigs => Set<BuilderConfig>();
     public DbSet<Region> Regions => Set<Region>();
+    
+    // Story Marketplace
+    public DbSet<StoryPurchase> StoryPurchases => Set<StoryPurchase>();
+    public DbSet<StoryMarketplaceInfo> StoryMarketplaceInfos => Set<StoryMarketplaceInfo>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -664,5 +669,42 @@ public class XooDbContext : DbContext
         };
 
         modelBuilder.Entity<HeroDefinition>().HasData(heroDefinitions);
+
+        // Story Marketplace Entity Configurations
+        modelBuilder.Entity<StoryPurchase>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.HasIndex(x => new { x.UserId, x.StoryId }).IsUnique();
+            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.Story).WithMany().HasForeignKey(x => x.StoryId).HasPrincipalKey(s => s.StoryId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<StoryMarketplaceInfo>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.HasIndex(x => x.StoryId).IsUnique();
+            e.Property(x => x.Region).HasMaxLength(50);
+            e.Property(x => x.AgeRating).HasMaxLength(10);
+            e.Property(x => x.Difficulty).HasMaxLength(20);
+            e.Property(x => x.Characters).HasConversion(
+                v => string.Join(',', v),
+                v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()
+            ).Metadata.SetValueComparer(new ValueComparer<List<string>>(
+                (c1, c2) => c1!.SequenceEqual(c2!),
+                c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                c => c.ToList()
+            ));
+            e.Property(x => x.Tags).HasConversion(
+                v => string.Join(',', v),
+                v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()
+            ).Metadata.SetValueComparer(new ValueComparer<List<string>>(
+                (c1, c2) => c1!.SequenceEqual(c2!),
+                c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                c => c.ToList()
+            ));
+            e.HasOne(x => x.Story).WithMany().HasForeignKey(x => x.StoryId).HasPrincipalKey(s => s.StoryId).OnDelete(DeleteBehavior.Cascade);
+        });
     }
 }
