@@ -1,146 +1,163 @@
 {
-  "storyId": "intro-pufpuf",
-  "title": "Marea Călătorie",
-  "coverImageUrl": "images/tol/stories/intro-pufpuf/0.Cover.png",
+  "storyId": "loi-intro",
+  "title": "Originea Păcii",
+  "coverImageUrl": "images/tol/stories/loi-intro/0.cover.png",
   "category": "terra",
   "sortOrder": 1,
-  "unlockedStoryHeroes": ["puf-puf"],
+  "unlockedStoryHeroes": [],
   "tiles": [
     {
       "tileId": "1",
       "type": "page",
       "sortOrder": 1,
-      "caption": "Chemarea",
-      "text": "Puf-Puf călătorea prin adâncul universului când liniștea cosmică fu spartă de un vuiet straniu, ca un oftat al stelelor. \\nInstrumentele pâlpâiră, iar busola stelară desenă spirale fără sens. \\nCu lăbuța pe parbrizul de cuarț, el simți mai mult, decât auzi, că cineva îl cheamă pe nume dintr-un loc foarte, foarte vechi.",
-      "imageUrl": "images/tol/stories/intro-pufpuf/1.puf-puf-flying.png"
+      "caption": "Două lumi, două tabere",
+      "text": "În Alchimalia existau două lumi foarte apropiate, dar aflate în război. \nLunaria, planeta iepurilor, cu câmpii de morcovi și vizuini cat vezi cu ochii si  \nKelo-Ketis, planeta pisicilor, condusă de un împărat razboinic. Granițele erau reci, iar podurile, rupte, desi erau atat de aproape pisicile si iepurii erau dusmani.",
+      "imageUrl": "images/tol/stories/loi-intro/1.two-worlds.png"
     },
     {
       "tileId": "2",
       "type": "page",
       "sortOrder": 2,
-      "caption": "Prăbușirea",
-      "text": "Un fulger de lumină înghiți nava și o azvârli într-un vârtej orbitor. Paratrăsnetele de plasmă se topiră, cârma se blocă, iar carena spintecă norii înainte să muște din pământul uscat. Când tăcerea reveni, aerul mirosea a uscăciune și arșiță. \\nPuf-Puf își atinse urechea zgâriată, privi copacii uriași și… nu știa unde se afla, de unde a plecat și de ce. Doar că ajunsese într-un loc străin care îi stârnea curiozitatea.",
-      "imageUrl": "images/tol/stories/intro-pufpuf/2.puf-puf-hurt.png"
+      "caption": "Împăratul Pufus Alchimus",
+      "text": "Pe Kelo-Ketis domnea Împăratul Pufus Alchimus, un războinic cunoscut pentru cuceriri și pentru setea de luptă. Războiul cu iepurii ținea de mult, iar armele vorbeau mai tare decât poveștile. Împăratul spera că într-o bună zi imperiul său se va întinde pe tot tărâmul Alchimaliei.",
+      "imageUrl": "images/tol/stories/loi-intro/2.emperor.png"
     },
     {
       "tileId": "3",
       "type": "page",
       "sortOrder": 3,
-      "caption": "Cristalul SOS",
-      "text": "La bord, în modulul SOS, un cristal străvechi pulsa ca o inimă adormită. \\nPuf-Puf deschise panoul, iar lumina cristalului proiectă în aer o hartă parcă vie.\\nRamuri de lumină, poteci care se împleteau la infinit, unele căi erau stinse, altele scânteiau ca semne. \\nToate convergeau într-un singur nod: Copacul Luminii.",
-      "imageUrl": "images/tol/stories/intro-pufpuf/3.puf-puf-crystal.png"
+      "caption": "Fiul cel curios",
+      "text": "Împăratului i s-a născut un fiu: Puf-Puf Alchimus, a fost numit. \nTatăl voia un luptător, dar Puf-Puf iubea matematica, jocurile cu elemente și visa la alchemie. Era mai mult explorator decât soldat. Petrece tot timpul in laboratorul sau unde incerca diverse combinatii intre elemente si citea o gramada de scrieri si retete stravechi.",
+      "imageUrl": "images/tol/stories/loi-intro/3.curious-son.png"
     },
     {
       "tileId": "4",
       "type": "page",
       "sortOrder": 4,
-      "caption": "Întâlnirea",
-      "text": "Frunzele Copacului foșneau ca o șoaptă când Puf-Puf îți iese în cale și îți zâmbește parcă amintindu-și ceva, puțin câte puțin. Puf-Puf „-Hei, tu. Da, ție îți vorbesc. Eu sunt Puf-Puf, o pisică vorbitoare de pe planeta Kelo-Ketis... nava mea e puțin șifonată, moralul însă e încă sus. \\nCopacul ne-a pus față în față și, sincer, tu pari genul care să știe ce face. Adică ai privirea aia de ai mai reparat două-trei nave spațiale marțea seara. \\nMă poți ajuta, te rog, să îmi repar nava și să mă întorc acasă? Cristalul este cheia. Trebuie să îl descifrăm.\\nCristalul părea să proiecteze într-o hologramă, aproape vie, un copac luminos, plin de mistere. ",
-      "imageUrl": "images/tol/stories/intro-pufpuf/puf-puf-home-planet.png"
+      "caption": "Prieteni peste graniță",
+      "text": "Deși era război, prietenia își găsea drum. Un iepure negru și o pisică albă se întâlneau în secret și își povesteau lumea, se jucau când pe Lunaria, când pe Ketis. Nu semănau a dușmani. Semănau cu doi copii curioși.",
+      "imageUrl": "images/tol/stories/loi-intro/4.friends.png"
     },
     {
       "tileId": "5",
-      "type": "quiz",
+      "type": "page",
       "sortOrder": 5,
-      "caption": "",
-      "text": "",
-      "imageUrl": "images/tol/stories/intro-pufpuf/4.TreeOfLight.png",
-      "question": "Puf-Puf îți cere ajutorul să vorbești cu cristalul SOS care arată harta. Ce ar fi cel mai important lucru de întrebat la început?",
-      "answers": [
-        {
-          "answerId": "a",
-          "text": "Ce drum de pe harta cosmică duce cel mai repede acasă?",
-          "tokens": [
-            {
-              "type": "Personality",
-              "value": "courage",
-              "quantity": 1
-            },
-            {
-              "type": "Discovery",
-              "value": "discovery credit",
-              "quantity": 1
-            }
-          ],
-          "sortOrder": 1
-        },
-        {
-          "answerId": "b",
-          "text": "Oare câte lumi arată harta?",
-          "tokens": [
-            {
-              "type": "Discovery",
-              "value": "discovery credit",
-              "quantity": 1
-            },
-            {
-              "type": "Personality",
-              "value": "curiosity",
-              "quantity": 1
-            }
-          ],
-          "sortOrder": 2
-        },
-        {
-          "answerId": "c",
-          "text": "Îmi arăți calea către Kelo-Ketis?",
-          "tokens": [
-            {
-              "type": "Personality",
-              "value": "thinking",
-              "quantity": 1
-            },
-            {
-              "type": "Discovery",
-              "value": "discovery credit",
-              "quantity": 1
-            }
-          ],
-          "sortOrder": 3
-        },
-        {
-          "answerId": "d",
-          "text": "Ce aș putea să folosesc pentru a repara nava?",
-          "tokens": [
-            {
-              "type": "Personality",
-              "value": "creativity",
-              "quantity": 1
-            },
-            {
-              "type": "Discovery",
-              "value": "discovery credit",
-              "quantity": 1
-            }
-          ],
-          "sortOrder": 4
-        },
-        {
-          "answerId": "e",
-          "text": "Care e cel mai sigur drum spre casă?",
-          "tokens": [
-            {
-              "type": "Personality",
-              "value": "safety",
-              "quantity": 1
-            },
-            {
-              "type": "Discovery",
-              "value": "discovery credit",
-              "quantity": 1
-            }
-          ],
-          "sortOrder": 5
-        }
-      ]
+      "caption": "Piatra din Lunaria",
+      "text": "Pe Ketis, Puf-Puf i-a surprins privind o piatră verde adusă de pe Lunaria, lucind ca un smarald. \n„ - Ține-ne secretul prieteniei și îți dăm piatra”, i-a șoptit iepurele. \nPuf-Puf a promis.",
+      "imageUrl": "images/tol/stories/loi-intro/5.lunaria-stone.png"
     },
     {
       "tileId": "6",
       "type": "page",
       "sortOrder": 6,
-      "caption": "Curaj",
-      "text": "Puf-Puf: - Să mergem mai aproape, o vom rezolva noi. Mă bucur că te-am găsit.\\nAmândoi mergeți cu pași mici către copac.",
-      "imageUrl": "images/tol/stories/intro-pufpuf/5.puf-puf-tree-of-light.png"
+      "caption": "Licoarea verde-aurie",
+      "text": "Cu piatra, Puf-Puf a făcut un elixir. Când atingea metalul, acesta devenea aur. Bucurie mare! S-au gandit sa si bea, descoperind ca acesta are un gust bun, a împărțit licoarea cu prietenii — mici înghițituri, multe râsete.",
+      "imageUrl": "images/tol/stories/loi-intro/6.elixir.png"
+    },
+    {
+      "tileId": "7",
+      "type": "page",
+      "sortOrder": 7,
+      "caption": "Somn la umbra copacului",
+      "text": "Obosiți, au adormit la umbra unui copac foarte înalt. Licoarea s-a scurs încet la rădăcini. Piatra verde încălzea pământul cu o lumină blândă.",
+      "imageUrl": "images/tol/stories/loi-intro/7.tree-nap.png"
+    },
+    {
+      "tileId": "8",
+      "type": "page",
+      "sortOrder": 8,
+      "caption": "Mâțo-Iepurele",
+      "text": "Când s-au trezit, lângă ei stătea o ființă ciudată, frumoasă: cu grația unei pisici și blândețea unui iepure. Se uita la ei fără teamă.\n- Buna eu sunt Mâțo-Iepurele! Am venit sa aduc Pacea...",
+      "imageUrl": "images/tol/stories/loi-intro/8.matso-iepurele.png"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "sortOrder": 9,
+      "caption": "",
+      "text": "",
+      "imageUrl": "images/tol/stories/loi-intro/9.quiz.png",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "Il vom incuraja",
+          "tokens": [],
+          "sortOrder": 1
+        },
+        {
+          "answerId": "b",
+          "text": "Vom pune elixirul la fiecare copac.",
+          "tokens": [],
+          "sortOrder": 2
+        },
+        {
+          "answerId": "c",
+          "text": "Il protejam pe Mâțo-Iepure.",
+          "tokens": [],
+          "sortOrder": 3
+        },
+        {
+          "answerId": "d",
+          "text": "Plantăm un copac al păcii în ambele lumi.",
+          "tokens": [],
+          "sortOrder": 4
+        },
+        {
+          "answerId": "e",
+          "text": "Pastram pacea cu orice pret.",
+          "tokens": [],
+          "sortOrder": 5
+        }
+      ],
+      "question": "Piatra, licoarea și prietenia au chemat Mâțo-Iepurele pentru a aduce pacea. ce faceți mai întâi?\n\nPastram pacea cu orice pret.\n"
+    },
+    {
+      "tileId": "9",
+      "type": "page",
+      "sortOrder": 10,
+      "caption": "Mesajul păcii",
+      "text": "„Eu port pacea dintre lumi”, a spus Mâțo-Iepurele. „Din prietenie, piatră și licoare s-a născut un pod, a spus Puf-Puf.\nRăzboaiele se sting când înveți să amesteci bine lucrurile.” \nPuf-Puf a înțeles că alchimia nu e doar despre metale, ci și despre inimi.",
+      "imageUrl": "images/tol/stories/loi-intro/10.message.png"
+    },
+    {
+      "tileId": "10",
+      "type": "page",
+      "sortOrder": 11,
+      "caption": "Hotărârea lui Puf-Puf",
+      "text": "În acea zi, Puf-Puf era bucuruos ca alesese sa fie un alchimist. Va căuta căi între lumi, nu războaie. Iar Mâțo-Iepurele avea să devină, cândva, semnul că pacea poate fi creată, nu doar găsită.",
+      "imageUrl": "images/tol/stories/loi-intro/11.choice.png"
+    },
+    {
+      "tileId": "12",
+      "type": "page",
+      "sortOrder": 12,
+      "caption": "Vraja",
+      "text": "Puf-Puf stătea chiar la granița dintre planete când iepurele păși înapoi pe Lunaria, vrând să-l conducă acasă în secret. Când totul era liniștit, o vrajă misterioasă făcu ca Lunaria să se desprindă de Kelo-Ketis și să dispară pentru totdeauna. Mâțo-Iepurele dispăruse și el.\n\nPuf-Puf: „Trebuie să aflu ce s-a întâmplat!” Și, cu pași grăbiți, merse din nou spre copac.",
+      "imageUrl": "images/tol/stories/loi-intro/12.the-spell.png"
+    },
+    {
+      "tileId": "13",
+      "type": "page",
+      "sortOrder": 13,
+      "caption": "...",
+      "text": "Ruptura dintre lumi era plina de mister, Puf-Puf ajunse repede in dreptul copacului care se transforamsera incredibil in ceva plin de lumina si mister.",
+      "imageUrl": "images/tol/stories/loi-intro/13.tobecontinued.png"
+    },
+    {
+      "tileId": "14",
+      "type": "page",
+      "sortOrder": 14,
+      "caption": "Copacul luminii",
+      "text": "În fața lui Puf-Puf se afla ceva atât de frumos și, totodată, de nerecunoscut. Marele copac devenise plin de lumină, iar din loc în loc se auzeau șoapte.\n„Trebuie să cauți pacea... cristalul este cheia...”, se auzi de undeva, din rădăcina copacului.\nPuf-Puf săpă la rădăcina copacului și găsi un cristal care părea să comunice cu el.",
+      "imageUrl": "images/tol/stories/loi-intro/14.tol.png"
+    },
+    {
+      "tileId": "15",
+      "type": "page",
+      "sortOrder": 15,
+      "caption": "Plecarea",
+      "text": "Îi spuse tatălui său că trebuie să plece, să exploreze; nu putea să-i spună Împăratului că vrea să aducă tocmai pacea — după atâta muncă de cucerire, acesta era ultimul lucru pe care marele Pufus Alchimus ar fi vrut să-l audă. Se urcă într-una dintre navele spațiale ale Imperiului și plecă.",
+      "imageUrl": "images/tol/stories/loi-intro/15.leavingkk.png"
     }
   ]
 }
