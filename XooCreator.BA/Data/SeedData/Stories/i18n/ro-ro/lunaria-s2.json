@@ -4,42 +4,39 @@
   "coverImageUrl": "images/tol/stories/lunaria-s2/0.Cover.png",
   "category": "terra",
   "sortOrder": 1,
+  "unlockedStoryHeroes": [],
   "tiles": [
     {
       "tileId": "1",
       "type": "page",
       "sortOrder": 1,
       "caption": "Aterizare la marginea orașului",
-      "text": "Portalul se stinge în spatele vostru. În vale se văd campuri portocalii pline de morcovi, dar locul e neobișnuit de tăcut. Puf-Puf își fixează lupa pe cristal: \\nPuf-Puf:„- Prea liniște pentru Lunaria… stăm cu urechile ciulite.” \\nIepurele negru dă din cap: „Mergem încet.”",
-      "imageUrl": "images/tol/stories/lunaria-s2/1.arrival.png",
-      "question": ""
+      "text": "Portalul se stinge în spatele vostru. În vale se întind câmpuri portocalii de morcovi, dar e o liniște ciudată.\nPuf-Puf ridică lupa spre cristal:\n— Prea liniște pentru Lunaria. Ținem urechile ciulite.\nIepurele negru încuviințează:\n— Mergem încet.",
+      "imageUrl": "images/tol/stories/lunaria-s2/1.arrival.png"
     },
     {
       "tileId": "2",
       "type": "page",
       "sortOrder": 2,
       "caption": "Ping din campiile de morcovi",
-      "text": "Cristalul pâlpâie ritmic, ca un ping îndepărtat. În rândurile de morcovi strălucește pe scurt o lumină și se stinge. \\nPuf-Puf: „-Semnal tehnic, nu animal. Acolo.”",
-      "imageUrl": "images/tol/stories/lunaria-s2/2.ping.png",
-      "question": ""
+      "text": "Cristalul pâlpâie ritmic, ca un ping îndepărtat. Printre rândurile de morcovi, o scânteie se aprinde o clipă și se stinge.\n— Semnal tehnic, nu animal, zice Puf-Puf. Acolo.\nIepurele negru își rotește urechile:\n— Nu e licurici. Sună ca o baliză.\nVă aplecați și înaintați pe două rânduri paralele, cu pași scurți. În pământ se văd urme fine și un fir subțire, îngropat pe jumătate. Ping-ul revine: mai lent, apoi iarăși scurt.\n— Tu rămâi pe stânga, spune Puf-Puf. Eu intru din dreapta.\n— Când ridici laba, mă opresc, zici tu.\n— Fix. Ne apropiem încet, fără să atingem cablul.",
+      "imageUrl": "images/tol/stories/lunaria-s2/2.ping.png"
     },
     {
       "tileId": "3",
       "type": "page",
       "sortOrder": 3,
       "caption": "Sub copăcelul de lună",
-      "text": "La umbra unui copăcel straniu se află un robot cu carcasă ca din tinichea, urechi scurte ca două antene și ochi negri stinși. Un led clipește: „…Gru…bot…”. \\nPuf-Puf, citeste în șoaptă: „- Model iepure. Blând, dar căzut.”",
-      "imageUrl": "images/tol/stories/lunaria-s2/3.moon-tree.png",
-      "question": ""
+      "text": "La umbra unui copăcel straniu zace un robot cu carcasă din tinichea. Are urechi scurte, ca două antene, și ochi negri, stinși. Un LED pâlpâie: „…Gru…bot…”.\n\nPuf-Puf, în șoaptă:\n— Model iepure. Blând, dar căzut.\n\nIepurele negru se apleacă:\n— Îl putem reporni?",
+      "imageUrl": "images/tol/stories/lunaria-s2/3.moon-tree.png"
     },
     {
       "tileId": "4",
       "type": "page",
       "sortOrder": 4,
       "caption": "Circuitul întrerupt",
-      "text": "Panoul frontal e întredeschis. Înăuntru, un circuit fisurat pârâie slab și miroase a ozon. Iepurele negru scoate un morcov și râde: „Pe Lunaria, morcovii nu repară roboți.” \\nPuf-Puf: „- Nu direct. Dar fibra de Lunkarot (un morcov special de pe lunaria) poate crea un jumper, iar sucul răcește excelent circuitele. Contează ritmul, nu forța.”",
-      "imageUrl": "images/tol/stories/lunaria-s2/4.broken-circuit.png",
-      "question": ""
+      "text": "Panoul frontal stă întredeschis. Înăuntru, un circuit fisurat cârâie încet și plutește miros de ozon.\nIepurele negru scoate un morcov și zâmbește:\n— Pe Lunaria, morcovii nu repară roboți.\n\n— Nu direct, îl corectează Puf-Puf. Dar fibra de Lunkarot — morcovul acela special de pe Lunaria — poate ține loc de jumper, iar sucul lui răcește bine traseele. Contează ritmul, nu forța.\n\n— Atunci tăiem o fibră subțire și picurăm încet, spui tu.\n— Fix așa, încuviințează Puf-Puf.",
+      "imageUrl": "images/tol/stories/lunaria-s2/4.broken-circuit.png"
     },
     {
       "tileId": "5",
@@ -48,7 +45,6 @@
       "caption": "",
       "text": "",
       "imageUrl": "images/tol/stories/lunaria-s2/5.quiz.png",
-      "question": "Circuitul cere ritm, nu împingere. Aveți Lunkarot pentru un jumper moale sucul care raceste. Care e mișcarea ta aici, ca să-l repari, fără să agravezi fisura?",
       "answers": [
         {
           "answerId": "a",
@@ -72,13 +68,13 @@
           "text": "Intai ma intreb ce of i inauntru",
           "tokens": [
             {
-              "type": "Personality",
-              "value": "curiosity",
+              "type": "Alchemy",
+              "value": "Karott",
               "quantity": 1
             },
             {
-              "type": "Alchemy",
-              "value": "Karott",
+              "type": "Personality",
+              "value": "curiosity",
               "quantity": 1
             }
           ],
@@ -106,13 +102,13 @@
           "text": "Creez o inima artificiala",
           "tokens": [
             {
-              "type": "Alchemy",
-              "value": "Karott",
+              "type": "Personality",
+              "value": "creativity",
               "quantity": 1
             },
             {
-              "type": "Personality",
-              "value": "creativity",
+              "type": "Alchemy",
+              "value": "Karott",
               "quantity": 1
             }
           ],
@@ -135,25 +131,24 @@
           ],
           "sortOrder": 5
         }
-      ]
+      ],
+      "question": "Circuitul cere ritm, nu împingere. Aveți Lunkarot pentru un jumper moale si sucul care raceste. Care e mișcarea ta aici, ca să-l repari, fără să agravezi fisura?"
     },
     {
       "tileId": "6",
       "type": "page",
       "sortOrder": 6,
       "caption": "Grubot își găsește vocea",
-      "text": "Sunetul devine uniform, ochii negri se aprind. \\nGrubot: „- Sistem… stabil. Nume: **Grubot**. Model: iepure. Stare: conștiință activă, umor experimental.” Puf-Puf zâmbește: „- Îți stă bine cu viața înapoi.” Grubot: „Mulțumesc. Am rătăcit după o furtună de câmp magnetic. Casa mea e **Mechanika**. Pot zbura, apoi încărcare.”\\nGrubot: „- Salvez coordonatele. Când deschideți ruta, **vă aștept acolo**.”",
-      "imageUrl": "images/tol/stories/lunaria-s2/6.grubot-talks.png",
-      "question": ""
+      "text": "Sunetul se stabilizează, iar ochii negri se aprind. Antenele-urechi tresar ușor.\n\n— Sistem… stabil, anunță robotul. Nume: Grubot. Model: iepure. Stare: conștiință activă. Modul umor: experimental.\nPuf-Puf zâmbește:\n— Îți stă bine cu viața înapoi.\n— Mulțumesc, răspunde Grubot. M-am rătăcit după o furtună de câmp magnetic. Casa mea e Mechanika. Pot decola, apoi am nevoie de încărcare.\n— Notat, spui tu.\n— Salvez coordonatele. Când deschideți ruta, vă aștept acolo, confirmă Grubot.",
+      "imageUrl": "images/tol/stories/lunaria-s2/6.grubot-talks.png"
     },
     {
       "tileId": "7",
       "type": "page",
       "sortOrder": 7,
       "caption": "Plecarea",
-      "text": "Propulsorii lui Grubot şuieră ușor. Se ridică deasupra campiilor portocalii, face o voltă și pornește spre orizont. Puf-Puf: „Un prieten nou, o rută viitoare. Continuăm.” \\nIepurele negru zâmbește: „- Drumul e clar — pentru noi, înainte.”",
-      "imageUrl": "images/tol/stories/lunaria-s2/7.departure.png",
-      "question": ""
+      "text": "Propulsoarele lui Grubot şuieră ușor. Se ridică deasupra câmpiilor portocalii, face o voltă scurtă și zboară spre orizont.\n— Un prieten nou, o rută viitoare. Continuăm, zice Puf-Puf.\nIepurele negru zâmbește:\n— Drumul e clar: înainte.",
+      "imageUrl": "images/tol/stories/lunaria-s2/7.departure.png"
     }
   ]
 }

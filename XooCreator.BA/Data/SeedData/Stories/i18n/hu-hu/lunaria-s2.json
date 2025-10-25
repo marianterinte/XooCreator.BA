@@ -4,13 +4,14 @@
   "coverImageUrl": "images/tol/stories/lunaria-s2/0.Cover.png",
   "category": "terra",
   "sortOrder": 1,
+  "unlockedStoryHeroes": [],
   "tiles": [
     {
       "tileId": "1",
       "type": "page",
       "sortOrder": 1,
       "caption": "Leszállás a város szélén",
-      "text": "A portál kialszik mögöttetek. A völgyben narancssárga sárgarépa mezők látszanak, de a hely szokatlanul csendes. Puf-Puf rögzíti a nagyítót a kristályra:\nPuf-Puf: \"- Túl csendes Lunariához... füleket hegyezünk.\"\nA fekete nyuszi bólint: \"Lassan megyünk.\"",
+      "text": "A portál kialszik mögöttetek. A völgyben narancssárga sárgarépa mezők terülnek el, de furcsa csend van.\nPuf-Puf felemeli a nagyítót a kristályhoz:\n— Túl csendes Lunariához. Füleket hegyezünk.\nA fekete nyuszi bólint:\n— Lassan megyünk.",
       "imageUrl": "images/tol/stories/lunaria-s2/1.arrival.png"
     },
     {
@@ -18,7 +19,7 @@
       "type": "page",
       "sortOrder": 2,
       "caption": "Ping a sárgarépa mezőkből",
-      "text": "A kristály ritmikusan villog, mint egy távoli ping. A sárgarépa sorokban rövid fény csillan és kialszik.\nPuf-Puf: \"-Technikai jel, nem állat. Ott.\"",
+      "text": "A kristály ritmikusan villog, mint egy távoli ping. A sárgarépa sorok között egy szikra rövid ideig felvillan és kialszik.\n— Technikai jel, nem állat, mondja Puf-Puf. Ott.\nA fekete nyuszi forgatja a füleit:\n— Nem szentjánosbogár. Úgy hangzik, mint egy jelzőfény.\nLefeksztek és két párhuzamos sorban haladtok előre, rövid lépésekkel. A földben finom nyomokat és egy vékony vezetéket láttok, félig eltemetve. A ping visszatér: lassabban, aztán megint rövid.\n— Te maradsz balra, mondja Puf-Puf. Én jobbról megyek be.\n— Amikor felemeled a mancsod, megállok, mondod te.\n— Pontosan. Lassan közeledünk, anélkül, hogy megérintenénk a kábelt.",
       "imageUrl": "images/tol/stories/lunaria-s2/2.ping.png"
     },
     {
@@ -26,7 +27,7 @@
       "type": "page",
       "sortOrder": 3,
       "caption": "A hold fácskája alatt",
-      "text": "Egy furcsa fácskának az árnyékában egy robot áll, bádog házassal, rövid fülekkel, mint két antenna, és kialudt fekete szemekkel. Egy LED villog: \"...Gru...bot...\".\nPuf-Puf suttogva olvassa: \"- Nyuszi modell. Szelíd, de leesett.\"",
+      "text": "Egy furcsa fácskának az árnyékában egy robot fekszik, bádog házassal. Rövid fülei vannak, mint két antenna, és fekete, kialudt szemek. Egy LED villog: \"...Gru...bot...\".\n\nPuf-Puf, suttogva:\n— Nyuszi modell. Szelíd, de leesett.\n\nA fekete nyuszi lehajol:\n— Újraindíthatjuk?",
       "imageUrl": "images/tol/stories/lunaria-s2/3.moon-tree.png"
     },
     {
@@ -34,7 +35,7 @@
       "type": "page",
       "sortOrder": 4,
       "caption": "A megszakított áramkör",
-      "text": "Az elülső panel félig nyitva. Belül egy repedt áramkör gyengén zizeg és ózon szagot áraszt. A fekete nyuszi elővesz egy sárgarépát és nevet: \"Lunarián a sárgarépa nem javít robotokat.\"\nPuf-Puf: \"- Nem közvetlenül. De a Lunkarot rost (egy speciális sárgarépa Lunariáról) jumpert hozhat létre, és a lé kiválóan hűti az áramköröket. A ritmus számít, nem az erő.\"",
+      "text": "Az elülső panel félig nyitva áll. Belül egy repedt áramkör lassan zizeg és ózon szagot áraszt.\nA fekete nyuszi elővesz egy sárgarépát és mosolyog:\n— Lunarián a sárgarépa nem javít robotokat.\n\n— Nem közvetlenül, javítja ki Puf-Puf. De a Lunkarot rost — az a speciális sárgarépa Lunariáról — jumper helyett szolgálhat, és a leve hűti jól az útvonalakat. A ritmus számít, nem az erő.\n\n— Akkor vágunk egy vékony rostot és lassan csöpögtetünk, mondod te.\n— Pontosan, egyetért Puf-Puf.",
       "imageUrl": "images/tol/stories/lunaria-s2/4.broken-circuit.png"
     },
     {
@@ -47,7 +48,7 @@
       "answers": [
         {
           "answerId": "a",
-          "text": "Teljesen szétszereljem és újra összerakom.",
+          "text": "Mindent felszerel és leszerel.",
           "tokens": [
             {
               "type": "Alchemy",
@@ -64,16 +65,16 @@
         },
         {
           "answerId": "b",
-          "text": "Először megkérdezem, mi van benne.",
+          "text": "Először megkérdezem, mi van benne",
           "tokens": [
-            {
-              "type": "Personality",
-              "value": "curiosity",
-              "quantity": 1
-            },
             {
               "type": "Alchemy",
               "value": "Karott",
+              "quantity": 1
+            },
+            {
+              "type": "Personality",
+              "value": "curiosity",
               "quantity": 1
             }
           ],
@@ -98,16 +99,16 @@
         },
         {
           "answerId": "d",
-          "text": "Mesterséges szívet hozok létre.",
+          "text": "Mesterséges szívet hozok létre",
           "tokens": [
-            {
-              "type": "Alchemy",
-              "value": "Karott",
-              "quantity": 1
-            },
             {
               "type": "Personality",
               "value": "creativity",
+              "quantity": 1
+            },
+            {
+              "type": "Alchemy",
+              "value": "Karott",
               "quantity": 1
             }
           ],
@@ -131,14 +132,14 @@
           "sortOrder": 5
         }
       ],
-      "question": "Az áramkör ritmust kér, nem erőltetést. Van Lunkarot egy puha jumperhez, lé, ami hűti. Mi a mozdulatod itt, hogy megjavítsd, anélkül, hogy súlyosbítanád a repedést?\n\n"
+      "question": "Az áramkör ritmust kér, nem erőltetést. Van Lunkarot egy puha jumperhez és lé, ami hűti. Mi a mozdulatod itt, hogy megjavítsd, anélkül, hogy súlyosbítanád a repedést?"
     },
     {
       "tileId": "6",
       "type": "page",
       "sortOrder": 6,
       "caption": "Grubot megtalálja a hangját",
-      "text": "A hang egyenletes lesz, a fekete szemek kigyulladnak.\nGrubot: \"- Rendszer... stabil. Név: **Grubot**. Modell: nyuszi. Állapot: aktív tudat, kísérleti humor.\" Puf-Puf mosolyog: \"- Jól áll neked az élet vissza.\" Grubot: \"Köszönöm. Mágneses mező vihar után tévedtem el. Az otthonom **Mechanika**. Tudok repülni, aztán töltés.\"\nGrubot: \"- Mentem a koordinátákat. Amikor megnyitjátok az útvonalat, **ott várok rátok**.\"",
+      "text": "A hang stabilizálódik, és a fekete szemek kigyulladnak. Az antenna-fülek enyhén megrezzennek.\n\n— Rendszer... stabil, jelenti a robot. Név: Grubot. Modell: nyuszi. Állapot: aktív tudat. Humor mód: kísérleti.\nPuf-Puf mosolyog:\n— Jól áll neked az élet vissza.\n— Köszönöm, válaszolja Grubot. Mágneses mező vihar után tévedtem el. Az otthonom Mechanika. Tudok felszállni, aztán töltésre van szükségem.\n— Jegyezve, mondod te.\n— Mentem a koordinátákat. Amikor megnyitjátok az útvonalat, ott várok rátok, megerősíti Grubot.",
       "imageUrl": "images/tol/stories/lunaria-s2/6.grubot-talks.png"
     },
     {
@@ -146,7 +147,7 @@
       "type": "page",
       "sortOrder": 7,
       "caption": "Távozás",
-      "text": "Grubot hajtóművei könnyedén fütyülnek. Felemelkedik a narancssárga mezők felett, egy kört tesz és elindul a horizont felé. Puf-Puf: \"Új barát, jövőbeli útvonal. Folytatjuk.\"\nA fekete nyuszi mosolyog: \"- Az út világos — nekünk előre.\"",
+      "text": "Grubot hajtóművei könnyedén fütyülnek. Felemelkedik a narancssárga mezők felett, egy rövid kört tesz és a horizont felé repül.\n— Új barát, jövőbeli útvonal. Folytatjuk, mondja Puf-Puf.\nA fekete nyuszi mosolyog:\n— Az út világos: előre.",
       "imageUrl": "images/tol/stories/lunaria-s2/7.departure.png"
     }
   ]
