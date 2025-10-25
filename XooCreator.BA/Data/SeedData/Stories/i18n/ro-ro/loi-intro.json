@@ -158,6 +158,13 @@
       "caption": "Plecarea",
       "text": "Îi spuse tatălui său că trebuie să plece, să exploreze; nu putea să-i spună Împăratului că vrea să aducă tocmai pacea — după atâta muncă de cucerire, acesta era ultimul lucru pe care marele Pufus Alchimus ar fi vrut să-l audă. Se urcă într-una dintre navele spațiale ale Imperiului și plecă.",
       "imageUrl": "images/tol/stories/loi-intro/15.leavingkk.png"
+    },
+    {
+      "tileId": "16",
+      "type": "video",
+      "sortOrder": 16,
+      "caption": "Crystal",
+      "imageUrl": "video/tol/stories/loi-intro/tol-cristal.mp4"
     }
   ]
 }
