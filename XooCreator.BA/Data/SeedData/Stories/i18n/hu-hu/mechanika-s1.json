@@ -2,16 +2,18 @@
   "storyId": "mechanika-s1",
   "title": "Magnus",
   "coverImageUrl": "images/tol/stories/mechanika-s1/0.Cover.png",
-  "category": "mechanika",
+  "category": "terra",
   "sortOrder": 1,
-  "unlockedStoryHeroes": ["grubot"],
+  "unlockedStoryHeroes": [
+    "grubot"
+  ],
   "tiles": [
     {
       "tileId": "1",
       "type": "page",
       "sortOrder": 1,
       "caption": "Köd Mechanika felett",
-      "text": "Mechanikába sűrű, fullasztó ködön keresztül szálltok le — gyárfüst, elveszett szikrák, nehéz levegő. A város fényei ködös foltok, a gyaloghidak nyikorognak, a fogaskerekek tapogatózva mennek.\nPuf-Puf bekapcsolja a gallérlámpáját.\n\"- Látótávolság: kicsi a nagyon kicsiig. Grubot, hallasz minket?\" Néhány percig kóboroltok csövek és szegecsek között, követve a kristály gyenge pulzusát.",
+      "text": "Mechanikába sűrű, csípős ködön keresztül szálltok le: gyárfüst, eltévedt szikrák, nehéz levegő. A város fényei csak ködös foltok; a gyaloghidak nyikorognak, a fogaskerekek rángatózva mennek.\nPuf-Puf bekapcsolja a gallérlámpáját.\n\n— Látótávolság: kicsi a nagyon kicsiig. Grubot, hallasz minket?\nEgy rövid sípolás. Aztán csend.\n\n— A kristály pulzusa szerint tartjuk az irányt, mondod te.\n— Csövek alatt, közel a korláthoz, mondja a fekete nyuszi.\n\nNéhány percig kóboroltok csövek, szegecsek és hideg gőz között, követve a kristály gyenge pulzusát.",
       "imageUrl": "images/tol/stories/mechanika-s1/1.fog.png"
     },
     {
@@ -19,7 +21,7 @@
       "type": "page",
       "sortOrder": 2,
       "caption": "Grubot megtalál titeket",
-      "text": "Egy tiszta jel vágja át a ködöt, majd egy vékony sugár követi. A füstből valami tűnik elő.\nGrubot: \"- A kristály aláírása és... egy ismerős kémiai nyom után észleltem titeket. LunKarot.\"\nPuf-Puf nevet: \"- Jó digitális orrod van.\"\nGrubot: \"- Az ígéret ígéret marad. Adtatok nekem pulzust; én látást adok. A Vezérlő toronyhoz.\"\n",
+      "text": "Egy tiszta jel vágja át a ködöt; egy vékony sugár vonja a levegőt. A füstből Grubot sziluettje rajzolódik ki.\n\n— A kristály aláírása és... egy ismerős kémiai nyom után észleltem titeket: Lunkarot, mondja Grubot.\nPuf-Puf nevet:\n— Jó digitális orrod van.\n— Az ígéret ígéret marad, folytatja Grubot. Adtatok nekem pulzust; én látást adok. Kövessetek a Vezérlő toronyhoz.",
       "imageUrl": "images/tol/stories/mechanika-s1/2.grubot.png"
     },
     {
@@ -27,7 +29,7 @@
       "type": "page",
       "sortOrder": 3,
       "caption": "A vezérlő torony",
-      "text": "Felmászol a torony fém lépcsőin. Fent egy hatalmas műszer vár: a Mechanika-Magnus Teleszkóp — csövek, tükrök, fogaskerekek, egy kupola, amely fém virágként nyílik ki.\nPuf-Puf: \"Ezzel keressük a bolygómat?\"",
+      "text": "Felmászol a fém lépcsőkön, a lépések visszhangoznak. Fent egy kolosszus vár rátok: a Mechanika-Magnus Teleszkóp — csövek, tükrök, fogaskerekek; a kupola fém virágként nyílik ki.\n\n— Ezzel keressük a bolygómat? kérdezi Puf-Puf.\n— Normálisan a város útvonalait szkennel, válaszolja Grubot. De a kristály adapterrel a bolygód aláírására hangolhatjuk.\n— Akkor most felrakjuk, mondod te.",
       "imageUrl": "images/tol/stories/mechanika-s1/3.control-tower.png"
     },
     {
@@ -35,7 +37,7 @@
       "type": "page",
       "sortOrder": 4,
       "caption": "Mi hiányzik",
-      "text": "Grubot kinyitja az oldalsó panelt: \"- Két dolog hiányzik: (1) egy kő Lunariáról a 'zöld szemhez'; (2) tárolt energia a fókuszáló tekercsekhez. Van egy tartály a torony alatt — feltöltve, de instabil. Ha van a kötök, felrakjuk; különben előkészítjük a helyét.\"",
+      "text": "Grubot visszahajtja a teleszkóp oldalsó paneljét. Belül egy üres foglalat és vastag tekercsek látszanak.\n\n— Két dolog hiányzik, mondja világosan:\n\negy kő Lunariáról a \"Zöld Szemhez\" — a darab, amely kalibrálja a spektrumot;\n\ntárolt energia a fókuszáló tekercsekhez.\n\n— Van egy tartály a torony alatt: feltöltve, de instabil, teszi hozzá Grubot.\n— Ha van a kötök, most felrakom; ha nincs, előkészítjük a foglalatot és stabilizáljuk a tekercseket.",
       "imageUrl": "images/tol/stories/mechanika-s1/4.missing.png"
     },
     {
@@ -51,9 +53,9 @@
           "text": "A kezemmel ragasztom fel a követ.",
           "tokens": [
             {
-               "type": "Alchemy",
-              "value": "circuite electrice",
-              "quantity": 1
+              "type": "Personality",
+              "value": "curiosity",
+              "quantity": 2
             },
             {
               "type": "Personality",
@@ -61,29 +63,29 @@
               "quantity": 1
             },
             {
-              "type": "Personality",
-              "value": "curiosity",
-              "quantity": 2
+              "type": "Alchemy",
+              "value": "circuite electrice",
+              "quantity": 1
             }
           ],
           "sortOrder": 1
         },
         {
           "answerId": "b",
-          "text": "Megkérdezem, hogyan köthetem fel a követ és mi fog történni utána.",
+          "text": "Megkérdezem, hogyan köthetem fel a követ és mi fog történni utána",
           "tokens": [
-            {
-              "type": "Personality",
-              "value": "curiosity",
-              "quantity": 1
-            },
             {
               "type": "Personality",
               "value": "courage",
               "quantity": 1
             },
             {
-               "type": "Alchemy",
+              "type": "Personality",
+              "value": "curiosity",
+              "quantity": 1
+            },
+            {
+              "type": "Alchemy",
               "value": "circuite electrice",
               "quantity": 1
             }
@@ -96,6 +98,11 @@
           "tokens": [
             {
               "type": "Personality",
+              "value": "curiosity",
+              "quantity": 1
+            },
+            {
+              "type": "Personality",
               "value": "thinking",
               "quantity": 1
             },
@@ -105,12 +112,7 @@
               "quantity": 1
             },
             {
-              "type": "Personality",
-              "value": "curiosity",
-              "quantity": 1
-            },
-            {
-               "type": "Alchemy",
+              "type": "Alchemy",
               "value": "circuite electrice",
               "quantity": 1
             }
@@ -122,13 +124,13 @@
           "text": "Improvizálok egy energiaforrást a kőből és a Terán lévő madár tollából.",
           "tokens": [
             {
-               "type": "Alchemy",
-              "value": "circuite electrice",
+              "type": "Personality",
+              "value": "curiosity",
               "quantity": 1
             },
             {
-              "type": "Personality",
-              "value": "creativity",
+              "type": "Alchemy",
+              "value": "circuite electrice",
               "quantity": 1
             },
             {
@@ -138,7 +140,7 @@
             },
             {
               "type": "Personality",
-              "value": "curiosity",
+              "value": "creativity",
               "quantity": 1
             }
           ],
@@ -154,8 +156,8 @@
               "quantity": 1
             },
             {
-              "type": "Personality",
-              "value": "courage",
+              "type": "Alchemy",
+              "value": "circuite electrice",
               "quantity": 1
             },
             {
@@ -164,8 +166,8 @@
               "quantity": 1
             },
             {
-               "type": "Alchemy",
-              "value": "circuite electrice",
+              "type": "Personality",
+              "value": "courage",
               "quantity": 1
             }
           ],
@@ -179,7 +181,7 @@
       "type": "page",
       "sortOrder": 6,
       "caption": "Fókuszálás",
-      "text": "A teleszkóp életre kel. A tükrök igazodnak, a szomszédos hologramok kigyulladnak, fény ágak jelennek meg rajtuk. Egy útvonal erősebben pulzál — egy szál, amely arra vár, hogy kövessék. Puf-Puf: \"Mutasd meg a Kelo-Ketist...\"",
+      "text": "A teleszkóp életre kel. A tükrök igazodnak, a hologramok kigyulladnak, és rajtuk fény ágak sarjadnak. Egy útvonal erősebben pulzál — egy szál, amely arra hív, hogy kövessétek.\n— Mutasd meg a Kelo-Ketist…, mondja Puf-Puf.\n",
       "imageUrl": "images/tol/stories/mechanika-s1/6.focus.png"
     },
     {
@@ -187,7 +189,7 @@
       "type": "page",
       "sortOrder": 7,
       "caption": "A térkép mélyül",
-      "text": "Grubot gépel: \"Tiszta jel. Rögzítem a koordinátákat és mentem az útvonal-sémát a portál megnyitásához.\"\nPuf-Puf: \"Az első nagy lépés kipipálva.\"",
+      "text": "Grubot gyorsan gépel.\n— Tiszta jel. Rögzítem a koordinátákat és mentem az útvonal-sémát a portál megnyitásához.\nPuf-Puf röviden mosolyog:\n— Az első nagy lépés kipipálva.",
       "imageUrl": "images/tol/stories/mechanika-s1/7.map-deepens.png"
     },
     {
@@ -203,7 +205,7 @@
       "type": "page",
       "sortOrder": 9,
       "caption": "Előre tekintés",
-      "text": "A teleszkóp pihenőbe megy, és a kinti köd vékonyabbnak tűnik. Van a mélyült térképetek és Elektromos áramkörök\n Puf-Puf: \"Oké, csapat. A következő ág?\"",
+      "text": "A teleszkóp pihenőbe megy, és a kinti köd vékonyabbnak tűnik. Van a mélyült térképetek és Elektromos áramkörök\\n Puf-Puf: \"Oké, csapat. A következő ág?\"",
       "imageUrl": "images/tol/stories/mechanika-s1/9.ahead.png"
     }
   ]
