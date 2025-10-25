@@ -4,6 +4,7 @@
   "coverImageUrl": "images/tol/stories/loi-intro/0.cover.png",
   "category": "terra",
   "sortOrder": 1,
+  "unlockedStoryHeroes": [],
   "tiles": [
     {
       "tileId": "1",
@@ -18,7 +19,7 @@
       "type": "page",
       "sortOrder": 2,
       "caption": "Împăratul Pufus Alchimus",
-      "text": "Pe Kelo-Ketis domnea Împăratul Pufus Alchimus, un războinic cunoscut pentru cuceriri si pentru setea de lupta. Războiul cu iepurii ținea de mult, iar armele vorbeau mai tare decât poveștile.",
+      "text": "Pe Kelo-Ketis domnea Împăratul Pufus Alchimus, un războinic cunoscut pentru cuceriri și pentru setea de luptă. Războiul cu iepurii ținea de mult, iar armele vorbeau mai tare decât poveștile. Împăratul spera că într-o bună zi imperiul său se va întinde pe tot tărâmul Alchimaliei.",
       "imageUrl": "images/tol/stories/loi-intro/2.emperor.png"
     },
     {
@@ -34,7 +35,7 @@
       "type": "page",
       "sortOrder": 4,
       "caption": "Prieteni peste graniță",
-      "text": "Deși război, prietenia își găsea drum. Un iepure negru și o pisică albă se întâlneau în secret și își povesteau lumea, se jucau cand pe Lunaria cand pe Ketis. Nu semănau a dușmani. Semănau a copii curioși.",
+      "text": "Deși era război, prietenia își găsea drum. Un iepure negru și o pisică albă se întâlneau în secret și își povesteau lumea, se jucau când pe Lunaria, când pe Ketis. Nu semănau a dușmani. Semănau cu doi copii curioși.",
       "imageUrl": "images/tol/stories/loi-intro/4.friends.png"
     },
     {
@@ -66,7 +67,7 @@
       "type": "page",
       "sortOrder": 8,
       "caption": "Mâțo-Iepurele",
-      "text": "Când s-au trezit, lângă ei stătea o ființă ciudată, frumoasă:cu grația unei pisici și blândețea unui iepure. Se uita la ei fără teamă.\n- Buna eu sunt Mâțo-Iepurele! Am venit sa aduc Pacea...",
+      "text": "Când s-au trezit, lângă ei stătea o ființă ciudată, frumoasă: cu grația unei pisici și blândețea unui iepure. Se uita la ei fără teamă.\n- Buna eu sunt Mâțo-Iepurele! Am venit sa aduc Pacea...",
       "imageUrl": "images/tol/stories/loi-intro/8.matso-iepurele.png"
     },
     {
@@ -131,7 +132,7 @@
       "type": "page",
       "sortOrder": 12,
       "caption": "Vraja",
-      "text": "Puf-Puf statu chiar la granita dintre planete cand iepurele pasi inapoi pe Lunaria, vrand sa il conduca acasa in secret.\nCand totul era linistit o vraja misterioasa facu ca Lunaria sa se desprinda Kelo-Ketis si sa dispara pentru todeauna. Mâțo-Iepurele disparuse si el\nPuf-Puf: \"-Trebuie sa aflu ce s-a intamplat si cu pasi grabiti merse dinnou spre copac\"",
+      "text": "Puf-Puf stătea chiar la granița dintre planete când iepurele păși înapoi pe Lunaria, vrând să-l conducă acasă în secret. Când totul era liniștit, o vrajă misterioasă făcu ca Lunaria să se desprindă de Kelo-Ketis și să dispară pentru totdeauna. Mâțo-Iepurele dispăruse și el.\n\nPuf-Puf: „Trebuie să aflu ce s-a întâmplat!” Și, cu pași grăbiți, merse din nou spre copac.",
       "imageUrl": "images/tol/stories/loi-intro/12.the-spell.png"
     },
     {
@@ -147,7 +148,7 @@
       "type": "page",
       "sortOrder": 14,
       "caption": "Copacul luminii",
-      "text": "In fata lui Puf-Puf avea ceva atat de frumos si totodata de nerecunoscut. Marele copac devenise plin de lumina, iar de ici de colo se auzeau soapte. \n\"Trebuie sa cauti pacea...cristalul este cheia...\" se auzi de undeva din radacina copacului. \nPuf-Puf sapa la radacina copacului si gasi un cristal care parea sa comunice cu el. \n",
+      "text": "În fața lui Puf-Puf se afla ceva atât de frumos și, totodată, de nerecunoscut. Marele copac devenise plin de lumină, iar din loc în loc se auzeau șoapte.\n„Trebuie să cauți pacea... cristalul este cheia...”, se auzi de undeva, din rădăcina copacului.\nPuf-Puf săpă la rădăcina copacului și găsi un cristal care părea să comunice cu el.",
       "imageUrl": "images/tol/stories/loi-intro/14.tol.png"
     },
     {
@@ -155,7 +156,7 @@
       "type": "page",
       "sortOrder": 15,
       "caption": "Plecarea",
-      "text": "Ii spuse tatalui sau ca trebuie sa plece, sa exploreze, nu putea sa ii spuna imparatului ca vrea sa aduca tocmai pacea, dupa atata munca de cucerire, numai asa nu isi dorea marele Pufus Alchimus sa auda. \nSe urca in una dintre navele spatiale a imperiului si pleca...\n",
+      "text": "Îi spuse tatălui său că trebuie să plece, să exploreze; nu putea să-i spună Împăratului că vrea să aducă tocmai pacea — după atâta muncă de cucerire, acesta era ultimul lucru pe care marele Pufus Alchimus ar fi vrut să-l audă. Se urcă într-una dintre navele spațiale ale Imperiului și plecă.",
       "imageUrl": "images/tol/stories/loi-intro/15.leavingkk.png"
     }
   ]
