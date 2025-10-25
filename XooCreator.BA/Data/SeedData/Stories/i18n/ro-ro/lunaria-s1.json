@@ -4,25 +4,25 @@
   "coverImageUrl": "images/tol/stories/lunaria-s1/0.Cover.png",
   "category": "terra",
   "sortOrder": 1,
-  "unlockedStoryHeroes": ["linkaro"],
+  "unlockedStoryHeroes": [
+    "linkaro"
+  ],
   "tiles": [
     {
       "tileId": "1",
       "type": "page",
       "sortOrder": 1,
       "caption": "Portalul și Consiliul Iepurilor",
-      "text": "Puf-Puf fixează lupa peste cristal și prinde, la margine, pana păsării portocalii pe care a ajutat-o pe Terra. Lumina se adună și se deschide un portal. Intrați: tu, Puf-Puf și iepurele negru. La capăt, o piață cu steaguri în semilună. \\nConsiliul Iepurilor vă întâmpină. „Călători din Copacul Luminii?”, întreabă un consilier. „Puf-Puf, la raport”, zice el scurt. „Suntem aici să ajutăm.” \\nCei din consiliu explică: „O boală îi slăbește pe ai noștri. Avem nevoie de soluții.”\\nIepurele negru: „Am auzit de așa ceva, știu și ce putem face! Pe Muntele Negru se află o mănăstire misterioasă, iar călugării de acolo vindecă orice boală.” \\nIepurele negru, tu și Puf-Puf porniți către Muntele Negru.",
-      "imageUrl": "images/tol/stories/lunaria-s1/1.portal-council.png",
-      "question": ""
+      "text": "— Ține bine, zise Puf-Puf. Așez lupa peste cristal. Uite pana păsării portocalii, trofeul de pe Terra. E cheia.\n— Și acum? întrebă iepurele negru.\n— Lumina se adună… Gata. S-a deschis portalul.\n\nIntrați: tu, Puf-Puf și iepurele negru. Dincolo, o piață cu steaguri în formă de semilună.\n\n— Sunteți călători din Copacul Luminii? întrebă un consilier.\n— Puf-Puf, la raport, spuse pisoiul. Am venit să ajutăm.\n— Atunci ascultați, zise consilierul. O boală ne slăbește iepurii. Avem nevoie de un leac.\n\n— Ce simptome sunt? întrebi tu.\n— Obosesc repede, aud mai prost și își pierd curajul, răspunse el.\n\n— Știu un loc, zise iepurele negru. Pe Muntele Negru e o mănăstire veche. Călugării de acolo vindecă astfel de boli.\n— Drumul e cu ceață și stânci, dar merită încercat, adăugă alt consilier. Luați acest sigiliu; vă deschide poarta mănăstirii.\n\n— Îl luăm, spui tu. Plecăm imediat.\n— Eu țin direcția după cristal, zise Puf-Puf.\n— Iar eu știu potecile, zise iepurele negru.\n\nStrângeți sigiliul, treceți pe sub steagurile în semilună și porniți spre Muntele Negru.",
+      "imageUrl": "images/tol/stories/lunaria-s1/1.portal-council.png"
     },
     {
       "tileId": "p2",
       "type": "page",
       "sortOrder": 2,
       "caption": "Drumul spre Muntele Negru",
-      "text": "Poteca se urcă greu; pietrele alunecă, vântul se schimbă des. După o pantă abruptă, zăriți cu mirare mănăstirea: ziduri albe, linii simple, stegulețe cu semilună.",
-      "imageUrl": "images/tol/stories/lunaria-s1/2.white-mountain-road.png",
-      "question": ""
+      "text": "Poteca urcă greu: pietrele fug de sub talpă, iar vântul ba vine din față, ba te împinge din spate. Ceața se adună pe colțurile stâncilor și parcă mușcă din marginea potecii. Puf-Puf merge lipit de stâncă, cu cristalul la piept, iar iepurele negru își testează sprijinul la fiecare pas.\n\n— Ține-te de mine, zice Puf-Puf. Aici alunecă.\n— Știu ocolul, răspunde iepurele. Încă zece pași și scăpăm de panta asta.\n— Respiră rar și apasă talpa întreagă, adaugi tu.\n\nDupă panta abruptă, vântul se liniștește ca la un semn. Ceața se rupe în fâșii și apare mănăstirea: ziduri albe, linii simple, curate, ca desenate cu rigla. Deasupra porții, stegulețe cu semilună foșnesc ușor, fără să facă zgomot.\n\n— Am ajuns, șoptește iepurele, cu o ușurare vizibilă.\n— Frumos loc, spune Puf-Puf. Parcă te cheamă să intri.\n— Hai, bate tu la poartă, zici. Eu țin sigiliul pregătit.",
+      "imageUrl": "images/tol/stories/lunaria-s1/2.white-mountain-road.png"
     },
     {
       "tileId": "3",
@@ -30,26 +30,23 @@
       "sortOrder": 3,
       "caption": "Sala Liniștii",
       "text": "În curte, călugări pisici și iepuri se antrenează în tăcere. Le spuneți despre boala din oraș. Se privesc mirați: n-au auzit.\\n„Trebuie să vorbiți cu marele maestru”, spune un călugăr și vă conduce într-o încăpere luminoasă. O siluetă stă cu spatele, în meditație.",
-      "imageUrl": "images/tol/stories/lunaria-s1/3.silent-hall.png",
-      "question": ""
+      "imageUrl": "images/tol/stories/lunaria-s1/3.silent-hall.png"
     },
     {
       "tileId": "4",
       "type": "page",
       "sortOrder": 4,
       "caption": "Linkaro, Mâțo-Iepurele",
-      "text": "Figura se întoarce. \\n— „E… pisică?”, șoptește Puf-Puf. \\n— „Sau iepure?”, întrebi tu. \\n— „Linkaro. Sunt un Mâțo-Iepure”, zâmbește. \\nPuf-Puf dă din cap: „Știu, am întâlnit un Mâțo-Iepure, pe vremea războaielor dintre pisici și iepuri.”\\nLinkaro: „Războaiele s-au încheiat. Sunt păstrătoarea păcii; eu am semnat ultimul armistițiu. Spuneți problema.” \\nÎi descrieți boala. \\nLinkaro: „Vă trebuie Pietrele Vieții, cu esență de vindecare. Sunt sub o cornișă expusă. Culegeți-le cu grijă.”",
-      "imageUrl": "images/tol/stories/lunaria-s1/4.linkaro.png",
-      "question": ""
+      "text": "— E… pisică? șoptește Puf-Puf.\n— Sau iepure? întrebi tu.\n— Linkaro, zâmbește ea. Sunt un Mâțo-Iepure.\n\n— Știu specia, dă din cap Puf-Puf. Am întâlnit unul pe vremea războaielor dintre pisici și iepuri.\n— Războaiele s-au încheiat, spune calm Linkaro. Eu am semnat ultimul armistițiu. Spuneți problema.\n\nÎi descrieți boala din oraș.\n\n— Vă trebuie Pietrele Vieții, cu esență de vindecare, spune Linkaro. Le găsiți sub o streașină de stâncă — o cornișă expusă. Culegeți-le cu grijă, doar pe cele care lucesc ușor.",
+      "imageUrl": "images/tol/stories/lunaria-s1/4.linkaro.png"
     },
     {
       "tileId": "5",
       "type": "page",
       "sortOrder": 5,
       "caption": "Pietrele Vieții",
-      "text": "Pe o creastă îngustă, sub stâncă, licăresc pietre verzi. Curentul de aer le slăbește pulsul dacă miști prea brusc. \\nPuf-Puf: „Aici contează cum te apropii! Știam de pietrele de pe Lunaria.”",
-      "imageUrl": "images/tol/stories/lunaria-s1/5.life-stones.png",
-      "question": ""
+      "text": "Pe o creastă îngustă, sub cornișă, licăresc pietre verzi, ca niște inimioare. Curentul rece le slăbește pulsul la orice mișcare bruscă.\n\n— Aici contează cum te apropii, șoptește Puf-Puf. Pietrele de pe Lunaria se sting dacă le sperii.\n— Mergem pe rând, cu pași rari, zici tu.\n— Țin vântul în urechi și vă dau semn când tace, adaugă iepurele negru.\n\nCând rafala se oprește, vă aplecați încet.\n— Ține punguța deschisă, spune Puf-Puf. Nu le atinge. Lasă-le să cadă singure.\n— Acum, șoptești. Ușor.\n\nDouă pietre se desprind blând și cad în pânză. A treia licărește mai tare, apoi se liniștește.\n— Trei ajung, zice Puf-Puf. Restul rămân muntelui.\n— Să nu le slăbim suflul, încuviințează iepurele. Plecăm.",
+      "imageUrl": "images/tol/stories/lunaria-s1/5.life-stones.png"
     },
     {
       "tileId": "6",
@@ -58,7 +55,6 @@
       "caption": "",
       "text": "",
       "imageUrl": "images/tol/stories/lunaria-s1/6.quiz.png",
-      "question": "Pietrele verzi pulsează sub cornișă. Nu cer forță, ci felul în care te apropii. Cum le culegi fără să le stingi lumina?",
       "answers": [
         {
           "answerId": "a",
@@ -82,13 +78,13 @@
           "text": "Ascult pulsul, apoi ating.",
           "tokens": [
             {
-              "type": "Discovery",
-              "value": "discovery credit",
+              "type": "Personality",
+              "value": "curiosity",
               "quantity": 1
             },
             {
-              "type": "Personality",
-              "value": "curiosity",
+              "type": "Discovery",
+              "value": "discovery credit",
               "quantity": 1
             }
           ],
@@ -99,13 +95,13 @@
           "text": "Sincronizez ca un ceasornicar.",
           "tokens": [
             {
-              "type": "Discovery",
-              "value": "discovery credit",
+              "type": "Personality",
+              "value": "thinking",
               "quantity": 1
             },
             {
-              "type": "Personality",
-              "value": "thinking",
+              "type": "Discovery",
+              "value": "discovery credit",
               "quantity": 1
             }
           ],
@@ -116,13 +112,13 @@
           "text": "Buclă moale, fără atingere.",
           "tokens": [
             {
-              "type": "Discovery",
-              "value": "discovery credit",
+              "type": "Personality",
+              "value": "creativity",
               "quantity": 1
             },
             {
-              "type": "Personality",
-              "value": "creativity",
+              "type": "Discovery",
+              "value": "discovery credit",
               "quantity": 1
             }
           ],
@@ -145,34 +141,32 @@
           ],
           "sortOrder": 5
         }
-      ]
+      ],
+      "question": "Pietrele verzi pulsează sub cornișă. Nu cer forță, ci felul în care te apropii. Cum le culegi fără să le stingi lumina?"
     },
     {
       "tileId": "p6",
       "type": "page",
       "sortOrder": 7,
       "caption": "Rețeta Linkaro",
-      "text": "Înapoi în sala liniștită, Linkaro dictează: \\n„Apă la fiert blând, mult morcov tăiat fin, ierburi locale și Pietrele Vieții puse sub vas, nu înăuntru. Când aburul capătă reflex verde, e gata.”",
-      "imageUrl": "images/tol/stories/lunaria-s1/7.recipe.png",
-      "question": ""
+      "text": "Înapoi în sala liniștită, Linkaro vorbește rar, ca să notați bine:\n\n— Apă la foc mic, să fiarbă blând.\n— Mult morcov, tăiat foarte fin. Ierburi locale — o mână mică ajunge.\n— Pietrele Vieții nu se pun în oală. Le așezați sub vas, ca un cuib. Ele dau esența prin căldură.\n— Când aburul capătă o sclipire verde, opriți focul. E gata.\n\n— Simplu și curat, zice Puf-Puf.\n— Clar, adaugi tu. Începem chiar acum.",
+      "imageUrl": "images/tol/stories/lunaria-s1/7.recipe.png"
     },
     {
       "tileId": "p7",
       "type": "page",
       "sortOrder": 8,
       "caption": "Supa în oraș",
-      "text": "Vă întoarceți la Consiliu. În piață, pregătiți vasul mare, așezați pietrele verzi sub el și urmați pașii. Iepurii bolnavi beau pe rând; urechile li se ridică, respirația se reglează, murmurul străzii revine.",
-      "imageUrl": "images/tol/stories/lunaria-s1/8.soup-city.png",
-      "question": ""
+      "text": "Vă întoarceți la Consiliu. În piață, puneți la mijloc vasul mare; Puf-Puf așază cu grijă pietrele verzi sub el, ca într-un cuib. Apa începe să freamăte la foc mic, morcovul tăiat fin și ierburile locale se lasă ușor în oală.\n\n— Ținem regula Linkaro, zice Puf-Puf. Pietrele rămân sub vas.\n— Așteptăm aburul verde, adaugi tu. Încet, fără grabă.\n\nCând aburul prinde o nuanță smarald, turnați în căni mici.\n— Pe rând, îi îndeamnă iepurele negru. Un gât, apoi respirați.\n\nIepurii bolnavi beau câte o înghițitură. Urechile li se ridică, pieptul se liniștește, ochii capătă luciu. În piață se aude din nou foșnetul pașilor, râsete scurte, vorbă domoală. Steagurile în semilună fâlfâie ușor — murmurul străzii revine.",
+      "imageUrl": "images/tol/stories/lunaria-s1/8.soup-city.png"
     },
     {
       "tileId": "p8",
       "type": "page",
       "sortOrder": 9,
       "caption": "Semne de vindecare",
-      "text": "Spre seară, cartierele sunt mai liniștite. Un pui de iepure face primul salt fără să șovăie. \\nLinkaro vă conduce până la marginea pieței: „Ați readus echilibrul prim. Mulțumesc.\\nPuf-Puf: „Notăm: Lunaria răspunde bine la grijă și la plan. Următorul pas îl alegem împreună.”",
-      "imageUrl": "images/tol/stories/lunaria-s1/9.healing.png",
-      "question": ""
+      "text": "Spre seară, cartierele se liniștesc. Un pui de iepure prinde curaj și face primul salt, fără ezitare. Piața parcă respiră ușor.\n\nLinkaro vă însoțește până la marginea pieței.\n— Ați readus echilibrul de bază. Mulțumesc, spune ea.\n\n— Notăm, zice Puf-Puf: Lunaria răspunde bine la grijă și la plan.\n— Iar pasul următor îl alegem împreună, adaugi tu.\nIepurele negru dă din cap:\n— Dimineață, stabilim drumul.",
+      "imageUrl": "images/tol/stories/lunaria-s1/9.healing.png"
     }
   ]
 }
