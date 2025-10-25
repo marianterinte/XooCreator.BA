@@ -12,15 +12,17 @@
       "sortOrder": 1,
       "caption": "Fog over Mechanika",
       "text": "You descend into Mechanika through thick, suffocating haze — factory smoke, lost sparks, heavy air. The city lights are blurred spots, the walkways creak, and the gears turn fumblingly. \nPuf-Puf lights his collar lamp.\n\"- Visibility: low to very low. Grubot, can you hear us?\" You wander for a few minutes among pipes and rivets, following the crystal's faint pulse.",
-      "imageUrl": "images/tol/stories/mechanika-s1/1.fog.png"
+      "imageUrl": "images/tol/stories/mechanika-s1/1.fog.png",
+      "question": ""
     },
     {
       "tileId": "2",
       "type": "page",
       "sortOrder": 2,
       "caption": "Grubot finds you",
-      "text": "A clean signal cuts through the fog, followed by a thin beam. Something emerges from the smoke.\nGrubot: \"- I detected you by the crystal's signature and... a familiar chemical trace. LunKarot.\" \nPuf-Puf laughs: \"- You've got a good digital nose.\" \nGrubot: \"- A promise remains a promise. You gave me a pulse; I give you vision. To the control tower.\"",
-      "imageUrl": "images/tol/stories/mechanika-s1/2.grubot.png"
+      "text": "A clean signal cuts through the fog, followed by a thin beam. Something emerges from the smoke.\nGrubot: \"- I detected you by the crystal's signature and... a familiar chemical trace. LunKarot.\" \nPuf-Puf laughs: \"- You've got a good digital nose.\" \nGrubot: \"- A promise remains a promise. You gave me a pulse; I give you vision. To the control tower.\"\n",
+      "imageUrl": "images/tol/stories/mechanika-s1/2.grubot.png",
+      "question": ""
     },
     {
       "tileId": "3",
@@ -28,7 +30,8 @@
       "sortOrder": 3,
       "caption": "The control tower",
       "text": "You climb the metal stairs of the tower. At the top, a massive instrument awaits you: the Mechanika-Magnus Telescope — tubes, mirrors, gears, a dome that opens like a metal flower. \nPuf-Puf: \"We're looking for my planet with this?\"",
-      "imageUrl": "images/tol/stories/mechanika-s1/3.control-tower.png"
+      "imageUrl": "images/tol/stories/mechanika-s1/3.control-tower.png",
+      "question": ""
     },
     {
       "tileId": "4",
@@ -36,7 +39,8 @@
       "sortOrder": 4,
       "caption": "What's missing",
       "text": "Grubot opens the side panel: \"- We're missing two things: (1) a stone from Lunaria for the 'green eye'; (2) stored energy for the focusing coils. We have a tank under the tower — charged, but unstable. If you have the stone, we'll mount it; otherwise, we prepare the socket.\"",
-      "imageUrl": "images/tol/stories/mechanika-s1/4.missing.png"
+      "imageUrl": "images/tol/stories/mechanika-s1/4.missing.png",
+      "question": ""
     },
     {
       "tileId": "5",
@@ -45,13 +49,14 @@
       "caption": "",
       "text": "",
       "imageUrl": "images/tol/stories/mechanika-s1/5.quiz.png",
+      "question": "The tank has energy, but the connection to the coils requires finesse. What move do you choose to start the telescope without forcing it?",
       "answers": [
         {
           "answerId": "a",
           "text": "I attach the stone with my own hand.",
           "tokens": [
             {
-              "type": "Alchemy",
+               "type": "Alchemy",
               "value": "circuite electrice",
               "quantity": 1
             },
@@ -83,7 +88,7 @@
               "quantity": 1
             },
             {
-              "type": "Alchemy",
+               "type": "Alchemy",
               "value": "circuite electrice",
               "quantity": 1
             }
@@ -110,7 +115,7 @@
               "quantity": 1
             },
             {
-              "type": "Alchemy",
+               "type": "Alchemy",
               "value": "circuite electrice",
               "quantity": 1
             }
@@ -122,7 +127,7 @@
           "text": "I improvise an energy source from the stone and the feather from the bird on Terra.",
           "tokens": [
             {
-              "type": "Alchemy",
+               "type": "Alchemy",
               "value": "circuite electrice",
               "quantity": 1
             },
@@ -164,15 +169,14 @@
               "quantity": 1
             },
             {
-              "type": "Alchemy",
+               "type": "Alchemy",
               "value": "circuite electrice",
               "quantity": 1
             }
           ],
           "sortOrder": 5
         }
-      ],
-      "question": "The tank has energy, but the connection to the coils requires finesse. What move do you choose to start the telescope without forcing it?"
+      ]
     },
     {
       "tileId": "6",
@@ -180,7 +184,8 @@
       "sortOrder": 6,
       "caption": "Focus",
       "text": "The telescope comes to life. The mirrors align, adjacent holograms light up, branches of light appear on them. One path pulses stronger — a thread waiting to be followed. Puf-Puf: \"Show us Kelo-Ketis...\"",
-      "imageUrl": "images/tol/stories/mechanika-s1/6.focus.png"
+      "imageUrl": "images/tol/stories/mechanika-s1/6.focus.png",
+      "question": ""
     },
     {
       "tileId": "7",
@@ -188,7 +193,8 @@
       "sortOrder": 7,
       "caption": "The map deepens",
       "text": "Grubot types: \"Clear signal. Fixing coordinates and saving the route-scheme for opening the portal.\"\nPuf-Puf: \"First big step checked off.\"",
-      "imageUrl": "images/tol/stories/mechanika-s1/7.map-deepens.png"
+      "imageUrl": "images/tol/stories/mechanika-s1/7.map-deepens.png",
+      "question": ""
     },
     {
       "tileId": "8",
@@ -196,7 +202,8 @@
       "sortOrder": 8,
       "caption": "Workshop reward",
       "text": "Grubot hands you a case with parts: \"Electric circuits — for what comes next.\" \nPuf-Puf chuckles: \"I'll put them next to the cookies for motivation.\"",
-      "imageUrl": "images/tol/stories/mechanika-s1/8.reward.png"
+      "imageUrl": "images/tol/stories/mechanika-s1/8.reward.png",
+      "question": ""
     },
     {
       "tileId": "9",
@@ -204,7 +211,8 @@
       "sortOrder": 9,
       "caption": "Looking ahead",
       "text": "The telescope enters rest mode, and the fog outside seems thinner. You have the deepened map and electric circuits.\nPuf-Puf: \"OK, team. Next branch?\"",
-      "imageUrl": "images/tol/stories/mechanika-s1/9.ahead.png"
+      "imageUrl": "images/tol/stories/mechanika-s1/9.ahead.png",
+      "question": ""
     }
   ]
 }

@@ -6,57 +6,62 @@
   "sortOrder": 1,
   "tiles": [
     {
-      "tileId": "p1",
+      "tileId": "1",
       "type": "page",
       "sortOrder": 1,
       "caption": "Target: The Moon Lens",
-      "text": "Emperor Puf-Puf hasn’t repaired his ship, and as for Earth, he has no idea where it is in relation to Kelo-Ketis. He has heard, however, of a rare artifact: the Moon Lens. With it, the crystal enlarges the map and you can search deeper for the route to Kelo-Ketis. The target points to an area of low rocks and tall grass at the edge of a forest.",
-      "imageUrl": "images/tol/stories/terra-s2/1.target.png"
+      "text": "Emperor Puf-Puf hasn't repaired his ship, and as for Earth, he has no idea where it is in relation to Kelo-Ketis. He has heard, however, of a rare artifact: the Moon Lens. With it, the crystal enlarges the map and you can search deeper for the route to Kelo-Ketis. The target points to an area of low rocks and tall grass at the edge of a forest.",
+      "imageUrl": "images/tol/stories/terra-s2/1.target.png",
+      "question": ""
     },
     {
-      "tileId": "p2",
+      "tileId": "2",
       "type": "page",
       "sortOrder": 2,
       "caption": "Strange Tracks",
-      "text": "In the grass appear small zigzagging tracks that disappear near a hollowed log. Beside them, carrot tails ‘artistically nibbled’.",
-      "imageUrl": "images/tol/stories/terra-s2/2.tracks.png"
+      "text": "In the grass appear small zigzagging tracks that disappear near a hollowed log. Beside them, carrot tails \"artistically nibbled\".",
+      "imageUrl": "images/tol/stories/terra-s2/2.tracks.png",
+      "question": ""
     },
     {
-      "tileId": "p3",
+      "tileId": "3",
       "type": "page",
       "sortOrder": 3,
       "caption": "The Black Rabbit",
-      "text": "From the log leaps a black rabbit, with matte fur and big eyes. ‘Hello! I’m… sometimes here, sometimes on Lunaria. Depends how you blink,’ it says, then laughs. ‘I know where the Lens is. And I need help getting home to Lunaria. If you help me, I’ll show you the way to the Lens.’",
-      "imageUrl": "images/tol/stories/terra-s2/3.black-rabbit.png"
+      "text": "From the log leaps a black rabbit, with matte fur and big eyes. \"Hello! I'm… sometimes here, sometimes on Lunaria. Depends how you blink,\" it says, then laughs. \"I know where the Lens is. And I need help getting home to Lunaria. If you help me, I'll show you the way to the Lens.\"\nPuf-Puf:\"Lunaria? I think I know this planet...let's go...\"",
+      "imageUrl": "images/tol/stories/terra-s2/3.black-rabbit.png",
+      "question": ""
     },
     {
-      "tileId": "p4",
+      "tileId": "4",
       "type": "page",
       "sortOrder": 4,
       "caption": "Where the Lens Is",
       "text": "Guided by the rabbit, you reach a short, cold grotto, with ankle-deep water. Pale crystals hang from the ceiling; on a rock rests a translucent disc — the Moon Lens — wedged between two stone outgrowths.",
-      "imageUrl": "images/tol/stories/terra-s2/4.cave.png"
+      "imageUrl": "images/tol/stories/terra-s2/4.cave.png",
+      "question": ""
     },
     {
-      "tileId": "p5",
+      "tileId": "5",
       "type": "page",
       "sortOrder": 5,
       "caption": "A Small Problem",
-      "text": "When you touch the rock, the water ripples and the entrance seems to ‘breathe’, narrowing slightly. ‘Sensitive grotto,’ says the rabbit. ‘Do good, you get an exit. Do wrong, you get a cold shower.’",
-      "imageUrl": "images/tol/stories/terra-s2/5.problem.png"
+      "text": "When you touch the rock, the water ripples and the entrance seems to \"breathe\", narrowing slightly. \"Sensitive grotto,\" says the rabbit. \"Do good, you get an exit. Do wrong, you get a cold shower.\"",
+      "imageUrl": "images/tol/stories/terra-s2/5.problem.png",
+      "question": ""
     },
     {
-      "tileId": "q1",
+      "tileId": "6",
       "type": "quiz",
       "sortOrder": 6,
       "caption": "",
       "text": "",
       "imageUrl": "images/tol/stories/terra-s2/6.quiz.png",
-      "question": "Choose how to extract the Moon Lens without destabilizing the grotto:",
+      "question": "Choose the approach to extract the Moon Lens without destabilizing the grotto:",
       "answers": [
         {
           "answerId": "a",
-          "text": "Slip over the narrow threshold and work quickly, giving the walls no time to ‘breathe’.",
+          "text": "Slip over the narrow threshold and work quickly, giving the walls no time to \"breathe\".",
           "tokens": [
             {
               "type": "Personality",
@@ -80,7 +85,7 @@
         },
         {
           "answerId": "c",
-          "text": "Make a short plan: who holds the flashlight, who sets the lever, the order of moves, and a ‘stop’ signal.",
+          "text": "Make a short plan: who holds the flashlight, who sets the lever, the order of moves, and a \"stop\" signal.",
           "tokens": [
             {
               "type": "Personality",
@@ -121,8 +126,9 @@
       "type": "page",
       "sortOrder": 7,
       "caption": "Success",
-      "text": "The Lens comes out cleanly, without disturbing the grotto. The rabbit claps its little paws: ‘Bravo! Sideways is better than straight!’ You place the Lens over the crystal and the map’s image sharpens. The rabbit looks at you, determined: ‘Let’s keep in touch. I want to go home to Lunaria — do you promise to help?’ Now you know where Lunaria is: not the Moon, but a planet far from Earth. If we had a source of energy, maybe we could repair the ship together…",
-      "imageUrl": "images/tol/stories/terra-s2/7.success.png"
+      "text": "The Lens comes out cleanly, without disturbing the grotto. The rabbit claps its little paws: \"Bravo! Sideways is better than straight!\" You place the Lens over the crystal and the map's image sharpens. The rabbit looks at you, determined: \"Let's keep in touch. I want to go home to Lunaria — do you promise to help?\"\nNow you know where Lunaria is: not the Moon, but a planet far from Earth. If we had a source of energy, maybe we could repair the ship together…",
+      "imageUrl": "images/tol/stories/terra-s2/7.success.png",
+      "question": ""
     }
   ]
 }

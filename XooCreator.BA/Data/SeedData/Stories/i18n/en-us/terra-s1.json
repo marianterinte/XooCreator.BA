@@ -4,6 +4,7 @@
   "coverImageUrl": "images/tol/stories/terra-s1/0.Cover.png",
   "category": "terra",
   "sortOrder": 1,
+  "unlockedStoryHeroes": [],
   "tiles": [
     {
       "tileId": "1",
@@ -11,15 +12,17 @@
       "sortOrder": 1,
       "caption": "Arrival",
       "text": "Puf-Puf decides to explore the planet he just landed on. You walk together and after a few hours, a farm, where several villagers live, appears in your path. Everything seems in order for a while, but people are worried and watch the sky like an unwelcome guest. \nPuf-Puf twitches his whiskers.\nPuf-Puf: - I wonder why the world is so scared? Why is everyone standing as if holding their breath?",
-      "imageUrl": "images/tol/stories/terra-s1/1.arrival.png"
+      "imageUrl": "images/tol/stories/terra-s1/1.arrival.png",
+      "question": ""
     },
     {
       "tileId": "2",
       "type": "page",
       "sortOrder": 2,
       "caption": "Strange Silence",
-      "text": "No rooster crows, no dog barks, not even the crickets find their chorus. The silence presses, thick, like a wet blanket. Puf-Puf looks at you: ‘It’s as if nature were counting to ten and didn’t dare say ten.’",
-      "imageUrl": "images/tol/stories/terra-s1/2.silence.png"
+      "text": "No rooster crows, no dog barks, not even the crickets find their chorus. The silence presses, thick, like a wet blanket. Puf-Puf looks at you.\nPuf-Puf: - It's as if nature were counting to ten and didn't dare say: ten!",
+      "imageUrl": "images/tol/stories/terra-s1/2.silence.png",
+      "question": ""
     },
     {
       "tileId": "3",
@@ -27,45 +30,51 @@
       "sortOrder": 3,
       "caption": "Whispers of the People",
       "text": "An old man approaches with small steps.\nOld man: -It's… a shadow... it comes down from the sky at sunset. The animals flee, the grain lies flat. We say it's a curse. \nPuf-Puf: - Curse or sign, it still has a cause. Let's track it!",
-      "imageUrl": "images/tol/stories/terra-s1/3.whispers.png"
+      "imageUrl": "images/tol/stories/terra-s1/3.whispers.png",
+      "question": ""
     },
     {
       "tileId": "4",
       "type": "page",
       "sortOrder": 4,
       "caption": "The First Night",
-      "text": "The sun sinks behind the hills, and the wind brings a new, restless rustle. Above the clouds, something large moves. A shadow across the fields, and the moon seems to step aside. Puf-Puf holds his breath for a moment and smiles a little: ‘OK… this isn’t just changing weather.’",
-      "imageUrl": "images/tol/stories/terra-s1/4.first-night.png"
+      "text": "The sun sinks behind the hills, and the wind brings a new, restless rustle. Above the clouds, something large moves. A shadow across the fields, and the moon seems to step aside. Puf-Puf holds his breath for a moment and smiles a little: \nPuf-Puf:- OK… this isn't just changing weather.",
+      "imageUrl": "images/tol/stories/terra-s1/4.first-night.png",
+      "question": ""
     },
     {
       "tileId": "5",
       "type": "page",
       "sortOrder": 5,
-      "caption": "The Earth’s Vibration",
+      "caption": "The Earth's Vibration",
       "text": "The ground shivers, lightly at first, then like a heavy footstep. The air smells of smoke and clean ash, like after a spark. In the flattened field, a huge silhouette can be made out, flickering on and off like a wounded beacon.",
-      "imageUrl": "images/tol/stories/terra-s1/5.vibration.png"
+      "imageUrl": "images/tol/stories/terra-s1/5.vibration.png",
+      "question": ""
     },
     {
       "tileId": "6",
       "type": "page",
       "sortOrder": 6,
       "caption": "The Creature",
-      "text": "From the shadows emerges a massive bird, with ember-like feathers and crystal eyes. Its left wing hangs heavy; each flap throws up sparks that fizzle on the water. It’s not a curse: it’s a lost being from another world, fallen into a place that doesn’t understand it yet.",
-      "imageUrl": "images/tol/stories/terra-s1/6.creature.png"
+      "text": "From the shadows emerges a massive bird, with ember-like feathers and crystal eyes. Its left wing hangs heavy; each flap throws up sparks that fizzle on the water. It's not a curse: it's a lost being from another world, fallen into a place that doesn't understand it yet.",
+      "imageUrl": "images/tol/stories/terra-s1/6.creature.png",
+      "question": ""
     },
     {
       "tileId": "7",
       "type": "page",
       "sortOrder": 7,
       "caption": "The Bond",
-      "text": "Puf-Puf approaches slowly, nods at you, then whispers: ‘It’s from the Tree of Light. If we help it, it can show us a hidden path on Terra.’ The bird looks straight at you, unafraid; in its eyes are furrows and stars. ‘You’ve got good hands,’ says Puf-Puf with a smile. ‘And I have… useful commentary. You try first.’",
-      "imageUrl": "images/tol/stories/terra-s1/7.bond.png"
+      "text": "Puf-Puf approaches slowly, nods at you, then whispers to you.\nPuf-Puf: - It's from the Tree of Light! If we help it, it can show us a hidden path on Terra. \nThe bird looks straight at you, unafraid; in its eyes are furrows and stars. \nPuf-Puf: - You have good hands, says Puf-Puf with a smile. \nPuf-Puf: - And I have… useful commentary. You try first!",
+      "imageUrl": "images/tol/stories/terra-s1/7.bond.png",
+      "question": ""
     },
     {
       "tileId": "8",
       "type": "quiz",
-      "caption": "Helping the Wounded Bird",
       "sortOrder": 8,
+      "caption": "",
+      "text": "",
       "imageUrl": "images/tol/stories/terra-s1/8.quiz.png",
       "question": "How do you help the wounded bird?",
       "answers": [
@@ -108,13 +117,13 @@
           "text": "Build a plan so it can stretch its wings again.",
           "tokens": [
             {
-              "type": "Discovery",
-              "value": "discovery credit",
+              "type": "Personality",
+              "value": "thinking",
               "quantity": 1
             },
             {
-              "type": "Personality",
-              "value": "thinking",
+              "type": "Discovery",
+              "value": "discovery credit",
               "quantity": 1
             }
           ],
@@ -125,13 +134,13 @@
           "text": "Use your creativity and find a new way to heal.",
           "tokens": [
             {
-              "type": "Personality",
-              "value": "creativity",
+              "type": "Discovery",
+              "value": "discovery credit",
               "quantity": 1
             },
             {
-              "type": "Discovery",
-              "value": "discovery credit",
+              "type": "Personality",
+              "value": "creativity",
               "quantity": 1
             }
           ],
@@ -162,7 +171,8 @@
       "sortOrder": 9,
       "caption": "The Path Opens",
       "text": "After your help, the bird tucks its injured wing to its chest and, with a calm effort, stretches the other. A strip of light slips from its feathers and cuts the field like a new path. \nPuf-Puf: - Look at it!, says Puf-Puf with a kind of playful pride. \nPuf-Puf: - The path that didn't exist until five minutes ago.\nThe bird lifts its gaze to the clouds, then to you. Puf-Puf receives a feather in gratitude and knows that the bird will become the village's protector from now on. The great, magical feather feeds an unexpected energy.",
-      "imageUrl": "images/tol/stories/terra-s1/9.path.png"
+      "imageUrl": "images/tol/stories/terra-s1/9.path.png",
+      "question": ""
     }
   ]
 }
