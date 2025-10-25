@@ -21,7 +21,7 @@
       "type": "page",
       "sortOrder": 2,
       "caption": "Grubot finds you",
-      "text": "A clean signal cuts through the fog; a thin beam streaks through the air. From the smoke, Grubot's silhouette takes shape.\n\n— I detected you by the crystal's signature and… a familiar chemical trace: Lunkarot, says Grubot.\nPuf-Puf laughs:\n— Good digital nose.\n— A promise is a promise, continues Grubot. You gave me pulse; I give you vision. Follow me to the Control Tower.",
+      "text": "A clean signal cuts through the fog; a thin beam streaks through the air. From the smoke, Grubot's silhouette takes shape.\n\n— I detected you by the crystal's signature and… a familiar chemical trace: Lunkarot, says the robot Grubot.\nPuf-Puf laughs:\n— Good digital nose.\n— A promise is a promise, continues Grubot. You gave me pulse; I give you vision. Follow me to the Control Tower.",
       "imageUrl": "images/tol/stories/mechanika-s1/2.grubot.png"
     },
     {
@@ -98,12 +98,12 @@
           "tokens": [
             {
               "type": "Personality",
-              "value": "curiosity",
+              "value": "thinking",
               "quantity": 1
             },
             {
               "type": "Personality",
-              "value": "thinking",
+              "value": "curiosity",
               "quantity": 1
             },
             {
@@ -124,23 +124,23 @@
           "text": "I improvise an energy source from the stone and the feather from the bird on Terra.",
           "tokens": [
             {
-              "type": "Personality",
-              "value": "curiosity",
-              "quantity": 1
-            },
-            {
               "type": "Alchemy",
               "value": "circuite electrice",
               "quantity": 1
             },
             {
               "type": "Personality",
-              "value": "courage",
+              "value": "curiosity",
               "quantity": 1
             },
             {
               "type": "Personality",
               "value": "creativity",
+              "quantity": 1
+            },
+            {
+              "type": "Personality",
+              "value": "courage",
               "quantity": 1
             }
           ],
@@ -152,7 +152,12 @@
           "tokens": [
             {
               "type": "Personality",
-              "value": "safety",
+              "value": "curiosity",
+              "quantity": 1
+            },
+            {
+              "type": "Personality",
+              "value": "courage",
               "quantity": 1
             },
             {
@@ -162,12 +167,7 @@
             },
             {
               "type": "Personality",
-              "value": "curiosity",
-              "quantity": 1
-            },
-            {
-              "type": "Personality",
-              "value": "courage",
+              "value": "safety",
               "quantity": 1
             }
           ],
@@ -181,7 +181,7 @@
       "type": "page",
       "sortOrder": 6,
       "caption": "Focus",
-      "text": "The telescope comes to life. The mirrors align, the holograms light up, and on them branches of light sprout. One route pulses stronger — a thread that calls you to follow it.\n— Show us Kelo-Ketis…, says Puf-Puf.\n",
+      "text": "The telescope awakens. The mirrors align, the holograms light up, and on them light lines branch out. One route pulses stronger — a thread that calls you.\n\n— Show us Kelo-Ketis! says Puf-Puf.",
       "imageUrl": "images/tol/stories/mechanika-s1/6.focus.png"
     },
     {
@@ -197,7 +197,7 @@
       "type": "page",
       "sortOrder": 8,
       "caption": "Workshop reward",
-      "text": "Grubot hands you a case with parts: \"Electric circuits — for what comes next.\"\nPuf-Puf giggles: \"I'll put them next to the cookies for motivation.\"",
+      "text": "Grubot hands you a metal case.\n—(robotic voice) Circuits and connectors. For what comes next.\n\nPuf-Puf giggles:\n— I'll put them next to the motivation cookies.\n\n— Good combination: energy and morale, you say.",
       "imageUrl": "images/tol/stories/mechanika-s1/8.reward.png"
     },
     {
@@ -205,7 +205,7 @@
       "type": "page",
       "sortOrder": 9,
       "caption": "Looking ahead",
-      "text": "The telescope enters rest, and the fog outside seems thinner. You have the deepened map and Electric circuits\\n Puf-Puf: \"Ok, team. Next branch?\"",
+      "text": "The telescope enters rest, and the fog in the city seems thinner. The hologram remains with the deepened map on screen, the routes marked clearly. The case with Electric circuits is attached to the backpack.\n\n— Ok, team. Next branch? says Puf-Puf.\n— East, on the main walkway, proposes the black rabbit. It's the cleanest.\n— Confirmed, says Grubot. The indicators show weaker wind there.\n— Then east it is, you conclude. Let's go.",
       "imageUrl": "images/tol/stories/mechanika-s1/9.ahead.png"
     }
   ]

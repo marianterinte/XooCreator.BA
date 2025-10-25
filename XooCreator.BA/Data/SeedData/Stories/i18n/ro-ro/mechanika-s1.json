@@ -21,7 +21,7 @@
       "type": "page",
       "sortOrder": 2,
       "caption": "Grubot vă găsește",
-      "text": "Un semnal curat taie ceața; o rază subțire brăzdează aerul. Din fum se conturează silueta lui Grubot.\n\n— V-am detectat după semnătura cristalului și… o urmă chimică familiară: Lunkarot, spune Grubot.\nPuf-Puf râde:\n— Nas digital bun.\n— Promisiunea e promisiune, continuă Grubot. Mi-ați dat puls; eu vă dau vedere. Urmați-mă la Turnul de Control.",
+      "text": "Un semnal curat taie ceața; o rază subțire brăzdează aerul. Din fum se conturează silueta lui Grubot.\n\n— V-am detectat după semnătura cristalului și… o urmă chimică familiară: Lunkarot, spune robotul Grubot.\nPuf-Puf râde:\n— Nas digital bun.\n— Promisiunea e promisiune, continuă Grubot. Mi-ați dat puls; eu vă dau vedere. Urmați-mă la Turnul de Control.",
       "imageUrl": "images/tol/stories/mechanika-s1/2.grubot.png"
     },
     {
@@ -98,12 +98,12 @@
           "tokens": [
             {
               "type": "Personality",
-              "value": "curiosity",
+              "value": "thinking",
               "quantity": 1
             },
             {
               "type": "Personality",
-              "value": "thinking",
+              "value": "curiosity",
               "quantity": 1
             },
             {
@@ -124,23 +124,23 @@
           "text": "Improvizez o sursa de energie a pietrei si a penei de pe tera de la pasare.",
           "tokens": [
             {
-              "type": "Personality",
-              "value": "curiosity",
-              "quantity": 1
-            },
-            {
               "type": "Alchemy",
               "value": "circuite electrice",
               "quantity": 1
             },
             {
               "type": "Personality",
-              "value": "courage",
+              "value": "curiosity",
               "quantity": 1
             },
             {
               "type": "Personality",
               "value": "creativity",
+              "quantity": 1
+            },
+            {
+              "type": "Personality",
+              "value": "courage",
               "quantity": 1
             }
           ],
@@ -152,7 +152,12 @@
           "tokens": [
             {
               "type": "Personality",
-              "value": "safety",
+              "value": "curiosity",
+              "quantity": 1
+            },
+            {
+              "type": "Personality",
+              "value": "courage",
               "quantity": 1
             },
             {
@@ -162,12 +167,7 @@
             },
             {
               "type": "Personality",
-              "value": "curiosity",
-              "quantity": 1
-            },
-            {
-              "type": "Personality",
-              "value": "courage",
+              "value": "safety",
               "quantity": 1
             }
           ],
@@ -181,7 +181,7 @@
       "type": "page",
       "sortOrder": 6,
       "caption": "Focalizare",
-      "text": "Telescopul prinde viață. Oglinzile se aliniază, hologramele se aprind, iar pe ele răsar ramuri de lumină. Un traseu pulsează mai puternic — un fir care te cheamă să-l urmezi.\n— Arată-ne Kelo-Ketis…, spune Puf-Puf.\n",
+      "text": "Telescopul se trezește. Oglinzile se aliniază, hologramele se aprind, iar pe ele se ramifică linii de lumină. Un traseu pulsează mai tare — un fir care vă cheamă.\n\n— Arată-ne Kelo-Ketis! spune Puf-Puf.",
       "imageUrl": "images/tol/stories/mechanika-s1/6.focus.png"
     },
     {
@@ -197,7 +197,7 @@
       "type": "page",
       "sortOrder": 8,
       "caption": "Recompensa de atelier",
-      "text": "Grubot vă întinde o casetă cu piese: \"Circuite electrice — pentru ce urmează.\"\nPuf-Puf chicotește: \"Le pun lângă biscuiții pentru motivație.\"",
+      "text": "Grubot vă întinde o casetă metalică.\n—(voce robotica) Circuite și conectori. Pentru ce urmează.\n\nPuf-Puf chicotește:\n— Le pun lângă biscuiții de motivație.\n\n— Bună combinație: energie și moral, zici tu.",
       "imageUrl": "images/tol/stories/mechanika-s1/8.reward.png"
     },
     {
@@ -205,7 +205,7 @@
       "type": "page",
       "sortOrder": 9,
       "caption": "Privirea înainte",
-      "text": "Telescopul intră în repaus, iar ceața de afară pare mai subțire. Aveți harta adâncită și Circuite electrice\\n Puf-Puf: \"Ok, echipă. Următoarea ramură?\"",
+      "text": "Telescopul intră în repaus, iar ceața din oraș pare mai subțire. Holograma rămâne cu harta adâncită pe ecran, traseele marcate clar. Caseta cu Circuite electrice e prinsă la rucsac.\n\n— Ok, echipă. Următoarea ramură? zice Puf-Puf.\n— Est, pe pasarela principală, propune iepurele negru. E cea mai curată.\n— Confirm, spune Grubot. Indicatorii arată vânt mai slab pe acolo.\n— Atunci est să fie, închei tu. Mergem.",
       "imageUrl": "images/tol/stories/mechanika-s1/9.ahead.png"
     }
   ]

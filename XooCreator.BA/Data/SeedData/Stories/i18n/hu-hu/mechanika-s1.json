@@ -21,7 +21,7 @@
       "type": "page",
       "sortOrder": 2,
       "caption": "Grubot megtalál titeket",
-      "text": "Egy tiszta jel vágja át a ködöt; egy vékony sugár vonja a levegőt. A füstből Grubot sziluettje rajzolódik ki.\n\n— A kristály aláírása és... egy ismerős kémiai nyom után észleltem titeket: Lunkarot, mondja Grubot.\nPuf-Puf nevet:\n— Jó digitális orrod van.\n— Az ígéret ígéret marad, folytatja Grubot. Adtatok nekem pulzust; én látást adok. Kövessetek a Vezérlő toronyhoz.",
+      "text": "Egy tiszta jel vágja át a ködöt; egy vékony sugár vonja a levegőt. A füstből Grubot sziluettje rajzolódik ki.\n\n— A kristály aláírása és... egy ismerős kémiai nyom után észleltem titeket: Lunkarot, mondja a robot Grubot.\nPuf-Puf nevet:\n— Jó digitális orrod van.\n— Az ígéret ígéret marad, folytatja Grubot. Adtatok nekem pulzust; én látást adok. Kövessetek a Vezérlő toronyhoz.",
       "imageUrl": "images/tol/stories/mechanika-s1/2.grubot.png"
     },
     {
@@ -98,12 +98,12 @@
           "tokens": [
             {
               "type": "Personality",
-              "value": "curiosity",
+              "value": "thinking",
               "quantity": 1
             },
             {
               "type": "Personality",
-              "value": "thinking",
+              "value": "curiosity",
               "quantity": 1
             },
             {
@@ -124,23 +124,23 @@
           "text": "Improvizálok egy energiaforrást a kőből és a Terán lévő madár tollából.",
           "tokens": [
             {
-              "type": "Personality",
-              "value": "curiosity",
-              "quantity": 1
-            },
-            {
               "type": "Alchemy",
               "value": "circuite electrice",
               "quantity": 1
             },
             {
               "type": "Personality",
-              "value": "courage",
+              "value": "curiosity",
               "quantity": 1
             },
             {
               "type": "Personality",
               "value": "creativity",
+              "quantity": 1
+            },
+            {
+              "type": "Personality",
+              "value": "courage",
               "quantity": 1
             }
           ],
@@ -152,7 +152,12 @@
           "tokens": [
             {
               "type": "Personality",
-              "value": "safety",
+              "value": "curiosity",
+              "quantity": 1
+            },
+            {
+              "type": "Personality",
+              "value": "courage",
               "quantity": 1
             },
             {
@@ -162,12 +167,7 @@
             },
             {
               "type": "Personality",
-              "value": "curiosity",
-              "quantity": 1
-            },
-            {
-              "type": "Personality",
-              "value": "courage",
+              "value": "safety",
               "quantity": 1
             }
           ],
@@ -181,7 +181,7 @@
       "type": "page",
       "sortOrder": 6,
       "caption": "Fókuszálás",
-      "text": "A teleszkóp életre kel. A tükrök igazodnak, a hologramok kigyulladnak, és rajtuk fény ágak sarjadnak. Egy útvonal erősebben pulzál — egy szál, amely arra hív, hogy kövessétek.\n— Mutasd meg a Kelo-Ketist…, mondja Puf-Puf.\n",
+      "text": "A teleszkóp felébred. A tükrök igazodnak, a hologramok kigyulladnak, és rajtuk fény vonalak ágaznak ki. Egy útvonal erősebben pulzál — egy szál, amely arra hív.\n\n— Mutasd meg a Kelo-Ketist! mondja Puf-Puf.",
       "imageUrl": "images/tol/stories/mechanika-s1/6.focus.png"
     },
     {
@@ -197,7 +197,7 @@
       "type": "page",
       "sortOrder": 8,
       "caption": "A műhely jutalma",
-      "text": "Grubot egy dobozt nyújt át alkatrészekkel: \"Elektromos áramkörök — a következőkre.\"\nPuf-Puf kuncog: \"A motivációs kekszek mellé teszem őket.\"",
+      "text": "Grubot egy fém dobozt nyújt át.\n—(robotikus hang) Áramkörök és csatlakozók. A következőkre.\n\nPuf-Puf kuncog:\n— A motivációs kekszek mellé teszem őket.\n\n— Jó kombináció: energia és morál, mondod te.",
       "imageUrl": "images/tol/stories/mechanika-s1/8.reward.png"
     },
     {
@@ -205,7 +205,7 @@
       "type": "page",
       "sortOrder": 9,
       "caption": "Előre tekintés",
-      "text": "A teleszkóp pihenőbe megy, és a kinti köd vékonyabbnak tűnik. Van a mélyült térképetek és Elektromos áramkörök\\n Puf-Puf: \"Oké, csapat. A következő ág?\"",
+      "text": "A teleszkóp pihenőbe megy, és a város köde vékonyabbnak tűnik. A hologram a mélyült térképpel marad a képernyőn, az útvonalak világosan megjelölve. A doboz az Elektromos áramkörökkel a hátizsákhoz van rögzítve.\n\n— Oké, csapat. A következő ág? mondja Puf-Puf.\n— Kelet, a fő gyalogúton, javasolja a fekete nyuszi. Az a legtisztább.\n— Megerősítve, mondja Grubot. A mutatók gyengébb szélmutatást jeleznek ott.\n— Akkor kelet lesz, zárnod le. Menjünk.",
       "imageUrl": "images/tol/stories/mechanika-s1/9.ahead.png"
     }
   ]
