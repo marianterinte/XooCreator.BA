@@ -12,48 +12,45 @@
   "region_aetherion_label": "Aetherion",
   "region_kelo_ketis_label": "Kelo-Ketis",
   
+  "hero_puf-puf_click_message": "Salut, călătorule! Eu sunt Împăratul Puf-Puf, ghidul tău prin Copacul Luminii.",
   "hero_puf-puf_region_gateway_message": "Copacul luminii!! Lasă-ți puterea imaginației să te poarte între lumile lui.",
   "hero_puf-puf_region_terra_message": "Planeta voastră...Sper să fie primitoare, of, mi-e dor de casă.",
   "hero_puf-puf_region_lunaria_message": "Lunaria??? îmi aduc aminte!! planeta pierdută!!",
   "hero_puf-puf_region_mechanika_message": "Întotdeauna mi-au plăcut roboții...nu și aerul de aici.",
   "hero_puf-puf_region_crystalia_message": "Sper să găsim și diamante",
   "hero_puf-puf_region_sylvaria_message": "Păduri cât vezi cu ochii și cărări care-și schimbă locul.",
- 
   "hero_puf-puf_region_oceanica_message": "Apa e frumoasă, dar nu-mi place să mă ud...",
   "hero_puf-puf_region_zephyra_message": "Vântul mă face să mă simt ușoară ca o pană!",
   "hero_puf-puf_region_pyron_message": "E prea cald aici! Cred că-mi arde blana...",
   "hero_puf-puf_region_neptunia_message": "Brrrr! Aici e prea frig pentru o prințesă!",
   "hero_puf-puf_region_aetherion_message": "Norii sunt ca niste perne moi...vreau să dorm!",
   "hero_puf-puf_region_kelo_ketis_message": "Planeta natală a lui Puf-Puf. Cheia drumului este Eroul Luminii.",
-  "hero_puf-puf_click_message": "Salut, călătorule! Eu sunt Împăratul Puf-Puf, ghidul tău prin Copacul Luminii.",
   
+  "hero_linkaro_click_message": "Eu sunt Linkaro, păstrătorul păcii. Vindec cu Pietrele Vieții.",
   "hero_linkaro_region_gateway_message": "Bine ai venit la Copacul Luminii! Eu sunt Linkaro, ghidul tău prin această călătorie magică.",
   "hero_linkaro_region_terra_message": "Terra este locul unde începe călătoria ta. Aici înveți primele lecții despre puterea lumii.",
   "hero_linkaro_region_lunaria_message": "Bine ai venit în Lunaria, unde lumina argintie dezvăluie adevăruri ascunse.",
   "hero_linkaro_region_mechanika_message": "Oh, ce loc ciudat! Toate aceste mașinării mă fac să mă simt neliniștită...",
   "hero_linkaro_region_crystalia_message": "Ce misterios...aceste cristale par să ascundă ceva secret...vreau să știu mai mult!",
   "hero_linkaro_region_sylvaria_message": "Sylvaria este pădurea vie. Aici natura îți vorbește prin fiecare frunză și ramură.",
-  
   "hero_linkaro_region_oceanica_message": "Oceanica este regatul apelor. Aici înveți despre puterea curățătoare a apei.",
   "hero_linkaro_region_zephyra_message": "Zephyra este regatul vânturilor. Aici înveți să te ridici cu vântul.",
   "hero_linkaro_region_pyron_message": "Pyron este regatul focului. Aici înveți despre puterea transformării.",
   "hero_linkaro_region_neptunia_message": "Neptunia este regatul ghețurilor. Aici înveți despre răbdare și perseverență.",
   "hero_linkaro_region_aetherion_message": "Aetherion este regatul norilor. Aici înveți să visezi și să creezi.",
   "hero_linkaro_region_kelo_ketis_message": "Kelo-Ketis este planeta natală a lui Puf-Puf. Aici se află cheia către Eroul Luminii.",
-  "hero_linkaro_click_message": "Eu sunt Linkaro, păstrătorul păcii. Vindec cu Pietrele Vieții.",
   
+  "hero_grubot_click_message": "Eu sunt Grubot, gardianul mecanic. Nasul meu digital detectează toate misterele.",
   "hero_grubot_region_gateway_message": "Salut! Eu sunt Grubot, gardianul mecanic. Nasul meu digital detectează toate misterele din jur.",
   "hero_grubot_region_terra_message": "Terra este o planetă solidă. Senzorii mei detectează o energie stabilă aici.",
   "hero_grubot_region_lunaria_message": "Lunaria are o frecvență electromagnetică unică. Lumina portocalie este fascinantă pentru senzorii mei.",
-  "hero_grubot_region_mechanika_message": "Oh, acasă! Trunul de control...mă pot odihni...",
+  "hero_grubot_region_mechanika_message": "Oh, acasă! Turnul de control...mă pot odihni...",
   "hero_grubot_region_crystalia_message": "Oare pot face un upgrade cu surse noi de energie?",
   "hero_grubot_region_sylvaria_message": "Sylvaria are o rețea biologică complexă. Fiecare copac este conectat la o rețea naturală.",
-  
   "hero_grubot_region_oceanica_message": "ATENȚIE! Apa poate afecta circuitele mele. Sistemul de protecție activat.",
   "hero_grubot_region_zephyra_message": "Vânturile pot afecta echilibrul meu. Calculând traiectoria optimă...",
   "hero_grubot_region_pyron_message": "TEMPERATURĂ CRITICĂ! Sistemul de răcire la maximum. Monitorizez supraîncălzirea.",
   "hero_grubot_region_neptunia_message": "TEMPERATURĂ SCĂZUTĂ DETECTATĂ. Sistemul de încălzire activat pentru protecția circuitelor.",
   "hero_grubot_region_aetherion_message": "DENSITATE MOLECULARĂ SCĂZUTĂ. Sistemul de propulsie funcționează eficient în această atmosferă.",
-  "hero_grubot_region_kelo_ketis_message": "Kelo-Ketis este planeta natală a lui Puf-Puf. Senzorii mei detectează o energie foarte puternică aici.",
-  "hero_grubot_click_message": "Eu sunt Grubot, gardianul mecanic. Nasul meu digital detectează toate misterele."
+  "hero_grubot_region_kelo_ketis_message": "Kelo-Ketis este planeta natală a lui Puf-Puf. Senzorii mei detectează o energie foarte puternică aici."
 }
