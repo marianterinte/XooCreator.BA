@@ -626,7 +626,7 @@ public class XooDbContext : DbContext
                 IsUnlocked = false,
                 PositionX = 0,
                 PositionY = 0,
-                Image = "images/heroes/puf-puf.png",
+                Image = "images/heroes/pufpufblink.gif",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             },

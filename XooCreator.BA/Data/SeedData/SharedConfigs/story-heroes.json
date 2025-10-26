@@ -3,7 +3,7 @@
     {
       "id": "puf-puf",
       "heroId": "puf-puf",
-      "imageUrl": "images/tol/stories/intro-pufpuf/heroes/puf-puf.png",
+      "imageUrl": "images/tol/stories/intro-pufpuf/heroes/pufpufblink.gif",
       "unlockConditions": {
         "type": "story_completion",
         "requiredStories": ["intro-pufpuf"],
