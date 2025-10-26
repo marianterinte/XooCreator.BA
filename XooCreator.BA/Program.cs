@@ -8,6 +8,7 @@ using XooCreator.BA.Services;
 using XooCreator.BA.Features.TreeOfLight;
 using XooCreator.BA.Features.TreeOfHeroes;
 using XooCreator.BA.Features.Stories;
+using XooCreator.BA.Features.Payment;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Errors;
@@ -135,6 +136,9 @@ builder.Services.AddScoped<IStoriesService, StoriesService>();
 // Story Marketplace Services
 builder.Services.AddScoped<IStoriesMarketplaceRepository, StoriesMarketplaceRepository>();
 builder.Services.AddScoped<IStoriesMarketplaceService, StoriesMarketplaceService>();
+
+// Payment services
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 var auth0Section = builder.Configuration.GetSection("Auth0");
 var auth0Domain = auth0Section["Domain"];
