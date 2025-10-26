@@ -6,63 +6,63 @@
         {
           "regionId": "gateway",
           "messageKey": "hero_puf-puf_region_gateway_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/puf-puf/region_gateway.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_gateway_message.wav"
         },
         {
           "regionId": "terra",
           "messageKey": "hero_puf-puf_region_terra_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/puf-puf/region_terra.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_terra_message.wav"
         },
         {
           "regionId": "lunaria",
           "messageKey": "hero_puf-puf_region_lunaria_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/puf-puf/region_lunaria.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_lunaria_message.wav"
         },
         {
           "regionId": "oceanica",
           "messageKey": "hero_puf-puf_region_oceanica_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/puf-puf/region_oceanica.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_oceanica_message.wav"
         },
         {
           "regionId": "sylvaria",
           "messageKey": "hero_puf-puf_region_sylvaria_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/puf-puf/region_sylvaria.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_sylvaria_message.wav"
         },
         {
           "regionId": "crystalia",
           "messageKey": "hero_puf-puf_region_crystalia_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/puf-puf/region_crystalia.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_crystalia_message.wav"
         },
         {
           "regionId": "zephyra",
           "messageKey": "hero_puf-puf_region_zephyra_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/puf-puf/region_zephyra.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_zephyra_message.wav"
         },
         {
           "regionId": "pyron",
           "messageKey": "hero_puf-puf_region_pyron_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/puf-puf/region_pyron.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_pyron_message.wav"
         },
         {
           "regionId": "neptunia",
           "messageKey": "hero_puf-puf_region_neptunia_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/puf-puf/region_neptunia.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_neptunia_message.wav"
         },
         {
           "regionId": "aetherion",
           "messageKey": "hero_puf-puf_region_aetherion_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/puf-puf/region_aetherion.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_aetherion_message.wav"
         },
         {
           "regionId": "kelo-ketis",
           "messageKey": "hero_puf-puf_region_kelo_ketis_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/puf-puf/region_kelo-ketis.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_kelo_ketis_message.wav"
         }
       ],
       "clickMessages": [
         {
           "messageKey": "hero_puf-puf_click_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/puf-puf/click.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_click_message.wav"
         }
       ]
     },
@@ -72,68 +72,68 @@
         {
           "regionId": "gateway",
           "messageKey": "hero_linkaro_region_gateway_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/linkaro/region_gateway.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_gateway_message.wav"
         },
         {
           "regionId": "terra",
           "messageKey": "hero_linkaro_region_terra_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/linkaro/region_terra.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_terra_message.wav"
         },
         {
           "regionId": "lunaria",
           "messageKey": "hero_linkaro_region_lunaria_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/linkaro/region_lunaria.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_lunaria_message.wav"
         },
         {
           "regionId": "mechanika",
           "messageKey": "hero_linkaro_region_mechanika_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/linkaro/region_mechanika.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_mechanika_message.wav"
         },
         {
           "regionId": "oceanica",
           "messageKey": "hero_linkaro_region_oceanica_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/linkaro/region_oceanica.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_oceanica_message.wav"
         },
         {
           "regionId": "sylvaria",
           "messageKey": "hero_linkaro_region_sylvaria_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/linkaro/region_sylvaria.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_sylvaria_message.wav"
         },
         {
           "regionId": "crystalia",
           "messageKey": "hero_linkaro_region_crystalia_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/linkaro/region_crystalia.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_crystalia_message.wav"
         },
         {
           "regionId": "zephyra",
           "messageKey": "hero_linkaro_region_zephyra_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/linkaro/region_zephyra.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_zephyra_message.wav"
         },
         {
           "regionId": "pyron",
           "messageKey": "hero_linkaro_region_pyron_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/linkaro/region_pyron.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_pyron_message.wav"
         },
         {
           "regionId": "neptunia",
           "messageKey": "hero_linkaro_region_neptunia_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/linkaro/region_neptunia.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_neptunia_message.wav"
         },
         {
           "regionId": "aetherion",
           "messageKey": "hero_linkaro_region_aetherion_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/linkaro/region_aetherion.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_aetherion_message.wav"
         },
         {
           "regionId": "kelo-ketis",
           "messageKey": "hero_linkaro_region_kelo_ketis_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/linkaro/region_kelo-ketis.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_kelo_ketis_message.wav"
         }
       ],
       "clickMessages": [
         {
           "messageKey": "hero_linkaro_click_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/linkaro/click.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_click_message.wav"
         }
       ]
     },
@@ -143,68 +143,68 @@
         {
           "regionId": "gateway",
           "messageKey": "hero_grubot_region_gateway_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/grubot/region_gateway.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_gateway_message.wav"
         },
         {
           "regionId": "terra",
           "messageKey": "hero_grubot_region_terra_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/grubot/region_terra.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_terra_message.wav"
         },
         {
           "regionId": "lunaria",
           "messageKey": "hero_grubot_region_lunaria_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/grubot/region_lunaria.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_lunaria_message.wav"
         },
         {
           "regionId": "mechanika",
           "messageKey": "hero_grubot_region_mechanika_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/grubot/region_mechanika.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_mechanika_message.wav"
         },
         {
           "regionId": "oceanica",
           "messageKey": "hero_grubot_region_oceanica_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/grubot/region_oceanica.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_oceanica_message.wav"
         },
         {
           "regionId": "sylvaria",
           "messageKey": "hero_grubot_region_sylvaria_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/grubot/region_sylvaria.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_sylvaria_message.wav"
         },
         {
           "regionId": "crystalia",
           "messageKey": "hero_grubot_region_crystalia_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/grubot/region_crystalia.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_crystalia_message.wav"
         },
         {
           "regionId": "zephyra",
           "messageKey": "hero_grubot_region_zephyra_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/grubot/region_zephyra.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_zephyra_message.wav"
         },
         {
           "regionId": "pyron",
           "messageKey": "hero_grubot_region_pyron_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/grubot/region_pyron.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_pyron_message.wav"
         },
         {
           "regionId": "neptunia",
           "messageKey": "hero_grubot_region_neptunia_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/grubot/region_neptunia.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_neptunia_message.wav"
         },
         {
           "regionId": "aetherion",
           "messageKey": "hero_grubot_region_aetherion_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/grubot/region_aetherion.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_aetherion_message.wav"
         },
         {
           "regionId": "kelo-ketis",
           "messageKey": "hero_grubot_region_kelo_ketis_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/grubot/region_kelo-ketis.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_kelo_ketis_message.wav"
         }
       ],
       "clickMessages": [
         {
           "messageKey": "hero_grubot_click_message",
-          "audioUrl": "audio/ro-ro/tol/hero-speach/grubot/click.wav"
+          "audioUrl": "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_click_message.wav"
         }
       ]
     }
