@@ -1,3 +1,5 @@
+using XooCreator.BA.Data.Enums;
+
 namespace XooCreator.BA.Data;
 
 /// <summary>
@@ -9,11 +11,15 @@ public class StoryDefinition
     public string StoryId { get; set; } = string.Empty; // e.g., "root-s1", "intro-pufpuf"
     public string Title { get; set; } = string.Empty;
     public string? CoverImageUrl { get; set; }
-    public string Category { get; set; } = string.Empty; // e.g., "main", "intro", "special"
+    public string Category { get; set; } = string.Empty; // e.g., "main", "intro", "special" - legacy field
+    public StoryCategory StoryCategory { get; set; } = StoryCategory.AlchimaliaEpic; // New enum-based category
+    public StoryStatus Status { get; set; } = StoryStatus.Published; // Publication status
     public int SortOrder { get; set; }
     public bool IsActive { get; set; } = true;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public Guid? CreatedBy { get; set; } // User who created the story
+    public Guid? UpdatedBy { get; set; } // User who last updated the story
     
     // Navigation
     public List<StoryTile> Tiles { get; set; } = new();

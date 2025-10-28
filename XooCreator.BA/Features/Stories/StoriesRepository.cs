@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using XooCreator.BA.Data;
+using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Features.TreeOfLight;
 
 namespace XooCreator.BA.Features.Stories;
@@ -510,7 +511,12 @@ public class StoriesRepository : IStoriesRepository
             Title = seedData.Title,
             CoverImageUrl = seedData.CoverImageUrl,
             Category = seedData.Category,
-            SortOrder = seedData.SortOrder
+            SortOrder = seedData.SortOrder,
+            // Set default values for new fields
+            StoryCategory = DetermineStoryCategory(seedData.StoryId, seedData.Category),
+            Status = StoryStatus.Published, // All seeded stories are published by default
+            CreatedBy = null, // System-created stories don't have a specific creator
+            UpdatedBy = null
         };
 
         if (seedData.Tiles != null)
@@ -758,6 +764,29 @@ public class StoriesRepository : IStoriesRepository
             "Generative" => TokenFamily.Generative,
             _ => TokenFamily.Personality
         };
+    }
+
+    /// <summary>
+    /// Determines the story category based on story ID and legacy category
+    /// </summary>
+    private static StoryCategory DetermineStoryCategory(string storyId, string legacyCategory)
+    {
+        // Check if it's an independent story based on the story ID pattern
+        if (storyId.StartsWith("learn-to-read", StringComparison.OrdinalIgnoreCase))
+        {
+            return StoryCategory.Indie;
+        }
+
+        // Check if it's in the independent stories folder (this would be determined by the seeding context)
+        // For now, we'll use the legacy category to determine the type
+        // Independent stories typically have categories like "terra" but are standalone
+        if (legacyCategory.Equals("independent", StringComparison.OrdinalIgnoreCase))
+        {
+            return StoryCategory.Indie;
+        }
+
+        // All other stories are part of the Alchimalia epic
+        return StoryCategory.AlchimaliaEpic;
     }
 }
 
