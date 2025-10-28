@@ -468,6 +468,10 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
 
     private int DeterminePrice(string storyId)
     {
+        // Special case: learn-to-read-s1 should be free
+        if (storyId == "learn-to-read-s1")
+            return 0;
+            
         // Based on TODO: "Stories de pe lunaria 1 da 1 token, cealalta 2 tokeni"
         if (storyId.Contains("lunaria"))
             return 1;
