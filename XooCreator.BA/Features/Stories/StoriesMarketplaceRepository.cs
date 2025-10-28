@@ -16,6 +16,7 @@ public interface IStoriesMarketplaceRepository
     Task<bool> IsStoryPurchasedAsync(Guid userId, string storyId);
     Task<List<StoryMarketplaceItemDto>> GetUserPurchasedStoriesAsync(Guid userId, string locale);
     Task SeedMarketplaceDataAsync();
+    Task<StoryDetailsDto?> GetStoryDetailsAsync(string storyId, Guid userId, string locale);
 }
 
 public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
@@ -32,8 +33,6 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         var query = _context.StoryMarketplaceInfos
             .Include(smi => smi.Story)
                 .ThenInclude(s => s.Translations)
-            .Include(smi => smi.Story)
-                .ThenInclude(s => s.Tiles)
             .Where(smi => smi.Story.IsActive);
 
         // Apply filters
@@ -115,20 +114,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             .Take(request.PageSize)
             .ToListAsync();
 
-        // Get user's purchased stories
-        var purchasedStoryIds = await _context.StoryPurchases
-            .Where(sp => sp.UserId == userId)
-            .Select(sp => sp.StoryId)
-            .ToListAsync();
-
-        // Get user's story progress
-        var storyProgress = await _context.UserStoryReadProgress
-            .Where(usp => usp.UserId == userId)
-            .GroupBy(usp => usp.StoryId)
-            .Select(g => new StoryProgressInfo(g.Key, g.Count()))
-            .ToListAsync();
-
-        return stories.Select(smi => MapToMarketplaceItemDto(smi, locale, purchasedStoryIds.Contains(smi.StoryId), storyProgress)).ToList();
+        return stories.Select(smi => MapToMarketplaceItemDto(smi, locale)).ToList();
     }
 
     public async Task<List<StoryMarketplaceItemDto>> GetFeaturedStoriesAsync(Guid userId, string locale)
@@ -136,25 +122,12 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         var featuredStories = await _context.StoryMarketplaceInfos
             .Include(smi => smi.Story)
                 .ThenInclude(s => s.Translations)
-            .Include(smi => smi.Story)
-                .ThenInclude(s => s.Tiles)
             .Where(smi => smi.IsFeatured && smi.Story.IsActive)
             .OrderBy(smi => smi.Story.SortOrder)
             .Take(5)
             .ToListAsync();
 
-        var purchasedStoryIds = await _context.StoryPurchases
-            .Where(sp => sp.UserId == userId)
-            .Select(sp => sp.StoryId)
-            .ToListAsync();
-
-        var storyProgress = await _context.UserStoryReadProgress
-            .Where(usp => usp.UserId == userId)
-            .GroupBy(usp => usp.StoryId)
-            .Select(g => new StoryProgressInfo(g.Key, g.Count()))
-            .ToListAsync();
-
-        return featuredStories.Select(smi => MapToMarketplaceItemDto(smi, locale, purchasedStoryIds.Contains(smi.StoryId), storyProgress)).ToList();
+        return featuredStories.Select(smi => MapToMarketplaceItemDto(smi, locale)).ToList();
     }
 
     public async Task<List<string>> GetAvailableRegionsAsync()
@@ -260,8 +233,6 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         var purchasedStories = await _context.StoryPurchases
             .Include(sp => sp.Story)
                 .ThenInclude(s => s.Translations)
-            .Include(sp => sp.Story)
-                .ThenInclude(s => s.Tiles)
             .Where(sp => sp.UserId == userId && sp.Story.IsActive)
             .OrderBy(sp => sp.PurchasedAt)
             .ToListAsync();
@@ -278,13 +249,11 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             var marketplaceInfo = await _context.StoryMarketplaceInfos
                 .Include(smi => smi.Story)
                     .ThenInclude(s => s.Translations)
-                .Include(smi => smi.Story)
-                    .ThenInclude(s => s.Tiles)
                 .FirstOrDefaultAsync(smi => smi.StoryId == sp.StoryId);
             
             if (marketplaceInfo != null)
             {
-                result.Add(MapToMarketplaceItemDto(marketplaceInfo, locale, true, storyProgress));
+                result.Add(MapToMarketplaceItemDto(marketplaceInfo, locale));
             }
         }
         return result;
@@ -326,7 +295,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
                     Tags = new List<string> { story.Category },
                     IsFeatured = story.StoryId.Contains("intro") || story.StoryId.Contains("loi"),
                     IsNew = false,
-                    EstimatedReadingTime = CalculateReadingTime(story.Tiles.Count),
+                    EstimatedReadingTime = CalculateReadingTime(story.StoryId),
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 });
@@ -340,23 +309,46 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         }
     }
 
-    private StoryMarketplaceItemDto MapToMarketplaceItemDto(StoryMarketplaceInfo smi, string locale, bool isPurchased, List<StoryProgressInfo> storyProgress)
+    public async Task<StoryDetailsDto?> GetStoryDetailsAsync(string storyId, Guid userId, string locale)
+    {
+        var marketplaceInfo = await _context.StoryMarketplaceInfos
+            .Include(smi => smi.Story)
+                .ThenInclude(s => s.Translations)
+            .Include(smi => smi.Story)
+                .ThenInclude(s => s.Tiles)
+            .FirstOrDefaultAsync(smi => smi.StoryId == storyId && smi.Story.IsActive);
+
+        if (marketplaceInfo == null)
+            return null;
+
+        // Check if user has purchased this story
+        var isPurchased = await _context.StoryPurchases
+            .AnyAsync(sp => sp.UserId == userId && sp.StoryId == storyId);
+
+        // Get user's story progress
+        var storyProgress = await _context.UserStoryReadProgress
+            .Where(usp => usp.UserId == userId && usp.StoryId == storyId)
+            .CountAsync();
+
+        var totalTiles = marketplaceInfo.Story.Tiles.Count;
+        var progressPercentage = totalTiles > 0 ? (int)((double)storyProgress / totalTiles * 100) : 0;
+        var isCompleted = progressPercentage >= 100;
+
+        return MapToStoryDetailsDto(marketplaceInfo, locale, isPurchased, isCompleted, progressPercentage);
+    }
+
+    private StoryDetailsDto MapToStoryDetailsDto(StoryMarketplaceInfo smi, string locale, bool isPurchased, bool isCompleted, int progressPercentage)
     {
         var translation = smi.Story.Translations.FirstOrDefault(t => t.LanguageCode == locale);
         var title = translation?.Title ?? smi.Story.Title;
-        
-        var progress = storyProgress.FirstOrDefault(sp => sp.StoryId == smi.StoryId);
-        var progressCount = progress?.ProgressCount ?? 0;
-        var totalTiles = smi.Story.Tiles.Count;
-        var progressPercentage = totalTiles > 0 ? (int)((double)progressCount / totalTiles * 100) : 0;
-        var isCompleted = progressPercentage >= 100;
 
-        return new StoryMarketplaceItemDto
+        return new StoryDetailsDto
         {
             Id = smi.StoryId,
             Title = title,
             CoverImageUrl = smi.Story.CoverImageUrl,
-            Summary = GenerateSummary(smi.Story, locale),
+            CreatedBy = smi.Story.CreatedBy,
+            Summary = GenerateDetailedSummary(smi.Story, locale),
             PriceInCredits = smi.PriceInCredits,
             Region = smi.Region,
             AgeRating = smi.AgeRating,
@@ -370,7 +362,46 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             IsCompleted = isCompleted,
             ProgressPercentage = progressPercentage,
             CreatedAt = smi.CreatedAt,
-            UnlockedStoryHeroes = new List<string>() // TODO: Add UnlockedStoryHeroes to StoryDefinition if needed
+            UnlockedStoryHeroes = new List<string>(), // TODO: Implement if needed
+            Category = smi.Story.Category,
+            StoryCategory = smi.Story.StoryCategory.ToString(),
+            Status = smi.Story.Status.ToString(),
+            SortOrder = smi.Story.SortOrder,
+            IsActive = smi.Story.IsActive,
+            UpdatedAt = smi.Story.UpdatedAt,
+            UpdatedBy = smi.Story.UpdatedBy
+        };
+    }
+
+    private string GenerateDetailedSummary(StoryDefinition story, string locale)
+    {
+        // Generate a more detailed summary for story details
+        var firstTile = story.Tiles.FirstOrDefault();
+        if (firstTile?.Translations?.FirstOrDefault(t => t.LanguageCode == locale)?.Text != null)
+        {
+            var text = firstTile.Translations.First(t => t.LanguageCode == locale).Text;
+            return text.Length > 300 ? text.Substring(0, 300) + "..." : text;
+        }
+        
+        return $"Discover the adventures in {story.Title} - {story.Category}. This story contains {story.Tiles.Count} interactive tiles.";
+    }
+
+    private StoryMarketplaceItemDto MapToMarketplaceItemDto(StoryMarketplaceInfo smi, string locale)
+    {
+        var translation = smi.Story.Translations.FirstOrDefault(t => t.LanguageCode == locale);
+        var title = translation?.Title ?? smi.Story.Title;
+
+        return new StoryMarketplaceItemDto
+        {
+            Id = smi.StoryId,
+            Title = title,
+            CoverImageUrl = smi.Story.CoverImageUrl,
+            CreatedBy = smi.Story.CreatedBy,
+            Summary = GenerateSummary(smi.Story, locale),
+            PriceInCredits = smi.PriceInCredits,
+            AgeRating = smi.AgeRating,
+            Characters = smi.Characters,
+            CreatedAt = smi.CreatedAt
         };
     }
 
@@ -443,22 +474,21 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         return 2;
     }
 
-    private int CalculateReadingTime(int tileCount)
+    private int CalculateReadingTime(string storyId)
     {
-        // Estimate 2 minutes per tile
-        return tileCount * 2;
+        // Estimate reading time based on story type
+        if (storyId.Contains("intro"))
+            return 15; // Longer intro stories
+        if (storyId.Contains("s1"))
+            return 10; // Season 1 stories
+        if (storyId.Contains("s2"))
+            return 12; // Season 2 stories
+        return 8; // Default reading time
     }
 
     private string GenerateSummary(StoryDefinition story, string locale)
     {
-        // Generate a simple summary based on the first tile
-        var firstTile = story.Tiles.FirstOrDefault();
-        if (firstTile?.Translations?.FirstOrDefault(t => t.LanguageCode == locale)?.Text != null)
-        {
-            var text = firstTile.Translations.First(t => t.LanguageCode == locale).Text;
-            return text.Length > 150 ? text.Substring(0, 150) + "..." : text;
-        }
-        
-        return $"Discover the adventures in {story.Title}";
+        // Generate a simple summary based on story title and category
+        return $"Discover the adventures in {story.Title} - {story.Category}";
     }
 }

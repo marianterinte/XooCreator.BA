@@ -7,12 +7,12 @@ using XooCreator.BA.Infrastructure;
 namespace XooCreator.BA.Features.Stories.Endpoints;
 
 [Endpoint]
-public class StoriesMarketplaceEndpoint
+public class GetMarketplaceStoriesEndpoint
 {
     private readonly IStoriesMarketplaceService _marketplaceService;
     private readonly IUserContextService _userContext;
 
-    public StoriesMarketplaceEndpoint(IStoriesMarketplaceService marketplaceService, IUserContextService userContext)
+    public GetMarketplaceStoriesEndpoint(IStoriesMarketplaceService marketplaceService, IUserContextService userContext)
     {
         _marketplaceService = marketplaceService;
         _userContext = userContext;
@@ -22,7 +22,7 @@ public class StoriesMarketplaceEndpoint
     [Authorize]
     public static async Task<Ok<GetMarketplaceStoriesResponse>> HandleGetMarketplace(
         [FromRoute] string locale,
-        [FromServices] StoriesMarketplaceEndpoint ep,
+        [FromServices] GetMarketplaceStoriesEndpoint ep,
         [FromQuery] string? searchTerm = null,
         [FromQuery] string[]? regions = null,
         [FromQuery] string[]? ageRatings = null,
@@ -55,53 +55,5 @@ public class StoriesMarketplaceEndpoint
 
         var result = await ep._marketplaceService.GetMarketplaceStoriesAsync(userId.Value, locale, request);
         return TypedResults.Ok(result);
-    }
-
-    [Route("/api/{locale}/stories/marketplace/purchase")]
-    [Authorize]
-    public static async Task<Results<Ok<PurchaseStoryResponse>, BadRequest<PurchaseStoryResponse>, UnauthorizedHttpResult>> HandlePurchaseStory(
-        [FromRoute] string locale,
-        [FromBody] PurchaseStoryRequest request,
-        [FromServices] StoriesMarketplaceEndpoint ep)
-    {
-        var userId = await ep._userContext.GetUserIdAsync();
-        if (userId == null) return TypedResults.Unauthorized();
-
-        var result = await ep._marketplaceService.PurchaseStoryAsync(userId.Value, request);
-        
-        if (result.Success)
-        {
-            return TypedResults.Ok(result);
-        }
-        else
-        {
-            return TypedResults.BadRequest(result);
-        }
-    }
-
-    [Route("/api/{locale}/stories/marketplace/purchased")]
-    [Authorize]
-    public static async Task<Ok<GetUserPurchasedStoriesResponse>> HandleGetPurchasedStories(
-        [FromRoute] string locale,
-        [FromServices] StoriesMarketplaceEndpoint ep)
-    {
-        var userId = await ep._userContext.GetUserIdAsync();
-        if (userId == null) throw new UnauthorizedAccessException("User not found");
-
-        var result = await ep._marketplaceService.GetUserPurchasedStoriesAsync(userId.Value, locale);
-        return TypedResults.Ok(result);
-    }
-
-    [Route("/api/{locale}/stories/marketplace/initialize")]
-    [Authorize]
-    public static async Task<Results<Ok, UnauthorizedHttpResult>> HandleInitializeMarketplace(
-        [FromRoute] string locale,
-        [FromServices] StoriesMarketplaceEndpoint ep)
-    {
-        var userId = await ep._userContext.GetUserIdAsync();
-        if (userId == null) return TypedResults.Unauthorized();
-
-        await ep._marketplaceService.InitializeMarketplaceAsync();
-        return TypedResults.Ok();
     }
 }

@@ -8,7 +8,8 @@ public interface IStoriesMarketplaceService
     Task<GetMarketplaceStoriesResponse> GetMarketplaceStoriesAsync(Guid userId, string locale, SearchStoriesRequest request);
     Task<PurchaseStoryResponse> PurchaseStoryAsync(Guid userId, PurchaseStoryRequest request);
     Task<GetUserPurchasedStoriesResponse> GetUserPurchasedStoriesAsync(Guid userId, string locale);
-    Task InitializeMarketplaceAsync();
+    Task<StoryDetailsDto?> GetStoryDetailsAsync(string storyId, Guid userId, string locale);
+    Task InitializeMarketplaceAsync(); // Keep for Program.cs startup
 }
 
 public class StoriesMarketplaceService : IStoriesMarketplaceService
@@ -146,6 +147,19 @@ public class StoriesMarketplaceService : IStoriesMarketplaceService
                 PurchasedStories = new List<StoryMarketplaceItemDto>(),
                 TotalCount = 0
             };
+        }
+    }
+
+    public async Task<StoryDetailsDto?> GetStoryDetailsAsync(string storyId, Guid userId, string locale)
+    {
+        try
+        {
+            return await _repository.GetStoryDetailsAsync(storyId, userId, locale);
+        }
+        catch (Exception ex)
+        {
+            // Log error
+            return null;
         }
     }
 

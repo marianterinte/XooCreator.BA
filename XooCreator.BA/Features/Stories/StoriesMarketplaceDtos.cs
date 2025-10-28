@@ -3,13 +3,14 @@ using XooCreator.BA.Data;
 namespace XooCreator.BA.Features.Stories;
 
 /// <summary>
-/// DTO for story marketplace item with purchase information
+/// DTO for detailed story information in marketplace
 /// </summary>
-public record StoryMarketplaceItemDto
+public record StoryDetailsDto
 {
     public required string Id { get; init; }
     public required string Title { get; init; }
     public string? CoverImageUrl { get; init; }
+    public Guid? CreatedBy { get; init; }
     public string? Summary { get; init; }
     public int PriceInCredits { get; init; }
     public string Region { get; init; } = string.Empty;
@@ -25,6 +26,29 @@ public record StoryMarketplaceItemDto
     public int ProgressPercentage { get; init; }
     public DateTime CreatedAt { get; init; }
     public List<string> UnlockedStoryHeroes { get; init; } = new();
+    public string Category { get; init; } = string.Empty;
+    public string StoryCategory { get; init; } = string.Empty;
+    public string Status { get; init; } = string.Empty;
+    public int SortOrder { get; init; }
+    public bool IsActive { get; init; }
+    public DateTime UpdatedAt { get; init; }
+    public Guid? UpdatedBy { get; init; }
+}
+
+/// <summary>
+/// DTO for story marketplace item with purchase information
+/// </summary>
+public record StoryMarketplaceItemDto
+{
+    public required string Id { get; init; }
+    public required string Title { get; init; }
+    public string? CoverImageUrl { get; init; }
+    public Guid? CreatedBy { get; init; }
+    public string? Summary { get; init; }
+    public int PriceInCredits { get; init; }
+    public string AgeRating { get; init; } = string.Empty;
+    public List<string> Characters { get; init; } = new();
+    public DateTime CreatedAt { get; init; }
 }
 
 /// <summary>
