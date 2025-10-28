@@ -12,6 +12,7 @@ public interface IStoriesRepository
     Task<List<UserStoryProgressDto>> GetUserStoryProgressAsync(Guid userId, string storyId);
     Task<bool> MarkTileAsReadAsync(Guid userId, string storyId, string tileId);
     Task SeedStoriesAsync();
+    Task SeedIndependentStoriesAsync();
 }
 
 public class StoriesRepository : IStoriesRepository
@@ -203,6 +204,130 @@ public class StoriesRepository : IStoriesRepository
     }
 
 
+    public async Task SeedIndependentStoriesAsync()
+    {
+        try
+        {
+            var createdStoryIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var lc in LanguageCodeExtensions.All())
+            {
+                await EnsureIndependentDefinitionsForLocale(lc.ToFolder(), createdStoryIds);
+                await ApplyIndependentTranslationsForLocale(lc.ToTag());
+            }
+
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An error occurred during independent story seeding: {ex.Message}");
+            throw;
+        }
+    }
+
+    private async Task EnsureIndependentDefinitionsForLocale(string localeFolder, HashSet<string> createdStoryIds)
+    {
+        var stories = await LoadIndependentStoriesFromJsonAsync(localeFolder);
+        foreach (var story in stories)
+        {
+            var exists = await _context.StoryDefinitions.AnyAsync(s => s.StoryId == story.StoryId);
+            if (!exists && !createdStoryIds.Contains(story.StoryId))
+            {
+                _context.StoryDefinitions.Add(story);
+                createdStoryIds.Add(story.StoryId);
+            }
+        }
+    }
+
+    private async Task ApplyIndependentTranslationsForLocale(string localeTag)
+    {
+        var processedDefTranslations = new HashSet<(Guid, string)>();
+        var processedTileTranslations = new HashSet<(Guid, string)>();
+        var processedAnswerTranslations = new HashSet<(Guid, string)>();
+
+        var translations = await LoadIndependentStoryTranslationsFromJsonAsync(localeTag);
+        if (translations.Count == 0) return;
+
+        foreach (var tr in translations)
+        {
+            var def = await _context.StoryDefinitions
+                .Include(s => s.Tiles)
+                    .ThenInclude(t => t.Answers)
+                .FirstOrDefaultAsync(s => s.StoryId == tr.StoryId);
+            if (def == null) continue;
+
+            if (!string.IsNullOrWhiteSpace(tr.Title))
+            {
+                var key = (def.Id, tr.Locale);
+                if (!processedDefTranslations.Contains(key))
+                {
+                    var existsTr = await _context.StoryDefinitionTranslations.AnyAsync(e => e.StoryDefinitionId == def.Id && e.LanguageCode == tr.Locale);
+                    if (!existsTr)
+                    {
+                        _context.StoryDefinitionTranslations.Add(new StoryDefinitionTranslation
+                        {
+                            StoryDefinitionId = def.Id,
+                            LanguageCode = tr.Locale,
+                            Title = tr.Title!
+                        });
+                    }
+                    processedDefTranslations.Add(key);
+                }
+            }
+
+            if (tr.Tiles == null) continue;
+
+            foreach (var t in tr.Tiles)
+            {
+                var dbTile = def.Tiles.FirstOrDefault(x => x.TileId == t.TileId);
+                if (dbTile == null) continue;
+
+                var tileKey = (dbTile.Id, tr.Locale);
+                if (!processedTileTranslations.Contains(tileKey))
+                {
+                    var existsTile = await _context.StoryTileTranslations.AnyAsync(e => e.StoryTileId == dbTile.Id && e.LanguageCode == tr.Locale);
+                    if (!existsTile)
+                    {
+                        _context.StoryTileTranslations.Add(new StoryTileTranslation
+                        {
+                            StoryTileId = dbTile.Id,
+                            LanguageCode = tr.Locale,
+                            Caption = t.Caption,
+                            Text = t.Text,
+                            Question = t.Question
+                        });
+                    }
+                    processedTileTranslations.Add(tileKey);
+                }
+
+                if (t.Answers == null) continue;
+
+                foreach (var answer in t.Answers)
+                {
+                    var dbAnswer = dbTile.Answers.FirstOrDefault(x => x.AnswerId == answer.AnswerId);
+                    if (dbAnswer == null) continue;
+
+                    var answerKey = (dbAnswer.Id, tr.Locale);
+                    if (!processedAnswerTranslations.Contains(answerKey))
+                    {
+                        var existsAns = await _context.StoryAnswerTranslations.AnyAsync(e => e.StoryAnswerId == dbAnswer.Id && e.LanguageCode == tr.Locale);
+                        if (!existsAns)
+                        {
+                            _context.StoryAnswerTranslations.Add(new StoryAnswerTranslation
+                            {
+                                StoryAnswerId = dbAnswer.Id,
+                                LanguageCode = tr.Locale,
+                                Text = answer.Text
+                            });
+                        }
+                        processedAnswerTranslations.Add(answerKey);
+                    }
+                }
+            }
+        }
+    }
+
+
     private static async Task<List<StoryDefinition>> LoadStoriesFromJsonAsync(string baseLocale = "ro-ro")
     {
 
@@ -278,6 +403,103 @@ public class StoriesRepository : IStoriesRepository
             .OrderBy(s => s.SortOrder)
             .ThenBy(s => s.StoryId, StringComparer.OrdinalIgnoreCase)
             .ToList();
+    }
+
+    private static async Task<List<StoryDefinition>> LoadIndependentStoriesFromJsonAsync(string baseLocale = "ro-ro")
+    {
+        var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+        var localeLc = (baseLocale ?? "ro-ro").ToLowerInvariant();
+        var dir = Path.Combine(baseDir, "Data", "SeedData", "Stories", "independent", "i18n", localeLc);
+
+        var storyMap = new Dictionary<string, StoryDefinition>(StringComparer.OrdinalIgnoreCase);
+        if (Directory.Exists(dir))
+        {
+            var files = Directory
+                .EnumerateFiles(dir, "*.json", SearchOption.TopDirectoryOnly)
+                .OrderBy(f => f, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            foreach (var file in files)
+            {
+                var json = await File.ReadAllTextAsync(file);
+                var seed = JsonSerializer.Deserialize<StorySeedData>(json, new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    PropertyNameCaseInsensitive = true
+                });
+                if (seed == null)
+                {
+                    throw new InvalidOperationException($"Invalid independent story seed data in '{file}'.");
+                }
+                var def = MapFromSeedData(seed);
+                storyMap[def.StoryId] = def;
+            }
+        }
+
+        return storyMap.Values
+            .OrderBy(s => s.SortOrder)
+            .ThenBy(s => s.StoryId, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    private sealed class IndependentStoryTranslationSeed
+    {
+        public string Locale { get; set; } = "en-us";
+        public string StoryId { get; set; } = string.Empty;
+        public string? Title { get; set; }
+        public List<TileTranslationSeed>? Tiles { get; set; }
+    }
+
+    private static async Task<List<IndependentStoryTranslationSeed>> LoadIndependentStoryTranslationsFromJsonAsync(string locale)
+    {
+        var results = new List<IndependentStoryTranslationSeed>();
+        var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+        var dir = Path.Combine(baseDir, "Data", "SeedData", "Stories", "independent", "i18n", locale);
+
+        var jsonOptions = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            PropertyNameCaseInsensitive = true
+        };
+
+        if (!Directory.Exists(dir)) return results;
+
+        var files = Directory
+            .EnumerateFiles(dir, "*.json", SearchOption.TopDirectoryOnly)
+            .OrderBy(f => f, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        foreach (var file in files)
+        {
+            var json = await File.ReadAllTextAsync(file);
+            var seed = JsonSerializer.Deserialize<StorySeedData>(json, jsonOptions);
+            if (seed == null || string.IsNullOrWhiteSpace(seed.StoryId))
+            {
+                continue;
+            }
+
+            var tr = new IndependentStoryTranslationSeed
+            {
+                Locale = locale.ToLowerInvariant(),
+                StoryId = seed.StoryId,
+                Title = seed.Title,
+                Tiles = seed.Tiles?.Select(t => new TileTranslationSeed
+                {
+                    TileId = t.TileId,
+                    Caption = t.Caption,
+                    Text = t.Text,
+                    Question = t.Question,
+                    Answers = t.Answers?.Select(a => new AnswerTranslationSeed
+                    {
+                        AnswerId = a.AnswerId,
+                        Text = a.Text
+                    }).ToList()
+                }).ToList()
+            };
+            results.Add(tr);
+        }
+
+        return results;
     }
 
     private static StoryDefinition MapFromSeedData(StorySeedData seedData)
@@ -475,7 +697,10 @@ public class StoriesRepository : IStoriesRepository
             {
                 Path.Combine(baseDir, "Data", "SeedData", "Stories", "i18n", "en-us", $"{storyId}.json"),
                 Path.Combine(baseDir, "Data", "SeedData", "Stories", "i18n", "ro-ro", $"{storyId}.json"),
-                Path.Combine(baseDir, "Data", "SeedData", "Stories", "i18n", "hu-hu", $"{storyId}.json")
+                Path.Combine(baseDir, "Data", "SeedData", "Stories", "i18n", "hu-hu", $"{storyId}.json"),
+                Path.Combine(baseDir, "Data", "SeedData", "Stories", "independent", "i18n", "en-us", $"{storyId}.json"),
+                Path.Combine(baseDir, "Data", "SeedData", "Stories", "independent", "i18n", "ro-ro", $"{storyId}.json"),
+                Path.Combine(baseDir, "Data", "SeedData", "Stories", "independent", "i18n", "hu-hu", $"{storyId}.json")
             };
 
             foreach (var file in candidates)

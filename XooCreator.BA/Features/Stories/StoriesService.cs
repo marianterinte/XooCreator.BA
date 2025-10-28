@@ -66,6 +66,7 @@ public class StoriesService : IStoriesService
     public async Task InitializeStoriesAsync()
     {
         await _repository.SeedStoriesAsync();
+        await _repository.SeedIndependentStoriesAsync();
     }
 
     public async Task<EditableStoryDto?> GetStoryForEditAsync(string storyId, string locale)
