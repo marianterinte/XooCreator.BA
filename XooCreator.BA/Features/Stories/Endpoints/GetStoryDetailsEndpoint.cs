@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure;
+using XooCreator.BA.Features.Stories;
 
 namespace XooCreator.BA.Features.Stories.Endpoints;
 
@@ -20,7 +21,7 @@ public class GetStoryDetailsEndpoint
 
     [Route("/api/{locale}/stories/marketplace/details/{storyId}")]
     [Authorize]
-    public static async Task<Results<Ok<StoryDetailsDto>, NotFound, UnauthorizedHttpResult>> HandleGetStoryDetails(
+    public static async Task<Results<Ok<StoryDetailsDto>, NotFound, UnauthorizedHttpResult>> HandleGet(
         [FromRoute] string storyId,
         [FromRoute] string locale,
         [FromServices] GetStoryDetailsEndpoint ep)
