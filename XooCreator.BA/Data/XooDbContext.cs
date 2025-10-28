@@ -768,6 +768,14 @@ public class XooDbContext : DbContext
             modelBuilder.Entity<StoryDefinition>().HasData(independentStories);
             Console.WriteLine("[SEEDING] Story definitions added to model builder");
             
+            Console.WriteLine("[SEEDING] Loading independent story tiles...");
+            var independentTiles = seedService.GetIndependentStoryTiles();
+            Console.WriteLine($"[SEEDING] Loaded {independentTiles.Count} independent story tiles");
+            
+            Console.WriteLine("[SEEDING] Adding story tiles to model builder...");
+            modelBuilder.Entity<StoryTile>().HasData(independentTiles);
+            Console.WriteLine("[SEEDING] Story tiles added to model builder");
+            
             Console.WriteLine("[SEEDING] Loading story translations...");
             var storyTranslations = LoadDataSync(() => seedService.LoadIndependentStoryTranslationsAsync(independentStories));
             Console.WriteLine($"[SEEDING] Loaded {storyTranslations.Count} story translations");

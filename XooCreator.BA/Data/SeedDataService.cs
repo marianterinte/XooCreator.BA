@@ -6,6 +6,7 @@ namespace XooCreator.BA.Data;
 
 public class SeedDataService
 {
+    private List<(StoryTile tile, string storyId)> _independentStoryTiles = new();
     private readonly string _seedDataPath;
 
     public SeedDataService(string? seedDataPath = null)
@@ -283,6 +284,68 @@ public class SeedDataService
                         UpdatedBy = Guid.Parse("33333333-3333-3333-3333-333333333333") // Alchimalia-Admin
                     };
 
+                    // Process tiles if they exist
+                    if (storyData.Tiles != null && storyData.Tiles.Any())
+                    {
+                        Console.WriteLine($"[SEEDING] Processing {storyData.Tiles.Count} tiles for story: {storyData.StoryId}");
+                        foreach (var tileSeed in storyData.Tiles)
+                        {
+                            var tile = new StoryTile
+                            {
+                                Id = Guid.NewGuid(), // Generate unique ID for tile
+                                TileId = tileSeed.TileId,
+                                Type = tileSeed.Type,
+                                SortOrder = tileSeed.SortOrder,
+                                Caption = tileSeed.Caption,
+                                Text = tileSeed.Text,
+                                ImageUrl = tileSeed.ImageUrl,
+                                AudioUrl = null, // Independent stories don't have audio
+                                Question = null,  // Independent stories don't have questions
+                                StoryDefinitionId = storyId // Set the foreign key
+                            };
+
+                            // Process answers if they exist
+                            if (tileSeed.Answers != null && tileSeed.Answers.Any())
+                            {
+                                Console.WriteLine($"[SEEDING] Processing {tileSeed.Answers.Count} answers for tile: {tileSeed.TileId}");
+                                foreach (var answerSeed in tileSeed.Answers)
+                                {
+                                    var answer = new StoryAnswer
+                                    {
+                                        AnswerId = answerSeed.AnswerId,
+                                        Text = answerSeed.Text,
+                                        TokensJson = null,
+                                        SortOrder = 0 // Default sort order
+                                    };
+
+                                    // Process tokens if they exist
+                                    if (answerSeed.Tokens != null && answerSeed.Tokens.Any())
+                                    {
+                                        foreach (var tokenSeed in answerSeed.Tokens)
+                                        {
+                                            answer.Tokens.Add(new StoryAnswerToken
+                                            {
+                                                Type = tokenSeed.Type,
+                                                Value = tokenSeed.Value,
+                                                Quantity = 1 // Default quantity
+                                            });
+                                        }
+                                    }
+
+                                    tile.Answers.Add(answer);
+                                }
+                            }
+
+                            // Store tile separately for later seeding
+                            _independentStoryTiles.Add((tile, storyData.StoryId));
+                        }
+                        Console.WriteLine($"[SEEDING] Prepared {storyData.Tiles.Count} tiles for story: {storyData.StoryId}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"[SEEDING] No tiles found for story: {storyData.StoryId}");
+                    }
+
                     stories.Add(storyDefinition);
                     Console.WriteLine($"[SEEDING] Added story: {storyData.StoryId} -> {storyId}");
                 }
@@ -296,6 +359,11 @@ public class SeedDataService
 
         Console.WriteLine($"[SEEDING] Total stories loaded: {stories.Count}");
         return stories;
+    }
+
+    public List<StoryTile> GetIndependentStoryTiles()
+    {
+        return _independentStoryTiles.Select(t => t.tile).ToList();
     }
 
     public async Task<List<StoryDefinitionTranslation>> LoadIndependentStoryTranslationsAsync(List<StoryDefinition> existingStories)
