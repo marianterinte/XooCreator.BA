@@ -37,6 +37,8 @@
     <Content Remove="Data\SeedData\Stories\i18n\en-us\learn-to-read-s1.json" />
     <Content Remove="Data\SeedData\Stories\i18n\hu-hu\learn-to-read-s1.json" />
     <Content Remove="Data\SeedData\Stories\i18n\ro-ro\learn-to-read-s1.json" />
+    <Content Remove="Data\SeedData\Stories\independent\i18n\en-us\learn-to-read-s1.json" />
+    <Content Remove="Data\SeedData\Stories\independent\i18n\hu-hu\learn-to-read-s1.json" />
   </ItemGroup>
 
 </Project>

@@ -273,6 +273,11 @@ using (var scope = app.Services.CreateScope())
         await storiesService.InitializeStoriesAsync();
         Console.WriteLine("✅ Stories initialized");
 
+        // Initialize marketplace data for all stories (including independent ones)
+        var marketplaceService = scope.ServiceProvider.GetRequiredService<IStoriesMarketplaceService>();
+        await marketplaceService.InitializeMarketplaceAsync();
+        Console.WriteLine("✅ Marketplace data initialized");
+
         // Now seed the tree model (which references stories)
         await treeModelService.InitializeTreeModelAsync();
         Console.WriteLine("✅ Tree model initialized");
