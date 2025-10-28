@@ -6,12 +6,12 @@ namespace XooCreator.BA.Data.Enums;
 public enum StoryCategory
 {
     /// <summary>
-    /// Independent story not part of the main Alchimalia epic
-    /// </summary>
-    Indie = 0,
-    
-    /// <summary>
     /// Story that is part of the main Alchimalia epic
     /// </summary>
-    AlchimaliaEpic = 1
+    AlchimaliaEpic = 0,
+    
+    /// <summary>
+    /// Independent story not part of the main Alchimalia epic
+    /// </summary>
+    Indie = 1
 }
