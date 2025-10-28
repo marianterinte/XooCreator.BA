@@ -5,6 +5,7 @@ namespace XooCreator.BA.Infrastructure;
 public interface IUserContextService
 {
     Task<Guid?> GetUserIdAsync();
+    Guid GetCurrentUserId();
     Task<string?> GetUserSubAsync();
     string GetRequestLocaleOrDefault(string fallback = "ro-ro");
 }
@@ -23,6 +24,14 @@ public class UserContextService : IUserContextService
     public async Task<Guid?> GetUserIdAsync()
     {
         return await _auth0UserService.GetCurrentUserIdAsync();
+    }
+
+    public Guid GetCurrentUserId()
+    {
+        var userId = GetUserIdAsync().GetAwaiter().GetResult();
+        if (userId == null)
+            throw new UnauthorizedAccessException("User not authenticated");
+        return userId.Value;
     }
 
     public Task<string?> GetUserSubAsync()

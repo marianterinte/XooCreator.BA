@@ -1,4 +1,6 @@
 using System.Text.Json;
+using XooCreator.BA.Data.Enums;
+using XooCreator.BA.Data.SeedData.DTOs;
 
 namespace XooCreator.BA.Data;
 
@@ -232,6 +234,152 @@ public class SeedDataService
         return heroClickMessages;
     }
 
+    public async Task<List<StoryDefinition>> LoadIndependentStoriesAsync()
+    {
+        var storiesPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SeedData", "Stories", "independent", "i18n", "ro-ro");
+        var stories = new List<StoryDefinition>();
+
+        Console.WriteLine($"[SEEDING] Loading independent stories from: {storiesPath}");
+
+        if (!Directory.Exists(storiesPath))
+        {
+            Console.WriteLine($"[SEEDING] Directory does not exist: {storiesPath}");
+            return stories;
+        }
+
+        var jsonFiles = Directory.GetFiles(storiesPath, "*.json");
+        Console.WriteLine($"[SEEDING] Found {jsonFiles.Length} JSON files");
+        
+        foreach (var filePath in jsonFiles)
+        {
+            try
+            {
+                Console.WriteLine($"[SEEDING] Processing file: {Path.GetFileName(filePath)}");
+                var json = await File.ReadAllTextAsync(filePath);
+                var storyData = JsonSerializer.Deserialize<StoryDefinitionSeedData>(json, new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                });
+
+                if (storyData != null)
+                {
+                    var storyId = GetStoryDefinitionIdByStoryId(storyData.StoryId);
+                    Console.WriteLine($"[SEEDING] Creating story: {storyData.StoryId} with ID: {storyId}");
+                    
+                    var storyDefinition = new StoryDefinition
+                    {
+                        Id = storyId, // Use consistent ID for each story
+                        StoryId = storyData.StoryId,
+                        Title = storyData.Title,
+                        CoverImageUrl = storyData.CoverImageUrl,
+                        Category = storyData.Category,
+                        StoryCategory = StoryCategory.AlchimaliaEpic, // Default category for independent stories
+                        Status = StoryStatus.Published,
+                        SortOrder = storyData.SortOrder,
+                        IsActive = true,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow,
+                        CreatedBy = Guid.Parse("33333333-3333-3333-3333-333333333333"), // Alchimalia-Admin
+                        UpdatedBy = Guid.Parse("33333333-3333-3333-3333-333333333333") // Alchimalia-Admin
+                    };
+
+                    stories.Add(storyDefinition);
+                    Console.WriteLine($"[SEEDING] Added story: {storyData.StoryId} -> {storyId}");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log error but continue with other files
+                Console.WriteLine($"[SEEDING ERROR] Error loading story from {filePath}: {ex.Message}");
+            }
+        }
+
+        Console.WriteLine($"[SEEDING] Total stories loaded: {stories.Count}");
+        return stories;
+    }
+
+    public async Task<List<StoryDefinitionTranslation>> LoadIndependentStoryTranslationsAsync(List<StoryDefinition> existingStories)
+    {
+        var translations = new List<StoryDefinitionTranslation>();
+        var languages = LanguageCodeExtensions.All().Select(lang => lang.ToFolder()).ToArray();
+
+        Console.WriteLine($"[SEEDING] Loading translations for {existingStories.Count} existing stories");
+
+        // Create a mapping of storyId to actual StoryDefinition ID
+        var storyIdToDefinitionId = existingStories.ToDictionary(s => s.StoryId, s => s.Id);
+        Console.WriteLine($"[SEEDING] Story ID mapping created:");
+        foreach (var kvp in storyIdToDefinitionId)
+        {
+            Console.WriteLine($"[SEEDING]   {kvp.Key} -> {kvp.Value}");
+        }
+
+        foreach (var language in languages)
+        {
+            var storiesPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SeedData", "Stories", "independent", "i18n", language);
+            Console.WriteLine($"[SEEDING] Processing language: {language} from {storiesPath}");
+            
+            if (!Directory.Exists(storiesPath))
+            {
+                Console.WriteLine($"[SEEDING] Directory does not exist for language {language}: {storiesPath}");
+                continue;
+            }
+
+            var jsonFiles = Directory.GetFiles(storiesPath, "*.json");
+            Console.WriteLine($"[SEEDING] Found {jsonFiles.Length} JSON files for language {language}");
+            
+            foreach (var filePath in jsonFiles)
+            {
+                try
+                {
+                    Console.WriteLine($"[SEEDING] Processing translation file: {Path.GetFileName(filePath)}");
+                    var json = await File.ReadAllTextAsync(filePath);
+                    var storyData = JsonSerializer.Deserialize<StoryDefinitionSeedData>(json, new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                    });
+
+                    if (storyData != null && storyIdToDefinitionId.TryGetValue(storyData.StoryId, out var storyDefinitionId))
+                    {
+                        var translationId = Guid.NewGuid();
+                        Console.WriteLine($"[SEEDING] Creating translation: {storyData.StoryId} ({language}) -> {storyDefinitionId} with translation ID: {translationId}");
+                        
+                        translations.Add(new StoryDefinitionTranslation
+                        {
+                            Id = translationId,
+                            StoryDefinitionId = storyDefinitionId,
+                            LanguageCode = language,
+                            Title = storyData.Title
+                        });
+                        
+                        Console.WriteLine($"[SEEDING] Added translation: {storyData.StoryId} ({language}) -> {storyDefinitionId}");
+                    }
+                    else if (storyData != null)
+                    {
+                        Console.WriteLine($"[SEEDING WARNING] Story {storyData.StoryId} not found in existing stories for language {language}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[SEEDING ERROR] Error loading story translation from {filePath}: {ex.Message}");
+                }
+            }
+        }
+
+        Console.WriteLine($"[SEEDING] Total translations loaded: {translations.Count}");
+        return translations;
+    }
+
+    private Guid GetStoryDefinitionIdByStoryId(string storyId)
+    {
+        // This is a simplified approach - in a real scenario, you might want to maintain a mapping
+        // For now, we'll generate consistent IDs based on storyId
+        return storyId switch
+        {
+            "learn-to-read-s1" => Guid.Parse("44444444-4444-4444-4444-444444444444"),
+            _ => Guid.NewGuid()
+        };
+    }
+
     private static Guid GetFixedStoryHeroId(string heroId)
     {
         return heroId switch
@@ -242,79 +390,4 @@ public class SeedDataService
             _ => Guid.NewGuid()
         };
     }
-}
-
-// DTOs for seed data deserialization
-public class BodyPartSeedData
-{
-    public string Key { get; set; } = string.Empty;
-    public string Name { get; set; } = string.Empty;
-    public string Image { get; set; } = string.Empty;
-    public bool IsBaseLocked { get; set; }
-}
-
-public class RegionSeedData
-{
-    public string Id { get; set; } = string.Empty;
-    public string Name { get; set; } = string.Empty;
-}
-
-public class AnimalSeedData
-{
-    public string Id { get; set; } = string.Empty;
-    public string Label { get; set; } = string.Empty;
-    public string Src { get; set; } = string.Empty;
-    public string RegionId { get; set; } = string.Empty;
-    public bool IsHybrid { get; set; }
-}
-
-public class AnimalPartSupportSeedData
-{
-    public string AnimalId { get; set; } = string.Empty;
-    public string PartKey { get; set; } = string.Empty;
-}
-
-public class StoryHeroesSeedData
-{
-    public List<StoryHeroSeedData> StoryHeroes { get; set; } = new();
-}
-
-public class StoryHeroSeedData
-{
-    public string Id { get; set; } = string.Empty;
-    public string HeroId { get; set; } = string.Empty;
-    public string ImageUrl { get; set; } = string.Empty;
-    public UnlockConditions UnlockConditions { get; set; } = new();
-}
-
-public class UnlockConditions
-{
-    public string Type { get; set; } = string.Empty;
-    public List<string> RequiredStories { get; set; } = new();
-    public int MinProgress { get; set; }
-}
-
-public class HeroMessagesSeedData
-{
-    public List<HeroMessageSeedData> HeroMessages { get; set; } = new();
-}
-
-public class HeroMessageSeedData
-{
-    public string HeroId { get; set; } = string.Empty;
-    public List<RegionMessageSeedData> RegionMessages { get; set; } = new();
-    public List<ClickMessageSeedData> ClickMessages { get; set; } = new();
-}
-
-public class RegionMessageSeedData
-{
-    public string RegionId { get; set; } = string.Empty;
-    public string MessageKey { get; set; } = string.Empty;
-    public string? AudioUrl { get; set; }
-}
-
-public class ClickMessageSeedData
-{
-    public string MessageKey { get; set; } = string.Empty;
-    public string? AudioUrl { get; set; }
 }

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Enums;
+using XooCreator.BA.Data.SeedData.DTOs;
 using XooCreator.BA.Features.TreeOfLight;
 
 namespace XooCreator.BA.Features.Stories;
@@ -111,7 +112,24 @@ public class StoriesRepository : IStoriesRepository
     {
         try
         {
-            if (await _context.StoryDefinitions.AnyAsync()) return;
+            // Check if main stories are already seeded (not just independent stories)
+            var mainStoryIds = new[] { "intro-pufpuf", "terra-s1", "lunaria-s1", "mechanika-s1" };
+            var existingMainStories = await _context.StoryDefinitions
+                .Where(s => mainStoryIds.Contains(s.StoryId))
+                .Select(s => s.StoryId)
+                .ToListAsync();
+            
+            Console.WriteLine($"[SEEDING] Checking main stories: {string.Join(", ", mainStoryIds)}");
+            Console.WriteLine($"[SEEDING] Existing main stories: {string.Join(", ", existingMainStories)}");
+            Console.WriteLine($"[SEEDING] Found {existingMainStories.Count}/{mainStoryIds.Length} main stories");
+            
+            if (existingMainStories.Count == mainStoryIds.Length) 
+            {
+                Console.WriteLine("[SEEDING] All main stories already exist, skipping main story seeding");
+                return;
+            }
+            
+            Console.WriteLine("[SEEDING] Loading main stories from JSON files...");
 
             var stories = await LoadStoriesFromJsonAsync(LanguageCode.RoRo.ToFolder());
             foreach (var story in stories)
@@ -788,48 +806,4 @@ public class StoriesRepository : IStoriesRepository
         // All other stories are part of the Alchimalia epic
         return StoryCategory.AlchimaliaEpic;
     }
-}
-
-// JSON deserialization models
-public class StoriesSeedData
-{
-    public List<StorySeedData> Stories { get; set; } = new();
-}
-
-public class StorySeedData
-{
-    public string StoryId { get; set; } = string.Empty;
-    public string Title { get; set; } = string.Empty;
-    public string? CoverImageUrl { get; set; }
-    public string Category { get; set; } = string.Empty;
-    public int SortOrder { get; set; }
-    public List<TileSeedData>? Tiles { get; set; }
-}
-
-public class TileSeedData
-{
-    public string TileId { get; set; } = string.Empty;
-    public string Type { get; set; } = string.Empty;
-    public int SortOrder { get; set; }
-    public string? Caption { get; set; }
-    public string? Text { get; set; }
-    public string? ImageUrl { get; set; }
-    public string? AudioUrl { get; set; }
-    public string? Question { get; set; }
-    public List<AnswerSeedData>? Answers { get; set; }
-}
-
-public class AnswerSeedData
-{
-    public string AnswerId { get; set; } = string.Empty;
-    public string Text { get; set; } = string.Empty;
-    public List<TokenSeedData>? Tokens { get; set; }
-    public int SortOrder { get; set; }
-}
-
-public class TokenSeedData
-{
-    public string Type { get; set; } = string.Empty; // e.g. "TreeOfHeroes" | "Personality" | "Alchemy"
-    public string Value { get; set; } = string.Empty;
-    public int Quantity { get; set; }
 }

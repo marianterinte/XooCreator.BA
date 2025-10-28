@@ -54,6 +54,10 @@ public class XooDbContext : DbContext
     // Story Marketplace
     public DbSet<StoryPurchase> StoryPurchases => Set<StoryPurchase>();
     public DbSet<StoryMarketplaceInfo> StoryMarketplaceInfos => Set<StoryMarketplaceInfo>();
+    
+    // User Story Relations
+    public DbSet<UserOwnedStories> UserOwnedStories => Set<UserOwnedStories>();
+    public DbSet<UserCreatedStories> UserCreatedStories => Set<UserCreatedStories>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -200,6 +204,8 @@ public class XooDbContext : DbContext
         SeedHeroMessagesDataFromJson(modelBuilder);
         
         SeedStoryHeroDefinitions(modelBuilder);
+        
+        SeedIndependentStoriesDataFromJson(modelBuilder);
 
         modelBuilder.Entity<TreeProgress>(e =>
         {
@@ -426,6 +432,7 @@ public class XooDbContext : DbContext
 
         var testUserId = Guid.Parse("11111111-1111-1111-1111-111111111111");
         var marianUserId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+        var systemAdminUserId = Guid.Parse("33333333-3333-3333-3333-333333333333");
         
         modelBuilder.Entity<AlchimaliaUser>().HasData(
             new AlchimaliaUser
@@ -444,6 +451,16 @@ public class XooDbContext : DbContext
                 Auth0Id = "marian-test-sub",
                 Name = "Marian",
                 Email = "marian@example.com",
+                CreatedAt = DateTime.UtcNow,
+                LastLoginAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            },
+            new AlchimaliaUser
+            {
+                Id = systemAdminUserId,
+                Auth0Id = "alchimalia-admin-sub",
+                Name = "Alchimalia-Admin",
+                Email = "alchimalia@admin.com",
                 CreatedAt = DateTime.UtcNow,
                 LastLoginAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -468,6 +485,12 @@ public class XooDbContext : DbContext
             { 
                 UserId = marianUserId, 
                 Balance = 5, 
+                UpdatedAt = DateTime.UtcNow 
+            },
+            new CreditWallet 
+            { 
+                UserId = systemAdminUserId, 
+                Balance = 1000, 
                 UpdatedAt = DateTime.UtcNow 
             }
         );
@@ -514,6 +537,65 @@ public class XooDbContext : DbContext
             }
         );
 
+        // Story Marketplace Entity Configurations
+        modelBuilder.Entity<StoryPurchase>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.HasIndex(x => new { x.UserId, x.StoryId }).IsUnique();
+            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.Story).WithMany().HasForeignKey(x => x.StoryId).HasPrincipalKey(s => s.StoryId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<StoryMarketplaceInfo>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.HasIndex(x => x.StoryId).IsUnique();
+            e.Property(x => x.Region).HasMaxLength(50);
+            e.Property(x => x.AgeRating).HasMaxLength(10);
+            e.Property(x => x.Difficulty).HasMaxLength(20);
+            e.Property(x => x.Characters).HasConversion(
+                v => string.Join(',', v),
+                v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()
+            ).Metadata.SetValueComparer(new ValueComparer<List<string>>(
+                (c1, c2) => c1!.SequenceEqual(c2!),
+                c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                c => c.ToList()
+            ));
+            e.Property(x => x.Tags).HasConversion(
+                v => string.Join(',', v),
+                v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()
+            ).Metadata.SetValueComparer(new ValueComparer<List<string>>(
+                (c1, c2) => c1!.SequenceEqual(c2!),
+                c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                c => c.ToList()
+            ));
+            e.HasOne(x => x.Story).WithMany().HasForeignKey(x => x.StoryId).HasPrincipalKey(s => s.StoryId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // User Owned Stories Configuration
+        modelBuilder.Entity<UserOwnedStories>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.HasIndex(x => new { x.UserId, x.StoryDefinitionId }).IsUnique();
+            e.Property(x => x.PurchasePrice).HasColumnType("decimal(10,2)");
+            e.Property(x => x.PurchaseReference).HasMaxLength(100);
+            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.StoryDefinition).WithMany().HasForeignKey(x => x.StoryDefinitionId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // User Created Stories Configuration
+        modelBuilder.Entity<UserCreatedStories>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.HasIndex(x => new { x.UserId, x.StoryDefinitionId }).IsUnique();
+            e.Property(x => x.CreationNotes).HasMaxLength(1000);
+            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.StoryDefinition).WithMany().HasForeignKey(x => x.StoryDefinitionId).OnDelete(DeleteBehavior.Cascade);
+        });
 
         base.OnModelCreating(modelBuilder);
     }
@@ -669,42 +751,39 @@ public class XooDbContext : DbContext
         };
 
         modelBuilder.Entity<HeroDefinition>().HasData(heroDefinitions);
-
-        // Story Marketplace Entity Configurations
-        modelBuilder.Entity<StoryPurchase>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.HasIndex(x => new { x.UserId, x.StoryId }).IsUnique();
-            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
-            e.HasOne(x => x.Story).WithMany().HasForeignKey(x => x.StoryId).HasPrincipalKey(s => s.StoryId).OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<StoryMarketplaceInfo>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.HasIndex(x => x.StoryId).IsUnique();
-            e.Property(x => x.Region).HasMaxLength(50);
-            e.Property(x => x.AgeRating).HasMaxLength(10);
-            e.Property(x => x.Difficulty).HasMaxLength(20);
-            e.Property(x => x.Characters).HasConversion(
-                v => string.Join(',', v),
-                v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()
-            ).Metadata.SetValueComparer(new ValueComparer<List<string>>(
-                (c1, c2) => c1!.SequenceEqual(c2!),
-                c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                c => c.ToList()
-            ));
-            e.Property(x => x.Tags).HasConversion(
-                v => string.Join(',', v),
-                v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()
-            ).Metadata.SetValueComparer(new ValueComparer<List<string>>(
-                (c1, c2) => c1!.SequenceEqual(c2!),
-                c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                c => c.ToList()
-            ));
-            e.HasOne(x => x.Story).WithMany().HasForeignKey(x => x.StoryId).HasPrincipalKey(s => s.StoryId).OnDelete(DeleteBehavior.Cascade);
-        });
     }
+
+    private void SeedIndependentStoriesDataFromJson(ModelBuilder modelBuilder)
+    {
+        try
+        {
+            Console.WriteLine("[SEEDING] Starting independent stories seeding...");
+            var seedService = new SeedDataService();
+            
+            Console.WriteLine("[SEEDING] Loading independent stories...");
+            var independentStories = LoadDataSync(() => seedService.LoadIndependentStoriesAsync());
+            Console.WriteLine($"[SEEDING] Loaded {independentStories.Count} independent stories");
+            
+            Console.WriteLine("[SEEDING] Adding story definitions to model builder...");
+            modelBuilder.Entity<StoryDefinition>().HasData(independentStories);
+            Console.WriteLine("[SEEDING] Story definitions added to model builder");
+            
+            Console.WriteLine("[SEEDING] Loading story translations...");
+            var storyTranslations = LoadDataSync(() => seedService.LoadIndependentStoryTranslationsAsync(independentStories));
+            Console.WriteLine($"[SEEDING] Loaded {storyTranslations.Count} story translations");
+            
+            Console.WriteLine("[SEEDING] Adding story translations to model builder...");
+            modelBuilder.Entity<StoryDefinitionTranslation>().HasData(storyTranslations);
+            Console.WriteLine("[SEEDING] Story translations added to model builder");
+            
+            Console.WriteLine("[SEEDING] Independent stories seeding completed successfully");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[SEEDING ERROR] Failed to load independent stories seed data: {ex.Message}");
+            Console.WriteLine($"[SEEDING ERROR] Stack trace: {ex.StackTrace}");
+            throw new InvalidOperationException("Failed to load independent stories seed data from JSON files", ex);
+        }
+    }
+
 }

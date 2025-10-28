@@ -2,6 +2,7 @@ using XooCreator.BA.Features.Stories;
 using XooCreator.BA.Features.TreeOfHeroes;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Data;
+using XooCreator.BA.Data.SeedData.DTOs;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 

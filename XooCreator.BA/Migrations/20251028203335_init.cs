@@ -582,6 +582,63 @@ namespace XooCreator.BA.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "UserCreatedStories",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    StoryDefinitionId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    PublishedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    IsPublished = table.Column<bool>(type: "boolean", nullable: false),
+                    CreationNotes = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserCreatedStories", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserCreatedStories_AlchimaliaUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AlchimaliaUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserCreatedStories_StoryDefinitions_StoryDefinitionId",
+                        column: x => x.StoryDefinitionId,
+                        principalTable: "StoryDefinitions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserOwnedStories",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    StoryDefinitionId = table.Column<Guid>(type: "uuid", nullable: false),
+                    PurchasedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    PurchasePrice = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
+                    PurchaseReference = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserOwnedStories", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserOwnedStories_AlchimaliaUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AlchimaliaUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserOwnedStories_StoryDefinitions_StoryDefinitionId",
+                        column: x => x.StoryDefinitionId,
+                        principalTable: "StoryDefinitions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "StoryHeroUnlocks",
                 columns: table => new
                 {
@@ -941,8 +998,9 @@ namespace XooCreator.BA.Migrations
                 columns: new[] { "Id", "Auth0Id", "CreatedAt", "Email", "HasVisitedImaginationLaboratory", "LastLoginAt", "Name", "Picture", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { new Guid("11111111-1111-1111-1111-111111111111"), "test-user-sub", new DateTime(2025, 10, 28, 19, 52, 10, 880, DateTimeKind.Utc).AddTicks(5680), "test@example.com", false, new DateTime(2025, 10, 28, 19, 52, 10, 880, DateTimeKind.Utc).AddTicks(5681), "Test User", null, new DateTime(2025, 10, 28, 19, 52, 10, 880, DateTimeKind.Utc).AddTicks(5681) },
-                    { new Guid("22222222-2222-2222-2222-222222222222"), "marian-test-sub", new DateTime(2025, 10, 28, 19, 52, 10, 880, DateTimeKind.Utc).AddTicks(5683), "marian@example.com", false, new DateTime(2025, 10, 28, 19, 52, 10, 880, DateTimeKind.Utc).AddTicks(5684), "Marian", null, new DateTime(2025, 10, 28, 19, 52, 10, 880, DateTimeKind.Utc).AddTicks(5684) }
+                    { new Guid("11111111-1111-1111-1111-111111111111"), "test-user-sub", new DateTime(2025, 10, 28, 20, 33, 35, 269, DateTimeKind.Utc).AddTicks(7578), "test@example.com", false, new DateTime(2025, 10, 28, 20, 33, 35, 269, DateTimeKind.Utc).AddTicks(7578), "Test User", null, new DateTime(2025, 10, 28, 20, 33, 35, 269, DateTimeKind.Utc).AddTicks(7579) },
+                    { new Guid("22222222-2222-2222-2222-222222222222"), "marian-test-sub", new DateTime(2025, 10, 28, 20, 33, 35, 269, DateTimeKind.Utc).AddTicks(7582), "marian@example.com", false, new DateTime(2025, 10, 28, 20, 33, 35, 269, DateTimeKind.Utc).AddTicks(7582), "Marian", null, new DateTime(2025, 10, 28, 20, 33, 35, 269, DateTimeKind.Utc).AddTicks(7583) },
+                    { new Guid("33333333-3333-3333-3333-333333333333"), "alchimalia-admin-sub", new DateTime(2025, 10, 28, 20, 33, 35, 269, DateTimeKind.Utc).AddTicks(7585), "alchimalia@admin.com", false, new DateTime(2025, 10, 28, 20, 33, 35, 269, DateTimeKind.Utc).AddTicks(7585), "Alchimalia-Admin", null, new DateTime(2025, 10, 28, 20, 33, 35, 269, DateTimeKind.Utc).AddTicks(7585) }
                 });
 
             migrationBuilder.InsertData(
@@ -970,9 +1028,9 @@ namespace XooCreator.BA.Migrations
                 columns: new[] { "Id", "AudioUrl", "CreatedAt", "HeroId", "IsActive", "MessageKey", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { new Guid("32088b37-0383-4c0e-bfab-4490a3d757c6"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_click_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 877, DateTimeKind.Utc).AddTicks(1891), "linkaro", true, "hero_linkaro_click_message", new DateTime(2025, 10, 28, 19, 52, 10, 877, DateTimeKind.Utc).AddTicks(1891) },
-                    { new Guid("41e7bac3-4f3e-40af-a079-4149a38da1b4"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_click_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 877, DateTimeKind.Utc).AddTicks(1886), "puf-puf", true, "hero_puf-puf_click_message", new DateTime(2025, 10, 28, 19, 52, 10, 877, DateTimeKind.Utc).AddTicks(1887) },
-                    { new Guid("50b0b1b0-e41a-43e3-8eae-8fba9e177975"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_click_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 877, DateTimeKind.Utc).AddTicks(1893), "grubot", true, "hero_grubot_click_message", new DateTime(2025, 10, 28, 19, 52, 10, 877, DateTimeKind.Utc).AddTicks(1893) }
+                    { new Guid("4ce73125-dfe7-444a-8098-113ff4480fd2"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_click_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 265, DateTimeKind.Utc).AddTicks(2703), "grubot", true, "hero_grubot_click_message", new DateTime(2025, 10, 28, 20, 33, 35, 265, DateTimeKind.Utc).AddTicks(2703) },
+                    { new Guid("a20dd5eb-d77b-4ef5-b01d-0909ecf9b1d6"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_click_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 265, DateTimeKind.Utc).AddTicks(2691), "puf-puf", true, "hero_puf-puf_click_message", new DateTime(2025, 10, 28, 20, 33, 35, 265, DateTimeKind.Utc).AddTicks(2692) },
+                    { new Guid("e01d0503-596e-42f2-95d2-bacaf8367cd7"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_click_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 265, DateTimeKind.Utc).AddTicks(2701), "linkaro", true, "hero_linkaro_click_message", new DateTime(2025, 10, 28, 20, 33, 35, 265, DateTimeKind.Utc).AddTicks(2701) }
                 });
 
             migrationBuilder.InsertData(
@@ -980,9 +1038,9 @@ namespace XooCreator.BA.Migrations
                 columns: new[] { "Id", "CourageCost", "CreatedAt", "CreativityCost", "CuriosityCost", "Image", "IsUnlocked", "PositionX", "PositionY", "PrerequisitesJson", "RewardsJson", "SafetyCost", "ThinkingCost", "Type", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { "grubot", 0, new DateTime(2025, 10, 28, 19, 52, 10, 877, DateTimeKind.Utc).AddTicks(2075), 0, 0, "images/heroes/grubot.png", false, 0.0, 0.0, "[]", "[]", 0, 0, "STORY_HERO", new DateTime(2025, 10, 28, 19, 52, 10, 877, DateTimeKind.Utc).AddTicks(2076) },
-                    { "linkaro", 0, new DateTime(2025, 10, 28, 19, 52, 10, 877, DateTimeKind.Utc).AddTicks(2072), 0, 0, "images/heroes/linkaro.png", false, 0.0, 0.0, "[]", "[]", 0, 0, "STORY_HERO", new DateTime(2025, 10, 28, 19, 52, 10, 877, DateTimeKind.Utc).AddTicks(2073) },
-                    { "puf-puf", 0, new DateTime(2025, 10, 28, 19, 52, 10, 877, DateTimeKind.Utc).AddTicks(2067), 0, 0, "images/heroes/pufpufblink.gif", false, 0.0, 0.0, "[]", "[]", 0, 0, "STORY_HERO", new DateTime(2025, 10, 28, 19, 52, 10, 877, DateTimeKind.Utc).AddTicks(2068) }
+                    { "grubot", 0, new DateTime(2025, 10, 28, 20, 33, 35, 265, DateTimeKind.Utc).AddTicks(2890), 0, 0, "images/heroes/grubot.png", false, 0.0, 0.0, "[]", "[]", 0, 0, "STORY_HERO", new DateTime(2025, 10, 28, 20, 33, 35, 265, DateTimeKind.Utc).AddTicks(2890) },
+                    { "linkaro", 0, new DateTime(2025, 10, 28, 20, 33, 35, 265, DateTimeKind.Utc).AddTicks(2887), 0, 0, "images/heroes/linkaro.png", false, 0.0, 0.0, "[]", "[]", 0, 0, "STORY_HERO", new DateTime(2025, 10, 28, 20, 33, 35, 265, DateTimeKind.Utc).AddTicks(2887) },
+                    { "puf-puf", 0, new DateTime(2025, 10, 28, 20, 33, 35, 265, DateTimeKind.Utc).AddTicks(2879), 0, 0, "images/heroes/pufpufblink.gif", false, 0.0, 0.0, "[]", "[]", 0, 0, "STORY_HERO", new DateTime(2025, 10, 28, 20, 33, 35, 265, DateTimeKind.Utc).AddTicks(2880) }
                 });
 
             migrationBuilder.InsertData(
@@ -990,41 +1048,41 @@ namespace XooCreator.BA.Migrations
                 columns: new[] { "Id", "AudioUrl", "CreatedAt", "HeroId", "IsActive", "MessageKey", "RegionId", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { new Guid("084552a1-7ada-40d8-9196-81d770d59f09"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_kelo_ketis_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8739), "grubot", true, "hero_grubot_region_kelo_ketis_message", "kelo-ketis", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8739) },
-                    { new Guid("0de77d9b-abb0-4f67-b040-5bd6799c2a6b"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_sylvaria_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8678), "linkaro", true, "hero_linkaro_region_sylvaria_message", "sylvaria", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8678) },
-                    { new Guid("10ce180e-863f-4cca-9c6e-89fd1179e087"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_terra_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8644), "puf-puf", true, "hero_puf-puf_region_terra_message", "terra", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8644) },
-                    { new Guid("19d4acda-2cc4-4c69-b86a-5a207d826db6"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_terra_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8670), "linkaro", true, "hero_linkaro_region_terra_message", "terra", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8671) },
-                    { new Guid("1b145a78-dc0b-4bc5-932e-ed2a184e23d3"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_kelo_ketis_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8689), "linkaro", true, "hero_linkaro_region_kelo_ketis_message", "kelo-ketis", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8689) },
-                    { new Guid("1b1d7b3f-90ca-4a37-9d84-0085bb76d7d7"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_gateway_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8691), "grubot", true, "hero_grubot_region_gateway_message", "gateway", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8691) },
-                    { new Guid("3107f225-b989-49e6-a75d-a225666e0c36"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_crystalia_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8700), "grubot", true, "hero_grubot_region_crystalia_message", "crystalia", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8700) },
-                    { new Guid("320b9eef-a59f-450e-8962-d70bee05042c"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_pyron_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8661), "puf-puf", true, "hero_puf-puf_region_pyron_message", "pyron", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8661) },
-                    { new Guid("3b36f96c-1827-44aa-9023-7ff10eee250e"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_zephyra_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8703), "grubot", true, "hero_grubot_region_zephyra_message", "zephyra", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8703) },
-                    { new Guid("3f80880d-bb55-4fed-abe7-7eb50fd668d0"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_aetherion_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8686), "linkaro", true, "hero_linkaro_region_aetherion_message", "aetherion", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8686) },
-                    { new Guid("42454e70-96b6-4391-ac77-b575c49d0fe0"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_pyron_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8705), "grubot", true, "hero_grubot_region_pyron_message", "pyron", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8705) },
-                    { new Guid("45506cf6-27cf-462b-ac8b-784c25af47aa"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_lunaria_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8694), "grubot", true, "hero_grubot_region_lunaria_message", "lunaria", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8694) },
-                    { new Guid("47359dc1-1202-4836-9521-27e9a5e32628"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_aetherion_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8737), "grubot", true, "hero_grubot_region_aetherion_message", "aetherion", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8737) },
-                    { new Guid("56e6c960-5b62-4fdd-b36c-e0ba0988bb6f"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_sylvaria_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8699), "grubot", true, "hero_grubot_region_sylvaria_message", "sylvaria", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8699) },
-                    { new Guid("626c52dd-1db1-45f4-abc8-3180bb69ec82"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_crystalia_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8652), "puf-puf", true, "hero_puf-puf_region_crystalia_message", "crystalia", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8652) },
-                    { new Guid("64909781-7b99-44c9-b1b3-017882e72e33"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_lunaria_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8646), "puf-puf", true, "hero_puf-puf_region_lunaria_message", "lunaria", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8646) },
-                    { new Guid("6499f46e-85df-4ba0-9db4-4c89e0a9c23d"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_mechanika_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8675), "linkaro", true, "hero_linkaro_region_mechanika_message", "mechanika", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8675) },
-                    { new Guid("6711229c-ba34-4b6a-8b49-2a66025c7872"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_oceanica_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8648), "puf-puf", true, "hero_puf-puf_region_oceanica_message", "oceanica", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8648) },
-                    { new Guid("67eec2bb-e038-47b9-b0ed-f22fcb0ad3e9"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_kelo_ketis_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8666), "puf-puf", true, "hero_puf-puf_region_kelo_ketis_message", "kelo-ketis", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8667) },
-                    { new Guid("75ecd701-2995-4b67-8190-7815b1b01fd0"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_neptunia_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8685), "linkaro", true, "hero_linkaro_region_neptunia_message", "neptunia", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8685) },
-                    { new Guid("81e9c025-5386-45d2-a231-e3ea83dbe462"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_aetherion_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8665), "puf-puf", true, "hero_puf-puf_region_aetherion_message", "aetherion", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8665) },
-                    { new Guid("86ad8fd2-12fd-491e-9a42-313c3fec1663"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_oceanica_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8697), "grubot", true, "hero_grubot_region_oceanica_message", "oceanica", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8697) },
-                    { new Guid("980bdd00-fe27-4bfb-bd26-33a09d5ffcbf"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_gateway_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8669), "linkaro", true, "hero_linkaro_region_gateway_message", "gateway", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8669) },
-                    { new Guid("9966577b-ac50-4d9f-9203-989d370cbe63"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_neptunia_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8734), "grubot", true, "hero_grubot_region_neptunia_message", "neptunia", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8734) },
-                    { new Guid("b8134293-6205-4698-b692-a5a5ca557e74"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_zephyra_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8682), "linkaro", true, "hero_linkaro_region_zephyra_message", "zephyra", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8682) },
-                    { new Guid("c2f2a31e-883c-475e-b0d8-061132b7ad30"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_mechanika_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8695), "grubot", true, "hero_grubot_region_mechanika_message", "mechanika", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8696) },
-                    { new Guid("c8fd5bf5-d1d8-49c6-a33a-44b4fa534537"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_gateway_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8640), "puf-puf", true, "hero_puf-puf_region_gateway_message", "gateway", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8641) },
-                    { new Guid("ca1abcbc-2bec-4c5b-843a-a2db58d9e71a"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_terra_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8693), "grubot", true, "hero_grubot_region_terra_message", "terra", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8693) },
-                    { new Guid("cb6792b5-76a4-45e1-b902-d52618fd647d"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_sylvaria_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8649), "puf-puf", true, "hero_puf-puf_region_sylvaria_message", "sylvaria", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8650) },
-                    { new Guid("cc5e5e19-78fb-4924-8f80-6e0a18b60d16"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_zephyra_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8659), "puf-puf", true, "hero_puf-puf_region_zephyra_message", "zephyra", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8659) },
-                    { new Guid("ce16832f-9587-4986-848a-aac6d6723b3f"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_crystalia_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8680), "linkaro", true, "hero_linkaro_region_crystalia_message", "crystalia", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8681) },
-                    { new Guid("e1ec98e4-5aca-4e7f-84b7-a78d50634b2b"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_pyron_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8683), "linkaro", true, "hero_linkaro_region_pyron_message", "pyron", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8684) },
-                    { new Guid("e351e85c-9e11-45e6-9442-44c16d8115d5"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_oceanica_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8676), "linkaro", true, "hero_linkaro_region_oceanica_message", "oceanica", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8677) },
-                    { new Guid("e42a7af5-6682-4839-b5c3-f27764309e24"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_neptunia_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8663), "puf-puf", true, "hero_puf-puf_region_neptunia_message", "neptunia", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8663) },
-                    { new Guid("e5beebf1-3fd2-4e91-96e6-1c0d44c8d70e"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_lunaria_message.wav", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8672), "linkaro", true, "hero_linkaro_region_lunaria_message", "lunaria", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(8672) }
+                    { new Guid("0717c66e-a57b-4b8d-b256-fd5e79cde759"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_zephyra_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9542), "grubot", true, "hero_grubot_region_zephyra_message", "zephyra", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9542) },
+                    { new Guid("08a52257-5547-41b9-a09e-f5195e22cc16"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_kelo_ketis_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9549), "grubot", true, "hero_grubot_region_kelo_ketis_message", "kelo-ketis", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9549) },
+                    { new Guid("0ea00c2a-26ec-41d6-b536-fdb9dcac9ae5"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_sylvaria_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9463), "puf-puf", true, "hero_puf-puf_region_sylvaria_message", "sylvaria", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9463) },
+                    { new Guid("0f57b899-7242-4eb0-9310-4db616fe2ee2"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_neptunia_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9498), "puf-puf", true, "hero_puf-puf_region_neptunia_message", "neptunia", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9499) },
+                    { new Guid("14799dc9-1edd-4dea-82af-57977c48fa1d"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_oceanica_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9536), "grubot", true, "hero_grubot_region_oceanica_message", "oceanica", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9536) },
+                    { new Guid("14e1eb0e-3a06-48da-b1aa-78115aaeb8c3"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_oceanica_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9461), "puf-puf", true, "hero_puf-puf_region_oceanica_message", "oceanica", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9461) },
+                    { new Guid("2c039ef3-5b82-49c9-9c03-61dcd527abc9"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_kelo_ketis_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9527), "linkaro", true, "hero_linkaro_region_kelo_ketis_message", "kelo-ketis", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9528) },
+                    { new Guid("2e5a6b07-a054-45fa-9607-f4d3e3b7d07f"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_pyron_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9521), "linkaro", true, "hero_linkaro_region_pyron_message", "pyron", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9521) },
+                    { new Guid("339155fd-8963-4ccf-9f5f-851e08698e42"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_kelo_ketis_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9503), "puf-puf", true, "hero_puf-puf_region_kelo_ketis_message", "kelo-ketis", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9503) },
+                    { new Guid("3982d41e-a4a0-480d-acde-9d7a7acd38f7"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_sylvaria_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9537), "grubot", true, "hero_grubot_region_sylvaria_message", "sylvaria", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9537) },
+                    { new Guid("43dd846b-ec33-4033-a49e-eb718ba035b3"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_gateway_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9529), "grubot", true, "hero_grubot_region_gateway_message", "gateway", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9530) },
+                    { new Guid("49a9ec8a-cd53-4450-8575-9dfc599a4b43"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_terra_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9508), "linkaro", true, "hero_linkaro_region_terra_message", "terra", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9508) },
+                    { new Guid("4e457f77-2332-4b07-9f3d-3ad50427c986"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_oceanica_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9514), "linkaro", true, "hero_linkaro_region_oceanica_message", "oceanica", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9514) },
+                    { new Guid("5ee86728-9932-45dd-b0ac-afe187b7d76e"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_terra_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9531), "grubot", true, "hero_grubot_region_terra_message", "terra", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9531) },
+                    { new Guid("6510c17f-008f-4c9e-bc0b-38ff622c3aa5"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_neptunia_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9523), "linkaro", true, "hero_linkaro_region_neptunia_message", "neptunia", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9523) },
+                    { new Guid("670cced5-e70f-4345-b690-5cc8ca5ff2c8"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_crystalia_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9493), "puf-puf", true, "hero_puf-puf_region_crystalia_message", "crystalia", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9493) },
+                    { new Guid("7260e99c-6aef-4c33-99df-27ebcc7a7602"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_crystalia_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9518), "linkaro", true, "hero_linkaro_region_crystalia_message", "crystalia", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9518) },
+                    { new Guid("81450a64-245a-4747-8336-85142b8b71f2"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_gateway_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9506), "linkaro", true, "hero_linkaro_region_gateway_message", "gateway", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9506) },
+                    { new Guid("85455a9a-5d81-4a16-ba23-a841aaa37bcc"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_neptunia_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9545), "grubot", true, "hero_grubot_region_neptunia_message", "neptunia", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9545) },
+                    { new Guid("933b59e6-6bcd-4cc2-b4cd-90f3356959f6"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_mechanika_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9534), "grubot", true, "hero_grubot_region_mechanika_message", "mechanika", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9534) },
+                    { new Guid("9bef90e9-6d36-4274-9c36-2cac6e4d00a2"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_lunaria_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9511), "linkaro", true, "hero_linkaro_region_lunaria_message", "lunaria", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9511) },
+                    { new Guid("a182848d-ba2b-4ff6-92fe-8d885fd1031e"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_pyron_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9543), "grubot", true, "hero_grubot_region_pyron_message", "pyron", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9543) },
+                    { new Guid("a38312d7-0903-4123-82e6-06444ce62360"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_terra_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9457), "puf-puf", true, "hero_puf-puf_region_terra_message", "terra", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9458) },
+                    { new Guid("abb5a4aa-8dbf-44de-97fa-49155b66c770"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_lunaria_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9533), "grubot", true, "hero_grubot_region_lunaria_message", "lunaria", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9533) },
+                    { new Guid("b0b651c2-4f95-4fe6-b841-0d05a8815732"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_aetherion_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9501), "puf-puf", true, "hero_puf-puf_region_aetherion_message", "aetherion", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9501) },
+                    { new Guid("bcde9bfb-cf60-4336-b721-1faaf4e28a62"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_zephyra_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9520), "linkaro", true, "hero_linkaro_region_zephyra_message", "zephyra", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9520) },
+                    { new Guid("d3f7b0d4-0225-4992-b028-6868ac86b89f"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_aetherion_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9547), "grubot", true, "hero_grubot_region_aetherion_message", "aetherion", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9547) },
+                    { new Guid("d7f7a387-8f53-4a94-9be0-2548829d9588"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_lunaria_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9459), "puf-puf", true, "hero_puf-puf_region_lunaria_message", "lunaria", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9459) },
+                    { new Guid("de419f29-2580-4b31-a4b2-88d79c4e79eb"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_crystalia_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9540), "grubot", true, "hero_grubot_region_crystalia_message", "crystalia", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9540) },
+                    { new Guid("e4d2aa39-1da4-49c7-9d7e-427792592ae5"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_mechanika_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9513), "linkaro", true, "hero_linkaro_region_mechanika_message", "mechanika", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9513) },
+                    { new Guid("e6d3196d-117d-42eb-bf85-1be341944834"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_gateway_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9453), "puf-puf", true, "hero_puf-puf_region_gateway_message", "gateway", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9454) },
+                    { new Guid("e7944f55-dfa6-4ecf-a008-80c7d9b144a0"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_sylvaria_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9516), "linkaro", true, "hero_linkaro_region_sylvaria_message", "sylvaria", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9516) },
+                    { new Guid("e9fa89e3-074e-4a8b-8a8c-084819dd1f5d"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_aetherion_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9526), "linkaro", true, "hero_linkaro_region_aetherion_message", "aetherion", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9526) },
+                    { new Guid("f88cf524-f9f6-420a-a2a9-259006808bd6"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_pyron_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9497), "puf-puf", true, "hero_puf-puf_region_pyron_message", "pyron", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9497) },
+                    { new Guid("fa0204cc-3729-4466-b288-efaa0bc95517"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_zephyra_message.wav", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9495), "puf-puf", true, "hero_puf-puf_region_zephyra_message", "zephyra", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(9495) }
                 });
 
             migrationBuilder.InsertData(
@@ -1042,13 +1100,18 @@ namespace XooCreator.BA.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "StoryDefinitions",
+                columns: new[] { "Id", "Category", "CoverImageUrl", "CreatedAt", "CreatedBy", "IsActive", "SortOrder", "Status", "StoryCategory", "StoryId", "Title", "UpdatedAt", "UpdatedBy" },
+                values: new object[] { new Guid("44444444-4444-4444-4444-444444444444"), "terra", "images/tol/stories/pp-prietenul-pierdut/0.cover.png", new DateTime(2025, 10, 28, 20, 33, 35, 265, DateTimeKind.Utc).AddTicks(5824), new Guid("33333333-3333-3333-3333-333333333333"), true, 1, 1, 1, "learn-to-read-s1", "Puf-Puf și prietenul pierdut", new DateTime(2025, 10, 28, 20, 33, 35, 265, DateTimeKind.Utc).AddTicks(5825), new Guid("33333333-3333-3333-3333-333333333333") });
+
+            migrationBuilder.InsertData(
                 table: "StoryHeroes",
                 columns: new[] { "Id", "CreatedAt", "HeroId", "ImageUrl", "IsActive", "UnlockConditionJson", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { new Guid("00000000-0000-0000-0000-000000000100"), new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(2878), "puf-puf", "images/tol/stories/intro-pufpuf/heroes/pufpufblink.gif", true, "{\"Type\":\"story_completion\",\"RequiredStories\":[\"intro-pufpuf\"],\"MinProgress\":100}", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(2878) },
-                    { new Guid("11111111-1111-1111-1111-111111111100"), new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(2923), "linkaro", "images/tol/stories/lunaria-s1/heroes/linkaro.png", true, "{\"Type\":\"story_completion\",\"RequiredStories\":[\"lunaria-s1\"],\"MinProgress\":100}", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(2923) },
-                    { new Guid("22222222-2222-2222-2222-222222222200"), new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(2934), "grubot", "images/tol/stories/mechanika-s1/heroes/grubot.png", true, "{\"Type\":\"story_completion\",\"RequiredStories\":[\"mechanika-s1\"],\"MinProgress\":100}", new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(2934) }
+                    { new Guid("00000000-0000-0000-0000-000000000100"), new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(3702), "puf-puf", "images/tol/stories/intro-pufpuf/heroes/pufpufblink.gif", true, "{\"Type\":\"story_completion\",\"RequiredStories\":[\"intro-pufpuf\"],\"MinProgress\":100}", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(3702) },
+                    { new Guid("11111111-1111-1111-1111-111111111100"), new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(3728), "linkaro", "images/tol/stories/lunaria-s1/heroes/linkaro.png", true, "{\"Type\":\"story_completion\",\"RequiredStories\":[\"lunaria-s1\"],\"MinProgress\":100}", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(3728) },
+                    { new Guid("22222222-2222-2222-2222-222222222200"), new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(3747), "grubot", "images/tol/stories/mechanika-s1/heroes/grubot.png", true, "{\"Type\":\"story_completion\",\"RequiredStories\":[\"mechanika-s1\"],\"MinProgress\":100}", new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(3748) }
                 });
 
             migrationBuilder.InsertData(
@@ -1097,14 +1160,14 @@ namespace XooCreator.BA.Migrations
                 columns: new[] { "Id", "BodyPartKey", "LanguageCode", "Name" },
                 values: new object[,]
                 {
-                    { new Guid("05dbfa66-7731-4895-927c-925e9e10297e"), "wings", "en-us", "Wings" },
-                    { new Guid("09cdf791-74ee-4efc-8ebf-512c7428543c"), "tail", "en-us", "Tail" },
-                    { new Guid("322e2173-0bc3-4ac0-99f9-7f840d5a8622"), "body", "en-us", "Body" },
-                    { new Guid("5e838456-52f3-4407-a260-99241a4b3e7d"), "arms", "en-us", "Arms" },
-                    { new Guid("a4f2c317-114a-4e18-b7f5-2f203a011e35"), "head", "en-us", "Head" },
-                    { new Guid("c168712e-ea6d-433d-ae05-c7413b45ad58"), "horns", "en-us", "Horns" },
-                    { new Guid("f0372110-eb9e-49c4-bb73-6f29d072da54"), "legs", "en-us", "Legs" },
-                    { new Guid("f301df5b-11e1-46f0-83cd-c265cd1c88fd"), "horn", "en-us", "Horn" }
+                    { new Guid("2ddb4988-4a06-4370-9894-9a447b621eb2"), "tail", "en-us", "Tail" },
+                    { new Guid("3f66073d-2e55-4b5c-9c2c-1cef950393ef"), "horn", "en-us", "Horn" },
+                    { new Guid("42d46181-0d1b-4cd1-84c8-4225dc5016a7"), "legs", "en-us", "Legs" },
+                    { new Guid("a7f3829e-2712-4f5b-a8f6-bdfe0e31f2f7"), "body", "en-us", "Body" },
+                    { new Guid("b7fae8e3-20e1-441f-a5f9-0571b78c9084"), "arms", "en-us", "Arms" },
+                    { new Guid("c36761b9-da3a-4578-99a9-234a06d58258"), "horns", "en-us", "Horns" },
+                    { new Guid("de62b9ae-9a7c-4011-8030-f21459eb9fda"), "head", "en-us", "Head" },
+                    { new Guid("f1dd33bc-d4c6-4f03-9e01-205e45b0f4a5"), "wings", "en-us", "Wings" }
                 });
 
             migrationBuilder.InsertData(
@@ -1112,8 +1175,8 @@ namespace XooCreator.BA.Migrations
                 columns: new[] { "Id", "Amount", "CreatedAt", "Reference", "Type", "UserId" },
                 values: new object[,]
                 {
-                    { new Guid("33333333-3333-3333-3333-333333333333"), 15, new DateTime(2025, 10, 27, 19, 52, 10, 880, DateTimeKind.Utc).AddTicks(5785), "test-purchase-marian", 0, new Guid("22222222-2222-2222-2222-222222222222") },
-                    { new Guid("44444444-4444-4444-4444-444444444444"), -5, new DateTime(2025, 10, 28, 17, 52, 10, 880, DateTimeKind.Utc).AddTicks(5794), "test-generation", 1, new Guid("22222222-2222-2222-2222-222222222222") }
+                    { new Guid("33333333-3333-3333-3333-333333333333"), 15, new DateTime(2025, 10, 27, 20, 33, 35, 269, DateTimeKind.Utc).AddTicks(7721), "test-purchase-marian", 0, new Guid("22222222-2222-2222-2222-222222222222") },
+                    { new Guid("44444444-4444-4444-4444-444444444444"), -5, new DateTime(2025, 10, 28, 18, 33, 35, 269, DateTimeKind.Utc).AddTicks(7731), "test-generation", 1, new Guid("22222222-2222-2222-2222-222222222222") }
                 });
 
             migrationBuilder.InsertData(
@@ -1121,8 +1184,9 @@ namespace XooCreator.BA.Migrations
                 columns: new[] { "UserId", "Balance", "DiscoveryBalance", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { new Guid("11111111-1111-1111-1111-111111111111"), 5, 0, new DateTime(2025, 10, 28, 19, 52, 10, 880, DateTimeKind.Utc).AddTicks(5744) },
-                    { new Guid("22222222-2222-2222-2222-222222222222"), 5, 0, new DateTime(2025, 10, 28, 19, 52, 10, 880, DateTimeKind.Utc).AddTicks(5746) }
+                    { new Guid("11111111-1111-1111-1111-111111111111"), 5, 0, new DateTime(2025, 10, 28, 20, 33, 35, 269, DateTimeKind.Utc).AddTicks(7672) },
+                    { new Guid("22222222-2222-2222-2222-222222222222"), 5, 0, new DateTime(2025, 10, 28, 20, 33, 35, 269, DateTimeKind.Utc).AddTicks(7673) },
+                    { new Guid("33333333-3333-3333-3333-333333333333"), 1000, 0, new DateTime(2025, 10, 28, 20, 33, 35, 269, DateTimeKind.Utc).AddTicks(7674) }
                 });
 
             migrationBuilder.InsertData(
@@ -1130,18 +1194,23 @@ namespace XooCreator.BA.Migrations
                 columns: new[] { "Id", "HeroId", "HeroType", "SourceStoryId", "UnlockedAt", "UserId" },
                 values: new object[,]
                 {
-                    { new Guid("11111111-1111-1111-1111-111111111111"), "seed", "HERO_TREE_TRANSFORMATION", "", new DateTime(2025, 10, 28, 19, 52, 10, 880, DateTimeKind.Utc).AddTicks(5763), new Guid("11111111-1111-1111-1111-111111111111") },
-                    { new Guid("22222222-2222-2222-2222-222222222222"), "seed", "HERO_TREE_TRANSFORMATION", "", new DateTime(2025, 10, 28, 19, 52, 10, 880, DateTimeKind.Utc).AddTicks(5765), new Guid("22222222-2222-2222-2222-222222222222") }
+                    { new Guid("11111111-1111-1111-1111-111111111111"), "seed", "HERO_TREE_TRANSFORMATION", "", new DateTime(2025, 10, 28, 20, 33, 35, 269, DateTimeKind.Utc).AddTicks(7695), new Guid("11111111-1111-1111-1111-111111111111") },
+                    { new Guid("22222222-2222-2222-2222-222222222222"), "seed", "HERO_TREE_TRANSFORMATION", "", new DateTime(2025, 10, 28, 20, 33, 35, 269, DateTimeKind.Utc).AddTicks(7697), new Guid("22222222-2222-2222-2222-222222222222") }
                 });
+
+            migrationBuilder.InsertData(
+                table: "StoryDefinitionTranslations",
+                columns: new[] { "Id", "LanguageCode", "StoryDefinitionId", "Title" },
+                values: new object[] { new Guid("c8272ec0-c3a2-4e52-afc5-b83ae21276ce"), "ro-ro", new Guid("44444444-4444-4444-4444-444444444444"), "Puf-Puf și prietenul pierdut" });
 
             migrationBuilder.InsertData(
                 table: "StoryHeroUnlocks",
                 columns: new[] { "Id", "CreatedAt", "StoryHeroId", "StoryId", "UnlockOrder" },
                 values: new object[,]
                 {
-                    { new Guid("11f73a64-f0ab-42d6-8486-2a70b32414d3"), new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(5029), new Guid("22222222-2222-2222-2222-222222222200"), "mechanika-s1", 1 },
-                    { new Guid("39b0fb71-8507-441b-a8d8-3fbe1acd765e"), new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(5007), new Guid("11111111-1111-1111-1111-111111111100"), "lunaria-s1", 1 },
-                    { new Guid("4a2ff09d-da9c-4a5d-81a7-6bca8a1b168a"), new DateTime(2025, 10, 28, 19, 52, 10, 876, DateTimeKind.Utc).AddTicks(4980), new Guid("00000000-0000-0000-0000-000000000100"), "intro-pufpuf", 1 }
+                    { new Guid("067b9beb-5e26-448b-9880-d8f0ba91ee41"), new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(5995), new Guid("22222222-2222-2222-2222-222222222200"), "mechanika-s1", 1 },
+                    { new Guid("25f2eb14-535d-4675-8d5f-61fe75996ed1"), new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(5960), new Guid("11111111-1111-1111-1111-111111111100"), "lunaria-s1", 1 },
+                    { new Guid("a0901ab4-9326-451d-bda1-10145d40ad80"), new DateTime(2025, 10, 28, 20, 33, 35, 264, DateTimeKind.Utc).AddTicks(5928), new Guid("00000000-0000-0000-0000-000000000100"), "intro-pufpuf", 1 }
                 });
 
             migrationBuilder.InsertData(
@@ -1302,40 +1371,40 @@ namespace XooCreator.BA.Migrations
                 columns: new[] { "Id", "AnimalId", "Label", "LanguageCode" },
                 values: new object[,]
                 {
-                    { new Guid("0425f0e2-9bad-4a4e-8a34-34a721eb02b9"), new Guid("00000000-0000-0000-0000-000000000012"), "Capuchin Monkey", "en-us" },
-                    { new Guid("1063895f-7314-4517-b71b-b97321f7f2da"), new Guid("00000000-0000-0000-0000-00000000001e"), "Cow", "en-us" },
-                    { new Guid("20542fc0-e9e7-4760-89db-133d9b7eb520"), new Guid("00000000-0000-0000-0000-00000000001b"), "Gray Wolf", "en-us" },
-                    { new Guid("250704fc-7e5a-4ca8-88ca-56fdbacb9527"), new Guid("00000000-0000-0000-0000-000000000020"), "Horse", "en-us" },
-                    { new Guid("2c46496c-2a3a-443f-b13e-02d502a105db"), new Guid("00000000-0000-0000-0000-000000000008"), "Camel", "en-us" },
-                    { new Guid("44cf8a1d-43df-4006-b195-956f75ce8604"), new Guid("00000000-0000-0000-0000-000000000005"), "Fox", "en-us" },
-                    { new Guid("4d00c97a-d237-4bb0-9fe1-4a5ef6289021"), new Guid("00000000-0000-0000-0000-000000000010"), "Toucan", "en-us" },
-                    { new Guid("53b5704c-fb0c-4840-988d-86d359ead353"), new Guid("00000000-0000-0000-0000-000000000015"), "African Elephant", "en-us" },
-                    { new Guid("57ddc1c1-26b0-4f7e-844e-059bd32ce72b"), new Guid("00000000-0000-0000-0000-000000000004"), "Dog", "en-us" },
-                    { new Guid("61e70400-b7c9-46f2-8ff4-a2efe0547ce9"), new Guid("00000000-0000-0000-0000-000000000009"), "Deer", "en-us" },
-                    { new Guid("6e64329c-f683-4b8a-b1c0-bd31b2eb1481"), new Guid("00000000-0000-0000-0000-00000000000c"), "Elephant", "en-us" },
-                    { new Guid("765bf17d-5217-45dc-83c2-39a03277810a"), new Guid("00000000-0000-0000-0000-000000000013"), "Poison Dart Frog", "en-us" },
-                    { new Guid("77688dc2-af03-4dbf-82d8-5029890c6cb7"), new Guid("00000000-0000-0000-0000-000000000019"), "Bison", "en-us" },
-                    { new Guid("7c1013bd-bbaf-45ec-a305-9fae2a6ba0a7"), new Guid("00000000-0000-0000-0000-000000000001"), "Bunny", "en-us" },
-                    { new Guid("82b0255a-d9fd-4121-aa33-bf163f6dc782"), new Guid("00000000-0000-0000-0000-000000000007"), "Monkey", "en-us" },
-                    { new Guid("859a9c76-6e42-4fd7-95dc-30cf5d50dc5f"), new Guid("00000000-0000-0000-0000-00000000000d"), "Ostrich", "en-us" },
-                    { new Guid("899f669d-7e6e-4bb1-b616-8ce132f5314c"), new Guid("00000000-0000-0000-0000-00000000000a"), "Duck", "en-us" },
-                    { new Guid("89fe2990-f5fb-45d7-939d-0f027e243b3d"), new Guid("00000000-0000-0000-0000-000000000018"), "Rhinoceros", "en-us" },
-                    { new Guid("8a19d6c4-0ca9-4661-b5c3-69a1b7d84ddd"), new Guid("00000000-0000-0000-0000-00000000001f"), "Sheep", "en-us" },
-                    { new Guid("9cd43a49-b849-4521-9b75-ce3c4e18bf14"), new Guid("00000000-0000-0000-0000-000000000021"), "Chicken", "en-us" },
-                    { new Guid("b2a44151-83b1-4cdd-a869-f518e8eb7e58"), new Guid("00000000-0000-0000-0000-00000000001d"), "Steppe Eagle", "en-us" },
-                    { new Guid("b8351e21-821a-419e-b543-93317e6c7395"), new Guid("00000000-0000-0000-0000-000000000002"), "Hippo", "en-us" },
-                    { new Guid("c1d48763-9381-4c7e-9568-6702cad08349"), new Guid("00000000-0000-0000-0000-000000000014"), "Lion", "en-us" },
-                    { new Guid("c52ab9f8-5e45-4e0e-98a9-71b3e087e57e"), new Guid("00000000-0000-0000-0000-000000000017"), "Zebra", "en-us" },
-                    { new Guid("cdf84e73-5fa1-4b71-a65e-7babe1c414f8"), new Guid("00000000-0000-0000-0000-000000000022"), "Pig", "en-us" },
-                    { new Guid("e1505df9-ecba-49d0-b409-84a7c9929dc5"), new Guid("00000000-0000-0000-0000-000000000016"), "Giraffe", "en-us" },
-                    { new Guid("e1a1a505-e253-46be-8977-92d133da9cbc"), new Guid("00000000-0000-0000-0000-00000000001c"), "Przewalski's Horse", "en-us" },
-                    { new Guid("e2b61345-1e6d-439c-a30b-4cf55ad46c10"), new Guid("00000000-0000-0000-0000-00000000000f"), "Jaguar", "en-us" },
-                    { new Guid("eaf8a2ba-594c-4e7d-8aed-0d48e3b6b09a"), new Guid("00000000-0000-0000-0000-00000000000e"), "Parrot", "en-us" },
-                    { new Guid("ebfc285e-23f1-4731-bf63-b6974c09d015"), new Guid("00000000-0000-0000-0000-000000000011"), "Anaconda", "en-us" },
-                    { new Guid("f05760e2-8e0e-40ac-9296-79929097ee77"), new Guid("00000000-0000-0000-0000-00000000001a"), "Saiga Antelope", "en-us" },
-                    { new Guid("f331b175-f7f7-418e-97a8-6b0bc26b5309"), new Guid("00000000-0000-0000-0000-000000000003"), "Giraffe", "en-us" },
-                    { new Guid("fa68507e-f080-440f-9f01-90b2d84591e7"), new Guid("00000000-0000-0000-0000-000000000006"), "Cat", "en-us" },
-                    { new Guid("ffa1393b-dbb5-497e-b69d-ab73e32fb54f"), new Guid("00000000-0000-0000-0000-00000000000b"), "Eagle", "en-us" }
+                    { new Guid("03d98516-ab68-4df9-add0-4995950c2f9e"), new Guid("00000000-0000-0000-0000-00000000000f"), "Jaguar", "en-us" },
+                    { new Guid("14319b97-9be8-47b6-92ad-a9179af0b0da"), new Guid("00000000-0000-0000-0000-000000000022"), "Pig", "en-us" },
+                    { new Guid("167fbd79-3fbd-475a-afcf-9496693d4247"), new Guid("00000000-0000-0000-0000-000000000013"), "Poison Dart Frog", "en-us" },
+                    { new Guid("1b4aa4f1-33b2-4ce5-a674-9239a55e04ec"), new Guid("00000000-0000-0000-0000-000000000001"), "Bunny", "en-us" },
+                    { new Guid("1b9dc3ae-8010-43fa-8935-44b6f04099c8"), new Guid("00000000-0000-0000-0000-000000000014"), "Lion", "en-us" },
+                    { new Guid("1fad1495-3bb1-482a-b574-8d4fbf76682c"), new Guid("00000000-0000-0000-0000-000000000008"), "Camel", "en-us" },
+                    { new Guid("214314d0-6004-4d04-9d8f-72bca3ce843f"), new Guid("00000000-0000-0000-0000-000000000020"), "Horse", "en-us" },
+                    { new Guid("21c449ad-da70-4f84-a49a-c0f5bca1145c"), new Guid("00000000-0000-0000-0000-00000000001a"), "Saiga Antelope", "en-us" },
+                    { new Guid("24472ef2-140f-4fab-a775-a7cd29373168"), new Guid("00000000-0000-0000-0000-000000000019"), "Bison", "en-us" },
+                    { new Guid("31b114e4-c7e0-4290-8342-d36590d988e9"), new Guid("00000000-0000-0000-0000-00000000001d"), "Steppe Eagle", "en-us" },
+                    { new Guid("346e7c7f-eb35-44f1-994c-4267ce72b4e5"), new Guid("00000000-0000-0000-0000-00000000001f"), "Sheep", "en-us" },
+                    { new Guid("39cb72a7-b5a9-4184-83cc-aae87d2a0c94"), new Guid("00000000-0000-0000-0000-00000000000c"), "Elephant", "en-us" },
+                    { new Guid("3baefaf4-e3a8-4dfd-9260-0d77ff359e17"), new Guid("00000000-0000-0000-0000-000000000015"), "African Elephant", "en-us" },
+                    { new Guid("4e51fd1e-1f8c-435a-8ec6-d7bd2d5e827e"), new Guid("00000000-0000-0000-0000-000000000009"), "Deer", "en-us" },
+                    { new Guid("546aa833-7ecb-40fb-b4c0-7d96f9dd9bb0"), new Guid("00000000-0000-0000-0000-000000000012"), "Capuchin Monkey", "en-us" },
+                    { new Guid("65b6756b-6101-4b22-94ef-f6d1bae6ed2e"), new Guid("00000000-0000-0000-0000-000000000003"), "Giraffe", "en-us" },
+                    { new Guid("683a1417-8e3c-4fe0-a2d0-202be3e40358"), new Guid("00000000-0000-0000-0000-000000000016"), "Giraffe", "en-us" },
+                    { new Guid("6b53d464-75eb-4603-96a1-42b7fd8e39b3"), new Guid("00000000-0000-0000-0000-000000000017"), "Zebra", "en-us" },
+                    { new Guid("859a2167-8eee-4f4e-8479-c25fdcae1615"), new Guid("00000000-0000-0000-0000-000000000006"), "Cat", "en-us" },
+                    { new Guid("8a2ba7ce-fe9e-406c-9623-f6532539970c"), new Guid("00000000-0000-0000-0000-000000000005"), "Fox", "en-us" },
+                    { new Guid("96afc08f-531c-47e8-a51a-5efcfc379166"), new Guid("00000000-0000-0000-0000-000000000011"), "Anaconda", "en-us" },
+                    { new Guid("981645e4-66a3-453e-82ce-a8171daf47c4"), new Guid("00000000-0000-0000-0000-000000000007"), "Monkey", "en-us" },
+                    { new Guid("9dc8b002-9d23-4b92-95f4-63eb4e6000f0"), new Guid("00000000-0000-0000-0000-000000000004"), "Dog", "en-us" },
+                    { new Guid("a0a6be5c-b156-4756-b876-b657a317e8e4"), new Guid("00000000-0000-0000-0000-00000000000d"), "Ostrich", "en-us" },
+                    { new Guid("a3870eab-f382-4286-8936-c76db8f3c403"), new Guid("00000000-0000-0000-0000-00000000001e"), "Cow", "en-us" },
+                    { new Guid("a6cee813-2f1a-4b01-94a2-595ab91e0da9"), new Guid("00000000-0000-0000-0000-00000000001c"), "Przewalski's Horse", "en-us" },
+                    { new Guid("aef8b654-8d8b-4bba-88a0-fc7d04a0e14d"), new Guid("00000000-0000-0000-0000-00000000000e"), "Parrot", "en-us" },
+                    { new Guid("c3d11c75-56af-45c8-bfd1-0ead70b33645"), new Guid("00000000-0000-0000-0000-00000000001b"), "Gray Wolf", "en-us" },
+                    { new Guid("c795a199-a8a1-4375-a871-43d885ed9cd6"), new Guid("00000000-0000-0000-0000-00000000000a"), "Duck", "en-us" },
+                    { new Guid("d57863aa-b113-48a7-8bf7-7bb41f628de6"), new Guid("00000000-0000-0000-0000-000000000021"), "Chicken", "en-us" },
+                    { new Guid("d62c1ad8-be15-4e19-b213-dc2e1a95b5dd"), new Guid("00000000-0000-0000-0000-000000000002"), "Hippo", "en-us" },
+                    { new Guid("e6a2a524-b8e5-4065-ae61-a2ade60c33ef"), new Guid("00000000-0000-0000-0000-000000000018"), "Rhinoceros", "en-us" },
+                    { new Guid("f9483712-79fe-4c64-90e0-02d641d2bca1"), new Guid("00000000-0000-0000-0000-000000000010"), "Toucan", "en-us" },
+                    { new Guid("fd388c52-618d-4df9-b10f-08b288080591"), new Guid("00000000-0000-0000-0000-00000000000b"), "Eagle", "en-us" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -1575,6 +1644,28 @@ namespace XooCreator.BA.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_UserCreatedStories_StoryDefinitionId",
+                table: "UserCreatedStories",
+                column: "StoryDefinitionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserCreatedStories_UserId_StoryDefinitionId",
+                table: "UserCreatedStories",
+                columns: new[] { "UserId", "StoryDefinitionId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserOwnedStories_StoryDefinitionId",
+                table: "UserOwnedStories",
+                column: "StoryDefinitionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserOwnedStories_UserId_StoryDefinitionId",
+                table: "UserOwnedStories",
+                columns: new[] { "UserId", "StoryDefinitionId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserStoryReadProgress_UserId_StoryId_TileId",
                 table: "UserStoryReadProgress",
                 columns: new[] { "UserId", "StoryId", "TileId" },
@@ -1667,6 +1758,12 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.DropTable(
                 name: "UserBestiary");
+
+            migrationBuilder.DropTable(
+                name: "UserCreatedStories");
+
+            migrationBuilder.DropTable(
+                name: "UserOwnedStories");
 
             migrationBuilder.DropTable(
                 name: "UserStoryReadProgress");

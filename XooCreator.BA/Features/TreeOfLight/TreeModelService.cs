@@ -1,5 +1,6 @@
 using System.Text.Json;
 using XooCreator.BA.Data;
+using XooCreator.BA.Data.SeedData.DTOs;
 using XooCreator.BA.Features.TreeOfHeroes;
 using XooCreator.BA.Infrastructure;
 
