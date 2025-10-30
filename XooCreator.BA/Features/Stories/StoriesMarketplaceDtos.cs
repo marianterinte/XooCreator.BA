@@ -11,6 +11,7 @@ public record StoryDetailsDto
     public required string Title { get; init; }
     public string? CoverImageUrl { get; init; }
     public Guid? CreatedBy { get; init; }
+    public string? CreatedByName { get; init; }
     public string? Summary { get; init; }
     public int PriceInCredits { get; init; }
     public string Region { get; init; } = string.Empty;

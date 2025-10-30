@@ -341,6 +341,14 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
     {
         var translation = smi.Story.Translations.FirstOrDefault(t => t.LanguageCode == locale);
         var title = translation?.Title ?? smi.Story.Title;
+        string? authorName = null;
+        if (smi.Story.CreatedBy.HasValue)
+        {
+            authorName = _context.Set<AlchimaliaUser>()
+                .Where(u => u.Id == smi.Story.CreatedBy.Value)
+                .Select(u => u.Name)
+                .FirstOrDefault();
+        }
 
         return new StoryDetailsDto
         {
@@ -348,6 +356,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             Title = title,
             CoverImageUrl = smi.Story.CoverImageUrl,
             CreatedBy = smi.Story.CreatedBy,
+            CreatedByName = authorName,
             Summary = GenerateDetailedSummary(smi.Story, locale),
             PriceInCredits = smi.PriceInCredits,
             Region = smi.Region,
