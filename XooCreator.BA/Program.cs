@@ -16,6 +16,9 @@ using XooCreator.BA.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authorization;
+using XooCreator.BA.Features.Stories.Repositories;
+using XooCreator.BA.Features.Stories.Services;
+using XooCreator.BA.Features.Payment.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

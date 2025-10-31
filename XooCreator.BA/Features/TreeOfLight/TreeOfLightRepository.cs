@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using XooCreator.BA.Data;
-using XooCreator.BA.Features.Stories;
+using XooCreator.BA.Features.Stories.DTOs;
 
 namespace XooCreator.BA.Features.TreeOfLight;
 
@@ -11,7 +11,7 @@ public interface ITreeOfLightRepository
     Task<List<TreeProgressDto>> GetTreeProgressAsync(Guid userId, string configId);
     Task<List<StoryProgressDto>> GetStoryProgressAsync(Guid userId, string configId);
 
-    Task<bool> CompleteStoryAsync(Guid userId, CompleteStoryRequest request, Stories.StoryContentDto? story, string configId);
+    Task<bool> CompleteStoryAsync(Guid userId, CompleteStoryRequest request, StoryContentDto? story, string configId);
     Task<bool> UnlockRegionAsync(Guid userId, string regionId, string configId);
     Task ResetUserProgressAsync(Guid userId);
     
@@ -70,7 +70,7 @@ public class TreeOfLightRepository : ITreeOfLightRepository
 
 
 
-    public async Task<bool> CompleteStoryAsync(Guid userId, CompleteStoryRequest request, Stories.StoryContentDto? story, string configId)
+    public async Task<bool> CompleteStoryAsync(Guid userId, CompleteStoryRequest request, StoryContentDto? story, string configId)
     {
         try
         {

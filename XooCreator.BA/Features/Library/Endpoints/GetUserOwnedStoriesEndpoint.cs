@@ -6,6 +6,7 @@ using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Data;
 using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data.Enums;
+using XooCreator.BA.Features.Library.DTOs;
 
 namespace XooCreator.BA.Features.Library.Endpoints;
 
@@ -58,23 +59,4 @@ public class GetUserOwnedStoriesEndpoint
 
         return TypedResults.Ok(response);
     }
-}
-
-public class GetUserOwnedStoriesResponse
-{
-    public List<OwnedStoryDto> Stories { get; set; } = new();
-    public int TotalCount { get; set; }
-}
-
-public class OwnedStoryDto
-{
-    public Guid Id { get; set; }
-    public string StoryId { get; set; } = string.Empty;
-    public string Title { get; set; } = string.Empty;
-    public string? CoverImageUrl { get; set; }
-    public string Category { get; set; } = string.Empty;
-    public StoryCategory StoryCategory { get; set; }
-    public StoryStatus Status { get; set; }
-    public DateTime PurchasedAt { get; set; }
-    public decimal PurchasePrice { get; set; }
 }

@@ -3,9 +3,10 @@ using System.Text.Json;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Data.SeedData.DTOs;
+using XooCreator.BA.Features.Stories.DTOs;
 using XooCreator.BA.Features.TreeOfLight;
 
-namespace XooCreator.BA.Features.Stories;
+namespace XooCreator.BA.Features.Stories.Repositories;
 
 public interface IStoriesRepository
 {
@@ -119,18 +120,11 @@ public class StoriesRepository : IStoriesRepository
                 .Select(s => s.StoryId)
                 .ToListAsync();
             
-            Console.WriteLine($"[SEEDING] Checking main stories: {string.Join(", ", mainStoryIds)}");
-            Console.WriteLine($"[SEEDING] Existing main stories: {string.Join(", ", existingMainStories)}");
-            Console.WriteLine($"[SEEDING] Found {existingMainStories.Count}/{mainStoryIds.Length} main stories");
-            
             if (existingMainStories.Count == mainStoryIds.Length) 
             {
-                Console.WriteLine("[SEEDING] All main stories already exist, skipping main story seeding");
                 return;
             }
             
-            Console.WriteLine("[SEEDING] Loading main stories from JSON files...");
-
             var stories = await LoadStoriesFromJsonAsync(LanguageCode.RoRo.ToFolder());
             foreach (var story in stories)
             {
@@ -221,7 +215,6 @@ public class StoriesRepository : IStoriesRepository
             throw;
         }
     }
-
 
     public async Task SeedIndependentStoriesAsync()
     {
@@ -346,10 +339,8 @@ public class StoriesRepository : IStoriesRepository
         }
     }
 
-
     private static async Task<List<StoryDefinition>> LoadStoriesFromJsonAsync(string baseLocale = "ro-ro")
     {
-
         var baseDir = AppDomain.CurrentDomain.BaseDirectory;
         var localeLc = (baseLocale ?? "ro-ro").ToLowerInvariant();
         var candidates = new[]
@@ -530,10 +521,9 @@ public class StoriesRepository : IStoriesRepository
             CoverImageUrl = seedData.CoverImageUrl,
             Category = seedData.Category,
             SortOrder = seedData.SortOrder,
-            // Set default values for new fields
             StoryCategory = DetermineStoryCategory(seedData.StoryId, seedData.Category),
-            Status = StoryStatus.Published, // All seeded stories are published by default
-            CreatedBy = null, // System-created stories don't have a specific creator
+            Status = StoryStatus.Published,
+            CreatedBy = null,
             UpdatedBy = null
         };
 
@@ -665,7 +655,6 @@ public class StoriesRepository : IStoriesRepository
                 }
                 catch (Exception ex)
                 {
-
                     throw ex;
                 }
             }
@@ -784,26 +773,18 @@ public class StoriesRepository : IStoriesRepository
         };
     }
 
-    /// <summary>
-    /// Determines the story category based on story ID and legacy category
-    /// </summary>
     private static StoryCategory DetermineStoryCategory(string storyId, string legacyCategory)
     {
-        // Check if it's an independent story based on the story ID pattern
         if (storyId.StartsWith("learn-to-read", StringComparison.OrdinalIgnoreCase))
         {
             return StoryCategory.Indie;
         }
-
-        // Check if it's in the independent stories folder (this would be determined by the seeding context)
-        // For now, we'll use the legacy category to determine the type
-        // Independent stories typically have categories like "terra" but are standalone
         if (legacyCategory.Equals("independent", StringComparison.OrdinalIgnoreCase))
         {
             return StoryCategory.Indie;
         }
-
-        // All other stories are part of the Alchimalia epic
         return StoryCategory.AlchimaliaEpic;
     }
 }
+
+

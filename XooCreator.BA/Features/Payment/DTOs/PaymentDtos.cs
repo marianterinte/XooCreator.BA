@@ -1,4 +1,4 @@
-namespace XooCreator.BA.Features.Payment;
+namespace XooCreator.BA.Features.Payment.DTOs;
 
 public class BuyMeCoffeeWebhookRequest
 {
@@ -54,3 +54,5 @@ public class PaymentStatusResponse
     public decimal Amount { get; set; }
     public DateTime CreatedAt { get; set; }
 }
+
+

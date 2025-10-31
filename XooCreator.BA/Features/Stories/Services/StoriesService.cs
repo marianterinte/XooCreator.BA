@@ -1,4 +1,7 @@
-namespace XooCreator.BA.Features.Stories;
+using XooCreator.BA.Features.Stories.DTOs;
+using XooCreator.BA.Features.Stories.Repositories;
+
+namespace XooCreator.BA.Features.Stories.Services;
 
 public interface IStoriesService
 {
@@ -101,7 +104,6 @@ public class StoriesService : IStoriesService
             }).ToList()
         };
     }
-
 }
 
 public class EditableStoryDto
@@ -137,4 +139,5 @@ public class EditableTokenDto
     public string Value { get; set; } = string.Empty;
     public int Quantity { get; set; }
 }
+
 

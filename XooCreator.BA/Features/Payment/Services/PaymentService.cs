@@ -4,8 +4,9 @@ using XooCreator.BA.Infrastructure;
 using System.Text;
 using System.Text.Json;
 using System.Security.Cryptography;
+using XooCreator.BA.Features.Payment.DTOs;
 
-namespace XooCreator.BA.Features.Payment;
+namespace XooCreator.BA.Features.Payment.Services;
 
 public interface IPaymentService
 {
@@ -33,14 +34,12 @@ public class PaymentService : IPaymentService
         {
             _logger.LogInformation("Processing Buy Me a Coffee webhook: {Type} - {Id}", request.Type, request.Id);
 
-            // Verify webhook signature
             if (!await VerifyWebhookSignatureAsync(JsonSerializer.Serialize(request), request.Id))
             {
                 _logger.LogWarning("Invalid webhook signature for payment {Id}", request.Id);
                 return new PaymentResponse { Success = false, Message = "Invalid signature" };
             }
 
-            // Process different webhook types
             switch (request.Type.ToLower())
             {
                 case "wishlist_payment_created":
@@ -66,17 +65,9 @@ public class PaymentService : IPaymentService
     private async Task<PaymentResponse> ProcessWishlistPaymentAsync(BuyMeCoffeeWebhookRequest request)
     {
         var payment = request.Data;
-        
-        // Log payment details
         _logger.LogInformation("Wishlist payment received: {Amount} {Currency} from {Name} ({Email})", 
             payment.Amount, payment.Currency, payment.Name, payment.Email);
-
-        // Process wishlist payment
         var creditsToAdd = CalculateCreditsFromAmount(payment.Amount);
-        
-        // You could add a method to add credits to user's wallet here
-        // await AddCreditsToUserAsync(payment.Email, creditsToAdd);
-
         return new PaymentResponse 
         { 
             Success = true, 
@@ -88,13 +79,8 @@ public class PaymentService : IPaymentService
     private async Task<PaymentResponse> ProcessWishlistRefundAsync(BuyMeCoffeeWebhookRequest request)
     {
         var refund = request.Data;
-        
         _logger.LogInformation("Wishlist payment refunded: {Amount} {Currency} from {Name} ({Email})", 
             refund.Amount, refund.Currency, refund.Name, refund.Email);
-
-        // Process refund logic here
-        // This could remove credits or update user status
-
         return new PaymentResponse 
         { 
             Success = true, 
@@ -106,13 +92,8 @@ public class PaymentService : IPaymentService
     private async Task<PaymentResponse> ProcessMembershipStartedAsync(BuyMeCoffeeWebhookRequest request)
     {
         var membership = request.Data;
-        
         _logger.LogInformation("Membership started: {Amount} {Currency} from {Name} ({Email})", 
             membership.Amount, membership.Currency, membership.Name, membership.Email);
-
-        // Process membership start logic here
-        // This could give premium access or special benefits
-
         return new PaymentResponse 
         { 
             Success = true, 
@@ -124,12 +105,8 @@ public class PaymentService : IPaymentService
     private async Task<PaymentResponse> ProcessMembershipUpdatedAsync(BuyMeCoffeeWebhookRequest request)
     {
         var membership = request.Data;
-        
         _logger.LogInformation("Membership updated: {Amount} {Currency} from {Name} ({Email})", 
             membership.Amount, membership.Currency, membership.Name, membership.Email);
-
-        // Process membership update logic here
-
         return new PaymentResponse 
         { 
             Success = true, 
@@ -140,15 +117,11 @@ public class PaymentService : IPaymentService
 
     private int CalculateCreditsFromAmount(decimal amount)
     {
-        // Convert EUR to credits (example: 1 EUR = 10 credits)
         return (int)(amount * 10);
     }
 
     public async Task<PaymentStatusResponse> GetPaymentStatusAsync(string paymentId)
     {
-        // In a real implementation, you would query your database
-        // or call Buy Me a Coffee API to get payment status
-        
         return new PaymentStatusResponse
         {
             Success = true,
@@ -164,10 +137,9 @@ public class PaymentService : IPaymentService
         if (string.IsNullOrEmpty(_webhookSecret))
         {
             _logger.LogWarning("Webhook secret not configured, skipping signature verification");
-            return true; // In development, you might want to skip verification
+            return true;
         }
 
-        // Implement HMAC-SHA256 signature verification
         using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(_webhookSecret));
         var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(payload));
         var computedSignature = Convert.ToHexString(computedHash).ToLower();
@@ -175,3 +147,5 @@ public class PaymentService : IPaymentService
         return computedSignature == signature.ToLower();
     }
 }
+
+

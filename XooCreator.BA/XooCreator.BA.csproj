@@ -23,14 +23,20 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include=".github\workflows\" />
-    <Folder Include="Features\Builder\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="Data\SeedData\**\*.json" CopyToOutputDirectory="PreserveNewest" />
     <None Include="Data\SeedData\**\*.csv" CopyToOutputDirectory="PreserveNewest" />
     <None Include="Resources\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove=".github\**" />
+    <Compile Remove="Features\Builder\**" />
+    <Content Remove=".github\**" />
+    <Content Remove="Features\Builder\**" />
+    <EmbeddedResource Remove=".github\**" />
+    <EmbeddedResource Remove="Features\Builder\**" />
+    <None Remove=".github\**" />
+    <None Remove="Features\Builder\**" />
   </ItemGroup>
 
   <ItemGroup>

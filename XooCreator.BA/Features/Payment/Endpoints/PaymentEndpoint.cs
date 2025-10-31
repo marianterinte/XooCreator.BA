@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using XooCreator.BA.Infrastructure.Endpoints;
+using XooCreator.BA.Features.Payment.DTOs;
+using XooCreator.BA.Features.Payment.Services;
 
-namespace XooCreator.BA.Features.Payment;
+namespace XooCreator.BA.Features.Payment.Endpoints;
 
 [Endpoint]
 public class PaymentEndpoint
@@ -24,26 +26,14 @@ public class PaymentEndpoint
         try
         {
             ep._logger.LogInformation("Received Buy Me a Coffee webhook: {Type}", request.Type);
-            
             var result = await ep._paymentService.ProcessWebhookAsync(request);
-            
-            if (result.Success)
-            {
-                return TypedResults.Ok(result);
-            }
-            else
-            {
-                return TypedResults.BadRequest(result);
-            }
+            if (result.Success) return TypedResults.Ok(result);
+            return TypedResults.BadRequest(result);
         }
         catch (Exception ex)
         {
             ep._logger.LogError(ex, "Error processing Buy Me a Coffee webhook");
-            return TypedResults.BadRequest(new PaymentResponse 
-            { 
-                Success = false, 
-                Message = "Internal server error" 
-            });
+            return TypedResults.BadRequest(new PaymentResponse { Success = false, Message = "Internal server error" });
         }
     }
 
@@ -71,26 +61,20 @@ public class PaymentEndpoint
     {
         try
         {
-            // This endpoint would create a payment intent or redirect to Buy Me a Coffee
-            // For now, we'll return a success response with instructions
-            
             var response = new PaymentResponse
             {
                 Success = true,
                 Message = $"Please visit https://buymeacoffee.com/marian.terinte?amount={request.Amount} to complete your payment of {request.Amount} {request.Currency}",
                 PaymentId = Guid.NewGuid().ToString()
             };
-
             return TypedResults.Ok(response);
         }
         catch (Exception ex)
         {
             ep._logger.LogError(ex, "Error creating payment");
-            return TypedResults.BadRequest(new PaymentResponse 
-            { 
-                Success = false, 
-                Message = "Failed to create payment" 
-            });
+            return TypedResults.BadRequest(new PaymentResponse { Success = false, Message = "Failed to create payment" });
         }
     }
 }
+
+

@@ -1,6 +1,6 @@
 using XooCreator.BA.Features.TreeOfLight;
 
-namespace XooCreator.BA.Features.Stories;
+namespace XooCreator.BA.Features.Stories.DTOs;
 
 public record StoryContentDto
 {
@@ -63,3 +63,4 @@ public record MarkTileAsReadResponse
     public bool Success { get; init; }
     public string? ErrorMessage { get; init; }
 }
+
