@@ -333,6 +333,11 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         var isPurchased = await _context.StoryPurchases
             .AnyAsync(sp => sp.UserId == userId && sp.StoryId == storyId);
 
+        // Check if user owns this story (UserOwnedStories)
+        var ownedRow = await _context.UserOwnedStories
+            .AnyAsync(uos => uos.UserId == userId && uos.StoryDefinitionId == marketplaceInfo.Story.Id);
+        var isOwned = isPurchased || ownedRow;
+
         // Get user's story progress
         var storyProgress = await _context.UserStoryReadProgress
             .Where(usp => usp.UserId == userId && usp.StoryId == storyId)
@@ -342,10 +347,10 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         var progressPercentage = totalTiles > 0 ? (int)((double)storyProgress / totalTiles * 100) : 0;
         var isCompleted = progressPercentage >= 100;
 
-        return MapToStoryDetailsDto(marketplaceInfo, locale, isPurchased, isCompleted, progressPercentage);
+        return MapToStoryDetailsDto(marketplaceInfo, locale, isPurchased, isOwned, isCompleted, progressPercentage);
     }
 
-    private StoryDetailsDto MapToStoryDetailsDto(StoryMarketplaceInfo smi, string locale, bool isPurchased, bool isCompleted, int progressPercentage)
+    private StoryDetailsDto MapToStoryDetailsDto(StoryMarketplaceInfo smi, string locale, bool isPurchased, bool isOwned, bool isCompleted, int progressPercentage)
     {
         var translation = smi.Story.Translations.FirstOrDefault(t => t.LanguageCode == locale);
         var title = translation?.Title ?? smi.Story.Title;
@@ -376,6 +381,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             IsNew = smi.IsNew,
             EstimatedReadingTime = smi.EstimatedReadingTime,
             IsPurchased = isPurchased,
+            IsOwned = isOwned,
             IsCompleted = isCompleted,
             ProgressPercentage = progressPercentage,
             CreatedAt = smi.CreatedAt,

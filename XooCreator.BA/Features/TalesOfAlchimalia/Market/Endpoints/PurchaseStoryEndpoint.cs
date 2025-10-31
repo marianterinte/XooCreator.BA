@@ -3,8 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure;
+using XooCreator.BA.Features.Stories;
 
-namespace XooCreator.BA.Features.Stories.Endpoints;
+namespace XooCreator.BA.Features.TalesOfAlchimalia.Market.Endpoints;
 
 [Endpoint]
 public class PurchaseStoryEndpoint
@@ -18,7 +19,7 @@ public class PurchaseStoryEndpoint
         _userContext = userContext;
     }
 
-    [Route("/api/{locale}/stories/marketplace/purchase")]
+    [Route("/api/{locale}/tales-of-alchimalia/market/purchase")]
     [Authorize]
     public static async Task<Results<Ok<PurchaseStoryResponse>, BadRequest<PurchaseStoryResponse>, UnauthorizedHttpResult>> HandlePurchaseStory(
         [FromRoute] string locale,
@@ -40,3 +41,5 @@ public class PurchaseStoryEndpoint
         }
     }
 }
+
+

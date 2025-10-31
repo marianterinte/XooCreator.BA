@@ -3,8 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure;
+using XooCreator.BA.Features.Stories;
 
-namespace XooCreator.BA.Features.Stories.Endpoints;
+namespace XooCreator.BA.Features.TalesOfAlchimalia.Market.Endpoints;
 
 [Endpoint]
 public class GetMarketplaceStoriesEndpoint
@@ -18,7 +19,7 @@ public class GetMarketplaceStoriesEndpoint
         _userContext = userContext;
     }
 
-    [Route("/api/{locale}/stories/marketplace")]
+    [Route("/api/{locale}/tales-of-alchimalia/market")]
     [Authorize]
     public static async Task<Ok<GetMarketplaceStoriesResponse>> HandleGetMarketplace(
         [FromRoute] string locale,
@@ -57,3 +58,5 @@ public class GetMarketplaceStoriesEndpoint
         return TypedResults.Ok(result);
     }
 }
+
+

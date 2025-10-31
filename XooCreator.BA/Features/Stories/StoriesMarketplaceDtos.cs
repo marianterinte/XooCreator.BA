@@ -23,6 +23,7 @@ public record StoryDetailsDto
     public bool IsNew { get; init; }
     public int EstimatedReadingTime { get; init; }
     public bool IsPurchased { get; init; }
+    public bool IsOwned { get; init; }
     public bool IsCompleted { get; init; }
     public int ProgressPercentage { get; init; }
     public DateTime CreatedAt { get; init; }

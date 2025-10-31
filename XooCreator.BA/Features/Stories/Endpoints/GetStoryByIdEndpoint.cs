@@ -15,7 +15,7 @@ public class GetStoryByIdEndpoint
     {
         _storiesService = storiesService;
         _userContext = userContext;
-    }
+    }   
 
     [Route("/api/{locale}/stories/{storyId}")] // GET /api/{locale}/stories/{storyId}
     [Authorize]

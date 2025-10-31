@@ -5,7 +5,7 @@ using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Features.Stories;
 
-namespace XooCreator.BA.Features.Stories.Endpoints;
+namespace XooCreator.BA.Features.TalesOfAlchimalia.Market.Endpoints;
 
 [Endpoint]
 public class GetStoryDetailsEndpoint
@@ -19,7 +19,7 @@ public class GetStoryDetailsEndpoint
         _userContext = userContext;
     }
 
-    [Route("/api/{locale}/stories/marketplace/details/{storyId}")]
+    [Route("/api/{locale}/tales-of-alchimalia/market/details/{storyId}")]
     [Authorize]
     public static async Task<Results<Ok<StoryDetailsDto>, NotFound, UnauthorizedHttpResult>> HandleGet(
         [FromRoute] string storyId,
@@ -37,3 +37,5 @@ public class GetStoryDetailsEndpoint
         return TypedResults.Ok(result);
     }
 }
+
+
