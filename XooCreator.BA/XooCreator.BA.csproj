@@ -47,11 +47,10 @@
     <Content Remove="Data\SeedData\Stories\i18n\en-us\learn-to-read-s1.json" />
     <Content Remove="Data\SeedData\Stories\i18n\hu-hu\learn-to-read-s1.json" />
     <Content Remove="Data\SeedData\Stories\i18n\ro-ro\learn-to-read-s1.json" />
-    <Content Remove="Data\SeedData\Stories\independent\i18n\en-us\learn-math-s1.json" />
-    <Content Remove="Data\SeedData\Stories\independent\i18n\en-us\learn-to-read-s1.json" />
-    <Content Remove="Data\SeedData\Stories\independent\i18n\hu-hu\learn-math-s1.json" />
-    <Content Remove="Data\SeedData\Stories\independent\i18n\hu-hu\learn-to-read-s1.json" />
-    <Content Remove="Data\SeedData\Stories\independent\i18n\ro-ro\learn-math-s1.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Data\SeedData\Stories\independent\" />
   </ItemGroup>
 
 </Project>
