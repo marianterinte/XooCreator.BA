@@ -1,9 +1,9 @@
 namespace XooCreator.BA.Data.Enums;
 
 /// <summary>
-/// Represents the category of a story
+/// Represents the type of a story
 /// </summary>
-public enum StoryCategory
+public enum StoryType
 {
     /// <summary>
     /// Story that is part of the main Alchimalia epic

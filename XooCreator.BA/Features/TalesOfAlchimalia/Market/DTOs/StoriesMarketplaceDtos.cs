@@ -25,8 +25,8 @@ public record StoryDetailsDto
     public int ProgressPercentage { get; init; }
     public DateTime CreatedAt { get; init; }
     public List<string> UnlockedStoryHeroes { get; init; } = new();
-    public string Category { get; init; } = string.Empty;
-    public string StoryCategory { get; init; } = string.Empty;
+    public string? StoryTopic { get; init; }
+    public string StoryType { get; init; } = string.Empty;
     public string Status { get; init; } = string.Empty;
     public int SortOrder { get; init; }
     public bool IsActive { get; init; }
@@ -45,8 +45,8 @@ public record StoryMarketplaceItemDto
     public string AgeRating { get; init; } = string.Empty;
     public List<string> Characters { get; init; } = new();
     public DateTime CreatedAt { get; init; }
-    public string Category { get; init; } = string.Empty;
-    public string StoryCategory { get; init; } = string.Empty;
+    public string? StoryTopic { get; init; }
+    public string StoryType { get; init; } = string.Empty;
     public string Status { get; init; } = string.Empty;
 }
 

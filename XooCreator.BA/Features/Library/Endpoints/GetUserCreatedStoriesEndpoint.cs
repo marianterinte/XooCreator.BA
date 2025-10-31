@@ -43,8 +43,8 @@ public class GetUserCreatedStoriesEndpoint
                     .Select(t => t.Title)
                     .FirstOrDefault() ?? ucs.StoryDefinition.Title,
                 CoverImageUrl = ucs.StoryDefinition.CoverImageUrl,
-                Category = ucs.StoryDefinition.Category,
-                StoryCategory = ucs.StoryDefinition.StoryCategory,
+                StoryTopic = ucs.StoryDefinition.StoryTopic,
+                StoryType = ucs.StoryDefinition.StoryType,
                 Status = ucs.StoryDefinition.Status,
                 CreatedAt = ucs.CreatedAt,
                 PublishedAt = ucs.PublishedAt,

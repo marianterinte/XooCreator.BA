@@ -14,8 +14,8 @@ public class OwnedStoryDto
     public string StoryId { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
     public string? CoverImageUrl { get; set; }
-    public string Category { get; set; } = string.Empty;
-    public StoryCategory StoryCategory { get; set; }
+    public string? StoryTopic { get; set; }
+    public StoryType StoryType { get; set; }
     public StoryStatus Status { get; set; }
     public DateTime PurchasedAt { get; set; }
     public decimal PurchasePrice { get; set; }
@@ -33,8 +33,8 @@ public class CreatedStoryDto
     public string StoryId { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
     public string? CoverImageUrl { get; set; }
-    public string Category { get; set; } = string.Empty;
-    public StoryCategory StoryCategory { get; set; }
+    public string? StoryTopic { get; set; }
+    public StoryType StoryType { get; set; }
     public StoryStatus Status { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? PublishedAt { get; set; }

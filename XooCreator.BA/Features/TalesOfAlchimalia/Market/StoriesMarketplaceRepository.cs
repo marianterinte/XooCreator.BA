@@ -37,11 +37,11 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
                 .ThenInclude(s => s.Translations)
             .Where(smi => smi.Story.IsActive);
 
-        // Filtre implicite: doar Published + StoryCategory = Indie (dacă nu s-au cerut categorii specifice)
+        // Filtre implicite: doar Published + StoryType = Indie (dacă nu s-au cerut categorii specifice)
         query = query.Where(smi => smi.Story.Status == StoryStatus.Published);
         if (!(request.Categories?.Any() ?? false))
         {
-            query = query.Where(smi => smi.Story.StoryCategory == StoryCategory.Indie);
+            query = query.Where(smi => smi.Story.StoryType == StoryType.Indie);
         }
         
             // Apply filters
@@ -69,7 +69,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
 
         if (request.Categories.Any())
         {
-            query = query.Where(smi => request.Categories.Contains(smi.Story.Category));
+            query = query.Where(smi => smi.Story.StoryTopic != null && request.Categories.Contains(smi.Story.StoryTopic));
         }
 
         if (request.Difficulties.Any())
@@ -301,7 +301,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
                     AgeRating = ageRating,
                     Difficulty = difficulty,
                     Characters = characters,
-                    Tags = new List<string> { story.Category },
+                    Tags = story.StoryTopic != null ? new List<string> { story.StoryTopic } : new List<string>(),
                     IsFeatured = story.StoryId.Contains("intro") || story.StoryId.Contains("loi"),
                     IsNew = false,
                     EstimatedReadingTime = CalculateReadingTime(story.StoryId),
@@ -387,8 +387,8 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             ProgressPercentage = progressPercentage,
             CreatedAt = smi.CreatedAt,
             UnlockedStoryHeroes = new List<string>(), // TODO: Implement if needed
-            Category = smi.Story.Category,
-            StoryCategory = smi.Story.StoryCategory.ToString(),
+            StoryTopic = smi.Story.StoryTopic,
+            StoryType = smi.Story.StoryType.ToString(),
             Status = smi.Story.Status.ToString(),
             SortOrder = smi.Story.SortOrder,
             IsActive = smi.Story.IsActive,
@@ -407,7 +407,8 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             return text.Length > 300 ? text.Substring(0, 300) + "..." : text;
         }
         
-        return $"Discover the adventures in {story.Title} - {story.Category}. This story contains {story.Tiles.Count} interactive tiles.";
+        var topicText = story.StoryTopic ?? "Unknown";
+        return $"Discover the adventures in {story.Title} - {topicText}. This story contains {story.Tiles.Count} interactive tiles.";
     }
 
     private StoryMarketplaceItemDto MapToMarketplaceItemDto(StoryMarketplaceInfo smi, string locale)
@@ -426,8 +427,8 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             AgeRating = smi.AgeRating,
             Characters = smi.Characters,
             CreatedAt = smi.CreatedAt,
-            Category = smi.Story.Category,
-            StoryCategory = smi.Story.StoryCategory.ToString(),
+            StoryTopic = smi.Story.StoryTopic,
+            StoryType = smi.Story.StoryType.ToString(),
             Status = smi.Story.Status.ToString()
         };
     }
@@ -520,6 +521,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
     private string GenerateSummary(StoryDefinition story, string locale)
     {
         // Generate a simple summary based on story title and category
-        return $"Discover the adventures in {story.Title} - {story.Category}";
+        var topicText = story.StoryTopic ?? "Unknown";
+        return $"Discover the adventures in {story.Title} - {topicText}";
     }
 }

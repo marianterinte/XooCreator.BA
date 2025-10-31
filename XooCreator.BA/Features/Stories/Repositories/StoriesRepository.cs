@@ -521,9 +521,9 @@ public class StoriesRepository : IStoriesRepository
             StoryId = seedData.StoryId,
             Title = seedData.Title,
             CoverImageUrl = seedData.CoverImageUrl,
-            Category = seedData.Category,
+            StoryTopic = seedData.Category,
             SortOrder = seedData.SortOrder,
-            StoryCategory = DetermineStoryCategory(seedData.StoryId, seedData.Category),
+            StoryType = DetermineStoryType(seedData.StoryId, seedData.Category),
             Status = StoryStatus.Published,
             CreatedBy = null,
             UpdatedBy = null
@@ -776,17 +776,17 @@ public class StoriesRepository : IStoriesRepository
         };
     }
 
-    private static StoryCategory DetermineStoryCategory(string storyId, string legacyCategory)
+    private static StoryType DetermineStoryType(string storyId, string legacyCategory)
     {
         if (storyId.StartsWith("learn-to-read", StringComparison.OrdinalIgnoreCase))
         {
-            return StoryCategory.Indie;
+            return StoryType.Indie;
         }
         if (legacyCategory.Equals("independent", StringComparison.OrdinalIgnoreCase))
         {
-            return StoryCategory.Indie;
+            return StoryType.Indie;
         }
-        return StoryCategory.AlchimaliaEpic;
+        return StoryType.AlchimaliaEpic;
     }
 
     public async Task<bool> StoryIdExistsAsync(string storyId)

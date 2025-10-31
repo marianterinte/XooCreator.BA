@@ -43,8 +43,8 @@ public class GetUserOwnedStoriesEndpoint
                     .Select(t => t.Title)
                     .FirstOrDefault() ?? uos.StoryDefinition.Title,
                 CoverImageUrl = uos.StoryDefinition.CoverImageUrl,
-                Category = uos.StoryDefinition.Category,
-                StoryCategory = uos.StoryDefinition.StoryCategory,
+                StoryTopic = uos.StoryDefinition.StoryTopic,
+                StoryType = uos.StoryDefinition.StoryType,
                 Status = uos.StoryDefinition.Status,
                 PurchasedAt = uos.PurchasedAt,
                 PurchasePrice = uos.PurchasePrice
