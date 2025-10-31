@@ -47,6 +47,11 @@ public record GetStoriesResponse
     public List<StoryContentDto> Stories { get; init; } = new();
 }
 
+public record CheckStoryIdResponse
+{
+    public required bool Exists { get; init; }
+}
+
 public record GetStoryByIdResponse
 {
     public StoryContentDto? Story { get; init; }

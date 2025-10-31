@@ -459,7 +459,7 @@ public class XooDbContext : DbContext
             {
                 Id = systemAdminUserId,
                 Auth0Id = "alchimalia-admin-sub",
-                Name = "Alchimalia-Admin",
+                Name = "Marian Teacher",
                 Email = "alchimalia@admin.com",
                 CreatedAt = DateTime.UtcNow,
                 LastLoginAt = DateTime.UtcNow,

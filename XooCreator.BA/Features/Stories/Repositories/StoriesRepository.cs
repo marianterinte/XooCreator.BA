@@ -15,6 +15,7 @@ public interface IStoriesRepository
     Task<StoryContentDto?> GetStoryByIdAsync(string storyId, string locale);
     Task<List<UserStoryProgressDto>> GetUserStoryProgressAsync(Guid userId, string storyId);
     Task<bool> MarkTileAsReadAsync(Guid userId, string storyId, string tileId);
+    Task<bool> StoryIdExistsAsync(string storyId);
     Task SeedStoriesAsync();
     Task SeedIndependentStoriesAsync();
 }
@@ -785,6 +786,13 @@ public class StoriesRepository : IStoriesRepository
             return StoryCategory.Indie;
         }
         return StoryCategory.AlchimaliaEpic;
+    }
+
+    public async Task<bool> StoryIdExistsAsync(string storyId)
+    {
+        var normalizedId = NormalizeStoryId(storyId);
+        return await _context.StoryDefinitions
+            .AnyAsync(s => s.StoryId == normalizedId);
     }
 }
 
