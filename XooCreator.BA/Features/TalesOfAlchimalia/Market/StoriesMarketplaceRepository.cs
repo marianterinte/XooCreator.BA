@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Enums;
+using XooCreator.BA.Features.TalesOfAlchimalia.Market;
 
 namespace XooCreator.BA.Features.Stories;
 

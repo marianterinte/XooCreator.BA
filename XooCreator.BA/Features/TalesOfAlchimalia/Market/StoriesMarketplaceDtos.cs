@@ -1,6 +1,6 @@
 using XooCreator.BA.Data;
 
-namespace XooCreator.BA.Features.Stories;
+namespace XooCreator.BA.Features.TalesOfAlchimalia.Market;
 
 /// <summary>
 /// DTO for detailed story information in marketplace

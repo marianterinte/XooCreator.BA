@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure;
+using XooCreator.BA.Features.TalesOfAlchimalia.Market;
+using XooCreator.BA.Features.Stories;
 
-namespace XooCreator.BA.Features.Stories.Endpoints;
+namespace XooCreator.BA.Features.Library.Endpoints;
 
 [Endpoint]
 public class GetUserPurchasedStoriesEndpoint

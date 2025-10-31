@@ -5,7 +5,7 @@ using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Features.Stories;
 
-namespace XooCreator.BA.Features.TalesOfAlchimalia.Endpoints;
+namespace XooCreator.BA.Features.TalesOfAlchimalia.Market;
 
 [Endpoint]
 public class TalesMarketEndpoint

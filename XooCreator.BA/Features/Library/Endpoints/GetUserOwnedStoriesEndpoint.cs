@@ -7,7 +7,7 @@ using XooCreator.BA.Data;
 using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data.Enums;
 
-namespace XooCreator.BA.Features.Stories.Endpoints;
+namespace XooCreator.BA.Features.Library.Endpoints;
 
 [Endpoint]
 public class GetUserOwnedStoriesEndpoint
