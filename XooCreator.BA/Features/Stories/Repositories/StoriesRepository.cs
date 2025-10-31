@@ -674,6 +674,7 @@ public class StoriesRepository : IStoriesRepository
             Id = story.StoryId,
             Title = defTitle,
             CoverImageUrl = story.CoverImageUrl,
+            Summary = story.Summary,
             UnlockedStoryHeroes = GetUnlockedHeroesFromSeed(story.StoryId),
             Tiles = story.Tiles
                 .OrderBy(t => t.SortOrder)

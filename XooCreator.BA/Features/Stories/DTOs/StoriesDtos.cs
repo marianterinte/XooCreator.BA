@@ -8,6 +8,7 @@ public record StoryContentDto
     public required string Id { get; init; }
     public required string Title { get; init; }
     public string? CoverImageUrl { get; init; }
+    public string? Summary { get; init; }
     public List<string> UnlockedStoryHeroes { get; init; } = new();
     public List<StoryTileDto> Tiles { get; init; } = new();
 }

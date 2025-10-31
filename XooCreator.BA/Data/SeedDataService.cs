@@ -274,7 +274,7 @@ public class SeedDataService
                         Title = storyData.Title,
                         CoverImageUrl = storyData.CoverImageUrl,
                         Category = storyData.Category,
-                        StoryCategory = StoryCategory.AlchimaliaEpic, // Default category for independent stories
+                        StoryCategory =  StoryCategory.Indie,
                         Status = StoryStatus.Published,
                         SortOrder = storyData.SortOrder,
                         IsActive = true,

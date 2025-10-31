@@ -11,6 +11,7 @@ public class StoryDefinition
     public string StoryId { get; set; } = string.Empty; // e.g., "root-s1", "intro-pufpuf"
     public string Title { get; set; } = string.Empty;
     public string? CoverImageUrl { get; set; }
+    public string? Summary { get; set; }
     public string Category { get; set; } = string.Empty; // e.g., "main", "intro", "special" - legacy field
     public StoryCategory StoryCategory { get; set; } = StoryCategory.AlchimaliaEpic; // New enum-based category
     public StoryStatus Status { get; set; } = StoryStatus.Published; // Publication status

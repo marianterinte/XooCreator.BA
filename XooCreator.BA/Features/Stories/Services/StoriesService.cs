@@ -81,6 +81,7 @@ public class StoriesService : IStoriesService
             Id = story.Id,
             Title = story.Title,
             CoverImageUrl = story.CoverImageUrl ?? string.Empty,
+            Summary = story.Summary,
             Tiles = story.Tiles.Select(t => new EditableTileDto
             {
                 Type = t.Type,
@@ -111,6 +112,7 @@ public class EditableStoryDto
     public string Id { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
     public string CoverImageUrl { get; set; } = string.Empty;
+    public string? Summary { get; set; }
     public List<EditableTileDto> Tiles { get; set; } = new();
 }
 
