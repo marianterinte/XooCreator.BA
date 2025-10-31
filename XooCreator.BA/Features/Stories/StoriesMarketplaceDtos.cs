@@ -50,6 +50,9 @@ public record StoryMarketplaceItemDto
     public string AgeRating { get; init; } = string.Empty;
     public List<string> Characters { get; init; } = new();
     public DateTime CreatedAt { get; init; }
+    public string Category { get; init; } = string.Empty;
+    public string StoryCategory { get; init; } = string.Empty;
+    public string Status { get; init; } = string.Empty;
 }
 
 /// <summary>

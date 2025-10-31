@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
+using XooCreator.BA.Data.Enums;
 
 namespace XooCreator.BA.Features.Stories;
 
@@ -35,7 +36,14 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
                 .ThenInclude(s => s.Translations)
             .Where(smi => smi.Story.IsActive);
 
-        // Apply filters
+        // Filtre implicite: doar Published + StoryCategory = Indie (dacă nu s-au cerut categorii specifice)
+        query = query.Where(smi => smi.Story.Status == StoryStatus.Published);
+        if (!(request.Categories?.Any() ?? false))
+        {
+            query = query.Where(smi => smi.Story.StoryCategory == StoryCategory.Indie);
+        }
+        
+            // Apply filters
         if (!string.IsNullOrEmpty(request.SearchTerm))
         {
             query = query.Where(smi => 
@@ -410,7 +418,10 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             PriceInCredits = smi.PriceInCredits,
             AgeRating = smi.AgeRating,
             Characters = smi.Characters,
-            CreatedAt = smi.CreatedAt
+            CreatedAt = smi.CreatedAt,
+            Category = smi.Story.Category,
+            StoryCategory = smi.Story.StoryCategory.ToString(),
+            Status = smi.Story.Status.ToString()
         };
     }
 
