@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure;
+using XooCreator.BA.Features.TalesOfAlchimalia.Market.DTOs;
+using XooCreator.BA.Features.TalesOfAlchimalia.Market.Services;
 using XooCreator.BA.Features.Stories;
 
 namespace XooCreator.BA.Features.TalesOfAlchimalia.Market.Endpoints;

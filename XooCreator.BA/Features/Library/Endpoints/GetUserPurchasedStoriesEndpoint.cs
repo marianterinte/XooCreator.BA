@@ -5,6 +5,8 @@ using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market;
 using XooCreator.BA.Features.Stories;
+using XooCreator.BA.Features.TalesOfAlchimalia.Market.Services;
+using XooCreator.BA.Features.TalesOfAlchimalia.Market.DTOs;
 
 namespace XooCreator.BA.Features.Library.Endpoints;
 

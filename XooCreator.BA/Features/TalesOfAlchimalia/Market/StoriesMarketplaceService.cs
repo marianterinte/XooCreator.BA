@@ -1,8 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
-using XooCreator.BA.Features.TalesOfAlchimalia.Market;
+using XooCreator.BA.Features.TalesOfAlchimalia.Market.DTOs;
+using XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories;
 
-namespace XooCreator.BA.Features.Stories;
+namespace XooCreator.BA.Features.TalesOfAlchimalia.Market.Services;
 
 public interface IStoriesMarketplaceService
 {

@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Enums;
-using XooCreator.BA.Features.TalesOfAlchimalia.Market;
+using XooCreator.BA.Features.TalesOfAlchimalia.Market.DTOs;
 
-namespace XooCreator.BA.Features.Stories;
+namespace XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories;
 
 public record StoryProgressInfo(string StoryId, int ProgressCount);
 

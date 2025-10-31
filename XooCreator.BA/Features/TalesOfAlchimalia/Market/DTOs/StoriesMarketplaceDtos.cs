@@ -1,10 +1,7 @@
 using XooCreator.BA.Data;
 
-namespace XooCreator.BA.Features.TalesOfAlchimalia.Market;
+namespace XooCreator.BA.Features.TalesOfAlchimalia.Market.DTOs;
 
-/// <summary>
-/// DTO for detailed story information in marketplace
-/// </summary>
 public record StoryDetailsDto
 {
     public required string Id { get; init; }
@@ -37,9 +34,6 @@ public record StoryDetailsDto
     public Guid? UpdatedBy { get; init; }
 }
 
-/// <summary>
-/// DTO for story marketplace item with purchase information
-/// </summary>
 public record StoryMarketplaceItemDto
 {
     public required string Id { get; init; }
@@ -56,17 +50,11 @@ public record StoryMarketplaceItemDto
     public string Status { get; init; } = string.Empty;
 }
 
-/// <summary>
-/// Request to purchase a story
-/// </summary>
 public record PurchaseStoryRequest
 {
     public required string StoryId { get; init; }
 }
 
-/// <summary>
-/// Response for story purchase
-/// </summary>
 public record PurchaseStoryResponse
 {
     public bool Success { get; init; }
@@ -75,9 +63,6 @@ public record PurchaseStoryResponse
     public int CreditsSpent { get; init; }
 }
 
-/// <summary>
-/// Response for marketplace stories
-/// </summary>
 public record GetMarketplaceStoriesResponse
 {
     public List<StoryMarketplaceItemDto> Stories { get; init; } = new();
@@ -89,9 +74,6 @@ public record GetMarketplaceStoriesResponse
     public bool HasMore { get; init; }
 }
 
-/// <summary>
-/// Request to search and filter stories
-/// </summary>
 public record SearchStoriesRequest
 {
     public string? SearchTerm { get; init; }
@@ -100,18 +82,17 @@ public record SearchStoriesRequest
     public List<string> Characters { get; init; } = new();
     public List<string> Categories { get; init; } = new();
     public List<string> Difficulties { get; init; } = new();
-    public string CompletionStatus { get; init; } = "all"; // all, completed, in-progress, not-started
-    public string SortBy { get; init; } = "sortOrder"; // title, date, difficulty, progress, sortOrder
-    public string SortOrder { get; init; } = "asc"; // asc, desc
+    public string CompletionStatus { get; init; } = "all";
+    public string SortBy { get; init; } = "sortOrder";
+    public string SortOrder { get; init; } = "asc";
     public int Page { get; init; } = 1;
     public int PageSize { get; init; } = 20;
 }
 
-/// <summary>
-/// Response for user's purchased stories
-/// </summary>
 public record GetUserPurchasedStoriesResponse
 {
     public List<StoryMarketplaceItemDto> PurchasedStories { get; init; } = new();
     public int TotalCount { get; init; }
 }
+
+

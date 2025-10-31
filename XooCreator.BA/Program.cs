@@ -19,6 +19,8 @@ using Microsoft.AspNetCore.Authorization;
 using XooCreator.BA.Features.Stories.Repositories;
 using XooCreator.BA.Features.Stories.Services;
 using XooCreator.BA.Features.Payment.Services;
+using XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories;
+using XooCreator.BA.Features.TalesOfAlchimalia.Market.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
