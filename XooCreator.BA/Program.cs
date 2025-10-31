@@ -24,6 +24,7 @@ using XooCreator.BA.Features.TreeOfHeroes.Services;
 using XooCreator.BA.Features.TreeOfHeroes.Repositories;
 using XooCreator.BA.Features.TreeOfLight.Services;
 using XooCreator.BA.Features.TreeOfLight.Repositories;
+using XooCreator.BA.Features.User.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -127,7 +128,7 @@ builder.Services.AddScoped<IHeroDefinitionSeedService, HeroDefinitionSeedService
 builder.Services.AddScoped<IHeroTreeProvider, HeroTreeProvider>();
 
 
-builder.Services.AddScoped<XooCreator.BA.Features.User.IUserProfileService, XooCreator.BA.Features.User.UserProfileService>();
+builder.Services.AddScoped<IUserProfileService, UserProfileService>();
 
 builder.Services.AddScoped<ITreeOfLightTranslationService, TreeOfLightTranslationService>();
 builder.Services.AddScoped<ITreeOfLightRepository, TreeOfLightRepository>();

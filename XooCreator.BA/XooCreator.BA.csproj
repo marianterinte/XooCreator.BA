@@ -47,4 +47,8 @@
     <Content Remove="Data\SeedData\Stories\independent\i18n\hu-hu\learn-to-read-s1.json" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Data\Repositories\" />
+  </ItemGroup>
+
 </Project>

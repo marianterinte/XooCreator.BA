@@ -1,4 +1,4 @@
-namespace XooCreator.BA.Features.User;
+namespace XooCreator.BA.Features.User.DTOs;
 
 public record UserProfileDto
 {

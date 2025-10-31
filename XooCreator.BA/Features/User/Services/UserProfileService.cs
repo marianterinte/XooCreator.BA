@@ -2,8 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Repositories;
+using XooCreator.BA.Features.User.DTOs;
 
-namespace XooCreator.BA.Features.User;
+namespace XooCreator.BA.Features.User.Services;
 
 public interface IUserProfileService
 {
