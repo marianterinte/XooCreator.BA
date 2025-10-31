@@ -30,12 +30,16 @@
 
   <ItemGroup>
     <Compile Remove=".github\**" />
+    <Compile Remove="Data\Repositories\**" />
     <Compile Remove="Features\Builder\**" />
     <Content Remove=".github\**" />
+    <Content Remove="Data\Repositories\**" />
     <Content Remove="Features\Builder\**" />
     <EmbeddedResource Remove=".github\**" />
+    <EmbeddedResource Remove="Data\Repositories\**" />
     <EmbeddedResource Remove="Features\Builder\**" />
     <None Remove=".github\**" />
+    <None Remove="Data\Repositories\**" />
     <None Remove="Features\Builder\**" />
   </ItemGroup>
 
@@ -43,12 +47,11 @@
     <Content Remove="Data\SeedData\Stories\i18n\en-us\learn-to-read-s1.json" />
     <Content Remove="Data\SeedData\Stories\i18n\hu-hu\learn-to-read-s1.json" />
     <Content Remove="Data\SeedData\Stories\i18n\ro-ro\learn-to-read-s1.json" />
+    <Content Remove="Data\SeedData\Stories\independent\i18n\en-us\learn-math-s1.json" />
     <Content Remove="Data\SeedData\Stories\independent\i18n\en-us\learn-to-read-s1.json" />
+    <Content Remove="Data\SeedData\Stories\independent\i18n\hu-hu\learn-math-s1.json" />
     <Content Remove="Data\SeedData\Stories\independent\i18n\hu-hu\learn-to-read-s1.json" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Data\Repositories\" />
+    <Content Remove="Data\SeedData\Stories\independent\i18n\ro-ro\learn-math-s1.json" />
   </ItemGroup>
 
 </Project>
