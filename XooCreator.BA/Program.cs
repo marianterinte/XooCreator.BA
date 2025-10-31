@@ -6,7 +6,6 @@ using XooCreator.BA.Data;
 using XooCreator.BA.Data.Repositories;
 using XooCreator.BA.Services;
 using XooCreator.BA.Features.TreeOfLight;
-using XooCreator.BA.Features.TreeOfHeroes;
 using XooCreator.BA.Features.Stories;
 using XooCreator.BA.Features.Payment;
 using XooCreator.BA.Infrastructure;
@@ -21,6 +20,10 @@ using XooCreator.BA.Features.Stories.Services;
 using XooCreator.BA.Features.Payment.Services;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Services;
+using XooCreator.BA.Features.TreeOfHeroes.Services;
+using XooCreator.BA.Features.TreeOfHeroes.Repositories;
+using XooCreator.BA.Features.TreeOfLight.Services;
+using XooCreator.BA.Features.TreeOfLight.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 

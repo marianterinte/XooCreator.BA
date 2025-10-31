@@ -1,10 +1,12 @@
 using System.Text.Json;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.SeedData.DTOs;
-using XooCreator.BA.Features.TreeOfHeroes;
+using XooCreator.BA.Features.TreeOfHeroes.DTOs;
+using XooCreator.BA.Features.TreeOfLight.DTOs;
+using XooCreator.BA.Features.TreeOfLight.Repositories;
 using XooCreator.BA.Infrastructure;
 
-namespace XooCreator.BA.Features.TreeOfLight;
+namespace XooCreator.BA.Features.TreeOfLight.Services;
 
 public interface ITreeModelService
 {

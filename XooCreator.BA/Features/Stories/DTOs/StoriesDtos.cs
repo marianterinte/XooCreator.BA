@@ -1,4 +1,5 @@
 using XooCreator.BA.Features.TreeOfLight;
+using XooCreator.BA.Features.TreeOfLight.DTOs;
 
 namespace XooCreator.BA.Features.Stories.DTOs;
 

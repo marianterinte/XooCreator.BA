@@ -2,7 +2,7 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
 
-namespace XooCreator.BA.Features.TreeOfLight;
+namespace XooCreator.BA.Features.TreeOfLight.Services;
 
 public class TreeOfLightTranslationService : ITreeOfLightTranslationService
 {

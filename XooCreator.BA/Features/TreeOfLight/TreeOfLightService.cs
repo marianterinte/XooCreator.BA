@@ -1,5 +1,8 @@
 using XooCreator.BA.Features.Stories;
-using XooCreator.BA.Features.TreeOfHeroes;
+using XooCreator.BA.Features.TreeOfHeroes.DTOs;
+using XooCreator.BA.Features.TreeOfHeroes.Repositories;
+using XooCreator.BA.Features.TreeOfLight.DTOs;
+using XooCreator.BA.Features.TreeOfLight.Repositories;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.SeedData.DTOs;
@@ -7,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using XooCreator.BA.Features.Stories.Repositories;
 
-namespace XooCreator.BA.Features.TreeOfLight;
+namespace XooCreator.BA.Features.TreeOfLight.Services;
 
 public interface ITreeOfLightService
 {

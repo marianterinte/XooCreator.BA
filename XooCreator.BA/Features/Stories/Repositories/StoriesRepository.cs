@@ -5,6 +5,7 @@ using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Data.SeedData.DTOs;
 using XooCreator.BA.Features.Stories.DTOs;
 using XooCreator.BA.Features.TreeOfLight;
+using XooCreator.BA.Features.TreeOfLight.DTOs;
 
 namespace XooCreator.BA.Features.Stories.Repositories;
 

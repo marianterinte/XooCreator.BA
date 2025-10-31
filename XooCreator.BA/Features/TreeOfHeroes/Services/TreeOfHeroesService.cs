@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
+using XooCreator.BA.Features.TreeOfHeroes.DTOs;
+using XooCreator.BA.Features.TreeOfHeroes.Repositories;
 
-namespace XooCreator.BA.Features.TreeOfHeroes;
+namespace XooCreator.BA.Features.TreeOfHeroes.Services;
 
 public interface ITreeOfHeroesService
 {

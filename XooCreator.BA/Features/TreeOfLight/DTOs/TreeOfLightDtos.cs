@@ -1,6 +1,6 @@
-using XooCreator.BA.Features.TreeOfHeroes;
+using XooCreator.BA.Features.TreeOfHeroes.DTOs;
 
-namespace XooCreator.BA.Features.TreeOfLight;
+namespace XooCreator.BA.Features.TreeOfLight.DTOs;
 
 public record TreeProgressDto
 {
@@ -39,10 +39,6 @@ public record CompleteStoryResponse
     public UserTokensDto? UpdatedTokens { get; init; }
 }
 
-
-
-
-
 public record ResetProgressResponse
 {
     public bool Success { get; init; }
@@ -50,7 +46,6 @@ public record ResetProgressResponse
     public string Message { get; init; } = string.Empty;
 }
 
-// Tree Model DTOs
 public record TreeStateDto
 {
     public List<TreeConfigurationDto> Configurations { get; init; } = new();
@@ -93,7 +88,7 @@ public record TreeStoryDto
 
 public record TreeUnlockRuleDto
 {
-    public required string Type { get; init; } // "story", "all", "any"
+    public required string Type { get; init; }
     public required string FromId { get; init; }
     public required string ToRegionId { get; init; }
     public List<string> RequiredStories { get; init; } = new();
@@ -124,7 +119,6 @@ public record CompletedStoryDto
     public DateTime CompletedAt { get; init; }
 }
 
-// Hero Messages DTOs
 public record HeroMessageDto
 {
     public required string HeroId { get; init; }
@@ -139,3 +133,6 @@ public record HeroClickMessageDto
     public required string Message { get; init; }
     public string? AudioUrl { get; init; }
 }
+
+
+

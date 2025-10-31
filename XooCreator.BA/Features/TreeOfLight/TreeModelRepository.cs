@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using XooCreator.BA.Data;
 
-namespace XooCreator.BA.Features.TreeOfLight;
+namespace XooCreator.BA.Features.TreeOfLight.Repositories;
 
 public interface ITreeModelRepository
 {

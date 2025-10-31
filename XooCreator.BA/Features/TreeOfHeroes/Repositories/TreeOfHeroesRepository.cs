@@ -1,10 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using XooCreator.BA.Data;
+using XooCreator.BA.Features.TreeOfHeroes.DTOs;
 using XooCreator.BA.Features.TreeOfLight;
+using XooCreator.BA.Features.TreeOfLight.DTOs;
 using XooCreator.BA.Services;
 
-namespace XooCreator.BA.Features.TreeOfHeroes;
+namespace XooCreator.BA.Features.TreeOfHeroes.Repositories;
 
 public interface ITreeOfHeroesRepository
 {
@@ -94,7 +96,7 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
             return false; // Already unlocked
         }
 
-        var heroTreeNode = new Data.HeroTreeProgress
+        var heroTreeNode = new HeroTreeProgress
         {
             UserId = userId,
             NodeId = request.NodeId,
@@ -303,7 +305,7 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
         }
 
         // Create new hero progress record
-        var heroProgress = new Data.HeroProgress
+        var heroProgress = new HeroProgress
         {
             UserId = userId,
             HeroId = heroId,
@@ -354,7 +356,7 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
                 if (userHeroProgress.Contains("seed"))
                 {
                     // Unlock this base hero
-                    var heroTreeNode = new Data.HeroTreeProgress
+                    var heroTreeNode = new HeroTreeProgress
                     {
                         UserId = userId,
                         NodeId = heroDef.Id,
@@ -379,7 +381,7 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
                 if (allPrerequisitesMet)
                 {
                     // Unlock this node
-                    var heroTreeNode = new Data.HeroTreeProgress
+                    var heroTreeNode = new HeroTreeProgress
                     {
                         UserId = userId,
                         NodeId = heroDef.Id,

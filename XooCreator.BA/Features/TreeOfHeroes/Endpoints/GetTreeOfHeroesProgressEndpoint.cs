@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure;
+using XooCreator.BA.Features.TreeOfHeroes.DTOs;
+using XooCreator.BA.Features.TreeOfHeroes.Services;
 
 namespace XooCreator.BA.Features.TreeOfHeroes.Endpoints;
 

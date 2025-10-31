@@ -1,7 +1,7 @@
 
 using XooCreator.BA.Data;
 
-namespace XooCreator.BA.Features.TreeOfLight;
+namespace XooCreator.BA.Features.TreeOfLight.Services;
 
 public interface ITreeOfLightTranslationService
 {

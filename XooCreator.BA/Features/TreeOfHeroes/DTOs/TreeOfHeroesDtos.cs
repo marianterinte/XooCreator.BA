@@ -1,4 +1,4 @@
-namespace XooCreator.BA.Features.TreeOfHeroes;
+namespace XooCreator.BA.Features.TreeOfHeroes.DTOs;
 
 public record HeroDefinitionDto
 {
@@ -79,7 +79,6 @@ public record TransformToHeroResponse
     public UserTokensDto? UpdatedTokens { get; init; }
 }
 
-// New DTOs for UI configuration
 public record TokenConfigDto
 {
     public required string Id { get; init; }
@@ -103,3 +102,6 @@ public record TreeOfHeroesConfigDto
     public required List<string> BaseHeroIds { get; init; }
     public required Dictionary<string, string> CanonicalHybridByPair { get; init; }
 }
+
+
+
