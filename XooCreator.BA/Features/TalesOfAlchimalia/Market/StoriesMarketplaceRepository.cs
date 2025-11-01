@@ -1,6 +1,8 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Enums;
+using XooCreator.BA.Data.SeedData.DTOs;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.DTOs;
 
 namespace XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories;
@@ -277,21 +279,26 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             .ToListAsync();
 
         var existingMarketplaceInfos = await _context.StoryMarketplaceInfos
-            .Select(smi => smi.StoryId)
             .ToListAsync();
 
+        var existingStoryIds = existingMarketplaceInfos
+            .Select(smi => smi.StoryId)
+            .ToHashSet();
+
         var newMarketplaceInfos = new List<StoryMarketplaceInfo>();
+        var updatedMarketplaceInfos = new List<StoryMarketplaceInfo>();
 
         foreach (var story in existingStories)
         {
-            if (!existingMarketplaceInfos.Contains(story.StoryId))
-            {
-                var region = ExtractRegionFromStoryId(story.StoryId);
-                var ageRating = DetermineAgeRating(story.StoryId);
-                var difficulty = DetermineDifficulty(story.StoryId);
-                var characters = ExtractCharactersFromStoryId(story.StoryId);
-                var price = DeterminePrice(story.StoryId);
+            var region = ExtractRegionFromStoryId(story.StoryId);
+            var ageRating = DetermineAgeRating(story.StoryId);
+            var difficulty = DetermineDifficulty(story.StoryId);
+            var characters = ExtractCharactersFromStoryId(story.StoryId);
+            var price = await GetPriceFromJsonOrDefaultAsync(story.StoryId);
 
+            if (!existingStoryIds.Contains(story.StoryId))
+            {
+                // Create new marketplace info
                 newMarketplaceInfos.Add(new StoryMarketplaceInfo
                 {
                     Id = Guid.NewGuid(),
@@ -309,11 +316,26 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
                     UpdatedAt = DateTime.UtcNow
                 });
             }
+            else
+            {
+                // Update existing marketplace info, especially for learn- stories that should be free
+                var existingInfo = existingMarketplaceInfos.FirstOrDefault(smi => smi.StoryId == story.StoryId);
+                if (existingInfo != null && existingInfo.PriceInCredits != price)
+                {
+                    existingInfo.PriceInCredits = price;
+                    existingInfo.UpdatedAt = DateTime.UtcNow;
+                    updatedMarketplaceInfos.Add(existingInfo);
+                }
+            }
         }
 
         if (newMarketplaceInfos.Any())
         {
             _context.StoryMarketplaceInfos.AddRange(newMarketplaceInfos);
+        }
+
+        if (updatedMarketplaceInfos.Any() || newMarketplaceInfos.Any())
+        {
             await _context.SaveChangesAsync();
         }
     }
@@ -494,14 +516,43 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         return characters;
     }
 
-    private int DeterminePrice(string storyId)
+    private async Task<int> GetPriceFromJsonOrDefaultAsync(string storyId)
     {
-        // Special case: learn-to-read-s1 should be free
-        if (storyId == "learn-to-read-s1")
-            return 0;
+        // Try to load price from JSON files (independent stories)
+        var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+        var locales = new[] { "ro-ro", "en-us", "hu-hu" };
+        
+        foreach (var locale in locales)
+        {
+            var dir = Path.Combine(baseDir, "Data", "SeedData", "Stories", "independent", "i18n", locale);
+            var filePath = Path.Combine(dir, $"{storyId}.json");
             
+            if (File.Exists(filePath))
+            {
+                try
+                {
+                    var json = await File.ReadAllTextAsync(filePath);
+                    var seed = JsonSerializer.Deserialize<StorySeedData>(json, new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        PropertyNameCaseInsensitive = true
+                    });
+                    
+                    if (seed?.Price.HasValue == true)
+                    {
+                        return seed.Price.Value;
+                    }
+                }
+                catch
+                {
+                    // If JSON parsing fails, continue to next locale or default
+                }
+            }
+        }
+        
+        // Default pricing logic if not specified in JSON
         // Based on TODO: "Stories de pe lunaria 1 da 1 token, cealalta 2 tokeni"
-        if (storyId.Contains("lunaria"))
+        if (storyId.Contains("lunaria", StringComparison.OrdinalIgnoreCase))
             return 1;
         return 2;
     }

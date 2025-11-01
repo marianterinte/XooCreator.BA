@@ -1,17 +1,19 @@
 {
-  "storyId": "learn-math-s1-en",
+  "storyId": "learn-math-s1",
   "title": "Grubot and the Lost Numbers",
   "coverImageUrl": "images/tol/stories/learn-math-s1/0.cover.png",
   "category": "mechanika",
   "sortOrder": 1,
-  "unlockedStoryHeroes": [ "grubot" ],
+  "storyType": 1,
+  "price": 0,
+  "unlockedStoryHeroes": [],
   "tiles": [
     {
       "tileId": "1",
       "type": "page",
       "sortOrder": 1,
       "caption": "Grubot in the workshop",
-      "text": "On planet Mechanika, Grubot worked in his shiny workshop. Numbers danced on his screen until… *Pop!* All numbers disappeared!\n\n“Error! Error! I’ve lost the numbers! I must find them!” said Grubot.",
+      "text": "On planet Mechanika, Grubot worked in his shiny workshop. Numbers danced on his screen until… *Pop!* All numbers disappeared!\n\n\"Error! Error! I've lost the numbers! I must find them!\" said Grubot.",
       "imageUrl": "images/tol/stories/learn-math-s1/1.workshop.png"
     },
     {
@@ -62,7 +64,7 @@
       "type": "page",
       "sortOrder": 4,
       "caption": "The tower of equations",
-      "text": "Grubot reaches a tall tower. On the door it says: “Enter only if you know subtraction!” Grubot activates his logic chip.",
+      "text": "Grubot reaches a tall tower. On the door it says: \"Enter only if you know subtraction!\" Grubot activates his logic chip.",
       "imageUrl": "images/tol/stories/learn-math-s1/4.tower.png"
     },
     {
@@ -148,7 +150,7 @@
       "type": "page",
       "sortOrder": 8,
       "caption": "The return of numbers",
-      "text": "When Grubot finished all his calculations, the numbers returned to his screen! He learned something big: Math is a superpower!\n\n“Mission complete!” said Grubot. “With logic and patience, I can fix anything!”",
+      "text": "When Grubot finished all his calculations, the numbers returned to his screen! He learned something big: Math is a superpower!\n\n\"Mission complete!\" said Grubot. \"With logic and patience, I can fix anything!\"",
       "imageUrl": "images/tol/stories/learn-math-s1/8.return.png"
     },
     {

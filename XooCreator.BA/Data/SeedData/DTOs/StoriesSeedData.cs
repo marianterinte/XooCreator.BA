@@ -13,6 +13,8 @@ public class StorySeedData
     public string? CoverImageUrl { get; set; }
     public string Category { get; set; } = string.Empty;
     public int SortOrder { get; set; }
+    public int? StoryType { get; set; } // StoryType enum value: 0=AlchimaliaEpic (default), 1=Indie
+    public int? Price { get; set; } // Price in credits. If not specified, default pricing logic applies
     public List<TileSeedData>? Tiles { get; set; }
 }
 

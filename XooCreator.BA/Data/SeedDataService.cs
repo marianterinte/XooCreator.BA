@@ -300,43 +300,16 @@ public class SeedDataService
                                 Text = tileSeed.Text,
                                 ImageUrl = tileSeed.ImageUrl,
                                 AudioUrl = null, // Independent stories don't have audio
-                                Question = null,  // Independent stories don't have questions
+                                Question = tileSeed.Question,  // Set question for quiz tiles
                                 StoryDefinitionId = storyId // Set the foreign key
                             };
 
-                            // Process answers if they exist
-                            if (tileSeed.Answers != null && tileSeed.Answers.Any())
-                            {
-                                Console.WriteLine($"[SEEDING] Processing {tileSeed.Answers.Count} answers for tile: {tileSeed.TileId}");
-                                foreach (var answerSeed in tileSeed.Answers)
-                                {
-                                    var answer = new StoryAnswer
-                                    {
-                                        AnswerId = answerSeed.AnswerId,
-                                        Text = answerSeed.Text,
-                                        TokensJson = null,
-                                        SortOrder = 0 // Default sort order
-                                    };
+                            // NOTE: Do NOT process Answers here because this method is used for migrations
+                            // which don't allow navigation properties. Independent stories should be seeded
+                            // via StoriesRepository.SeedIndependentStoriesAsync() which uses SaveChanges()
+                            // and can handle navigation properties through MapFromSeedData()
 
-                                    // Process tokens if they exist
-                                    if (answerSeed.Tokens != null && answerSeed.Tokens.Any())
-                                    {
-                                        foreach (var tokenSeed in answerSeed.Tokens)
-                                        {
-                                            answer.Tokens.Add(new StoryAnswerToken
-                                            {
-                                                Type = tokenSeed.Type,
-                                                Value = tokenSeed.Value,
-                                                Quantity = 1 // Default quantity
-                                            });
-                                        }
-                                    }
-
-                                    tile.Answers.Add(answer);
-                                }
-                            }
-
-                            // Store tile separately for later seeding
+                            // Store tile WITHOUT Answers to avoid navigation property issues
                             _independentStoryTiles.Add((tile, storyData.StoryId));
                         }
                         Console.WriteLine($"[SEEDING] Prepared {storyData.Tiles.Count} tiles for story: {storyData.StoryId}");

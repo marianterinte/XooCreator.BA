@@ -1,58 +1,192 @@
 {
-  "storyId": "learn-to-read-s1",
-  "title": "Puf-Puf és az elveszett barát",
-  "coverImageUrl": "images/tol/stories/learn-to-read-s1/0.cover.png",
-  "category": "terra",
+  "storyId": "learn-math-s1",
+  "title": "Grubot și numerele pierdute",
+  "coverImageUrl": "images/tol/stories/learn-math-s1/0.cover.png",
+  "category": "mechanika",
   "sortOrder": 1,
+  "storyType": 1,
+  "price": 0,
   "unlockedStoryHeroes": [],
   "tiles": [
     {
       "tileId": "1",
       "type": "page",
       "sortOrder": 1,
-      "caption": "Puf-Puf útnak indul",
-      "text": "Puf-Puf egy kicsi, pelyhes cica. Esik az eső az erdő felett. Narancssárga köpönyeget visel. „Milyen pompás az eső illata!” – mondja Puf-Puf.",
-      "imageUrl": "images/tol/stories/learn-to-read-s1/1.start.png"
+      "caption": "Grubot în atelier",
+      "text": "Pe planeta Mechanika, Grubot lucra în atelierul său strălucitor. Numerele dansau pe ecranul lui până când... *Pop!* Toate numerele au dispărut!\n\n\"Eroare! Eroare! Am pierdut numerele! Trebuie să le găsesc!\" spuse Grubot.",
+      "imageUrl": "images/tol/stories/learn-math-s1/1.workshop.png"
     },
     {
       "tileId": "2",
       "type": "page",
       "sortOrder": 2,
-      "caption": "Egy kis sírás",
-      "text": "Hallja: „Pfff… pfff…” Puf-Puf megáll. „Ki sír?” A bokorból egy kis nyuszi bújik elő.",
-      "imageUrl": "images/tol/stories/learn-to-read-s1/2.cry.png"
+      "caption": "Podul sumelor",
+      "text": "Pentru a traversa râul cu aburi, Grubot trebuie să repare podul. Fiecare treaptă metalică ascunde o sumă. Doar cei care adună corect pot trece!",
+      "imageUrl": "images/tol/stories/learn-math-s1/2.bridge.png"
+    },
+    {
+      "tileId": "q1",
+      "type": "quiz",
+      "sortOrder": 3,
+      "caption": "",
+      "text": "",
+      "imageUrl": "images/tol/stories/learn-math-s1/3.quiz.png",
+      "question": "Grubot are 3 șuruburi și găsește încă 2. Câte șuruburi are acum?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "4",
+          "tokens": [],
+          "sortOrder": 1
+        },
+        {
+          "answerId": "b",
+          "text": "5 ✅",
+          "tokens": [
+            {
+              "type": "Learning",
+              "value": "math_addition",
+              "quantity": 1
+            }
+          ],
+          "sortOrder": 2
+        },
+        {
+          "answerId": "c",
+          "text": "6",
+          "tokens": [],
+          "sortOrder": 3
+        }
+      ]
     },
     {
       "tileId": "3",
       "type": "page",
-      "sortOrder": 3,
-      "caption": "Az elveszett barát",
-      "text": "„Elvesztem” – mondja a nyuszi. „Ne félj” – mondja Puf-Puf. „Segítek megtalálni az utat hazáig!”",
-      "imageUrl": "images/tol/stories/learn-to-read-s1/3.lost-friend.png"
+      "sortOrder": 4,
+      "caption": "Turnul ecuațiilor",
+      "text": "Grubot ajunge la un turn înalt. Pe ușă scrie: \"Intrați doar dacă știți scăderea!\" Grubot activează cipul său logic.",
+      "imageUrl": "images/tol/stories/learn-math-s1/4.tower.png"
+    },
+    {
+      "tileId": "q2",
+      "type": "quiz",
+      "sortOrder": 5,
+      "caption": "",
+      "text": "",
+      "imageUrl": "images/tol/stories/learn-math-s1/5.quiz.png",
+      "question": "Grubot are 10 baterii. Folosește 4 pentru dronă. Câte baterii îi mai rămân?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "5",
+          "tokens": [],
+          "sortOrder": 1
+        },
+        {
+          "answerId": "b",
+          "text": "6 ✅",
+          "tokens": [
+            {
+              "type": "Learning",
+              "value": "math_subtraction",
+              "quantity": 1
+            }
+          ],
+          "sortOrder": 2
+        },
+        {
+          "answerId": "c",
+          "text": "8",
+          "tokens": [],
+          "sortOrder": 3
+        }
+      ]
     },
     {
       "tileId": "4",
       "type": "page",
-      "sortOrder": 4,
-      "caption": "Az esőben és az erdőben",
-      "text": "Együtt mennek az erdőben. Az eső csepereg a köveken. Puf-Puf tartja az esernyőt. A nyuszi ugrál a pocsolyákban: „Plip-plop!”",
-      "imageUrl": "images/tol/stories/learn-to-read-s1/4.rain-forest.png"
+      "sortOrder": 6,
+      "caption": "Portalurile numerelor",
+      "text": "Pe cer apar trei portaluri strălucitoare: roșu, galben și albastru. Fiecare se deschide doar dacă rezolvi o mică înmulțire!",
+      "imageUrl": "images/tol/stories/learn-math-s1/6.portals.png"
+    },
+    {
+      "tileId": "q3",
+      "type": "quiz",
+      "sortOrder": 7,
+      "caption": "",
+      "text": "",
+      "imageUrl": "images/tol/stories/learn-math-s1/7.quiz.png",
+      "question": "Fiecare portal are 2 lumini. Fiecare lumină are 3 raze. Câte raze în total?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "5",
+          "tokens": [],
+          "sortOrder": 1
+        },
+        {
+          "answerId": "b",
+          "text": "6",
+          "tokens": [],
+          "sortOrder": 2
+        },
+        {
+          "answerId": "c",
+          "text": "6 raze pe portal × 3 portaluri = 18 ✅",
+          "tokens": [
+            {
+              "type": "Learning",
+              "value": "math_multiplication",
+              "quantity": 1
+            }
+          ],
+          "sortOrder": 3
+        }
+      ]
     },
     {
       "tileId": "5",
       "type": "page",
-      "sortOrder": 5,
-      "caption": "A tisztás a tollal",
-      "text": "Egy virágos tisztásra érnek. A földön egy fényes toll fekszik. „Ez a tisztás közel van az otthonomhoz!” – mondja a nyuszi vidáman.",
-      "imageUrl": "images/tol/stories/learn-to-read-s1/5.meadow.png"
+      "sortOrder": 8,
+      "caption": "Întoarcerea numerelor",
+      "text": "Când Grubot a terminat toate calculele, numerele s-au întors pe ecranul lui! A învățat ceva important: Matematica este o superputere!\n\n\"Misiune completă!\" spuse Grubot. \"Cu logica și răbdarea, pot repara orice!\"",
+      "imageUrl": "images/tol/stories/learn-math-s1/8.return.png"
     },
     {
-      "tileId": "6",
-      "type": "page",
-      "sortOrder": 6,
-      "caption": "A barátság meséje",
-      "text": "„Köszönöm, Puf-Puf!” „A barátok segítenek egymásnak” – mondja a cica. Az eső eláll. A szivárvány ragyog. **P**, mint Puf-Puf, **P**, mint pajtás!",
-      "imageUrl": "images/tol/stories/learn-to-read-s1/6.end.png"
+      "tileId": "q4",
+      "type": "quiz",
+      "sortOrder": 9,
+      "caption": "",
+      "text": "",
+      "imageUrl": "images/tol/stories/learn-math-s1/9.quiz.png",
+      "question": "Grubot are 4 roți și construiește încă 2 roboți ca el. Câte roți în total?",
+      "answers": [
+        {
+          "answerId": "a",
+          "text": "8",
+          "tokens": [],
+          "sortOrder": 1
+        },
+        {
+          "answerId": "b",
+          "text": "10",
+          "tokens": [],
+          "sortOrder": 2
+        },
+        {
+          "answerId": "c",
+          "text": "12 ✅",
+          "tokens": [
+            {
+              "type": "Learning",
+              "value": "math_multiplication",
+              "quantity": 1
+            }
+          ],
+          "sortOrder": 3
+        }
+      ]
     }
   ]
 }

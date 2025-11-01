@@ -205,7 +205,9 @@ public class XooDbContext : DbContext
         
         SeedStoryHeroDefinitions(modelBuilder);
         
-        SeedIndependentStoriesDataFromJson(modelBuilder);
+        // Independent stories are seeded via StoriesRepository.SeedIndependentStoriesAsync()
+        // which uses SaveChanges() instead of HasData() to allow navigation properties
+        // SeedIndependentStoriesDataFromJson(modelBuilder);
 
         modelBuilder.Entity<TreeProgress>(e =>
         {
@@ -753,45 +755,9 @@ public class XooDbContext : DbContext
         modelBuilder.Entity<HeroDefinition>().HasData(heroDefinitions);
     }
 
-    private void SeedIndependentStoriesDataFromJson(ModelBuilder modelBuilder)
-    {
-        try
-        {
-            Console.WriteLine("[SEEDING] Starting independent stories seeding...");
-            var seedService = new SeedDataService();
-            
-            Console.WriteLine("[SEEDING] Loading independent stories...");
-            var independentStories = LoadDataSync(() => seedService.LoadIndependentStoriesAsync());
-            Console.WriteLine($"[SEEDING] Loaded {independentStories.Count} independent stories");
-            
-            Console.WriteLine("[SEEDING] Adding story definitions to model builder...");
-            modelBuilder.Entity<StoryDefinition>().HasData(independentStories);
-            Console.WriteLine("[SEEDING] Story definitions added to model builder");
-            
-            Console.WriteLine("[SEEDING] Loading independent story tiles...");
-            var independentTiles = seedService.GetIndependentStoryTiles();
-            Console.WriteLine($"[SEEDING] Loaded {independentTiles.Count} independent story tiles");
-            
-            Console.WriteLine("[SEEDING] Adding story tiles to model builder...");
-            modelBuilder.Entity<StoryTile>().HasData(independentTiles);
-            Console.WriteLine("[SEEDING] Story tiles added to model builder");
-            
-            Console.WriteLine("[SEEDING] Loading story translations...");
-            var storyTranslations = LoadDataSync(() => seedService.LoadIndependentStoryTranslationsAsync(independentStories));
-            Console.WriteLine($"[SEEDING] Loaded {storyTranslations.Count} story translations");
-            
-            Console.WriteLine("[SEEDING] Adding story translations to model builder...");
-            modelBuilder.Entity<StoryDefinitionTranslation>().HasData(storyTranslations);
-            Console.WriteLine("[SEEDING] Story translations added to model builder");
-            
-            Console.WriteLine("[SEEDING] Independent stories seeding completed successfully");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[SEEDING ERROR] Failed to load independent stories seed data: {ex.Message}");
-            Console.WriteLine($"[SEEDING ERROR] Stack trace: {ex.StackTrace}");
-            throw new InvalidOperationException("Failed to load independent stories seed data from JSON files", ex);
-        }
-    }
+    // REMOVED: SeedIndependentStoriesDataFromJson method
+    // Independent stories are now seeded via StoriesRepository.SeedIndependentStoriesAsync()
+    // which uses SaveChanges() instead of HasData() to allow navigation properties.
+    // This method was removed because HasData() cannot handle entities with navigation properties.
 
 }

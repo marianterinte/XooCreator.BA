@@ -5,7 +5,8 @@ public enum TokenFamily
     Personality,
     Alchemy,
     Discovery,
-    Generative
+    Generative,
+    Learning
 }
 
 

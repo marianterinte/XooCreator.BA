@@ -523,8 +523,11 @@ public class StoriesRepository : IStoriesRepository
             CoverImageUrl = seedData.CoverImageUrl,
             StoryTopic = seedData.Category,
             SortOrder = seedData.SortOrder,
-            StoryType = DetermineStoryType(seedData.StoryId, seedData.Category),
+            StoryType = seedData.StoryType.HasValue 
+                ? (StoryType)seedData.StoryType.Value 
+                : StoryType.AlchimaliaEpic, // Default to AlchimaliaEpic if not specified
             Status = StoryStatus.Published,
+            IsActive = true, // Explicitly set IsActive for independent stories
             CreatedBy = null,
             UpdatedBy = null
         };
@@ -772,22 +775,11 @@ public class StoriesRepository : IStoriesRepository
             "Alchemy" => TokenFamily.Alchemy,
             "Discovery" => TokenFamily.Discovery,
             "Generative" => TokenFamily.Generative,
+            "Learning" => TokenFamily.Discovery, // Learning tokens map to Discovery family
             _ => TokenFamily.Personality
         };
     }
 
-    private static StoryType DetermineStoryType(string storyId, string legacyCategory)
-    {
-        if (storyId.StartsWith("learn-to-read", StringComparison.OrdinalIgnoreCase))
-        {
-            return StoryType.Indie;
-        }
-        if (legacyCategory.Equals("independent", StringComparison.OrdinalIgnoreCase))
-        {
-            return StoryType.Indie;
-        }
-        return StoryType.AlchimaliaEpic;
-    }
 
     public async Task<bool> StoryIdExistsAsync(string storyId)
     {

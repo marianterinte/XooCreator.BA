@@ -4,6 +4,8 @@
   "coverImageUrl": "images/tol/stories/pp-prietenul-pierdut/0.cover.png",
   "category": "terra",
   "sortOrder": 1,
+  "storyType": 1,
+  "price": 0,
   "unlockedStoryHeroes": [],
   "tiles": [
     {
