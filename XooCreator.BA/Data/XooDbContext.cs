@@ -69,6 +69,9 @@ public class XooDbContext : DbContext
             e.HasIndex(x => x.Auth0Id).IsUnique();
             e.Property(x => x.Id).ValueGeneratedOnAdd();
             e.Property(x => x.Name).HasMaxLength(100).IsRequired();
+            e.Property(x => x.FirstName).HasMaxLength(100).IsRequired();
+            e.Property(x => x.LastName).HasMaxLength(100).IsRequired();
+            e.Property(x => x.Role).IsRequired();
             e.Property(x => x.Email).HasMaxLength(256).IsRequired();
             e.Property(x => x.Auth0Id).HasMaxLength(256).IsRequired();
             e.Property(x => x.Picture).HasMaxLength(512);
@@ -442,7 +445,10 @@ public class XooDbContext : DbContext
                 Id = testUserId,
                 Auth0Id = "test-user-sub",
                 Name = "Test User",
+                FirstName = "Test",
+                LastName = "User",
                 Email = "test@example.com",
+                Role = Enums.UserRole.Reader,
                 CreatedAt = DateTime.UtcNow,
                 LastLoginAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -452,7 +458,10 @@ public class XooDbContext : DbContext
                 Id = marianUserId,
                 Auth0Id = "marian-test-sub",
                 Name = "Marian",
+                FirstName = "Marian",
+                LastName = "",
                 Email = "marian@example.com",
+                Role = Enums.UserRole.Creator,
                 CreatedAt = DateTime.UtcNow,
                 LastLoginAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -462,7 +471,10 @@ public class XooDbContext : DbContext
                 Id = systemAdminUserId,
                 Auth0Id = "alchimalia-admin-sub",
                 Name = "Marian Teacher",
+                FirstName = "Marian",
+                LastName = "Teacher",
                 Email = "alchimalia@admin.com",
+                Role = Enums.UserRole.Admin,
                 CreatedAt = DateTime.UtcNow,
                 LastLoginAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow

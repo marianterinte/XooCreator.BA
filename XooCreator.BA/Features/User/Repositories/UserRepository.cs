@@ -21,9 +21,17 @@ public class UserRepository : IUserRepository
     public async Task<AlchimaliaUser> EnsureAsync(string auth0Id, string name, string email, string? picture = null, CancellationToken ct = default)
     {
         var user = await _db.AlchimaliaUsers.FirstOrDefaultAsync(u => u.Auth0Id == auth0Id, ct);
+        
+        // Parse name into FirstName and LastName (simple split on space)
+        var nameParts = name.Trim().Split(new[] { ' ' }, 2, StringSplitOptions.RemoveEmptyEntries);
+        var firstName = nameParts.Length > 0 ? nameParts[0] : name;
+        var lastName = nameParts.Length > 1 ? nameParts[1] : string.Empty;
+        
         if (user != null) 
         {
             user.Name = name;
+            user.FirstName = firstName;
+            user.LastName = lastName;
             user.Email = email;
             user.Picture = picture;
             user.LastLoginAt = DateTime.UtcNow;
@@ -35,9 +43,12 @@ public class UserRepository : IUserRepository
         user = new AlchimaliaUser { 
             Id = Guid.NewGuid(), 
             Auth0Id = auth0Id, 
-            Name = name, 
+            Name = name,
+            FirstName = firstName,
+            LastName = lastName,
             Email = email,
             Picture = picture,
+            Role = Data.Enums.UserRole.Reader, // Default role
             CreatedAt = DateTime.UtcNow,
             LastLoginAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow

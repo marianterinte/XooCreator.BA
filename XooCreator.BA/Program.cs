@@ -116,6 +116,8 @@ builder.Services.AddDbContext<XooDbContext>(options =>
 });
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<XooCreator.BA.Features.UserAdministration.Repositories.IUserAdministrationRepository, XooCreator.BA.Features.UserAdministration.Repositories.UserAdministrationRepository>();
+builder.Services.AddScoped<XooCreator.BA.Features.UserAdministration.Services.IUserAdministrationService, XooCreator.BA.Features.UserAdministration.Services.UserAdministrationService>();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IAuth0UserService, Auth0UserService>();
