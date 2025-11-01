@@ -1,0 +1,58 @@
+{
+  "storyId": "learn-to-read-s1",
+  "title": "Puf-Puf és az elveszett barát",
+  "coverImageUrl": "images/tol/stories/learn-to-read-s1/0.cover.png",
+  "category": "terra",
+  "sortOrder": 1,
+  "unlockedStoryHeroes": [],
+  "tiles": [
+    {
+      "tileId": "1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Puf-Puf útnak indul",
+      "text": "Puf-Puf egy kicsi, pelyhes cica. Esik az eső az erdő felett. Narancssárga köpönyeget visel. „Milyen pompás az eső illata!” – mondja Puf-Puf.",
+      "imageUrl": "images/tol/stories/learn-to-read-s1/1.start.png"
+    },
+    {
+      "tileId": "2",
+      "type": "page",
+      "sortOrder": 2,
+      "caption": "Egy kis sírás",
+      "text": "Hallja: „Pfff… pfff…” Puf-Puf megáll. „Ki sír?” A bokorból egy kis nyuszi bújik elő.",
+      "imageUrl": "images/tol/stories/learn-to-read-s1/2.cry.png"
+    },
+    {
+      "tileId": "3",
+      "type": "page",
+      "sortOrder": 3,
+      "caption": "Az elveszett barát",
+      "text": "„Elvesztem” – mondja a nyuszi. „Ne félj” – mondja Puf-Puf. „Segítek megtalálni az utat hazáig!”",
+      "imageUrl": "images/tol/stories/learn-to-read-s1/3.lost-friend.png"
+    },
+    {
+      "tileId": "4",
+      "type": "page",
+      "sortOrder": 4,
+      "caption": "Az esőben és az erdőben",
+      "text": "Együtt mennek az erdőben. Az eső csepereg a köveken. Puf-Puf tartja az esernyőt. A nyuszi ugrál a pocsolyákban: „Plip-plop!”",
+      "imageUrl": "images/tol/stories/learn-to-read-s1/4.rain-forest.png"
+    },
+    {
+      "tileId": "5",
+      "type": "page",
+      "sortOrder": 5,
+      "caption": "A tisztás a tollal",
+      "text": "Egy virágos tisztásra érnek. A földön egy fényes toll fekszik. „Ez a tisztás közel van az otthonomhoz!” – mondja a nyuszi vidáman.",
+      "imageUrl": "images/tol/stories/learn-to-read-s1/5.meadow.png"
+    },
+    {
+      "tileId": "6",
+      "type": "page",
+      "sortOrder": 6,
+      "caption": "A barátság meséje",
+      "text": "„Köszönöm, Puf-Puf!” „A barátok segítenek egymásnak” – mondja a cica. Az eső eláll. A szivárvány ragyog. **P**, mint Puf-Puf, **P**, mint pajtás!",
+      "imageUrl": "images/tol/stories/learn-to-read-s1/6.end.png"
+    }
+  ]
+}

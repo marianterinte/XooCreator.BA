@@ -1,0 +1,58 @@
+{
+  "storyId": "learn-to-read-s1",
+  "title": "Puf-Puf and the Lost Friend",
+  "coverImageUrl": "images/tol/stories/learn-to-read-s1/0.cover.png",
+  "category": "terra",
+  "sortOrder": 1,
+  "unlockedStoryHeroes": [],
+  "tiles": [
+    {
+      "tileId": "1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Puf-Puf starts",
+      "text": "Puf-Puf is a small, fluffy cat. It rains over the forest. He wears an orange poncho. “The perfume of rain is so pleasant!” says Puf-Puf.",
+      "imageUrl": "images/tol/stories/learn-to-read-s1/1.start.png"
+    },
+    {
+      "tileId": "2",
+      "type": "page",
+      "sortOrder": 2,
+      "caption": "A little cry",
+      "text": "He hears: “Pfff… pfff…” Puf-Puf stops. “Who’s crying?” From the bush, a small bunny appears.",
+      "imageUrl": "images/tol/stories/learn-to-read-s1/2.cry.png"
+    },
+    {
+      "tileId": "3",
+      "type": "page",
+      "sortOrder": 3,
+      "caption": "The lost friend",
+      "text": "“I got lost,” says the bunny. “Don’t worry,” says Puf-Puf. “I’ll help you find the path home!”",
+      "imageUrl": "images/tol/stories/learn-to-read-s1/3.lost-friend.png"
+    },
+    {
+      "tileId": "4",
+      "type": "page",
+      "sortOrder": 4,
+      "caption": "Through rain and forest",
+      "text": "They walk together through the forest. The rain drips on the pebbles. Puf-Puf holds the umbrella. The bunny jumps in puddles: “Plip-plop!”",
+      "imageUrl": "images/tol/stories/learn-to-read-s1/4.rain-forest.png"
+    },
+    {
+      "tileId": "5",
+      "type": "page",
+      "sortOrder": 5,
+      "caption": "The meadow with a feather",
+      "text": "They reach a meadow full of flowers. On the ground lies a shiny feather. “This meadow is near my home!” says the bunny, smiling proudly.",
+      "imageUrl": "images/tol/stories/learn-to-read-s1/5.meadow.png"
+    },
+    {
+      "tileId": "6",
+      "type": "page",
+      "sortOrder": 6,
+      "caption": "The story of friendship",
+      "text": "“Thank you, Puf-Puf!” “Friends help each other,” says the kitten. The rain stops. A rainbow shines above. **P** for Puf-Puf, **P** for partner, **P** for peace!",
+      "imageUrl": "images/tol/stories/learn-to-read-s1/6.end.png"
+    }
+  ]
+}
