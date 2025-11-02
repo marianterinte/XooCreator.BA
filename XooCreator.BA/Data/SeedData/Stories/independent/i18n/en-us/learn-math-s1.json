@@ -1,7 +1,7 @@
 {
   "storyId": "learn-math-s1",
-  "title": "Grubot and the Lost Numbers",
-  "coverImageUrl": "images/tol/stories/learn-math-s1/0.cover.png",
+  "title": "Problems on Mechankia",
+  "coverImageUrl": "images/tales-of-alchimalia/stories/learn-math-s1/0.cover.png",
   "category": "mechanika",
   "sortOrder": 1,
   "storyType": 1,
@@ -14,7 +14,7 @@
       "sortOrder": 1,
       "caption": "Alarm in the Control Tower",
       "text": "On planet Mechanika, a red alarm blinked in the Control Tower. “Alert! Generator North-3 stopped pulsing!” Without it, the robot citizens cannot recharge. Grubot straightened his antennas: “I’ll reach the Heart of Energy and bring it back online. Step by step.”",
-      "imageUrl": "images/tol/stories/learn-math-s1/1.workshop.png"
+      "imageUrl": "images/tales-of-alchimalia/stories/learn-math-s1/1.workshop.png"
     },
     {
       "tileId": "2",
@@ -22,7 +22,7 @@
       "sortOrder": 2,
       "caption": "Corridor of Light",
       "text": "The path to the Heart passes through a tunnel of colored lamps. Each lamp glows only when the right energy is added. “Too little and it fades, too much and it pops,” said Grubot. “Balance first, then move on.”",
-      "imageUrl": "images/tol/stories/learn-math-s1/2.bridge.png"
+      "imageUrl": "images/tales-of-alchimalia/stories/learn-math-s1/2.bridge.png"
     },
     {
       "tileId": "q1",
@@ -30,7 +30,7 @@
       "sortOrder": 3,
       "caption": "",
       "text": "",
-      "imageUrl": "images/tol/stories/learn-math-s1/3.quiz.png",
+      "imageUrl": "images/tales-of-alchimalia/stories/learn-math-s1/3.quiz.png",
       "question": "On the panel, 3 green sparks are lit. Grubot adds 2 more to match the lamp’s pattern. How many sparks glow now?",
       "answers": [
         {
@@ -66,7 +66,7 @@
       "sortOrder": 4,
       "caption": "Chamber of Balance",
       "text": "Next room: gauges and pipes hiss softly. A message flickers: “Pressure too high. Reduce to safe level.” Grubot taps the valves. “Not too much, not too little—just right.”",
-      "imageUrl": "images/tol/stories/learn-math-s1/4.tower.png"
+      "imageUrl": "images/tales-of-alchimalia/stories/learn-math-s1/4.tower.png"
     },
     {
       "tileId": "q2",
@@ -74,7 +74,7 @@
       "sortOrder": 5,
       "caption": "",
       "text": "",
-      "imageUrl": "images/tol/stories/learn-math-s1/5.quiz.png",
+      "imageUrl": "images/tales-of-alchimalia/stories/learn-math-s1/5.quiz.png",
       "question": "The gauge shows 10 units of pressure. Grubot releases 4 units to reach the safe mark. What number stays on the gauge?",
       "answers": [
         {
@@ -110,7 +110,7 @@
       "sortOrder": 6,
       "caption": "Hall of Twin Turbines",
       "text": "Deeper inside, two giant turbines hum in the dark. Rings of tiny lights circle each rotor. “I must sync their rhythm,” thinks Grubot. “All lights pulsing together.”",
-      "imageUrl": "images/tol/stories/learn-math-s1/6.portals.png"
+      "imageUrl": "images/tales-of-alchimalia/stories/learn-math-s1/6.portals.png"
     },
     {
       "tileId": "q3",
@@ -118,7 +118,7 @@
       "sortOrder": 7,
       "caption": "",
       "text": "",
-      "imageUrl": "images/tol/stories/learn-math-s1/7.quiz.png",
+      "imageUrl": "images/tales-of-alchimalia/stories/learn-math-s1/7.quiz.png",
       "question": "Each turbine has 2 rings. Each ring has 3 lights that must glow together. How many lights should glow in total on both turbines?",
       "answers": [
         {
@@ -154,7 +154,7 @@
       "sortOrder": 8,
       "caption": "Crystal Sharing Gate",
       "text": "A tall gate blocks the core. Four blue crystals wait for a fair share of power. “If I divide the flow evenly, the lock will open,” says Grubot. “Equal light for every crystal.”",
-      "imageUrl": "images/tol/stories/learn-math-s1/8.return.png"
+      "imageUrl": "images/tales-of-alchimalia/stories/learn-math-s1/8.return.png"
     },
     {
       "tileId": "q4",
@@ -162,7 +162,7 @@
       "sortOrder": 9,
       "caption": "",
       "text": "",
-      "imageUrl": "images/tol/stories/learn-math-s1/9.quiz.png",
+      "imageUrl": "images/tales-of-alchimalia/stories/learn-math-s1/9.quiz.png",
       "question": "There are 12 energy orbs to send equally to 3 crystals. How many orbs does each crystal receive?",
       "answers": [
         {

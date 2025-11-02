@@ -1,7 +1,7 @@
 {
   "storyId": "learn-math-s1",
-  "title": "Grubot și Numerele Pierdute",
-  "coverImageUrl": "images/tol/stories/learn-math-s1/0.cover.png",
+  "title": "Probleme pe Mechankia",
+  "coverImageUrl": "images/tales-of-alchimalia/stories/learn-math-s1/0.cover.png",
   "category": "mechanika",
   "sortOrder": 1,
   "storyType": 1,
@@ -14,7 +14,7 @@
       "sortOrder": 1,
       "caption": "Alarm în Turnul de Control",
       "text": "Pe planeta Mechanika, o alarmă roșie a clipit în Turnul de Control. \"Alertă! Generatorul North-3 a încetat să pulseze!\" Fără el, cetățenii roboți nu se pot reîncărca. Grubot și-a îndreptat antenele: \"Voi ajunge la Inima Energiei și o voi repune în funcțiune. Pas cu pas.\"",
-      "imageUrl": "images/tol/stories/learn-math-s1/1.workshop.png"
+      "imageUrl": "images/tales-of-alchimalia/stories/learn-math-s1/1.workshop.png"
     },
     {
       "tileId": "2",
@@ -22,7 +22,7 @@
       "sortOrder": 2,
       "caption": "Coridorul Luminii",
       "text": "Drumul către Inimă trece printr-un tunel de lămpi colorate. Fiecare lampă strălucește doar când se adaugă energia potrivită. \"Prea puțin și se estompează, prea mult și se sparge,\" a spus Grubot. \"Echilibrul mai întâi, apoi înainte.\"",
-      "imageUrl": "images/tol/stories/learn-math-s1/2.bridge.png"
+      "imageUrl": "images/tales-of-alchimalia/stories/learn-math-s1/2.bridge.png"
     },
     {
       "tileId": "q1",
@@ -30,7 +30,7 @@
       "sortOrder": 3,
       "caption": "",
       "text": "",
-      "imageUrl": "images/tol/stories/learn-math-s1/3.quiz.png",
+      "imageUrl": "images/tales-of-alchimalia/stories/learn-math-s1/3.quiz.png",
       "question": "Pe panou, 3 scântei verzi sunt aprinse. Grubot adaugă încă 2 pentru a se potrivi cu modelul lămpii. Câte scântei strălucesc acum?",
       "answers": [
         {
@@ -66,7 +66,7 @@
       "sortOrder": 4,
       "caption": "Camera Echilibrului",
       "text": "Următoarea încăpere: manometre și țevi șuieră încet. Un mesaj clipă: \"Presiune prea mare. Reduceți la nivel sigur.\" Grubot bate pe supape. \"Nu prea mult, nu prea puțin—exact potrivit.\"",
-      "imageUrl": "images/tol/stories/learn-math-s1/4.tower.png"
+      "imageUrl": "images/tales-of-alchimalia/stories/learn-math-s1/4.tower.png"
     },
     {
       "tileId": "q2",
@@ -74,7 +74,7 @@
       "sortOrder": 5,
       "caption": "",
       "text": "",
-      "imageUrl": "images/tol/stories/learn-math-s1/5.quiz.png",
+      "imageUrl": "images/tales-of-alchimalia/stories/learn-math-s1/5.quiz.png",
       "question": "Manometrul arată 10 unități de presiune. Grubot eliberează 4 unități pentru a ajunge la semnul sigur. Ce număr rămâne pe manometru?",
       "answers": [
         {
@@ -110,7 +110,7 @@
       "sortOrder": 6,
       "caption": "Sala Turbinelor Gemeni",
       "text": "Mai adânc în interior, două turbine uriașe zumzăie în întuneric. Inele de lumini mici înconjoară fiecare rotor. \"Trebuie să le sincronizez ritmul,\" se gândește Grubot. \"Toate luminile pulsând împreună.\"",
-      "imageUrl": "images/tol/stories/learn-math-s1/6.portals.png"
+      "imageUrl": "images/tales-of-alchimalia/stories/learn-math-s1/6.portals.png"
     },
     {
       "tileId": "q3",
@@ -118,7 +118,7 @@
       "sortOrder": 7,
       "caption": "",
       "text": "",
-      "imageUrl": "images/tol/stories/learn-math-s1/7.quiz.png",
+      "imageUrl": "images/tales-of-alchimalia/stories/learn-math-s1/7.quiz.png",
       "question": "Fiecare turbină are 2 inele. Fiecare inel are 3 lumini care trebuie să strălucească împreună. Câte lumini ar trebui să strălucească în total pe ambele turbine?",
       "answers": [
         {
@@ -154,7 +154,7 @@
       "sortOrder": 8,
       "caption": "Poarta Distribuției Cristalelor",
       "text": "O poartă înaltă blochează miezul. Patru cristale albastre așteaptă o parte echitabilă de putere. \"Dacă împart fluxul în mod egal, lacătul se va deschide,\" spune Grubot. \"Lumină egală pentru fiecare cristal.\"",
-      "imageUrl": "images/tol/stories/learn-math-s1/8.return.png"
+      "imageUrl": "images/tales-of-alchimalia/stories/learn-math-s1/8.return.png"
     },
     {
       "tileId": "q4",
@@ -162,7 +162,7 @@
       "sortOrder": 9,
       "caption": "",
       "text": "",
-      "imageUrl": "images/tol/stories/learn-math-s1/9.quiz.png",
+      "imageUrl": "images/tales-of-alchimalia/stories/learn-math-s1/9.quiz.png",
       "question": "Sunt 12 sfere de energie de trimis în mod egal la 3 cristale. Câte sfere primește fiecare cristal?",
       "answers": [
         {
