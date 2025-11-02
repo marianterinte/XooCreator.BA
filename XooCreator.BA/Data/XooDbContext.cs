@@ -435,37 +435,9 @@ public class XooDbContext : DbContext
             e.HasIndex(x => x.HeroId).IsUnique();
         });
 
-        var testUserId = Guid.Parse("11111111-1111-1111-1111-111111111111");
-        var marianUserId = Guid.Parse("22222222-2222-2222-2222-222222222222");
         var systemAdminUserId = Guid.Parse("33333333-3333-3333-3333-333333333333");
         
         modelBuilder.Entity<AlchimaliaUser>().HasData(
-            new AlchimaliaUser
-            {
-                Id = testUserId,
-                Auth0Id = "test-user-sub",
-                Name = "Test User",
-                FirstName = "Test",
-                LastName = "User",
-                Email = "test@example.com",
-                Role = Enums.UserRole.Reader,
-                CreatedAt = DateTime.UtcNow,
-                LastLoginAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            },
-            new AlchimaliaUser
-            {
-                Id = marianUserId,
-                Auth0Id = "marian-test-sub",
-                Name = "Marian",
-                FirstName = "Marian",
-                LastName = "",
-                Email = "marian@example.com",
-                Role = Enums.UserRole.Creator,
-                CreatedAt = DateTime.UtcNow,
-                LastLoginAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            },
             new AlchimaliaUser
             {
                 Id = systemAdminUserId,
@@ -491,63 +463,9 @@ public class XooDbContext : DbContext
         modelBuilder.Entity<CreditWallet>().HasData(
             new CreditWallet 
             { 
-                UserId = testUserId, 
-                Balance = 5, 
-                UpdatedAt = DateTime.UtcNow 
-            },
-            new CreditWallet 
-            { 
-                UserId = marianUserId, 
-                Balance = 5, 
-                UpdatedAt = DateTime.UtcNow 
-            },
-            new CreditWallet 
-            { 
                 UserId = systemAdminUserId, 
                 Balance = 1000, 
                 UpdatedAt = DateTime.UtcNow 
-            }
-        );
-
-
-
-        modelBuilder.Entity<HeroProgress>().HasData(
-            new HeroProgress
-            {
-                Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
-                UserId = testUserId,
-                HeroId = "seed",
-                HeroType = "HERO_TREE_TRANSFORMATION",
-                UnlockedAt = DateTime.UtcNow
-            },
-            new HeroProgress
-            {
-                Id = Guid.Parse("22222222-2222-2222-2222-222222222222"),
-                UserId = marianUserId,
-                HeroId = "seed",
-                HeroType = "HERO_TREE_TRANSFORMATION",
-                UnlockedAt = DateTime.UtcNow
-            }
-        );
-
-        modelBuilder.Entity<CreditTransaction>().HasData(
-            new CreditTransaction
-            {
-                Id = Guid.Parse("33333333-3333-3333-3333-333333333333"),
-                UserId = marianUserId,
-                Amount = 15,
-                Type = CreditTransactionType.Purchase,
-                Reference = "test-purchase-marian",
-                CreatedAt = DateTime.UtcNow.AddDays(-1)
-            },
-            new CreditTransaction
-            {
-                Id = Guid.Parse("44444444-4444-4444-4444-444444444444"),
-                UserId = marianUserId,
-                Amount = -5,
-                Type = CreditTransactionType.Spend,
-                Reference = "test-generation",
-                CreatedAt = DateTime.UtcNow.AddHours(-2)
             }
         );
 
