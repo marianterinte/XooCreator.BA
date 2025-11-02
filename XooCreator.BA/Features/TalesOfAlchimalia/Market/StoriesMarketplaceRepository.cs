@@ -533,6 +533,16 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             .OrderBy(l => l)
             .ToList() ?? new List<string>();
 
+        // Get author name from database
+        string? authorName = null;
+        if (smi.Story.CreatedBy.HasValue)
+        {
+            authorName = _context.Set<AlchimaliaUser>()
+                .Where(u => u.Id == smi.Story.CreatedBy.Value)
+                .Select(u => u.Name)
+                .FirstOrDefault();
+        }
+
         // Get summary from JSON file for the current locale, or use StoryDefinition.Summary, or empty string
         var summary = GetSummaryFromJson(smi.Story.StoryId, locale) 
             ?? smi.Story.Summary 
@@ -544,6 +554,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             Title = title,
             CoverImageUrl = smi.Story.CoverImageUrl,
             CreatedBy = smi.Story.CreatedBy,
+            CreatedByName = authorName,
             Summary = summary,
             PriceInCredits = smi.PriceInCredits,
             AgeRating = smi.AgeRating,
