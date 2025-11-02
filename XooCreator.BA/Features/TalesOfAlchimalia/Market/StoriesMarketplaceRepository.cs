@@ -441,6 +441,11 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
                 .FirstOrDefault();
         }
 
+        // Get summary from JSON file for the current locale, or use StoryDefinition.Summary, or empty string
+        var summary = GetSummaryFromJson(smi.Story.StoryId, normalizedLocale) 
+            ?? smi.Story.Summary 
+            ?? string.Empty;
+
         return new StoryDetailsDto
         {
             Id = smi.StoryId,
@@ -448,7 +453,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             CoverImageUrl = smi.Story.CoverImageUrl,
             CreatedBy = smi.Story.CreatedBy,
             CreatedByName = authorName,
-            Summary = GenerateDetailedSummary(smi.Story, normalizedLocale),
+            Summary = summary,
             PriceInCredits = smi.PriceInCredits,
             Region = smi.Region,
             AgeRating = smi.AgeRating,
@@ -478,19 +483,42 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         };
     }
 
-    private string GenerateDetailedSummary(StoryDefinition story, string locale)
+    private string? GetSummaryFromJson(string storyId, string locale)
     {
-        // Locale should already be normalized when passed here (from MapToStoryDetailsDto)
-        // Generate a more detailed summary for story details
-        var firstTile = story.Tiles.FirstOrDefault();
-        if (firstTile?.Translations?.FirstOrDefault(t => t.LanguageCode == locale)?.Text != null)
+        try
         {
-            var text = firstTile.Translations.First(t => t.LanguageCode == locale).Text;
-            return text.Length > 300 ? text.Substring(0, 300) + "..." : text;
+            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            var candidates = new[]
+            {
+                Path.Combine(baseDir, "Data", "SeedData", "Stories", "independent", "i18n", locale, $"{storyId}.json"),
+                Path.Combine(baseDir, "Data", "SeedData", "Stories", "i18n", locale, $"{storyId}.json")
+            };
+
+            foreach (var filePath in candidates)
+            {
+                if (!File.Exists(filePath)) continue;
+                
+                var json = File.ReadAllText(filePath);
+                var data = JsonSerializer.Deserialize<StorySeedDataJsonProbe>(json, new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    PropertyNameCaseInsensitive = true
+                });
+                
+                if (!string.IsNullOrWhiteSpace(data?.Summary))
+                {
+                    return data.Summary;
+                }
+            }
         }
+        catch { }
         
-        var topicText = story.StoryTopic ?? "Unknown";
-        return $"Discover the adventures in {story.Title} - {topicText}. This story contains {story.Tiles.Count} interactive tiles.";
+        return null;
+    }
+
+    private sealed class StorySeedDataJsonProbe
+    {
+        public string? Summary { get; set; }
     }
 
     private StoryMarketplaceItemDto MapToMarketplaceItemDto(StoryMarketplaceInfo smi, string locale)
@@ -505,13 +533,18 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             .OrderBy(l => l)
             .ToList() ?? new List<string>();
 
+        // Get summary from JSON file for the current locale, or use StoryDefinition.Summary, or empty string
+        var summary = GetSummaryFromJson(smi.Story.StoryId, locale) 
+            ?? smi.Story.Summary 
+            ?? string.Empty;
+
         return new StoryMarketplaceItemDto
         {
             Id = smi.StoryId,
             Title = title,
             CoverImageUrl = smi.Story.CoverImageUrl,
             CreatedBy = smi.Story.CreatedBy,
-            Summary = GenerateSummary(smi.Story, locale), // locale is already normalized in MapToMarketplaceItemDto
+            Summary = summary,
             PriceInCredits = smi.PriceInCredits,
             AgeRating = smi.AgeRating,
             Characters = smi.Characters,
@@ -637,10 +670,4 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         return 8; // Default reading time
     }
 
-    private string GenerateSummary(StoryDefinition story, string locale)
-    {
-        // Generate a simple summary based on story title and category
-        var topicText = story.StoryTopic ?? "Unknown";
-        return $"Discover the adventures in {story.Title} - {topicText}";
-    }
 }

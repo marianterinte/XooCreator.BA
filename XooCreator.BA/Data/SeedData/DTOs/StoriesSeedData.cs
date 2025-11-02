@@ -13,6 +13,7 @@ public class StorySeedData
     public string? CoverImageUrl { get; set; }
     public string Category { get; set; } = string.Empty;
     public string? StoryTopic { get; set; } // Story topic/theme (e.g., "Matematică", "Literatură")
+    public string? Summary { get; set; } // Story summary/description
     public int SortOrder { get; set; }
     public int? StoryType { get; set; } // StoryType enum value: 0=AlchimaliaEpic (default), 1=Indie
     public int? Price { get; set; } // Price in credits. If not specified, default pricing logic applies

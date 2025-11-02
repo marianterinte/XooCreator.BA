@@ -1,11 +1,12 @@
 {
   "storyId": "learn-math-s1",
-  "title": "Problems on Mechankia",
+  "title": "Trouble on Mechankia",
   "coverImageUrl": "images/tales-of-alchimalia/stories/learn-math-s1/0.cover.png",
   "category": "mechanika",
   "sortOrder": 1,
   "storyType": 1,
   "storyTopic": "Mathematics",
+  "summary": "Help Grubot to resolve problems on Mechanika.",
   "price": 0,
   "unlockedStoryHeroes": [],
   "tiles": [

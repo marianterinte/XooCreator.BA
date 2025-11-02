@@ -6,6 +6,7 @@ public class StoryDefinitionSeedData
     public string Title { get; set; } = string.Empty;
     public string? CoverImageUrl { get; set; }
     public string Category { get; set; } = string.Empty;
+    public string? Summary { get; set; } // Story summary/description
     public int SortOrder { get; set; }
     public List<string> UnlockedStoryHeroes { get; set; } = new();
     public List<StoryTileSeedData> Tiles { get; set; } = new();
