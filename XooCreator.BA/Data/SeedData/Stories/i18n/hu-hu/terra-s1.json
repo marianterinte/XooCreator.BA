@@ -2,8 +2,7 @@
   "storyId": "terra-s1",
   "title": "A Farm Árnyéka",
   "coverImageUrl": "images/tol/stories/terra-s1/0.Cover.png",
-  "category": "terra",
-  "sortOrder": 1,
+    "sortOrder": 1,
   "tiles": [
     {
       "tileId": "1",

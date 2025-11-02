@@ -2,8 +2,7 @@
   "storyId": "aetherion-s2",
   "title": "Aetherion – Atelierul de Aripi",
   "coverImageUrl": "images/worlds/aetherion.jpg",
-  "category": "main",
-  "sortOrder": 27,
+    "sortOrder": 27,
   "tiles": [
     {
       "tileId": "p1",

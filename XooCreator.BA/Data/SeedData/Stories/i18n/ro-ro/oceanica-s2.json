@@ -2,8 +2,7 @@
   "storyId": "oceanica-s2",
   "title": "Oceanica – Insulele Plutitoare",
   "coverImageUrl": "images/worlds/oceanica.jpg",
-  "category": "main",
-  "sortOrder": 9,
+    "sortOrder": 9,
   "tiles": [
     {
       "tileId": "p1",

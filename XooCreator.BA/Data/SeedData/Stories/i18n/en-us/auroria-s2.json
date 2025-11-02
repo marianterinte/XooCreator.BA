@@ -2,8 +2,7 @@
   "storyId": "auroria-s2",
   "title": "Auroria – Atelierul de Spice",
   "coverImageUrl": "images/worlds/terra.jpg",
-  "category": "main",
-  "sortOrder": 5,
+    "sortOrder": 5,
   "tiles": [
     {
       "tileId": "p1",

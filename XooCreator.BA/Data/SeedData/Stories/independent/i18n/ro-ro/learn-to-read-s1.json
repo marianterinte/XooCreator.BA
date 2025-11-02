@@ -2,7 +2,7 @@
   "storyId": "learn-to-read-s1",
   "title": "Puf-Puf și prietenul pierdut",
   "coverImageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/0.cover.png",
-  "category": "terra",
+  "storyTopic": "Citit",
   "sortOrder": 1,
   "storyType": 1,
   "summary": "Exersează citirea în timpul acestei povești în care Puf-Puf descoperă un prieten nou.",
@@ -39,7 +39,7 @@
       "sortOrder": 4,
       "caption": "Prin ploaie și pădure",
       "text": "Merg împreună prin pădure. Ploaia picură pe pietre. Puf-Puf ține umbrela. Iepurașul sare prin bălți: „Plip-plop!”",
-      "imageUrl": "images/tales-of-alchimalia/stories/pp-prietenul_pierdut/4.ploaie-padure.png"
+      "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/4.rain-forest.png"
     },
     {
       "tileId": "5",

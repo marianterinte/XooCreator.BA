@@ -2,8 +2,7 @@
   "storyId": "pyron-s1",
   "title": "Pyron – Nicovala Stelelor",
   "coverImageUrl": "images/worlds/pyron.jpg",
-  "category": "main",
-  "sortOrder": 20,
+    "sortOrder": 20,
   "tiles": [
     {
       "tileId": "p1",

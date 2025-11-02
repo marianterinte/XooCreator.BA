@@ -2,8 +2,7 @@
   "storyId": "verdantia-s1",
   "title": "Verdantia – Grădinile Suspendate",
   "coverImageUrl": "images/worlds/sylvaria.jpg",
-  "category": "main",
-  "sortOrder": 9,
+    "sortOrder": 9,
   "tiles": [
     {
       "tileId": "p1",

@@ -2,7 +2,7 @@
   "storyId": "learn-to-read-s1",
   "title": "Puf-Puf and the Lost Friend",
   "coverImageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/0.cover.png",
-  "category": "terra",
+  "storyTopic": "Reading",
   "sortOrder": 1,
   "storyType": 1,
   "summary": "Practice a reading exercise during this story where Puf-Puf discovers a new friend.",
@@ -14,7 +14,7 @@
       "type": "page",
       "sortOrder": 1,
       "caption": "Puf-Puf starts",
-      "text": "Puf-Puf is a small, fluffy cat. It rains over the forest. He wears an orange poncho. “The perfume of rain is so pleasant!” says Puf-Puf.",
+      "text": "Puf-Puf is a small, fluffy cat. It pours over the forest. He wears an orange poncho. \"The perfume of rain is so pleasant!\" says Puf-Puf.",
       "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/1.start.png"
     },
     {
@@ -30,7 +30,7 @@
       "type": "page",
       "sortOrder": 3,
       "caption": "The lost friend",
-      "text": "“I got lost,” says the bunny. “Don’t worry,” says Puf-Puf. “I’ll help you find the path home!”",
+      "text": "\"I got lost,\" says the bunny. \"Don't worry,\" says Puf-Puf. \"I'll help you find the path home!\"",
       "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/3.lost-friend.png"
     },
     {
@@ -46,7 +46,7 @@
       "type": "page",
       "sortOrder": 5,
       "caption": "The meadow with a feather",
-      "text": "They reach a meadow full of flowers. On the ground lies a shiny feather. “This meadow is near my home!” says the bunny, smiling proudly.",
+      "text": "They reach a pretty meadow full of flowers. On the ground lies a shiny peacock feather. \"This place is near my home!\" says the bunny, smiling proudly.",
       "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/5.meadow.png"
     },
     {

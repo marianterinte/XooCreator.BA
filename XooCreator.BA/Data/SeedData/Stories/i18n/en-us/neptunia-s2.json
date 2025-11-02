@@ -2,8 +2,7 @@
   "storyId": "neptunia-s2",
   "title": "Neptunia – Balenele Luminoase",
   "coverImageUrl": "images/worlds/neptunia.jpg",
-  "category": "main",
-  "sortOrder": 24,
+    "sortOrder": 24,
   "tiles": [
     {
       "tileId": "p1",

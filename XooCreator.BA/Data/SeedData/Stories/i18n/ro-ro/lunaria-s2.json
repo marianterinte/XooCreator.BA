@@ -2,8 +2,7 @@
   "storyId": "lunaria-s2",
   "title": "Semnalul",
   "coverImageUrl": "images/tol/stories/lunaria-s2/0.Cover.png",
-  "category": "terra",
-  "sortOrder": 1,
+    "sortOrder": 1,
   "unlockedStoryHeroes": [],
   "tiles": [
     {

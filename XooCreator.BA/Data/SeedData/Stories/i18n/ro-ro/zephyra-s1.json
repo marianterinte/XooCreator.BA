@@ -2,8 +2,7 @@
   "storyId": "zephyra-s1",
   "title": "Zephyra – Poduri de Vânt",
   "coverImageUrl": "images/worlds/zephyra.jpg",
-  "category": "main",
-  "sortOrder": 17,
+    "sortOrder": 17,
   "tiles": [
     {
       "tileId": "p1",

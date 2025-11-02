@@ -2,8 +2,7 @@
   "storyId": "crystalia-s1",
   "title": "Crystalia – Ecouri Logice",
   "coverImageUrl": "images/worlds/crystalia.jpg",
-  "category": "main",
-  "sortOrder": 14,
+    "sortOrder": 14,
   "tiles": [
     {
       "tileId": "p1",

@@ -273,7 +273,7 @@ public class SeedDataService
                         StoryId = storyData.StoryId,
                         Title = storyData.Title,
                         CoverImageUrl = storyData.CoverImageUrl,
-                        StoryTopic = storyData.Category,
+                        StoryTopic = storyData.StoryTopic ?? string.Empty,
                         Summary = storyData.Summary ?? string.Empty,
                         StoryType = StoryType.Indie,
                         Status = StoryStatus.Published,

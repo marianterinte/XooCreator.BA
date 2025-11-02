@@ -2,10 +2,10 @@
   "storyId": "learn-to-read-s1",
   "title": "Puf-Puf és az elveszett barát",
   "coverImageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/0.cover.png",
-  "category": "terra",
+  "storyTopic": "Olvasás",
   "sortOrder": 1,
   "storyType": 1,
-  "summary": "Gyakorold az olvasást ebben a történetben, ahol Puf-Puf új barátot talál.",
+  "summary": "Gyakorold az olvasást ebben a mesében, ahol Puf-Puf egy új barátot talál.",
   "price": 0,
   "unlockedStoryHeroes": [],
   "tiles": [
@@ -13,49 +13,49 @@
       "tileId": "1",
       "type": "page",
       "sortOrder": 1,
-      "caption": "Puf-Puf útnak indul",
-      "text": "Puf-Puf egy kicsi, pelyhes cica. Esik az eső az erdő felett. Narancssárga köpönyeget visel. „Milyen pompás az eső illata!” – mondja Puf-Puf.",
-      "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/1.start.png"
+      "caption": "Puf-Puf elindul",
+      "text": "Puf-Puf egy pici, puha cica. Párás erdő felett esik az eső. Piros köpenyt visel. „Milyen pompás az eső illata!” – mondja Puf-Puf.",
+      "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/1.pleaca.png"
     },
     {
       "tileId": "2",
       "type": "page",
       "sortOrder": 2,
-      "caption": "Egy kis sírás",
-      "text": "Hallja: „Pfff… pfff…” Puf-Puf megáll. „Ki sír?” A bokorból egy kis nyuszi bújik elő.",
-      "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/2.cry.png"
+      "caption": "Egy pici sírás",
+      "text": "Hallatszik: „Pff… pff…”. Puf-Puf megáll. „Ki pityereg?” – kérdezi. A bokorból egy pici nyuszi bújik elő.",
+      "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/2.planset.png"
     },
     {
       "tileId": "3",
       "type": "page",
       "sortOrder": 3,
-      "caption": "Az elveszett barát",
-      "text": "„Elvesztem” – mondja a nyuszi. „Ne félj” – mondja Puf-Puf. „Segítek megtalálni az utat hazáig!”",
-      "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/3.lost-friend.png"
+      "caption": "Az elveszett pajtás",
+      "text": "„Elvesztem” – mondja a nyuszi. „Ne pityeregj!” – mondja Puf-Puf. „Elkísérlek a patak mentén hazáig!”",
+      "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/3.pierdut.png"
     },
     {
       "tileId": "4",
       "type": "page",
       "sortOrder": 4,
-      "caption": "Az esőben és az erdőben",
-      "text": "Együtt mennek az erdőben. Az eső csepereg a köveken. Puf-Puf tartja az esernyőt. A nyuszi ugrál a pocsolyákban: „Plip-plop!”",
+      "caption": "Párás patak mellett",
+      "text": "Együtt mennek az erdőben. A patak partján pocsolyák csillognak. Puf-Puf tartja az esernyőt. A nyuszi pancsol: „Plip-plop!”",
       "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/4.rain-forest.png"
     },
     {
       "tileId": "5",
       "type": "page",
       "sortOrder": 5,
-      "caption": "A tisztás a tollal",
-      "text": "Egy virágos tisztásra érnek. A földön egy fényes toll fekszik. „Ez a tisztás közel van az otthonomhoz!” – mondja a nyuszi vidáman.",
-      "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/5.meadow.png"
+      "caption": "A pillangós pázsit",
+      "text": "Egy virágos pázsitra érnek. A fűben egy pici, puha toll fekszik. „Ez a pázsit már közel van!” – mondja a nyuszi. Mosolyog, mint a nap.",
+      "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/5.poiana.png"
     },
     {
       "tileId": "6",
       "type": "page",
       "sortOrder": 6,
-      "caption": "A barátság meséje",
-      "text": "„Köszönöm, Puf-Puf!” „A barátok segítenek egymásnak” – mondja a cica. Az eső eláll. A szivárvány ragyog. **P**, mint Puf-Puf, **P**, mint pajtás!",
-      "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/6.end.png"
+      "caption": "A pajtás története",
+      "text": "„Köszönöm, Puf-Puf!” – mondja a nyuszi. „A pajtások segítenek egymásnak!” – feleli a cica. Az eső eláll, a nap kisüt. P mint Puf-Puf, P mint pajtás!",
+      "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/6.final.png"
     }
   ]
 }

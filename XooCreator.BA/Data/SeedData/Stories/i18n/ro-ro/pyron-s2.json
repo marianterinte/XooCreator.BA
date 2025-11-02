@@ -2,8 +2,7 @@
   "storyId": "pyron-s2",
   "title": "Pyron – Focul care Creează",
   "coverImageUrl": "images/worlds/pyron.jpg",
-  "category": "main",
-  "sortOrder": 21,
+    "sortOrder": 21,
   "tiles": [
     {
       "tileId": "p1",

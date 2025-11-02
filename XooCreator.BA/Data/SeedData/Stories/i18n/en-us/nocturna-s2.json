@@ -2,8 +2,7 @@
   "storyId": "nocturna-s2",
   "title": "Nocturna – Balconul Lunii",
   "coverImageUrl": "images/worlds/neptunia.jpg",
-  "category": "main",
-  "sortOrder": 13,
+    "sortOrder": 13,
   "tiles": [
     {
       "tileId": "p1",

@@ -2,8 +2,7 @@
   "storyId": "aetherion-s1",
   "title": "Aetherion – Biblioteci de Nori",
   "coverImageUrl": "images/worlds/aetherion.jpg",
-  "category": "main",
-  "sortOrder": 26,
+    "sortOrder": 26,
   "tiles": [
     {
       "tileId": "p1",

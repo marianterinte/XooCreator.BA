@@ -2,8 +2,7 @@
   "storyId": "oceanica-s1",
   "title": "Oceanica – Coralul Cântător",
   "coverImageUrl": "images/worlds/oceanica.jpg",
-  "category": "main",
-  "sortOrder": 8,
+    "sortOrder": 8,
   "tiles": [
     {
       "tileId": "p1",

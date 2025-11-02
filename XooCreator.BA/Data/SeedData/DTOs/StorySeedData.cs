@@ -5,7 +5,7 @@ public class StoryDefinitionSeedData
     public string StoryId { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
     public string? CoverImageUrl { get; set; }
-    public string Category { get; set; } = string.Empty;
+    public string? StoryTopic { get; set; } // Story topic/theme (e.g., "Matematică", "Literatură")
     public string? Summary { get; set; } // Story summary/description
     public int SortOrder { get; set; }
     public List<string> UnlockedStoryHeroes { get; set; } = new();

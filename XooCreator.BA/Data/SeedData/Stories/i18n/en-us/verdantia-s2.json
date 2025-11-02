@@ -2,8 +2,7 @@
   "storyId": "verdantia-s2",
   "title": "Verdantia – Apa care Cântă",
   "coverImageUrl": "images/worlds/sylvaria.jpg",
-  "category": "main",
-  "sortOrder": 10,
+    "sortOrder": 10,
   "tiles": [
     {
       "tileId": "p1",

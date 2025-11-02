@@ -2,8 +2,7 @@
   "storyId": "sylvaria-s1",
   "title": "Sylvaria – Cărarea Vie",
   "coverImageUrl": "images/worlds/sylvaria.jpg",
-  "category": "main",
-  "sortOrder": 11,
+    "sortOrder": 11,
   "tiles": [
     {
       "tileId": "p1",

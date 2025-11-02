@@ -2,8 +2,7 @@
   "storyId": "mechanika-s1",
   "title": "Magnus",
   "coverImageUrl": "images/tol/stories/mechanika-s1/0.Cover.png",
-  "category": "terra",
-  "sortOrder": 1,
+    "sortOrder": 1,
   "unlockedStoryHeroes": [
     "grubot"
   ],

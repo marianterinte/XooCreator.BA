@@ -2,8 +2,7 @@
   "storyId": "loi-intro",
   "title": "Originea Păcii",
   "coverImageUrl": "images/tol/stories/loi-intro/0.cover.png",
-  "category": "terra",
-  "sortOrder": 1,
+    "sortOrder": 1,
   "unlockedStoryHeroes": [],
   "tiles": [
     {

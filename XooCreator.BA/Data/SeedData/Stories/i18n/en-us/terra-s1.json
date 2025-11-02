@@ -2,8 +2,7 @@
   "storyId": "terra-s1",
   "title": "The Shadow at the Farm",
   "coverImageUrl": "images/tol/stories/terra-s1/0.Cover.png",
-  "category": "terra",
-  "sortOrder": 1,
+    "sortOrder": 1,
   "unlockedStoryHeroes": [],
   "tiles": [
     {

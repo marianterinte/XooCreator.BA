@@ -2,8 +2,7 @@
   "storyId": "neptunia-s1",
   "title": "Neptunia – Gheața care Cântă",
   "coverImageUrl": "images/worlds/neptunia.jpg",
-  "category": "main",
-  "sortOrder": 23,
+    "sortOrder": 23,
   "tiles": [
     {
       "tileId": "p1",

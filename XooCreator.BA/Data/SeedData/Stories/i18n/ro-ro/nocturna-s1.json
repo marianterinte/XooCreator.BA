@@ -2,8 +2,7 @@
   "storyId": "nocturna-s1",
   "title": "Nocturna – Aleea Felinarelor",
   "coverImageUrl": "images/worlds/neptunia.jpg",
-  "category": "main",
-  "sortOrder": 12,
+    "sortOrder": 12,
   "tiles": [
     {
       "tileId": "p1",

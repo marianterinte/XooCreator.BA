@@ -2,8 +2,7 @@
   "storyId": "auroria-s1",
   "title": "Auroria – Cântecul Zorilor",
   "coverImageUrl": "images/worlds/terra.jpg",
-  "category": "main",
-  "sortOrder": 4,
+    "sortOrder": 4,
   "tiles": [
     {
       "tileId": "p1",
