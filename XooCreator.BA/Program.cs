@@ -47,6 +47,7 @@ builder.Services.AddSwaggerGen(c =>
         Description = "XooCreator Backend API"
     });
     c.OperationFilter<LocaleParameterOperationFilter>();
+    c.OperationFilter<BusinessFolderTagOperationFilter>();
 
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
