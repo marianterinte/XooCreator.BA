@@ -15,7 +15,7 @@
       "sortOrder": 1,
       "caption": "Puf-Puf elindul",
       "text": "Puf-Puf egy pici, puha cica. Párás erdő felett esik az eső. Piros köpenyt visel. „Milyen pompás az eső illata!” – mondja Puf-Puf.",
-      "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/1.pleaca.png"
+      "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/1.start.png"
     },
     {
       "tileId": "2",
@@ -23,7 +23,7 @@
       "sortOrder": 2,
       "caption": "Egy pici sírás",
       "text": "Hallatszik: „Pff… pff…”. Puf-Puf megáll. „Ki pityereg?” – kérdezi. A bokorból egy pici nyuszi bújik elő.",
-      "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/2.planset.png"
+      "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/2.cry.png"
     },
     {
       "tileId": "3",
@@ -31,7 +31,7 @@
       "sortOrder": 3,
       "caption": "Az elveszett pajtás",
       "text": "„Elvesztem” – mondja a nyuszi. „Ne pityeregj!” – mondja Puf-Puf. „Elkísérlek a patak mentén hazáig!”",
-      "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/3.pierdut.png"
+      "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/3.lost-friend.png"
     },
     {
       "tileId": "4",
@@ -47,7 +47,7 @@
       "sortOrder": 5,
       "caption": "A pillangós pázsit",
       "text": "Egy virágos pázsitra érnek. A fűben egy pici, puha toll fekszik. „Ez a pázsit már közel van!” – mondja a nyuszi. Mosolyog, mint a nap.",
-      "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/5.poiana.png"
+      "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/5.meadow.png"
     },
     {
       "tileId": "6",
@@ -55,7 +55,7 @@
       "sortOrder": 6,
       "caption": "A pajtás története",
       "text": "„Köszönöm, Puf-Puf!” – mondja a nyuszi. „A pajtások segítenek egymásnak!” – feleli a cica. Az eső eláll, a nap kisüt. P mint Puf-Puf, P mint pajtás!",
-      "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/6.final.png"
+      "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/6.end.png"
     }
   ]
 }

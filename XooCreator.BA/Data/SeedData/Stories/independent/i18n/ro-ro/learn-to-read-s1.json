@@ -15,7 +15,7 @@
       "sortOrder": 1,
       "caption": "Puf-Puf pleacă",
       "text": "Puf-Puf e un pisoi mic și pufos. Plouă peste pădure. Poartă o pelerină portocalie. „Ce plăcut e parfumul ploii!”, spune Puf-Puf.",
-      "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/1.pleaca.png"
+      "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/1.start.png"
     },
     {
       "tileId": "2",
@@ -23,7 +23,7 @@
       "sortOrder": 2,
       "caption": "Un plânset mic",
       "text": "Se aude: „Pfff… pfff…”. Puf-Puf se oprește. „Cine plânge?” Din tufiș apare un iepuraș mic.",
-      "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/2.planset.png"
+      "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/2.cry.png"
     },
     {
       "tileId": "3",
@@ -31,7 +31,7 @@
       "sortOrder": 3,
       "caption": "Prietenul pierdut",
       "text": "„M-am pierdut”, spune iepurașul. „Nu plânge”, spune Puf-Puf. „Te voi duce pe potecă spre casă!”",
-      "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/3.pierdut.png"
+      "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/3.lost-friend.png"
     },
     {
       "tileId": "4",
@@ -47,7 +47,7 @@
       "sortOrder": 5,
       "caption": "Poiana cu pană",
       "text": "Ajung într-o poiană plină de flori. Pe jos e o pană strălucitoare. „Poiana asta e aproape!”, spune iepurașul. Zâmbește cu putere.",
-      "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/5.poiana.png"
+      "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/5.meadow.png"
     },
     {
       "tileId": "6",
@@ -55,7 +55,7 @@
       "sortOrder": 6,
       "caption": "Povestea prieteniei",
       "text": "„Mulțumesc, Puf-Puf!” „Prietenii se ajută!”, spune pisoiul. Ploaia se oprește. Pe cer, un curcubeu. P ca Puf-Puf, P ca prieten!",
-      "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/6.final.png"
+      "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/6.end.png"
     }
   ]
 }
