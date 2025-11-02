@@ -4,21 +4,11 @@ using XooCreator.BA.Data;
 using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Data.SeedData.DTOs;
 using XooCreator.BA.Features.Stories.DTOs;
-using XooCreator.BA.Features.TreeOfLight;
+using XooCreator.BA.Features.Stories.Mappers;
+using XooCreator.BA.Features.Stories.SeedEntities;
 using XooCreator.BA.Features.TreeOfLight.DTOs;
 
 namespace XooCreator.BA.Features.Stories.Repositories;
-
-public interface IStoriesRepository
-{
-    Task<List<StoryContentDto>> GetAllStoriesAsync(string locale);
-    Task<StoryContentDto?> GetStoryByIdAsync(string storyId, string locale);
-    Task<List<UserStoryProgressDto>> GetUserStoryProgressAsync(Guid userId, string storyId);
-    Task<bool> MarkTileAsReadAsync(Guid userId, string storyId, string tileId);
-    Task<bool> StoryIdExistsAsync(string storyId);
-    Task SeedStoriesAsync();
-    Task SeedIndependentStoriesAsync();
-}
 
 public class StoriesRepository : IStoriesRepository
 {
@@ -45,7 +35,7 @@ public class StoriesRepository : IStoriesRepository
             .OrderBy(s => s.SortOrder)
             .ToListAsync();
 
-        return stories.Select(s => MapToDtoWithLocale(s, locale)).ToList();
+        return stories.Select(s => StoryDefinitionMapper.MapToDtoWithLocale(s, locale)).ToList();
     }
 
     public async Task<StoryContentDto?> GetStoryByIdAsync(string storyId, string locale)
@@ -63,7 +53,7 @@ public class StoriesRepository : IStoriesRepository
                         .ThenInclude(a => a.Translations)
                 .FirstOrDefaultAsync(s => s.StoryId == storyId && s.IsActive);
 
-        return story == null ? null : MapToDtoWithLocale(story, locale);
+        return story == null ? null : StoryDefinitionMapper.MapToDtoWithLocale(story, locale);
     }
 
     public async Task<List<UserStoryProgressDto>> GetUserStoryProgressAsync(Guid userId, string storyId)
@@ -91,7 +81,7 @@ public class StoriesRepository : IStoriesRepository
 
             if (existing != null)
             {
-                return true; // Already marked as read
+                return true;
             }
 
             var readProgress = new UserStoryReadProgress
@@ -387,7 +377,7 @@ public class StoriesRepository : IStoriesRepository
                     throw new InvalidOperationException($"Invalid story seed data in '{file}'.");
                 }
 
-                var def = MapFromSeedData(seed);
+                var def = StoryDefinitionMapper.MapFromSeedData(seed);
                 storyMap[def.StoryId] = def;
             }
             if (files.Count > 0) break;
@@ -412,7 +402,7 @@ public class StoriesRepository : IStoriesRepository
                 if (string.IsNullOrWhiteSpace(s.StoryId)) continue;
                 if (!storyMap.ContainsKey(s.StoryId))
                 {
-                    storyMap[s.StoryId] = MapFromSeedData(s);
+                    storyMap[s.StoryId] = StoryDefinitionMapper.MapFromSeedData(s);
                 }
             }
         }
@@ -455,7 +445,7 @@ public class StoriesRepository : IStoriesRepository
                 {
                     throw new InvalidOperationException($"Invalid independent story seed data in '{file}'.");
                 }
-                var def = MapFromSeedData(seed);
+                var def = StoryDefinitionMapper.MapFromSeedDataForIndie(seed);
                 storyMap[def.StoryId] = def;
             }
         }
@@ -464,14 +454,6 @@ public class StoriesRepository : IStoriesRepository
             .OrderBy(s => s.SortOrder)
             .ThenBy(s => s.StoryId, StringComparer.OrdinalIgnoreCase)
             .ToList();
-    }
-
-    private sealed class IndependentStoryTranslationSeed
-    {
-        public string Locale { get; set; } = "en-us";
-        public string StoryId { get; set; } = string.Empty;
-        public string? Title { get; set; }
-        public List<TileTranslationSeed>? Tiles { get; set; }
     }
 
     private static async Task<List<IndependentStoryTranslationSeed>> LoadIndependentStoryTranslationsFromJsonAsync(string locale)
@@ -524,97 +506,6 @@ public class StoriesRepository : IStoriesRepository
         }
 
         return results;
-    }
-
-    private static StoryDefinition MapFromSeedData(StorySeedData seedData)
-    {
-        var story = new StoryDefinition
-        {
-            StoryId = seedData.StoryId,
-            Title = seedData.Title,
-            CoverImageUrl = seedData.CoverImageUrl,
-            StoryTopic = seedData.Category,
-            SortOrder = seedData.SortOrder,
-            StoryType = seedData.StoryType.HasValue 
-                ? (StoryType)seedData.StoryType.Value 
-                : StoryType.AlchimaliaEpic, // Default to AlchimaliaEpic if not specified
-            Status = StoryStatus.Published,
-            IsActive = true, // Explicitly set IsActive for independent stories
-            CreatedBy = null,
-            UpdatedBy = null
-        };
-
-        if (seedData.Tiles != null)
-        {
-            foreach (var tileSeed in seedData.Tiles)
-            {
-                var tile = new StoryTile
-                {
-                    TileId = tileSeed.TileId,
-                    Type = tileSeed.Type,
-                    SortOrder = tileSeed.SortOrder,
-                    Caption = tileSeed.Caption,
-                    Text = tileSeed.Text,
-                    ImageUrl = tileSeed.ImageUrl,
-                    AudioUrl = tileSeed.AudioUrl,
-                    Question = tileSeed.Question
-                };
-
-                if (tileSeed.Answers != null)
-                {
-                    foreach (var answerSeed in tileSeed.Answers)
-                    {
-                        var answer = new StoryAnswer
-                        {
-                            AnswerId = answerSeed.AnswerId,
-                            Text = answerSeed.Text,
-                            TokensJson = null,
-                            SortOrder = answerSeed.SortOrder
-                        };
-                        if (answerSeed.Tokens != null)
-                        {
-                            foreach (var tk in answerSeed.Tokens)
-                            {
-                                answer.Tokens.Add(new StoryAnswerToken
-                                {
-                                    Type = MapFamily(tk.Type).ToString(),
-                                    Value = tk.Value,
-                                    Quantity = tk.Quantity
-                                });
-                            }
-                        }
-                        tile.Answers.Add(answer);
-                    }
-                }
-
-                story.Tiles.Add(tile);
-            }
-        }
-
-        return story;
-    }
-
-    private sealed class StoryTranslationSeed
-    {
-        public string Locale { get; set; } = "en-us";
-        public string StoryId { get; set; } = string.Empty;
-        public string? Title { get; set; }
-        public List<TileTranslationSeed>? Tiles { get; set; }
-    }
-
-    private sealed class TileTranslationSeed
-    {
-        public string TileId { get; set; } = string.Empty;
-        public string? Caption { get; set; }
-        public string? Text { get; set; }
-        public string? Question { get; set; }
-        public List<AnswerTranslationSeed>? Answers { get; set; }
-    }
-
-    private sealed class AnswerTranslationSeed
-    {
-        public string AnswerId { get; set; } = string.Empty;
-        public string? Text { get; set; }
     }
 
     private static async Task<List<StoryTranslationSeed>> LoadStoryTranslationsFromJsonAsync(string locale)
@@ -680,118 +571,12 @@ public class StoriesRepository : IStoriesRepository
         return results;
     }
 
-    private static StoryContentDto MapToDtoWithLocale(StoryDefinition story, string locale)
-    {
-        var lc = (locale ?? "ro-ro").ToLowerInvariant();
-        var defTitle = TryGetTitle(story, lc) ?? story.Title;
-        return new StoryContentDto
-        {
-            Id = story.StoryId,
-            Title = defTitle,
-            CoverImageUrl = story.CoverImageUrl,
-            Summary = story.Summary,
-            UnlockedStoryHeroes = GetUnlockedHeroesFromSeed(story.StoryId),
-            Tiles = story.Tiles
-                .OrderBy(t => t.SortOrder)
-                .Select(t => new StoryTileDto
-                {
-                    Type = t.Type,
-                    Id = t.TileId,
-                    Caption = TryGetCaption(t, lc) ?? t.Caption,
-                    Text = TryGetText(t, lc) ?? t.Text,
-                    ImageUrl = t.ImageUrl,
-                    AudioUrl = t.AudioUrl,
-                    Question = TryGetQuestion(t, lc) ?? t.Question,
-                    Answers = t.Answers
-                        .OrderBy(a => a.SortOrder)
-                        .Select(a => new StoryAnswerDto
-                        {
-                            Id = a.AnswerId,
-                            Text = TryGetAnswerText(a, lc) ?? a.Text,
-                            Tokens = a.Tokens.Select(tok => new TokenReward
-                            {
-                                Type = Enum.TryParse<TokenFamily>(tok.Type, true, out var fam) ? fam : TokenFamily.Personality,
-                                Value = tok.Value,
-                                Quantity = tok.Quantity
-                            }).ToList()
-                        }).ToList()
-                }).ToList()
-        };
-    }
-
-    private static List<string> GetUnlockedHeroesFromSeed(string storyId)
-    {
-        try
-        {
-            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
-            var candidates = new[]
-            {
-                Path.Combine(baseDir, "Data", "SeedData", "Stories", "i18n", "en-us", $"{storyId}.json"),
-                Path.Combine(baseDir, "Data", "SeedData", "Stories", "i18n", "ro-ro", $"{storyId}.json"),
-                Path.Combine(baseDir, "Data", "SeedData", "Stories", "i18n", "hu-hu", $"{storyId}.json"),
-                Path.Combine(baseDir, "Data", "SeedData", "Stories", "independent", "i18n", "en-us", $"{storyId}.json"),
-                Path.Combine(baseDir, "Data", "SeedData", "Stories", "independent", "i18n", "ro-ro", $"{storyId}.json"),
-                Path.Combine(baseDir, "Data", "SeedData", "Stories", "independent", "i18n", "hu-hu", $"{storyId}.json")
-            };
-
-            foreach (var file in candidates)
-            {
-                if (!File.Exists(file)) continue;
-                var json = File.ReadAllText(file);
-                var data = JsonSerializer.Deserialize<StoryJsonProbe>(json, new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                    PropertyNameCaseInsensitive = true
-                });
-                if (data?.UnlockedStoryHeroes != null && data.UnlockedStoryHeroes.Count > 0)
-                {
-                    return data.UnlockedStoryHeroes;
-                }
-            }
-        }
-        catch { }
-        return new List<string>();
-    }
-
-    private sealed class StoryJsonProbe
-    {
-        public List<string> UnlockedStoryHeroes { get; set; } = new();
-    }
-
-    private static string? TryGetTitle(StoryDefinition def, string lc)
-        => def.Translations?.FirstOrDefault(t => t.LanguageCode == lc)?.Title;
-    private static string? TryGetCaption(StoryTile t, string lc)
-        => t.Translations?.FirstOrDefault(tr => tr.LanguageCode == lc)?.Caption;
-    private static string? TryGetText(StoryTile t, string lc)
-        => t.Translations?.FirstOrDefault(tr => tr.LanguageCode == lc)?.Text;
-    private static string? TryGetQuestion(StoryTile t, string lc)
-        => t.Translations?.FirstOrDefault(tr => tr.LanguageCode == lc)?.Question;
-
-    private static string? TryGetAnswerText(StoryAnswer a, string lc)
-        => a.Translations?.FirstOrDefault(tr => tr.LanguageCode == lc)?.Text;
-
     private static string NormalizeStoryId(string storyId)
     {
         if (string.Equals(storyId, "intro-puf-puf", StringComparison.OrdinalIgnoreCase))
             return "intro-pufpuf";
         return storyId;
     }
-
-    private static TokenFamily MapFamily(string type)
-    {
-        if (string.IsNullOrWhiteSpace(type)) return TokenFamily.Personality;
-        return type.Trim() switch
-        {
-            "TreeOfHeroes" => TokenFamily.Personality,
-            "Personality" => TokenFamily.Personality,
-            "Alchemy" => TokenFamily.Alchemy,
-            "Discovery" => TokenFamily.Discovery,
-            "Generative" => TokenFamily.Generative,
-            "Learning" => TokenFamily.Discovery, // Learning tokens map to Discovery family
-            _ => TokenFamily.Personality
-        };
-    }
-
 
     public async Task<bool> StoryIdExistsAsync(string storyId)
     {
