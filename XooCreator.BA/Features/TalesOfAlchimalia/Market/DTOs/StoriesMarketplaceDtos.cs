@@ -32,6 +32,7 @@ public record StoryDetailsDto
     public bool IsActive { get; init; }
     public DateTime UpdatedAt { get; init; }
     public Guid? UpdatedBy { get; init; }
+    public List<string> AvailableLanguages { get; init; } = new(); 
 }
 
 public record StoryMarketplaceItemDto
@@ -48,6 +49,7 @@ public record StoryMarketplaceItemDto
     public string? StoryTopic { get; init; }
     public string StoryType { get; init; } = string.Empty;
     public string Status { get; init; } = string.Empty;
+    public List<string> AvailableLanguages { get; init; } = new(); // e.g., ["ro-ro", "en-us", "hu-hu"]
 }
 
 public record PurchaseStoryRequest

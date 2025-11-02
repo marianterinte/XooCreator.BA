@@ -1,6 +1,6 @@
 {
   "storyId": "learn-math-s1",
-  "title": "Grubot és az elveszett számok",
+  "title": "Grubot és az Elveszett Számok",
   "coverImageUrl": "images/tol/stories/learn-math-s1/0.cover.png",
   "category": "mechanika",
   "sortOrder": 1,
@@ -12,16 +12,16 @@
       "tileId": "1",
       "type": "page",
       "sortOrder": 1,
-      "caption": "Grubot a műhelyben",
-      "text": "Mechanika bolygón Grubot a fényes műhelyében dolgozott. Számok táncoltak a képernyőjén, amíg… *Pop!* Minden szám eltűnt!\n\n\"Hiba! Hiba! Elvesztettem a számokat! Meg kell találnom őket!\" mondta Grubot.",
+      "caption": "Riasztás a Vezérlőtoronyban",
+      "text": "A Mechanika bolygón egy piros riasztás villogott a Vezérlőtornyban. \"Riasztás! A North-3 generátor leállt!\" Nélküle a robot polgárok nem tölthetnek. Grubot kigombolta az antennáit: \"Elérjük az Energia Szívét és újra online hozzuk. Lépésről lépésre.\"",
       "imageUrl": "images/tol/stories/learn-math-s1/1.workshop.png"
     },
     {
       "tileId": "2",
       "type": "page",
       "sortOrder": 2,
-      "caption": "Az összegek hídja",
-      "text": "A gőzfolyó áthidalásához Grubotnak meg kell javítania a hidat. Minden fém lépcső egy összeget rejt. Csak azok léphetnek át, akik helyesen adnak össze!",
+      "caption": "A Fény Folyosója",
+      "text": "Az Út a Szívhez színes lámpák alagútján halad át. Minden lámpa csak akkor világít, amikor a megfelelő energiát adják hozzá. \"Túl kevés és elhalványul, túl sok és kipukkad,\" mondta Grubot. \"Először az egyensúly, aztán tovább.\"",
       "imageUrl": "images/tol/stories/learn-math-s1/2.bridge.png"
     },
     {
@@ -31,7 +31,7 @@
       "caption": "",
       "text": "",
       "imageUrl": "images/tol/stories/learn-math-s1/3.quiz.png",
-      "question": "Grubotnak 3 csavarja van, és még 2-t talál. Hány csavara van most?",
+      "question": "A paneleken 3 zöld szikra világít. Grubot még 2-t ad hozzá, hogy megfeleljen a lámpa mintájának. Hány szikra világít most?",
       "answers": [
         {
           "answerId": "a",
@@ -41,7 +41,8 @@
         },
         {
           "answerId": "b",
-          "text": "5 ✅",
+          "text": "5",
+          "isCorrect": true,
           "tokens": [
             {
               "type": "Learning",
@@ -63,8 +64,8 @@
       "tileId": "3",
       "type": "page",
       "sortOrder": 4,
-      "caption": "Az egyenletek tornya",
-      "text": "Grubot egy magas toronyhoz érkezik. Az ajtón ez áll: \"Csak akkor lépj be, ha tudod a kivonást!\" Grubot aktiválja a logikai chipjét.",
+      "caption": "Az Egyensúly Kamrája",
+      "text": "A következő szoba: manométerek és csövek halkan sziszegnek. Egy üzenet villog: \"A nyomás túl magas. Csökkentsd biztonságos szintre.\" Grubot megkopogtatja a szelepeket. \"Nem túl sok, nem túl kevés—éppen elég.\"",
       "imageUrl": "images/tol/stories/learn-math-s1/4.tower.png"
     },
     {
@@ -74,7 +75,7 @@
       "caption": "",
       "text": "",
       "imageUrl": "images/tol/stories/learn-math-s1/5.quiz.png",
-      "question": "Grubotnak 10 elem van. 4-et használ a drónjához. Hány elem maradt?",
+      "question": "A manométer 10 egységnyi nyomást mutat. Grubot 4 egységet enged ki, hogy elérje a biztonságos jelet. Milyen szám marad a manométeren?",
       "answers": [
         {
           "answerId": "a",
@@ -84,7 +85,8 @@
         },
         {
           "answerId": "b",
-          "text": "6 ✅",
+          "text": "6",
+          "isCorrect": true,
           "tokens": [
             {
               "type": "Learning",
@@ -106,8 +108,8 @@
       "tileId": "4",
       "type": "page",
       "sortOrder": 6,
-      "caption": "A számok portáljai",
-      "text": "Az égen három csillogó portál jelenik meg: piros, sárga és kék. Mindegyik csak akkor nyílik meg, ha megoldasz egy kis szorzást!",
+      "caption": "Az Iker Turbinák Csarnoka",
+      "text": "Mélyebben belül, két hatalmas turbina zúg a sötétben. Apró fények gyűrűi ölelik körül minden rotort. \"Szinronizálnom kell a ritmusukat,\" gondolja Grubot. \"Minden fény együtt pulzál.\"",
       "imageUrl": "images/tol/stories/learn-math-s1/6.portals.png"
     },
     {
@@ -117,7 +119,7 @@
       "caption": "",
       "text": "",
       "imageUrl": "images/tol/stories/learn-math-s1/7.quiz.png",
-      "question": "Minden portálnak 2 fénye van. Minden fénynek 3 sugara van. Összesen hány sugár?",
+      "question": "Minden turbinának 2 gyűrűje van. Minden gyűrűnek 3 fénye van, amiknek együtt kell világítaniuk. Hány fénynek kell összesen világítania mindkét turbinán?",
       "answers": [
         {
           "answerId": "a",
@@ -133,7 +135,8 @@
         },
         {
           "answerId": "c",
-          "text": "6 sugár portálonként × 3 portál = 18 ✅",
+          "text": "12",
+          "isCorrect": true,
           "tokens": [
             {
               "type": "Learning",
@@ -149,8 +152,8 @@
       "tileId": "5",
       "type": "page",
       "sortOrder": 8,
-      "caption": "A számok visszatérése",
-      "text": "Amikor Grubot befejezte az összes számítását, a számok visszatértek a képernyőjére! Valami fontosat tanult: A matematika egy szupererő!\n\n\"Küldetés befejezve!\" mondta Grubot. \"Logikával és türelemmel mindent megjavíthatok!\"",
+      "caption": "A Kristály Megosztás Kapuja",
+      "text": "Egy magas kapu elzárja a magot. Négy kék kristály várja a hatalom méltányos részét. \"Ha egyenletesen osztom el az áramlást, a zár kinyílik,\" mondja Grubot. \"Egyenlő fény minden kristály számára.\"",
       "imageUrl": "images/tol/stories/learn-math-s1/8.return.png"
     },
     {
@@ -160,7 +163,7 @@
       "caption": "",
       "text": "",
       "imageUrl": "images/tol/stories/learn-math-s1/9.quiz.png",
-      "question": "Grubotnak 4 kereke van, és még 2 hozzá hasonló robotot épít. Összesen hány kerék?",
+      "question": "12 energia gömb van, amit egyenlően kell küldeni 3 kristályhoz. Hány gömböt kap minden kristály?",
       "answers": [
         {
           "answerId": "a",
@@ -170,20 +173,21 @@
         },
         {
           "answerId": "b",
-          "text": "10",
-          "tokens": [],
+          "text": "4",
+          "isCorrect": true,
+          "tokens": [
+            {
+              "type": "Learning",
+              "value": "math_division",
+              "quantity": 1
+            }
+          ],
           "sortOrder": 2
         },
         {
           "answerId": "c",
-          "text": "12 ✅",
-          "tokens": [
-            {
-              "type": "Learning",
-              "value": "math_multiplication",
-              "quantity": 1
-            }
-          ],
+          "text": "12",
+          "tokens": [],
           "sortOrder": 3
         }
       ]

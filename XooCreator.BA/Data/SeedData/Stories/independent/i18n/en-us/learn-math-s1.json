@@ -12,16 +12,16 @@
       "tileId": "1",
       "type": "page",
       "sortOrder": 1,
-      "caption": "Grubot in the workshop",
-      "text": "On planet Mechanika, Grubot worked in his shiny workshop. Numbers danced on his screen until… *Pop!* All numbers disappeared!\n\n\"Error! Error! I've lost the numbers! I must find them!\" said Grubot.",
+      "caption": "Alarm in the Control Tower",
+      "text": "On planet Mechanika, a red alarm blinked in the Control Tower. “Alert! Generator North-3 stopped pulsing!” Without it, the robot citizens cannot recharge. Grubot straightened his antennas: “I’ll reach the Heart of Energy and bring it back online. Step by step.”",
       "imageUrl": "images/tol/stories/learn-math-s1/1.workshop.png"
     },
     {
       "tileId": "2",
       "type": "page",
       "sortOrder": 2,
-      "caption": "The bridge of sums",
-      "text": "To cross the steam river, Grubot must fix the bridge. Each metal step hides a sum. Only those who add correctly can pass!",
+      "caption": "Corridor of Light",
+      "text": "The path to the Heart passes through a tunnel of colored lamps. Each lamp glows only when the right energy is added. “Too little and it fades, too much and it pops,” said Grubot. “Balance first, then move on.”",
       "imageUrl": "images/tol/stories/learn-math-s1/2.bridge.png"
     },
     {
@@ -31,7 +31,7 @@
       "caption": "",
       "text": "",
       "imageUrl": "images/tol/stories/learn-math-s1/3.quiz.png",
-      "question": "Grubot has 3 bolts and finds 2 more. How many bolts does he have now?",
+      "question": "On the panel, 3 green sparks are lit. Grubot adds 2 more to match the lamp’s pattern. How many sparks glow now?",
       "answers": [
         {
           "answerId": "a",
@@ -41,7 +41,8 @@
         },
         {
           "answerId": "b",
-          "text": "5 ✅",
+          "text": "5",
+          "isCorrect": true,
           "tokens": [
             {
               "type": "Learning",
@@ -63,8 +64,8 @@
       "tileId": "3",
       "type": "page",
       "sortOrder": 4,
-      "caption": "The tower of equations",
-      "text": "Grubot reaches a tall tower. On the door it says: \"Enter only if you know subtraction!\" Grubot activates his logic chip.",
+      "caption": "Chamber of Balance",
+      "text": "Next room: gauges and pipes hiss softly. A message flickers: “Pressure too high. Reduce to safe level.” Grubot taps the valves. “Not too much, not too little—just right.”",
       "imageUrl": "images/tol/stories/learn-math-s1/4.tower.png"
     },
     {
@@ -74,7 +75,7 @@
       "caption": "",
       "text": "",
       "imageUrl": "images/tol/stories/learn-math-s1/5.quiz.png",
-      "question": "Grubot has 10 batteries. He uses 4 for his drone. How many batteries are left?",
+      "question": "The gauge shows 10 units of pressure. Grubot releases 4 units to reach the safe mark. What number stays on the gauge?",
       "answers": [
         {
           "answerId": "a",
@@ -84,7 +85,8 @@
         },
         {
           "answerId": "b",
-          "text": "6 ✅",
+          "text": "6",
+          "isCorrect": true,
           "tokens": [
             {
               "type": "Learning",
@@ -106,8 +108,8 @@
       "tileId": "4",
       "type": "page",
       "sortOrder": 6,
-      "caption": "The number portals",
-      "text": "In the sky, three glowing portals appear: red, yellow, and blue. Each one opens only if you solve a little multiplication!",
+      "caption": "Hall of Twin Turbines",
+      "text": "Deeper inside, two giant turbines hum in the dark. Rings of tiny lights circle each rotor. “I must sync their rhythm,” thinks Grubot. “All lights pulsing together.”",
       "imageUrl": "images/tol/stories/learn-math-s1/6.portals.png"
     },
     {
@@ -117,7 +119,7 @@
       "caption": "",
       "text": "",
       "imageUrl": "images/tol/stories/learn-math-s1/7.quiz.png",
-      "question": "Each portal has 2 lights. Each light has 3 beams. How many beams in total?",
+      "question": "Each turbine has 2 rings. Each ring has 3 lights that must glow together. How many lights should glow in total on both turbines?",
       "answers": [
         {
           "answerId": "a",
@@ -133,7 +135,8 @@
         },
         {
           "answerId": "c",
-          "text": "6 per portal × 3 portals = 18 ✅",
+          "text": "12",
+          "isCorrect": true,
           "tokens": [
             {
               "type": "Learning",
@@ -149,8 +152,8 @@
       "tileId": "5",
       "type": "page",
       "sortOrder": 8,
-      "caption": "The return of numbers",
-      "text": "When Grubot finished all his calculations, the numbers returned to his screen! He learned something big: Math is a superpower!\n\n\"Mission complete!\" said Grubot. \"With logic and patience, I can fix anything!\"",
+      "caption": "Crystal Sharing Gate",
+      "text": "A tall gate blocks the core. Four blue crystals wait for a fair share of power. “If I divide the flow evenly, the lock will open,” says Grubot. “Equal light for every crystal.”",
       "imageUrl": "images/tol/stories/learn-math-s1/8.return.png"
     },
     {
@@ -160,7 +163,7 @@
       "caption": "",
       "text": "",
       "imageUrl": "images/tol/stories/learn-math-s1/9.quiz.png",
-      "question": "Grubot has 4 wheels and builds 2 more robots like him. How many wheels in total?",
+      "question": "There are 12 energy orbs to send equally to 3 crystals. How many orbs does each crystal receive?",
       "answers": [
         {
           "answerId": "a",
@@ -170,20 +173,21 @@
         },
         {
           "answerId": "b",
-          "text": "10",
-          "tokens": [],
+          "text": "4",
+          "isCorrect": true,
+          "tokens": [
+            {
+              "type": "Learning",
+              "value": "math_division",
+              "quantity": 1
+            }
+          ],
           "sortOrder": 2
         },
         {
           "answerId": "c",
-          "text": "12 ✅",
-          "tokens": [
-            {
-              "type": "Learning",
-              "value": "math_multiplication",
-              "quantity": 1
-            }
-          ],
+          "text": "12",
+          "tokens": [],
           "sortOrder": 3
         }
       ]

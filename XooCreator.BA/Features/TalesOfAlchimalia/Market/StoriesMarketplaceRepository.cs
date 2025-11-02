@@ -34,6 +34,9 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
 
     public async Task<List<StoryMarketplaceItemDto>> GetMarketplaceStoriesAsync(Guid userId, string locale, SearchStoriesRequest request)
     {
+        // Normalize locale to lowercase (e.g., "ro-RO" -> "ro-ro") to match database LanguageCode format
+        var normalizedLocale = (locale ?? "ro-ro").ToLowerInvariant();
+        
         var query = _context.StoryMarketplaceInfos
             .Include(smi => smi.Story)
                 .ThenInclude(s => s.Translations)
@@ -51,7 +54,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         {
             query = query.Where(smi => 
                 smi.Story.Title.Contains(request.SearchTerm) ||
-                smi.Story.Translations.Any(t => t.LanguageCode == locale && t.Title.Contains(request.SearchTerm)));
+                smi.Story.Translations.Any(t => t.LanguageCode == normalizedLocale && t.Title.Contains(request.SearchTerm)));
         }
 
         if (request.Regions.Any())
@@ -125,11 +128,29 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             .Take(request.PageSize)
             .ToListAsync();
 
-        return stories.Select(smi => MapToMarketplaceItemDto(smi, locale)).ToList();
+        // Ensure translations are loaded for all stories
+        foreach (var smi in stories)
+        {
+            if (smi.Story != null)
+            {
+                var entry = _context.Entry(smi.Story);
+                var translationsEntry = entry.Collection(s => s.Translations);
+                if (!translationsEntry.IsLoaded)
+                {
+                    await translationsEntry.LoadAsync();
+                }
+            }
+        }
+
+        // Use normalizedLocale already defined at line 38
+        return stories.Select(smi => MapToMarketplaceItemDto(smi, normalizedLocale)).ToList();
     }
 
     public async Task<List<StoryMarketplaceItemDto>> GetFeaturedStoriesAsync(Guid userId, string locale)
     {
+        // Normalize locale to lowercase (e.g., "ro-RO" -> "ro-ro") to match database LanguageCode format
+        var normalizedLocale = (locale ?? "ro-ro").ToLowerInvariant();
+        
         var featuredStories = await _context.StoryMarketplaceInfos
             .Include(smi => smi.Story)
                 .ThenInclude(s => s.Translations)
@@ -138,7 +159,21 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             .Take(5)
             .ToListAsync();
 
-        return featuredStories.Select(smi => MapToMarketplaceItemDto(smi, locale)).ToList();
+        // Ensure translations are loaded for all featured stories
+        foreach (var smi in featuredStories)
+        {
+            if (smi.Story != null)
+            {
+                var entry = _context.Entry(smi.Story);
+                var translationsEntry = entry.Collection(s => s.Translations);
+                if (!translationsEntry.IsLoaded)
+                {
+                    await translationsEntry.LoadAsync();
+                }
+            }
+        }
+
+        return featuredStories.Select(smi => MapToMarketplaceItemDto(smi, normalizedLocale)).ToList();
     }
 
     public async Task<List<string>> GetAvailableRegionsAsync()
@@ -254,6 +289,20 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             .Select(g => new StoryProgressInfo(g.Key, g.Count()))
             .ToListAsync();
 
+        // Ensure translations are loaded for all purchased stories
+        foreach (var sp in purchasedStories)
+        {
+            if (sp.Story != null)
+            {
+                var entry = _context.Entry(sp.Story);
+                var translationsEntry = entry.Collection(s => s.Translations);
+                if (!translationsEntry.IsLoaded)
+                {
+                    await translationsEntry.LoadAsync();
+                }
+            }
+        }
+
         var result = new List<StoryMarketplaceItemDto>();
         foreach (var sp in purchasedStories)
         {
@@ -264,7 +313,9 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             
             if (marketplaceInfo != null)
             {
-                result.Add(MapToMarketplaceItemDto(marketplaceInfo, locale));
+                // Normalize locale to lowercase for mapping
+                var normalizedLocale = (locale ?? "ro-ro").ToLowerInvariant();
+                result.Add(MapToMarketplaceItemDto(marketplaceInfo, normalizedLocale));
             }
         }
         return result;
@@ -370,12 +421,16 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         var progressPercentage = totalTiles > 0 ? (int)((double)storyProgress / totalTiles * 100) : 0;
         var isCompleted = progressPercentage >= 100;
 
-        return MapToStoryDetailsDto(marketplaceInfo, locale, isPurchased, isOwned, isCompleted, progressPercentage);
+        // Normalize locale to lowercase for mapping
+        var normalizedLocale = (locale ?? "ro-ro").ToLowerInvariant();
+        return MapToStoryDetailsDto(marketplaceInfo, normalizedLocale, isPurchased, isOwned, isCompleted, progressPercentage);
     }
 
     private StoryDetailsDto MapToStoryDetailsDto(StoryMarketplaceInfo smi, string locale, bool isPurchased, bool isOwned, bool isCompleted, int progressPercentage)
     {
-        var translation = smi.Story.Translations.FirstOrDefault(t => t.LanguageCode == locale);
+        // Locale should already be normalized when passed here, but ensure it's lowercase for safety
+        var normalizedLocale = (locale ?? "ro-ro").ToLowerInvariant();
+        var translation = smi.Story.Translations?.FirstOrDefault(t => t.LanguageCode == normalizedLocale);
         var title = translation?.Title ?? smi.Story.Title;
         string? authorName = null;
         if (smi.Story.CreatedBy.HasValue)
@@ -393,7 +448,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             CoverImageUrl = smi.Story.CoverImageUrl,
             CreatedBy = smi.Story.CreatedBy,
             CreatedByName = authorName,
-            Summary = GenerateDetailedSummary(smi.Story, locale),
+            Summary = GenerateDetailedSummary(smi.Story, normalizedLocale),
             PriceInCredits = smi.PriceInCredits,
             Region = smi.Region,
             AgeRating = smi.AgeRating,
@@ -415,12 +470,17 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             SortOrder = smi.Story.SortOrder,
             IsActive = smi.Story.IsActive,
             UpdatedAt = smi.Story.UpdatedAt,
-            UpdatedBy = smi.Story.UpdatedBy
+            UpdatedBy = smi.Story.UpdatedBy,
+            AvailableLanguages = smi.Story.Translations?
+                .Select(t => t.LanguageCode)
+                .OrderBy(l => l)
+                .ToList() ?? new List<string>()
         };
     }
 
     private string GenerateDetailedSummary(StoryDefinition story, string locale)
     {
+        // Locale should already be normalized when passed here (from MapToStoryDetailsDto)
         // Generate a more detailed summary for story details
         var firstTile = story.Tiles.FirstOrDefault();
         if (firstTile?.Translations?.FirstOrDefault(t => t.LanguageCode == locale)?.Text != null)
@@ -435,8 +495,15 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
 
     private StoryMarketplaceItemDto MapToMarketplaceItemDto(StoryMarketplaceInfo smi, string locale)
     {
-        var translation = smi.Story.Translations.FirstOrDefault(t => t.LanguageCode == locale);
+        var translation = smi.Story.Translations?.FirstOrDefault(t => t.LanguageCode == locale);
         var title = translation?.Title ?? smi.Story.Title;
+        
+        // Extract available languages from translations
+        // Use null-safe navigation and fallback to empty list if translations are not loaded
+        var availableLanguages = smi.Story.Translations?
+            .Select(t => t.LanguageCode)
+            .OrderBy(l => l)
+            .ToList() ?? new List<string>();
 
         return new StoryMarketplaceItemDto
         {
@@ -444,14 +511,15 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             Title = title,
             CoverImageUrl = smi.Story.CoverImageUrl,
             CreatedBy = smi.Story.CreatedBy,
-            Summary = GenerateSummary(smi.Story, locale),
+            Summary = GenerateSummary(smi.Story, locale), // locale is already normalized in MapToMarketplaceItemDto
             PriceInCredits = smi.PriceInCredits,
             AgeRating = smi.AgeRating,
             Characters = smi.Characters,
             CreatedAt = smi.CreatedAt,
             StoryTopic = smi.Story.StoryTopic,
             StoryType = smi.Story.StoryType.ToString(),
-            Status = smi.Story.Status.ToString()
+            Status = smi.Story.Status.ToString(),
+            AvailableLanguages = availableLanguages
         };
     }
 

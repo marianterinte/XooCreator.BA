@@ -224,9 +224,21 @@ public class StoriesRepository : IStoriesRepository
         {
             var createdStoryIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
+            // First, create StoryDefinitions for all languages (but each story only once)
+            // This is similar to SeedStoriesAsync where we create base stories first
             foreach (var lc in LanguageCodeExtensions.All())
             {
                 await EnsureIndependentDefinitionsForLocale(lc.ToFolder(), createdStoryIds);
+            }
+            
+            // Save StoryDefinitions to database before creating translations
+            // This ensures StoryDefinitions exist when we look them up in ApplyIndependentTranslationsForLocale
+            await _context.SaveChangesAsync();
+
+            // Now create translations for all languages (including ro-ro, unlike SeedStoriesAsync)
+            // This ensures all languages have translations, including the base ro-ro
+            foreach (var lc in LanguageCodeExtensions.All())
+            {
                 await ApplyIndependentTranslationsForLocale(lc.ToTag());
             }
 
