@@ -1,6 +1,7 @@
 using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Features.UserAdministration.DTOs;
 using XooCreator.BA.Features.UserAdministration.Repositories;
+using XooCreator.BA.Infrastructure.Services;
 
 namespace XooCreator.BA.Features.UserAdministration.Services;
 
@@ -8,15 +9,18 @@ public interface IUserAdministrationService
 {
     Task<GetAllUsersResponse> GetAllUsersAsync(CancellationToken ct = default);
     Task<UpdateUserRoleResponse> UpdateUserRoleAsync(Guid userId, UserRole role, CancellationToken ct = default);
+    Task<CurrentUserResponse?> GetCurrentUserAsync(CancellationToken ct = default);
 }
 
 public class UserAdministrationService : IUserAdministrationService
 {
     private readonly IUserAdministrationRepository _repository;
+    private readonly IAuth0UserService _auth0UserService;
 
-    public UserAdministrationService(IUserAdministrationRepository repository)
+    public UserAdministrationService(IUserAdministrationRepository repository, IAuth0UserService auth0UserService)
     {
         _repository = repository;
+        _auth0UserService = auth0UserService;
     }
 
     public async Task<GetAllUsersResponse> GetAllUsersAsync(CancellationToken ct = default)
@@ -78,6 +82,29 @@ public class UserAdministrationService : IUserAdministrationService
                 Success = false,
                 ErrorMessage = ex.Message
             };
+        }
+    }
+
+    public async Task<CurrentUserResponse?> GetCurrentUserAsync(CancellationToken ct = default)
+    {
+        try
+        {
+            var user = await _auth0UserService.GetCurrentUserAsync(ct);
+            if (user == null)
+            {
+                return null;
+            }
+
+            return new CurrentUserResponse
+            {
+                Id = user.Id,
+                Email = user.Email,
+                Role = user.Role
+            };
+        }
+        catch (Exception)
+        {
+            return null;
         }
     }
 }

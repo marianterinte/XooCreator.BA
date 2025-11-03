@@ -74,34 +74,56 @@ public class StoriesService : IStoriesService
 
     public async Task<EditableStoryDto?> GetStoryForEditAsync(string storyId, string locale)
     {
-        var story = await _repository.GetStoryByIdAsync(storyId, locale);
+        // Get StoryDefinition directly to access StoryType property
+        var story = await _repository.GetStoryDefinitionByIdAsync(storyId);
         if (story == null) return null;
+
+        // Get translation for the requested locale
+        var translation = story.Translations.FirstOrDefault(t => t.LanguageCode == locale) 
+            ?? story.Translations.FirstOrDefault(t => t.LanguageCode == "ro-ro")
+            ?? story.Translations.FirstOrDefault();
+
         return new EditableStoryDto
         {
-            Id = story.Id,
-            Title = story.Title,
+            Id = story.StoryId,
+            Title = translation?.Title ?? story.Title,
             CoverImageUrl = story.CoverImageUrl ?? string.Empty,
-            Summary = story.Summary,
-            Tiles = story.Tiles.Select(t => new EditableTileDto
+            Summary = story.Summary ?? string.Empty,
+            StoryType = (int)story.StoryType,
+            Tiles = story.Tiles.OrderBy(t => t.SortOrder).Select(t =>
             {
-                Type = t.Type,
-                Id = t.Id,
-                Caption = t.Caption ?? string.Empty,
-                Text = t.Text,
-                ImageUrl = t.ImageUrl,
-                AudioUrl = t.AudioUrl,
-                Question = t.Question,
-                Answers = (t.Answers ?? new()).Select(a => new EditableAnswerDto
+                var tileTranslation = t.Translations.FirstOrDefault(tr => tr.LanguageCode == locale)
+                    ?? t.Translations.FirstOrDefault(tr => tr.LanguageCode == "ro-ro")
+                    ?? t.Translations.FirstOrDefault();
+
+                return new EditableTileDto
                 {
-                    Id = a.Id,
-                    Text = a.Text ?? string.Empty,
-                    Tokens = (a.Tokens ?? new()).Select(tok => new EditableTokenDto
+                    Type = t.Type,
+                    Id = t.TileId,
+                    Caption = tileTranslation?.Caption ?? t.Caption ?? string.Empty,
+                    Text = tileTranslation?.Text ?? t.Text ?? string.Empty,
+                    ImageUrl = t.ImageUrl ?? string.Empty,
+                    AudioUrl = t.AudioUrl ?? string.Empty,
+                    Question = tileTranslation?.Question ?? t.Question ?? string.Empty,
+                    Answers = (t.Answers ?? new()).OrderBy(a => a.SortOrder).Select(a =>
                     {
-                        Type = (int)tok.Type,
-                        Value = tok.Value,
-                        Quantity = tok.Quantity
+                        var answerTranslation = a.Translations.FirstOrDefault(at => at.LanguageCode == locale)
+                            ?? a.Translations.FirstOrDefault(at => at.LanguageCode == "ro-ro")
+                            ?? a.Translations.FirstOrDefault();
+
+                        return new EditableAnswerDto
+                        {
+                            Id = a.AnswerId,
+                            Text = answerTranslation?.Text ?? a.Text ?? string.Empty,
+                            Tokens = (a.Tokens ?? new()).Select(tok => new EditableTokenDto
+                            {
+                                Type = tok.Type ?? string.Empty, // Type is already a string in StoryAnswerToken
+                                Value = tok.Value ?? string.Empty,
+                                Quantity = tok.Quantity
+                            }).ToList()
+                        };
                     }).ToList()
-                }).ToList()
+                };
             }).ToList()
         };
     }
@@ -113,6 +135,7 @@ public class EditableStoryDto
     public string Title { get; set; } = string.Empty;
     public string CoverImageUrl { get; set; } = string.Empty;
     public string? Summary { get; set; }
+    public int StoryType { get; set; } = 0; // 0 = AlchimaliaEpic (Tree Of Light), 1 = Indie (Independent)
     public List<EditableTileDto> Tiles { get; set; } = new();
 }
 
@@ -137,7 +160,7 @@ public class EditableAnswerDto
 
 public class EditableTokenDto
 {
-    public int Type { get; set; }
+    public string Type { get; set; } = string.Empty; // TokenFamily as string (e.g., "Personality", "Discovery")
     public string Value { get; set; } = string.Empty;
     public int Quantity { get; set; }
 }

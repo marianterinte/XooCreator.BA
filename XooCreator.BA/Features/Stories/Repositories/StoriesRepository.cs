@@ -56,6 +56,24 @@ public class StoriesRepository : IStoriesRepository
         return story == null ? null : StoryDefinitionMapper.MapToDtoWithLocale(story, locale);
     }
 
+    public async Task<StoryDefinition?> GetStoryDefinitionByIdAsync(string storyId)
+    {
+        storyId = NormalizeStoryId(storyId);
+        var story = await _context.StoryDefinitions
+                .Include(s => s.Translations)
+                .Include(s => s.Tiles)
+                    .ThenInclude(t => t.Translations)
+                .Include(s => s.Tiles)
+                    .ThenInclude(t => t.Answers)
+                        .ThenInclude(a => a.Tokens)
+                .Include(s => s.Tiles)
+                    .ThenInclude(t => t.Answers)
+                        .ThenInclude(a => a.Translations)
+                .FirstOrDefaultAsync(s => s.StoryId == storyId && s.IsActive);
+
+        return story;
+    }
+
     public async Task<List<UserStoryProgressDto>> GetUserStoryProgressAsync(Guid userId, string storyId)
     {
         storyId = NormalizeStoryId(storyId);

@@ -59,3 +59,30 @@ public class UpdateUserRoleEndpoint
         return TypedResults.Ok(result);
     }
 }
+
+[Endpoint]
+public class GetCurrentUserEndpoint
+{
+    private readonly IUserAdministrationService _userAdministrationService;
+
+    public GetCurrentUserEndpoint(IUserAdministrationService userAdministrationService)
+    {
+        _userAdministrationService = userAdministrationService;
+    }
+
+    [Route("/api/user-administration/current-user")]
+    [Authorize]
+    public static async Task<Results<Ok<CurrentUserResponse>, UnauthorizedHttpResult, NotFound>> HandleGet(
+        [FromServices] GetCurrentUserEndpoint ep,
+        CancellationToken ct)
+    {
+        var currentUser = await ep._userAdministrationService.GetCurrentUserAsync(ct);
+        
+        if (currentUser == null)
+        {
+            return TypedResults.NotFound();
+        }
+
+        return TypedResults.Ok(currentUser);
+    }
+}

@@ -29,3 +29,10 @@ public class UpdateUserRoleResponse
     public string? ErrorMessage { get; set; }
 }
 
+public class CurrentUserResponse
+{
+    public Guid Id { get; set; }
+    public string Email { get; set; } = string.Empty;
+    public UserRole Role { get; set; }
+}
+

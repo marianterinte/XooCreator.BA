@@ -178,6 +178,7 @@ public static class StoryDefinitionMapper
             CoverImageUrl = story.CoverImageUrl,
             Summary = story.Summary,
             StoryTopic = story.StoryTopic,
+            StoryType = story.StoryType.ToString(),
             UnlockedStoryHeroes = GetUnlockedHeroesFromSeed(story.StoryId),
             Tiles = story.Tiles
                 .OrderBy(t => t.SortOrder)
