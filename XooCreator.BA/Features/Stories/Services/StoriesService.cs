@@ -117,7 +117,7 @@ public class StoriesService : IStoriesService
                             Text = answerTranslation?.Text ?? a.Text ?? string.Empty,
                             Tokens = (a.Tokens ?? new()).Select(tok => new EditableTokenDto
                             {
-                                Type = tok.Type ?? string.Empty, // Type is already a string in StoryAnswerToken
+                                Type = tok.Type ?? string.Empty, 
                                 Value = tok.Value ?? string.Empty,
                                 Quantity = tok.Quantity
                             }).ToList()

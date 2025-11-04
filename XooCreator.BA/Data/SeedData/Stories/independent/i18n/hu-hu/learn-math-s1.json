@@ -1,11 +1,11 @@
 {
   "storyId": "learn-math-s1",
-  "title": "Problémák Mechankián",
+  "title": "Problémák Mechanikán",
   "coverImageUrl": "images/tales-of-alchimalia/stories/learn-math-s1/0.cover.png",
-    "sortOrder": 1,
+  "sortOrder": 1,
   "storyType": 1,
   "storyTopic": "Mathematics",
-  "summary": "Segíts Grubotnak problémákat megoldani Mechankián.",
+  "summary": "Segíts Grubotnak problémákat megoldani Mechanikán.",
   "price": 0,
   "unlockedStoryHeroes": [],
   "tiles": [
@@ -14,7 +14,7 @@
       "type": "page",
       "sortOrder": 1,
       "caption": "Riasztás a Vezérlőtoronyban",
-      "text": "A Mechanika bolygón egy piros riasztás villogott a Vezérlőtornyban. \"Riasztás! A North-3 generátor leállt!\" Nélküle a robot polgárok nem tölthetnek. Grubot kigombolta az antennáit: \"Elérjük az Energia Szívét és újra online hozzuk. Lépésről lépésre.\"",
+      "text": "A Mechanika bolygón egy piros riasztás villogott a Vezérlőtornyban. \"Riasztás! A North-3 generátor leállt!\" Nélküle a robot polgárok nem tudnak újratöltődni. Grubot robot kiegyenesítette az antennáit: \"El fogom érni az Energia Szívét és újra üzembe helyezem. Lépésről lépésre.\"",
       "imageUrl": "images/tales-of-alchimalia/stories/learn-math-s1/1.workshop.png"
     },
     {
@@ -110,7 +110,7 @@
       "type": "page",
       "sortOrder": 6,
       "caption": "Az Iker Turbinák Csarnoka",
-      "text": "Mélyebben belül, két hatalmas turbina zúg a sötétben. Apró fények gyűrűi ölelik körül minden rotort. \"Szinronizálnom kell a ritmusukat,\" gondolja Grubot. \"Minden fény együtt pulzál.\"",
+      "text": "Mélyebben belül, két hatalmas turbina zümmög a sötétben. Apró fények gyűrűi ölelik körül minden rotort. \"Szinronizálnom kell a ritmusukat,\" gondolja Grubot. \"Minden fény együtt pulzál.\"",
       "imageUrl": "images/tales-of-alchimalia/stories/learn-math-s1/6.portals.png"
     },
     {
