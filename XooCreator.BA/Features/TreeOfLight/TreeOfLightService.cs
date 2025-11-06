@@ -170,10 +170,15 @@ public class TreeOfLightService : ITreeOfLightService
         return newlyUnlockedRegions;
     }
 
+    /// <summary>
+    /// Checks and unlocks heroes based on story completion
+    /// Heroes are now independent - stories decide which heroes unlock via unlockedStoryHeroes array
+    /// </summary>
     private async Task<List<UnlockedHeroDto>> CheckAndUnlockHeroesAsync(Guid userId, string storyId)
     {
         var newlyUnlockedHeroes = new List<UnlockedHeroDto>();
 
+        // Get heroes that should be unlocked by this story (from story JSON unlockedStoryHeroes array)
         var storyUnlockedHeroes = await GetUnlockedHeroesFromStoryJsonAsync(storyId);
         foreach (var heroId in storyUnlockedHeroes)
         {
@@ -198,43 +203,7 @@ public class TreeOfLightService : ITreeOfLightService
             }
         }
 
-        var storyHeroes = await _repository.GetStoryHeroesAsync();
-        
-        foreach (var storyHero in storyHeroes)
-        {
-            var isAlreadyUnlocked = await _repository.IsHeroUnlockedAsync(userId, storyHero.HeroId);
-            if (isAlreadyUnlocked)
-            {
-                continue;
-            }
-
-            var unlockConditions = JsonSerializer.Deserialize<UnlockConditions>(storyHero.UnlockConditionJson);
-            if (unlockConditions?.Type == "story_completion" && unlockConditions.RequiredStories != null)
-            {
-                if (unlockConditions.RequiredStories.Contains(storyId))
-                {
-                    var completedStories = await _repository.GetStoryProgressAsync(userId, "puf-puf-journey-v1"); // Use default config
-                    var completedStoryIds = new HashSet<string>(completedStories.Select(cs => cs.StoryId));
-                    
-                    var allRequiredStoriesCompleted = unlockConditions.RequiredStories.All(requiredStoryId => completedStoryIds.Contains(requiredStoryId));
-                    if (allRequiredStoriesCompleted)
-                    {
-                        var unlocked = await _repository.UnlockHeroAsync(userId, storyHero.HeroId, "STORY_COMPLETION");
-                        if (unlocked)
-                        {
-                            await SaveStoryHeroToBestiaryAsync(userId, storyHero.HeroId);
-                            
-                            newlyUnlockedHeroes.Add(new UnlockedHeroDto
-                            {
-                                HeroId = storyHero.HeroId,
-                                ImageUrl = storyHero.ImageUrl
-                            });
-                        }
-                    }
-                }
-            }
-        }
-
+        // No longer checking UnlockConditionJson - heroes are independent, stories decide unlocks
         return newlyUnlockedHeroes;
     }
 
@@ -329,48 +298,24 @@ public class TreeOfLightService : ITreeOfLightService
 
     private async Task<string> GetStoryHeroNameAsync(string heroId)
     {
-        try
-        {
-            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
-            var candidates = new[]
-            {
-                Path.Combine(baseDir, "Data", "SeedData", "Translations", "en-US", "story-heroes.json"),
-                Path.Combine(baseDir, "Data", "SeedData", "Translations", "ro-RO", "story-heroes.json"),
-                Path.Combine(baseDir, "Data", "SeedData", "Translations", "hu-HU", "story-heroes.json")
-            };
-
-            foreach (var filePath in candidates)
-            {
-                if (File.Exists(filePath))
-                {
-                    var json = await File.ReadAllTextAsync(filePath);
-                    var translations = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
-                    var nameKey = $"story_hero_{heroId}_name";
-                    if (translations?.ContainsKey(nameKey) == true)
-                    {
-                        return translations[nameKey];
-                    }
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error reading hero name for {heroId}: {ex.Message}");
-        }
-
-        return heroId; // Fallback to heroId if name not found
+        return await GetStoryHeroTranslationAsync(heroId, "name");
     }
 
     private async Task<string> GetStoryHeroStoryAsync(string heroId)
+    {
+        return await GetStoryHeroTranslationAsync(heroId, "story");
+    }
+
+    private async Task<string> GetStoryHeroTranslationAsync(string heroId, string field)
     {
         try
         {
             var baseDir = AppDomain.CurrentDomain.BaseDirectory;
             var candidates = new[]
             {
-                Path.Combine(baseDir, "Data", "SeedData", "Translations", "en-US", "story-heroes.json"),
-                Path.Combine(baseDir, "Data", "SeedData", "Translations", "ro-RO", "story-heroes.json"),
-                Path.Combine(baseDir, "Data", "SeedData", "Translations", "hu-HU", "story-heroes.json")
+                Path.Combine(baseDir, "Data", "SeedData", "StoryHeroes", "i18n", "en-us", $"{heroId}.json"),
+                Path.Combine(baseDir, "Data", "SeedData", "StoryHeroes", "i18n", "ro-ro", $"{heroId}.json"),
+                Path.Combine(baseDir, "Data", "SeedData", "StoryHeroes", "i18n", "hu-hu", $"{heroId}.json")
             };
 
             foreach (var filePath in candidates)
@@ -378,41 +323,62 @@ public class TreeOfLightService : ITreeOfLightService
                 if (File.Exists(filePath))
                 {
                     var json = await File.ReadAllTextAsync(filePath);
-                    var translations = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
-                    var storyKey = $"story_hero_{heroId}_story";
-                    if (translations?.ContainsKey(storyKey) == true)
+                    var heroData = JsonSerializer.Deserialize<Dictionary<string, string>>(json, new JsonSerializerOptions
                     {
-                        return translations[storyKey];
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        PropertyNameCaseInsensitive = true
+                    });
+
+                    if (heroData?.ContainsKey(field) == true)
+                    {
+                        return heroData[field];
                     }
                 }
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error reading hero story for {heroId}: {ex.Message}");
+            Console.WriteLine($"Error reading hero {field} for {heroId}: {ex.Message}");
         }
 
-        return $"A hero discovered through the Tree of Light stories."; // Fallback story
+        // Fallback values
+        return field switch
+        {
+            "name" => heroId,
+            "story" => $"A hero discovered through the Tree of Light stories.",
+            "description" => $"A hero from the Tree of Light",
+            _ => string.Empty
+        };
     }
 
     private async Task<string> GetStoryHeroImageUrlAsync(string heroId)
     {
         try
         {
-            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
-            var storyHeroesPath = Path.Combine(baseDir, "Data", "SeedData", "SharedConfigs", "story-heroes.json");
-            
-            if (File.Exists(storyHeroesPath))
+            // Try to get from database first
+            var storyHeroes = await _repository.GetStoryHeroesAsync();
+            var storyHero = storyHeroes.FirstOrDefault(sh => sh.HeroId == heroId);
+            if (storyHero != null && !string.IsNullOrEmpty(storyHero.ImageUrl))
             {
-                var json = await File.ReadAllTextAsync(storyHeroesPath);
-                var storyHeroesData = JsonSerializer.Deserialize<StoryHeroesConfig>(json, new JsonSerializerOptions
+                return storyHero.ImageUrl;
+            }
+
+            // Fallback: try to load from individual JSON file
+            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            var heroFilePath = Path.Combine(baseDir, "Data", "SeedData", "StoryHeroes", $"{heroId}.json");
+            
+            if (File.Exists(heroFilePath))
+            {
+                var json = await File.ReadAllTextAsync(heroFilePath);
+                var heroData = JsonSerializer.Deserialize<StoryHeroSeedData>(json, new JsonSerializerOptions
                 {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                    PropertyNameCaseInsensitive = true
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
                 });
 
-                var hero = storyHeroesData?.StoryHeroes?.FirstOrDefault(h => h.HeroId == heroId);
-                return hero?.ImageUrl ?? $"images/tol/stories/heroes/{heroId}.png";
+                if (!string.IsNullOrEmpty(heroData?.ImageUrl))
+                {
+                    return heroData.ImageUrl;
+                }
             }
         }
         catch (Exception ex)
@@ -531,15 +497,5 @@ public class StoryJsonData
     public List<object>? Tiles { get; set; }
 }
 
-public class StoryHeroesConfig
-{
-    public List<StoryHeroConfig>? StoryHeroes { get; set; }
-}
-
-public class StoryHeroConfig
-{
-    public string Id { get; set; } = string.Empty;
-    public string HeroId { get; set; } = string.Empty;
-    public string ImageUrl { get; set; } = string.Empty;
-    public object? UnlockConditions { get; set; }
-}
+// Helper classes for JSON deserialization (legacy - no longer used after refactoring)
+// Removed StoryHeroesConfig and StoryHeroConfig - now using StoryHeroSeedData from DTOs

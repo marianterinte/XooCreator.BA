@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
+using XooCreator.BA.Data.SeedData.DTOs;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Features.TreeOfLight;
@@ -63,9 +64,9 @@ public sealed class GetUserBestiaryEndpoint
 
         var items = rawItems.Select(item => new BestiaryItemDto(
             item.Id,
-            ep.TranslateText(item.Name, item.BestiaryType, locale, translations, item.ArmsKey, item.BodyKey, item.HeadKey),
+            ep.TranslateText(item.Name, item.BestiaryType, locale, translations, item.ArmsKey, item.BodyKey, item.HeadKey, "name"),
             ep.GetImageUrl(item.BestiaryType, item.ArmsKey, item.BodyKey, item.HeadKey),
-            ep.TranslateText(item.Story, item.BestiaryType, locale, translations, item.ArmsKey, item.BodyKey, item.HeadKey),
+            ep.TranslateText(item.Story, item.BestiaryType, locale, translations, item.ArmsKey, item.BodyKey, item.HeadKey, "story"),
             item.DiscoveredAt,
             item.BestiaryType
         )).ToList();
@@ -88,22 +89,21 @@ public sealed class GetUserBestiaryEndpoint
     {
         try
         {
+            // Try to load from individual JSON file (new structure)
             var baseDir = AppDomain.CurrentDomain.BaseDirectory;
-            var storyHeroesPath = Path.Combine(baseDir, "Data", "SeedData", "SharedConfigs", "story-heroes.json");
+            var heroFilePath = Path.Combine(baseDir, "Data", "SeedData", "StoryHeroes", $"{heroId}.json");
             
-            if (File.Exists(storyHeroesPath))
+            if (File.Exists(heroFilePath))
             {
-                var json = File.ReadAllText(storyHeroesPath);
-                var storyHeroesData = JsonSerializer.Deserialize<StoryHeroesConfig>(json, new JsonSerializerOptions
+                var json = File.ReadAllText(heroFilePath);
+                var heroData = JsonSerializer.Deserialize<StoryHeroSeedData>(json, new JsonSerializerOptions
                 {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                    PropertyNameCaseInsensitive = true
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
                 });
 
-                var hero = storyHeroesData?.StoryHeroes?.FirstOrDefault(h => h.HeroId == heroId);
-                if (hero != null)
+                if (!string.IsNullOrEmpty(heroData?.ImageUrl))
                 {
-                    return hero.ImageUrl;
+                    return heroData.ImageUrl;
                 }
             }
         }
@@ -115,7 +115,7 @@ public sealed class GetUserBestiaryEndpoint
         return $"images/tol/stories/heroes/{heroId}.png"; // Fallback
     }
 
-    private string TranslateText(string text, string bestiaryType, string locale, Dictionary<string, string> translations, string? armsKey = null, string? bodyKey = null, string? headKey = null)
+    private string TranslateText(string text, string bestiaryType, string locale, Dictionary<string, string> translations, string? armsKey = null, string? bodyKey = null, string? headKey = null, string? fieldHint = null)
     {
         if (bestiaryType == "storyhero" && text.StartsWith("story_hero_"))
         {
@@ -135,7 +135,7 @@ public sealed class GetUserBestiaryEndpoint
         }
         else if (bestiaryType == "treeofheroes")
         {
-            return GetTreeOfHeroesTranslation(text, locale, armsKey);
+            return GetTreeOfHeroesTranslation(text, locale, armsKey, fieldHint);
         }
         
         return text;
@@ -147,8 +147,8 @@ public sealed class GetUserBestiaryEndpoint
         {
             var baseDir = AppDomain.CurrentDomain.BaseDirectory;
             
-            // First try the individual hero files in BookOfHeroes/i18n
-            var heroFilePath = Path.Combine(baseDir, "Data", "SeedData", "BookOfHeroes", "i18n", locale, $"{heroId}.json");
+            // Try the individual hero files in StoryHeroes/i18n (new location)
+            var heroFilePath = Path.Combine(baseDir, "Data", "SeedData", "StoryHeroes", "i18n", locale, $"{heroId}.json");
             
             if (File.Exists(heroFilePath))
             {
@@ -165,30 +165,11 @@ public sealed class GetUserBestiaryEndpoint
                 }
             }
             
-            // If not found, try the consolidated story-heroes.json file
-            var storyHeroesFilePath = Path.Combine(baseDir, "Data", "SeedData", "Translations", locale, "story-heroes.json");
-            
-            if (File.Exists(storyHeroesFilePath))
-            {
-                var json = File.ReadAllText(storyHeroesFilePath);
-                var translations = JsonSerializer.Deserialize<Dictionary<string, string>>(json, new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                    PropertyNameCaseInsensitive = true
-                });
-
-                var key = $"story_hero_{heroId}_{field}";
-                if (translations?.ContainsKey(key) == true)
-                {
-                    return translations[key];
-                }
-            }
-            
             // Fallback to English if not found in requested locale
             if (locale != "en-us")
             {
                 // Try English individual hero file
-                var fallbackHeroFilePath = Path.Combine(baseDir, "Data", "SeedData", "BookOfHeroes", "i18n", "en-us", $"{heroId}.json");
+                var fallbackHeroFilePath = Path.Combine(baseDir, "Data", "SeedData", "StoryHeroes", "i18n", "en-us", $"{heroId}.json");
                 
                 if (File.Exists(fallbackHeroFilePath))
                 {
@@ -202,25 +183,6 @@ public sealed class GetUserBestiaryEndpoint
                     if (heroData?.ContainsKey(field) == true)
                     {
                         return heroData[field];
-                    }
-                }
-                
-                // Try English consolidated story-heroes.json file
-                var fallbackStoryHeroesFilePath = Path.Combine(baseDir, "Data", "SeedData", "Translations", "en-us", "story-heroes.json");
-                
-                if (File.Exists(fallbackStoryHeroesFilePath))
-                {
-                    var json = File.ReadAllText(fallbackStoryHeroesFilePath);
-                    var translations = JsonSerializer.Deserialize<Dictionary<string, string>>(json, new JsonSerializerOptions
-                    {
-                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                        PropertyNameCaseInsensitive = true
-                    });
-
-                    var key = $"story_hero_{heroId}_{field}";
-                    if (translations?.ContainsKey(key) == true)
-                    {
-                        return translations[key];
                     }
                 }
             }
@@ -301,21 +263,54 @@ public sealed class GetUserBestiaryEndpoint
         return text; // Fallback to original text
     }
 
-    private string GetTreeOfHeroesTranslation(string text, string locale, string? armsKey)
+    private string GetTreeOfHeroesTranslation(string text, string locale, string? armsKey, string? fieldHint = null)
     {
         try
         {
             var baseDir = AppDomain.CurrentDomain.BaseDirectory;
             
-            // For tree of heroes, armsKey contains the hero ID
-            var heroId = armsKey;
-            if (string.IsNullOrEmpty(heroId))
+            string translationKey;
+            string heroId;
+            string field;
+            
+            // If text is already a complete translation key (e.g., "hero_tree_brave_puppy_name"), use it directly
+            if (text.StartsWith("hero_tree_") && (text.EndsWith("_name") || text.EndsWith("_story") || text.EndsWith("_description")))
             {
-                return text; // If we can't get the hero ID, return original text
+                translationKey = text;
+            }
+            else
+            {
+                // Text is just the heroId (e.g., "hero_tree_guardian" or just "guardian"), need to construct full key
+                // First, try to get heroId from text or armsKey
+                if (text.StartsWith("hero_tree_"))
+                {
+                    // Extract heroId from text (remove "hero_tree_" prefix)
+                    heroId = text.Substring("hero_tree_".Length);
+                }
+                else if (!string.IsNullOrEmpty(armsKey))
+                {
+                    // Use armsKey as heroId (armsKey contains the hero ID for tree of heroes)
+                    heroId = armsKey;
+                }
+                else
+                {
+                    // Fallback: use text as heroId
+                    heroId = text;
+                }
+                
+                if (string.IsNullOrEmpty(heroId))
+                {
+                    return text; // If we can't get the hero ID, return original text
+                }
+                
+                // Use fieldHint if provided (from TranslateText call), otherwise determine from text
+                field = fieldHint ?? GetTreeOfHeroesField(text);
+                translationKey = $"hero_tree_{heroId}_{field}";
             }
             
             // Try to get the translation for the requested locale
-            var heroTreeFilePath = Path.Combine(baseDir, "Data", "SeedData", "BookOfHeroes", "i18n", locale, "hero-tree.json");
+            // Note: hero-tree.json is now in StoryHeroes/i18n (moved from BookOfHeroes/i18n)
+            var heroTreeFilePath = Path.Combine(baseDir, "Data", "SeedData", "StoryHeroes", "i18n", locale, "hero-tree.json");
             
             if (File.Exists(heroTreeFilePath))
             {
@@ -325,21 +320,17 @@ public sealed class GetUserBestiaryEndpoint
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                     PropertyNameCaseInsensitive = true
                 });
-
-                // Determine if we're translating name or story
-                var field = GetTreeOfHeroesField(text);
-                var key = $"hero_tree_{heroId}_{field}";
                 
-                if (heroTreeData?.ContainsKey(key) == true)
+                if (heroTreeData?.ContainsKey(translationKey) == true)
                 {
-                    return heroTreeData[key];
+                    return heroTreeData[translationKey];
                 }
             }
             
             // If not found in requested locale, try English fallback
             if (locale != "en-us")
             {
-                var fallbackFilePath = Path.Combine(baseDir, "Data", "SeedData", "BookOfHeroes", "i18n", "en-us", "hero-tree.json");
+                var fallbackFilePath = Path.Combine(baseDir, "Data", "SeedData", "StoryHeroes", "i18n", "en-us", "hero-tree.json");
                 
                 if (File.Exists(fallbackFilePath))
                 {
@@ -349,14 +340,10 @@ public sealed class GetUserBestiaryEndpoint
                         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                         PropertyNameCaseInsensitive = true
                     });
-
-                    // Determine if we're translating name or story
-                    var field = GetTreeOfHeroesField(text);
-                    var key = $"hero_tree_{heroId}_{field}";
                     
-                    if (heroTreeData?.ContainsKey(key) == true)
+                    if (heroTreeData?.ContainsKey(translationKey) == true)
                     {
-                        return heroTreeData[key];
+                        return heroTreeData[translationKey];
                     }
                 }
             }
@@ -371,7 +358,19 @@ public sealed class GetUserBestiaryEndpoint
 
     private string GetTreeOfHeroesField(string text)
     {
-        // Simple heuristic: if the text is relatively short (likely a name), return "name"
+        // If text is a translation key (e.g., "hero_tree_brave_puppy_name"), extract the field
+        if (text.StartsWith("hero_tree_") && text.Contains("_"))
+        {
+            var parts = text.Split('_');
+            if (parts.Length >= 4)
+            {
+                // Format: hero_tree_{heroId}_{field}
+                var field = parts[parts.Length - 1]; // Last part is the field (name, story, description)
+                return field;
+            }
+        }
+        
+        // Fallback: Simple heuristic: if the text is relatively short (likely a name), return "name"
         // Otherwise, return "story"
         if (text.Length < 50) // Names are typically shorter
         {
@@ -415,19 +414,6 @@ public sealed class GetUserBestiaryEndpoint
     }
 }
 
-// Helper classes for JSON deserialization
-public class StoryHeroesConfig
-{
-    public List<StoryHeroConfig>? StoryHeroes { get; set; }
-}
-
-public class StoryHeroConfig
-{
-    public string Id { get; set; } = string.Empty;
-    public string HeroId { get; set; } = string.Empty;
-    public string ImageUrl { get; set; } = string.Empty;
-    public object? UnlockConditions { get; set; }
-}
 
 public class DiscoveryCreature
 {

@@ -73,3 +73,15 @@ public record MarkTileAsReadResponse
     public string? ErrorMessage { get; init; }
 }
 
+/// <summary>
+/// DTO for story editor to display available heroes
+/// </summary>
+public record StoryEditorHeroDto
+{
+    public required string HeroId { get; init; }
+    public required string Name { get; init; }
+    public required string Description { get; init; }
+    public required string Story { get; init; }
+    public required string ImageUrl { get; init; }
+}
+

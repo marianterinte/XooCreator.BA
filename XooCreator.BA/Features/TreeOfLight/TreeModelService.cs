@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.SeedData.DTOs;
 using XooCreator.BA.Features.TreeOfHeroes.DTOs;
@@ -20,13 +21,15 @@ public class TreeModelService : ITreeModelService
     private readonly ITreeOfLightRepository _tolRepository;
     private readonly ITreeOfLightTranslationService _translationService;
     private readonly IUserContextService _userContext;
+    private readonly XooDbContext _dbContext;
 
-    public TreeModelService(ITreeModelRepository treeModelRepository, ITreeOfLightRepository tolRepository, ITreeOfLightTranslationService translationService, IUserContextService userContext)
+    public TreeModelService(ITreeModelRepository treeModelRepository, ITreeOfLightRepository tolRepository, ITreeOfLightTranslationService translationService, IUserContextService userContext, XooDbContext dbContext)
     {
         _treeModelRepository = treeModelRepository;
         _tolRepository = tolRepository;
         _translationService = translationService;
         _userContext = userContext;
+        _dbContext = dbContext;
     }
 
     public async Task<TreeStateDto> GetTreeStateAsync(Guid userId, string? configId = null)
@@ -150,42 +153,157 @@ public class TreeModelService : ITreeModelService
         return unlockedRegions.ToList();
     }
 
+    /// <summary>
+    /// Evaluates which heroes should be unlocked based on completed stories
+    /// Heroes are now independent - stories decide which heroes unlock via unlockedStoryHeroes array
+    /// This method checks all completed stories and unlocks heroes from their unlockedStoryHeroes arrays
+    /// </summary>
     private async Task<List<UnlockedHeroDto>> EvaluateUnlockedHeroesAsync(Guid userId, List<StoryProgressDto> completedStories)
     {
-        var completedStoryIds = new HashSet<string>(completedStories.Select(cs => cs.StoryId));
         var unlockedHeroes = new List<UnlockedHeroDto>();
+        var unlockedHeroIds = new HashSet<string>();
 
-        var storyHeroes = await _tolRepository.GetStoryHeroesAsync();
-        
-        foreach (var storyHero in storyHeroes)
+        // For each completed story, check its unlockedStoryHeroes array
+        foreach (var completedStory in completedStories)
+        {
+            var storyUnlockedHeroes = await GetUnlockedHeroesFromStoryJsonAsync(completedStory.StoryId);
+            foreach (var heroId in storyUnlockedHeroes)
+            {
+                if (!unlockedHeroIds.Contains(heroId))
+                {
+                    unlockedHeroIds.Add(heroId);
+                    
+                    var isAlreadyUnlocked = await _tolRepository.IsHeroUnlockedAsync(userId, heroId);
+                    if (!isAlreadyUnlocked)
+                    {
+                        await _tolRepository.UnlockHeroAsync(userId, heroId, "STORY_COMPLETION");
+                        // Save to bestiary when unlocking
+                        await SaveStoryHeroToBestiaryAsync(userId, heroId);
+                    }
+
+                    // Get hero image URL
+                    var storyHeroes = await _tolRepository.GetStoryHeroesAsync();
+                    var storyHero = storyHeroes.FirstOrDefault(sh => sh.HeroId == heroId);
+                    
+                    unlockedHeroes.Add(new UnlockedHeroDto
+                    {
+                        HeroId = heroId,
+                        ImageUrl = storyHero?.ImageUrl ?? string.Empty
+                    });
+                }
+            }
+        }
+
+        // Also include already unlocked heroes
+        var allStoryHeroes = await _tolRepository.GetStoryHeroesAsync();
+        foreach (var storyHero in allStoryHeroes)
         {
             var isAlreadyUnlocked = await _tolRepository.IsHeroUnlockedAsync(userId, storyHero.HeroId);
-            if (isAlreadyUnlocked)
+            if (isAlreadyUnlocked && !unlockedHeroIds.Contains(storyHero.HeroId))
             {
                 unlockedHeroes.Add(new UnlockedHeroDto
                 {
                     HeroId = storyHero.HeroId,
                     ImageUrl = storyHero.ImageUrl
                 });
-                continue;
-            }
-
-            var unlockConditions = JsonSerializer.Deserialize<UnlockConditions>(storyHero.UnlockConditionJson);
-            if (unlockConditions?.Type == "story_completion" && unlockConditions.RequiredStories != null)
-            {
-                var allRequiredStoriesCompleted = unlockConditions.RequiredStories.All(storyId => completedStoryIds.Contains(storyId));
-                if (allRequiredStoriesCompleted)
-                {
-                    await _tolRepository.UnlockHeroAsync(userId, storyHero.HeroId, "STORY_COMPLETION");
-                    unlockedHeroes.Add(new UnlockedHeroDto
-                    {
-                        HeroId = storyHero.HeroId,
-                        ImageUrl = storyHero.ImageUrl
-                    });
-                }
             }
         }
 
         return unlockedHeroes;
     }
+
+    private async Task<List<string>> GetUnlockedHeroesFromStoryJsonAsync(string storyId)
+    {
+        try
+        {
+            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            var candidates = new[]
+            {
+                Path.Combine(baseDir, "Data", "SeedData", "Stories", "i18n", "en-us", $"{storyId}.json"),
+                Path.Combine(baseDir, "Data", "SeedData", "Stories", "i18n", "ro-ro", $"{storyId}.json"),
+                Path.Combine(baseDir, "Data", "SeedData", "Stories", "i18n", "hu-hu", $"{storyId}.json")
+            };
+
+            foreach (var filePath in candidates)
+            {
+                if (File.Exists(filePath))
+                {
+                    var json = await File.ReadAllTextAsync(filePath);
+                    var storyData = JsonSerializer.Deserialize<StoryJsonData>(json, new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        PropertyNameCaseInsensitive = true
+                    });
+
+                    return storyData?.UnlockedStoryHeroes ?? new List<string>();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error reading story JSON for {storyId}: {ex.Message}");
+        }
+
+        return new List<string>();
+    }
+
+    /// <summary>
+    /// Saves a story hero to the bestiary when unlocked
+    /// Same logic as TreeOfLightService.SaveStoryHeroToBestiaryAsync
+    /// </summary>
+    private async Task SaveStoryHeroToBestiaryAsync(Guid userId, string heroId)
+    {
+        try
+        {
+            var heroNameKey = $"story_hero_{heroId}_name";
+            var heroStoryKey = $"story_hero_{heroId}_story";
+
+            var existingBestiaryItem = await _dbContext.BestiaryItems
+                .FirstOrDefaultAsync(bi => bi.ArmsKey == heroId);
+
+            BestiaryItem bestiaryItem;
+            if (existingBestiaryItem == null)
+            {
+                bestiaryItem = new BestiaryItem
+                {
+                    Id = Guid.NewGuid(),
+                    ArmsKey = heroId, // Use HeroId as the identifier
+                    BodyKey = "—", 
+                    HeadKey = "—",
+                    Name = heroNameKey, // Store translation key instead of translated text
+                    Story = heroStoryKey, // Store translation key instead of translated text
+                    CreatedAt = DateTime.UtcNow
+                };
+                _dbContext.BestiaryItems.Add(bestiaryItem);
+            }
+            else
+            {
+                bestiaryItem = existingBestiaryItem;
+            }
+
+            var existingUserBestiary = await _dbContext.UserBestiary
+                .FirstOrDefaultAsync(ub => ub.UserId == userId && ub.BestiaryItemId == bestiaryItem.Id && ub.BestiaryType == "storyhero");
+
+            if (existingUserBestiary == null)
+            {
+                var userBestiary = new UserBestiary
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = userId,
+                    BestiaryItemId = bestiaryItem.Id,
+                    BestiaryType = "storyhero",
+                    DiscoveredAt = DateTime.UtcNow
+                };
+                _dbContext.UserBestiary.Add(userBestiary);
+            }
+
+            await _dbContext.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to save story hero {heroId} to bestiary: {ex.Message}");
+        }
+    }
 }
+
+// Note: StoryJsonData is defined in TreeOfLightService.cs (same namespace)

@@ -595,8 +595,7 @@ public class XooDbContext : DbContext
             
             modelBuilder.Entity<StoryHero>().HasData(storyHeroes);
             
-            var storyHeroUnlocks = LoadDataSync(() => seedService.LoadStoryHeroUnlocksAsync());
-            modelBuilder.Entity<StoryHeroUnlock>().HasData(storyHeroUnlocks);
+            // No longer seeding StoryHeroUnlock - heroes are independent, stories decide unlocks via unlockedStoryHeroes
         }
         catch (Exception ex)
         {

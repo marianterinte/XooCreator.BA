@@ -103,57 +103,66 @@ public class SeedDataService
         }).ToList() ?? new List<AnimalPartSupport>();
     }
 
+    /// <summary>
+    /// Loads story heroes from separate JSON files in StoryHeroes folder
+    /// Each hero has its own JSON file (e.g., grubot.json, linkaro.json, puf-puf.json)
+    /// Heroes are now independent - stories decide which heroes unlock via unlockedStoryHeroes array
+    /// </summary>
     public async Task<List<StoryHero>> LoadStoryHeroesAsync()
     {
-        var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SeedData", "SharedConfigs", "story-heroes.json");
-        if (!File.Exists(filePath))
+        var heroesPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SeedData", "StoryHeroes");
+        if (!Directory.Exists(heroesPath))
         {
-            throw new FileNotFoundException($"StoryHeroes seed data file not found: {filePath}");
+            throw new DirectoryNotFoundException($"StoryHeroes seed data directory not found: {heroesPath}");
         }
 
-        var json = await File.ReadAllTextAsync(filePath);
-        var storyHeroesData = JsonSerializer.Deserialize<StoryHeroesSeedData>(json, new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        });
+        var jsonFiles = Directory.GetFiles(heroesPath, "*.json");
+        var storyHeroes = new List<StoryHero>();
 
-        return storyHeroesData?.StoryHeroes?.Select((sh, index) => new StoryHero
+        foreach (var filePath in jsonFiles)
         {
-            Id = GetFixedStoryHeroId(sh.HeroId), // Use fixed IDs for seeding
-            HeroId = sh.HeroId,
-            ImageUrl = sh.ImageUrl,
-            UnlockConditionJson = JsonSerializer.Serialize(sh.UnlockConditions),
-            IsActive = true,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        }).ToList() ?? new List<StoryHero>();
-    }
-
-    public async Task<List<StoryHeroUnlock>> LoadStoryHeroUnlocksAsync()
-    {
-        var storyHeroes = await LoadStoryHeroesAsync();
-        var unlocks = new List<StoryHeroUnlock>();
-
-        foreach (var storyHero in storyHeroes)
-        {
-            var unlockConditions = JsonSerializer.Deserialize<UnlockConditions>(storyHero.UnlockConditionJson);
-            if (unlockConditions?.RequiredStories != null)
+            try
             {
-                foreach (var storyId in unlockConditions.RequiredStories)
+                var json = await File.ReadAllTextAsync(filePath);
+                var heroData = JsonSerializer.Deserialize<StoryHeroSeedData>(json, new JsonSerializerOptions
                 {
-                    unlocks.Add(new StoryHeroUnlock
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                });
+
+                if (heroData != null && !string.IsNullOrEmpty(heroData.HeroId))
+                {
+                    storyHeroes.Add(new StoryHero
                     {
-                        Id = Guid.NewGuid(),
-                        StoryHeroId = storyHero.Id,
-                        StoryId = storyId,
-                        UnlockOrder = 1,
-                        CreatedAt = DateTime.UtcNow
+                        Id = GetFixedStoryHeroId(heroData.HeroId), // Use fixed IDs for seeding
+                        HeroId = heroData.HeroId,
+                        ImageUrl = heroData.ImageUrl,
+                        UnlockConditionJson = null, // No longer needed - heroes are independent
+                        IsActive = true,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow
                     });
                 }
             }
+            catch (Exception ex)
+            {
+                // Log error but continue with other files
+                Console.WriteLine($"[SEEDING ERROR] Error loading story hero from {filePath}: {ex.Message}");
+            }
         }
 
-        return unlocks;
+        return storyHeroes;
+    }
+
+    /// <summary>
+    /// DEPRECATED: No longer needed - heroes are independent and stories decide unlocks via unlockedStoryHeroes
+    /// Keeping for backward compatibility but returns empty list
+    /// </summary>
+    [Obsolete("StoryHeroUnlock seeding is no longer needed - heroes are independent, stories decide unlocks via unlockedStoryHeroes")]
+    public async Task<List<StoryHeroUnlock>> LoadStoryHeroUnlocksAsync()
+    {
+        // Heroes are now independent - stories decide which heroes unlock via unlockedStoryHeroes array
+        // No need to create StoryHeroUnlock entries
+        return new List<StoryHeroUnlock>();
     }
 
     public async Task<List<HeroMessage>> LoadHeroMessagesAsync()

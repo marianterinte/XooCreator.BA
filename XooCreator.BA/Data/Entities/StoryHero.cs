@@ -8,7 +8,7 @@ public class StoryHero
     public Guid Id { get; set; }
     public string HeroId { get; set; } = string.Empty; // Reference to HeroDefinition.Id
     public string ImageUrl { get; set; } = string.Empty; // Image URL for the hero
-    public string UnlockConditionJson { get; set; } = string.Empty; // JSON with unlock conditions
+    public string? UnlockConditionJson { get; set; } // JSON with unlock conditions (deprecated - heroes are now independent, stories decide unlocks via unlockedStoryHeroes)
     public bool IsActive { get; set; } = true;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
