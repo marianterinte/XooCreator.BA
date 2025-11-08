@@ -36,3 +36,8 @@ public record CommitUploadResponse
     public string? ETag { get; init; }
 }
 
+public record RequestReadResponse
+{
+    public required string ReadUrl { get; init; }
+}
+
