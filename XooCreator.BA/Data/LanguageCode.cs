@@ -37,5 +37,20 @@ namespace XooCreator.BA.Data
             yield return LanguageCode.EnUs;
             yield return LanguageCode.HuHu;
         }
+
+        /// <summary>
+        /// Converts a language tag string (e.g., "en-us", "ro-ro", "hu-hu") to a LanguageCode enum.
+        /// Returns LanguageCode.RoRo as default if the tag is null, empty, or unrecognized.
+        /// </summary>
+        public static LanguageCode FromTag(string? tag)
+        {
+            var t = (tag ?? "ro-ro").ToLowerInvariant();
+            return t switch
+            {
+                "en-us" => LanguageCode.EnUs,
+                "hu-hu" => LanguageCode.HuHu,
+                _ => LanguageCode.RoRo
+            };
+        }
     }
 }

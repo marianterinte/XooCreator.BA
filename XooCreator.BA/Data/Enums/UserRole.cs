@@ -16,6 +16,11 @@ public enum UserRole
     Creator = 1,
     
     /// <summary>
+    /// Reviewer - user with review permissions (claim/approve/reject)
+    /// </summary>
+    Reviewer = 3,
+
+    /// <summary>
     /// Admin - administrator with full system access
     /// </summary>
     Admin = 2

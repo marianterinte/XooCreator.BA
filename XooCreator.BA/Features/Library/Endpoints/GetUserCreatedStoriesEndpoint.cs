@@ -31,7 +31,7 @@ public class GetUserCreatedStoriesEndpoint
         [FromServices] GetUserCreatedStoriesEndpoint ep)
     {
         var userId = ep._userContextService.GetCurrentUserId();
-        var langCode = NormalizeLocale(locale);
+        var langCode = LanguageCodeExtensions.FromTag(locale);
         
         // Get published/approved stories from UserCreatedStories
         var publishedStories = await ep._context.UserCreatedStories
@@ -143,16 +143,5 @@ public class GetUserCreatedStoriesEndpoint
         };
 
         return TypedResults.Ok(response);
-    }
-
-    private static LanguageCode NormalizeLocale(string locale)
-    {
-        var normalized = (locale ?? "ro-ro").ToLowerInvariant();
-        return normalized switch
-        {
-            "en-us" => LanguageCode.EnUs,
-            "hu-hu" => LanguageCode.HuHu,
-            _ => LanguageCode.RoRo
-        };
     }
 }

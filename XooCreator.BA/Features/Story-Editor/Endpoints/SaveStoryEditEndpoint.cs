@@ -47,23 +47,12 @@ public class SaveStoryEditEndpoint
         }
 
         var langTag = ep._userContext.GetRequestLocaleOrDefault("ro-ro");
-        var lang = ToLanguageCode(langTag);
+        var lang = LanguageCodeExtensions.FromTag(langTag);
 
         // Persist raw JSON from editor; status stays draft unless changed elsewhere
         var json = body.RootElement.GetRawText();
         await ep._editorService.SaveDraftJsonAsync(user.Id, storyId, lang, json, ct);
         return TypedResults.Ok(new SaveResponse());
-    }
-
-    private static LanguageCode ToLanguageCode(string tag)
-    {
-        var t = (tag ?? "ro-ro").ToLowerInvariant();
-        return t switch
-        {
-            "en-us" => LanguageCode.EnUs,
-            "hu-hu" => LanguageCode.HuHu,
-            _ => LanguageCode.RoRo
-        };
     }
 }
 

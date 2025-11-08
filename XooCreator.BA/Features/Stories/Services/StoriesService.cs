@@ -80,7 +80,7 @@ public class StoriesService : IStoriesService
     public async Task<EditableStoryDto?> GetStoryForEditAsync(string storyId, string locale)
     {
         // 1) Try to load StoryCraft (editor working copy) first
-        var lang = ToLanguageCode(locale);
+        var lang = LanguageCodeExtensions.FromTag(locale);
         var craft = await _crafts.GetAsync(storyId, lang);
         if (craft != null && !string.IsNullOrWhiteSpace(craft.Json))
         {
@@ -161,16 +161,6 @@ public class StoriesService : IStoriesService
         };
     }
 
-    private static LanguageCode ToLanguageCode(string tag)
-    {
-        var t = (tag ?? "ro-ro").ToLowerInvariant();
-        return t switch
-        {
-            "en-us" => LanguageCode.EnUs,
-            "hu-hu" => LanguageCode.HuHu,
-            _ => LanguageCode.RoRo
-        };
-    }
 }
 
 public class EditableStoryDto

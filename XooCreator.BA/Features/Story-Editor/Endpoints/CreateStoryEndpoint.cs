@@ -42,7 +42,7 @@ public class CreateStoryEndpoint
 
     [Route("/api/{locale}/stories")]
     [Authorize]
-    public static async Task<Results<Ok<CreateStoryResponse>, BadRequest<string>, UnauthorizedHttpResult>> HandlePost(
+    public static async Task<Results<Ok<CreateStoryResponse>, BadRequest<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
         [FromRoute] string locale,
         [FromServices] CreateStoryEndpoint ep,
         [FromBody] CreateStoryRequest req,
@@ -51,8 +51,14 @@ public class CreateStoryEndpoint
         var user = await ep._auth0.GetCurrentUserAsync(ct);
         if (user == null) return TypedResults.Unauthorized();
 
+        // Creator-only guard
+        if (user.Role != Data.Enums.UserRole.Creator)
+        {
+            return TypedResults.Forbid();
+        }
+
         var langTag = string.IsNullOrWhiteSpace(req.Lang) ? ep._userContext.GetRequestLocaleOrDefault("ro-ro") : req.Lang!;
-        var lang = ToLanguageCode(langTag);
+        var lang = LanguageCodeExtensions.FromTag(langTag);
         string storyId = (req.StoryId ?? string.Empty).Trim();
         if (string.IsNullOrWhiteSpace(storyId))
         {
@@ -67,17 +73,6 @@ public class CreateStoryEndpoint
 
         await ep._editorService.EnsureDraftAsync(user.Id, storyId, lang, ct);
         return TypedResults.Ok(new CreateStoryResponse { StoryId = storyId });
-    }
-
-    private static LanguageCode ToLanguageCode(string tag)
-    {
-        var t = (tag ?? "ro-ro").ToLowerInvariant();
-        return t switch
-        {
-            "en-us" => LanguageCode.EnUs,
-            "hu-hu" => LanguageCode.HuHu,
-            _ => LanguageCode.RoRo
-        };
     }
 }
 
