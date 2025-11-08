@@ -55,9 +55,9 @@ public class CreateStoryEndpoint
         if (user == null) return TypedResults.Unauthorized();
 
         // Creator-only guard
-        if (user.Role != Data.Enums.UserRole.Creator)
+        if (!ep._auth0.HasRole(user, Data.Enums.UserRole.Creator))
         {
-            ep._logger.LogWarning("CreateStory forbidden: userId={UserId} role={Role}", user?.Id, user?.Role);
+            ep._logger.LogWarning("CreateStory forbidden: userId={UserId} roles={Roles}", user?.Id, string.Join(",", user?.Roles ?? new List<UserRole> { user?.Role ?? UserRole.Reader }));
             return TypedResults.Forbid();
         }
 

@@ -47,9 +47,9 @@ public class SubmitStoryEndpoint
         var user = await ep._auth0.GetCurrentUserAsync(ct);
         if (user == null) return TypedResults.Unauthorized();
 
-        if (user.Role != Data.Enums.UserRole.Creator)
+        if (!ep._auth0.HasRole(user, Data.Enums.UserRole.Creator))
         {
-            ep._logger.LogWarning("Submit forbidden: userId={UserId} role={Role}", user?.Id, user?.Role);
+            ep._logger.LogWarning("Submit forbidden: userId={UserId} roles={Roles}", user?.Id, string.Join(",", user?.Roles ?? new List<UserRole> { user?.Role ?? UserRole.Reader }));
             return TypedResults.Forbid();
         }
 

@@ -51,9 +51,9 @@ public class ReviewStoryEndpoint
         var user = await ep._auth0.GetCurrentUserAsync(ct);
         if (user == null) return TypedResults.Unauthorized();
 
-        if (user.Role != Data.Enums.UserRole.Reviewer)
+        if (!ep._auth0.HasRole(user, Data.Enums.UserRole.Reviewer))
         {
-            ep._logger.LogWarning("Review forbidden: userId={UserId} role={Role}", user?.Id, user?.Role);
+            ep._logger.LogWarning("Review forbidden: userId={UserId} roles={Roles}", user?.Id, string.Join(",", user?.Roles ?? new List<UserRole> { user?.Role ?? UserRole.Reader }));
             return TypedResults.Forbid();
         }
 

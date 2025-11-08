@@ -44,7 +44,7 @@ public class RetractStoryEndpoint
         var user = await ep._auth0.GetCurrentUserAsync(ct);
         if (user == null) return TypedResults.Unauthorized();
 
-        if (user.Role != Data.Enums.UserRole.Creator)
+        if (!ep._auth0.HasRole(user, Data.Enums.UserRole.Creator))
         {
             return TypedResults.Forbid();
         }

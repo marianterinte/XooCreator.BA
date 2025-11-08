@@ -56,7 +56,7 @@ public class SaveStoryEditEndpoint
         if (craft == null) return TypedResults.NotFound();
 
         // Only owner (Creator) can edit
-        if (craft.OwnerUserId != user.Id || user.Role != Data.Enums.UserRole.Creator)
+        if (craft.OwnerUserId != user.Id || !ep._auth0.HasRole(user, Data.Enums.UserRole.Creator))
         {
             ep._logger.LogWarning("Save forbidden: userId={UserId} storyId={StoryId}", user.Id, storyId);
             return TypedResults.Forbid();
