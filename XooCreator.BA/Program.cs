@@ -25,6 +25,7 @@ using XooCreator.BA.Features.TreeOfHeroes.Repositories;
 using XooCreator.BA.Features.TreeOfLight.Services;
 using XooCreator.BA.Features.TreeOfLight.Repositories;
 using XooCreator.BA.Features.User.Services;
+using XooCreator.BA.Infrastructure.Services.Blob;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -123,6 +124,7 @@ builder.Services.AddScoped<XooCreator.BA.Features.UserAdministration.Services.IU
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IAuth0UserService, Auth0UserService>();
 builder.Services.AddScoped<IUserContextService, UserContextService>();
+builder.Services.AddSingleton<IBlobSasService, BlobSasService>();
 builder.Services.AddScoped<IDbHealthService, DbHealthService>();
 builder.Services.AddScoped<ICreatureBuilderService, CreatureBuilderService>();
 builder.Services.AddScoped<ISeedDiscoveryService, SeedDiscoveryService>();
