@@ -9,6 +9,7 @@ public interface IUserAdministrationRepository
     Task<List<AlchimaliaUser>> GetAllUsersAsync(CancellationToken ct = default);
     Task<AlchimaliaUser?> GetUserByIdAsync(Guid userId, CancellationToken ct = default);
     Task<bool> UpdateUserRoleAsync(Guid userId, UserRole role, CancellationToken ct = default);
+    Task<bool> UpdateUserRolesAsync(Guid userId, List<UserRole> roles, CancellationToken ct = default);
 }
 
 public class UserAdministrationRepository : IUserAdministrationRepository
@@ -35,11 +36,20 @@ public class UserAdministrationRepository : IUserAdministrationRepository
 
     public async Task<bool> UpdateUserRoleAsync(Guid userId, UserRole role, CancellationToken ct = default)
     {
+        // For backward compatibility, convert single role to list
+        return await UpdateUserRolesAsync(userId, new List<UserRole> { role }, ct);
+    }
+
+    public async Task<bool> UpdateUserRolesAsync(Guid userId, List<UserRole> roles, CancellationToken ct = default)
+    {
         var user = await _db.AlchimaliaUsers.FirstOrDefaultAsync(u => u.Id == userId, ct);
         if (user == null)
             return false;
 
-        user.Role = role;
+        // Update both Role (for backward compatibility) and Roles
+        user.Roles = roles;
+        // Set Role to first role for backward compatibility, or Reader if empty
+        user.Role = roles.Count > 0 ? roles[0] : UserRole.Reader;
         user.UpdatedAt = DateTime.UtcNow;
         
         await _db.SaveChangesAsync(ct);

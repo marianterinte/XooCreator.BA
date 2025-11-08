@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using System.Linq;
 using XooCreator.BA.Data.Entities;
+using XooCreator.BA.Data.Enums;
 
 namespace XooCreator.BA.Data;
 
@@ -74,6 +76,12 @@ public class XooDbContext : DbContext
             e.Property(x => x.FirstName).HasMaxLength(100).IsRequired();
             e.Property(x => x.LastName).HasMaxLength(100).IsRequired();
             e.Property(x => x.Role).IsRequired();
+            // Configure Roles as PostgreSQL array
+            e.Property(x => x.Roles)
+                .HasConversion(
+                    v => v.Select(r => (int)r).ToArray(),
+                    v => v.Select(r => (UserRole)r).ToList())
+                .HasColumnType("integer[]");
             e.Property(x => x.Email).HasMaxLength(256).IsRequired();
             e.Property(x => x.Auth0Id).HasMaxLength(256).IsRequired();
             e.Property(x => x.Picture).HasMaxLength(512);
@@ -449,6 +457,7 @@ public class XooDbContext : DbContext
                 LastName = "Teacher",
                 Email = "alchimalia@admin.com",
                 Role = Enums.UserRole.Admin,
+                Roles = new List<UserRole> { Enums.UserRole.Admin },
                 CreatedAt = DateTime.UtcNow,
                 LastLoginAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow

@@ -10,7 +10,8 @@ public class AlchimaliaUser
     public string Name { get; set; } = string.Empty;  // Kept for backward compatibility
     public string FirstName { get; set; } = string.Empty;  // Nume
     public string LastName { get; set; } = string.Empty;  // Prenume
-    public UserRole Role { get; set; } = UserRole.Reader;
+    public UserRole Role { get; set; } = UserRole.Reader;  // Kept for backward compatibility, will be deprecated
+    public List<UserRole> Roles { get; set; } = new() { UserRole.Reader };  // Multiple roles support
     public string? Picture { get; set; }  // From Auth0 profile (optional)
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime LastLoginAt { get; set; } = DateTime.UtcNow;

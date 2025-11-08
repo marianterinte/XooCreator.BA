@@ -46,7 +46,10 @@ public class UpdateUserRoleEndpoint
         [FromBody] UpdateUserRoleRequest request,
         CancellationToken ct)
     {
-        var result = await ep._userAdministrationService.UpdateUserRoleAsync(userId, request.Role, ct);
+        // If Roles is provided, use it; otherwise fall back to single Role for backward compatibility
+        var result = request.Roles != null && request.Roles.Count > 0
+            ? await ep._userAdministrationService.UpdateUserRolesAsync(userId, request.Roles, ct)
+            : await ep._userAdministrationService.UpdateUserRoleAsync(userId, request.Role, ct);
         
         if (!result.Success)
         {

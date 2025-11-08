@@ -9,6 +9,7 @@ public interface IUserAdministrationService
 {
     Task<GetAllUsersResponse> GetAllUsersAsync(CancellationToken ct = default);
     Task<UpdateUserRoleResponse> UpdateUserRoleAsync(Guid userId, UserRole role, CancellationToken ct = default);
+    Task<UpdateUserRoleResponse> UpdateUserRolesAsync(Guid userId, List<UserRole> roles, CancellationToken ct = default);
     Task<CurrentUserResponse?> GetCurrentUserAsync(CancellationToken ct = default);
 }
 
@@ -34,7 +35,8 @@ public class UserAdministrationService : IUserAdministrationService
                 FirstName = u.FirstName,
                 LastName = u.LastName,
                 Email = u.Email,
-                Role = u.Role
+                Role = u.Role,  // Backward compatibility
+                Roles = u.Roles ?? (u.Role != 0 ? new List<UserRole> { u.Role } : new List<UserRole> { UserRole.Reader })
             }).ToList();
 
             return new GetAllUsersResponse
@@ -55,6 +57,12 @@ public class UserAdministrationService : IUserAdministrationService
 
     public async Task<UpdateUserRoleResponse> UpdateUserRoleAsync(Guid userId, UserRole role, CancellationToken ct = default)
     {
+        // For backward compatibility, convert single role to list
+        return await UpdateUserRolesAsync(userId, new List<UserRole> { role }, ct);
+    }
+
+    public async Task<UpdateUserRoleResponse> UpdateUserRolesAsync(Guid userId, List<UserRole> roles, CancellationToken ct = default)
+    {
         try
         {
             var user = await _repository.GetUserByIdAsync(userId, ct);
@@ -67,12 +75,12 @@ public class UserAdministrationService : IUserAdministrationService
                 };
             }
 
-            var success = await _repository.UpdateUserRoleAsync(userId, role, ct);
+            var success = await _repository.UpdateUserRolesAsync(userId, roles, ct);
             
             return new UpdateUserRoleResponse
             {
                 Success = success,
-                ErrorMessage = success ? null : "Failed to update user role"
+                ErrorMessage = success ? null : "Failed to update user roles"
             };
         }
         catch (Exception ex)
@@ -99,7 +107,8 @@ public class UserAdministrationService : IUserAdministrationService
             {
                 Id = user.Id,
                 Email = user.Email,
-                Role = user.Role
+                Role = user.Role,  // Backward compatibility
+                Roles = user.Roles ?? (user.Role != 0 ? new List<UserRole> { user.Role } : new List<UserRole> { UserRole.Reader })
             };
         }
         catch (Exception)
