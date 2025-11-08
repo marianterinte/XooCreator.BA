@@ -9,6 +9,7 @@ using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Data;
 using XooCreator.BA.Features.StoryEditor.Services;
 using Microsoft.Extensions.Logging;
+using XooCreator.BA.Data.Enums;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 
