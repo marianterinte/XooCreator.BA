@@ -1,4 +1,5 @@
 using XooCreator.BA.Data.Enums;
+using System.Text.Json.Serialization;
 
 namespace XooCreator.BA.Features.Library.DTOs;
 
@@ -16,6 +17,7 @@ public class OwnedStoryDto
     public string? CoverImageUrl { get; set; }
     public string? StoryTopic { get; set; }
     public StoryType StoryType { get; set; }
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public StoryStatus Status { get; set; }
     public DateTime PurchasedAt { get; set; }
     public decimal PurchasePrice { get; set; }
@@ -35,6 +37,7 @@ public class CreatedStoryDto
     public string? CoverImageUrl { get; set; }
     public string? StoryTopic { get; set; }
     public StoryType StoryType { get; set; }
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public StoryStatus Status { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? PublishedAt { get; set; }

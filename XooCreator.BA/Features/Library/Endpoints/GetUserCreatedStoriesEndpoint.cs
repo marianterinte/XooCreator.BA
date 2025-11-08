@@ -9,6 +9,7 @@ using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Features.Library.DTOs;
 using System.Text.Json;
 using XooCreator.BA.Data.Entities;
+using System.Text.Json.Serialization;
 
 namespace XooCreator.BA.Features.Library.Endpoints;
 
@@ -91,15 +92,9 @@ public class GetUserCreatedStoriesEndpoint
                     StoryType = root.TryGetProperty("storyType", out var typeProp) && typeProp.ValueKind == JsonValueKind.Number
                         ? (StoryType)typeProp.GetInt32()
                         : StoryType.AlchimaliaEpic,
-                    Status = draft.Status switch
-                    {
-                        "draft" => StoryStatus.Draft,
-                        "in_review" => StoryStatus.Draft, // In review is still considered draft
-                        "approved" => StoryStatus.Draft, // Approved but not yet published is still draft
-                        "published" => StoryStatus.Published,
-                        "archived" => StoryStatus.Retreated, // Archived is treated as retreated
-                        _ => StoryStatus.Draft
-                    },
+                    // Use the same mapping logic as StoriesService.GetStoryForEditAsync
+                    // Convert database string status (e.g., "sent_for_approval") to StoryStatus enum
+                    Status = StoryStatusExtensions.FromDb(draft.Status),
                     CreatedAt = draft.UpdatedAt, // Use UpdatedAt as CreatedAt for drafts
                     PublishedAt = null,
                     IsPublished = false,
@@ -119,7 +114,8 @@ public class GetUserCreatedStoriesEndpoint
                     CoverImageUrl = null,
                     StoryTopic = null,
                     StoryType = StoryType.AlchimaliaEpic,
-                    Status = StoryStatus.Draft,
+                    // Use the same mapping logic as StoriesService.GetStoryForEditAsync
+                    Status = StoryStatusExtensions.FromDb(draft.Status),
                     CreatedAt = draft.UpdatedAt,
                     PublishedAt = null,
                     IsPublished = false,
