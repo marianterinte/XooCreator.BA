@@ -51,4 +51,10 @@ public class StoryCraftsRepository : IStoryCraftsRepository
         existing.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync(ct);
     }
+
+    public Task<List<StoryCraft>> ListByOwnerAsync(Guid ownerUserId, CancellationToken ct = default)
+        => _context.StoryCrafts
+            .Where(x => x.OwnerUserId == ownerUserId)
+            .OrderByDescending(x => x.UpdatedAt)
+            .ToListAsync(ct);
 }
