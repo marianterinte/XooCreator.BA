@@ -17,9 +17,10 @@ public class CommitUploadEndpoint
         _sas = sas;
     }
 
-    [Route("/api/assets/commit")]
+    [Route("/api/{locale}/assets/commit")]
     [Authorize]
     public static async Task<Results<Ok<CommitUploadResponse>, BadRequest<string>>> HandlePost(
+        [FromRoute] string locale,
         [FromServices] CommitUploadEndpoint ep,
         [FromBody] CommitUploadDto dto,
         CancellationToken ct)
