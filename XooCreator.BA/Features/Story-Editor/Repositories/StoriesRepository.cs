@@ -1,14 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using XooCreator.BA.Data;
-using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Data.SeedData.DTOs;
 using XooCreator.BA.Features.Stories.DTOs;
 using XooCreator.BA.Features.Stories.Mappers;
+using XooCreator.BA.Features.Stories.Repositories;
 using XooCreator.BA.Features.Stories.SeedEntities;
-using XooCreator.BA.Features.TreeOfLight.DTOs;
 
-namespace XooCreator.BA.Features.Stories.Repositories;
+namespace XooCreator.BA.Features.StoryEditor.Repositories;
 
 public class StoriesRepository : IStoriesRepository
 {

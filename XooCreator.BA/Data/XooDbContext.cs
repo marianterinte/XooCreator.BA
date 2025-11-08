@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using XooCreator.BA.Data.Entities;
 
 namespace XooCreator.BA.Data;
 
@@ -58,6 +59,7 @@ public class XooDbContext : DbContext
     // User Story Relations
     public DbSet<UserOwnedStories> UserOwnedStories => Set<UserOwnedStories>();
     public DbSet<UserCreatedStories> UserCreatedStories => Set<UserCreatedStories>();
+    public DbSet<StoryCraft> StoryCrafts => Set<StoryCraft>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -530,6 +532,18 @@ public class XooDbContext : DbContext
         });
 
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<StoryCraft>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.StoryId).HasMaxLength(200).IsRequired();
+            e.Property(x => x.Lang).IsRequired();
+            e.Property(x => x.Status).HasMaxLength(20).IsRequired();
+            e.Property(x => x.Json).IsRequired();
+            e.Property(x => x.UpdatedAt).IsRequired();
+            e.HasIndex(x => new { x.StoryId, x.Lang }).IsUnique();
+        });
     }
 
     private void SeedBuilderDataFromJson(ModelBuilder modelBuilder)

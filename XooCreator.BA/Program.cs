@@ -15,7 +15,6 @@ using XooCreator.BA.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authorization;
-using XooCreator.BA.Features.Stories.Repositories;
 using XooCreator.BA.Features.Stories.Services;
 using XooCreator.BA.Features.Payment.Services;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories;
@@ -26,6 +25,8 @@ using XooCreator.BA.Features.TreeOfLight.Services;
 using XooCreator.BA.Features.TreeOfLight.Repositories;
 using XooCreator.BA.Features.User.Services;
 using XooCreator.BA.Infrastructure.Services.Blob;
+using XooCreator.BA.Features.Stories.Repositories;
+using XooCreator.BA.Features.StoryEditor.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -144,8 +145,9 @@ builder.Services.AddScoped<ITreeModelService, TreeModelService>();
 builder.Services.AddScoped<ITreeOfHeroesRepository, TreeOfHeroesRepository>();
 builder.Services.AddScoped<ITreeOfHeroesService, TreeOfHeroesService>();
 
-builder.Services.AddScoped<IStoriesRepository, StoriesRepository>();
 builder.Services.AddScoped<IStoriesService, StoriesService>();
+builder.Services.AddScoped<IStoriesRepository, StoriesRepository>();
+builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Repositories.IStoryCraftsRepository, XooCreator.BA.Features.StoryEditor.Repositories.StoryCraftsRepository>();
 
 // Story Marketplace Services
 builder.Services.AddScoped<IStoriesMarketplaceRepository, StoriesMarketplaceRepository>();
