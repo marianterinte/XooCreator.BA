@@ -7,6 +7,7 @@ using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Services;
 using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Data;
+using XooCreator.BA.Features.StoryEditor.Services;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 
@@ -14,12 +15,14 @@ namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 public class SaveStoryEditEndpoint
 {
     private readonly IStoryCraftsRepository _crafts;
+    private readonly IStoryEditorService _editorService;
     private readonly IUserContextService _userContext;
     private readonly IAuth0UserService _auth0;
 
-    public SaveStoryEditEndpoint(IStoryCraftsRepository crafts, IUserContextService userContext, IAuth0UserService auth0)
+    public SaveStoryEditEndpoint(IStoryCraftsRepository crafts, IStoryEditorService editorService, IUserContextService userContext, IAuth0UserService auth0)
     {
         _crafts = crafts;
+        _editorService = editorService;
         _userContext = userContext;
         _auth0 = auth0;
     }
@@ -48,7 +51,7 @@ public class SaveStoryEditEndpoint
 
         // Persist raw JSON from editor; status stays draft unless changed elsewhere
         var json = body.RootElement.GetRawText();
-        await ep._crafts.UpsertAsync(user.Id, storyId, lang, "draft", json, ct);
+        await ep._editorService.SaveDraftJsonAsync(user.Id, storyId, lang, json, ct);
         return TypedResults.Ok(new SaveResponse());
     }
 

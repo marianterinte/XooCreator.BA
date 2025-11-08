@@ -7,6 +7,7 @@ using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Services;
 using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Data;
+using XooCreator.BA.Features.StoryEditor.Services;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 
@@ -27,12 +28,14 @@ public record CreateStoryResponse
 public class CreateStoryEndpoint
 {
     private readonly IStoryCraftsRepository _crafts;
+    private readonly IStoryEditorService _editorService;
     private readonly IUserContextService _userContext;
     private readonly IAuth0UserService _auth0;
 
-    public CreateStoryEndpoint(IStoryCraftsRepository crafts, IUserContextService userContext, IAuth0UserService auth0)
+    public CreateStoryEndpoint(IStoryCraftsRepository crafts, IStoryEditorService editorService, IUserContextService userContext, IAuth0UserService auth0)
     {
         _crafts = crafts;
+        _editorService = editorService;
         _userContext = userContext;
         _auth0 = auth0;
     }
@@ -62,13 +65,7 @@ public class CreateStoryEndpoint
             return TypedResults.BadRequest("storyId must end with -s1, -s2, ...");
         }
 
-        var existing = await ep._crafts.GetAsync(storyId, lang, ct);
-        if (existing != null)
-        {
-            return TypedResults.Ok(new CreateStoryResponse { StoryId = storyId });
-        }
-
-        await ep._crafts.CreateAsync(user.Id, storyId, lang, "draft", "{}", ct);
+        await ep._editorService.EnsureDraftAsync(user.Id, storyId, lang, ct);
         return TypedResults.Ok(new CreateStoryResponse { StoryId = storyId });
     }
 

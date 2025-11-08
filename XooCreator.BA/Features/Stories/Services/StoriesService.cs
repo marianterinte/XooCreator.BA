@@ -1,5 +1,8 @@
 using XooCreator.BA.Features.Stories.DTOs;
 using XooCreator.BA.Features.Stories.Repositories;
+using XooCreator.BA.Features.StoryEditor.Repositories;
+using System.Text.Json;
+using XooCreator.BA.Data;
 
 namespace XooCreator.BA.Features.Stories.Services;
 
@@ -15,10 +18,12 @@ public interface IStoriesService
 public class StoriesService : IStoriesService
 {
     private readonly IStoriesRepository _repository;
+    private readonly IStoryCraftsRepository _crafts;
 
-    public StoriesService(IStoriesRepository repository)
+    public StoriesService(IStoriesRepository repository, IStoryCraftsRepository crafts)
     {
         _repository = repository;
+        _crafts = crafts;
     }
 
     public async Task<GetStoriesResponse> GetAllStoriesAsync(string locale)
@@ -74,7 +79,35 @@ public class StoriesService : IStoriesService
 
     public async Task<EditableStoryDto?> GetStoryForEditAsync(string storyId, string locale)
     {
-        // Get StoryDefinition directly to access StoryType property
+        // 1) Try to load StoryCraft (editor working copy) first
+        var lang = ToLanguageCode(locale);
+        var craft = await _crafts.GetAsync(storyId, lang);
+        if (craft != null && !string.IsNullOrWhiteSpace(craft.Json))
+        {
+            try
+            {
+                var dto = JsonSerializer.Deserialize<EditableStoryDto>(craft.Json, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+                if (dto != null)
+                {
+                    // Ensure id/title defaults exist
+                    if (string.IsNullOrWhiteSpace(dto.Id)) dto.Id = storyId;
+                    dto.Title ??= string.Empty;
+                    dto.CoverImageUrl ??= string.Empty;
+                    dto.Summary ??= string.Empty;
+                    dto.Tiles ??= new();
+                    return dto;
+                }
+            }
+            catch
+            {
+                // If parsing fails, fall back to StoryDefinition mapping
+            }
+        }
+
+        // 2) Fallback to StoryDefinition for initial bootstrapping
         var story = await _repository.GetStoryDefinitionByIdAsync(storyId);
         if (story == null) return null;
 
@@ -125,6 +158,17 @@ public class StoriesService : IStoriesService
                     }).ToList()
                 };
             }).ToList()
+        };
+    }
+
+    private static LanguageCode ToLanguageCode(string tag)
+    {
+        var t = (tag ?? "ro-ro").ToLowerInvariant();
+        return t switch
+        {
+            "en-us" => LanguageCode.EnUs,
+            "hu-hu" => LanguageCode.HuHu,
+            _ => LanguageCode.RoRo
         };
     }
 }

@@ -41,10 +41,39 @@ public class RequestUploadEndpoint
         }
 
         var contentType = string.IsNullOrWhiteSpace(dto.ContentType) ? "application/octet-stream" : dto.ContentType;
-       
-        //TODO AI FIX THIS 
-        //if (dto.ExpectedSize < 0)
-        //    dto.ExpectedSize = 0;
+
+        // Validări minime (tip/extension/size)
+        var ext = Path.GetExtension(dto.FileName).ToLowerInvariant();
+        var allowedImage = new[] { ".png", ".jpg", ".jpeg", ".webp" };
+        var allowedAudio = new[] { ".mp3", ".m4a", ".wav", ".aac", ".ogg" };
+        var allowedVideo = new[] { ".mp4", ".webm" };
+
+        long maxImage = ep._config.GetValue<long?>("Uploads:MaxImageBytes") ?? 10 * 1024 * 1024;
+        long maxAudio = ep._config.GetValue<long?>("Uploads:MaxAudioBytes") ?? 50 * 1024 * 1024;
+        long maxVideo = ep._config.GetValue<long?>("Uploads:MaxVideoBytes") ?? 200 * 1024 * 1024;
+
+        if (string.Equals(dto.Kind, "cover", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(dto.Kind, "tile-image", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!allowedImage.Contains(ext)) return TypedResults.BadRequest("Unsupported image extension.");
+            if (!contentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase)) return TypedResults.BadRequest("Invalid image content-type.");
+            if (dto.ExpectedSize > maxImage) return TypedResults.BadRequest("Image too large.");
+        }
+        else if (string.Equals(dto.Kind, "tile-audio", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!allowedAudio.Contains(ext)) return TypedResults.BadRequest("Unsupported audio extension.");
+            if (!contentType.StartsWith("audio/", StringComparison.OrdinalIgnoreCase)) return TypedResults.BadRequest("Invalid audio content-type.");
+            if (dto.ExpectedSize > maxAudio) return TypedResults.BadRequest("Audio too large.");
+        }
+        else if (string.Equals(dto.Kind, "video", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!allowedVideo.Contains(ext)) return TypedResults.BadRequest("Unsupported video extension.");
+            if (!contentType.StartsWith("video/", StringComparison.OrdinalIgnoreCase)) return TypedResults.BadRequest("Invalid video content-type.");
+            if (dto.ExpectedSize > maxVideo) return TypedResults.BadRequest("Video too large.");
+        }
+
+        if (dto.ExpectedSize < 0)
+            dto.ExpectedSize = 0;
 
         // Build relative path based on kind
         var relPath = dto.Kind switch
