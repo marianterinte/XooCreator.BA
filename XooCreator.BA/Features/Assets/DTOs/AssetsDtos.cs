@@ -16,6 +16,8 @@ public record RequestUploadResponse
     public required string PutUrl { get; init; }
     public required string BlobUrl { get; init; }
     public required string RelPath { get; init; }
+    public required string Container { get; init; }
+    public required string BlobPath { get; init; }
 }
 
 public record CommitUploadDto

@@ -24,10 +24,9 @@ public class RequestUploadEndpoint
         _config = config;
     }
 
-    [Route("/api/{locale}/assets/request-upload")]
+    [Route("/api/assets/request-upload")]
     [Authorize]
     public static async Task<Results<Ok<RequestUploadResponse>, BadRequest<string>, UnauthorizedHttpResult>> HandlePost(
-        [FromRoute] string locale,
         [FromServices] RequestUploadEndpoint ep,
         [FromBody] RequestUploadDto dto,
         CancellationToken ct)
@@ -87,9 +86,9 @@ public class RequestUploadEndpoint
             _ => $"misc/{dto.FileName}"
         };
 
-        // Draft blob path (don't pre-encode; SDK will encode when building the SAS URL)
-        var emailPath = user.Email; // e.g., marian.terinte@gmail.com
-        var blobPath = $"draft/u/{emailPath}/stories/{dto.StoryId}/{dto.Lang}/{relPath}";
+        // Draft blob path - encode email for URL safety
+        var emailEsc = Uri.EscapeDataString(user.Email);
+        var blobPath = $"draft/u/{emailEsc}/stories/{dto.StoryId}/{dto.Lang}/{relPath}";
 
         // Issue PUT SAS
         var putUri = await ep._sas.GetPutSasAsync(ep._sas.DraftContainer, blobPath, contentType!, TimeSpan.FromMinutes(10), ct);
@@ -101,7 +100,9 @@ public class RequestUploadEndpoint
         {
             PutUrl = putUri.ToString(),
             BlobUrl = blobClient.Uri.ToString(),
-            RelPath = relPath
+            RelPath = relPath,
+            Container = ep._sas.DraftContainer,
+            BlobPath = blobPath
         });
     }
 }

@@ -17,10 +17,9 @@ public class CommitUploadEndpoint
         _sas = sas;
     }
 
-    [Route("/api/{locale}/assets/commit")]
+    [Route("/api/assets/commit")]
     [Authorize]
-    public static async Task<Results<Ok<CommitUploadResponse>, BadRequest<string>>> HandlePost(
-        [FromRoute] string locale,
+    public static async Task<Results<Ok<CommitUploadResponse>, BadRequest<string>, NotFound<string>>> HandlePost(
         [FromServices] CommitUploadEndpoint ep,
         [FromBody] CommitUploadDto dto,
         CancellationToken ct)
@@ -36,6 +35,13 @@ public class CommitUploadEndpoint
         }
 
         var blobClient = ep._sas.GetBlobClient(dto.Container, dto.BlobPath);
+        
+        // Check if blob exists before trying to get properties
+        if (!await blobClient.ExistsAsync(ct))
+        {
+            return TypedResults.NotFound($"Blob not found at path: {dto.BlobPath}");
+        }
+        
         var props = await blobClient.GetPropertiesAsync(cancellationToken: ct);
 
         var size = props.Value.ContentLength;
