@@ -3,6 +3,7 @@ using XooCreator.BA.Features.Stories.Repositories;
 using XooCreator.BA.Features.StoryEditor.Repositories;
 using System.Text.Json;
 using XooCreator.BA.Data;
+using XooCreator.BA.Data.Enums;
 
 namespace XooCreator.BA.Features.Stories.Services;
 
@@ -98,6 +99,7 @@ public class StoriesService : IStoriesService
                     dto.CoverImageUrl ??= string.Empty;
                     dto.Summary ??= string.Empty;
                     dto.Tiles ??= new();
+                    dto.Status = MapStatusForFrontend(StoryStatusExtensions.FromDb(craft.Status));
                     return dto;
                 }
             }
@@ -123,6 +125,7 @@ public class StoriesService : IStoriesService
             CoverImageUrl = story.CoverImageUrl ?? string.Empty,
             Summary = story.Summary ?? string.Empty,
             StoryType = (int)story.StoryType,
+            Status = MapStatusForFrontend(story.Status), // story.Status is already StoryStatus enum
             Tiles = story.Tiles.OrderBy(t => t.SortOrder).Select(t =>
             {
                 var tileTranslation = t.Translations.FirstOrDefault(tr => tr.LanguageCode == locale)
@@ -161,6 +164,19 @@ public class StoriesService : IStoriesService
         };
     }
 
+    private static string MapStatusForFrontend(StoryStatus status)
+    {
+        return status switch
+        {
+            StoryStatus.Approved => "approved",
+            StoryStatus.Published => "published",
+            StoryStatus.InReview => "in-review",
+            StoryStatus.SentForApproval => "sent-for-approval",
+            StoryStatus.ChangesRequested => "changes-requested",
+            _ => "draft"
+        };
+    }
+
 }
 
 public class EditableStoryDto
@@ -170,6 +186,7 @@ public class EditableStoryDto
     public string CoverImageUrl { get; set; } = string.Empty;
     public string? Summary { get; set; }
     public int StoryType { get; set; } = 0; // 0 = AlchimaliaEpic (Tree Of Light), 1 = Indie (Independent)
+    public string? Status { get; set; } // 'draft' | 'in-review' | 'approved' | 'published' (FE semantic)
     public List<EditableTileDto> Tiles { get; set; } = new();
 }
 
