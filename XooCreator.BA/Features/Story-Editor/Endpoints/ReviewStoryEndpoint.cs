@@ -6,6 +6,8 @@ using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
+using Microsoft.Extensions.Logging;
+using XooCreator.BA.Data.Enums;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 
@@ -15,12 +17,14 @@ public class ReviewStoryEndpoint
     private readonly IStoryCraftsRepository _crafts;
     private readonly IUserContextService _userContext;
     private readonly IAuth0UserService _auth0;
+    private readonly ILogger<ReviewStoryEndpoint> _logger;
 
-    public ReviewStoryEndpoint(IStoryCraftsRepository crafts, IUserContextService userContext, IAuth0UserService auth0)
+    public ReviewStoryEndpoint(IStoryCraftsRepository crafts, IUserContextService userContext, IAuth0UserService auth0, ILogger<ReviewStoryEndpoint> logger)
     {
         _crafts = crafts;
         _userContext = userContext;
         _auth0 = auth0;
+        _logger = logger;
     }
 
     public record ReviewRequest
@@ -37,7 +41,7 @@ public class ReviewStoryEndpoint
 
     [Route("/api/{locale}/stories/{storyId}/review")]
     [Authorize]
-    public static async Task<Results<Ok<ReviewResponse>, NotFound, BadRequest<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
+    public static async Task<Results<Ok<ReviewResponse>, NotFound, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
         [FromRoute] string locale,
         [FromRoute] string storyId,
         [FromServices] ReviewStoryEndpoint ep,
@@ -49,6 +53,7 @@ public class ReviewStoryEndpoint
 
         if (user.Role != Data.Enums.UserRole.Reviewer)
         {
+            ep._logger.LogWarning("Review forbidden: userId={UserId} role={Role}", user?.Id, user?.Role);
             return TypedResults.Forbid();
         }
 
@@ -58,14 +63,20 @@ public class ReviewStoryEndpoint
         var craft = await ep._crafts.GetAsync(storyId, lang, ct);
         if (craft == null) return TypedResults.NotFound();
 
-        var current = (craft.Status ?? "draft").ToLowerInvariant();
-        if (current != "in_review")
+        var current = StoryStatusExtensions.FromDb(craft.Status);
+        if (current != StoryStatus.InReview)
         {
-            return TypedResults.BadRequest("Invalid state transition. Expected InReview.");
+            ep._logger.LogWarning("Review invalid state: storyId={StoryId} state={State}", storyId, current);
+            return TypedResults.Conflict("Invalid state transition. Expected InReview.");
         }
 
-        var newStatus = req.Approve ? "approved" : "changes_requested";
-        await ep._crafts.UpsertAsync(craft.OwnerUserId, storyId, lang, newStatus, string.Empty, ct);
+        // Apply decision
+        var newStatus = req.Approve ? StoryStatus.Approved : StoryStatus.ChangesRequested;
+        craft.Status = newStatus.ToDb();
+        craft.ReviewNotes = string.IsNullOrWhiteSpace(req.Notes) ? craft.ReviewNotes : req.Notes;
+        craft.ReviewEndedAt = DateTime.UtcNow;
+        await ep._crafts.SaveAsync(craft, ct);
+        ep._logger.LogInformation("Review decision: storyId={StoryId} lang={Lang} to={To} notesPresent={Notes}", storyId, langTag, newStatus, !string.IsNullOrWhiteSpace(req.Notes));
         return TypedResults.Ok(new ReviewResponse { Status = req.Approve ? "Approved" : "ChangesRequested" });
     }
 }

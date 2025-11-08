@@ -1,5 +1,6 @@
 using XooCreator.BA.Data;
 using XooCreator.BA.Features.StoryEditor.Repositories;
+using XooCreator.BA.Data.Enums;
 
 namespace XooCreator.BA.Features.StoryEditor.Services;
 
@@ -16,11 +17,11 @@ public class StoryEditorService : IStoryEditorService
     {
         var existing = await _crafts.GetAsync(storyId, lang, ct);
         if (existing != null) return;
-        await _crafts.CreateAsync(ownerUserId, storyId, lang, "draft", "{}", ct);
+        await _crafts.CreateAsync(ownerUserId, storyId, lang, StoryStatus.Draft.ToDb(), "{}", ct);
     }
 
     public Task SaveDraftJsonAsync(Guid ownerUserId, string storyId, LanguageCode lang, string json, CancellationToken ct = default)
-        => _crafts.UpsertAsync(ownerUserId, storyId, lang, "draft", json, ct);
+        => _crafts.UpsertAsync(ownerUserId, storyId, lang, StoryStatus.Draft.ToDb(), json, ct);
 }
 
 

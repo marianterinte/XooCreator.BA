@@ -9,6 +9,8 @@ using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
 using XooCreator.BA.Infrastructure.Services.Blob;
+using Microsoft.Extensions.Logging;
+using XooCreator.BA.Data.Enums;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 
@@ -19,13 +21,15 @@ public class PublishStoryEndpoint
     private readonly IUserContextService _userContext;
     private readonly IAuth0UserService _auth0;
     private readonly IBlobSasService _sas;
+    private readonly ILogger<PublishStoryEndpoint> _logger;
 
-    public PublishStoryEndpoint(IStoryCraftsRepository crafts, IUserContextService userContext, IAuth0UserService auth0, IBlobSasService sas)
+    public PublishStoryEndpoint(IStoryCraftsRepository crafts, IUserContextService userContext, IAuth0UserService auth0, IBlobSasService sas, ILogger<PublishStoryEndpoint> logger)
     {
         _crafts = crafts;
         _userContext = userContext;
         _auth0 = auth0;
         _sas = sas;
+        _logger = logger;
     }
 
     public record PublishResponse
@@ -36,7 +40,7 @@ public class PublishStoryEndpoint
 
     [Route("/api/{locale}/stories/{storyId}/publish")]
     [Authorize]
-    public static async Task<Results<Ok<PublishResponse>, NotFound, BadRequest<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
+    public static async Task<Results<Ok<PublishResponse>, NotFound, BadRequest<string>, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
         [FromRoute] string locale,
         [FromRoute] string storyId,
         [FromServices] PublishStoryEndpoint ep,
@@ -61,10 +65,11 @@ public class PublishStoryEndpoint
             return TypedResults.BadRequest("Only the owner can publish this story.");
         }
 
-        var current = (craft.Status ?? "draft").ToLowerInvariant();
-        if (current != "approved")
+        var current = StoryStatusExtensions.FromDb(craft.Status);
+        if (current != StoryStatus.Approved)
         {
-            return TypedResults.BadRequest("Invalid state transition. Expected Approved.");
+            ep._logger.LogWarning("Publish invalid state: storyId={StoryId} state={State}", storyId, current);
+            return TypedResults.Conflict("Invalid state transition. Expected Approved.");
         }
 
         // 1) Extract referenced asset relative paths from draft JSON
@@ -101,10 +106,12 @@ public class PublishStoryEndpoint
                 }
                 if (props.Value.CopyStatus == CopyStatus.Failed || props.Value.CopyStatus == CopyStatus.Aborted)
                 {
+                    ep._logger.LogError("Publish copy failed: storyId={StoryId} rel={Rel}", storyId, rel);
                     return TypedResults.BadRequest($"Failed to copy asset: {rel}");
                 }
                 if (DateTime.UtcNow > pollUntil)
                 {
+                    ep._logger.LogError("Publish copy timeout: storyId={StoryId} rel={Rel}", storyId, rel);
                     return TypedResults.BadRequest($"Timeout while copying asset: {rel}");
                 }
                 await Task.Delay(250, ct);
@@ -112,11 +119,13 @@ public class PublishStoryEndpoint
 
             // Delete source after successful copy
             var sourceClient = ep._sas.GetBlobClient(ep._sas.DraftContainer, sourceBlobPath);
-            try { await sourceClient.DeleteIfExistsAsync(cancellationToken: ct); } catch { /* best-effort */ }
+            try { await sourceClient.DeleteIfExistsAsync(cancellationToken: ct); ep._logger.LogInformation("Deleted draft asset: {Path}", sourceBlobPath); } catch { /* best-effort */ }
         }
 
         // 3) Mark as published (keep JSON as-is)
-        await ep._crafts.UpsertAsync(craft.OwnerUserId, storyId, lang, "published", craft.Json, ct);
+        craft.Status = StoryStatus.Published.ToDb();
+        await ep._crafts.SaveAsync(craft, ct);
+        ep._logger.LogInformation("Published story: storyId={StoryId} lang={Lang} assets={Count}", storyId, langTag, relPaths.Count);
         return TypedResults.Ok(new PublishResponse());
     }
 

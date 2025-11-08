@@ -1,22 +1,43 @@
 namespace XooCreator.BA.Data.Enums;
 
-/// <summary>
-/// Represents the publication status of a story
-/// </summary>
 public enum StoryStatus
 {
-    /// <summary>
-    /// Story is in draft state, not yet published
-    /// </summary>
     Draft = 0,
-    
-    /// <summary>
-    /// Story is published and available to users
-    /// </summary>
-    Published = 1,
-    
-    /// <summary>
-    /// Story has been retracted/unpublished
-    /// </summary>
-    Retreated = 2
+    SentForApproval = 1,
+    InReview = 2,
+    Approved = 3,
+    ChangesRequested = 4,
+    Published = 5,
+    Archived = 6,
+    Retreated = 7
+}
+
+public static class StoryStatusExtensions
+{
+    public static StoryStatus FromDb(string? status)
+    {
+        var s = (status ?? "draft").Trim().ToLowerInvariant();
+        return s switch
+        {
+            "sent_for_approval" => StoryStatus.SentForApproval,
+            "in_review" => StoryStatus.InReview,
+            "approved" => StoryStatus.Approved,
+            "changes_requested" => StoryStatus.ChangesRequested,
+            "published" => StoryStatus.Published,
+            "archived" => StoryStatus.Archived,
+            _ => StoryStatus.Draft
+        };
+    }
+
+    public static string ToDb(this StoryStatus status)
+        => status switch
+        {
+            StoryStatus.SentForApproval => "sent_for_approval",
+            StoryStatus.InReview => "in_review",
+            StoryStatus.Approved => "approved",
+            StoryStatus.ChangesRequested => "changes_requested",
+            StoryStatus.Published => "published",
+            StoryStatus.Archived => "archived",
+            _ => "draft"
+        };
 }

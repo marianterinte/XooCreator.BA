@@ -6,6 +6,7 @@ using XooCreator.BA.Features.StoryEditor.Services;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
+using Microsoft.Extensions.Logging;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 
@@ -15,12 +16,14 @@ public class CreateTranslationEndpoint
     private readonly IStoryEditorService _editorService;
     private readonly IUserContextService _userContext;
     private readonly IAuth0UserService _auth0;
+    private readonly ILogger<CreateTranslationEndpoint> _logger;
 
-    public CreateTranslationEndpoint(IStoryEditorService editorService, IUserContextService userContext, IAuth0UserService auth0)
+    public CreateTranslationEndpoint(IStoryEditorService editorService, IUserContextService userContext, IAuth0UserService auth0, ILogger<CreateTranslationEndpoint> logger)
     {
         _editorService = editorService;
         _userContext = userContext;
         _auth0 = auth0;
+        _logger = logger;
     }
 
     public record CreateTranslationRequest
@@ -59,6 +62,7 @@ public class CreateTranslationEndpoint
 
         var lang = LanguageCodeExtensions.FromTag(req.Lang);
         await ep._editorService.EnsureDraftAsync(user.Id, storyId, lang, ct);
+        ep._logger.LogInformation("Create translation draft: userId={UserId} storyId={StoryId} lang={Lang}", user.Id, storyId, req.Lang.ToLowerInvariant());
         return TypedResults.Ok(new CreateTranslationResponse { StoryId = storyId, Lang = req.Lang.ToLowerInvariant() });
     }
 }

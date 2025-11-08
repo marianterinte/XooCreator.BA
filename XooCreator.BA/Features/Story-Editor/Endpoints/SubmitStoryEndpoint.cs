@@ -7,6 +7,8 @@ using XooCreator.BA.Features.StoryEditor.Services;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
+using Microsoft.Extensions.Logging;
+using XooCreator.BA.Data.Enums;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 
@@ -17,13 +19,15 @@ public class SubmitStoryEndpoint
     private readonly IStoryEditorService _editorService;
     private readonly IUserContextService _userContext;
     private readonly IAuth0UserService _auth0;
+    private readonly ILogger<SubmitStoryEndpoint> _logger;
 
-    public SubmitStoryEndpoint(IStoryCraftsRepository crafts, IStoryEditorService editorService, IUserContextService userContext, IAuth0UserService auth0)
+    public SubmitStoryEndpoint(IStoryCraftsRepository crafts, IStoryEditorService editorService, IUserContextService userContext, IAuth0UserService auth0, ILogger<SubmitStoryEndpoint> logger)
     {
         _crafts = crafts;
         _editorService = editorService;
         _userContext = userContext;
         _auth0 = auth0;
+        _logger = logger;
     }
 
     public record SubmitResponse
@@ -34,7 +38,7 @@ public class SubmitStoryEndpoint
 
     [Route("/api/{locale}/stories/{storyId}/submit")]
     [Authorize]
-    public static async Task<Results<Ok<SubmitResponse>, NotFound, BadRequest<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
+    public static async Task<Results<Ok<SubmitResponse>, NotFound, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
         [FromRoute] string locale,
         [FromRoute] string storyId,
         [FromServices] SubmitStoryEndpoint ep,
@@ -45,6 +49,7 @@ public class SubmitStoryEndpoint
 
         if (user.Role != Data.Enums.UserRole.Creator)
         {
+            ep._logger.LogWarning("Submit forbidden: userId={UserId} role={Role}", user?.Id, user?.Role);
             return TypedResults.Forbid();
         }
 
@@ -56,16 +61,20 @@ public class SubmitStoryEndpoint
 
         if (craft.OwnerUserId != user.Id)
         {
-            return TypedResults.BadRequest("Only the owner can submit the story for approval.");
+            ep._logger.LogWarning("Submit not owner: userId={UserId} storyId={StoryId}", user.Id, storyId);
+            return TypedResults.Forbid();
         }
 
-        var current = (craft.Status ?? "draft").ToLowerInvariant();
-        if (current != "draft" && current != "changes_requested")
+        var current = StoryStatusExtensions.FromDb(craft.Status);
+        if (current != StoryStatus.Draft && current != StoryStatus.ChangesRequested)
         {
-            return TypedResults.BadRequest("Invalid state transition. Expected Draft or ChangesRequested.");
+            ep._logger.LogWarning("Submit invalid state: storyId={StoryId} state={State}", storyId, current);
+            return TypedResults.Conflict("Invalid state transition. Expected Draft or ChangesRequested.");
         }
 
-        await ep._crafts.UpsertAsync(user.Id, storyId, lang, "sent_for_approval", string.Empty, ct);
+        craft.Status = StoryStatus.SentForApproval.ToDb();
+        await ep._crafts.SaveAsync(craft, ct);
+        ep._logger.LogInformation("Submit: storyId={StoryId} lang={Lang} from={From} to={To}", storyId, langTag, current, StoryStatus.SentForApproval);
         return TypedResults.Ok(new SubmitResponse());
     }
 }

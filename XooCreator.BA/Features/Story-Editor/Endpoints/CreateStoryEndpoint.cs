@@ -8,6 +8,7 @@ using XooCreator.BA.Infrastructure.Services;
 using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Data;
 using XooCreator.BA.Features.StoryEditor.Services;
+using Microsoft.Extensions.Logging;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 
@@ -31,13 +32,15 @@ public class CreateStoryEndpoint
     private readonly IStoryEditorService _editorService;
     private readonly IUserContextService _userContext;
     private readonly IAuth0UserService _auth0;
+    private readonly ILogger<CreateStoryEndpoint> _logger;
 
-    public CreateStoryEndpoint(IStoryCraftsRepository crafts, IStoryEditorService editorService, IUserContextService userContext, IAuth0UserService auth0)
+    public CreateStoryEndpoint(IStoryCraftsRepository crafts, IStoryEditorService editorService, IUserContextService userContext, IAuth0UserService auth0, ILogger<CreateStoryEndpoint> logger)
     {
         _crafts = crafts;
         _editorService = editorService;
         _userContext = userContext;
         _auth0 = auth0;
+        _logger = logger;
     }
 
     [Route("/api/{locale}/stories")]
@@ -54,6 +57,7 @@ public class CreateStoryEndpoint
         // Creator-only guard
         if (user.Role != Data.Enums.UserRole.Creator)
         {
+            ep._logger.LogWarning("CreateStory forbidden: userId={UserId} role={Role}", user?.Id, user?.Role);
             return TypedResults.Forbid();
         }
 
@@ -72,6 +76,7 @@ public class CreateStoryEndpoint
         }
 
         await ep._editorService.EnsureDraftAsync(user.Id, storyId, lang, ct);
+        ep._logger.LogInformation("CreateStory: userId={UserId} storyId={StoryId} lang={Lang}", user.Id, storyId, langTag);
         return TypedResults.Ok(new CreateStoryResponse { StoryId = storyId });
     }
 }

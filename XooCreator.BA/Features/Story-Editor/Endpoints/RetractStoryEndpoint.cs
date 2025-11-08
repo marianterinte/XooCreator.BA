@@ -6,6 +6,8 @@ using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
+using Microsoft.Extensions.Logging;
+using XooCreator.BA.Data.Enums;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 
@@ -15,12 +17,14 @@ public class RetractStoryEndpoint
     private readonly IStoryCraftsRepository _crafts;
     private readonly IUserContextService _userContext;
     private readonly IAuth0UserService _auth0;
+    private readonly ILogger<RetractStoryEndpoint> _logger;
 
-    public RetractStoryEndpoint(IStoryCraftsRepository crafts, IUserContextService userContext, IAuth0UserService auth0)
+    public RetractStoryEndpoint(IStoryCraftsRepository crafts, IUserContextService userContext, IAuth0UserService auth0, ILogger<RetractStoryEndpoint> logger)
     {
         _crafts = crafts;
         _userContext = userContext;
         _auth0 = auth0;
+        _logger = logger;
     }
 
     public record RetractResponse
@@ -31,7 +35,7 @@ public class RetractStoryEndpoint
 
     [Route("/api/{locale}/stories/{storyId}/retract")]
     [Authorize]
-    public static async Task<Results<Ok<RetractResponse>, NotFound, BadRequest<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
+    public static async Task<Results<Ok<RetractResponse>, NotFound, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
         [FromRoute] string locale,
         [FromRoute] string storyId,
         [FromServices] RetractStoryEndpoint ep,
@@ -53,16 +57,23 @@ public class RetractStoryEndpoint
 
         if (craft.OwnerUserId != user.Id)
         {
-            return TypedResults.BadRequest("Only the owner can retract this story.");
+            return TypedResults.Forbid();
         }
 
-        var current = (craft.Status ?? "draft").ToLowerInvariant();
-        if (current != "sent_for_approval" && current != "in_review")
+        var current = StoryStatusExtensions.FromDb(craft.Status);
+        if (current != StoryStatus.SentForApproval && current != StoryStatus.InReview)
         {
-            return TypedResults.BadRequest("Invalid state transition. Expected SentForApproval or InReview.");
+            return TypedResults.Conflict("Invalid state transition. Expected SentForApproval or InReview.");
         }
 
-        await ep._crafts.UpsertAsync(craft.OwnerUserId, storyId, lang, "draft", string.Empty, ct);
+        // Clear assignment and revert to Draft
+        craft.Status = StoryStatus.Draft.ToDb();
+        craft.AssignedReviewerUserId = null;
+        craft.ReviewNotes = null;
+        craft.ReviewStartedAt = null;
+        craft.ReviewEndedAt = null;
+        await ep._crafts.SaveAsync(craft, ct);
+        ep._logger.LogInformation("Retract: storyId={StoryId} lang={Lang}", storyId, langTag);
         return TypedResults.Ok(new RetractResponse());
     }
 }
