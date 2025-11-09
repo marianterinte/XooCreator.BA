@@ -86,7 +86,21 @@ public class PublishStoryEndpoint
                     : "images";
 
             var sourceBlobPath = $"draft/u/{emailEsc}/stories/{storyId}/{langTag}/{rel}";
-            var targetBlobPath = $"{category}/stories/{storyId}/{langTag}/{rel}";
+
+            // New published structure:
+            // images: images/tales-of-alchimalia-stories/{email}/{storyId}/{fileName}
+            // video:  video/tales-of-alchimalia-stories/{email}/{storyId}/{fileName}
+            // audio:  audio/tales-of-alchimalia-stories/{email}/{storyId}/{lang}/{fileName}
+            // - No 'cover' or 'tiles' folders in published
+            // - Images and videos are language-agnostic; audio is language-specific
+            var publishedRoot = $"{category}/tales-of-alchimalia-stories/{emailEsc}/{storyId}";
+            if (string.Equals(category, "audio", StringComparison.OrdinalIgnoreCase))
+            {
+                publishedRoot = $"{publishedRoot}/{langTag}";
+            }
+
+            var targetFileName = ComputePublishedFileName(rel);
+            var targetBlobPath = $"{publishedRoot}/{targetFileName}";
 
             // Issue short-lived read SAS for the source
             var sourceSas = await ep._sas.GetReadSasAsync(ep._sas.DraftContainer, sourceBlobPath, TimeSpan.FromMinutes(10), ct);
@@ -127,6 +141,42 @@ public class PublishStoryEndpoint
         await ep._crafts.SaveAsync(craft, ct);
         ep._logger.LogInformation("Published story: storyId={StoryId} assets={Count}", storyId, relPaths.Count);
         return TypedResults.Ok(new PublishResponse());
+    }
+
+    private static string ComputePublishedFileName(string relPath)
+    {
+        // Examples of incoming relPath (from craft JSON):
+        // - cover/0.cover.png            -> cover.png
+        // - tiles/p1/bg.webp             -> p1.webp
+        // - audio/p3/intro.m4a           -> p3.m4a   (audio is lang-specific in target but filename rule same)
+        // - video/p2/intro.mp4           -> p2.mp4
+        // Fallback: last segment if pattern unknown
+        try
+        {
+            var parts = relPath.Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            if (parts.Length == 0) return Path.GetFileName(relPath);
+
+            var ext = Path.GetExtension(parts[^1]);
+            if (parts[0].Equals("cover", StringComparison.OrdinalIgnoreCase))
+            {
+                return string.IsNullOrWhiteSpace(ext) ? "cover" : $"cover{ext}";
+            }
+
+            if (parts.Length >= 2 && (parts[0].Equals("tiles", StringComparison.OrdinalIgnoreCase)
+                || parts[0].Equals("audio", StringComparison.OrdinalIgnoreCase)
+                || parts[0].Equals("video", StringComparison.OrdinalIgnoreCase)))
+            {
+                var tileId = parts[1];
+                return string.IsNullOrWhiteSpace(ext) ? tileId : $"{tileId}{ext}";
+            }
+
+            // Default to last segment
+            return parts[^1];
+        }
+        catch
+        {
+            return Path.GetFileName(relPath);
+        }
     }
 
     private static List<string> ExtractAssetRelPaths(StoryCraft craft)

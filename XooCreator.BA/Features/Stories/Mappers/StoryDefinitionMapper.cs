@@ -13,6 +13,8 @@ namespace XooCreator.BA.Features.Stories.Mappers;
 /// </summary>
 public static class StoryDefinitionMapper
 {
+    private const string SeedSystemOwner = "system";
+
     /// <summary>
     /// Marian Teacher (Marian T) GUID constant for Indie stories.
     /// </summary>
@@ -28,7 +30,7 @@ public static class StoryDefinitionMapper
         {
             StoryId = seedData.StoryId,
             Title = seedData.Title,
-            CoverImageUrl = seedData.CoverImageUrl,
+            CoverImageUrl = NormalizeCoverImagePathForSeeds(seedData.StoryId, seedData.CoverImageUrl),
             StoryTopic = seedData.StoryTopic ?? string.Empty,
             Summary = seedData.Summary ?? string.Empty,
             SortOrder = seedData.SortOrder,
@@ -50,7 +52,7 @@ public static class StoryDefinitionMapper
                     SortOrder = tileSeed.SortOrder,
                     Caption = tileSeed.Caption,
                     Text = tileSeed.Text,
-                    ImageUrl = tileSeed.ImageUrl,
+                    ImageUrl = NormalizeTileImagePathForSeeds(seedData.StoryId, tileSeed.TileId, tileSeed.ImageUrl),
                     AudioUrl = tileSeed.AudioUrl,
                     Question = tileSeed.Question
                 };
@@ -103,7 +105,7 @@ public static class StoryDefinitionMapper
         {
             StoryId = seedData.StoryId,
             Title = seedData.Title,
-            CoverImageUrl = seedData.CoverImageUrl,
+            CoverImageUrl = NormalizeCoverImagePathForSeeds(seedData.StoryId, seedData.CoverImageUrl),
             StoryTopic = seedData.StoryTopic ?? string.Empty,
             Summary = seedData.Summary ?? string.Empty,
             SortOrder = seedData.SortOrder,
@@ -125,7 +127,7 @@ public static class StoryDefinitionMapper
                     SortOrder = tileSeed.SortOrder,
                     Caption = tileSeed.Caption,
                     Text = tileSeed.Text,
-                    ImageUrl = tileSeed.ImageUrl,
+                    ImageUrl = NormalizeTileImagePathForSeeds(seedData.StoryId, tileSeed.TileId, tileSeed.ImageUrl),
                     AudioUrl = tileSeed.AudioUrl,
                     Question = tileSeed.Question
                 };
@@ -286,6 +288,24 @@ public static class StoryDefinitionMapper
         public List<string> UnlockedStoryHeroes { get; set; } = new();
     }
 
+    #endregion
+
+    #region Helper Methods for Published Path Normalization (Seeds)
+    private static string NormalizeCoverImagePathForSeeds(string storyId, string? coverPath)
+    {
+        if (string.IsNullOrWhiteSpace(coverPath)) return string.Empty;
+        var ext = Path.GetExtension(coverPath);
+        var safeExt = string.IsNullOrWhiteSpace(ext) ? ".png" : ext;
+        return $"images/tales-of-alchimalia-stories/{SeedSystemOwner}/{storyId}/cover{safeExt}";
+    }
+
+    private static string? NormalizeTileImagePathForSeeds(string storyId, string tileId, string? imagePath)
+    {
+        if (string.IsNullOrWhiteSpace(imagePath)) return imagePath;
+        var ext = Path.GetExtension(imagePath);
+        var safeExt = string.IsNullOrWhiteSpace(ext) ? ".png" : ext;
+        return $"images/tales-of-alchimalia-stories/{SeedSystemOwner}/{storyId}/{tileId}{safeExt}";
+    }
     #endregion
 }
 
