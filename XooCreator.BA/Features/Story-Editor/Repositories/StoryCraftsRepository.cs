@@ -13,42 +13,59 @@ public class StoryCraftsRepository : IStoryCraftsRepository
         _context = context;
     }
 
-    public async Task<StoryCraft?> GetAsync(string storyId, LanguageCode lang, CancellationToken ct = default)
+    public async Task<StoryCraft?> GetAsync(string storyId, CancellationToken ct = default)
     {
         var id = (storyId ?? string.Empty).Trim();
-        return await _context.StoryCrafts.FirstOrDefaultAsync(x => x.StoryId == id && x.Lang == lang, ct);
+        return await _context.StoryCrafts
+            .Include(x => x.Translations)
+            .Include(x => x.Tiles)
+                .ThenInclude(t => t.Translations)
+            .Include(x => x.Tiles)
+                .ThenInclude(t => t.Answers)
+                    .ThenInclude(a => a.Translations)
+            .Include(x => x.Tiles)
+                .ThenInclude(t => t.Answers)
+                    .ThenInclude(a => a.Tokens)
+            .FirstOrDefaultAsync(x => x.StoryId == id, ct);
     }
 
-    public async Task<StoryCraft> CreateAsync(Guid ownerUserId, string storyId, LanguageCode lang, string status, string json, CancellationToken ct = default)
+    public async Task<StoryCraft?> GetWithLanguageAsync(string storyId, string languageCode, CancellationToken ct = default)
+    {
+        var id = (storyId ?? string.Empty).Trim();
+        var lang = (languageCode ?? string.Empty).ToLowerInvariant();
+        
+        return await _context.StoryCrafts
+            .Include(x => x.Translations.Where(t => t.LanguageCode == lang))
+            .Include(x => x.Tiles)
+                .ThenInclude(t => t.Translations.Where(tr => tr.LanguageCode == lang))
+            .Include(x => x.Tiles)
+                .ThenInclude(t => t.Answers)
+                    .ThenInclude(a => a.Translations.Where(at => at.LanguageCode == lang))
+            .Include(x => x.Tiles)
+                .ThenInclude(t => t.Answers)
+                    .ThenInclude(a => a.Tokens)
+            .FirstOrDefaultAsync(x => x.StoryId == id, ct);
+    }
+
+    public async Task<StoryCraft> CreateAsync(Guid ownerUserId, string storyId, string status, CancellationToken ct = default)
     {
         var craft = new StoryCraft
         {
             Id = Guid.NewGuid(),
             OwnerUserId = ownerUserId,
             StoryId = (storyId ?? string.Empty).Trim(),
-            Lang = lang,
             Status = string.IsNullOrWhiteSpace(status) ? "draft" : status,
-            Json = string.IsNullOrWhiteSpace(json) ? "{}" : json,
-            UpdatedAt = DateTime.UtcNow
+            UpdatedAt = DateTime.UtcNow,
+            CreatedAt = DateTime.UtcNow
         };
         _context.StoryCrafts.Add(craft);
         await _context.SaveChangesAsync(ct);
         return craft;
     }
 
-    public async Task UpsertAsync(Guid ownerUserId, string storyId, LanguageCode lang, string status, string json, CancellationToken ct = default)
+    public async Task SaveAsync(StoryCraft craft, CancellationToken ct = default)
     {
-        var existing = await GetAsync(storyId, lang, ct);
-        if (existing == null)
-        {
-            await CreateAsync(ownerUserId, storyId, lang, status, json, ct);
-            return;
-        }
-
-        existing.OwnerUserId = ownerUserId;
-        if (!string.IsNullOrWhiteSpace(status)) existing.Status = status;
-        if (!string.IsNullOrWhiteSpace(json)) existing.Json = json;
-        existing.UpdatedAt = DateTime.UtcNow;
+        craft.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync(ct);
     }
 
@@ -63,12 +80,6 @@ public class StoryCraftsRepository : IStoryCraftsRepository
             .OrderByDescending(x => x.UpdatedAt)
             .ToListAsync(ct);
 
-    public async Task SaveAsync(StoryCraft craft, CancellationToken ct = default)
-    {
-        craft.UpdatedAt = DateTime.UtcNow;
-        await _context.SaveChangesAsync(ct);
-    }
-
     public async Task<int> CountDistinctStoryIdsByOwnerAsync(Guid ownerUserId, CancellationToken ct = default)
     {
         return await _context.StoryCrafts
@@ -76,5 +87,27 @@ public class StoryCraftsRepository : IStoryCraftsRepository
             .Select(x => x.StoryId)
             .Distinct()
             .CountAsync(ct);
+    }
+
+    public async Task DeleteAsync(string storyId, CancellationToken ct = default)
+    {
+        var id = (storyId ?? string.Empty).Trim();
+        var craft = await _context.StoryCrafts.FirstOrDefaultAsync(x => x.StoryId == id, ct);
+        if (craft != null)
+        {
+            _context.StoryCrafts.Remove(craft);
+            await _context.SaveChangesAsync(ct);
+        }
+    }
+
+    public async Task<List<string>> GetAvailableLanguagesAsync(string storyId, CancellationToken ct = default)
+    {
+        var id = (storyId ?? string.Empty).Trim();
+        var languages = await _context.StoryCraftTranslations
+            .Where(x => x.StoryCraft.StoryId == id)
+            .Select(x => x.LanguageCode)
+            .Distinct()
+            .ToListAsync(ct);
+        return languages;
     }
 }

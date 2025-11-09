@@ -62,6 +62,12 @@ public class XooDbContext : DbContext
     public DbSet<UserOwnedStories> UserOwnedStories => Set<UserOwnedStories>();
     public DbSet<UserCreatedStories> UserCreatedStories => Set<UserCreatedStories>();
     public DbSet<StoryCraft> StoryCrafts => Set<StoryCraft>();
+    public DbSet<StoryCraftTranslation> StoryCraftTranslations => Set<StoryCraftTranslation>();
+    public DbSet<StoryCraftTile> StoryCraftTiles => Set<StoryCraftTile>();
+    public DbSet<StoryCraftTileTranslation> StoryCraftTileTranslations => Set<StoryCraftTileTranslation>();
+    public DbSet<StoryCraftAnswer> StoryCraftAnswers => Set<StoryCraftAnswer>();
+    public DbSet<StoryCraftAnswerTranslation> StoryCraftAnswerTranslations => Set<StoryCraftAnswerTranslation>();
+    public DbSet<StoryCraftAnswerToken> StoryCraftAnswerTokens => Set<StoryCraftAnswerToken>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -547,11 +553,76 @@ public class XooDbContext : DbContext
             e.HasKey(x => x.Id);
             e.Property(x => x.Id).ValueGeneratedOnAdd();
             e.Property(x => x.StoryId).HasMaxLength(200).IsRequired();
-            e.Property(x => x.Lang).IsRequired();
             e.Property(x => x.Status).HasMaxLength(20).IsRequired();
-            e.Property(x => x.Json).IsRequired();
             e.Property(x => x.UpdatedAt).IsRequired();
-            e.HasIndex(x => new { x.StoryId, x.Lang }).IsUnique();
+            e.HasIndex(x => x.StoryId).IsUnique();
+            e.HasMany(x => x.Translations).WithOne(x => x.StoryCraft).HasForeignKey(x => x.StoryCraftId).OnDelete(DeleteBehavior.Cascade);
+            e.HasMany(x => x.Tiles).WithOne(x => x.StoryCraft).HasForeignKey(x => x.StoryCraftId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<StoryCraftTranslation>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.LanguageCode).HasMaxLength(10);
+            e.HasIndex(x => new { x.StoryCraftId, x.LanguageCode }).IsUnique();
+            e.HasOne(x => x.StoryCraft)
+                .WithMany(s => s.Translations)
+                .HasForeignKey(x => x.StoryCraftId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<StoryCraftTile>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.HasIndex(x => new { x.StoryCraftId, x.TileId }).IsUnique();
+            e.HasOne(x => x.StoryCraft).WithMany(x => x.Tiles).HasForeignKey(x => x.StoryCraftId);
+            e.HasMany(x => x.Answers).WithOne(x => x.StoryCraftTile).HasForeignKey(x => x.StoryCraftTileId).OnDelete(DeleteBehavior.Cascade);
+            e.HasMany(x => x.Translations).WithOne(x => x.StoryCraftTile).HasForeignKey(x => x.StoryCraftTileId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<StoryCraftTileTranslation>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.LanguageCode).HasMaxLength(10);
+            e.HasIndex(x => new { x.StoryCraftTileId, x.LanguageCode }).IsUnique();
+            e.HasOne(x => x.StoryCraftTile)
+                .WithMany(t => t.Translations)
+                .HasForeignKey(x => x.StoryCraftTileId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<StoryCraftAnswer>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.HasIndex(x => new { x.StoryCraftTileId, x.AnswerId }).IsUnique();
+            e.HasOne(x => x.StoryCraftTile).WithMany(x => x.Answers).HasForeignKey(x => x.StoryCraftTileId);
+            e.HasMany(x => x.Tokens).WithOne(x => x.StoryCraftAnswer).HasForeignKey(x => x.StoryCraftAnswerId).OnDelete(DeleteBehavior.Cascade);
+            e.HasMany(x => x.Translations).WithOne(x => x.StoryCraftAnswer).HasForeignKey(x => x.StoryCraftAnswerId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<StoryCraftAnswerTranslation>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.LanguageCode).HasMaxLength(10);
+            e.HasIndex(x => new { x.StoryCraftAnswerId, x.LanguageCode }).IsUnique();
+            e.HasOne(x => x.StoryCraftAnswer)
+                .WithMany(a => a.Translations)
+                .HasForeignKey(x => x.StoryCraftAnswerId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<StoryCraftAnswerToken>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.Type).HasMaxLength(64).IsRequired();
+            e.Property(x => x.Value).HasMaxLength(128).IsRequired();
+            e.HasOne(x => x.StoryCraftAnswer).WithMany(x => x.Tokens).HasForeignKey(x => x.StoryCraftAnswerId).OnDelete(DeleteBehavior.Cascade);
         });
     }
 

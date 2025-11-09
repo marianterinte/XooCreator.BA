@@ -63,7 +63,6 @@ public class CreateStoryEndpoint
         }
 
         var langTag = string.IsNullOrWhiteSpace(req.Lang) ? ep._userContext.GetRequestLocaleOrDefault("ro-ro") : req.Lang!;
-        var lang = LanguageCodeExtensions.FromTag(langTag);
         
         // Generate storyId if not provided
         string storyId = (req.StoryId ?? string.Empty).Trim();
@@ -75,7 +74,9 @@ public class CreateStoryEndpoint
             ep._logger.LogInformation("Generated storyId: {StoryId} for userId={UserId}", storyId, user.Id);
         }
 
-        await ep._editorService.EnsureDraftAsync(user.Id, storyId, lang, ct);
+        // Ensure draft exists and create translation for the requested language
+        await ep._editorService.EnsureDraftAsync(user.Id, storyId, ct);
+        await ep._editorService.EnsureTranslationAsync(user.Id, storyId, langTag, ct);
         ep._logger.LogInformation("CreateStory: userId={UserId} storyId={StoryId} lang={Lang}", user.Id, storyId, langTag);
         return TypedResults.Ok(new CreateStoryResponse { StoryId = storyId });
     }

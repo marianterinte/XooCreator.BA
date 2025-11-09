@@ -49,10 +49,7 @@ public class RetractStoryEndpoint
             return TypedResults.Forbid();
         }
 
-        var langTag = ep._userContext.GetRequestLocaleOrDefault("ro-ro");
-        var lang = LanguageCodeExtensions.FromTag(langTag);
-
-        var craft = await ep._crafts.GetAsync(storyId, lang, ct);
+        var craft = await ep._crafts.GetAsync(storyId, ct);
         if (craft == null) return TypedResults.NotFound();
 
         if (craft.OwnerUserId != user.Id)
@@ -73,7 +70,7 @@ public class RetractStoryEndpoint
         craft.ReviewStartedAt = null;
         craft.ReviewEndedAt = null;
         await ep._crafts.SaveAsync(craft, ct);
-        ep._logger.LogInformation("Retract: storyId={StoryId} lang={Lang}", storyId, langTag);
+        ep._logger.LogInformation("Retract: storyId={StoryId}", storyId);
         return TypedResults.Ok(new RetractResponse());
     }
 }

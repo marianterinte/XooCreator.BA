@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Azure.Storage.Blobs.Models;
 using System.Text.Json;
 using XooCreator.BA.Data;
+using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Endpoints;
@@ -55,9 +56,8 @@ public class PublishStoryEndpoint
         }
 
         var langTag = ep._userContext.GetRequestLocaleOrDefault("ro-ro");
-        var lang = LanguageCodeExtensions.FromTag(langTag);
 
-        var craft = await ep._crafts.GetAsync(storyId, lang, ct);
+        var craft = await ep._crafts.GetAsync(storyId, ct);
         if (craft == null) return TypedResults.NotFound();
 
         if (craft.OwnerUserId != user.Id)
@@ -72,8 +72,8 @@ public class PublishStoryEndpoint
             return TypedResults.Conflict("Invalid state transition. Expected Approved.");
         }
 
-        // 1) Extract referenced asset relative paths from draft JSON
-        var relPaths = ExtractAssetRelPaths(craft.Json);
+        // 1) Extract referenced asset relative paths from craft structure
+        var relPaths = ExtractAssetRelPaths(craft);
 
         // 2) Copy assets: drafts -> published
         var emailEsc = Uri.EscapeDataString(user.Email);
@@ -122,55 +122,59 @@ public class PublishStoryEndpoint
             try { await sourceClient.DeleteIfExistsAsync(cancellationToken: ct); ep._logger.LogInformation("Deleted draft asset: {Path}", sourceBlobPath); } catch { /* best-effort */ }
         }
 
-        // 3) Mark as published (keep JSON as-is)
+        // 3) Mark as published
         craft.Status = StoryStatus.Published.ToDb();
         await ep._crafts.SaveAsync(craft, ct);
-        ep._logger.LogInformation("Published story: storyId={StoryId} lang={Lang} assets={Count}", storyId, langTag, relPaths.Count);
+        ep._logger.LogInformation("Published story: storyId={StoryId} assets={Count}", storyId, relPaths.Count);
         return TypedResults.Ok(new PublishResponse());
     }
 
-    private static List<string> ExtractAssetRelPaths(string json)
+    private static List<string> ExtractAssetRelPaths(StoryCraft craft)
     {
         var results = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        if (string.IsNullOrWhiteSpace(json)) return results.ToList();
-
-        using var doc = JsonDocument.Parse(json);
-
-        void Walk(JsonElement el)
+        
+        // Extract cover image
+        if (!string.IsNullOrWhiteSpace(craft.CoverImageUrl))
         {
-            switch (el.ValueKind)
+            var coverPath = craft.CoverImageUrl;
+            if (coverPath.StartsWith("cover/", StringComparison.OrdinalIgnoreCase) ||
+                coverPath.StartsWith("tiles/", StringComparison.OrdinalIgnoreCase))
             {
-                case JsonValueKind.Object:
-                    foreach (var prop in el.EnumerateObject())
-                    {
-                        if (prop.Value.ValueKind == JsonValueKind.String)
-                        {
-                            var val = prop.Value.GetString() ?? string.Empty;
-                            if (!string.IsNullOrWhiteSpace(val) &&
-                                (val.StartsWith("cover/", StringComparison.OrdinalIgnoreCase) ||
-                                 val.StartsWith("tiles/", StringComparison.OrdinalIgnoreCase) ||
-                                 val.StartsWith("audio/", StringComparison.OrdinalIgnoreCase) ||
-                                 val.StartsWith("video/", StringComparison.OrdinalIgnoreCase)))
-                            {
-                                results.Add(val);
-                            }
-                        }
-                        else
-                        {
-                            Walk(prop.Value);
-                        }
-                    }
-                    break;
-                case JsonValueKind.Array:
-                    foreach (var item in el.EnumerateArray())
-                    {
-                        Walk(item);
-                    }
-                    break;
+                results.Add(coverPath);
             }
         }
-
-        Walk(doc.RootElement);
+        
+        // Extract tile assets
+        foreach (var tile in craft.Tiles)
+        {
+            if (!string.IsNullOrWhiteSpace(tile.ImageUrl))
+            {
+                var imgPath = tile.ImageUrl;
+                if (imgPath.StartsWith("tiles/", StringComparison.OrdinalIgnoreCase))
+                {
+                    results.Add(imgPath);
+                }
+            }
+            
+            if (!string.IsNullOrWhiteSpace(tile.AudioUrl))
+            {
+                var audioPath = tile.AudioUrl;
+                if (audioPath.StartsWith("audio/", StringComparison.OrdinalIgnoreCase))
+                {
+                    results.Add(audioPath);
+                }
+            }
+            
+            if (!string.IsNullOrWhiteSpace(tile.VideoUrl))
+            {
+                var videoPath = tile.VideoUrl;
+                if (videoPath.StartsWith("video/", StringComparison.OrdinalIgnoreCase))
+                {
+                    results.Add(videoPath);
+                }
+            }
+        }
+        
         return results.ToList();
     }
 }

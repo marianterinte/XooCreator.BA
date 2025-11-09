@@ -57,10 +57,7 @@ public class ReviewStoryEndpoint
             return TypedResults.Forbid();
         }
 
-        var langTag = ep._userContext.GetRequestLocaleOrDefault("ro-ro");
-        var lang = LanguageCodeExtensions.FromTag(langTag);
-
-        var craft = await ep._crafts.GetAsync(storyId, lang, ct);
+        var craft = await ep._crafts.GetAsync(storyId, ct);
         if (craft == null) return TypedResults.NotFound();
 
         var current = StoryStatusExtensions.FromDb(craft.Status);
@@ -76,7 +73,7 @@ public class ReviewStoryEndpoint
         craft.ReviewNotes = string.IsNullOrWhiteSpace(req.Notes) ? craft.ReviewNotes : req.Notes;
         craft.ReviewEndedAt = DateTime.UtcNow;
         await ep._crafts.SaveAsync(craft, ct);
-        ep._logger.LogInformation("Review decision: storyId={StoryId} lang={Lang} to={To} notesPresent={Notes}", storyId, langTag, newStatus, !string.IsNullOrWhiteSpace(req.Notes));
+        ep._logger.LogInformation("Review decision: storyId={StoryId} to={To} notesPresent={Notes}", storyId, newStatus, !string.IsNullOrWhiteSpace(req.Notes));
         return TypedResults.Ok(new ReviewResponse { Status = req.Approve ? "Approved" : "ChangesRequested" });
     }
 }

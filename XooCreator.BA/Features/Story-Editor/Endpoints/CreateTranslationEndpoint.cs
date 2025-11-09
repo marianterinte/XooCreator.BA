@@ -55,15 +55,48 @@ public class CreateTranslationEndpoint
             return TypedResults.Forbid();
         }
 
+        if (string.IsNullOrWhiteSpace(storyId) || storyId.Equals("new", StringComparison.OrdinalIgnoreCase))
+        {
+            return TypedResults.BadRequest("storyId is required and cannot be 'new'");
+        }
+
         if (string.IsNullOrWhiteSpace(req.Lang))
         {
             return TypedResults.BadRequest("lang is required");
         }
 
-        var lang = LanguageCodeExtensions.FromTag(req.Lang);
-        await ep._editorService.EnsureDraftAsync(user.Id, storyId, lang, ct);
-        ep._logger.LogInformation("Create translation draft: userId={UserId} storyId={StoryId} lang={Lang}", user.Id, storyId, req.Lang.ToLowerInvariant());
-        return TypedResults.Ok(new CreateTranslationResponse { StoryId = storyId, Lang = req.Lang.ToLowerInvariant() });
+        var lang = req.Lang.ToLowerInvariant();
+        await ep._editorService.EnsureTranslationAsync(user.Id, storyId, lang, ct);
+        ep._logger.LogInformation("Create translation draft: userId={UserId} storyId={StoryId} lang={Lang}", user.Id, storyId, lang);
+        return TypedResults.Ok(new CreateTranslationResponse { StoryId = storyId, Lang = lang });
+    }
+
+    [Route("/api/{locale}/stories/{storyId}/translations/{lang}")]
+    [Authorize]
+    public static async Task<Results<Ok<CreateTranslationResponse>, BadRequest<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandleDelete(
+        [FromRoute] string locale,
+        [FromRoute] string storyId,
+        [FromRoute] string lang,
+        [FromServices] CreateTranslationEndpoint ep,
+        CancellationToken ct)
+    {
+        var user = await ep._auth0.GetCurrentUserAsync(ct);
+        if (user == null) return TypedResults.Unauthorized();
+
+        if (!ep._auth0.HasRole(user, Data.Enums.UserRole.Creator))
+        {
+            return TypedResults.Forbid();
+        }
+
+        if (string.IsNullOrWhiteSpace(lang))
+        {
+            return TypedResults.BadRequest("lang is required");
+        }
+
+        var langLower = lang.ToLowerInvariant();
+        await ep._editorService.DeleteTranslationAsync(user.Id, storyId, langLower, ct);
+        ep._logger.LogInformation("Delete translation draft: userId={UserId} storyId={StoryId} lang={Lang}", user.Id, storyId, langLower);
+        return TypedResults.Ok(new CreateTranslationResponse { StoryId = storyId, Lang = langLower });
     }
 }
 

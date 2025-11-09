@@ -48,24 +48,20 @@ public class ListStoryCraftsEndpoint
         var items = new List<StoryCraftListItemDto>(list.Count);
         foreach (var c in list)
         {
-            // Extract title/cover from JSON
-            string title = c.StoryId;
-            string? cover = null;
-            try
-            {
-                using var doc = JsonDocument.Parse(c.Json ?? "{}");
-                if (doc.RootElement.TryGetProperty("title", out var tEl) && tEl.ValueKind == JsonValueKind.String)
-                    title = tEl.GetString() ?? title;
-                if (doc.RootElement.TryGetProperty("coverImageUrl", out var cEl) && cEl.ValueKind == JsonValueKind.String)
-                    cover = cEl.GetString();
-            }
-            catch { /* ignore malformed draft json */ }
+            // Get title from first available translation, fallback to StoryId
+            var firstTranslation = c.Translations.FirstOrDefault();
+            string title = firstTranslation?.Title ?? c.StoryId;
+            string? cover = c.CoverImageUrl;
+            
+            // Get available languages
+            var availableLangs = c.Translations.Select(t => t.LanguageCode).ToList();
+            var primaryLang = availableLangs.FirstOrDefault() ?? "ro-ro";
 
             var status = StoryStatusExtensions.FromDb(c.Status);
             items.Add(new StoryCraftListItemDto
             {
                 StoryId = c.StoryId,
-                Lang = c.Lang.ToTag(),
+                Lang = primaryLang,
                 Title = title,
                 CoverImageUrl = cover,
                 Status = MapStatusForFrontend(status),

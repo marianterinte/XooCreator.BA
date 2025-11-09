@@ -58,9 +58,10 @@ public class GetUserCreatedStoriesEndpoint
             })
             .ToListAsync();
 
-        // Get draft stories from StoryCrafts
+        // Get draft stories from StoryCrafts (for the requested language)
         var drafts = await ep._context.StoryCrafts
-            .Where(sc => sc.OwnerUserId == userId && sc.Lang == langCode)
+            .Include(sc => sc.Translations.Where(t => t.LanguageCode == locale))
+            .Where(sc => sc.OwnerUserId == userId)
             .ToListAsync();
 
         var draftStories = new List<CreatedStoryDto>();
@@ -72,56 +73,28 @@ public class GetUserCreatedStoriesEndpoint
             if (publishedStoryIds.Contains(draft.StoryId))
                 continue;
 
-            try
-            {
-                // Parse JSON to extract story metadata
-                var jsonDoc = JsonDocument.Parse(draft.Json);
-                var root = jsonDoc.RootElement;
+            // Get translation for the requested locale
+            var draftTranslation = draft.Translations.FirstOrDefault(t => t.LanguageCode == locale)
+                ?? draft.Translations.FirstOrDefault();
 
-                var storyDto = new CreatedStoryDto
-                {
-                    Id = draft.Id, // Use StoryCraft ID
-                    StoryId = draft.StoryId,
-                    Title = root.TryGetProperty("title", out var titleProp) 
-                        ? titleProp.GetString() ?? draft.StoryId 
-                        : draft.StoryId,
-                    CoverImageUrl = root.TryGetProperty("coverImageUrl", out var coverProp) 
-                        ? coverProp.GetString() 
-                        : null,
-                    StoryTopic = null, // Not in draft JSON
-                    StoryType = root.TryGetProperty("storyType", out var typeProp) && typeProp.ValueKind == JsonValueKind.Number
-                        ? (StoryType)typeProp.GetInt32()
-                        : StoryType.AlchimaliaEpic,
-                    // Use the same mapping logic as StoriesService.GetStoryForEditAsync
-                    // Convert database string status (e.g., "sent_for_approval") to StoryStatus enum
-                    Status = StoryStatusExtensions.FromDb(draft.Status),
-                    CreatedAt = draft.UpdatedAt, // Use UpdatedAt as CreatedAt for drafts
-                    PublishedAt = null,
-                    IsPublished = false,
-                    CreationNotes = null
-                };
-
-                draftStories.Add(storyDto);
-            }
-            catch (JsonException)
+            var storyDto = new CreatedStoryDto
             {
-                // If JSON parsing fails, create a minimal DTO
-                draftStories.Add(new CreatedStoryDto
-                {
-                    Id = draft.Id,
-                    StoryId = draft.StoryId,
-                    Title = draft.StoryId,
-                    CoverImageUrl = null,
-                    StoryTopic = null,
-                    StoryType = StoryType.AlchimaliaEpic,
-                    // Use the same mapping logic as StoriesService.GetStoryForEditAsync
-                    Status = StoryStatusExtensions.FromDb(draft.Status),
-                    CreatedAt = draft.UpdatedAt,
-                    PublishedAt = null,
-                    IsPublished = false,
-                    CreationNotes = null
-                });
-            }
+                Id = draft.Id, // Use StoryCraft ID
+                StoryId = draft.StoryId,
+                Title = draftTranslation?.Title ?? draft.StoryId,
+                CoverImageUrl = draft.CoverImageUrl,
+                StoryTopic = null, // Not in draft
+                StoryType = draft.StoryType,
+                // Use the same mapping logic as StoriesService.GetStoryForEditAsync
+                // Convert database string status (e.g., "sent_for_approval") to StoryStatus enum
+                Status = StoryStatusExtensions.FromDb(draft.Status),
+                CreatedAt = draft.CreatedAt,
+                PublishedAt = null,
+                IsPublished = false,
+                CreationNotes = null
+            };
+
+            draftStories.Add(storyDto);
         }
 
         // Combine published and draft stories, remove duplicates by StoryId

@@ -8,6 +8,7 @@ using XooCreator.BA.Infrastructure.Services;
 using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Data;
 using XooCreator.BA.Features.StoryEditor.Services;
+using XooCreator.BA.Features.Stories.Services;
 using Microsoft.Extensions.Logging;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
@@ -55,7 +56,6 @@ public class SaveStoryEditEndpoint
         }
 
         var langTag = ep._userContext.GetRequestLocaleOrDefault("ro-ro");
-        var lang = LanguageCodeExtensions.FromTag(langTag);
 
         // Generate storyId if "new" or empty
         string finalStoryId = storyId?.Trim() ?? string.Empty;
@@ -69,15 +69,30 @@ public class SaveStoryEditEndpoint
             ep._logger.LogInformation("Generated storyId: {StoryId} for userId={UserId}", finalStoryId, user.Id);
         }
 
-        var craft = await ep._crafts.GetAsync(finalStoryId, lang, ct);
-        
-        // If craft doesn't exist, create it
-        if (craft == null)
+        // Deserialize JSON to EditableStoryDto
+        EditableStoryDto? dto;
+        try
         {
-            craft = await ep._crafts.CreateAsync(user.Id, finalStoryId, lang, "draft", body.RootElement.GetRawText(), ct);
-            ep._logger.LogInformation("Created new story draft: storyId={StoryId} lang={Lang}", finalStoryId, langTag);
+            dto = JsonSerializer.Deserialize<EditableStoryDto>(body.RootElement.GetRawText(), new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+            if (dto == null)
+            {
+                return TypedResults.BadRequest("Invalid story data");
+            }
+            dto.Id = finalStoryId; // Ensure ID matches
         }
-        else
+        catch (Exception ex)
+        {
+            ep._logger.LogError(ex, "Failed to deserialize story data");
+            return TypedResults.BadRequest("Invalid JSON format");
+        }
+
+        var craft = await ep._crafts.GetAsync(finalStoryId, ct);
+        
+        // Check if craft exists and verify ownership/status
+        if (craft != null)
         {
             // Only owner can edit
             if (craft.OwnerUserId != user.Id)
@@ -93,12 +108,11 @@ public class SaveStoryEditEndpoint
                 ep._logger.LogWarning("Save read-only: storyId={StoryId} status={Status}", finalStoryId, status);
                 return TypedResults.Conflict("Story is read-only in the current status.");
             }
-
-            // Persist raw JSON from editor without changing current status
-            craft.Json = body.RootElement.GetRawText();
-            await ep._crafts.SaveAsync(craft, ct);
-            ep._logger.LogInformation("Save story draft: storyId={StoryId} lang={Lang}", finalStoryId, langTag);
         }
+
+        // Save using the new structure
+        await ep._editorService.SaveDraftAsync(user.Id, finalStoryId, langTag, dto, ct);
+        ep._logger.LogInformation("Save story draft: storyId={StoryId} lang={Lang}", finalStoryId, langTag);
 
         return TypedResults.Ok(new SaveResponse { StoryId = finalStoryId });
     }

@@ -80,33 +80,62 @@ public class StoriesService : IStoriesService
 
     public async Task<EditableStoryDto?> GetStoryForEditAsync(string storyId, string locale)
     {
-        // 1) Try to load StoryCraft (editor working copy) first
-        var lang = LanguageCodeExtensions.FromTag(locale);
-        var craft = await _crafts.GetAsync(storyId, lang);
-        if (craft != null && !string.IsNullOrWhiteSpace(craft.Json))
+        // Get available languages for this story
+        var availableLangs = await _crafts.GetAvailableLanguagesAsync(storyId);
+        if (availableLangs.Count == 0)
         {
-            try
+            availableLangs = new List<string> { "ro-ro" }; // Default to ro-ro if no languages found
+        }
+
+        // 1) Try to load StoryCraft (editor working copy) first
+        var lang = locale.ToLowerInvariant();
+        var craft = await _crafts.GetWithLanguageAsync(storyId, lang);
+        if (craft != null)
+        {
+            var translation = craft.Translations.FirstOrDefault(t => t.LanguageCode == lang);
+            
+            return new EditableStoryDto
             {
-                var dto = JsonSerializer.Deserialize<EditableStoryDto>(craft.Json, new JsonSerializerOptions
+                Id = craft.StoryId,
+                Title = translation?.Title ?? string.Empty,
+                CoverImageUrl = craft.CoverImageUrl ?? string.Empty,
+                Summary = translation?.Summary,
+                StoryType = (int)craft.StoryType,
+                Status = MapStatusForFrontend(StoryStatusExtensions.FromDb(craft.Status)),
+                AvailableLanguages = availableLangs,
+                Tiles = craft.Tiles.OrderBy(t => t.SortOrder).Select(t =>
                 {
-                    PropertyNameCaseInsensitive = true
-                });
-                if (dto != null)
-                {
-                    // Ensure id/title defaults exist
-                    if (string.IsNullOrWhiteSpace(dto.Id)) dto.Id = storyId;
-                    dto.Title ??= string.Empty;
-                    dto.CoverImageUrl ??= string.Empty;
-                    dto.Summary ??= string.Empty;
-                    dto.Tiles ??= new();
-                    dto.Status = MapStatusForFrontend(StoryStatusExtensions.FromDb(craft.Status));
-                    return dto;
-                }
-            }
-            catch
-            {
-                // If parsing fails, fall back to StoryDefinition mapping
-            }
+                    var tileTranslation = t.Translations.FirstOrDefault(tr => tr.LanguageCode == lang);
+                    
+                    return new EditableTileDto
+                    {
+                        Type = t.Type,
+                        Id = t.TileId,
+                        Caption = tileTranslation?.Caption,
+                        Text = tileTranslation?.Text,
+                        ImageUrl = t.ImageUrl ?? string.Empty,
+                        AudioUrl = t.AudioUrl ?? string.Empty,
+                        VideoUrl = t.VideoUrl ?? string.Empty,
+                        Question = tileTranslation?.Question,
+                        Answers = t.Answers.OrderBy(a => a.SortOrder).Select(a =>
+                        {
+                            var answerTranslation = a.Translations.FirstOrDefault(at => at.LanguageCode == lang);
+                            
+                            return new EditableAnswerDto
+                            {
+                                Id = a.AnswerId,
+                                Text = answerTranslation?.Text ?? string.Empty,
+                                Tokens = a.Tokens.Select(tok => new EditableTokenDto
+                                {
+                                    Type = tok.Type,
+                                    Value = tok.Value,
+                                    Quantity = tok.Quantity
+                                }).ToList()
+                            };
+                        }).ToList()
+                    };
+                }).ToList()
+            };
         }
 
         // 2) Fallback to StoryDefinition for initial bootstrapping
@@ -114,18 +143,19 @@ public class StoriesService : IStoriesService
         if (story == null) return null;
 
         // Get translation for the requested locale
-        var translation = story.Translations.FirstOrDefault(t => t.LanguageCode == locale) 
+        var storyTranslation = story.Translations.FirstOrDefault(t => t.LanguageCode == locale) 
             ?? story.Translations.FirstOrDefault(t => t.LanguageCode == "ro-ro")
             ?? story.Translations.FirstOrDefault();
 
         return new EditableStoryDto
         {
             Id = story.StoryId,
-            Title = translation?.Title ?? story.Title,
+            Title = storyTranslation?.Title ?? story.Title,
             CoverImageUrl = story.CoverImageUrl ?? string.Empty,
             Summary = story.Summary ?? string.Empty,
             StoryType = (int)story.StoryType,
             Status = MapStatusForFrontend(story.Status), // story.Status is already StoryStatus enum
+            AvailableLanguages = availableLangs,
             Tiles = story.Tiles.OrderBy(t => t.SortOrder).Select(t =>
             {
                 var tileTranslation = t.Translations.FirstOrDefault(tr => tr.LanguageCode == locale)
@@ -189,6 +219,7 @@ public class EditableStoryDto
     public string? Summary { get; set; }
     public int StoryType { get; set; } = 0; // 0 = AlchimaliaEpic (Tree Of Light), 1 = Indie (Independent)
     public string? Status { get; set; } // 'draft' | 'in-review' | 'approved' | 'published' (FE semantic)
+    public List<string>? AvailableLanguages { get; set; } // Available language codes for this story
     public List<EditableTileDto> Tiles { get; set; } = new();
 }
 
@@ -200,6 +231,7 @@ public class EditableTileDto
     public string? Text { get; set; }
     public string? ImageUrl { get; set; }
     public string? AudioUrl { get; set; }
+    public string? VideoUrl { get; set; }
     public string? Question { get; set; }
     public List<EditableAnswerDto> Answers { get; set; } = new();
 }

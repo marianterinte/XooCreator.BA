@@ -51,10 +51,7 @@ public class ClaimStoryReviewEndpoint
             return TypedResults.Forbid();
         }
 
-        var langTag = ep._userContext.GetRequestLocaleOrDefault("ro-ro");
-        var lang = LanguageCodeExtensions.FromTag(langTag);
-
-        var craft = await ep._crafts.GetAsync(storyId, lang, ct);
+        var craft = await ep._crafts.GetAsync(storyId, ct);
         if (craft == null) return TypedResults.NotFound();
 
         var current = StoryStatusExtensions.FromDb(craft.Status);
@@ -69,7 +66,7 @@ public class ClaimStoryReviewEndpoint
         craft.AssignedReviewerUserId = user.Id;
         craft.ReviewStartedAt = DateTime.UtcNow;
         await ep._crafts.SaveAsync(craft, ct);
-        ep._logger.LogInformation("Claim: storyId={StoryId} lang={Lang} reviewer={Reviewer}", storyId, langTag, user.Id);
+        ep._logger.LogInformation("Claim: storyId={StoryId} reviewer={Reviewer}", storyId, user.Id);
         return TypedResults.Ok(new ClaimResponse());
     }
 }

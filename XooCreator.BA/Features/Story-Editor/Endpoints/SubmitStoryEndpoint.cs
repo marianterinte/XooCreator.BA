@@ -53,10 +53,7 @@ public class SubmitStoryEndpoint
             return TypedResults.Forbid();
         }
 
-        var langTag = ep._userContext.GetRequestLocaleOrDefault("ro-ro");
-        var lang = LanguageCodeExtensions.FromTag(langTag);
-
-        var craft = await ep._crafts.GetAsync(storyId, lang, ct);
+        var craft = await ep._crafts.GetAsync(storyId, ct);
         if (craft == null) return TypedResults.NotFound();
 
         if (craft.OwnerUserId != user.Id)
@@ -74,7 +71,7 @@ public class SubmitStoryEndpoint
 
         craft.Status = StoryStatus.SentForApproval.ToDb();
         await ep._crafts.SaveAsync(craft, ct);
-        ep._logger.LogInformation("Submit: storyId={StoryId} lang={Lang} from={From} to={To}", storyId, langTag, current, StoryStatus.SentForApproval);
+        ep._logger.LogInformation("Submit: storyId={StoryId} from={From} to={To}", storyId, current, StoryStatus.SentForApproval);
         return TypedResults.Ok(new SubmitResponse());
     }
 }
