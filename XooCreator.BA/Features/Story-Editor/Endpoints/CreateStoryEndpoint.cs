@@ -64,16 +64,15 @@ public class CreateStoryEndpoint
 
         var langTag = string.IsNullOrWhiteSpace(req.Lang) ? ep._userContext.GetRequestLocaleOrDefault("ro-ro") : req.Lang!;
         var lang = LanguageCodeExtensions.FromTag(langTag);
+        
+        // Generate storyId if not provided
         string storyId = (req.StoryId ?? string.Empty).Trim();
         if (string.IsNullOrWhiteSpace(storyId))
         {
-            return TypedResults.BadRequest("storyId is required (format: ends with -sN).");
-        }
-
-        // basic validation: ends with -sN
-        if (!Regex.IsMatch(storyId, "-s[1-9]\\d*$", RegexOptions.IgnoreCase))
-        {
-            return TypedResults.BadRequest("storyId must end with -s1, -s2, ...");
+            // Generate storyId: email-s1, email-s2, etc.
+            var storyCount = await ep._crafts.CountDistinctStoryIdsByOwnerAsync(user.Id, ct);
+            storyId = $"{user.Email}-s{storyCount + 1}";
+            ep._logger.LogInformation("Generated storyId: {StoryId} for userId={UserId}", storyId, user.Id);
         }
 
         await ep._editorService.EnsureDraftAsync(user.Id, storyId, lang, ct);

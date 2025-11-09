@@ -383,19 +383,28 @@ public class StoriesRepository : IStoriesRepository
             foreach (var file in files)
             {
                 var json = await File.ReadAllTextAsync(file);
-                var seed = JsonSerializer.Deserialize<StorySeedData>(json, new JsonSerializerOptions
+                try
                 {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                    PropertyNameCaseInsensitive = true
-                });
+                    var seed = JsonSerializer.Deserialize<StorySeedData>(json, new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        PropertyNameCaseInsensitive = true
+                    });
+                    if (seed == null)
+                    {
+                        throw new InvalidOperationException($"Invalid story seed data in '{file}'.");
+                    }
 
-                if (seed == null)
-                {
-                    throw new InvalidOperationException($"Invalid story seed data in '{file}'.");
+                    var def = StoryDefinitionMapper.MapFromSeedData(seed);
+                    storyMap[def.StoryId] = def;
+
                 }
+                catch (Exception ex)
+                {
 
-                var def = StoryDefinitionMapper.MapFromSeedData(seed);
-                storyMap[def.StoryId] = def;
+                    throw;
+                }
+              
             }
             if (files.Count > 0) break;
         }

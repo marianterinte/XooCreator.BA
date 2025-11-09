@@ -12,5 +12,6 @@ public interface IStoryCraftsRepository
     Task<List<StoryCraft>> ListByOwnerAsync(Guid ownerUserId, CancellationToken ct = default);
     Task<List<StoryCraft>> ListAllAsync(CancellationToken ct = default);
     Task SaveAsync(StoryCraft craft, CancellationToken ct = default);
+    Task<int> CountDistinctStoryIdsByOwnerAsync(Guid ownerUserId, CancellationToken ct = default);
 }
 

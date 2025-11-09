@@ -1,0 +1,18 @@
+{
+  "storyId": "crystalia-s1",
+  "title": "Crystalia",
+  "coverImageUrl": "images/tol/stories/crystalia-s1/0.Cover.png",
+  "sortOrder": 1,
+  "unlockedStoryHeroes": [],
+  "tiles": [
+    {
+      "tileId": "1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Crystalia",
+      "text": "Crystalia",
+      "imageUrl": "images/tol/stories/crystalia-s1/0.Cover.png",
+      "question": ""
+    }
+  ]
+}

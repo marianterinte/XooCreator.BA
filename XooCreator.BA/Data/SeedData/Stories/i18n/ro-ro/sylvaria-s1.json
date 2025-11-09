@@ -1,0 +1,18 @@
+{
+  "storyId": "sylvaria-s1",
+  "title": "Sylvaria",
+  "coverImageUrl": "images/tol/stories/sylvaria-s1/0.Cover.png",
+  "sortOrder": 1,
+  "unlockedStoryHeroes": [],
+  "tiles": [
+    {
+      "tileId": "1",
+      "type": "page",
+      "sortOrder": 1,
+      "caption": "Sylvaria",
+      "text": "Sylvaria",
+      "imageUrl": "images/tol/stories/sylvaria-s1/0.Cover.png",
+      "question": ""
+    }
+  ]
+}

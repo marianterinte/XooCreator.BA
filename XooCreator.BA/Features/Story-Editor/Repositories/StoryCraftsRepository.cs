@@ -68,4 +68,13 @@ public class StoryCraftsRepository : IStoryCraftsRepository
         craft.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync(ct);
     }
+
+    public async Task<int> CountDistinctStoryIdsByOwnerAsync(Guid ownerUserId, CancellationToken ct = default)
+    {
+        return await _context.StoryCrafts
+            .Where(x => x.OwnerUserId == ownerUserId)
+            .Select(x => x.StoryId)
+            .Distinct()
+            .CountAsync(ct);
+    }
 }

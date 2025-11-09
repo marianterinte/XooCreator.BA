@@ -30,7 +30,11 @@ public class SaveStoryEditEndpoint
         _logger = logger;
     }
 
-    public record SaveResponse { public bool Success { get; init; } = true; }
+    public record SaveResponse 
+    { 
+        public bool Success { get; init; } = true;
+        public string? StoryId { get; init; }
+    }
 
     [Route("/api/{locale}/stories/{storyId}/edit")]
     [Authorize]
@@ -44,37 +48,59 @@ public class SaveStoryEditEndpoint
         var user = await ep._auth0.GetCurrentUserAsync(ct);
         if (user == null) return TypedResults.Unauthorized();
 
-        if (string.IsNullOrWhiteSpace(storyId))
+        if (!ep._auth0.HasRole(user, Data.Enums.UserRole.Creator))
         {
-            return TypedResults.BadRequest("Missing storyId.");
+            ep._logger.LogWarning("Save forbidden: userId={UserId} not a creator", user.Id);
+            return TypedResults.Forbid();
         }
 
         var langTag = ep._userContext.GetRequestLocaleOrDefault("ro-ro");
         var lang = LanguageCodeExtensions.FromTag(langTag);
 
-        var craft = await ep._crafts.GetAsync(storyId, lang, ct);
-        if (craft == null) return TypedResults.NotFound();
-
-        // Only owner (Creator) can edit
-        if (craft.OwnerUserId != user.Id || !ep._auth0.HasRole(user, Data.Enums.UserRole.Creator))
+        // Generate storyId if "new" or empty
+        string finalStoryId = storyId?.Trim() ?? string.Empty;
+        bool isNewStory = string.IsNullOrWhiteSpace(finalStoryId) || finalStoryId.Equals("new", StringComparison.OrdinalIgnoreCase);
+        
+        if (isNewStory)
         {
-            ep._logger.LogWarning("Save forbidden: userId={UserId} storyId={StoryId}", user.Id, storyId);
-            return TypedResults.Forbid();
+            // Generate storyId: email-s1, email-s2, etc.
+            var storyCount = await ep._crafts.CountDistinctStoryIdsByOwnerAsync(user.Id, ct);
+            finalStoryId = $"{user.Email}-s{storyCount + 1}";
+            ep._logger.LogInformation("Generated storyId: {StoryId} for userId={UserId}", finalStoryId, user.Id);
         }
 
-        // Disallow edits in SentForApproval/InReview/Approved/Published
-        var status = (craft.Status ?? "draft").ToLowerInvariant();
-        if (status is "sent_for_approval" or "in_review" or "approved" or "published")
+        var craft = await ep._crafts.GetAsync(finalStoryId, lang, ct);
+        
+        // If craft doesn't exist, create it
+        if (craft == null)
         {
-            ep._logger.LogWarning("Save read-only: storyId={StoryId} status={Status}", storyId, status);
-            return TypedResults.Conflict("Story is read-only in the current status.");
+            craft = await ep._crafts.CreateAsync(user.Id, finalStoryId, lang, "draft", body.RootElement.GetRawText(), ct);
+            ep._logger.LogInformation("Created new story draft: storyId={StoryId} lang={Lang}", finalStoryId, langTag);
+        }
+        else
+        {
+            // Only owner can edit
+            if (craft.OwnerUserId != user.Id)
+            {
+                ep._logger.LogWarning("Save forbidden: userId={UserId} storyId={StoryId} not owner", user.Id, finalStoryId);
+                return TypedResults.Forbid();
+            }
+
+            // Disallow edits in SentForApproval/InReview/Approved/Published
+            var status = (craft.Status ?? "draft").ToLowerInvariant();
+            if (status is "sent_for_approval" or "in_review" or "approved" or "published")
+            {
+                ep._logger.LogWarning("Save read-only: storyId={StoryId} status={Status}", finalStoryId, status);
+                return TypedResults.Conflict("Story is read-only in the current status.");
+            }
+
+            // Persist raw JSON from editor without changing current status
+            craft.Json = body.RootElement.GetRawText();
+            await ep._crafts.SaveAsync(craft, ct);
+            ep._logger.LogInformation("Save story draft: storyId={StoryId} lang={Lang}", finalStoryId, langTag);
         }
 
-        // Persist raw JSON from editor without changing current status
-        craft.Json = body.RootElement.GetRawText();
-        await ep._crafts.SaveAsync(craft, ct);
-        ep._logger.LogInformation("Save story draft: storyId={StoryId} lang={Lang}", storyId, langTag);
-        return TypedResults.Ok(new SaveResponse());
+        return TypedResults.Ok(new SaveResponse { StoryId = finalStoryId });
     }
 }
 
