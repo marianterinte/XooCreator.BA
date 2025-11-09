@@ -1,7 +1,7 @@
 {
   "storyId": "learn-to-read-s1",
   "title": "Puf-Puf and the Lost Friend",
-  "coverImageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/0.cover.png",
+  "coverImageUrl": "images/tales-of-alchimalia/stories/seed@alchimalia.com/learn-to-read-s1/0.cover.png",
   "storyTopic": "Reading",
   "sortOrder": 1,
   "storyType": 1,
@@ -15,7 +15,7 @@
       "sortOrder": 1,
       "caption": "Puf-Puf starts",
       "text": "Puf-Puf is a small, fluffy cat. It pours over the forest. He wears an orange poncho. \"The perfume of rain is so pleasant!\" says Puf-Puf.",
-      "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/1.start.png"
+      "imageUrl": "images/tales-of-alchimalia/stories/seed@alchimalia.com/learn-to-read-s1/1.start.png"
     },
     {
       "tileId": "2",
@@ -23,7 +23,7 @@
       "sortOrder": 2,
       "caption": "A little cry",
       "text": "He hears: “Pfff… pfff…” Puf-Puf stops. “Who’s crying?” From the bush, a small bunny appears.",
-      "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/2.cry.png"
+      "imageUrl": "images/tales-of-alchimalia/stories/seed@alchimalia.com/learn-to-read-s1/2.cry.png"
     },
     {
       "tileId": "3",
@@ -31,7 +31,7 @@
       "sortOrder": 3,
       "caption": "The lost friend",
       "text": "\"I got lost,\" says the bunny. \"Don't worry,\" says Puf-Puf. \"I'll help you find the path home!\"",
-      "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/3.lost-friend.png"
+      "imageUrl": "images/tales-of-alchimalia/stories/seed@alchimalia.com/learn-to-read-s1/3.lost-friend.png"
     },
     {
       "tileId": "4",
@@ -39,7 +39,7 @@
       "sortOrder": 4,
       "caption": "Through rain and forest",
       "text": "They walk together through the forest. The rain drips on the pebbles. Puf-Puf holds the umbrella. The bunny jumps in puddles: “Plip-plop!”",
-      "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/4.rain-forest.png"
+      "imageUrl": "images/tales-of-alchimalia/stories/seed@alchimalia.com/learn-to-read-s1/4.rain-forest.png"
     },
     {
       "tileId": "5",
@@ -47,7 +47,7 @@
       "sortOrder": 5,
       "caption": "The meadow with a feather",
       "text": "They reach a pretty meadow full of flowers. On the ground lies a shiny peacock feather. \"This place is near my home!\" says the bunny, smiling proudly.",
-      "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/5.meadow.png"
+      "imageUrl": "images/tales-of-alchimalia/stories/seed@alchimalia.com/learn-to-read-s1/5.meadow.png"
     },
     {
       "tileId": "6",
@@ -55,7 +55,7 @@
       "sortOrder": 6,
       "caption": "The story of friendship",
       "text": "“Thank you, Puf-Puf!” “Friends help each other,” says the kitten. The rain stops. A rainbow shines above. **P** for Puf-Puf, **P** for partner, **P** for peace!",
-      "imageUrl": "images/tales-of-alchimalia/stories/learn-to-read-s1/6.end.png"
+      "imageUrl": "images/tales-of-alchimalia/stories/seed@alchimalia.com/learn-to-read-s1/6.end.png"
     }
   ]
 }

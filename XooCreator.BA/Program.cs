@@ -150,6 +150,7 @@ builder.Services.AddScoped<IStoriesService, StoriesService>();
 builder.Services.AddScoped<IStoriesRepository, StoriesRepository>();
 builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Repositories.IStoryCraftsRepository, XooCreator.BA.Features.StoryEditor.Repositories.StoryCraftsRepository>();
 builder.Services.AddScoped<IStoryEditorService, StoryEditorService>();
+builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IStoryPublishingService, XooCreator.BA.Features.StoryEditor.Services.StoryPublishingService>();
 
 // Story Marketplace Services
 builder.Services.AddScoped<IStoriesMarketplaceRepository, StoriesMarketplaceRepository>();
@@ -230,7 +231,7 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var recreate = builder.Configuration.GetValue<bool>("Database:RecreateOnStart");
-        recreate = false; // Force recreation every time during development
+        recreate = true; // Force recreation every time during development
 
         if (recreate)
         {

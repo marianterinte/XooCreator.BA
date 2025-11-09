@@ -16,6 +16,7 @@ public class StoryTile
     public string? Text { get; set; }
     public string? ImageUrl { get; set; }
     public string? AudioUrl { get; set; }
+    public string? VideoUrl { get; set; }
     
     // Quiz-specific fields
     public string? Question { get; set; }

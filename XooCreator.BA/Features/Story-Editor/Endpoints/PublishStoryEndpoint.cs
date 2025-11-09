@@ -23,14 +23,16 @@ public class PublishStoryEndpoint
     private readonly IAuth0UserService _auth0;
     private readonly IBlobSasService _sas;
     private readonly ILogger<PublishStoryEndpoint> _logger;
+    private readonly XooCreator.BA.Features.StoryEditor.Services.IStoryPublishingService _publisher;
 
-    public PublishStoryEndpoint(IStoryCraftsRepository crafts, IUserContextService userContext, IAuth0UserService auth0, IBlobSasService sas, ILogger<PublishStoryEndpoint> logger)
+    public PublishStoryEndpoint(IStoryCraftsRepository crafts, IUserContextService userContext, IAuth0UserService auth0, IBlobSasService sas, ILogger<PublishStoryEndpoint> logger, XooCreator.BA.Features.StoryEditor.Services.IStoryPublishingService publisher)
     {
         _crafts = crafts;
         _userContext = userContext;
         _auth0 = auth0;
         _sas = sas;
         _logger = logger;
+        _publisher = publisher;
     }
 
     public record PublishResponse
@@ -88,12 +90,13 @@ public class PublishStoryEndpoint
             var sourceBlobPath = $"draft/u/{emailEsc}/stories/{storyId}/{langTag}/{rel}";
 
             // New published structure:
-            // images: images/tales-of-alchimalia-stories/{email}/{storyId}/{fileName}
-            // video:  video/tales-of-alchimalia-stories/{email}/{storyId}/{fileName}
-            // audio:  audio/tales-of-alchimalia-stories/{email}/{storyId}/{lang}/{fileName}
+            // images: images/tales-of-alchimalia/stories/{email}/{storyId}/{fileName}
+            // video:  video/tales-of-alchimalia/stories/{email}/{storyId}/{fileName}
+            // audio:  audio/tales-of-alchimalia/stories/{email}/{storyId}/{lang}/{fileName}
             // - No 'cover' or 'tiles' folders in published
             // - Images and videos are language-agnostic; audio is language-specific
-            var publishedRoot = $"{category}/tales-of-alchimalia-stories/{emailEsc}/{storyId}";
+            var owner = user.Email; // keep '@', avoid % encoding
+            var publishedRoot = $"{category}/tales-of-alchimalia/stories/{owner}/{storyId}";
             if (string.Equals(category, "audio", StringComparison.OrdinalIgnoreCase))
             {
                 publishedRoot = $"{publishedRoot}/{langTag}";
@@ -136,7 +139,10 @@ public class PublishStoryEndpoint
             try { await sourceClient.DeleteIfExistsAsync(cancellationToken: ct); ep._logger.LogInformation("Deleted draft asset: {Path}", sourceBlobPath); } catch { /* best-effort */ }
         }
 
-        // 3) Mark as published
+        // 3) Upsert StoryDefinition from craft (single source of truth for marketplace)
+        await ep._publisher.UpsertFromCraftAsync(craft, user.Email, langTag, ct);
+
+        // 4) Mark craft as published
         craft.Status = StoryStatus.Published.ToDb();
         await ep._crafts.SaveAsync(craft, ct);
         ep._logger.LogInformation("Published story: storyId={StoryId} assets={Count}", storyId, relPaths.Count);

@@ -1,7 +1,7 @@
 {
   "storyId": "learn-math-s1",
   "title": "Problémák Mechanikán",
-  "coverImageUrl": "images/tales-of-alchimalia/stories/learn-math-s1/0.cover.png",
+  "coverImageUrl": "images/tales-of-alchimalia/stories/seed@alchimalia.com/learn-math-s1/0.cover.png",
   "sortOrder": 1,
   "storyType": 1,
   "storyTopic": "Mathematics",
@@ -15,7 +15,7 @@
       "sortOrder": 1,
       "caption": "Riasztás a Vezérlőtoronyban",
       "text": "A Mechanika bolygón egy piros riasztás villogott a Vezérlőtornyban. \"Riasztás! A North-3 generátor leállt!\" Nélküle a robot polgárok nem tudnak újratöltődni. Grubot robot kiegyenesítette az antennáit: \"El fogom érni az Energia Szívét és újra üzembe helyezem. Lépésről lépésre.\"",
-      "imageUrl": "images/tales-of-alchimalia/stories/learn-math-s1/1.workshop.png"
+      "imageUrl": "images/tales-of-alchimalia/stories/seed@alchimalia.com/learn-math-s1/1.workshop.png"
     },
     {
       "tileId": "2",
@@ -23,7 +23,7 @@
       "sortOrder": 2,
       "caption": "A Fény Folyosója",
       "text": "Az Út a Szívhez színes lámpák alagútján halad át. Minden lámpa csak akkor világít, amikor a megfelelő energiát adják hozzá. \"Túl kevés és elhalványul, túl sok és kipukkad,\" mondta Grubot. \"Először az egyensúly, aztán tovább.\"",
-      "imageUrl": "images/tales-of-alchimalia/stories/learn-math-s1/2.bridge.png"
+      "imageUrl": "images/tales-of-alchimalia/stories/seed@alchimalia.com/learn-math-s1/2.bridge.png"
     },
     {
       "tileId": "q1",
@@ -31,7 +31,7 @@
       "sortOrder": 3,
       "caption": "",
       "text": "",
-      "imageUrl": "images/tales-of-alchimalia/stories/learn-math-s1/3.quiz.png",
+      "imageUrl": "images/tales-of-alchimalia/stories/seed@alchimalia.com/learn-math-s1/3.quiz.png",
       "question": "A paneleken 3 zöld szikra világít. Grubot még 2-t ad hozzá, hogy megfeleljen a lámpa mintájának. Hány szikra világít most?",
       "answers": [
         {
@@ -67,7 +67,7 @@
       "sortOrder": 4,
       "caption": "Az Egyensúly Kamrája",
       "text": "A következő szoba: manométerek és csövek halkan sziszegnek. Egy üzenet villog: \"A nyomás túl magas. Csökkentsd biztonságos szintre.\" Grubot megkopogtatja a szelepeket. \"Nem túl sok, nem túl kevés—éppen elég.\"",
-      "imageUrl": "images/tales-of-alchimalia/stories/learn-math-s1/4.tower.png"
+      "imageUrl": "images/tales-of-alchimalia/stories/seed@alchimalia.com/learn-math-s1/4.tower.png"
     },
     {
       "tileId": "q2",
@@ -75,7 +75,7 @@
       "sortOrder": 5,
       "caption": "",
       "text": "",
-      "imageUrl": "images/tales-of-alchimalia/stories/learn-math-s1/5.quiz.png",
+      "imageUrl": "images/tales-of-alchimalia/stories/seed@alchimalia.com/learn-math-s1/5.quiz.png",
       "question": "A manométer 10 egységnyi nyomást mutat. Grubot 4 egységet enged ki, hogy elérje a biztonságos jelet. Milyen szám marad a manométeren?",
       "answers": [
         {
@@ -111,7 +111,7 @@
       "sortOrder": 6,
       "caption": "Az Iker Turbinák Csarnoka",
       "text": "Mélyebben belül, két hatalmas turbina zümmög a sötétben. Apró fények gyűrűi ölelik körül minden rotort. \"Szinronizálnom kell a ritmusukat,\" gondolja Grubot. \"Minden fény együtt pulzál.\"",
-      "imageUrl": "images/tales-of-alchimalia/stories/learn-math-s1/6.portals.png"
+      "imageUrl": "images/tales-of-alchimalia/stories/seed@alchimalia.com/learn-math-s1/6.portals.png"
     },
     {
       "tileId": "q3",
@@ -119,7 +119,7 @@
       "sortOrder": 7,
       "caption": "",
       "text": "",
-      "imageUrl": "images/tales-of-alchimalia/stories/learn-math-s1/7.quiz.png",
+      "imageUrl": "images/tales-of-alchimalia/stories/seed@alchimalia.com/learn-math-s1/7.quiz.png",
       "question": "Minden turbinának 2 gyűrűje van. Minden gyűrűnek 3 fénye van, amiknek együtt kell világítaniuk. Hány fénynek kell összesen világítania mindkét turbinán?",
       "answers": [
         {
@@ -155,7 +155,7 @@
       "sortOrder": 8,
       "caption": "A Kristály Megosztás Kapuja",
       "text": "Egy magas kapu elzárja a magot. Négy kék kristály várja a hatalom méltányos részét. \"Ha egyenletesen osztom el az áramlást, a zár kinyílik,\" mondja Grubot. \"Egyenlő fény minden kristály számára.\"",
-      "imageUrl": "images/tales-of-alchimalia/stories/learn-math-s1/8.return.png"
+      "imageUrl": "images/tales-of-alchimalia/stories/seed@alchimalia.com/learn-math-s1/8.return.png"
     },
     {
       "tileId": "q4",
@@ -163,7 +163,7 @@
       "sortOrder": 9,
       "caption": "",
       "text": "",
-      "imageUrl": "images/tales-of-alchimalia/stories/learn-math-s1/9.quiz.png",
+      "imageUrl": "images/tales-of-alchimalia/stories/seed@alchimalia.com/learn-math-s1/9.quiz.png",
       "question": "12 energia gömb van, amit egyenlően kell küldeni 3 kristályhoz. Hány gömböt kap minden kristály?",
       "answers": [
         {

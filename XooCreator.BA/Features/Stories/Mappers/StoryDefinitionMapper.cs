@@ -13,7 +13,9 @@ namespace XooCreator.BA.Features.Stories.Mappers;
 /// </summary>
 public static class StoryDefinitionMapper
 {
-    private const string SeedSystemOwner = "system";
+    // Email used as owner folder for seeded stories' published paths.
+    // Note: this is sanitized for folder usage (not URL-encoded).
+    private const string SeedOwnerEmail = "seed@alchimalia.com";
 
     /// <summary>
     /// Marian Teacher (Marian T) GUID constant for Indie stories.
@@ -105,7 +107,7 @@ public static class StoryDefinitionMapper
         {
             StoryId = seedData.StoryId,
             Title = seedData.Title,
-            CoverImageUrl = NormalizeCoverImagePathForSeeds(seedData.StoryId, seedData.CoverImageUrl),
+            CoverImageUrl = seedData.CoverImageUrl,
             StoryTopic = seedData.StoryTopic ?? string.Empty,
             Summary = seedData.Summary ?? string.Empty,
             SortOrder = seedData.SortOrder,
@@ -127,7 +129,7 @@ public static class StoryDefinitionMapper
                     SortOrder = tileSeed.SortOrder,
                     Caption = tileSeed.Caption,
                     Text = tileSeed.Text,
-                    ImageUrl = NormalizeTileImagePathForSeeds(seedData.StoryId, tileSeed.TileId, tileSeed.ImageUrl),
+                    ImageUrl = tileSeed.ImageUrl,
                     AudioUrl = tileSeed.AudioUrl,
                     Question = tileSeed.Question
                 };
@@ -296,7 +298,8 @@ public static class StoryDefinitionMapper
         if (string.IsNullOrWhiteSpace(coverPath)) return string.Empty;
         var ext = Path.GetExtension(coverPath);
         var safeExt = string.IsNullOrWhiteSpace(ext) ? ".png" : ext;
-        return $"images/tales-of-alchimalia-stories/{SeedSystemOwner}/{storyId}/cover{safeExt}";
+        var owner = SanitizeEmailForFolder(SeedOwnerEmail);
+        return $"images/tales-of-alchimalia/stories/{owner}/{storyId}/cover{safeExt}";
     }
 
     private static string? NormalizeTileImagePathForSeeds(string storyId, string tileId, string? imagePath)
@@ -304,7 +307,22 @@ public static class StoryDefinitionMapper
         if (string.IsNullOrWhiteSpace(imagePath)) return imagePath;
         var ext = Path.GetExtension(imagePath);
         var safeExt = string.IsNullOrWhiteSpace(ext) ? ".png" : ext;
-        return $"images/tales-of-alchimalia-stories/{SeedSystemOwner}/{storyId}/{tileId}{safeExt}";
+        var owner = SanitizeEmailForFolder(SeedOwnerEmail);
+        return $"images/tales-of-alchimalia/stories/{owner}/{storyId}/{tileId}{safeExt}";
+    }
+
+    private static string SanitizeEmailForFolder(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email)) return "unknown";
+        var trimmed = email.Trim().ToLowerInvariant();
+        // Keep '@' as is; strip/normalize only characters outside [a-z0-9._-@]
+        var chars = trimmed.Select(ch =>
+            char.IsLetterOrDigit(ch) || ch == '.' || ch == '_' || ch == '-' || ch == '@' ? ch : '-'
+        ).ToArray();
+        // Collapse consecutive dashes
+        var cleaned = new string(chars);
+        while (cleaned.Contains("--")) cleaned = cleaned.Replace("--", "-");
+        return cleaned.Trim('-');
     }
     #endregion
 }
