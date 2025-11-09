@@ -164,6 +164,8 @@ public class StoriesService : IStoriesService
         };
     }
 
+    internal static string MapStatusForFrontendForExternal(StoryStatus status) => MapStatusForFrontend(status);
+
     private static string MapStatusForFrontend(StoryStatus status)
     {
         return status switch

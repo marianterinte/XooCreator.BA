@@ -58,6 +58,11 @@ public class StoryCraftsRepository : IStoryCraftsRepository
             .OrderByDescending(x => x.UpdatedAt)
             .ToListAsync(ct);
 
+    public Task<List<StoryCraft>> ListAllAsync(CancellationToken ct = default)
+        => _context.StoryCrafts
+            .OrderByDescending(x => x.UpdatedAt)
+            .ToListAsync(ct);
+
     public async Task SaveAsync(StoryCraft craft, CancellationToken ct = default)
     {
         craft.UpdatedAt = DateTime.UtcNow;
