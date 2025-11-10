@@ -295,20 +295,58 @@ public static class StoryDefinitionMapper
     #region Helper Methods for Published Path Normalization (Seeds)
     private static string NormalizeCoverImagePathForSeeds(string storyId, string? coverPath)
     {
-        if (string.IsNullOrWhiteSpace(coverPath)) return string.Empty;
-        var ext = Path.GetExtension(coverPath);
-        var safeExt = string.IsNullOrWhiteSpace(ext) ? ".png" : ext;
+        if (string.IsNullOrWhiteSpace(coverPath))
+        {
+            return string.Empty;
+        }
+
+        var normalized = coverPath.TrimStart('/');
+        if (normalized.StartsWith("images/tales-of-alchimalia/stories/", StringComparison.OrdinalIgnoreCase))
+        {
+            return normalized;
+        }
+
+        var fileName = Path.GetFileName(normalized);
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            return string.Empty;
+        }
+        else if (!fileName.Contains('.'))
+        {
+            var ext = Path.GetExtension(normalized);
+            fileName = $"{fileName}{(string.IsNullOrWhiteSpace(ext) ? ".png" : ext)}";
+        }
+
         var owner = SanitizeEmailForFolder(SeedOwnerEmail);
-        return $"images/tales-of-alchimalia/stories/{owner}/{storyId}/cover{safeExt}";
+        return $"images/tales-of-alchimalia/stories/{owner}/{storyId}/{fileName}";
     }
 
     private static string? NormalizeTileImagePathForSeeds(string storyId, string tileId, string? imagePath)
     {
-        if (string.IsNullOrWhiteSpace(imagePath)) return imagePath;
-        var ext = Path.GetExtension(imagePath);
-        var safeExt = string.IsNullOrWhiteSpace(ext) ? ".png" : ext;
+        if (string.IsNullOrWhiteSpace(imagePath))
+        {
+            return imagePath;
+        }
+
+        var normalized = imagePath.TrimStart('/');
+        if (normalized.StartsWith("images/tales-of-alchimalia/stories/", StringComparison.OrdinalIgnoreCase))
+        {
+            return normalized;
+        }
+
+        var fileName = Path.GetFileName(normalized);
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            fileName = $"{tileId}.png";
+        }
+        else if (!fileName.Contains('.'))
+        {
+            var ext = Path.GetExtension(normalized);
+            fileName = $"{fileName}{(string.IsNullOrWhiteSpace(ext) ? ".png" : ext)}";
+        }
+
         var owner = SanitizeEmailForFolder(SeedOwnerEmail);
-        return $"images/tales-of-alchimalia/stories/{owner}/{storyId}/{tileId}{safeExt}";
+        return $"images/tales-of-alchimalia/stories/{owner}/{storyId}/{fileName}";
     }
 
     private static string SanitizeEmailForFolder(string email)

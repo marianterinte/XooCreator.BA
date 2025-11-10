@@ -56,7 +56,6 @@ public class XooDbContext : DbContext
     
     // Story Marketplace
     public DbSet<StoryPurchase> StoryPurchases => Set<StoryPurchase>();
-    public DbSet<StoryMarketplaceInfo> StoryMarketplaceInfos => Set<StoryMarketplaceInfo>();
     
     // User Story Relations
     public DbSet<UserOwnedStories> UserOwnedStories => Set<UserOwnedStories>();
@@ -496,32 +495,7 @@ public class XooDbContext : DbContext
             e.HasOne(x => x.Story).WithMany().HasForeignKey(x => x.StoryId).HasPrincipalKey(s => s.StoryId).OnDelete(DeleteBehavior.Cascade);
         });
 
-        modelBuilder.Entity<StoryMarketplaceInfo>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.HasIndex(x => x.StoryId).IsUnique();
-            e.Property(x => x.Region).HasMaxLength(50);
-            e.Property(x => x.AgeRating).HasMaxLength(10);
-            e.Property(x => x.Difficulty).HasMaxLength(20);
-            e.Property(x => x.Characters).HasConversion(
-                v => string.Join(',', v),
-                v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()
-            ).Metadata.SetValueComparer(new ValueComparer<List<string>>(
-                (c1, c2) => c1!.SequenceEqual(c2!),
-                c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                c => c.ToList()
-            ));
-            e.Property(x => x.Tags).HasConversion(
-                v => string.Join(',', v),
-                v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()
-            ).Metadata.SetValueComparer(new ValueComparer<List<string>>(
-                (c1, c2) => c1!.SequenceEqual(c2!),
-                c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                c => c.ToList()
-            ));
-            e.HasOne(x => x.Story).WithMany().HasForeignKey(x => x.StoryId).HasPrincipalKey(s => s.StoryId).OnDelete(DeleteBehavior.Cascade);
-        });
+        // Removed StoryMarketplaceInfo entity mapping
 
         // User Owned Stories Configuration
         modelBuilder.Entity<UserOwnedStories>(e =>

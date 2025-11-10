@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Data;
@@ -37,18 +38,18 @@ public class AcquireFreeStoryEndpoint
         if (string.IsNullOrWhiteSpace(finalStoryId))
             return TypedResults.BadRequest(new GetFreeStoryResponse(false, "Missing storyId"));
 
-        var info = await ep._context.StoryMarketplaceInfos
-            .Include(smi => smi.Story)
-            .FirstOrDefaultAsync(smi => smi.StoryId == finalStoryId && smi.Story.IsActive);
-        if (info == null) return TypedResults.NotFound();
+        var def = await ep._context.StoryDefinitions
+            .FirstOrDefaultAsync(s => s.StoryId == finalStoryId && s.IsActive);
+        if (def == null) return TypedResults.NotFound();
 
-        if (info.PriceInCredits > 0)
+        var price = await GetPriceFromJsonOrDefaultAsync(finalStoryId);
+        if (price > 0)
         {
             return TypedResults.BadRequest(new GetFreeStoryResponse(false, "Story is not free"));
         }
 
         var alreadyOwned = await ep._context.UserOwnedStories
-            .AnyAsync(uos => uos.UserId == userId && uos.StoryDefinitionId == info.Story.Id);
+            .AnyAsync(uos => uos.UserId == userId && uos.StoryDefinitionId == def.Id);
         if (alreadyOwned)
         {
             return TypedResults.Ok(new GetFreeStoryResponse(true, null));
@@ -58,7 +59,7 @@ public class AcquireFreeStoryEndpoint
         {
             Id = Guid.NewGuid(),
             UserId = userId.Value,
-            StoryDefinitionId = info.Story.Id,
+            StoryDefinitionId = def.Id,
             PurchasedAt = DateTime.UtcNow,
             PurchasePrice = 0,
             PurchaseReference = "FREE_GET"
@@ -66,6 +67,39 @@ public class AcquireFreeStoryEndpoint
         await ep._context.SaveChangesAsync();
 
         return TypedResults.Ok(new GetFreeStoryResponse(true, null));
+    }
+
+    private static async Task<int> GetPriceFromJsonOrDefaultAsync(string storyId)
+    {
+        var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+        var locales = new[] { "ro-ro", "en-us", "hu-hu" };
+        foreach (var locale in locales)
+        {
+            var dir = Path.Combine(baseDir, "Data", "SeedData", "Stories", "independent", "i18n", locale);
+            var filePath = Path.Combine(dir, $"{storyId}.json");
+            if (File.Exists(filePath))
+            {
+                try
+                {
+                    var json = await File.ReadAllTextAsync(filePath);
+                    var seed = JsonSerializer.Deserialize<StorySeedDataProbe>(json, new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        PropertyNameCaseInsensitive = true
+                    });
+                    if (seed?.Price.HasValue == true) return seed.Price.Value;
+                }
+                catch { }
+            }
+        }
+        // Default heuristic
+        if (storyId.Contains("lunaria", StringComparison.OrdinalIgnoreCase)) return 1;
+        return 2;
+    }
+
+    private sealed class StorySeedDataProbe
+    {
+        public int? Price { get; set; }
     }
 }
 

@@ -19,8 +19,8 @@ public interface IStoriesMarketplaceRepository
     Task<bool> PurchaseStoryAsync(Guid userId, string storyId, int creditsSpent);
     Task<bool> IsStoryPurchasedAsync(Guid userId, string storyId);
     Task<List<StoryMarketplaceItemDto>> GetUserPurchasedStoriesAsync(Guid userId, string locale);
-    Task SeedMarketplaceDataAsync();
     Task<StoryDetailsDto?> GetStoryDetailsAsync(string storyId, Guid userId, string locale);
+    Task<int> GetComputedPriceAsync(string storyId);
 }
 
 public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
@@ -34,93 +34,93 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
 
     public async Task<List<StoryMarketplaceItemDto>> GetMarketplaceStoriesAsync(Guid userId, string locale, SearchStoriesRequest request)
     {
-        // Normalize locale to lowercase (e.g., "ro-RO" -> "ro-ro") to match database LanguageCode format
         var normalizedLocale = (locale ?? "ro-ro").ToLowerInvariant();
         
-        var query = _context.StoryMarketplaceInfos
-            .Include(smi => smi.Story)
-                .ThenInclude(s => s.Translations)
-            .Where(smi => smi.Story.IsActive);
+        var query = _context.StoryDefinitions
+            .Include(s => s.Translations)
+            .Where(s => s.IsActive);
 
         // Filtre implicite: doar Published + StoryType = Indie (dacă nu s-au cerut categorii specifice)
-        query = query.Where(smi => smi.Story.Status == StoryStatus.Published);
+        query = query.Where(s => s.Status == StoryStatus.Published);
         if (!(request.Categories?.Any() ?? false))
         {
-            query = query.Where(smi => smi.Story.StoryType == StoryType.Indie);
-        }
-        
-            // Apply filters
-        if (!string.IsNullOrEmpty(request.SearchTerm))
-        {
-            query = query.Where(smi => 
-                smi.Story.Title.Contains(request.SearchTerm) ||
-                smi.Story.Translations.Any(t => t.LanguageCode == normalizedLocale && t.Title.Contains(request.SearchTerm)));
+            query = query.Where(s => s.StoryType == StoryType.Indie);
         }
 
-        if (request.Regions.Any())
-        {
-            query = query.Where(smi => request.Regions.Contains(smi.Region));
-        }
 
-        if (request.AgeRatings.Any())
-        {
-            query = query.Where(smi => request.AgeRatings.Contains(smi.AgeRating));
-        }
 
-        if (request.Characters.Any())
-        {
-            query = query.Where(smi => smi.Characters.Any(c => request.Characters.Contains(c)));
-        }
+        // Apply filters
+        //if (!string.IsNullOrEmpty(request.SearchTerm))
+        //{
+        //    query = query.Where(smi => 
+        //        smi.Story.Title.Contains(request.SearchTerm) ||
+        //        smi.Story.Translations.Any(t => t.LanguageCode == normalizedLocale && t.Title.Contains(request.SearchTerm)));
+        //}
 
-        if (request.Categories.Any())
-        {
-            query = query.Where(smi => smi.Story.StoryTopic != null && request.Categories.Contains(smi.Story.StoryTopic));
-        }
+        //if (request.Regions.Any())
+        //{
+        //    query = query.Where(smi => request.Regions.Contains(smi.Region));
+        //}
 
-        if (request.Difficulties.Any())
-        {
-            query = query.Where(smi => request.Difficulties.Contains(smi.Difficulty));
-        }
+        //if (request.AgeRatings.Any())
+        //{
+        //    query = query.Where(smi => request.AgeRatings.Contains(smi.AgeRating));
+        //}
 
-        // Apply completion status filter
-        switch (request.CompletionStatus)
-        {
-            case "completed":
-                var completedStoryIds = await _context.UserStoryReadProgress
-                    .Where(usp => usp.UserId == userId)
-                    .GroupBy(usp => usp.StoryId)
-                    .Where(g => g.Count() > 0) // Has progress
-                    .Select(g => g.Key)
-                    .ToListAsync();
-                query = query.Where(smi => completedStoryIds.Contains(smi.StoryId));
-                break;
-            case "in-progress":
-                var inProgressStoryIds = await _context.UserStoryReadProgress
-                    .Where(usp => usp.UserId == userId)
-                    .Select(usp => usp.StoryId)
-                    .Distinct()
-                    .ToListAsync();
-                query = query.Where(smi => inProgressStoryIds.Contains(smi.StoryId));
-                break;
-            case "not-started":
-                var startedStoryIds = await _context.UserStoryReadProgress
-                    .Where(usp => usp.UserId == userId)
-                    .Select(usp => usp.StoryId)
-                    .Distinct()
-                    .ToListAsync();
-                query = query.Where(smi => !startedStoryIds.Contains(smi.StoryId));
-                break;
-        }
+        //if (request.Characters.Any())
+        //{
+        //    query = query.Where(smi => smi.Characters.Any(c => request.Characters.Contains(c)));
+        //}
+
+        //if (request.Categories.Any())
+        //{
+        //    query = query.Where(smi => smi.Story.StoryTopic != null && request.Categories.Contains(smi.Story.StoryTopic));
+        //}
+
+        //if (request.Difficulties.Any())
+        //{
+        //    query = query.Where(smi => request.Difficulties.Contains(smi.Difficulty));
+        //}
+
+        //// Apply completion status filter
+        //switch (request.CompletionStatus)
+        //{
+        //    case "completed":
+        //        var completedStoryIds = await _context.UserStoryReadProgress
+        //            .Where(usp => usp.UserId == userId)
+        //            .GroupBy(usp => usp.StoryId)
+        //            .Where(g => g.Count() > 0) // Has progress
+        //            .Select(g => g.Key)
+        //            .ToListAsync();
+        //        query = query.Where(smi => completedStoryIds.Contains(smi.StoryId));
+        //        break;
+        //    case "in-progress":
+        //        var inProgressStoryIds = await _context.UserStoryReadProgress
+        //            .Where(usp => usp.UserId == userId)
+        //            .Select(usp => usp.StoryId)
+        //            .Distinct()
+        //            .ToListAsync();
+        //        query = query.Where(smi => inProgressStoryIds.Contains(smi.StoryId));
+        //        break;
+        //    case "not-started":
+        //        var startedStoryIds = await _context.UserStoryReadProgress
+        //            .Where(usp => usp.UserId == userId)
+        //            .Select(usp => usp.StoryId)
+        //            .Distinct()
+        //            .ToListAsync();
+        //        query = query.Where(smi => !startedStoryIds.Contains(smi.StoryId));
+        //        break;
+        //}
 
         // Apply sorting
-        query = request.SortBy switch
-        {
-            "title" => request.SortOrder == "desc" ? query.OrderByDescending(smi => smi.Story.Title) : query.OrderBy(smi => smi.Story.Title),
-            "date" => request.SortOrder == "desc" ? query.OrderByDescending(smi => smi.CreatedAt) : query.OrderBy(smi => smi.CreatedAt),
-            "difficulty" => request.SortOrder == "desc" ? query.OrderByDescending(smi => smi.Difficulty) : query.OrderBy(smi => smi.Difficulty),
-            "price" => request.SortOrder == "desc" ? query.OrderByDescending(smi => smi.PriceInCredits) : query.OrderBy(smi => smi.PriceInCredits),
-            _ => request.SortOrder == "desc" ? query.OrderByDescending(smi => smi.Story.SortOrder) : query.OrderBy(smi => smi.Story.SortOrder)
-        };
+        //query = request.SortBy switch
+        //{
+        //    "title" => request.SortOrder == "desc" ? query.OrderByDescending(smi => smi.Story.Title) : query.OrderBy(smi => smi.Story.Title),
+        //    "date" => request.SortOrder == "desc" ? query.OrderByDescending(smi => smi.CreatedAt) : query.OrderBy(smi => smi.CreatedAt),
+        //    "difficulty" => request.SortOrder == "desc" ? query.OrderByDescending(smi => smi.Difficulty) : query.OrderBy(smi => smi.Difficulty),
+        //    "price" => request.SortOrder == "desc" ? query.OrderByDescending(smi => smi.PriceInCredits) : query.OrderBy(smi => smi.PriceInCredits),
+        //    _ => request.SortOrder == "desc" ? query.OrderByDescending(smi => smi.Story.SortOrder) : query.OrderBy(smi => smi.Story.SortOrder)
+        //};
 
         // Apply pagination
         var stories = await query
@@ -128,22 +128,8 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             .Take(request.PageSize)
             .ToListAsync();
 
-        // Ensure translations are loaded for all stories
-        foreach (var smi in stories)
-        {
-            if (smi.Story != null)
-            {
-                var entry = _context.Entry(smi.Story);
-                var translationsEntry = entry.Collection(s => s.Translations);
-                if (!translationsEntry.IsLoaded)
-                {
-                    await translationsEntry.LoadAsync();
-                }
-            }
-        }
-
-        // Use normalizedLocale already defined at line 38
-        return stories.Select(smi => MapToMarketplaceItemDto(smi, normalizedLocale)).ToList();
+        // Map from StoryDefinition directly
+        return await MapToMarketplaceListAsync(stories, normalizedLocale);
     }
 
     public async Task<List<StoryMarketplaceItemDto>> GetFeaturedStoriesAsync(Guid userId, string locale)
@@ -151,60 +137,47 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         // Normalize locale to lowercase (e.g., "ro-RO" -> "ro-ro") to match database LanguageCode format
         var normalizedLocale = (locale ?? "ro-ro").ToLowerInvariant();
         
-        var featuredStories = await _context.StoryMarketplaceInfos
-            .Include(smi => smi.Story)
-                .ThenInclude(s => s.Translations)
-            .Where(smi => smi.IsFeatured && smi.Story.IsActive)
-            .OrderBy(smi => smi.Story.SortOrder)
+        var featuredStories = await _context.StoryDefinitions
+            .Include(s => s.Translations)
+            .Where(s => s.IsActive && s.Status == StoryStatus.Published)
+            .OrderBy(s => s.SortOrder)
             .Take(5)
             .ToListAsync();
 
-        // Ensure translations are loaded for all featured stories
-        foreach (var smi in featuredStories)
-        {
-            if (smi.Story != null)
-            {
-                var entry = _context.Entry(smi.Story);
-                var translationsEntry = entry.Collection(s => s.Translations);
-                if (!translationsEntry.IsLoaded)
-                {
-                    await translationsEntry.LoadAsync();
-                }
-            }
-        }
-
-        return featuredStories.Select(smi => MapToMarketplaceItemDto(smi, normalizedLocale)).ToList();
+        return await MapToMarketplaceListAsync(featuredStories, normalizedLocale);
     }
 
     public async Task<List<string>> GetAvailableRegionsAsync()
     {
-        return await _context.StoryMarketplaceInfos
-            .Where(smi => smi.Story.IsActive)
-            .Select(smi => smi.Region)
+        var ids = await _context.StoryDefinitions
+            .Where(s => s.IsActive && s.Status == StoryStatus.Published)
+            .Select(s => s.StoryId)
+            .ToListAsync();
+        return ids.Select(ExtractRegionFromStoryId)
             .Distinct()
             .OrderBy(r => r)
-            .ToListAsync();
+            .ToList();
     }
 
     public async Task<List<string>> GetAvailableAgeRatingsAsync()
     {
-        return await _context.StoryMarketplaceInfos
-            .Where(smi => smi.Story.IsActive)
-            .Select(smi => smi.AgeRating)
+        var ids = await _context.StoryDefinitions
+            .Where(s => s.IsActive && s.Status == StoryStatus.Published)
+            .Select(s => s.StoryId)
+            .ToListAsync();
+        return ids.Select(DetermineAgeRating)
             .Distinct()
             .OrderBy(r => r)
-            .ToListAsync();
+            .ToList();
     }
 
     public async Task<List<string>> GetAvailableCharactersAsync()
     {
-        var allCharacters = await _context.StoryMarketplaceInfos
-            .Where(smi => smi.Story.IsActive)
-            .Select(smi => smi.Characters)
+        var ids = await _context.StoryDefinitions
+            .Where(s => s.IsActive && s.Status == StoryStatus.Published)
+            .Select(s => s.StoryId)
             .ToListAsync();
-
-        return allCharacters
-            .SelectMany(c => c)
+        return ids.SelectMany(ExtractCharactersFromStoryId)
             .Distinct()
             .OrderBy(c => c)
             .ToList();
@@ -289,118 +262,25 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             .Select(g => new StoryProgressInfo(g.Key, g.Count()))
             .ToListAsync();
 
-        // Ensure translations are loaded for all purchased stories
-        foreach (var sp in purchasedStories)
-        {
-            if (sp.Story != null)
-            {
-                var entry = _context.Entry(sp.Story);
-                var translationsEntry = entry.Collection(s => s.Translations);
-                if (!translationsEntry.IsLoaded)
-                {
-                    await translationsEntry.LoadAsync();
-                }
-            }
-        }
-
-        var result = new List<StoryMarketplaceItemDto>();
-        foreach (var sp in purchasedStories)
-        {
-            var marketplaceInfo = await _context.StoryMarketplaceInfos
-                .Include(smi => smi.Story)
-                    .ThenInclude(s => s.Translations)
-                .FirstOrDefaultAsync(smi => smi.StoryId == sp.StoryId);
-            
-            if (marketplaceInfo != null)
-            {
-                // Normalize locale to lowercase for mapping
-                var normalizedLocale = (locale ?? "ro-ro").ToLowerInvariant();
-                result.Add(MapToMarketplaceItemDto(marketplaceInfo, normalizedLocale));
-            }
-        }
-        return result;
+        var ids = purchasedStories.Select(sp => sp.StoryId).ToList();
+        var defs = await _context.StoryDefinitions
+            .Include(s => s.Translations)
+            .Where(s => ids.Contains(s.StoryId))
+            .ToListAsync();
+        var normalizedLocale = (locale ?? "ro-ro").ToLowerInvariant();
+        return await MapToMarketplaceListAsync(defs, normalizedLocale);
     }
 
-    public async Task SeedMarketplaceDataAsync()
-    {
-        // This will be implemented to seed marketplace data for existing stories
-        // For now, we'll create a basic implementation
-        var existingStories = await _context.StoryDefinitions
-            .Where(s => s.IsActive)
-            .ToListAsync();
-
-        var existingMarketplaceInfos = await _context.StoryMarketplaceInfos
-            .ToListAsync();
-
-        var existingStoryIds = existingMarketplaceInfos
-            .Select(smi => smi.StoryId)
-            .ToHashSet();
-
-        var newMarketplaceInfos = new List<StoryMarketplaceInfo>();
-        var updatedMarketplaceInfos = new List<StoryMarketplaceInfo>();
-
-        foreach (var story in existingStories)
-        {
-            var region = ExtractRegionFromStoryId(story.StoryId);
-            var ageRating = DetermineAgeRating(story.StoryId);
-            var difficulty = DetermineDifficulty(story.StoryId);
-            var characters = ExtractCharactersFromStoryId(story.StoryId);
-            var price = await GetPriceFromJsonOrDefaultAsync(story.StoryId);
-
-            if (!existingStoryIds.Contains(story.StoryId))
-            {
-                // Create new marketplace info
-                newMarketplaceInfos.Add(new StoryMarketplaceInfo
-                {
-                    Id = Guid.NewGuid(),
-                    StoryId = story.StoryId,
-                    PriceInCredits = price,
-                    Region = region,
-                    AgeRating = ageRating,
-                    Difficulty = difficulty,
-                    Characters = characters,
-                    Tags = story.StoryTopic != null ? new List<string> { story.StoryTopic } : new List<string>(),
-                    IsFeatured = story.StoryId.Contains("intro") || story.StoryId.Contains("loi"),
-                    IsNew = false,
-                    EstimatedReadingTime = CalculateReadingTime(story.StoryId),
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                });
-            }
-            else
-            {
-                // Update existing marketplace info, especially for learn- stories that should be free
-                var existingInfo = existingMarketplaceInfos.FirstOrDefault(smi => smi.StoryId == story.StoryId);
-                if (existingInfo != null && existingInfo.PriceInCredits != price)
-                {
-                    existingInfo.PriceInCredits = price;
-                    existingInfo.UpdatedAt = DateTime.UtcNow;
-                    updatedMarketplaceInfos.Add(existingInfo);
-                }
-            }
-        }
-
-        if (newMarketplaceInfos.Any())
-        {
-            _context.StoryMarketplaceInfos.AddRange(newMarketplaceInfos);
-        }
-
-        if (updatedMarketplaceInfos.Any() || newMarketplaceInfos.Any())
-        {
-            await _context.SaveChangesAsync();
-        }
-    }
+    // Removed SeedMarketplaceDataAsync (no longer needed without StoryMarketplaceInfos)
 
     public async Task<StoryDetailsDto?> GetStoryDetailsAsync(string storyId, Guid userId, string locale)
     {
-        var marketplaceInfo = await _context.StoryMarketplaceInfos
-            .Include(smi => smi.Story)
-                .ThenInclude(s => s.Translations)
-            .Include(smi => smi.Story)
-                .ThenInclude(s => s.Tiles)
-            .FirstOrDefaultAsync(smi => smi.StoryId == storyId && smi.Story.IsActive);
+        var def = await _context.StoryDefinitions
+            .Include(s => s.Translations)
+            .Include(s => s.Tiles)
+            .FirstOrDefaultAsync(s => s.StoryId == storyId && s.IsActive && s.Status == StoryStatus.Published);
 
-        if (marketplaceInfo == null)
+        if (def == null)
             return null;
 
         // Check if user has purchased this story
@@ -409,7 +289,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
 
         // Check if user owns this story (UserOwnedStories)
         var ownedRow = await _context.UserOwnedStories
-            .AnyAsync(uos => uos.UserId == userId && uos.StoryDefinitionId == marketplaceInfo.Story.Id);
+            .AnyAsync(uos => uos.UserId == userId && uos.StoryDefinitionId == def.Id);
         var isOwned = isPurchased || ownedRow;
 
         // Get user's story progress
@@ -417,71 +297,16 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             .Where(usp => usp.UserId == userId && usp.StoryId == storyId)
             .CountAsync();
 
-        var totalTiles = marketplaceInfo.Story.Tiles.Count;
+        var totalTiles = def.Tiles.Count;
         var progressPercentage = totalTiles > 0 ? (int)((double)storyProgress / totalTiles * 100) : 0;
         var isCompleted = progressPercentage >= 100;
 
         // Normalize locale to lowercase for mapping
         var normalizedLocale = (locale ?? "ro-ro").ToLowerInvariant();
-        return MapToStoryDetailsDto(marketplaceInfo, normalizedLocale, isPurchased, isOwned, isCompleted, progressPercentage);
+        return await MapToStoryDetailsFromDefinitionAsync(def, normalizedLocale, isPurchased, isOwned, isCompleted, progressPercentage);
     }
 
-    private StoryDetailsDto MapToStoryDetailsDto(StoryMarketplaceInfo smi, string locale, bool isPurchased, bool isOwned, bool isCompleted, int progressPercentage)
-    {
-        // Locale should already be normalized when passed here, but ensure it's lowercase for safety
-        var normalizedLocale = (locale ?? "ro-ro").ToLowerInvariant();
-        var translation = smi.Story.Translations?.FirstOrDefault(t => t.LanguageCode == normalizedLocale);
-        var title = translation?.Title ?? smi.Story.Title;
-        string? authorName = null;
-        if (smi.Story.CreatedBy.HasValue)
-        {
-            authorName = _context.Set<AlchimaliaUser>()
-                .Where(u => u.Id == smi.Story.CreatedBy.Value)
-                .Select(u => u.Name)
-                .FirstOrDefault();
-        }
-
-        // Get summary from JSON file for the current locale, or use StoryDefinition.Summary, or empty string
-        var summary = GetSummaryFromJson(smi.Story.StoryId, normalizedLocale) 
-            ?? smi.Story.Summary 
-            ?? string.Empty;
-
-        return new StoryDetailsDto
-        {
-            Id = smi.StoryId,
-            Title = title,
-            CoverImageUrl = smi.Story.CoverImageUrl,
-            CreatedBy = smi.Story.CreatedBy,
-            CreatedByName = authorName,
-            Summary = summary,
-            PriceInCredits = smi.PriceInCredits,
-            Region = smi.Region,
-            AgeRating = smi.AgeRating,
-            Difficulty = smi.Difficulty,
-            Characters = smi.Characters,
-            Tags = smi.Tags,
-            IsFeatured = smi.IsFeatured,
-            IsNew = smi.IsNew,
-            EstimatedReadingTime = smi.EstimatedReadingTime,
-            IsPurchased = isPurchased,
-            IsOwned = isOwned,
-            IsCompleted = isCompleted,
-            ProgressPercentage = progressPercentage,
-            CreatedAt = smi.CreatedAt,
-            UnlockedStoryHeroes = new List<string>(), // TODO: Implement if needed
-            StoryTopic = smi.Story.StoryTopic,
-            StoryType = smi.Story.StoryType.ToString(),
-            Status = smi.Story.Status.ToString(),
-            SortOrder = smi.Story.SortOrder,
-            IsActive = smi.Story.IsActive,
-            UpdatedAt = smi.Story.UpdatedAt,
-            UpdatedBy = smi.Story.UpdatedBy,
-            AvailableLanguages = smi.Story.Translations?
-                .Select(t => t.LanguageCode)
-                .OrderBy(l => l)
-                .ToList() ?? new List<string>()
-        };
-    }
+    // Removed old MapToStoryDetailsDto using StoryMarketplaceInfo
 
     private string? GetSummaryFromJson(string storyId, string locale)
     {
@@ -521,51 +346,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         public string? Summary { get; set; }
     }
 
-    private StoryMarketplaceItemDto MapToMarketplaceItemDto(StoryMarketplaceInfo smi, string locale)
-    {
-        var translation = smi.Story.Translations?.FirstOrDefault(t => t.LanguageCode == locale);
-        var title = translation?.Title ?? smi.Story.Title;
-        
-        // Extract available languages from translations
-        // Use null-safe navigation and fallback to empty list if translations are not loaded
-        var availableLanguages = smi.Story.Translations?
-            .Select(t => t.LanguageCode)
-            .OrderBy(l => l)
-            .ToList() ?? new List<string>();
-
-        // Get author name from database
-        string? authorName = null;
-        if (smi.Story.CreatedBy.HasValue)
-        {
-            authorName = _context.Set<AlchimaliaUser>()
-                .Where(u => u.Id == smi.Story.CreatedBy.Value)
-                .Select(u => u.Name)
-                .FirstOrDefault();
-        }
-
-        // Get summary from JSON file for the current locale, or use StoryDefinition.Summary, or empty string
-        var summary = GetSummaryFromJson(smi.Story.StoryId, locale) 
-            ?? smi.Story.Summary 
-            ?? string.Empty;
-
-        return new StoryMarketplaceItemDto
-        {
-            Id = smi.StoryId,
-            Title = title,
-            CoverImageUrl = smi.Story.CoverImageUrl,
-            CreatedBy = smi.Story.CreatedBy,
-            CreatedByName = authorName,
-            Summary = summary,
-            PriceInCredits = smi.PriceInCredits,
-            AgeRating = smi.AgeRating,
-            Characters = smi.Characters,
-            CreatedAt = smi.CreatedAt,
-            StoryTopic = smi.Story.StoryTopic,
-            StoryType = smi.Story.StoryType.ToString(),
-            Status = smi.Story.Status.ToString(),
-            AvailableLanguages = availableLanguages
-        };
-    }
+    // Removed old MapToMarketplaceItemDto using StoryMarketplaceInfo
 
     private string ExtractRegionFromStoryId(string storyId)
     {
@@ -679,6 +460,116 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         if (storyId.Contains("s2"))
             return 12; // Season 2 stories
         return 8; // Default reading time
+    }
+
+    // New helpers for mapping from StoryDefinition directly
+    private async Task<List<StoryMarketplaceItemDto>> MapToMarketplaceListAsync(List<StoryDefinition> defs, string locale)
+    {
+        var result = new List<StoryMarketplaceItemDto>();
+        foreach (var def in defs)
+        {
+            result.Add(await MapToMarketplaceItemFromDefinitionAsync(def, locale));
+        }
+        return result;
+    }
+
+    private async Task<StoryMarketplaceItemDto> MapToMarketplaceItemFromDefinitionAsync(StoryDefinition def, string locale)
+    {
+        var translation = def.Translations?.FirstOrDefault(t => t.LanguageCode == locale);
+        var title = translation?.Title ?? def.Title;
+
+        // Extract available languages from translations
+        var availableLanguages = def.Translations?
+            .Select(t => t.LanguageCode)
+            .OrderBy(l => l)
+            .ToList() ?? new List<string>();
+
+        // Get author name from database
+        string? authorName = null;
+        if (def.CreatedBy.HasValue)
+        {
+            authorName = await _context.Set<AlchimaliaUser>()
+                .Where(u => u.Id == def.CreatedBy.Value)
+                .Select(u => u.Name)
+                .FirstOrDefaultAsync();
+        }
+
+        // Get summary from JSON file for the current locale, or use StoryDefinition.Summary, or empty string
+        var summary = GetSummaryFromJson(def.StoryId, locale) 
+            ?? def.Summary 
+            ?? string.Empty;
+
+        return new StoryMarketplaceItemDto
+        {
+            Id = def.StoryId,
+            Title = title,
+            CoverImageUrl = def.CoverImageUrl,
+            CreatedBy = def.CreatedBy,
+            CreatedByName = authorName,
+            Summary = summary,
+            PriceInCredits = await GetPriceFromJsonOrDefaultAsync(def.StoryId),
+            AgeRating = DetermineAgeRating(def.StoryId),
+            Characters = ExtractCharactersFromStoryId(def.StoryId),
+            CreatedAt = def.CreatedAt,
+            StoryTopic = def.StoryTopic,
+            StoryType = def.StoryType.ToString(),
+            Status = def.Status.ToString(),
+            AvailableLanguages = availableLanguages
+        };
+    }
+
+    private async Task<StoryDetailsDto?> MapToStoryDetailsFromDefinitionAsync(StoryDefinition def, string locale, bool isPurchased, bool isOwned, bool isCompleted, int progressPercentage)
+    {
+        var translation = def.Translations?.FirstOrDefault(t => t.LanguageCode == locale);
+        var title = translation?.Title ?? def.Title;
+        string? authorName = null;
+        if (def.CreatedBy.HasValue)
+        {
+            authorName = await _context.Set<AlchimaliaUser>()
+                .Where(u => u.Id == def.CreatedBy.Value)
+                .Select(u => u.Name)
+                .FirstOrDefaultAsync();
+        }
+
+        var summary = GetSummaryFromJson(def.StoryId, locale) ?? def.Summary ?? string.Empty;
+
+        return new StoryDetailsDto
+        {
+            Id = def.StoryId,
+            Title = title,
+            CoverImageUrl = def.CoverImageUrl,
+            CreatedBy = def.CreatedBy,
+            CreatedByName = authorName,
+            Summary = summary,
+            PriceInCredits = await GetPriceFromJsonOrDefaultAsync(def.StoryId),
+            Region = ExtractRegionFromStoryId(def.StoryId),
+            AgeRating = DetermineAgeRating(def.StoryId),
+            Difficulty = DetermineDifficulty(def.StoryId),
+            Characters = ExtractCharactersFromStoryId(def.StoryId),
+            Tags = new List<string>(),
+            IsFeatured = false,
+            IsNew = false,
+            EstimatedReadingTime = CalculateReadingTime(def.StoryId),
+            IsPurchased = isPurchased,
+            IsOwned = isOwned,
+            IsCompleted = isCompleted,
+            ProgressPercentage = progressPercentage,
+            CreatedAt = def.CreatedAt,
+            UnlockedStoryHeroes = new List<string>(),
+            StoryTopic = def.StoryTopic,
+            StoryType = def.StoryType.ToString(),
+            Status = def.Status.ToString(),
+            SortOrder = def.SortOrder,
+            IsActive = def.IsActive,
+            UpdatedAt = def.UpdatedAt,
+            UpdatedBy = def.UpdatedBy,
+            AvailableLanguages = def.Translations?.Select(t => t.LanguageCode).OrderBy(l => l).ToList() ?? new List<string>()
+        };
+    }
+
+    public async Task<int> GetComputedPriceAsync(string storyId)
+    {
+        return await GetPriceFromJsonOrDefaultAsync(storyId);
     }
 
 }

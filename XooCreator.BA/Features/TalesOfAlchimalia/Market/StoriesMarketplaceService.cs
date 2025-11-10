@@ -66,16 +66,16 @@ public class StoriesMarketplaceService : IStoriesMarketplaceService
     {
         try
         {
-            // Get story marketplace info to determine price
-            var marketplaceInfo = await _context.StoryMarketplaceInfos
-                .FirstOrDefaultAsync(smi => smi.StoryId == request.StoryId);
+            // Determine price based on story seed or heuristics
+            var def = await _context.StoryDefinitions
+                .FirstOrDefaultAsync(s => s.StoryId == request.StoryId && s.IsActive);
 
-            if (marketplaceInfo == null)
+            if (def == null)
             {
                 return new PurchaseStoryResponse
                 {
                     Success = false,
-                    ErrorMessage = "Story not found in marketplace"
+                    ErrorMessage = "Story not found"
                 };
             }
 
@@ -91,7 +91,9 @@ public class StoriesMarketplaceService : IStoriesMarketplaceService
             }
 
             // Attempt purchase
-            var purchaseSuccess = await _repository.PurchaseStoryAsync(userId, request.StoryId, marketplaceInfo.PriceInCredits);
+            var price = await _repository.GetComputedPriceAsync(request.StoryId);
+
+            var purchaseSuccess = await _repository.PurchaseStoryAsync(userId, request.StoryId, price);
 
             if (!purchaseSuccess)
             {
@@ -102,7 +104,7 @@ public class StoriesMarketplaceService : IStoriesMarketplaceService
                 return new PurchaseStoryResponse
                 {
                     Success = false,
-                    ErrorMessage = currentBalance < marketplaceInfo.PriceInCredits 
+                    ErrorMessage = currentBalance < price 
                         ? "Insufficient credits" 
                         : "Purchase failed",
                     RemainingCredits = currentBalance
@@ -117,7 +119,7 @@ public class StoriesMarketplaceService : IStoriesMarketplaceService
             {
                 Success = true,
                 RemainingCredits = remainingCredits,
-                CreditsSpent = marketplaceInfo.PriceInCredits
+                CreditsSpent = price
             };
         }
         catch (Exception ex)
@@ -169,7 +171,8 @@ public class StoriesMarketplaceService : IStoriesMarketplaceService
     {
         try
         {
-            await _repository.SeedMarketplaceDataAsync();
+            // No-op: marketplace seeding removed
+            await Task.CompletedTask;
         }
         catch (Exception ex)
         {
