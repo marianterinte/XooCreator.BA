@@ -71,12 +71,14 @@ public class StoryCraftsRepository : IStoryCraftsRepository
 
     public Task<List<StoryCraft>> ListByOwnerAsync(Guid ownerUserId, CancellationToken ct = default)
         => _context.StoryCrafts
+            .Include(s => s.Translations)
             .Where(x => x.OwnerUserId == ownerUserId)
             .OrderByDescending(x => x.UpdatedAt)
             .ToListAsync(ct);
 
     public Task<List<StoryCraft>> ListAllAsync(CancellationToken ct = default)
         => _context.StoryCrafts
+            .Include(s=>s.Translations)
             .OrderByDescending(x => x.UpdatedAt)
             .ToListAsync(ct);
 

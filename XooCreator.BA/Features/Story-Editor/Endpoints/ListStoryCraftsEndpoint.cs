@@ -48,9 +48,10 @@ public class ListStoryCraftsEndpoint
         var items = new List<StoryCraftListItemDto>(list.Count);
         foreach (var c in list)
         {
-            // Get title from first available translation, fallback to StoryId
-            var firstTranslation = c.Translations.FirstOrDefault();
-            string title = firstTranslation?.Title ?? c.StoryId;
+            var firstTranslation = c.Translations
+                .FirstOrDefault(t => !string.IsNullOrWhiteSpace(t.Title))
+                ?? c.Translations.FirstOrDefault();
+            string title = string.IsNullOrWhiteSpace(firstTranslation?.Title) ? c.StoryId : firstTranslation!.Title!;
             string? cover = c.CoverImageUrl;
             
             // Get available languages
