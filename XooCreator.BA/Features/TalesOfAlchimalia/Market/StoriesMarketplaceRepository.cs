@@ -442,12 +442,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
                 }
             }
         }
-        
-        // Default pricing logic if not specified in JSON
-        // Based on TODO: "Stories de pe lunaria 1 da 1 token, cealalta 2 tokeni"
-        if (storyId.Contains("lunaria", StringComparison.OrdinalIgnoreCase))
-            return 1;
-        return 2;
+        return 0;
     }
 
     private int CalculateReadingTime(string storyId)
