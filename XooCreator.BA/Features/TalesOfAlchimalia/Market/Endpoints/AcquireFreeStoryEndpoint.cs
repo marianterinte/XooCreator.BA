@@ -92,9 +92,8 @@ public class AcquireFreeStoryEndpoint
                 catch { }
             }
         }
-        // Default heuristic
-        if (storyId.Contains("lunaria", StringComparison.OrdinalIgnoreCase)) return 1;
-        return 2;
+        
+        return 0;
     }
 
     private sealed class StorySeedDataProbe
