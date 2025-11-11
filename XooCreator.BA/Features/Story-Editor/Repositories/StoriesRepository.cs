@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using XooCreator.BA.Data;
+using XooCreator.BA.Data.SeedData;
 using XooCreator.BA.Data.SeedData.DTOs;
 using XooCreator.BA.Features.Stories.DTOs;
 using XooCreator.BA.Features.Stories.Mappers;
@@ -360,15 +361,18 @@ public class StoriesRepository : IStoriesRepository
         }
     }
 
-    private static async Task<List<StoryDefinition>> LoadStoriesFromJsonAsync(string baseLocale = "ro-ro")
+    private async Task<List<StoryDefinition>> LoadStoriesFromJsonAsync(string baseLocale = "ro-ro")
     {
         var baseDir = AppDomain.CurrentDomain.BaseDirectory;
         var localeLc = (baseLocale ?? "ro-ro").ToLowerInvariant();
         var candidates = new[]
         {
-            Path.Combine(baseDir, "Data", "SeedData", "Stories", "i18n", localeLc)
+            Path.Combine(baseDir, "Data", "SeedData", "Stories", "seed@alchimalia.com", "i18n", localeLc)
         };
         var legacyPath = Path.Combine(baseDir, "Data", "SeedData", "stories-seed.json");
+
+        // Get seed user ID for ownership
+        var seedUserId = await SeedUserHelper.GetOrCreateSeedUserIdAsync(_context);
 
         var storyMap = new Dictionary<string, StoryDefinition>(StringComparer.OrdinalIgnoreCase);
 
@@ -395,7 +399,7 @@ public class StoriesRepository : IStoriesRepository
                         throw new InvalidOperationException($"Invalid story seed data in '{file}'.");
                     }
 
-                    var def = StoryDefinitionMapper.MapFromSeedData(seed);
+                    var def = StoryDefinitionMapper.MapFromSeedData(seed, seedUserId);
                     storyMap[def.StoryId] = def;
 
                 }
@@ -428,7 +432,7 @@ public class StoriesRepository : IStoriesRepository
                 if (string.IsNullOrWhiteSpace(s.StoryId)) continue;
                 if (!storyMap.ContainsKey(s.StoryId))
                 {
-                    storyMap[s.StoryId] = StoryDefinitionMapper.MapFromSeedData(s);
+                    storyMap[s.StoryId] = StoryDefinitionMapper.MapFromSeedData(s, seedUserId);
                 }
             }
         }
@@ -445,11 +449,14 @@ public class StoriesRepository : IStoriesRepository
             .ToList();
     }
 
-    private static async Task<List<StoryDefinition>> LoadIndependentStoriesFromJsonAsync(string baseLocale = "ro-ro")
+    private async Task<List<StoryDefinition>> LoadIndependentStoriesFromJsonAsync(string baseLocale = "ro-ro")
     {
         var baseDir = AppDomain.CurrentDomain.BaseDirectory;
         var localeLc = (baseLocale ?? "ro-ro").ToLowerInvariant();
-        var dir = Path.Combine(baseDir, "Data", "SeedData", "Stories", "independent", "i18n", localeLc);
+        var dir = Path.Combine(baseDir, "Data", "SeedData", "Stories", "seed@alchimalia.com", "independent", "i18n", localeLc);
+
+        // Get seed user ID for ownership
+        var seedUserId = await SeedUserHelper.GetOrCreateSeedUserIdAsync(_context);
 
         var storyMap = new Dictionary<string, StoryDefinition>(StringComparer.OrdinalIgnoreCase);
         if (Directory.Exists(dir))
@@ -471,7 +478,7 @@ public class StoriesRepository : IStoriesRepository
                 {
                     throw new InvalidOperationException($"Invalid independent story seed data in '{file}'.");
                 }
-                var def = StoryDefinitionMapper.MapFromSeedDataForIndie(seed);
+                var def = StoryDefinitionMapper.MapFromSeedDataForIndie(seed, seedUserId);
                 storyMap[def.StoryId] = def;
             }
         }
@@ -486,7 +493,7 @@ public class StoriesRepository : IStoriesRepository
     {
         var results = new List<IndependentStoryTranslationSeed>();
         var baseDir = AppDomain.CurrentDomain.BaseDirectory;
-        var dir = Path.Combine(baseDir, "Data", "SeedData", "Stories", "independent", "i18n", locale);
+        var dir = Path.Combine(baseDir, "Data", "SeedData", "Stories", "seed@alchimalia.com", "independent", "i18n", locale);
 
         var jsonOptions = new JsonSerializerOptions
         {
@@ -539,7 +546,7 @@ public class StoriesRepository : IStoriesRepository
         var results = new List<StoryTranslationSeed>();
         var candidates = new[]
         {
-            Path.Combine("Data", "SeedData", "Stories", "i18n", locale)
+            Path.Combine("Data", "SeedData", "Stories", "seed@alchimalia.com", "i18n", locale)
         };
 
         var jsonOptions = new JsonSerializerOptions

@@ -24,10 +24,11 @@ public static class StoryDefinitionMapper
 
     /// <summary>
     /// Maps seed data to StoryDefinition for Indie stories.
-    /// Sets CreatedBy and UpdatedBy to Marian Teacher (Marian T) GUID.
+    /// Sets CreatedBy and UpdatedBy to seed user ID (seed@alchimalia.com) if provided, otherwise falls back to Marian Teacher GUID.
     /// </summary>
-    public static StoryDefinition MapFromSeedDataForIndie(StorySeedData seedData)
+    public static StoryDefinition MapFromSeedDataForIndie(StorySeedData seedData, Guid? seedUserId = null)
     {
+        var ownerId = seedUserId ?? MarianTeacherUserId; // Fallback to old GUID for backward compatibility
         var story = new StoryDefinition
         {
             StoryId = seedData.StoryId,
@@ -39,8 +40,8 @@ public static class StoryDefinitionMapper
             StoryType = StoryType.Indie,
             Status = StoryStatus.Published,
             IsActive = true,
-            CreatedBy = MarianTeacherUserId,
-            UpdatedBy = MarianTeacherUserId
+            CreatedBy = ownerId,
+            UpdatedBy = ownerId
         };
 
         if (seedData.Tiles != null)
@@ -95,9 +96,9 @@ public static class StoryDefinitionMapper
 
     /// <summary>
     /// Maps seed data to StoryDefinition for AlchimaliaEpic stories (original logic).
-    /// Preserves original behavior without modifications for Indie stories.
+    /// Sets CreatedBy and UpdatedBy to seed user ID (seed@alchimalia.com) if provided, otherwise null.
     /// </summary>
-    public static StoryDefinition MapFromSeedData(StorySeedData seedData)
+    public static StoryDefinition MapFromSeedData(StorySeedData seedData, Guid? seedUserId = null)
     {
         var storyType = seedData.StoryType.HasValue 
             ? (StoryType)seedData.StoryType.Value 
@@ -114,8 +115,8 @@ public static class StoryDefinitionMapper
             StoryType = storyType,
             Status = StoryStatus.Published,
             IsActive = true,
-            CreatedBy = null,
-            UpdatedBy = null
+            CreatedBy = seedUserId, // Use seed user if provided, otherwise null (backward compatible)
+            UpdatedBy = seedUserId
         };
 
         if (seedData.Tiles != null)
@@ -258,12 +259,12 @@ public static class StoryDefinitionMapper
             var baseDir = AppDomain.CurrentDomain.BaseDirectory;
             var candidates = new[]
             {
-                Path.Combine(baseDir, "Data", "SeedData", "Stories", "i18n", "en-us", $"{storyId}.json"),
-                Path.Combine(baseDir, "Data", "SeedData", "Stories", "i18n", "ro-ro", $"{storyId}.json"),
-                Path.Combine(baseDir, "Data", "SeedData", "Stories", "i18n", "hu-hu", $"{storyId}.json"),
-                Path.Combine(baseDir, "Data", "SeedData", "Stories", "independent", "i18n", "en-us", $"{storyId}.json"),
-                Path.Combine(baseDir, "Data", "SeedData", "Stories", "independent", "i18n", "ro-ro", $"{storyId}.json"),
-                Path.Combine(baseDir, "Data", "SeedData", "Stories", "independent", "i18n", "hu-hu", $"{storyId}.json")
+                Path.Combine(baseDir, "Data", "SeedData", "Stories", "seed@alchimalia.com", "i18n", "en-us", $"{storyId}.json"),
+                Path.Combine(baseDir, "Data", "SeedData", "Stories", "seed@alchimalia.com", "i18n", "ro-ro", $"{storyId}.json"),
+                Path.Combine(baseDir, "Data", "SeedData", "Stories", "seed@alchimalia.com", "i18n", "hu-hu", $"{storyId}.json"),
+                Path.Combine(baseDir, "Data", "SeedData", "Stories", "seed@alchimalia.com", "independent", "i18n", "en-us", $"{storyId}.json"),
+                Path.Combine(baseDir, "Data", "SeedData", "Stories", "seed@alchimalia.com", "independent", "i18n", "ro-ro", $"{storyId}.json"),
+                Path.Combine(baseDir, "Data", "SeedData", "Stories", "seed@alchimalia.com", "independent", "i18n", "hu-hu", $"{storyId}.json")
             };
 
             foreach (var file in candidates)

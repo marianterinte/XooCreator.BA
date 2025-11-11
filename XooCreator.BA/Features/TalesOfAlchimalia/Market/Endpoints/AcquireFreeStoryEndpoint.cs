@@ -75,7 +75,7 @@ public class AcquireFreeStoryEndpoint
         var locales = new[] { "ro-ro", "en-us", "hu-hu" };
         foreach (var locale in locales)
         {
-            var dir = Path.Combine(baseDir, "Data", "SeedData", "Stories", "independent", "i18n", locale);
+            var dir = Path.Combine(baseDir, "Data", "SeedData", "Stories", "seed@alchimalia.com", "independent", "i18n", locale);
             var filePath = Path.Combine(dir, $"{storyId}.json");
             if (File.Exists(filePath))
             {

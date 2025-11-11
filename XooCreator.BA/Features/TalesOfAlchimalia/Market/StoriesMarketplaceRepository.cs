@@ -315,8 +315,8 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             var baseDir = AppDomain.CurrentDomain.BaseDirectory;
             var candidates = new[]
             {
-                Path.Combine(baseDir, "Data", "SeedData", "Stories", "independent", "i18n", locale, $"{storyId}.json"),
-                Path.Combine(baseDir, "Data", "SeedData", "Stories", "i18n", locale, $"{storyId}.json")
+                Path.Combine(baseDir, "Data", "SeedData", "Stories", "seed@alchimalia.com", "independent", "i18n", locale, $"{storyId}.json"),
+                Path.Combine(baseDir, "Data", "SeedData", "Stories", "seed@alchimalia.com", "i18n", locale, $"{storyId}.json")
             };
 
             foreach (var filePath in candidates)
@@ -417,7 +417,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         
         foreach (var locale in locales)
         {
-            var dir = Path.Combine(baseDir, "Data", "SeedData", "Stories", "independent", "i18n", locale);
+            var dir = Path.Combine(baseDir, "Data", "SeedData", "Stories", "seed@alchimalia.com", "independent", "i18n", locale);
             var filePath = Path.Combine(dir, $"{storyId}.json");
             
             if (File.Exists(filePath))

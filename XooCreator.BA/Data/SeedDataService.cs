@@ -1,5 +1,7 @@
 using System.Text.Json;
+using XooCreator.BA.Data;
 using XooCreator.BA.Data.Enums;
+using XooCreator.BA.Data.SeedData;
 using XooCreator.BA.Data.SeedData.DTOs;
 
 namespace XooCreator.BA.Data;
@@ -235,9 +237,9 @@ public class SeedDataService
         return heroClickMessages;
     }
 
-    public async Task<List<StoryDefinition>> LoadIndependentStoriesAsync()
+    public async Task<List<StoryDefinition>> LoadIndependentStoriesAsync(XooDbContext? dbContext = null, Guid? seedUserId = null)
     {
-        var storiesPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SeedData", "Stories", "independent", "i18n", "ro-ro");
+        var storiesPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SeedData", "Stories", "seed@alchimalia.com", "independent", "i18n", "ro-ro");
         var stories = new List<StoryDefinition>();
 
         Console.WriteLine($"[SEEDING] Loading independent stories from: {storiesPath}");
@@ -246,6 +248,19 @@ public class SeedDataService
         {
             Console.WriteLine($"[SEEDING] Directory does not exist: {storiesPath}");
             return stories;
+        }
+
+        // Get seed user ID if not provided
+        Guid? ownerId = seedUserId;
+        if (ownerId == null && dbContext != null)
+        {
+            ownerId = await SeedUserHelper.GetOrCreateSeedUserIdAsync(dbContext);
+        }
+        // Fallback to old GUID if still null (backward compatibility)
+        if (ownerId == null)
+        {
+            ownerId = Guid.Parse("33333333-3333-3333-3333-333333333333");
+            Console.WriteLine($"[SEEDING] Using fallback GUID for seed user (seed user not found)");
         }
 
         var jsonFiles = Directory.GetFiles(storiesPath, "*.json");
@@ -281,8 +296,8 @@ public class SeedDataService
                         IsActive = true,
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = DateTime.UtcNow,
-                        CreatedBy = Guid.Parse("33333333-3333-3333-3333-333333333333"), // Alchimalia-Admin
-                        UpdatedBy = Guid.Parse("33333333-3333-3333-3333-333333333333") // Alchimalia-Admin
+                        CreatedBy = ownerId,
+                        UpdatedBy = ownerId
                     };
 
                     // Process tiles if they exist
@@ -357,7 +372,7 @@ public class SeedDataService
 
         foreach (var language in languages)
         {
-            var storiesPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SeedData", "Stories", "independent", "i18n", language);
+            var storiesPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SeedData", "Stories", "seed@alchimalia.com", "independent", "i18n", language);
             Console.WriteLine($"[SEEDING] Processing language: {language} from {storiesPath}");
             
             if (!Directory.Exists(storiesPath))

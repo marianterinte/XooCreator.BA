@@ -44,20 +44,20 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Remove="Data\SeedData\Stories\i18n\en-us\crystalia-s1.json" />
-    <Content Remove="Data\SeedData\Stories\i18n\en-us\learn-to-read-s1.json" />
-    <Content Remove="Data\SeedData\Stories\i18n\en-us\sylvaria-s1.json" />
-    <Content Remove="Data\SeedData\Stories\i18n\hu-hu\crystalia-s1.json" />
-    <Content Remove="Data\SeedData\Stories\i18n\hu-hu\learn-to-read-s1.json" />
-    <Content Remove="Data\SeedData\Stories\i18n\hu-hu\sylvaria-s1.json" />
-    <Content Remove="Data\SeedData\Stories\i18n\ro-ro\crystalia-s1.json" />
-    <Content Remove="Data\SeedData\Stories\i18n\ro-ro\learn-to-read-s1.json" />
-    <Content Remove="Data\SeedData\Stories\i18n\ro-ro\sylvaria-s1.json" />
-    <Content Remove="Data\SeedData\Stories\independent\i18n\en-us\learn-math-s1.json" />
-    <Content Remove="Data\SeedData\Stories\independent\i18n\en-us\learn-to-read-s1.json" />
-    <Content Remove="Data\SeedData\Stories\independent\i18n\hu-hu\learn-math-s1.json" />
-    <Content Remove="Data\SeedData\Stories\independent\i18n\hu-hu\learn-to-read-s1.json" />
-    <Content Remove="Data\SeedData\Stories\independent\i18n\ro-ro\learn-math-s1.json" />
+    <Content Remove="Data\SeedData\Stories\seed%40alchimalia.com\i18n\en-us\crystalia-s1.json" />
+    <Content Remove="Data\SeedData\Stories\seed%40alchimalia.com\i18n\en-us\learn-to-read-s1.json" />
+    <Content Remove="Data\SeedData\Stories\seed%40alchimalia.com\i18n\en-us\sylvaria-s1.json" />
+    <Content Remove="Data\SeedData\Stories\seed%40alchimalia.com\i18n\hu-hu\crystalia-s1.json" />
+    <Content Remove="Data\SeedData\Stories\seed%40alchimalia.com\i18n\hu-hu\learn-to-read-s1.json" />
+    <Content Remove="Data\SeedData\Stories\seed%40alchimalia.com\i18n\hu-hu\sylvaria-s1.json" />
+    <Content Remove="Data\SeedData\Stories\seed%40alchimalia.com\i18n\ro-ro\crystalia-s1.json" />
+    <Content Remove="Data\SeedData\Stories\seed%40alchimalia.com\i18n\ro-ro\learn-to-read-s1.json" />
+    <Content Remove="Data\SeedData\Stories\seed%40alchimalia.com\i18n\ro-ro\sylvaria-s1.json" />
+    <Content Remove="Data\SeedData\Stories\seed%40alchimalia.com\independent\i18n\en-us\learn-math-s1.json" />
+    <Content Remove="Data\SeedData\Stories\seed%40alchimalia.com\independent\i18n\en-us\learn-to-read-s1.json" />
+    <Content Remove="Data\SeedData\Stories\seed%40alchimalia.com\independent\i18n\hu-hu\learn-math-s1.json" />
+    <Content Remove="Data\SeedData\Stories\seed%40alchimalia.com\independent\i18n\hu-hu\learn-to-read-s1.json" />
+    <Content Remove="Data\SeedData\Stories\seed%40alchimalia.com\independent\i18n\ro-ro\learn-math-s1.json" />
   </ItemGroup>
 
 </Project>
