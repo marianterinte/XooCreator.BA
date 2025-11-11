@@ -72,6 +72,11 @@ public class ReviewStoryEndpoint
         craft.Status = newStatus.ToDb();
         craft.ReviewNotes = string.IsNullOrWhiteSpace(req.Notes) ? craft.ReviewNotes : req.Notes;
         craft.ReviewEndedAt = DateTime.UtcNow;
+        craft.ReviewedByUserId = user.Id;
+        if (req.Approve)
+        {
+            craft.ApprovedByUserId = user.Id;
+        }
         await ep._crafts.SaveAsync(craft, ct);
         ep._logger.LogInformation("Review decision: storyId={StoryId} to={To} notesPresent={Notes}", storyId, newStatus, !string.IsNullOrWhiteSpace(req.Notes));
         return TypedResults.Ok(new ReviewResponse { Status = req.Approve ? "Approved" : "ChangesRequested" });

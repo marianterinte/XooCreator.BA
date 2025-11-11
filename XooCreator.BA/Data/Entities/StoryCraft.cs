@@ -33,6 +33,11 @@ public class StoryCraft
     public string? ReviewNotes { get; set; }
     public DateTime? ReviewStartedAt { get; set; }
     public DateTime? ReviewEndedAt { get; set; }
+    public Guid? ReviewedByUserId { get; set; }
+    public Guid? ApprovedByUserId { get; set; }
+
+    // Versioning reference: the published version from which this draft originated
+    public int BaseVersion { get; set; } = 0;
     
     // Navigation
     public List<StoryCraftTranslation> Translations { get; set; } = new();

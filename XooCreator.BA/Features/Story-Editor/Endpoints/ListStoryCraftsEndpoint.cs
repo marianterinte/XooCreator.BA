@@ -40,10 +40,21 @@ public class ListStoryCraftsEndpoint
 
         var isReviewerOrAdmin = ep._auth0.HasRole(user, Data.Enums.UserRole.Reviewer) || ep._auth0.HasRole(user, Data.Enums.UserRole.Admin);
         var wantAll = string.Equals(scope, "all", StringComparison.OrdinalIgnoreCase);
+        var wantAssigned = string.Equals(scope, "assigned", StringComparison.OrdinalIgnoreCase);
+        var wantClaimable = string.Equals(scope, "claimable", StringComparison.OrdinalIgnoreCase);
 
-        var list = (isReviewerOrAdmin && wantAll)
+        var list = (isReviewerOrAdmin && (wantAll || wantAssigned || wantClaimable))
             ? await ep._crafts.ListAllAsync(ct)
             : await ep._crafts.ListByOwnerAsync(user.Id, ct);
+
+        if (isReviewerOrAdmin && wantAssigned)
+        {
+            list = list.Where(c => c.AssignedReviewerUserId == user.Id).ToList();
+        }
+        else if (isReviewerOrAdmin && wantClaimable)
+        {
+            list = list.Where(c => c.AssignedReviewerUserId == null && StoryStatusExtensions.FromDb(c.Status) == StoryStatus.SentForApproval).ToList();
+        }
 
         var items = new List<StoryCraftListItemDto>(list.Count);
         foreach (var c in list)
@@ -68,7 +79,9 @@ public class ListStoryCraftsEndpoint
                 Status = MapStatusForFrontend(status),
                 UpdatedAt = c.UpdatedAt,
                 OwnerEmail = "", // could be enriched later by joining users table
-                IsOwnedByCurrentUser = c.OwnerUserId == user.Id
+                IsOwnedByCurrentUser = c.OwnerUserId == user.Id,
+                AssignedReviewerUserId = c.AssignedReviewerUserId,
+                IsAssignedToCurrentUser = c.AssignedReviewerUserId == user.Id
             });
         }
 

@@ -7,7 +7,8 @@ namespace XooCreator.BA.Features.StoryEditor.Services;
 
 public interface IStoryPublishingService
 {
-    Task UpsertFromCraftAsync(StoryCraft craft, string ownerEmail, string langTag, CancellationToken ct);
+    // Returns the new global version after publish
+    Task<int> UpsertFromCraftAsync(StoryCraft craft, string ownerEmail, string langTag, CancellationToken ct);
 }
 
 public class StoryPublishingService : IStoryPublishingService
@@ -19,7 +20,7 @@ public class StoryPublishingService : IStoryPublishingService
         _db = db;
     }
 
-    public async Task UpsertFromCraftAsync(StoryCraft craft, string ownerEmail, string langTag, CancellationToken ct)
+    public async Task<int> UpsertFromCraftAsync(StoryCraft craft, string ownerEmail, string langTag, CancellationToken ct)
     {
         if (craft == null) throw new ArgumentNullException(nameof(craft));
         var storyId = craft.StoryId;
@@ -30,7 +31,8 @@ public class StoryPublishingService : IStoryPublishingService
             .Include(d => d.Translations)
             .FirstOrDefaultAsync(d => d.StoryId == storyId, ct);
 
-        if (def == null)
+        var isNew = def == null;
+        if (isNew)
         {
             def = new StoryDefinition
             {
@@ -39,7 +41,8 @@ public class StoryPublishingService : IStoryPublishingService
                 StoryType = craft.StoryType,
                 Status = StoryStatus.Published,
                 IsActive = true,
-                SortOrder = 0
+                SortOrder = 0,
+                Version = 1
             };
             _db.StoryDefinitions.Add(def);
         }
@@ -51,6 +54,11 @@ public class StoryPublishingService : IStoryPublishingService
         def.StoryType = craft.StoryType;
         def.Status = StoryStatus.Published;
         def.UpdatedAt = DateTime.UtcNow;
+        // Version bump for existing definitions
+        if (!isNew)
+        {
+            def.Version = def.Version <= 0 ? 1 : def.Version + 1;
+        }
 
         // Map cover to published structure (language-agnostic)
         if (!string.IsNullOrWhiteSpace(craft.CoverImageUrl))
@@ -170,6 +178,7 @@ public class StoryPublishingService : IStoryPublishingService
         }
 
         await _db.SaveChangesAsync(ct);
+        return def.Version;
     }
 
     private static string ComputePublishedFileName(string relPath)

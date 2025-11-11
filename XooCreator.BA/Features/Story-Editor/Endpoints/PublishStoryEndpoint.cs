@@ -62,13 +62,15 @@ public class PublishStoryEndpoint
         var craft = await ep._crafts.GetAsync(storyId, ct);
         if (craft == null) return TypedResults.NotFound();
 
-        if (craft.OwnerUserId != user.Id)
+        var isAdmin = ep._auth0.HasRole(user, Data.Enums.UserRole.Admin);
+
+        if (!isAdmin && craft.OwnerUserId != user.Id)
         {
             return TypedResults.BadRequest("Only the owner can publish this story.");
         }
 
         var current = StoryStatusExtensions.FromDb(craft.Status);
-        if (current != StoryStatus.Approved)
+        if (!isAdmin && current != StoryStatus.Approved)
         {
             ep._logger.LogWarning("Publish invalid state: storyId={StoryId} state={State}", storyId, current);
             return TypedResults.Conflict("Invalid state transition. Expected Approved.");
@@ -139,11 +141,12 @@ public class PublishStoryEndpoint
             try { await sourceClient.DeleteIfExistsAsync(cancellationToken: ct); ep._logger.LogInformation("Deleted draft asset: {Path}", sourceBlobPath); } catch { /* best-effort */ }
         }
 
-        // 3) Upsert StoryDefinition from craft (single source of truth for marketplace)
-        await ep._publisher.UpsertFromCraftAsync(craft, user.Email, langTag, ct);
+        // 3) Upsert StoryDefinition from craft (single source of truth for marketplace), bump version
+        var newVersion = await ep._publisher.UpsertFromCraftAsync(craft, user.Email, langTag, ct);
 
-        // 4) Mark craft as published
+        // 4) Mark craft as published and record base version
         craft.Status = StoryStatus.Published.ToDb();
+        craft.BaseVersion = newVersion;
         await ep._crafts.SaveAsync(craft, ct);
         ep._logger.LogInformation("Published story: storyId={StoryId} assets={Count}", storyId, relPaths.Count);
         return TypedResults.Ok(new PublishResponse());

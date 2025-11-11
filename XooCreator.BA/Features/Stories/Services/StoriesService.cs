@@ -103,6 +103,13 @@ public class StoriesService : IStoriesService
                 StoryType = (int)craft.StoryType,
                 Status = MapStatusForFrontend(StoryStatusExtensions.FromDb(craft.Status)),
                 AvailableLanguages = availableLangs,
+                AssignedReviewerUserId = craft.AssignedReviewerUserId,
+                ReviewedByUserId = craft.ReviewedByUserId,
+                ApprovedByUserId = craft.ApprovedByUserId,
+                ReviewNotes = craft.ReviewNotes,
+                ReviewStartedAt = craft.ReviewStartedAt,
+                ReviewEndedAt = craft.ReviewEndedAt,
+                BaseVersion = craft.BaseVersion,
                 Tiles = craft.Tiles.OrderBy(t => t.SortOrder).Select(t =>
                 {
                     var tileTranslation = t.Translations.FirstOrDefault(tr => tr.LanguageCode == lang);
@@ -221,6 +228,17 @@ public class EditableStoryDto
     public string? Status { get; set; } // 'draft' | 'in-review' | 'approved' | 'published' (FE semantic)
     public List<string>? AvailableLanguages { get; set; } // Available language codes for this story
     public List<EditableTileDto> Tiles { get; set; } = new();
+
+    // Reviewer/Audit fields (optional)
+    public Guid? AssignedReviewerUserId { get; set; }
+    public Guid? ReviewedByUserId { get; set; }
+    public Guid? ApprovedByUserId { get; set; }
+    public string? ReviewNotes { get; set; }
+    public DateTime? ReviewStartedAt { get; set; }
+    public DateTime? ReviewEndedAt { get; set; }
+
+    // Version reference
+    public int? BaseVersion { get; set; }
 }
 
 public class EditableTileDto

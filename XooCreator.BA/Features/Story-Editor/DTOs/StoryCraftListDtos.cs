@@ -12,6 +12,8 @@ public record StoryCraftListItemDto
     public required DateTime UpdatedAt { get; init; }
     public required string OwnerEmail { get; init; }
     public bool IsOwnedByCurrentUser { get; init; }
+    public Guid? AssignedReviewerUserId { get; init; }
+    public bool IsAssignedToCurrentUser { get; init; }
 }
 
 public record ListStoryCraftsResponse
