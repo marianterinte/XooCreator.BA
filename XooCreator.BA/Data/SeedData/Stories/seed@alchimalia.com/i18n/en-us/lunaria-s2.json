@@ -1,7 +1,7 @@
 {
   "storyId": "lunaria-s2",
   "title": "The Signal",
-  "coverImageUrl": "images/tol/stories/lunaria-s2/0.Cover.png",
+  "coverImageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s2/0.Cover.png",
     "sortOrder": 1,
   "unlockedStoryHeroes": [],
   "tiles": [
@@ -11,7 +11,7 @@
       "sortOrder": 1,
       "caption": "Landing at the edge of town",
       "text": "The portal fades behind you. In the valley stretch orange carrot fields, but there's a strange silence.\nPuf-Puf raises the magnifier to the crystal:\n— Too quiet for Lunaria. We keep our ears perked up.\nThe black rabbit nods:\n— We go slowly.",
-      "imageUrl": "images/tol/stories/lunaria-s2/1.arrival.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s2/1.arrival.png"
     },
     {
       "tileId": "2",
@@ -19,7 +19,7 @@
       "sortOrder": 2,
       "caption": "Ping from the carrot fields",
       "text": "The crystal flickers rhythmically, like a distant ping. Among the carrot rows, a spark lights up briefly and goes out.\n— Technical signal, not animal, says Puf-Puf. Over there.\nThe black rabbit rotates his ears:\n— It's not a firefly. Sounds like a beacon.\nYou bend down and advance on two parallel rows, with short steps. In the ground you can see fine traces and a thin wire, half-buried. The ping returns: slower, then short again.\n— You stay on the left, says Puf-Puf. I enter from the right.\n— When you lift your paw, I stop, you say.\n— Exactly. We approach slowly, without touching the cable.",
-      "imageUrl": "images/tol/stories/lunaria-s2/2.ping.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s2/2.ping.png"
     },
     {
       "tileId": "3",
@@ -27,7 +27,7 @@
       "sortOrder": 3,
       "caption": "Under the moon tree",
       "text": "In the shade of a strange little tree lies a robot with a tin-like casing. It has short ears, like two antennas, and black, lifeless eyes. An LED flickers: \"...Gru...bot...\".\n\nPuf-Puf, in a whisper:\n— Rabbit model. Gentle, but fallen.\n\nThe black rabbit bends down:\n— Can we restart it?",
-      "imageUrl": "images/tol/stories/lunaria-s2/3.moon-tree.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s2/3.moon-tree.png"
     },
     {
       "tileId": "4",
@@ -35,7 +35,7 @@
       "sortOrder": 4,
       "caption": "The broken circuit",
       "text": "The front panel stands ajar. Inside, a cracked circuit sizzles slowly and floats the smell of ozone.\nThe black rabbit pulls out a carrot and smiles:\n— On Lunaria, carrots don't repair robots.\n\n— Not directly, corrects Puf-Puf. But Lunkarot fiber — that special carrot from Lunaria — can serve as a jumper, and its juice cools the pathways well. It's about rhythm, not force.\n\n— Then we cut a thin fiber and drip slowly, you say.\n— Exactly, agrees Puf-Puf.",
-      "imageUrl": "images/tol/stories/lunaria-s2/4.broken-circuit.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s2/4.broken-circuit.png"
     },
     {
       "tileId": "5",
@@ -43,7 +43,7 @@
       "sortOrder": 5,
       "caption": "",
       "text": "",
-      "imageUrl": "images/tol/stories/lunaria-s2/5.quiz.png",
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s2/5.quiz.png",
       "answers": [
         {
           "answerId": "a",
@@ -139,7 +139,7 @@
       "sortOrder": 6,
       "caption": "Grubot finds his voice",
       "text": "The sound stabilizes, and the black eyes light up. The antenna-ears twitch slightly.\n\n— System... stable, announces the robot. Name: Grubot. Model: rabbit. Status: active consciousness. Humor mode: experimental.\nPuf-Puf smiles:\n— Life suits you well.\n— Thank you, replies Grubot. I got lost after a magnetic field storm. My home is Mechanika. I can take off, then I need charging.\n— Noted, you say.\n— Saving coordinates. When you open the route, I'll be waiting there, confirms Grubot.",
-      "imageUrl": "images/tol/stories/lunaria-s2/6.grubot-talks.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s2/6.grubot-talks.png"
     },
     {
       "tileId": "7",
@@ -147,7 +147,7 @@
       "sortOrder": 7,
       "caption": "The departure",
       "text": "Grubot's thrusters hiss softly. He rises above the orange fields, makes a short loop and flies toward the horizon.\n— A new friend, a future route. We continue, says Puf-Puf.\nThe black rabbit smiles:\n— The path is clear: forward.",
-      "imageUrl": "images/tol/stories/lunaria-s2/7.departure.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s2/7.departure.png"
     }
   ]
 }

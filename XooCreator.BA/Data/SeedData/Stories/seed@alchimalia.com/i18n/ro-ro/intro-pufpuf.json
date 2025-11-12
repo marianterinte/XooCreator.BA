@@ -1,7 +1,7 @@
 {
   "storyId": "intro-pufpuf",
   "title": "Marea Călătorie",
-  "coverImageUrl": "images/tol/stories/intro-pufpuf/0.Cover.png",
+  "coverImageUrl": "images/tol/stories/seed@alchimalia.com/intro-pufpuf/0.Cover.png",
     "sortOrder": 1,
   "unlockedStoryHeroes": ["puf-puf"],
   "tiles": [
@@ -11,7 +11,7 @@
       "sortOrder": 1,
       "caption": "Chemarea",
       "text": "Puf-Puf călătorea prin adâncul universului când liniștea cosmică fu spartă de un vuiet straniu, ca un oftat al stelelor. \\nInstrumentele pâlpâiră, iar busola stelară desenă spirale fără sens. \\nCu lăbuța pe parbrizul de cuarț, el simți mai mult, decât auzi, că cineva îl cheamă pe nume dintr-un loc foarte, foarte vechi.",
-      "imageUrl": "images/tol/stories/intro-pufpuf/1.puf-puf-flying.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/intro-pufpuf/1.puf-puf-flying.png"
     },
     {
       "tileId": "2",
@@ -19,7 +19,7 @@
       "sortOrder": 2,
       "caption": "Prăbușirea",
       "text": "Un fulger de lumină înghiți nava și o azvârli într-un vârtej orbitor. Paratrăsnetele de plasmă se topiră, cârma se blocă, iar carena spintecă norii înainte să muște din pământul uscat. Când tăcerea reveni, aerul mirosea a uscăciune și arșiță. \\nPuf-Puf își atinse urechea zgâriată, privi copacii uriași și… nu știa unde se afla, de unde a plecat și de ce. Doar că ajunsese într-un loc străin care îi stârnea curiozitatea.",
-      "imageUrl": "images/tol/stories/intro-pufpuf/2.puf-puf-hurt.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/intro-pufpuf/2.puf-puf-hurt.png"
     },
     {
       "tileId": "3",
@@ -27,7 +27,7 @@
       "sortOrder": 3,
       "caption": "Cristalul SOS",
       "text": "La bord, în modulul SOS, un cristal străvechi pulsa ca o inimă adormită. \\nPuf-Puf deschise panoul, iar lumina cristalului proiectă în aer o hartă parcă vie.\\nRamuri de lumină, poteci care se împleteau la infinit, unele căi erau stinse, altele scânteiau ca semne. \\nToate convergeau într-un singur nod: Copacul Luminii.",
-      "imageUrl": "images/tol/stories/intro-pufpuf/3.puf-puf-crystal.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/intro-pufpuf/3.puf-puf-crystal.png"
     },
     {
       "tileId": "4",
@@ -35,7 +35,7 @@
       "sortOrder": 4,
       "caption": "Întâlnirea",
       "text": "Frunzele Copacului foșneau ca o șoaptă când Puf-Puf îți iese în cale și îți zâmbește parcă amintindu-și ceva, puțin câte puțin. Puf-Puf „-Hei, tu. Da, ție îți vorbesc. Eu sunt Puf-Puf, o pisică vorbitoare de pe planeta Kelo-Ketis... nava mea e puțin șifonată, moralul însă e încă sus. \\nCopacul ne-a pus față în față și, sincer, tu pari genul care să știe ce face. Adică ai privirea aia de ai mai reparat două-trei nave spațiale marțea seara. \\nMă poți ajuta, te rog, să îmi repar nava și să mă întorc acasă? Cristalul este cheia. Trebuie să îl descifrăm.\\nCristalul părea să proiecteze într-o hologramă, aproape vie, un copac luminos, plin de mistere. ",
-      "imageUrl": "images/tol/stories/intro-pufpuf/puf-puf-home-planet.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/intro-pufpuf/puf-puf-home-planet.png"
     },
     {
       "tileId": "5",
@@ -43,7 +43,7 @@
       "sortOrder": 5,
       "caption": "",
       "text": "",
-      "imageUrl": "images/tol/stories/intro-pufpuf/4.TreeOfLight.png",
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/intro-pufpuf/4.TreeOfLight.png",
       "question": "Puf-Puf îți cere ajutorul să vorbești cu cristalul SOS care arată harta. Ce ar fi cel mai important lucru de întrebat la început?",
       "answers": [
         {
@@ -139,7 +139,7 @@
       "sortOrder": 6,
       "caption": "Curaj",
       "text": "Puf-Puf: - Să mergem mai aproape, o vom rezolva noi. Mă bucur că te-am găsit.\\nAmândoi mergeți cu pași mici către copac.",
-      "imageUrl": "images/tol/stories/intro-pufpuf/5.puf-puf-tree-of-light.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/intro-pufpuf/5.puf-puf-tree-of-light.png"
     }
   ]
 }

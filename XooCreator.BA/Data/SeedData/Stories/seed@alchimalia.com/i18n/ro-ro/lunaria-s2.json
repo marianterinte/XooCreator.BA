@@ -1,7 +1,7 @@
 {
   "storyId": "lunaria-s2",
   "title": "Semnalul",
-  "coverImageUrl": "images/tol/stories/lunaria-s2/0.Cover.png",
+  "coverImageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s2/0.Cover.png",
     "sortOrder": 1,
   "unlockedStoryHeroes": [],
   "tiles": [
@@ -11,7 +11,7 @@
       "sortOrder": 1,
       "caption": "Aterizare la marginea orașului",
       "text": "Portalul se stinge în spatele vostru. În vale se întind câmpuri portocalii de morcovi, dar e o liniște ciudată.\nPuf-Puf ridică lupa spre cristal:\n— Prea liniște pentru Lunaria. Ținem urechile ciulite.\nIepurele negru încuviințează:\n— Mergem încet.",
-      "imageUrl": "images/tol/stories/lunaria-s2/1.arrival.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s2/1.arrival.png"
     },
     {
       "tileId": "2",
@@ -19,7 +19,7 @@
       "sortOrder": 2,
       "caption": "Ping din campiile de morcovi",
       "text": "Cristalul pâlpâie ritmic, ca un ping îndepărtat. Printre rândurile de morcovi, o scânteie se aprinde o clipă și se stinge.\n— Semnal tehnic, nu animal, zice Puf-Puf. Acolo.\nIepurele negru își rotește urechile:\n— Nu e licurici. Sună ca o baliză.\nVă aplecați și înaintați pe două rânduri paralele, cu pași scurți. În pământ se văd urme fine și un fir subțire, îngropat pe jumătate. Ping-ul revine: mai lent, apoi iarăși scurt.\n— Tu rămâi pe stânga, spune Puf-Puf. Eu intru din dreapta.\n— Când ridici laba, mă opresc, zici tu.\n— Fix. Ne apropiem încet, fără să atingem cablul.",
-      "imageUrl": "images/tol/stories/lunaria-s2/2.ping.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s2/2.ping.png"
     },
     {
       "tileId": "3",
@@ -27,7 +27,7 @@
       "sortOrder": 3,
       "caption": "Sub copăcelul de lună",
       "text": "La umbra unui copăcel straniu zace un robot cu carcasă din tinichea. Are urechi scurte, ca două antene, și ochi negri, stinși. Un LED pâlpâie: „…Gru…bot…”.\n\nPuf-Puf, în șoaptă:\n— Model iepure. Blând, dar căzut.\n\nIepurele negru se apleacă:\n— Îl putem reporni?",
-      "imageUrl": "images/tol/stories/lunaria-s2/3.moon-tree.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s2/3.moon-tree.png"
     },
     {
       "tileId": "4",
@@ -35,7 +35,7 @@
       "sortOrder": 4,
       "caption": "Circuitul întrerupt",
       "text": "Panoul frontal stă întredeschis. Înăuntru, un circuit fisurat cârâie încet și plutește miros de ozon.\nIepurele negru scoate un morcov și zâmbește:\n— Pe Lunaria, morcovii nu repară roboți.\n\n— Nu direct, îl corectează Puf-Puf. Dar fibra de Lunkarot — morcovul acela special de pe Lunaria — poate ține loc de jumper, iar sucul lui răcește bine traseele. Contează ritmul, nu forța.\n\n— Atunci tăiem o fibră subțire și picurăm încet, spui tu.\n— Fix așa, încuviințează Puf-Puf.",
-      "imageUrl": "images/tol/stories/lunaria-s2/4.broken-circuit.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s2/4.broken-circuit.png"
     },
     {
       "tileId": "5",
@@ -43,7 +43,7 @@
       "sortOrder": 5,
       "caption": "",
       "text": "",
-      "imageUrl": "images/tol/stories/lunaria-s2/5.quiz.png",
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s2/5.quiz.png",
       "answers": [
         {
           "answerId": "a",
@@ -139,7 +139,7 @@
       "sortOrder": 6,
       "caption": "Grubot își găsește vocea",
       "text": "Sunetul se stabilizează, iar ochii negri se aprind. Antenele-urechi tresar ușor.\n\n— Sistem… stabil, anunță robotul. Nume: Grubot. Model: iepure. Stare: conștiință activă. Modul umor: experimental.\nPuf-Puf zâmbește:\n— Îți stă bine cu viața înapoi.\n— Mulțumesc, răspunde Grubot. M-am rătăcit după o furtună de câmp magnetic. Casa mea e Mechanika. Pot decola, apoi am nevoie de încărcare.\n— Notat, spui tu.\n— Salvez coordonatele. Când deschideți ruta, vă aștept acolo, confirmă Grubot.",
-      "imageUrl": "images/tol/stories/lunaria-s2/6.grubot-talks.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s2/6.grubot-talks.png"
     },
     {
       "tileId": "7",
@@ -147,7 +147,7 @@
       "sortOrder": 7,
       "caption": "Plecarea",
       "text": "Propulsoarele lui Grubot şuieră ușor. Se ridică deasupra câmpiilor portocalii, face o voltă scurtă și zboară spre orizont.\n— Un prieten nou, o rută viitoare. Continuăm, zice Puf-Puf.\nIepurele negru zâmbește:\n— Drumul e clar: înainte.",
-      "imageUrl": "images/tol/stories/lunaria-s2/7.departure.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s2/7.departure.png"
     }
   ]
 }

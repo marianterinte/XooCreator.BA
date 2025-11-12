@@ -1,7 +1,7 @@
 {
   "storyId": "mechanika-s1",
   "title": "Magnus",
-  "coverImageUrl": "images/tol/stories/mechanika-s1/0.Cover.png",
+  "coverImageUrl": "images/tol/stories/seed@alchimalia.com/mechanika-s1/0.Cover.png",
     "sortOrder": 1,
   "unlockedStoryHeroes": [
     "grubot"
@@ -13,7 +13,7 @@
       "sortOrder": 1,
       "caption": "Ceață peste Mechanika",
       "text": "Coborâți în Mechanika printr-o pâclă groasă și înțepătoare: fum de uzine, scântei rătăcite, aer greu. Luminile orașului sunt doar pete încețoșate; pasarelele scârțâie, roțile dințate se mișcă sacadat.\nPuf-Puf aprinde lampa de pe guler.\n\n— Vizibilitate: mică spre foarte mică. Grubot, ne auzi?\nUn țiuit scurt. Apoi tăcere.\n\n— Ținem direcția după pulsul cristalului, spui tu.\n— Pe sub conducte, aproape de balustradă, zice iepurele negru.\n\nRătăciți câteva minute printre țevi, nituri și aburi reci, urmărind pulsația slabă a cristalului.",
-      "imageUrl": "images/tol/stories/mechanika-s1/1.fog.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/mechanika-s1/1.fog.png"
     },
     {
       "tileId": "2",
@@ -21,7 +21,7 @@
       "sortOrder": 2,
       "caption": "Grubot vă găsește",
       "text": "Un semnal curat taie ceața; o rază subțire brăzdează aerul. Din fum se conturează silueta lui Grubot.\n\n— V-am detectat după semnătura cristalului și… o urmă chimică familiară: Lunkarot, spune robotul Grubot.\nPuf-Puf râde:\n— Nas digital bun.\n— Promisiunea e promisiune, continuă Grubot. Mi-ați dat puls; eu vă dau vedere. Urmați-mă la Turnul de Control.",
-      "imageUrl": "images/tol/stories/mechanika-s1/2.grubot.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/mechanika-s1/2.grubot.png"
     },
     {
       "tileId": "3",
@@ -29,7 +29,7 @@
       "sortOrder": 3,
       "caption": "Turnul de control",
       "text": "Urcați scările metalice, cu pașii bătuți în ecou. Sus, vă așteaptă un colos: Telescopul Mechanika-Magnus — tuburi, oglinzi, angrenaje; cupola se deschide ca o floare de metal.\n\n— Cu ăsta căutăm planeta mea? întreabă Puf-Puf.\n— În mod normal scanează traseele orașului, răspunde Grubot. Dar cu adaptorul de cristal îl putem regla pe semnătura planetei tale.\n— Atunci îl montăm acum, zici tu.",
-      "imageUrl": "images/tol/stories/mechanika-s1/3.control-tower.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/mechanika-s1/3.control-tower.png"
     },
     {
       "tileId": "4",
@@ -37,7 +37,7 @@
       "sortOrder": 4,
       "caption": "Ce lipsește",
       "text": "Grubot rabatează panoul lateral al telescopului. Înăuntru se vede un soclu gol și bobine groase.\n\n— Ne lipsesc două lucruri, spune el clar:\n\no piatră din Lunaria pentru „Ochiul Verde” — piesa care calibrează spectrul;\n\nenergie stocată pentru bobinele de focalizare.\n\n— Avem un rezervor sub turn: încărcat, dar instabil, adaugă Grubot.\n— Dacă aveți piatra, o montez acum; dacă nu, pregătim locașul și stabilizăm bobinele.",
-      "imageUrl": "images/tol/stories/mechanika-s1/4.missing.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/mechanika-s1/4.missing.png"
     },
     {
       "tileId": "5",
@@ -45,7 +45,7 @@
       "sortOrder": 5,
       "caption": "",
       "text": "",
-      "imageUrl": "images/tol/stories/mechanika-s1/5.quiz.png",
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/mechanika-s1/5.quiz.png",
       "answers": [
         {
           "answerId": "a",
@@ -181,7 +181,7 @@
       "sortOrder": 6,
       "caption": "Focalizare",
       "text": "Telescopul se trezește. Oglinzile se aliniază, hologramele se aprind, iar pe ele se ramifică linii de lumină. Un traseu pulsează mai tare — un fir care vă cheamă.\n\n— Arată-ne Kelo-Ketis! spune Puf-Puf.",
-      "imageUrl": "images/tol/stories/mechanika-s1/6.focus.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/mechanika-s1/6.focus.png"
     },
     {
       "tileId": "7",
@@ -189,7 +189,7 @@
       "sortOrder": 7,
       "caption": "Harta se adâncește",
       "text": "Grubot tastează rapid.\n— Semnal clar. Fixez coordonatele și salvez schema rutei pentru deschiderea portalului.\nPuf-Puf zâmbește scurt:\n— Primul pas mare e bifat.",
-      "imageUrl": "images/tol/stories/mechanika-s1/7.map-deepens.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/mechanika-s1/7.map-deepens.png"
     },
     {
       "tileId": "8",
@@ -197,7 +197,7 @@
       "sortOrder": 8,
       "caption": "Recompensa de atelier",
       "text": "Grubot vă întinde o casetă metalică.\n—(voce robotica) Circuite și conectori. Pentru ce urmează.\n\nPuf-Puf chicotește:\n— Le pun lângă biscuiții de motivație.\n\n— Bună combinație: energie și moral, zici tu.",
-      "imageUrl": "images/tol/stories/mechanika-s1/8.reward.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/mechanika-s1/8.reward.png"
     },
     {
       "tileId": "9",
@@ -205,7 +205,7 @@
       "sortOrder": 9,
       "caption": "Privirea înainte",
       "text": "Telescopul intră în repaus, iar ceața din oraș pare mai subțire. Holograma rămâne cu harta adâncită pe ecran, traseele marcate clar. Caseta cu Circuite electrice e prinsă la rucsac.\n\n— Ok, echipă. Următoarea ramură? zice Puf-Puf.\n— Est, pe pasarela principală, propune iepurele negru. E cea mai curată.\n— Confirm, spune Grubot. Indicatorii arată vânt mai slab pe acolo.\n— Atunci est să fie, închei tu. Mergem.",
-      "imageUrl": "images/tol/stories/mechanika-s1/9.ahead.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/mechanika-s1/9.ahead.png"
     }
   ]
 }

@@ -1,7 +1,7 @@
 {
   "storyId": "mechanika-s1",
   "title": "Magnus",
-  "coverImageUrl": "images/tol/stories/mechanika-s1/0.Cover.png",
+  "coverImageUrl": "images/tol/stories/seed@alchimalia.com/mechanika-s1/0.Cover.png",
     "sortOrder": 1,
   "unlockedStoryHeroes": [
     "grubot"
@@ -13,7 +13,7 @@
       "sortOrder": 1,
       "caption": "Fog over Mechanika",
       "text": "You descend into Mechanika through thick, stinging haze: factory smoke, stray sparks, heavy air. The city lights are just blurred spots; the walkways creak, the gears move jerkily.\nPuf-Puf lights the lamp on his collar.\n\n— Visibility: small to very small. Grubot, can you hear us?\nA short beep. Then silence.\n\n— We keep direction by the crystal's pulse, you say.\n— Under pipes, close to the railing, says the black rabbit.\n\nYou wander for a few minutes among pipes, rivets and cold steam, following the crystal's weak pulse.",
-      "imageUrl": "images/tol/stories/mechanika-s1/1.fog.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/mechanika-s1/1.fog.png"
     },
     {
       "tileId": "2",
@@ -21,7 +21,7 @@
       "sortOrder": 2,
       "caption": "Grubot finds you",
       "text": "A clean signal cuts through the fog; a thin beam streaks through the air. From the smoke, Grubot's silhouette takes shape.\n\n— I detected you by the crystal's signature and… a familiar chemical trace: Lunkarot, says the robot Grubot.\nPuf-Puf laughs:\n— Good digital nose.\n— A promise is a promise, continues Grubot. You gave me pulse; I give you vision. Follow me to the Control Tower.",
-      "imageUrl": "images/tol/stories/mechanika-s1/2.grubot.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/mechanika-s1/2.grubot.png"
     },
     {
       "tileId": "3",
@@ -29,7 +29,7 @@
       "sortOrder": 3,
       "caption": "The control tower",
       "text": "You climb the metal stairs, with steps echoing. Upstairs, a colossus awaits you: the Mechanika-Magnus Telescope — tubes, mirrors, gears; the dome opens like a metal flower.\n\n— With this we're looking for my planet? asks Puf-Puf.\n— Normally it scans the city's routes, replies Grubot. But with the crystal adapter we can tune it to your planet's signature.\n— Then we mount it now, you say.",
-      "imageUrl": "images/tol/stories/mechanika-s1/3.control-tower.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/mechanika-s1/3.control-tower.png"
     },
     {
       "tileId": "4",
@@ -37,7 +37,7 @@
       "sortOrder": 4,
       "caption": "What's missing",
       "text": "Grubot folds back the telescope's side panel. Inside you can see an empty socket and thick coils.\n\n— We're missing two things, he says clearly:\n\na stone from Lunaria for the \"Green Eye\" — the piece that calibrates the spectrum;\n\nstored energy for the focusing coils.\n\n— We have a reservoir under the tower: charged, but unstable, adds Grubot.\n— If you have the stone, I mount it now; if not, we prepare the socket and stabilize the coils.",
-      "imageUrl": "images/tol/stories/mechanika-s1/4.missing.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/mechanika-s1/4.missing.png"
     },
     {
       "tileId": "5",
@@ -45,7 +45,7 @@
       "sortOrder": 5,
       "caption": "",
       "text": "",
-      "imageUrl": "images/tol/stories/mechanika-s1/5.quiz.png",
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/mechanika-s1/5.quiz.png",
       "answers": [
         {
           "answerId": "a",
@@ -181,7 +181,7 @@
       "sortOrder": 6,
       "caption": "Focus",
       "text": "The telescope awakens. The mirrors align, the holograms light up, and on them light lines branch out. One route pulses stronger — a thread that calls you.\n\n— Show us Kelo-Ketis! says Puf-Puf.",
-      "imageUrl": "images/tol/stories/mechanika-s1/6.focus.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/mechanika-s1/6.focus.png"
     },
     {
       "tileId": "7",
@@ -189,7 +189,7 @@
       "sortOrder": 7,
       "caption": "The map deepens",
       "text": "Grubot types rapidly.\n— Clear signal. I'm fixing the coordinates and saving the route scheme for opening the portal.\nPuf-Puf smiles briefly:\n— First big step is checked off.",
-      "imageUrl": "images/tol/stories/mechanika-s1/7.map-deepens.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/mechanika-s1/7.map-deepens.png"
     },
     {
       "tileId": "8",
@@ -197,7 +197,7 @@
       "sortOrder": 8,
       "caption": "Workshop reward",
       "text": "Grubot hands you a metal case.\n—(robotic voice) Circuits and connectors. For what comes next.\n\nPuf-Puf giggles:\n— I'll put them next to the motivation cookies.\n\n— Good combination: energy and morale, you say.",
-      "imageUrl": "images/tol/stories/mechanika-s1/8.reward.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/mechanika-s1/8.reward.png"
     },
     {
       "tileId": "9",
@@ -205,7 +205,7 @@
       "sortOrder": 9,
       "caption": "Looking ahead",
       "text": "The telescope enters rest, and the fog in the city seems thinner. The hologram remains with the deepened map on screen, the routes marked clearly. The case with Electric circuits is attached to the backpack.\n\n— Ok, team. Next branch? says Puf-Puf.\n— East, on the main walkway, proposes the black rabbit. It's the cleanest.\n— Confirmed, says Grubot. The indicators show weaker wind there.\n— Then east it is, you conclude. Let's go.",
-      "imageUrl": "images/tol/stories/mechanika-s1/9.ahead.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/mechanika-s1/9.ahead.png"
     }
   ]
 }

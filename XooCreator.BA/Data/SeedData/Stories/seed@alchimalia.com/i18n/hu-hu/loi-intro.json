@@ -1,7 +1,7 @@
 {
   "storyId": "loi-intro",
   "title": "A Béke Eredete",
-  "coverImageUrl": "images/tol/stories/loi-intro/0.cover.png",
+  "coverImageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/0.cover.png",
     "sortOrder": 1,
   "tiles": [
     {
@@ -10,7 +10,7 @@
       "sortOrder": 1,
       "caption": "Két világ, két tábor",
       "text": "Alchimaliában két világ létezett, nagyon közel egymáshoz, de háborúban. Lunaria — a nyuszik bolygója, sárgarépa mezőkkel és üregekkel. Kelo-Ketis — a macskák bolygója, egy császár által vezetve. A határok hidegek voltak, a hidak pedig eltörtek.",
-      "imageUrl": "images/tol/stories/loi-intro/1.two-worlds.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/1.two-worlds.png"
     },
     {
       "tileId": "2",
@@ -18,7 +18,7 @@
       "sortOrder": 2,
       "caption": "Pufus Alchimus Császár",
       "text": "Ketisen Pufus Alchimus Császár uralkodott, egy harcos, aki hódításairól volt ismert. A háború a nyuszikkal már régóta tartott, és a fegyverek hangosabban szóltak, mint a történetek.",
-      "imageUrl": "images/tol/stories/loi-intro/2.emperor.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/2.emperor.png"
     },
     {
       "tileId": "3",
@@ -26,7 +26,7 @@
       "sortOrder": 3,
       "caption": "A kíváncsi fiú",
       "text": "A császárnak egy fia született: Puf-Puf Alchimus. Az apa egy harcost akart. De Puf-Puf szerette a matematikát, az elemekkel való játékokat és az alkímiáról álmodott. Inkább felfedező volt, mint katona.",
-      "imageUrl": "images/tol/stories/loi-intro/3.curious-son.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/3.curious-son.png"
     },
     {
       "tileId": "4",
@@ -34,7 +34,7 @@
       "sortOrder": 4,
       "caption": "Barátok a határon túl",
       "text": "Bár háború volt, a barátság megtalálta az útját. Egy fekete nyuszi és egy fehér macska titokban találkoztak és elmesélték egymásnak a világukat. Nem ellenségeknek tűntek. Kíváncsi gyerekeknek tűntek.",
-      "imageUrl": "images/tol/stories/loi-intro/4.friends.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/4.friends.png"
     },
     {
       "tileId": "5",
@@ -42,7 +42,7 @@
       "sortOrder": 5,
       "caption": "A Lunaria kő",
       "text": "Ketisen Puf-Puf meglepetten látta, ahogy egy zöld követ néz, amit Lunariáról hoztak, smaragdként csillogva.\n\"- Tartsd titokban a barátságunkat, és odaadjuk a követ\", suttogta a nyuszi. Puf-Puf megígérte.",
-      "imageUrl": "images/tol/stories/loi-intro/5.lunaria-stone.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/5.lunaria-stone.png"
     },
     {
       "tileId": "6",
@@ -50,7 +50,7 @@
       "sortOrder": 6,
       "caption": "A zöld-arany folyadék",
       "text": "A kővel Puf-Puf egy elixírt készített. Amikor a fémet érintette, arannyá vált. Nagy öröm! Megosztotta a folyadékot a barátaival — kis kortyok, sok nevetés.",
-      "imageUrl": "images/tol/stories/loi-intro/6.elixir.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/6.elixir.png"
     },
     {
       "tileId": "7",
@@ -58,7 +58,7 @@
       "sortOrder": 7,
       "caption": "Alvás a fa árnyékában",
       "text": "Fáradtan elaludtak egy nagyon magas fa árnyékában. A folyadék lassan a gyökerekhez csorgott. A zöld kő enyhe fénnyel melegítette a földet.",
-      "imageUrl": "images/tol/stories/loi-intro/7.tree-nap.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/7.tree-nap.png"
     },
     {
       "tileId": "8",
@@ -66,7 +66,7 @@
       "sortOrder": 8,
       "caption": "Macska-Nyuszi",
       "text": "Amikor felébredtek, mellettük egy furcsa, szép lény állt: macska grációval és nyuszi szelídséggel. Félelem nélkül nézett rájuk.\n- Szia, én Macska-Nyuszi vagyok! A békét hoztam...",
-      "imageUrl": "images/tol/stories/loi-intro/8.matso-iepurele.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/8.matso-iepurele.png"
     },
     {
       "tileId": "q1",
@@ -74,7 +74,7 @@
       "sortOrder": 9,
       "caption": "",
       "text": "",
-      "imageUrl": "images/tol/stories/loi-intro/9.quiz.png",
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/9.quiz.png",
       "answers": [
         {
           "answerId": "a",
@@ -115,7 +115,7 @@
       "sortOrder": 10,
       "caption": "A béke üzenete",
       "text": "\"Én hordom a békét a világok között\", mondta Macska-Nyuszi. \"Barátságból, kőből és folyadékból született egy híd\", mondta Puf-Puf.\nA háborúk kialszanak, amikor megtanulod jól keverni a dolgokat.\nPuf-Puf megértette, hogy az alkímia nem csak a fémekről szól, hanem a szívekről is.",
-      "imageUrl": "images/tol/stories/loi-intro/10.message.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/10.message.png"
     },
     {
       "tileId": "10",
@@ -123,7 +123,7 @@
       "sortOrder": 11,
       "caption": "Puf-Puf döntése",
       "text": "Aznap Puf-Puf a saját útját választotta: felfedező és alkimista. Világok közötti utakat fog keresni, nem háborúkat. És Macska-Nyuszi egyszer a jelképévé válik, hogy a béke nem csak megtalálható, hanem létrehozható is.",
-      "imageUrl": "images/tol/stories/loi-intro/11.choice.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/11.choice.png"
     },
     {
       "tileId": "12",
@@ -131,7 +131,7 @@
       "sortOrder": 12,
       "caption": "A varázslat",
       "text": "Amikor minden csendes volt, egy titokzatos varázslat miatt Lunaria elszakadt Kelo-Ketistől és örökre eltűnt.\nPuf-Puf: \"-Meg kell tudnom, mi történt, elindulok egy utazásra!\"",
-      "imageUrl": "images/tol/stories/loi-intro/12.the-spell.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/12.the-spell.png"
     },
     {
       "tileId": "13",
@@ -139,7 +139,7 @@
       "sortOrder": 13,
       "caption": "...",
       "text": "Folytatjuk...",
-      "imageUrl": "images/tol/stories/loi-intro/13.tobecontinued.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/13.tobecontinued.png"
     },
     {
       "tileId": "14",
@@ -147,7 +147,7 @@
       "sortOrder": 14,
       "caption": "A Fény Fája",
       "text": "Puf-Puf előtt valami gyönyörű és mégis felismerhetetlen állt. A nagy fa fénnyel telt meg, és innen-onnan suttogások hallatszottak. \"A békét kell keresned... a kristály a kulcs...\" — szólt egy hang a gyökerek felől. Puf-Puf a gyökereknél ásott, és talált egy kristályt, amely mintha beszélt volna hozzá.",
-      "imageUrl": "images/tol/stories/loi-intro/14.tol.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/14.tol.png"
     },
     {
       "tileId": "15",
@@ -155,7 +155,7 @@
       "sortOrder": 15,
       "caption": "Indulás",
       "text": "Elmondta az apjának, hogy el kell mennie, felfedezni. Nem mondhatta el a császárnak, hogy békét akar hozni — ennyi hódítás után ez volt az utolsó, amit a nagy Pufus Alchimus hallani akart. Felszállt a birodalom egyik űrhajójára és elindult...",
-      "imageUrl": "images/tol/stories/loi-intro/15.leavingkk.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/15.leavingkk.png"
     }
   ]
 }

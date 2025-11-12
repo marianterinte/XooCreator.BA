@@ -1,7 +1,7 @@
 {
   "storyId": "lunaria-s1",
   "title": "Linkaro",
-  "coverImageUrl": "images/tol/stories/lunaria-s1/0.Cover.png",
+  "coverImageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s1/0.Cover.png",
     "sortOrder": 1,
   "unlockedStoryHeroes": [
     "linkaro"
@@ -13,7 +13,7 @@
       "sortOrder": 1,
       "caption": "The Portal and the Rabbits' Council",
       "text": "— Hold tight, said Puf-Puf. I'm placing the magnifier over the crystal. Look, the feather of the orange bird, the trophy from Terra. It's the key.\n— And now? asked the black rabbit.\n— The light gathers... Ready. The portal has opened.\n\nYou enter: you, Puf-Puf and the black rabbit. Beyond, a square with crescent-shaped flags.\n\n— Are you travelers from the Tree of Light? asked a councilor.\n— Puf-Puf, reporting, said the kitten. We've come to help.\n— Then listen, said the councilor. An illness weakens our rabbits. We need a cure.\n\n— What are the symptoms? you ask.\n— They tire quickly, hear poorly and lose their courage, he replied.\n\n— I know a place, said the black rabbit. On Black Mountain there's an old monastery. The monks there heal such illnesses.\n— The road is foggy and rocky, but it's worth trying, added another councilor. Take this seal; it opens the monastery gate.\n\n— We'll take it, you say. We're leaving immediately.\n— I'll keep direction by the crystal, said Puf-Puf.\n— And I know the paths, said the black rabbit.\n\nYou take the seal, pass under the crescent flags and set off toward Black Mountain.",
-      "imageUrl": "images/tol/stories/lunaria-s1/1.portal-council.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s1/1.portal-council.png"
     },
     {
       "tileId": "p2",
@@ -21,7 +21,7 @@
       "sortOrder": 2,
       "caption": "Road to Black Mountain",
       "text": "The path climbs hard: stones slip from under your feet, and the wind comes from the front, then pushes you from behind. Fog gathers on the corners of the rocks and seems to bite at the edge of the path. Puf-Puf walks close to the rock, with the crystal at his chest, while the black rabbit tests his footing with each step.\n\n— Hold onto me, says Puf-Puf. It's slippery here.\n— I know a way around, replies the rabbit. Ten more steps and we'll escape this slope.\n— Breathe slowly and press your whole foot down, you add.\n\nAfter the steep slope, the wind calms as if at a signal. The fog breaks into strips and the monastery appears: white walls, simple, clean lines, as if drawn with a ruler. Above the gate, small crescent flags rustle gently, making no noise.\n\n— We've arrived, whispers the rabbit, with visible relief.\n— Beautiful place, says Puf-Puf. It seems to call you to enter.\n— Come on, you knock on the gate, you say. I'll keep the seal ready.",
-      "imageUrl": "images/tol/stories/lunaria-s1/2.white-mountain-road.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s1/2.white-mountain-road.png"
     },
     {
       "tileId": "3",
@@ -29,7 +29,7 @@
       "sortOrder": 3,
       "caption": "The Hall of Silence",
       "text": "In the courtyard, cat and rabbit monks train in silence. You tell them about the illness in the city. They look at each other in surprise: they haven't heard.\n\"You must speak with the grand master,\" says a monk and leads you into a bright room. A silhouette sits with its back turned, meditating.",
-      "imageUrl": "images/tol/stories/lunaria-s1/3.silent-hall.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s1/3.silent-hall.png"
     },
     {
       "tileId": "4",
@@ -37,7 +37,7 @@
       "sortOrder": 4,
       "caption": "Linkaro, the Cat-Rabbit",
       "text": "— Is it... a cat? whispers Puf-Puf.\n— Or a rabbit? you ask.\n— Linkaro, she smiles. I'm a Cat-Rabbit.\n\n— I know the species, nods Puf-Puf. I met one during the wars between cats and rabbits.\n— The wars are over, says Linkaro calmly. I signed the last armistice. Tell me the problem.\n\nYou describe the illness in the city.\n\n— You need the Stones of Life, with healing essence, says Linkaro. You'll find them under a rock overhang — an exposed ledge. Gather them carefully, only those that glow softly.",
-      "imageUrl": "images/tol/stories/lunaria-s1/4.linkaro.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s1/4.linkaro.png"
     },
     {
       "tileId": "5",
@@ -45,7 +45,7 @@
       "sortOrder": 5,
       "caption": "The Stones of Life",
       "text": "On a narrow ridge, under the ledge, green stones glimmer like little hearts. The cold current weakens their pulse at any sudden movement.\n\n— Here it matters how you approach, whispers Puf-Puf. The stones on Lunaria go out if you frighten them.\n— We go one by one, with rare steps, you say.\n— I'll keep the wind in my ears and give you a signal when it's quiet, adds the black rabbit.\n\nWhen the gust stops, you bend down slowly.\n— Keep the pouch open, says Puf-Puf. Don't touch them. Let them fall by themselves.\n— Now, you whisper. Gently.\n\nTwo stones detach softly and fall into the cloth. The third glimmers brighter, then calms down.\n— Three are enough, says Puf-Puf. The rest stay with the mountain.\n— Let's not weaken their breath, agrees the rabbit. We're leaving.",
-      "imageUrl": "images/tol/stories/lunaria-s1/5.life-stones.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s1/5.life-stones.png"
     },
     {
       "tileId": "6",
@@ -53,7 +53,7 @@
       "sortOrder": 6,
       "caption": "",
       "text": "",
-      "imageUrl": "images/tol/stories/lunaria-s1/6.quiz.png",
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s1/6.quiz.png",
       "answers": [
         {
           "answerId": "a",
@@ -149,7 +149,7 @@
       "sortOrder": 7,
       "caption": "Linkaro's Recipe",
       "text": "Back in the quiet hall, Linkaro speaks rarely, so you can note well:\n\n— Water on low heat, to boil gently.\n— Lots of carrot, cut very fine. Local herbs — a small handful is enough.\n— The Stones of Life don't go in the pot. You place them under the vessel, like a nest. They give the essence through heat.\n— When the steam takes on a green shimmer, turn off the heat. It's ready.\n\n— Simple and clean, says Puf-Puf.\n— Clear, you add. We start right now.",
-      "imageUrl": "images/tol/stories/lunaria-s1/7.recipe.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s1/7.recipe.png"
     },
     {
       "tileId": "p7",
@@ -157,7 +157,7 @@
       "sortOrder": 8,
       "caption": "Soup in the City",
       "text": "You return to the Council. In the square, you place the big vessel in the middle; Puf-Puf carefully places the green stones under it, like in a nest. The water begins to simmer on low heat, the finely cut carrot and local herbs settle gently into the pot.\n\n— We follow Linkaro's rule, says Puf-Puf. The stones stay under the vessel.\n— We wait for the green steam, you add. Slowly, without hurry.\n\nWhen the steam takes on an emerald hue, you pour into small cups.\n— One by one, urges the black rabbit. One sip, then breathe.\n\nThe sick rabbits drink one sip each. Their ears rise, their chests calm down, their eyes gain luster. In the square you hear again the rustle of steps, short laughs, gentle talk. The crescent flags flutter lightly — the street's murmur returns.",
-      "imageUrl": "images/tol/stories/lunaria-s1/8.soup-city.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s1/8.soup-city.png"
     },
     {
       "tileId": "p8",
@@ -165,7 +165,7 @@
       "sortOrder": 9,
       "caption": "Signs of Healing",
       "text": "Toward evening, the neighborhoods calm down. A rabbit kit gains courage and makes the first jump, without hesitation. The square seems to breathe lightly.\n\nLinkaro accompanies you to the edge of the square.\n— You've restored the basic balance. Thank you, she says.\n\n— We note, says Puf-Puf: Lunaria responds well to care and planning.\n— And the next step we choose together, you add.\nThe black rabbit nods:\n— In the morning, we'll establish the path.",
-      "imageUrl": "images/tol/stories/lunaria-s1/9.healing.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s1/9.healing.png"
     }
   ]
 }

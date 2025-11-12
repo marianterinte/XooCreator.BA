@@ -1,7 +1,7 @@
 {
   "storyId": "terra-s1",
   "title": "A Farm Árnyéka",
-  "coverImageUrl": "images/tol/stories/terra-s1/0.Cover.png",
+  "coverImageUrl": "images/tol/stories/seed@alchimalia.com/terra-s1/0.Cover.png",
     "sortOrder": 1,
   "tiles": [
     {
@@ -10,7 +10,7 @@
       "sortOrder": 1,
       "caption": "Érkezés",
       "text": "Puf-Puf úgy dönt, hogy felfedezi a bolygót, amelyre éppen leszállt. Együtt sétáltok és néhány óra után egy farm jelenik meg az úton, ahol több falusi lakik. Minden rendben tűnik egy ideig, de az emberek aggódnak és úgy néznek az égre, mint egy nem kívánt vendégre. \nPuf-Puf összeráncolja a bajuszát.\nPuf-Puf: - Vajon miért van a világ ennyire ijedt? Miért áll mindenki úgy, mintha visszatartja a lélegzetét?",
-      "imageUrl": "images/tol/stories/terra-s1/1.arrival.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/terra-s1/1.arrival.png"
     },
     {
       "tileId": "2",
@@ -18,7 +18,7 @@
       "sortOrder": 2,
       "caption": "A furcsa csend",
       "text": "Egy kakas sem kukorékol, egy kutya sem ugat, a tücskök sem találják a kórusukat. A csend nyomja, vastag, mint egy nedves takaró. Puf-Puf rád néz: \"Mintha a természet tízig számolna és nem merne tízre mondani.\"",
-      "imageUrl": "images/tol/stories/terra-s1/2.silence.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/terra-s1/2.silence.png"
     },
     {
       "tileId": "3",
@@ -26,7 +26,7 @@
       "sortOrder": 3,
       "caption": "Az emberek suttogása",
       "text": "Egy öregember apró lépésekkel közeledik.\nÖregember: -Ez... egy árnyék... lejön az égből napnyugtakor. Az állatok menekülnek, a gabonák a földre fekszenek. Azt mondjuk, hogy átok. \nPuf-Puf: - Átok vagy jel, minden okkal van. Fogjuk meg a nyomát!",
-      "imageUrl": "images/tol/stories/terra-s1/3.whispers.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/terra-s1/3.whispers.png"
     },
     {
       "tileId": "4",
@@ -34,7 +34,7 @@
       "sortOrder": 4,
       "caption": "Az első éjszaka",
       "text": "A nap a dombok mögé csorog, és a szél új, nyugtalan zörgést hoz. A felhők felett valami nagy mozog. Árnyék a mezők felett, és a hold mintha félrehúzódna. Puf-Puf egy pillanatra visszatartja a lélegzetét és kissé mosolyog: \"OK... ez nem csak változékony időjárás.\"",
-      "imageUrl": "images/tol/stories/terra-s1/4.first-night.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/terra-s1/4.first-night.png"
     },
     {
       "tileId": "5",
@@ -42,7 +42,7 @@
       "sortOrder": 5,
       "caption": "A föld rezgése",
       "text": "A föld megremeg, először könnyedén, majd mint egy nehéz lépés. A levegő füst és tiszta hamu szagát árasztja, mint egy szikra után. A lefektetett kalásztengerben egy hatalmas sziluett sejlik, amely szaggatottan villog, mint egy sérült világítótorony.",
-      "imageUrl": "images/tol/stories/terra-s1/5.vibration.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/terra-s1/5.vibration.png"
     },
     {
       "tileId": "6",
@@ -50,7 +50,7 @@
       "sortOrder": 6,
       "caption": "A lény",
       "text": "Az árnyékokból egy hatalmas madár tűnik elő, tollakkal, mint a parázs, és kristály szemekkel. A bal szárnya nehezen lóg; minden csapása szikrákat emel, amelyek a vízen kialszanak. Ez nem átok: egy másik világból tévedt lény, aki egy olyan helyre esett, amely még nem érti meg.",
-      "imageUrl": "images/tol/stories/terra-s1/6.creature.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/terra-s1/6.creature.png"
     },
     {
       "tileId": "7",
@@ -58,7 +58,7 @@
       "sortOrder": 7,
       "caption": "A kapcsolat",
       "text": "Puf-Puf lassan közeledik, bólint, majd suttogva szól hozzád: \"A Fény Fájából való. Ha segítünk neki, megmutathat egy rejtett utat a Terán.\" A madár egyenesen néz rád, félelem nélkül; a szemében barázdák és csillagok látszanak. \"Neked jó kezeid vannak\", mondja Puf-Puf mosolyogva. \"És nekem... hasznos megjegyzéseim. Próbáld te először.\"",
-      "imageUrl": "images/tol/stories/terra-s1/7.bond.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/terra-s1/7.bond.png"
     },
     {
       "tileId": "8",
@@ -66,7 +66,7 @@
       "sortOrder": 8,
       "caption": "",
       "text": "",
-      "imageUrl": "images/tol/stories/terra-s1/8.quiz.png",
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/terra-s1/8.quiz.png",
       "answers": [
         {
           "answerId": "a",
@@ -162,7 +162,7 @@
       "sortOrder": 9,
       "caption": "A megnyílt út",
       "text": "A segítségetek után a madár a mellkasához húzza a sérült szárnyát, és nyugodt erőfeszítéssel kinyújtja a másikat. Egy fénycsík szakad ki a tollai közül és új ösvényként vágja át a mezőt. \nPuf-Puf: - Nézd!, mondja Puf-Puf egyfajta játékos büszkeséggel. \nPuf-Puf: - Az út, amely öt perccel ezelőtt még nem létezett.\nA madár felnéz a felhőkre, majd rátok. Puf-Puf egy tollat kap hálából, és tudja, hogy a madár mostantól a falu védelmezője lesz. A nagy, mágikus toll ismeretlen energiát táplál.",
-      "imageUrl": "images/tol/stories/terra-s1/9.path.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/terra-s1/9.path.png"
     }
   ]
 }

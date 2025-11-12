@@ -1,7 +1,7 @@
 {
   "storyId": "lunaria-s2",
   "title": "A jel",
-  "coverImageUrl": "images/tol/stories/lunaria-s2/0.Cover.png",
+  "coverImageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s2/0.Cover.png",
     "sortOrder": 1,
   "unlockedStoryHeroes": [],
   "tiles": [
@@ -11,7 +11,7 @@
       "sortOrder": 1,
       "caption": "Leszállás a város szélén",
       "text": "A portál kialszik mögöttetek. A völgyben narancssárga sárgarépa mezők terülnek el, de furcsa csend van.\nPuf-Puf felemeli a nagyítót a kristályhoz:\n— Túl csendes Lunariához. Füleket hegyezünk.\nA fekete nyuszi bólint:\n— Lassan megyünk.",
-      "imageUrl": "images/tol/stories/lunaria-s2/1.arrival.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s2/1.arrival.png"
     },
     {
       "tileId": "2",
@@ -19,7 +19,7 @@
       "sortOrder": 2,
       "caption": "Ping a sárgarépa mezőkből",
       "text": "A kristály ritmikusan villog, mint egy távoli ping. A sárgarépa sorok között egy szikra rövid ideig felvillan és kialszik.\n— Technikai jel, nem állat, mondja Puf-Puf. Ott.\nA fekete nyuszi forgatja a füleit:\n— Nem szentjánosbogár. Úgy hangzik, mint egy jelzőfény.\nLefeksztek és két párhuzamos sorban haladtok előre, rövid lépésekkel. A földben finom nyomokat és egy vékony vezetéket láttok, félig eltemetve. A ping visszatér: lassabban, aztán megint rövid.\n— Te maradsz balra, mondja Puf-Puf. Én jobbról megyek be.\n— Amikor felemeled a mancsod, megállok, mondod te.\n— Pontosan. Lassan közeledünk, anélkül, hogy megérintenénk a kábelt.",
-      "imageUrl": "images/tol/stories/lunaria-s2/2.ping.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s2/2.ping.png"
     },
     {
       "tileId": "3",
@@ -27,7 +27,7 @@
       "sortOrder": 3,
       "caption": "A hold fácskája alatt",
       "text": "Egy furcsa fácskának az árnyékában egy robot fekszik, bádog házassal. Rövid fülei vannak, mint két antenna, és fekete, kialudt szemek. Egy LED villog: \"...Gru...bot...\".\n\nPuf-Puf, suttogva:\n— Nyuszi modell. Szelíd, de leesett.\n\nA fekete nyuszi lehajol:\n— Újraindíthatjuk?",
-      "imageUrl": "images/tol/stories/lunaria-s2/3.moon-tree.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s2/3.moon-tree.png"
     },
     {
       "tileId": "4",
@@ -35,7 +35,7 @@
       "sortOrder": 4,
       "caption": "A megszakított áramkör",
       "text": "Az elülső panel félig nyitva áll. Belül egy repedt áramkör lassan zizeg és ózon szagot áraszt.\nA fekete nyuszi elővesz egy sárgarépát és mosolyog:\n— Lunarián a sárgarépa nem javít robotokat.\n\n— Nem közvetlenül, javítja ki Puf-Puf. De a Lunkarot rost — az a speciális sárgarépa Lunariáról — jumper helyett szolgálhat, és a leve hűti jól az útvonalakat. A ritmus számít, nem az erő.\n\n— Akkor vágunk egy vékony rostot és lassan csöpögtetünk, mondod te.\n— Pontosan, egyetért Puf-Puf.",
-      "imageUrl": "images/tol/stories/lunaria-s2/4.broken-circuit.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s2/4.broken-circuit.png"
     },
     {
       "tileId": "5",
@@ -43,7 +43,7 @@
       "sortOrder": 5,
       "caption": "",
       "text": "",
-      "imageUrl": "images/tol/stories/lunaria-s2/5.quiz.png",
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s2/5.quiz.png",
       "answers": [
         {
           "answerId": "a",
@@ -139,7 +139,7 @@
       "sortOrder": 6,
       "caption": "Grubot megtalálja a hangját",
       "text": "A hang stabilizálódik, és a fekete szemek kigyulladnak. Az antenna-fülek enyhén megrezzennek.\n\n— Rendszer... stabil, jelenti a robot. Név: Grubot. Modell: nyuszi. Állapot: aktív tudat. Humor mód: kísérleti.\nPuf-Puf mosolyog:\n— Jól áll neked az élet vissza.\n— Köszönöm, válaszolja Grubot. Mágneses mező vihar után tévedtem el. Az otthonom Mechanika. Tudok felszállni, aztán töltésre van szükségem.\n— Jegyezve, mondod te.\n— Mentem a koordinátákat. Amikor megnyitjátok az útvonalat, ott várok rátok, megerősíti Grubot.",
-      "imageUrl": "images/tol/stories/lunaria-s2/6.grubot-talks.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s2/6.grubot-talks.png"
     },
     {
       "tileId": "7",
@@ -147,7 +147,7 @@
       "sortOrder": 7,
       "caption": "Távozás",
       "text": "Grubot hajtóművei könnyedén fütyülnek. Felemelkedik a narancssárga mezők felett, egy rövid kört tesz és a horizont felé repül.\n— Új barát, jövőbeli útvonal. Folytatjuk, mondja Puf-Puf.\nA fekete nyuszi mosolyog:\n— Az út világos: előre.",
-      "imageUrl": "images/tol/stories/lunaria-s2/7.departure.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s2/7.departure.png"
     }
   ]
 }

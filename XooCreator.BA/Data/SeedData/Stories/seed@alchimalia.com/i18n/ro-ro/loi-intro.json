@@ -1,7 +1,7 @@
 {
   "storyId": "loi-intro",
   "title": "Originea Păcii",
-  "coverImageUrl": "images/tol/stories/loi-intro/0.cover.png",
+  "coverImageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/0.cover.png",
     "sortOrder": 1,
   "unlockedStoryHeroes": [],
   "tiles": [
@@ -11,7 +11,7 @@
       "sortOrder": 1,
       "caption": "Două lumi, două tabere",
       "text": "În Alchimalia existau două lumi foarte apropiate, dar aflate în război. \nLunaria, planeta iepurilor, cu câmpii de morcovi și vizuini cat vezi cu ochii si  \nKelo-Ketis, planeta pisicilor, condusă de un împărat razboinic. Granițele erau reci, iar podurile, rupte, desi erau atat de aproape pisicile si iepurii erau dusmani.",
-      "imageUrl": "images/tol/stories/loi-intro/1.two-worlds.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/1.two-worlds.png"
     },
     {
       "tileId": "2",
@@ -19,7 +19,7 @@
       "sortOrder": 2,
       "caption": "Împăratul Pufus Alchimus",
       "text": "Pe Kelo-Ketis domnea Împăratul Pufus Alchimus, un războinic cunoscut pentru cuceriri și pentru setea de luptă. Războiul cu iepurii ținea de mult, iar armele vorbeau mai tare decât poveștile. Împăratul spera că într-o bună zi imperiul său se va întinde pe tot tărâmul Alchimaliei.",
-      "imageUrl": "images/tol/stories/loi-intro/2.emperor.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/2.emperor.png"
     },
     {
       "tileId": "3",
@@ -27,7 +27,7 @@
       "sortOrder": 3,
       "caption": "Fiul cel curios",
       "text": "Împăratului i s-a născut un fiu: Puf-Puf Alchimus, a fost numit. \nTatăl voia un luptător, dar Puf-Puf iubea matematica, jocurile cu elemente și visa la alchemie. Era mai mult explorator decât soldat. Petrece tot timpul in laboratorul sau unde incerca diverse combinatii intre elemente si citea o gramada de scrieri si retete stravechi.",
-      "imageUrl": "images/tol/stories/loi-intro/3.curious-son.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/3.curious-son.png"
     },
     {
       "tileId": "4",
@@ -35,7 +35,7 @@
       "sortOrder": 4,
       "caption": "Prieteni peste graniță",
       "text": "Deși era război, prietenia își găsea drum. Un iepure negru și o pisică albă se întâlneau în secret și își povesteau lumea, se jucau când pe Lunaria, când pe Ketis. Nu semănau a dușmani. Semănau cu doi copii curioși.",
-      "imageUrl": "images/tol/stories/loi-intro/4.friends.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/4.friends.png"
     },
     {
       "tileId": "5",
@@ -43,7 +43,7 @@
       "sortOrder": 5,
       "caption": "Piatra din Lunaria",
       "text": "Pe Ketis, Puf-Puf i-a surprins privind o piatră verde adusă de pe Lunaria, lucind ca un smarald. \n„ - Ține-ne secretul prieteniei și îți dăm piatra”, i-a șoptit iepurele. \nPuf-Puf a promis.",
-      "imageUrl": "images/tol/stories/loi-intro/5.lunaria-stone.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/5.lunaria-stone.png"
     },
     {
       "tileId": "6",
@@ -51,7 +51,7 @@
       "sortOrder": 6,
       "caption": "Licoarea verde-aurie",
       "text": "Cu piatra, Puf-Puf a făcut un elixir. Când atingea metalul, acesta devenea aur. Bucurie mare! S-au gandit sa si bea, descoperind ca acesta are un gust bun, a împărțit licoarea cu prietenii — mici înghițituri, multe râsete.",
-      "imageUrl": "images/tol/stories/loi-intro/6.elixir.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/6.elixir.png"
     },
     {
       "tileId": "7",
@@ -59,7 +59,7 @@
       "sortOrder": 7,
       "caption": "Somn la umbra copacului",
       "text": "Obosiți, au adormit la umbra unui copac foarte înalt. Licoarea s-a scurs încet la rădăcini. Piatra verde încălzea pământul cu o lumină blândă.",
-      "imageUrl": "images/tol/stories/loi-intro/7.tree-nap.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/7.tree-nap.png"
     },
     {
       "tileId": "8",
@@ -67,7 +67,7 @@
       "sortOrder": 8,
       "caption": "Mâțo-Iepurele",
       "text": "Când s-au trezit, lângă ei stătea o ființă ciudată, frumoasă: cu grația unei pisici și blândețea unui iepure. Se uita la ei fără teamă.\n- Buna eu sunt Mâțo-Iepurele! Am venit sa aduc Pacea...",
-      "imageUrl": "images/tol/stories/loi-intro/8.matso-iepurele.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/8.matso-iepurele.png"
     },
     {
       "tileId": "q1",
@@ -75,7 +75,7 @@
       "sortOrder": 9,
       "caption": "",
       "text": "",
-      "imageUrl": "images/tol/stories/loi-intro/9.quiz.png",
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/9.quiz.png",
       "answers": [
         {
           "answerId": "a",
@@ -116,7 +116,7 @@
       "sortOrder": 10,
       "caption": "Mesajul păcii",
       "text": "„Eu port pacea dintre lumi”, a spus Mâțo-Iepurele. „Din prietenie, piatră și licoare s-a născut un pod, a spus Puf-Puf.\nRăzboaiele se sting când înveți să amesteci bine lucrurile.” \nPuf-Puf a înțeles că alchimia nu e doar despre metale, ci și despre inimi.",
-      "imageUrl": "images/tol/stories/loi-intro/10.message.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/10.message.png"
     },
     {
       "tileId": "10",
@@ -124,7 +124,7 @@
       "sortOrder": 11,
       "caption": "Hotărârea lui Puf-Puf",
       "text": "În acea zi, Puf-Puf era bucuruos ca alesese sa fie un alchimist. Va căuta căi între lumi, nu războaie. Iar Mâțo-Iepurele avea să devină, cândva, semnul că pacea poate fi creată, nu doar găsită.",
-      "imageUrl": "images/tol/stories/loi-intro/11.choice.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/11.choice.png"
     },
     {
       "tileId": "12",
@@ -132,7 +132,7 @@
       "sortOrder": 12,
       "caption": "Vraja",
       "text": "Puf-Puf stătea chiar la granița dintre planete când iepurele păși înapoi pe Lunaria, vrând să-l conducă acasă în secret. Când totul era liniștit, o vrajă misterioasă făcu ca Lunaria să se desprindă de Kelo-Ketis și să dispară pentru totdeauna. Mâțo-Iepurele dispăruse și el.\n\nPuf-Puf: „Trebuie să aflu ce s-a întâmplat!” Și, cu pași grăbiți, merse din nou spre copac.",
-      "imageUrl": "images/tol/stories/loi-intro/12.the-spell.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/12.the-spell.png"
     },
     {
       "tileId": "13",
@@ -140,7 +140,7 @@
       "sortOrder": 13,
       "caption": "...",
       "text": "Ruptura dintre lumi era plina de mister, Puf-Puf ajunse repede in dreptul copacului care se transforamsera incredibil in ceva plin de lumina si mister.",
-      "imageUrl": "images/tol/stories/loi-intro/13.tobecontinued.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/13.tobecontinued.png"
     },
     {
       "tileId": "14",
@@ -148,7 +148,7 @@
       "sortOrder": 14,
       "caption": "Copacul luminii",
       "text": "În fața lui Puf-Puf se afla ceva atât de frumos și, totodată, de nerecunoscut. Marele copac devenise plin de lumină, iar din loc în loc se auzeau șoapte.\n„Trebuie să cauți pacea... cristalul este cheia...”, se auzi de undeva, din rădăcina copacului.\nPuf-Puf săpă la rădăcina copacului și găsi un cristal care părea să comunice cu el.",
-      "imageUrl": "images/tol/stories/loi-intro/14.tol.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/14.tol.png"
     },
     {
       "tileId": "15",
@@ -156,14 +156,14 @@
       "sortOrder": 15,
       "caption": "Plecarea",
       "text": "Îi spuse tatălui său că trebuie să plece, să exploreze; nu putea să-i spună Împăratului că vrea să aducă tocmai pacea — după atâta muncă de cucerire, acesta era ultimul lucru pe care marele Pufus Alchimus ar fi vrut să-l audă. Se urcă într-una dintre navele spațiale ale Imperiului și plecă.",
-      "imageUrl": "images/tol/stories/loi-intro/15.leavingkk.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/15.leavingkk.png"
     },
     {
       "tileId": "16",
       "type": "video",
       "sortOrder": 16,
       "caption": "Crystal",
-      "imageUrl": "video/tol/stories/loi-intro/tol-cristal.mp4"
+      "imageUrl": "video/tol/stories/seed@alchimalia.com/loi-intro/tol-cristal.mp4"
     }
   ]
 }

@@ -1,7 +1,7 @@
 {
   "storyId": "lunaria-s1",
   "title": "Linkaro",
-  "coverImageUrl": "images/tol/stories/lunaria-s1/0.Cover.png",
+  "coverImageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s1/0.Cover.png",
     "sortOrder": 1,
   "unlockedStoryHeroes": [
     "linkaro"
@@ -13,7 +13,7 @@
       "sortOrder": 1,
       "caption": "A portál és a Nyuszik Tanácsa",
       "text": "— Kapaszkodj jól, mondta Puf-Puf. Ráhelyezem a nagyítót a kristályra. Nézd, a narancssárga madár tollát, a trófeát a Teráról. Ez a kulcs.\n— És most? kérdezte a fekete nyuszi.\n— A fény összegyűlik... Kész. Megnyílt a portál.\n\nBeléptek: te, Puf-Puf és a fekete nyuszi. Túl, egy tér félhold alakú zászlókkal.\n\n— Utazók vagytok a Fény Fájából? kérdezte egy tanácsos.\n— Puf-Puf, jelentkezem, mondta a kiscica. Azért jöttünk, hogy segítsünk.\n— Akkor hallgassatok, mondta a tanácsos. Egy betegség gyengíti a nyuszinkat. Szükségünk van egy gyógyírra.\n\n— Milyenek a tünetek? kérdezed te.\n— Gyorsan elfáradnak, rosszabbul hallanak és elvesztik a bátorságukat, válaszolta.\n\n— Tudok egy helyet, mondta a fekete nyuszi. A Fekete Hegyen van egy régi kolostor. A szerzetesek ott gyógyítanak ilyen betegségeket.\n— Az út ködös és sziklás, de érdemes megpróbálni, tette hozzá egy másik tanácsos. Vegyétek el ezt a pecsétet; ez nyitja a kolostor kapuját.\n\n— Elvesszük, mondod te. Azonnal indulunk.\n— Én a kristály szerint tartom az irányt, mondta Puf-Puf.\n— Én pedig ismerem az ösvényeket, mondta a fekete nyuszi.\n\nElveszitek a pecsétet, áthaladtok a félhold zászlók alatt és elindultok a Fekete Hegy felé.",
-      "imageUrl": "images/tol/stories/lunaria-s1/1.portal-council.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s1/1.portal-council.png"
     },
     {
       "tileId": "p2",
@@ -21,7 +21,7 @@
       "sortOrder": 2,
       "caption": "Az út a Fekete Hegy felé",
       "text": "Az ösvény nehezen emelkedik: a kövek csúsznak a talp alól, a szél előbb elöl jön, aztán hátulról tol. A köd a sziklák sarkain gyűlik össze és mintha harapna az ösvény széléről. Puf-Puf a sziklához simulva jár, a kristályt a mellkasán, míg a fekete nyuszi minden lépésnél teszteli a támaszt.\n\n— Kapaszkodj belém, mondja Puf-Puf. Itt csúszik.\n— Ismerek egy kerülőt, válaszolja a nyuszi. Még tíz lépés és kiszabadulunk ebből a lejtőből.\n— Ritkán lélegezz és nyomd le a teljes talpat, teszed hozzá te.\n\nA meredek lejtő után a szél mintha egy jelre csendesedne. A köd csíkokra törik és megjelenik a kolostor: fehér falak, egyszerű, tiszta vonalak, mintha vonalzóval rajzolták volna. A kapu felett félhold zászlócskák finoman susognak, zajt nem csapnak.\n\n— Megérkeztünk, suttogja a nyuszi, látható megkönnyebbüléssel.\n— Szép hely, mondja Puf-Puf. Mintha hívna, hogy belépj.\n— Gyerünk, kopogj a kapun, mondod te. Én a pecsétet készenlétben tartom.",
-      "imageUrl": "images/tol/stories/lunaria-s1/2.white-mountain-road.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s1/2.white-mountain-road.png"
     },
     {
       "tileId": "3",
@@ -29,7 +29,7 @@
       "sortOrder": 3,
       "caption": "A Csend Csarnoka",
       "text": "Az udvaron macska és nyuszi szerzetesek csendben gyakorolnak. Elmesélitek nekik a város betegségét. Csodálkozva néznek egymásra: nem hallottak róla.\n\"A nagy mesterrel kell beszélnetek\", mondja egy szerzetes és egy világos helyiségbe vezet. Egy sziluett hátat fordítva meditál.",
-      "imageUrl": "images/tol/stories/lunaria-s1/3.silent-hall.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s1/3.silent-hall.png"
     },
     {
       "tileId": "4",
@@ -37,7 +37,7 @@
       "sortOrder": 4,
       "caption": "Linkaro, Macska-Nyuszi",
       "text": "— Ez... macska? suttogja Puf-Puf.\n— Vagy nyuszi? kérdezed te.\n— Linkaro, mosolyog. Macska-Nyuszi vagyok.\n\n— Ismerem a fajtát, bólint Puf-Puf. Találkoztam egyet a macskák és nyuszik közötti háborúk idején.\n— A háborúk véget értek, mondja nyugodtan Linkaro. Én írtam alá az utolsó fegyverszünetet. Mondjátok el a problémát.\n\nElmagyarázzátok a város betegségét.\n\n— Az Élet Köveire van szükségetek, gyógyító esszenciával, mondja Linkaro. Egy szikla párkány alatt találjátok — egy kiugró szikla. Óvatosan szedjétek le, csak azokat, amelyek finoman világítanak.",
-      "imageUrl": "images/tol/stories/lunaria-s1/4.linkaro.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s1/4.linkaro.png"
     },
     {
       "tileId": "5",
@@ -45,7 +45,7 @@
       "sortOrder": 5,
       "caption": "Az Élet Kövei",
       "text": "Egy keskeny gerincen, a párkány alatt zöld kövek csillognak, mint kis szívek. A hideg légáramlat gyengíti a pulzusukat bármilyen hirtelen mozgásnál.\n\n— Itt számít, hogyan közeledsz, suttogja Puf-Puf. A Lunaria kövei kialszanak, ha megijeszted őket.\n— Egyenként megyünk, ritka lépésekkel, mondod te.\n— A széllel a fülemben tartom és jelzek, amikor csendes, teszi hozzá a fekete nyuszi.\n\nAmikor a szélroham megáll, lassan lehajoltok.\n— Tartsd nyitva a zsákot, mondja Puf-Puf. Ne érintsd meg őket. Hagyd, hogy maguktól essenek le.\n— Most, suttogod. Finoman.\n\nKét kő finoman levánd és a vászonba esik. A harmadik erősebben csillog, aztán megnyugszik.\n— Három elég, mondja Puf-Puf. A többi a heggyel marad.\n— Ne gyengítsük a leheletüket, egyetért a nyuszi. Indulunk.",
-      "imageUrl": "images/tol/stories/lunaria-s1/5.life-stones.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s1/5.life-stones.png"
     },
     {
       "tileId": "6",
@@ -53,7 +53,7 @@
       "sortOrder": 6,
       "caption": "",
       "text": "",
-      "imageUrl": "images/tol/stories/lunaria-s1/6.quiz.png",
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s1/6.quiz.png",
       "answers": [
         {
           "answerId": "a",
@@ -149,7 +149,7 @@
       "sortOrder": 7,
       "caption": "Linkaro receptje",
       "text": "Vissza a csendes csarnokba, Linkaro ritkán beszél, hogy jól jegyezzétek:\n\n— Vízet kis lángon, hogy finoman forraljon.\n— Sok sárgarépa, nagyon finomra vágva. Helyi füvek — egy kis marék elég.\n— Az Élet Kövei nem kerülnek a fazékba. A fazék alá helyezitek, mint egy fészket. A hőn keresztül adják az esszenciát.\n— Amikor a gőz zöld csillogást kap, kapcsoljátok le a tüzet. Kész.\n\n— Egyszerű és tiszta, mondja Puf-Puf.\n— Világos, teszed hozzá te. Most kezdjük.",
-      "imageUrl": "images/tol/stories/lunaria-s1/7.recipe.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s1/7.recipe.png"
     },
     {
       "tileId": "p7",
@@ -157,7 +157,7 @@
       "sortOrder": 8,
       "caption": "Leves a városban",
       "text": "Visszatértek a Tanácshoz. A téren a közepére teszitek a nagy edényt; Puf-Puf óvatosan a zöld köveket alá helyezi, mint egy fészket. A víz kis lángon kezd bugyogni, a finomra vágott sárgarépa és a helyi füvek finoman leülepednek a fazékba.\n\n— Linkaro szabályát követjük, mondja Puf-Puf. A kövek az edény alatt maradnak.\n— A zöld gőzt várjuk, teszed hozzá te. Lassan, sietség nélkül.\n\nAmikor a gőz smaragd árnyalatot kap, kis csészékbe öntitek.\n— Egyenként, sürgeti a fekete nyuszi. Egy korty, aztán lélegezzetek.\n\nA beteg nyuszik egy-egy kortyot isznak. A füleik felemelkednek, a mellkasuk megnyugszik, a szemeik fényt kapnak. A téren újra halljátok a lépések susogását, rövid nevetést, szelíd beszédet. A félhold zászlók finoman lobognak — az utca zúgása visszatér.",
-      "imageUrl": "images/tol/stories/lunaria-s1/8.soup-city.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s1/8.soup-city.png"
     },
     {
       "tileId": "p8",
@@ -165,7 +165,7 @@
       "sortOrder": 9,
       "caption": "Gyógyulás jelei",
       "text": "Estére a negyedek megnyugszanak. Egy nyuszi kölyök bátorságot kap és az első ugrást teszi, habozás nélkül. A tér mintha könnyedén lélegezne.\n\nLinkaro a tér széléig kísér titeket.\n— Visszahoztátok az alapvető egyensúlyt. Köszönöm, mondja.\n\n— Jegyezzük, mondja Puf-Puf: Lunaria jól reagál a gondoskodásra és a tervezésre.\n— A következő lépést együtt választjuk, teszed hozzá te.\nA fekete nyuszi bólint:\n— Reggel megállapítjuk az utat.",
-      "imageUrl": "images/tol/stories/lunaria-s1/9.healing.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s1/9.healing.png"
     }
   ]
 }

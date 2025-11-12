@@ -112,7 +112,7 @@ public sealed class GetUserBestiaryEndpoint
             Console.WriteLine($"Error reading story hero image path for {heroId}: {ex.Message}");
         }
 
-        return $"images/tol/stories/heroes/{heroId}.png"; // Fallback
+        return $"images/tol/stories/seed@alchimalia.com/heroes/{heroId}.png"; // Fallback
     }
 
     private string TranslateText(string text, string bestiaryType, string locale, Dictionary<string, string> translations, string? armsKey = null, string? bodyKey = null, string? headKey = null)

@@ -412,7 +412,7 @@ public class TreeOfLightService : ITreeOfLightService
                 });
 
                 var hero = storyHeroesData?.StoryHeroes?.FirstOrDefault(h => h.HeroId == heroId);
-                return hero?.ImageUrl ?? $"images/tol/stories/heroes/{heroId}.png";
+                return hero?.ImageUrl ?? $"images/tol/stories/seed@alchimalia.com/heroes/{heroId}.png";
             }
         }
         catch (Exception ex)
@@ -420,7 +420,7 @@ public class TreeOfLightService : ITreeOfLightService
             Console.WriteLine($"Error reading hero image URL for {heroId}: {ex.Message}");
         }
 
-        return $"images/tol/stories/heroes/{heroId}.png"; // Fallback image URL
+        return $"images/tol/stories/seed@alchimalia.com/heroes/{heroId}.png"; // Fallback image URL
     }
 
     private async Task UpdateDiscoveryCreditsAsync(Guid userId, int discoveryCredits, string storyId)

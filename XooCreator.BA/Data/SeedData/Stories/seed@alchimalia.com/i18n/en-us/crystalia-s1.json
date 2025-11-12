@@ -1,7 +1,7 @@
 {
   "storyId": "crystalia-s1",
   "title": "Crystalia",
-  "coverImageUrl": "images/tol/stories/crystalia-s1/0.Cover.png",
+  "coverImageUrl": "images/tol/stories/seed@alchimalia.com/crystalia-s1/0.Cover.png",
   "sortOrder": 1,
   "unlockedStoryHeroes": [],
   "tiles": [
@@ -11,7 +11,7 @@
       "sortOrder": 1,
       "caption": "Crystalia",
       "text": "Crystalia",
-      "imageUrl": "images/tol/stories/crystalia-s1/0.Cover.png",
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/crystalia-s1/0.Cover.png",
       "question": ""
     }
   ]

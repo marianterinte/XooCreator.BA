@@ -94,31 +94,31 @@
     {
       "storyId": "intro-pufpuf",
       "regionId": "gateway",
-      "rewardImageUrl": "images/tol/stories/intro-pufpuf/0.Cover.png",
+      "rewardImageUrl": "images/tol/stories/seed@alchimalia.com/intro-pufpuf/0.Cover.png",
       "sortOrder": 1
     },
     {
       "storyId": "terra-s1",
       "regionId": "terra",
-      "rewardImageUrl": "images/tol/stories/terra-s1/0.Cover.png",
+      "rewardImageUrl": "images/tol/stories/seed@alchimalia.com/terra-s1/0.Cover.png",
       "sortOrder": 1
     },
     {
       "storyId": "terra-s2",
       "regionId": "terra",
-      "rewardImageUrl": "images/tol/stories/terra-s2/0.Cover.png",
+      "rewardImageUrl": "images/tol/stories/seed@alchimalia.com/terra-s2/0.Cover.png",
       "sortOrder": 2
     },
     {
       "storyId": "lunaria-s1",
       "regionId": "lunaria",
-      "rewardImageUrl": "images/tol/stories/lunaria-s1/0.Cover.png",
+      "rewardImageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s1/0.Cover.png",
       "sortOrder": 1
     },
     {
       "storyId": "lunaria-s2",
       "regionId": "lunaria",
-      "rewardImageUrl": "images/tol/stories/lunaria-s2/0.Cover.png",
+      "rewardImageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s2/0.Cover.png",
       "sortOrder": 2
     },
     {

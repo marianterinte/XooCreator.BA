@@ -1,7 +1,7 @@
 {
   "storyId": "terra-s1",
   "title": "Umbra de la Fermă",
-  "coverImageUrl": "images/tol/stories/terra-s1/0.Cover.png",
+  "coverImageUrl": "images/tol/stories/seed@alchimalia.com/terra-s1/0.Cover.png",
   "sortOrder": 1,
   "unlockedStoryHeroes": [],
   "tiles": [
@@ -11,7 +11,7 @@
       "sortOrder": 1,
       "caption": "Sosirea",
       "text": "Puf-Puf decide să exploreze planeta pe care tocmai a aterizat. Mergeți împreună și după câteva ore, o fermă, unde sunt mai mulți săteni, vă iese în cale. Totul pare în ordine o perioadă, dar oamenii își sunt îngrijorați și privesc cerul ca pe un oaspete nepoftit. \\\nPuf-Puf își încrețește mustățile.\\\nPuf-Puf: - Oare de ce e lumea așa de speriată? De ce toți stau de parcă își țin respirația?",
-      "imageUrl": "images/tol/stories/terra-s1/1.arrival.png",
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/terra-s1/1.arrival.png",
       "question": ""
     },
     {
@@ -20,7 +20,7 @@
       "sortOrder": 2,
       "caption": "Tăcerea stranie",
       "text": "Niciun cocoș nu cântă, niciun câine nu latră, nici greierii nu-și găsesc corul. Liniștea apasă, groasă, ca o pătură udă. Puf-Puf se uită la tine.\\nPuf-Puf: - E ca și cum natura ar număra până la zece și n-ar îndrăzni să spună: zece!",
-      "imageUrl": "images/tol/stories/terra-s1/2.silence.png",
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/terra-s1/2.silence.png",
       "question": ""
     },
     {
@@ -29,7 +29,7 @@
       "sortOrder": 3,
       "caption": "Șoaptele oamenilor",
       "text": "Un bătrân se apropie cu pași mărunți.\\nBătrânul: -E… o umbră... coboară din cer la apus. Animalele fug, grânele se culcă la pământ. Zicem că-i un blestem. \\nPuf-Puf: - Blestem sau semn, tot o cauză are. Hai să prindem urma!",
-      "imageUrl": "images/tol/stories/terra-s1/3.whispers.png",
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/terra-s1/3.whispers.png",
       "question": ""
     },
     {
@@ -38,7 +38,7 @@
       "sortOrder": 4,
       "caption": "Prima noapte",
       "text": "Soarele se scurge după dealuri, iar vântul aduce un foșnet nou, neliniștit. Deasupra norilor, ceva mare se mișcă. Umbră peste câmpuri, iar luna parcă se dă la o parte. Puf-Puf își ține respirația o clipă și zâmbește puțin: \\nPuf-Puf:- OK… asta nu e doar vreme schimbătoare.",
-      "imageUrl": "images/tol/stories/terra-s1/4.first-night.png",
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/terra-s1/4.first-night.png",
       "question": ""
     },
     {
@@ -47,7 +47,7 @@
       "sortOrder": 5,
       "caption": "Vibrația pământului",
       "text": "Pământul tresare, ușor la început, apoi ca un pas greoi. Aerul miroase a fum și a cenușă curată, ca după o scânteie. În lanul culcat, se ghicește o siluetă uriașă care pâlpâie intermitent, ca un far rănit.",
-      "imageUrl": "images/tol/stories/terra-s1/5.vibration.png",
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/terra-s1/5.vibration.png",
       "question": ""
     },
     {
@@ -56,7 +56,7 @@
       "sortOrder": 6,
       "caption": "Creatura",
       "text": "Din umbre iese la iveală o pasăre imensă, cu pene ca jarul și ochi de cristal. Aripa stângă îi atârnă grea; fiecare bătaie ridică scântei care se sting pe apă. Nu e un blestem: e o ființă rătăcită din altă lume, căzută într-un loc care nu o înțelege încă.",
-      "imageUrl": "images/tol/stories/terra-s1/6.creature.png",
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/terra-s1/6.creature.png",
       "question": ""
     },
     {
@@ -65,7 +65,7 @@
       "sortOrder": 7,
       "caption": "Legătura",
       "text": "Puf-Puf se apropie încet, îți face semn din cap și apoi îți vorbește pe șoptite.\\nPuf-Puf: - E din Copacul Luminii! Dacă o ajutăm, ne poate arăta un drum ascuns pe Terra. \\nPasărea te privește drept, fără teamă; în ochii ei se văd brazde și stele. \\nPuf-Puf: - Tu ai mâini bune, zice Puf-Puf cu un zâmbet. \\nPuf-Puf: - Și eu am… comentarii utile. Încearcă tu primul!",
-      "imageUrl": "images/tol/stories/terra-s1/7.bond.png",
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/terra-s1/7.bond.png",
       "question": ""
     },
     {
@@ -74,7 +74,7 @@
       "sortOrder": 8,
       "caption": "",
       "text": "",
-      "imageUrl": "images/tol/stories/terra-s1/8.quiz.png",
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/terra-s1/8.quiz.png",
       "question": "Cum ajuți pasărea rănită?",
       "answers": [
         {
@@ -170,7 +170,7 @@
       "sortOrder": 9,
       "caption": "Drumul deschis",
       "text": "După ajutorul vostru, pasărea își strânge aripa rănită la piept și, cu un efort calm, își întinde cealaltă. O dungă de lumină se desprinde din penele ei și taie câmpul ca o potecă nouă. \\nPuf-Puf: - Uite-l!, spune Puf-Puf, cu un fel de mândrie jucăușă. \\nPuf-Puf: - Drumul care n-a existat până acum cinci minute.\\nPasărea ridică privirea spre nori, apoi către voi. Puf-Puf primește o pană, în semn de recunoștință, și știe că pasărea va deveni, de acum înainte, protectoarea satului. Pana cea mare, magică, alimentează o energie nebănuită.",
-      "imageUrl": "images/tol/stories/terra-s1/9.path.png",
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/terra-s1/9.path.png",
       "question": ""
     }
   ]

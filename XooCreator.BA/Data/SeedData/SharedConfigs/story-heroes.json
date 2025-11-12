@@ -3,7 +3,7 @@
     {
       "id": "puf-puf",
       "heroId": "puf-puf",
-      "imageUrl": "images/tol/stories/intro-pufpuf/heroes/pufpufblink.gif",
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/intro-pufpuf/heroes/pufpufblink.gif",
       "unlockConditions": {
         "type": "story_completion",
         "requiredStories": ["intro-pufpuf"],
@@ -13,7 +13,7 @@
     {
       "id": "linkaro",
       "heroId": "linkaro",
-      "imageUrl": "images/tol/stories/lunaria-s1/heroes/linkaro.png",
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/lunaria-s1/heroes/linkaro.png",
       "unlockConditions": {
         "type": "story_completion",
         "requiredStories": ["lunaria-s1"],
@@ -23,7 +23,7 @@
     {
       "id": "grubot",
       "heroId": "grubot",
-      "imageUrl": "images/tol/stories/mechanika-s1/heroes/grubot.png",
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/mechanika-s1/heroes/grubot.png",
       "unlockConditions": {
         "type": "story_completion",
         "requiredStories": ["mechanika-s1"],

@@ -1,7 +1,7 @@
 {
   "storyId": "terra-s2",
   "title": "Egy új barát",
-  "coverImageUrl": "images/tol/stories/terra-s2/0.Cover.png",
+  "coverImageUrl": "images/tol/stories/seed@alchimalia.com/terra-s2/0.Cover.png",
     "sortOrder": 1,
   "tiles": [
     {
@@ -10,7 +10,7 @@
       "sortOrder": 1,
       "caption": "Cél: A Hold Lencséje",
       "text": "Puf-Puf Császár nem javította meg a hajóját, és a Földről sem tudja, hol van a Kelo-Ketishez képest. Hallott azonban egy ritka műtárgyról: a Hold Lencséjéről. Vele a kristály megnagyobbítja a térképet, és mélyebben kereshetitek a Kelo-Ketis felé vezető útvonalat. A cél alacsony sziklák és magas fű területét jelzi, egy erdő szélén.",
-      "imageUrl": "images/tol/stories/terra-s2/1.target.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/terra-s2/1.target.png"
     },
     {
       "tileId": "2",
@@ -18,7 +18,7 @@
       "sortOrder": 2,
       "caption": "Furcsa nyomok",
       "text": "A füvben kis, cikkcakkos nyomok tűnnek fel, amelyek egy üreges rönk mellett tűnnek el. Mellettük \"művészien megkóstolt\" sárgarépa farkok.",
-      "imageUrl": "images/tol/stories/terra-s2/2.tracks.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/terra-s2/2.tracks.png"
     },
     {
       "tileId": "3",
@@ -26,7 +26,7 @@
       "sortOrder": 3,
       "caption": "A fekete nyuszi",
       "text": "A rönkből egy fekete nyuszi ugrik ki, matt bundával és nagy szemekkel. \"Szia! Én... néha itt vagyok, néha Lunarián. Attól függ, hogyan pislogsz\", mondja, majd nevet. \"Tudom, hol van a Lencse. És segítségre van szükségem, hogy hazajussak Lunariára. Ha segítetek, megmutatom az utat a Lencséhez.\"\nPuf-Puf: \"Lunaria? mintha ismerném ezt a bolygót... menjünk...\"",
-      "imageUrl": "images/tol/stories/terra-s2/3.black-rabbit.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/terra-s2/3.black-rabbit.png"
     },
     {
       "tileId": "4",
@@ -34,7 +34,7 @@
       "sortOrder": 4,
       "caption": "A lencse helye",
       "text": "A nyuszi vezetésével egy rövid, hideg barlanghoz érkeztek, ahol a víz a bokáig ér. A mennyezeten halvány kristályok lógnak; egy sziklán egy áttetsző korong — a Hold Lencséje — két kőkinövés között szorulva.",
-      "imageUrl": "images/tol/stories/terra-s2/4.cave.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/terra-s2/4.cave.png"
     },
     {
       "tileId": "5",
@@ -42,7 +42,7 @@
       "sortOrder": 5,
       "caption": "A kis probléma",
       "text": "Amikor megérinted a sziklát, a víz hullámokat csinál és a bejárat mintha \"lélegzik\", kissé összehúzódva. \"Érzékeny barlang\", mondja a nyuszi. \"Jól csinálod, kijáratot kapsz. Rosszul csinálod, hideg zuhanyt kapsz.\"",
-      "imageUrl": "images/tol/stories/terra-s2/5.problem.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/terra-s2/5.problem.png"
     },
     {
       "tileId": "6",
@@ -50,7 +50,7 @@
       "sortOrder": 6,
       "caption": "",
       "text": "",
-      "imageUrl": "images/tol/stories/terra-s2/6.quiz.png",
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/terra-s2/6.quiz.png",
       "answers": [
         {
           "answerId": "a",
@@ -121,7 +121,7 @@
       "sortOrder": 7,
       "caption": "A siker",
       "text": "A Lencse tiszta, anélkül, hogy megzavarná a barlangot. A nyuszi tapsol: \"Bravó! Oldalirányban jobb, mint egyenesen!\" A Lencsét a kristályra teszed, és a térkép képe tisztul. A nyuszi határozottan rád néz: \"Tartjuk a kapcsolatot. Haza akarok menni Lunariára — megígéred, hogy segítesz?\"\nMost már tudjátok, hol van Lunaria: nem, nem a Hold, hanem egy távoli bolygó a Földtől. Ha lenne energiaforrásunk, talán együtt megjavíthatnánk a hajót...",
-      "imageUrl": "images/tol/stories/terra-s2/7.success.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/terra-s2/7.success.png"
     }
   ]
 }

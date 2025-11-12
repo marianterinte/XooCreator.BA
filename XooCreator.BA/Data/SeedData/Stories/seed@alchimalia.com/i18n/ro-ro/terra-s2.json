@@ -1,7 +1,7 @@
 {
   "storyId": "terra-s2",
   "title": "Un nou prieten",
-  "coverImageUrl": "images/tol/stories/terra-s2/0.Cover.png",
+  "coverImageUrl": "images/tol/stories/seed@alchimalia.com/terra-s2/0.Cover.png",
     "sortOrder": 1,
   "tiles": [
     {
@@ -10,7 +10,7 @@
       "sortOrder": 1,
       "caption": "Ținta: Lentila Lunii",
       "text": "Împăratul Puf-Puf nu și-a reparat nava, iar despre Pământ habar nu are unde se află față de Kelo-Ketis. A auzit, în schimb, de un artefact rar: Lentila Lunii. Cu ea, cristalul mărește harta și puteți căuta mai adânc ruta spre Kelo-Ketis. Ținta indică o zonă cu stânci joase și iarbă înaltă, la marginea unei păduri.",
-      "imageUrl": "images/tol/stories/terra-s2/1.target.png",
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/terra-s2/1.target.png",
       "question": ""
     },
     {
@@ -19,7 +19,7 @@
       "sortOrder": 2,
       "caption": "Urme ciudate",
       "text": "În iarbă apar urme mici, în zigzag, care dispar lângă un buștean scobit. Pe lângă ele, cozi de morcov „gustate artistic”.",
-      "imageUrl": "images/tol/stories/terra-s2/2.tracks.png",
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/terra-s2/2.tracks.png",
       "question": ""
     },
     {
@@ -28,7 +28,7 @@
       "sortOrder": 3,
       "caption": "Iepurele negru",
       "text": "Din buștean sare un iepure negru, cu blana mată și ochi mari. „Bună! Eu sunt… uneori aici, uneori pe Lunaria. Depinde cum clipești”, spune, apoi râde. „Știu unde e Lentila. Și am nevoie de ajutor să ajung acasă, pe Lunaria. Dacă mă ajutați, vă arăt drumul către Lentilă.”\\nPuf-Puf:\"Lunaria? parca stiu planeta asta...sa mergem...\"",
-      "imageUrl": "images/tol/stories/terra-s2/3.black-rabbit.png",
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/terra-s2/3.black-rabbit.png",
       "question": ""
     },
     {
@@ -37,7 +37,7 @@
       "sortOrder": 4,
       "caption": "Locul lentilei",
       "text": "Ghidați de iepure, ajungeți la o grotă scurtă, rece, cu apă până la gleznă. Pe tavan atârnă cristale palide; pe o stâncă, un disc translucid — Lentila Lunii — prins între două excrescențe de piatră.",
-      "imageUrl": "images/tol/stories/terra-s2/4.cave.png",
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/terra-s2/4.cave.png",
       "question": ""
     },
     {
@@ -46,7 +46,7 @@
       "sortOrder": 5,
       "caption": "Problema mică",
       "text": "Când atingi stânca, apa face valuri și intrarea parcă „respiră”, strângându-se ușor. „Grotă sensibilă”, spune iepurele. „Faci bine, primești ieșire. Faci rău, primești duș rece.”",
-      "imageUrl": "images/tol/stories/terra-s2/5.problem.png",
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/terra-s2/5.problem.png",
       "question": ""
     },
     {
@@ -55,7 +55,7 @@
       "sortOrder": 6,
       "caption": "",
       "text": "",
-      "imageUrl": "images/tol/stories/terra-s2/6.quiz.png",
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/terra-s2/6.quiz.png",
       "question": "Alege abordarea ca să scoți Lentila Lunii fără să destabilizezi grota:",
       "answers": [
         {
@@ -126,7 +126,7 @@
       "sortOrder": 7,
       "caption": "Reușita",
       "text": "Lentila iese curat, fără să tulbure grota. Iepurele bate din lăbuțe: „Bravo! Lateral e mai bine decât drept!” Pui Lentila peste cristal, iar imaginea hărții se clarifică. Iepurele te privește hotărât: „Ținem legătura. Vreau acasă, pe Lunaria — promiți că mă ajuți?”\\nAcum știți unde e Lunaria: nu, nu e Luna, ci o planetă îndepărtată de Pământ. Dacă am avea o sursă de energie, poate că am putea repara nava împreună…",
-      "imageUrl": "images/tol/stories/terra-s2/7.success.png",
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/terra-s2/7.success.png",
       "question": ""
     }
   ]

@@ -1,7 +1,7 @@
 {
   "storyId": "loi-intro",
   "title": "The Origin of Peace",
-  "coverImageUrl": "images/tol/stories/loi-intro/0.cover.png",
+  "coverImageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/0.cover.png",
     "sortOrder": 1,
   "unlockedStoryHeroes": [],
   "tiles": [
@@ -11,7 +11,7 @@
       "sortOrder": 1,
       "caption": "Two Worlds, Two Sides",
       "text": "In Alchimalia there were two very close worlds, but at war. \nLunaria, the rabbits' planet, with carrot fields and burrows as far as the eye could see, and \nKelo-Ketis, the cats' planet, ruled by a warlike emperor. The borders were cold, and the bridges were broken, even though they were so close, cats and rabbits were enemies.",
-      "imageUrl": "images/tol/stories/loi-intro/1.two-worlds.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/1.two-worlds.png"
     },
     {
       "tileId": "2",
@@ -19,7 +19,7 @@
       "sortOrder": 2,
       "caption": "Emperor Pufus Alchimus",
       "text": "On Kelo-Ketis ruled Emperor Pufus Alchimus, a warrior known for conquests and thirst for battle. The war with the rabbits had lasted long, and weapons spoke louder than stories. The emperor hoped that one day his empire would extend across all of Alchimalia.",
-      "imageUrl": "images/tol/stories/loi-intro/2.emperor.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/2.emperor.png"
     },
     {
       "tileId": "3",
@@ -27,7 +27,7 @@
       "sortOrder": 3,
       "caption": "The Curious Son",
       "text": "A son was born to the emperor: Puf-Puf Alchimus, he was named. \nThe father wanted a fighter, but Puf-Puf loved mathematics, games with elements and dreamed of alchemy. He was more of an explorer than a soldier. He spent all his time in his laboratory where he tried various combinations between elements and read a lot of ancient writings and recipes.",
-      "imageUrl": "images/tol/stories/loi-intro/3.curious-son.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/3.curious-son.png"
     },
     {
       "tileId": "4",
@@ -35,7 +35,7 @@
       "sortOrder": 4,
       "caption": "Friends Across the Border",
       "text": "Although there was war, friendship found its way. A black rabbit and a white cat met in secret and told each other about their world, playing sometimes on Lunaria, sometimes on Ketis. They didn't look like enemies. They looked like two curious children.",
-      "imageUrl": "images/tol/stories/loi-intro/4.friends.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/4.friends.png"
     },
     {
       "tileId": "5",
@@ -43,7 +43,7 @@
       "sortOrder": 5,
       "caption": "The Stone from Lunaria",
       "text": "On Ketis, Puf-Puf caught them looking at a green stone brought from Lunaria, gleaming like an emerald. \n\"Keep the secret of our friendship and we'll give you the stone,\" whispered the rabbit. \nPuf-Puf promised.",
-      "imageUrl": "images/tol/stories/loi-intro/5.lunaria-stone.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/5.lunaria-stone.png"
     },
     {
       "tileId": "6",
@@ -51,7 +51,7 @@
       "sortOrder": 6,
       "caption": "The Green-Golden Elixir",
       "text": "With the stone, Puf-Puf made an elixir. When it touched metal, it became gold. Great joy! They thought to drink it too, discovering that it had a good taste, he shared the elixir with his friends — small sips, lots of laughter.",
-      "imageUrl": "images/tol/stories/loi-intro/6.elixir.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/6.elixir.png"
     },
     {
       "tileId": "7",
@@ -59,7 +59,7 @@
       "sortOrder": 7,
       "caption": "Sleep Under the Tree",
       "text": "Tired, they fell asleep under a very tall tree. The elixir slowly seeped to the roots. The green stone warmed the earth with a gentle light.",
-      "imageUrl": "images/tol/stories/loi-intro/7.tree-nap.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/7.tree-nap.png"
     },
     {
       "tileId": "8",
@@ -67,7 +67,7 @@
       "sortOrder": 8,
       "caption": "Cat-Rabbit",
       "text": "When they woke up, a strange, beautiful being stood beside them: with the grace of a cat and the gentleness of a rabbit. It looked at them without fear.\n- Hello, I'm the Cat-Rabbit! I have come to bring Peace...",
-      "imageUrl": "images/tol/stories/loi-intro/8.matso-iepurele.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/8.matso-iepurele.png"
     },
     {
       "tileId": "q1",
@@ -75,7 +75,7 @@
       "sortOrder": 9,
       "caption": "",
       "text": "",
-      "imageUrl": "images/tol/stories/loi-intro/9.quiz.png",
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/9.quiz.png",
       "answers": [
         {
           "answerId": "a",
@@ -116,7 +116,7 @@
       "sortOrder": 10,
       "caption": "Message of Peace",
       "text": "\"I carry peace between worlds,\" said the Cat-Rabbit. \"From friendship, stone and elixir a bridge was born,\" said Puf-Puf.\nWars fade when you learn to mix things well.\" \nPuf-Puf understood that alchemy is not just about metals, but also about hearts.",
-      "imageUrl": "images/tol/stories/loi-intro/10.message.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/10.message.png"
     },
     {
       "tileId": "10",
@@ -124,7 +124,7 @@
       "sortOrder": 11,
       "caption": "Puf-Puf's Decision",
       "text": "That day, Puf-Puf was happy that he had chosen to be an alchemist. He would seek ways between worlds, not wars. And the Cat-Rabbit would, someday, become the sign that peace can be created, not just found.",
-      "imageUrl": "images/tol/stories/loi-intro/11.choice.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/11.choice.png"
     },
     {
       "tileId": "12",
@@ -132,7 +132,7 @@
       "sortOrder": 12,
       "caption": "The Spell",
       "text": "Puf-Puf was standing right at the border between planets when the rabbit stepped back onto Lunaria, wanting to lead him home in secret. When everything was quiet, a mysterious spell caused Lunaria to break away from Kelo-Ketis and disappear forever. The Cat-Rabbit had disappeared too.\n\nPuf-Puf: \"I must find out what happened!\" And, with hurried steps, he walked again toward the tree.",
-      "imageUrl": "images/tol/stories/loi-intro/12.the-spell.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/12.the-spell.png"
     },
     {
       "tileId": "13",
@@ -140,7 +140,7 @@
       "sortOrder": 13,
       "caption": "...",
       "text": "The rupture between worlds was full of mystery, Puf-Puf quickly reached the tree which had transformed incredibly into something full of light and mystery.",
-      "imageUrl": "images/tol/stories/loi-intro/13.tobecontinued.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/13.tobecontinued.png"
     },
     {
       "tileId": "14",
@@ -148,7 +148,7 @@
       "sortOrder": 14,
       "caption": "Tree of Light",
       "text": "In front of Puf-Puf stood something so beautiful and yet unrecognizable. The great tree had become full of light, and whispers could be heard here and there.\n\"You must seek peace... the crystal is the key...\", came a voice from somewhere, from the tree's roots.\nPuf-Puf dug at the tree's roots and found a crystal that seemed to communicate with him.",
-      "imageUrl": "images/tol/stories/loi-intro/14.tol.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/14.tol.png"
     },
     {
       "tileId": "15",
@@ -156,14 +156,14 @@
       "sortOrder": 15,
       "caption": "Departure",
       "text": "He told his father that he had to leave, to explore; he couldn't tell the Emperor that he wanted to bring peace — after so much work of conquest, that was the last thing the great Pufus Alchimus would have wanted to hear. He boarded one of the Empire's spaceships and left.",
-      "imageUrl": "images/tol/stories/loi-intro/15.leavingkk.png"
+      "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/15.leavingkk.png"
     },
     {
       "tileId": "16",
       "type": "video",
       "sortOrder": 16,
       "caption": "Crystal",
-      "imageUrl": "video/tol/stories/loi-intro/tol-cristal.mp4"
+      "imageUrl": "video/tol/stories/seed@alchimalia.com/loi-intro/tol-cristal.mp4"
     }
   ]
 }

@@ -8,8 +8,8 @@
     { "id": "crystalia", "label": "Crystalia",       "level": 5,  "imageUrl": "images/worlds/crystalia.jpg","pufpufMessage": "Fény barlangok és visszhangok, amelyek ötletekkel válaszolnak.", "sortOrder": 5 }
   ],
   "storyNodes": [
-    { "storyId": "intro-pufpuf", "regionId": "gateway",  "rewardImageUrl": "images/tol/stories/intro-pufpuf/0.Cover.png", "sortOrder": 1 },
-    { "storyId": "loi-intro",    "regionId": "gateway",  "rewardImageUrl": "images/tol/stories/loi-intro/0.cover.png", "sortOrder": 2 },
+    { "storyId": "intro-pufpuf", "regionId": "gateway",  "rewardImageUrl": "images/tol/stories/seed@alchimalia.com/intro-pufpuf/0.Cover.png", "sortOrder": 1 },
+    { "storyId": "loi-intro",    "regionId": "gateway",  "rewardImageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/0.cover.png", "sortOrder": 2 },
     { "storyId": "terra-s1",     "regionId": "terra",    "rewardImageUrl": "images/homepage/heroes/hero1.jpg",   "sortOrder": 1 },
     { "storyId": "terra-s2",     "regionId": "terra",    "rewardImageUrl": "images/homepage/heroes/hero2.jpg",   "sortOrder": 2 },
     { "storyId": "mechanika-s1", "regionId": "mechanika","rewardImageUrl": "images/homepage/heroes/hero2.jpg",   "sortOrder": 1 },
