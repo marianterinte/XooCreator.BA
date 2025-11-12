@@ -76,8 +76,8 @@ public class CreateStoryEndpoint
 
         // Ensure draft exists and create translation for the requested language
         await ep._editorService.EnsureDraftAsync(user.Id, storyId, ct);
-        await ep._editorService.EnsureTranslationAsync(user.Id, storyId, langTag, ct);
-        ep._logger.LogInformation("CreateStory: userId={UserId} storyId={StoryId} lang={Lang}", user.Id, storyId, langTag);
+        await ep._editorService.EnsureTranslationAsync(user.Id, storyId, langTag, req.Title, ct);
+        ep._logger.LogInformation("CreateStory: userId={UserId} storyId={StoryId} lang={Lang} title={Title}", user.Id, storyId, langTag, req.Title ?? "(empty)");
         return TypedResults.Ok(new CreateStoryResponse { StoryId = storyId });
     }
 }

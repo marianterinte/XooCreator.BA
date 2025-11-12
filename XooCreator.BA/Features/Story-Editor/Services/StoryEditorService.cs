@@ -26,7 +26,7 @@ public class StoryEditorService : IStoryEditorService
         await _crafts.CreateAsync(ownerUserId, storyId, StoryStatus.Draft.ToDb(), ct);
     }
 
-    public async Task EnsureTranslationAsync(Guid ownerUserId, string storyId, string languageCode, CancellationToken ct = default)
+    public async Task EnsureTranslationAsync(Guid ownerUserId, string storyId, string languageCode, string? title = null, CancellationToken ct = default)
     {
         // Ensure draft exists first
         await EnsureDraftAsync(ownerUserId, storyId, ct);
@@ -44,10 +44,16 @@ public class StoryEditorService : IStoryEditorService
                 Id = Guid.NewGuid(),
                 StoryCraftId = craft.Id,
                 LanguageCode = lang,
-                Title = string.Empty,
+                Title = title ?? string.Empty,
                 Summary = null
             };
             _context.StoryCraftTranslations.Add(translation);
+            await _context.SaveChangesAsync(ct);
+        }
+        else if (!string.IsNullOrWhiteSpace(title))
+        {
+            // Update title if provided and translation already exists
+            translation.Title = title;
             await _context.SaveChangesAsync(ct);
         }
     }

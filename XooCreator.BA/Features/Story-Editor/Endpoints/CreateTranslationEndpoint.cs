@@ -66,7 +66,7 @@ public class CreateTranslationEndpoint
         }
 
         var lang = req.Lang.ToLowerInvariant();
-        await ep._editorService.EnsureTranslationAsync(user.Id, storyId, lang, ct);
+        await ep._editorService.EnsureTranslationAsync(user.Id, storyId, lang, null, ct);
         ep._logger.LogInformation("Create translation draft: userId={UserId} storyId={StoryId} lang={Lang}", user.Id, storyId, lang);
         return TypedResults.Ok(new CreateTranslationResponse { StoryId = storyId, Lang = lang });
     }
