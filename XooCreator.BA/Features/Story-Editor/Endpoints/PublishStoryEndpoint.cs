@@ -174,7 +174,8 @@ public class PublishStoryEndpoint
             }
 
             // Delete source after successful copy
-            try { await sourceClient.DeleteIfExistsAsync(cancellationToken: ct); ep._logger.LogInformation("Deleted draft asset: {Path}", sourceBlobPath); } catch { /* best-effort */ }
+            // TODO DO NOT DELETE DRAFTS CURRENTLY.
+            //   try { await sourceClient.DeleteIfExistsAsync(cancellationToken: ct); ep._logger.LogInformation("Deleted draft asset: {Path}", sourceBlobPath); } catch { /* best-effort */ }
         }
 
         // 3) Upsert StoryDefinition from craft (single source of truth for marketplace), bump version
