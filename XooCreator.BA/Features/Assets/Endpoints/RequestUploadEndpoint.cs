@@ -88,7 +88,13 @@ public class RequestUploadEndpoint
 
         // Draft blob path - encode email for URL safety
         var emailEsc = Uri.EscapeDataString(user.Email);
-        var blobPath = $"draft/u/{emailEsc}/stories/{dto.StoryId}/{dto.Lang}/{relPath}";
+        var normalizedRelPath = relPath.TrimStart('/');
+        // Images (cover and tile-image) are language-agnostic; audio and video are language-specific
+        var isLanguageAgnosticAsset = string.Equals(dto.Kind, "tile-image", StringComparison.OrdinalIgnoreCase) 
+            || string.Equals(dto.Kind, "cover", StringComparison.OrdinalIgnoreCase);
+        var blobPath = isLanguageAgnosticAsset
+            ? $"draft/u/{emailEsc}/stories/{dto.StoryId}/{normalizedRelPath}"
+            : $"draft/u/{emailEsc}/stories/{dto.StoryId}/{dto.Lang}/{normalizedRelPath}";
 
         // Issue PUT SAS
         var putUri = await ep._sas.GetPutSasAsync(ep._sas.DraftContainer, blobPath, contentType!, TimeSpan.FromMinutes(10), ct);

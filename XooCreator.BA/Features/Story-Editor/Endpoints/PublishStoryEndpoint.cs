@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Azure.Storage.Blobs.Models;
 using System.Text.Json;
+using System.Collections.Generic;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Features.StoryEditor.Repositories;
@@ -12,6 +13,7 @@ using XooCreator.BA.Infrastructure.Services;
 using XooCreator.BA.Infrastructure.Services.Blob;
 using Microsoft.Extensions.Logging;
 using XooCreator.BA.Data.Enums;
+using Azure.Storage.Blobs;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 
@@ -89,7 +91,42 @@ public class PublishStoryEndpoint
                     ? "video"
                     : "images";
 
-            var sourceBlobPath = $"draft/u/{emailEsc}/stories/{storyId}/{langTag}/{rel}";
+            var normalizedRel = rel.TrimStart('/');
+            var baseDraftPath = $"draft/u/{emailEsc}/stories/{storyId}";
+            var sourcePathCandidates = new List<string>();
+            // Images (cover and tiles) are language-agnostic; audio and video are language-specific
+            var isImageAsset = rel.StartsWith("tiles/", StringComparison.OrdinalIgnoreCase) 
+                || rel.StartsWith("cover/", StringComparison.OrdinalIgnoreCase);
+
+            if (isImageAsset)
+            {
+                // New structure (language-agnostic) first, then legacy with language segment
+                sourcePathCandidates.Add($"{baseDraftPath}/{normalizedRel}");
+                sourcePathCandidates.Add($"{baseDraftPath}/{langTag}/{normalizedRel}");
+            }
+            else
+            {
+                sourcePathCandidates.Add($"{baseDraftPath}/{langTag}/{normalizedRel}");
+            }
+
+            string? sourceBlobPath = null;
+            BlobClient? sourceClient = null;
+            foreach (var candidate in sourcePathCandidates)
+            {
+                var candidateClient = ep._sas.GetBlobClient(ep._sas.DraftContainer, candidate);
+                if (await candidateClient.ExistsAsync(ct))
+                {
+                    sourceBlobPath = candidate;
+                    sourceClient = candidateClient;
+                    break;
+                }
+            }
+
+            if (sourceBlobPath is null || sourceClient is null)
+            {
+                ep._logger.LogWarning("Publish asset not found in draft container: storyId={StoryId} rel={Rel}", storyId, rel);
+                return TypedResults.BadRequest($"Draft asset not found: {rel}");
+            }
 
             // New published structure:
             // images: images/tales-of-alchimalia/stories/{email}/{storyId}/{fileName}
@@ -137,7 +174,6 @@ public class PublishStoryEndpoint
             }
 
             // Delete source after successful copy
-            var sourceClient = ep._sas.GetBlobClient(ep._sas.DraftContainer, sourceBlobPath);
             try { await sourceClient.DeleteIfExistsAsync(cancellationToken: ct); ep._logger.LogInformation("Deleted draft asset: {Path}", sourceBlobPath); } catch { /* best-effort */ }
         }
 
