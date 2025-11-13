@@ -136,7 +136,7 @@ public class StoryEditorService : IStoryEditorService
                     SortOrder = i,
                     ImageUrl = tileDto.ImageUrl,
                     AudioUrl = tileDto.AudioUrl,
-                    VideoUrl = tileDto.Type == "video" ? tileDto.ImageUrl : null, // Assuming video URL is in ImageUrl for video type
+                    VideoUrl = tileDto.VideoUrl, // Use VideoUrl directly from DTO
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
@@ -150,10 +150,7 @@ public class StoryEditorService : IStoryEditorService
                 tile.SortOrder = i;
                 tile.ImageUrl = tileDto.ImageUrl;
                 tile.AudioUrl = tileDto.AudioUrl;
-                if (tileDto.Type == "video")
-                {
-                    tile.VideoUrl = tileDto.ImageUrl;
-                }
+                tile.VideoUrl = tileDto.VideoUrl; // Use VideoUrl directly from DTO
                 tile.UpdatedAt = DateTime.UtcNow;
             }
             

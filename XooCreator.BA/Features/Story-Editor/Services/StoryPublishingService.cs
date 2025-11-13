@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.Enums;
@@ -14,10 +15,12 @@ public interface IStoryPublishingService
 public class StoryPublishingService : IStoryPublishingService
 {
     private readonly XooDbContext _db;
+    private readonly ILogger<StoryPublishingService> _logger;
 
-    public StoryPublishingService(XooDbContext db)
+    public StoryPublishingService(XooDbContext db, ILogger<StoryPublishingService> logger)
     {
         _db = db;
+        _logger = logger;
     }
 
     public async Task<int> UpsertFromCraftAsync(StoryCraft craft, string ownerEmail, string langTag, CancellationToken ct)
@@ -63,7 +66,7 @@ public class StoryPublishingService : IStoryPublishingService
         // Map cover to published structure (language-agnostic)
         if (!string.IsNullOrWhiteSpace(craft.CoverImageUrl))
         {
-            var fileName = ComputePublishedFileName(craft.CoverImageUrl);
+            var fileName = ComputePublishedFileName(craft.CoverImageUrl, "cover");
             def.CoverImageUrl = $"images/tales-of-alchimalia/stories/{SanitizeEmailForFolder(ownerEmail)}/{storyId}/{fileName}";
         }
 
@@ -96,8 +99,13 @@ public class StoryPublishingService : IStoryPublishingService
 
         // Tiles
         var tilesBySort = craft.Tiles.OrderBy(t => t.SortOrder).ToList();
+        _logger.LogInformation("Publishing story: storyId={StoryId} tilesCount={Count}", storyId, tilesBySort.Count);
+        
         foreach (var ctile in tilesBySort)
         {
+            _logger.LogInformation("Processing tile: tileId={TileId} imageUrl={ImageUrl} audioUrl={AudioUrl} videoUrl={VideoUrl}", 
+                ctile.TileId, ctile.ImageUrl ?? "(null)", ctile.AudioUrl ?? "(null)", ctile.VideoUrl ?? "(null)");
+            
             var tile = new StoryTile
             {
                 StoryDefinition = def,
@@ -106,24 +114,30 @@ public class StoryPublishingService : IStoryPublishingService
                 SortOrder = ctile.SortOrder,
                 Caption = null,
                 Text = null,
-                Question = null
+                Question = null,
+                ImageUrl = null,
+                AudioUrl = null,
+                VideoUrl = null
             };
 
             // Map non-translatable asset paths to published structure
             if (!string.IsNullOrWhiteSpace(ctile.ImageUrl))
             {
-                var fileName = ComputePublishedFileName(ctile.ImageUrl);
+                var fileName = ComputePublishedFileName(ctile.ImageUrl, "tiles");
                 tile.ImageUrl = $"images/tales-of-alchimalia/stories/{SanitizeEmailForFolder(ownerEmail)}/{storyId}/{fileName}";
+                _logger.LogInformation("Mapped ImageUrl: {ImageUrl} -> {PublishedUrl}", ctile.ImageUrl, tile.ImageUrl);
             }
             if (!string.IsNullOrWhiteSpace(ctile.VideoUrl))
             {
-                var fileName = ComputePublishedFileName(ctile.VideoUrl);
+                var fileName = ComputePublishedFileName(ctile.VideoUrl, "video");
                 tile.VideoUrl = $"video/tales-of-alchimalia/stories/{SanitizeEmailForFolder(ownerEmail)}/{storyId}/{fileName}";
+                _logger.LogInformation("Mapped VideoUrl: {VideoUrl} -> {PublishedUrl}", ctile.VideoUrl, tile.VideoUrl);
             }
             if (!string.IsNullOrWhiteSpace(ctile.AudioUrl))
             {
-                var fileName = ComputePublishedFileName(ctile.AudioUrl);
+                var fileName = ComputePublishedFileName(ctile.AudioUrl, "audio");
                 tile.AudioUrl = $"audio/tales-of-alchimalia/stories/{SanitizeEmailForFolder(ownerEmail)}/{storyId}/{langTag}/{fileName}";
+                _logger.LogInformation("Mapped AudioUrl: {AudioUrl} -> {PublishedUrl}", ctile.AudioUrl, tile.AudioUrl);
             }
 
             _db.StoryTiles.Add(tile);
@@ -181,57 +195,114 @@ public class StoryPublishingService : IStoryPublishingService
         return def.Version;
     }
 
-    private static string ComputePublishedFileName(string relPath)
+    private static string ComputePublishedFileName(string relPath, string category)
     {
-        // Examples of incoming relPath (from craft):
-        // - cover/0.cover.png            -> cover.png
-        // - tiles/p1/bg.webp             -> p1.webp (legacy structure with tileId folder)
-        // - tiles/p1.webp                -> p1.webp (new structure, filename already contains tileId)
-        // - audio/4.cave.wav             -> 4.cave.wav (filename is in parts[1], use as-is)
-        // - audio/p3/intro.m4a           -> p3.m4a (legacy structure with tileId folder)
         var parts = relPath.Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
         if (parts.Length == 0) return Path.GetFileName(relPath);
         
-        if (parts[0].Equals("cover", StringComparison.OrdinalIgnoreCase))
+        return category.ToLowerInvariant() switch
         {
-            var ext = Path.GetExtension(parts[^1]);
-            return string.IsNullOrWhiteSpace(ext) ? "cover" : $"cover{ext}";
+            "cover" => ExtractCoverFileName(parts),
+            "tiles" => ExtractImageFileName(parts),
+            "audio" => ExtractAudioFileName(parts),
+            "video" => ExtractVideoFileName(parts),
+            _ => parts[^1] // Default to last segment
+        };
+    }
+
+    private static string ExtractCoverFileName(string[] parts)
+    {
+        // cover/0.cover.png -> cover.png
+        if (parts.Length == 0) return "cover";
+        var ext = Path.GetExtension(parts[^1]);
+        return string.IsNullOrWhiteSpace(ext) ? "cover" : $"cover{ext}";
+    }
+
+    private static string ExtractImageFileName(string[] parts)
+    {
+        // tiles/p1.webp -> p1.webp (new structure: filename directly)
+        // tiles/p1/bg.webp -> bg.webp (legacy structure: filename in parts[2])
+        if (parts.Length < 2) return Path.GetFileName(string.Join("/", parts));
+        
+        // Check if parts[1] is a filename (has extension) or a folder (no extension)
+        if (Path.HasExtension(parts[1]))
+        {
+            // New structure: filename is directly in parts[1]
+            return parts[1];
         }
         
-        if (parts.Length >= 2 && (parts[0].Equals("tiles", StringComparison.OrdinalIgnoreCase)
-            || parts[0].Equals("audio", StringComparison.OrdinalIgnoreCase)
-            || parts[0].Equals("video", StringComparison.OrdinalIgnoreCase)))
+        // Legacy structure: parts[1] is tileId folder, parts[2] is the actual filename
+        if (parts.Length >= 3)
         {
-            // For audio/tiles/video, parts[1] can be either:
-            // 1. A filename directly (e.g., "4.cave.wav", "p1.webp") - use as-is
-            // 2. A tileId folder (e.g., "p1") - then parts[2] is the filename
-            // Check if parts[1] looks like a filename (has extension) or a folder (no extension)
-            var hasExtension = Path.HasExtension(parts[1]);
-            
-            if (hasExtension)
+            return parts[2];
+        }
+        
+        // Fallback
+        return parts[^1];
+    }
+
+    private static string ExtractAudioFileName(string[] parts)
+    {
+        // audio/4.cave.wav -> 4.cave.wav (new structure: filename directly)
+        // audio/p1/4.cave.wav -> 4.cave.wav (legacy structure: filename in parts[2])
+        // 4.cave.wav -> 4.cave.wav (just filename, no prefix)
+        
+        // If only one part, it's just the filename
+        if (parts.Length == 1)
+        {
+            return parts[0];
+        }
+        
+        // If parts[0] is "audio", skip it and process the rest
+        if (parts.Length >= 2 && parts[0].Equals("audio", StringComparison.OrdinalIgnoreCase))
+        {
+            // Check if parts[1] is a filename (has extension) or a folder (no extension)
+            if (Path.HasExtension(parts[1]))
             {
-                // parts[1] is already the filename (e.g., "4.cave.wav")
+                // New structure: filename is directly in parts[1]
                 return parts[1];
             }
-            else
+            
+            // Legacy structure: parts[1] is tileId folder, parts[2] is the actual filename
+            if (parts.Length >= 3)
             {
-                // parts[1] is a tileId folder, parts[2] is the filename (legacy structure)
-                // Extract extension from filename and combine with tileId
-                if (parts.Length >= 3)
-                {
-                    var ext = Path.GetExtension(parts[2]);
-                    var tileId = parts[1];
-                    return string.IsNullOrWhiteSpace(ext) ? tileId : $"{tileId}{ext}";
-                }
-                else
-                {
-                    // Fallback: use parts[1] as-is
-                    return parts[1];
-                }
+                return parts[2];
             }
         }
         
-        // Default to last segment
+        // If no "audio" prefix, find the last part that looks like a filename
+        for (int i = parts.Length - 1; i >= 0; i--)
+        {
+            if (Path.HasExtension(parts[i]))
+            {
+                return parts[i];
+            }
+        }
+        
+        // Fallback: return last part
+        return parts[^1];
+    }
+
+    private static string ExtractVideoFileName(string[] parts)
+    {
+        // video/p1.mp4 -> p1.mp4 (new structure: filename directly)
+        // video/p1/intro.mp4 -> intro.mp4 (legacy structure: filename in parts[2])
+        if (parts.Length < 2) return Path.GetFileName(string.Join("/", parts));
+        
+        // Check if parts[1] is a filename (has extension) or a folder (no extension)
+        if (Path.HasExtension(parts[1]))
+        {
+            // New structure: filename is directly in parts[1]
+            return parts[1];
+        }
+        
+        // Legacy structure: parts[1] is tileId folder, parts[2] is the actual filename
+        if (parts.Length >= 3)
+        {
+            return parts[2];
+        }
+        
+        // Fallback
         return parts[^1];
     }
 

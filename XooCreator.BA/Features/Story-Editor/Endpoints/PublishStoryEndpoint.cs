@@ -141,7 +141,7 @@ public class PublishStoryEndpoint
                 publishedRoot = $"{publishedRoot}/{langTag}";
             }
 
-            var targetFileName = ComputePublishedFileName(rel);
+            var targetFileName = ComputePublishedFileName(rel, category);
             var targetBlobPath = $"{publishedRoot}/{targetFileName}";
 
             // Issue short-lived read SAS for the source
@@ -189,33 +189,44 @@ public class PublishStoryEndpoint
         return TypedResults.Ok(new PublishResponse());
     }
 
-    private static string ComputePublishedFileName(string relPath)
+    private static string ComputePublishedFileName(string relPath, string category)
     {
         // Examples of incoming relPath (from craft JSON):
         // - cover/0.cover.png            -> cover.png
-        // - tiles/p1/bg.webp             -> p1.webp
-        // - audio/1.target.wav           -> 1.target.wav   (audio is lang-specific in target but filename rule same)
-        // - audio/p3/intro.m4a           -> p3.m4a
-        // - video/p2/intro.mp4           -> p2.mp4
-        // Fallback: last segment if pattern unknown
+        // - tiles/p1/bg.webp             -> bg.webp (legacy) or p1.webp (new)
+        // - audio/1.target.wav           -> 1.target.wav (new structure)
+        // - audio/p1/4.cave.wav         -> 4.cave.wav (legacy structure)
+        // - video/p2/intro.mp4          -> intro.mp4 (legacy) or p2.mp4 (new)
         try
         {
             var parts = relPath.Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
             if (parts.Length == 0) return Path.GetFileName(relPath);
 
-            if (parts[0].Equals("cover", StringComparison.OrdinalIgnoreCase))
+            if (category.Equals("cover", StringComparison.OrdinalIgnoreCase))
             {
                 var ext = Path.GetExtension(parts[^1]);
                 return string.IsNullOrWhiteSpace(ext) ? "cover" : $"cover{ext}";
             }
 
-            if (parts.Length >= 2 && (parts[0].Equals("tiles", StringComparison.OrdinalIgnoreCase)
-                || parts[0].Equals("audio", StringComparison.OrdinalIgnoreCase)
-                || parts[0].Equals("video", StringComparison.OrdinalIgnoreCase)))
+            if (parts.Length >= 2 && (category.Equals("tiles", StringComparison.OrdinalIgnoreCase)
+                || category.Equals("audio", StringComparison.OrdinalIgnoreCase)
+                || category.Equals("video", StringComparison.OrdinalIgnoreCase)))
             {
-                // For audio/tiles/video, the filename is in parts[1] (e.g., "1.target.wav" or "p1.webp")
-                // Use it as-is, don't add extension again
-                return parts[1];
+                // Check if parts[1] is a filename (has extension) or a folder (no extension)
+                if (Path.HasExtension(parts[1]))
+                {
+                    // New structure: filename is directly in parts[1]
+                    return parts[1];
+                }
+                
+                // Legacy structure: parts[1] is tileId folder, parts[2] is the actual filename
+                if (parts.Length >= 3)
+                {
+                    return parts[2];
+                }
+                
+                // Fallback
+                return parts[^1];
             }
 
             // Default to last segment
