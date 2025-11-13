@@ -66,7 +66,7 @@ public class StoryPublishingService : IStoryPublishingService
         // Map cover to published structure (language-agnostic)
         if (!string.IsNullOrWhiteSpace(craft.CoverImageUrl))
         {
-            var fileName = ComputePublishedFileName(craft.CoverImageUrl, "cover");
+            var fileName = craft.CoverImageUrl;
             def.CoverImageUrl = $"images/tales-of-alchimalia/stories/{SanitizeEmailForFolder(ownerEmail)}/{storyId}/{fileName}";
         }
 
@@ -115,9 +115,9 @@ public class StoryPublishingService : IStoryPublishingService
                 Caption = null,
                 Text = null,
                 Question = null,
-                ImageUrl = null,
-                AudioUrl = null,
-                VideoUrl = null
+                ImageUrl = ctile.ImageUrl,
+                AudioUrl = ctile.AudioUrl,
+                VideoUrl = ctile.VideoUrl
             };
 
             // Map non-translatable asset paths to published structure
