@@ -58,9 +58,9 @@ public class RetractStoryEndpoint
         }
 
         var current = StoryStatusExtensions.FromDb(craft.Status);
-        if (current != StoryStatus.SentForApproval && current != StoryStatus.InReview)
+        if (current != StoryStatus.SentForApproval && current != StoryStatus.InReview && current != StoryStatus.Approved)
         {
-            return TypedResults.Conflict("Invalid state transition. Expected SentForApproval or InReview.");
+            return TypedResults.Conflict("Invalid state transition. Expected SentForApproval, InReview, or Approved.");
         }
 
         // Clear assignment and revert to Draft
@@ -69,6 +69,10 @@ public class RetractStoryEndpoint
         craft.ReviewNotes = null;
         craft.ReviewStartedAt = null;
         craft.ReviewEndedAt = null;
+        if (current == StoryStatus.Approved)
+        {
+            craft.ApprovedByUserId = null;
+        }
         await ep._crafts.SaveAsync(craft, ct);
         ep._logger.LogInformation("Retract: storyId={StoryId}", storyId);
         return TypedResults.Ok(new RetractResponse());
