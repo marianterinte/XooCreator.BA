@@ -183,20 +183,55 @@ public class StoryPublishingService : IStoryPublishingService
 
     private static string ComputePublishedFileName(string relPath)
     {
+        // Examples of incoming relPath (from craft):
+        // - cover/0.cover.png            -> cover.png
+        // - tiles/p1/bg.webp             -> p1.webp (legacy structure with tileId folder)
+        // - tiles/p1.webp                -> p1.webp (new structure, filename already contains tileId)
+        // - audio/4.cave.wav             -> 4.cave.wav (filename is in parts[1], use as-is)
+        // - audio/p3/intro.m4a           -> p3.m4a (legacy structure with tileId folder)
         var parts = relPath.Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
         if (parts.Length == 0) return Path.GetFileName(relPath);
-        var ext = Path.GetExtension(parts[^1]);
+        
         if (parts[0].Equals("cover", StringComparison.OrdinalIgnoreCase))
         {
+            var ext = Path.GetExtension(parts[^1]);
             return string.IsNullOrWhiteSpace(ext) ? "cover" : $"cover{ext}";
         }
+        
         if (parts.Length >= 2 && (parts[0].Equals("tiles", StringComparison.OrdinalIgnoreCase)
             || parts[0].Equals("audio", StringComparison.OrdinalIgnoreCase)
             || parts[0].Equals("video", StringComparison.OrdinalIgnoreCase)))
         {
-            var tileId = parts[1];
-            return string.IsNullOrWhiteSpace(ext) ? tileId : $"{tileId}{ext}";
+            // For audio/tiles/video, parts[1] can be either:
+            // 1. A filename directly (e.g., "4.cave.wav", "p1.webp") - use as-is
+            // 2. A tileId folder (e.g., "p1") - then parts[2] is the filename
+            // Check if parts[1] looks like a filename (has extension) or a folder (no extension)
+            var hasExtension = Path.HasExtension(parts[1]);
+            
+            if (hasExtension)
+            {
+                // parts[1] is already the filename (e.g., "4.cave.wav")
+                return parts[1];
+            }
+            else
+            {
+                // parts[1] is a tileId folder, parts[2] is the filename (legacy structure)
+                // Extract extension from filename and combine with tileId
+                if (parts.Length >= 3)
+                {
+                    var ext = Path.GetExtension(parts[2]);
+                    var tileId = parts[1];
+                    return string.IsNullOrWhiteSpace(ext) ? tileId : $"{tileId}{ext}";
+                }
+                else
+                {
+                    // Fallback: use parts[1] as-is
+                    return parts[1];
+                }
+            }
         }
+        
+        // Default to last segment
         return parts[^1];
     }
 

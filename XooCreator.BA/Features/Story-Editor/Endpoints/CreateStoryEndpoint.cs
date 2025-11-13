@@ -75,7 +75,9 @@ public class CreateStoryEndpoint
         }
 
         // Ensure draft exists and create translation for the requested language
-        await ep._editorService.EnsureDraftAsync(user.Id, storyId, ct);
+        // Use req.StoryType if provided, otherwise default to Indie (1)
+        var storyType = req.StoryType.HasValue ? (StoryType)req.StoryType.Value : StoryType.Indie;
+        await ep._editorService.EnsureDraftAsync(user.Id, storyId, storyType, ct);
         await ep._editorService.EnsureTranslationAsync(user.Id, storyId, langTag, req.Title, ct);
         ep._logger.LogInformation("CreateStory: userId={UserId} storyId={StoryId} lang={Lang} title={Title}", user.Id, storyId, langTag, req.Title ?? "(empty)");
         return TypedResults.Ok(new CreateStoryResponse { StoryId = storyId });

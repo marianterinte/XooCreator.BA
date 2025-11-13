@@ -18,18 +18,25 @@ public class StoryEditorService : IStoryEditorService
         _context = context;
     }
 
-    public async Task EnsureDraftAsync(Guid ownerUserId, string storyId, CancellationToken ct = default)
+    public async Task EnsureDraftAsync(Guid ownerUserId, string storyId, StoryType? storyType = null, CancellationToken ct = default)
     {
         var existing = await _crafts.GetAsync(storyId, ct);
         if (existing != null) return;
         
-        await _crafts.CreateAsync(ownerUserId, storyId, StoryStatus.Draft.ToDb(), ct);
+        var craft = await _crafts.CreateAsync(ownerUserId, storyId, StoryStatus.Draft.ToDb(), ct);
+        
+        // If storyType is provided, update it (default is already set to Indie in CreateAsync)
+        if (storyType.HasValue && craft.StoryType != storyType.Value)
+        {
+            craft.StoryType = storyType.Value;
+            await _context.SaveChangesAsync(ct);
+        }
     }
 
     public async Task EnsureTranslationAsync(Guid ownerUserId, string storyId, string languageCode, string? title = null, CancellationToken ct = default)
     {
-        // Ensure draft exists first
-        await EnsureDraftAsync(ownerUserId, storyId, ct);
+        // Ensure draft exists first (default to Indie if not specified)
+        await EnsureDraftAsync(ownerUserId, storyId, StoryType.Indie, ct);
         
         var craft = await _crafts.GetAsync(storyId, ct);
         if (craft == null) return;
@@ -60,8 +67,9 @@ public class StoryEditorService : IStoryEditorService
 
     public async Task SaveDraftAsync(Guid ownerUserId, string storyId, string languageCode, EditableStoryDto dto, CancellationToken ct = default)
     {
-        // Ensure draft exists
-        await EnsureDraftAsync(ownerUserId, storyId, ct);
+        // Ensure draft exists (use StoryType from DTO if provided, otherwise default to Indie)
+        var storyType = dto.StoryType > 0 ? (StoryType?)dto.StoryType : StoryType.Indie;
+        await EnsureDraftAsync(ownerUserId, storyId, storyType, ct);
         
         var craft = await _crafts.GetAsync(storyId, ct);
         if (craft == null) throw new InvalidOperationException($"StoryCraft not found for storyId: {storyId}");

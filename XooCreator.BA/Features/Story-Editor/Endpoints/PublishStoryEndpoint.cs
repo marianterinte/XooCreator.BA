@@ -194,7 +194,8 @@ public class PublishStoryEndpoint
         // Examples of incoming relPath (from craft JSON):
         // - cover/0.cover.png            -> cover.png
         // - tiles/p1/bg.webp             -> p1.webp
-        // - audio/p3/intro.m4a           -> p3.m4a   (audio is lang-specific in target but filename rule same)
+        // - audio/1.target.wav           -> 1.target.wav   (audio is lang-specific in target but filename rule same)
+        // - audio/p3/intro.m4a           -> p3.m4a
         // - video/p2/intro.mp4           -> p2.mp4
         // Fallback: last segment if pattern unknown
         try
@@ -202,9 +203,9 @@ public class PublishStoryEndpoint
             var parts = relPath.Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
             if (parts.Length == 0) return Path.GetFileName(relPath);
 
-            var ext = Path.GetExtension(parts[^1]);
             if (parts[0].Equals("cover", StringComparison.OrdinalIgnoreCase))
             {
+                var ext = Path.GetExtension(parts[^1]);
                 return string.IsNullOrWhiteSpace(ext) ? "cover" : $"cover{ext}";
             }
 
@@ -212,8 +213,9 @@ public class PublishStoryEndpoint
                 || parts[0].Equals("audio", StringComparison.OrdinalIgnoreCase)
                 || parts[0].Equals("video", StringComparison.OrdinalIgnoreCase)))
             {
-                var tileId = parts[1];
-                return string.IsNullOrWhiteSpace(ext) ? tileId : $"{tileId}{ext}";
+                // For audio/tiles/video, the filename is in parts[1] (e.g., "1.target.wav" or "p1.webp")
+                // Use it as-is, don't add extension again
+                return parts[1];
             }
 
             // Default to last segment

@@ -7,7 +7,7 @@ namespace XooCreator.BA.Features.StoryEditor.Services;
 public interface IStoryEditorService
 {
     // Ensure a draft exists for a story (creates StoryCraft if needed)
-    Task EnsureDraftAsync(Guid ownerUserId, string storyId, CancellationToken ct = default);
+    Task EnsureDraftAsync(Guid ownerUserId, string storyId, StoryType? storyType = null, CancellationToken ct = default);
     
     // Ensure a translation exists for a specific language (creates StoryCraftTranslation if needed)
     Task EnsureTranslationAsync(Guid ownerUserId, string storyId, string languageCode, string? title = null, CancellationToken ct = default);

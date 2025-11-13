@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
+using XooCreator.BA.Data.Enums;
 
 namespace XooCreator.BA.Features.StoryEditor.Repositories;
 
@@ -55,6 +56,7 @@ public class StoryCraftsRepository : IStoryCraftsRepository
             OwnerUserId = ownerUserId,
             StoryId = (storyId ?? string.Empty).Trim(),
             Status = string.IsNullOrWhiteSpace(status) ? "draft" : status,
+            StoryType = StoryType.Indie, // Default to Indie (1) for new stories
             UpdatedAt = DateTime.UtcNow,
             CreatedAt = DateTime.UtcNow
         };
