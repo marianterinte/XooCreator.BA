@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Azure.Storage.Blobs.Models;
@@ -12,6 +13,7 @@ using XooCreator.BA.Infrastructure.Services.Blob;
 using Microsoft.Extensions.Logging;
 using XooCreator.BA.Data.Enums;
 using Azure.Storage.Blobs;
+using XooCreator.BA.Data;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 
@@ -49,20 +51,51 @@ public class PublishStoryEndpoint
         [FromServices] PublishStoryEndpoint ep,
         CancellationToken ct)
     {
-        var user = await ep._auth0.GetCurrentUserAsync(ct);
-        if (user == null) return TypedResults.Unauthorized();
-
-        if (!ep._auth0.HasRole(user, Data.Enums.UserRole.Creator))
-        {
-            return TypedResults.Forbid();
-        }
+        // Authorization check
+        var authResult = await ep.ValidateAuthorizationAsync(ct);
+        if (authResult.Result != null) return (Results<Ok<PublishResponse>, NotFound, BadRequest<string>, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>)authResult.Result;
+        var user = authResult.User!;
 
         var langTag = ep._userContext.GetRequestLocaleOrDefault("ro-ro");
 
+        // Load craft
         var craft = await ep._crafts.GetAsync(storyId, ct);
         if (craft == null) return TypedResults.NotFound();
 
-        var isAdmin = ep._auth0.HasRole(user, Data.Enums.UserRole.Admin);
+        // Validate permissions and status
+        var permissionResult = ep.ValidatePublishPermissions(user, craft);
+        if (permissionResult != null) return (Results<Ok<PublishResponse>, NotFound, BadRequest<string>, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>)permissionResult;
+
+        // Copy assets to published container
+        var assets = StoryAssetPathMapper.ExtractAssets(craft, langTag);
+        var copyResult = await ep.CopyAssetsToPublishedAsync(assets, user.Email, storyId, ct);
+        if (copyResult != null) return (Results<Ok<PublishResponse>, NotFound, BadRequest<string>, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>)copyResult;
+
+        // Finalize publishing
+        await ep.FinalizePublishingAsync(craft, user.Email, langTag, assets.Count, storyId, ct);
+
+        return TypedResults.Ok(new PublishResponse());
+    }
+
+    private async Task<(AlchimaliaUser? User, IResult? Result)> ValidateAuthorizationAsync(CancellationToken ct)
+    {
+        var user = await _auth0.GetCurrentUserAsync(ct);
+        if (user == null)
+        {
+            return (null, TypedResults.Unauthorized());
+        }
+
+        if (!_auth0.HasRole(user, Data.Enums.UserRole.Creator))
+        {
+            return (null, TypedResults.Forbid());
+        }
+
+        return (user, null);
+    }
+
+    private IResult? ValidatePublishPermissions(AlchimaliaUser user, StoryCraft craft)
+    {
+        var isAdmin = _auth0.HasRole(user, Data.Enums.UserRole.Admin);
 
         if (!isAdmin && craft.OwnerUserId != user.Id)
         {
@@ -72,79 +105,119 @@ public class PublishStoryEndpoint
         var current = StoryStatusExtensions.FromDb(craft.Status);
         if (!isAdmin && current != StoryStatus.Approved)
         {
-            ep._logger.LogWarning("Publish invalid state: storyId={StoryId} state={State}", storyId, current);
+            _logger.LogWarning("Publish invalid state: storyId={StoryId} state={State}", craft.StoryId, current);
             return TypedResults.Conflict("Invalid state transition. Expected Approved.");
         }
 
-        var assets = StoryAssetPathMapper.ExtractAssets(craft, langTag);
+        return null;
+    }
 
+    private async Task<IResult?> CopyAssetsToPublishedAsync(
+        List<StoryAssetPathMapper.AssetInfo> assets,
+        string userEmail,
+        string storyId,
+        CancellationToken ct)
+    {
         foreach (var asset in assets)
         {
-            var sourceBlobPath = StoryAssetPathMapper.BuildDraftPath(asset, user.Email, storyId);
-            var sourceClient = ep._sas.GetBlobClient(ep._sas.DraftContainer, sourceBlobPath);
+            var sourceResult = await FindSourceAssetAsync(asset, userEmail, storyId, ct);
+            if (sourceResult.Error != null) return sourceResult.Error;
 
-            if (!await sourceClient.ExistsAsync(ct))
+            var copyResult = await CopyAssetWithPollingAsync(
+                sourceResult.SourceBlobPath!,
+                asset,
+                userEmail,
+                storyId,
+                ct);
+            if (copyResult != null) return copyResult;
+        }
+
+        return null;
+    }
+
+    private async Task<(string? SourceBlobPath, IResult? Error)> FindSourceAssetAsync(
+        StoryAssetPathMapper.AssetInfo asset,
+        string userEmail,
+        string storyId,
+        CancellationToken ct)
+    {
+        var sourceBlobPath = StoryAssetPathMapper.BuildDraftPath(asset, userEmail, storyId);
+        var sourceClient = _sas.GetBlobClient(_sas.DraftContainer, sourceBlobPath);
+
+        if (await sourceClient.ExistsAsync(ct))
+        {
+            return (sourceBlobPath, null);
+        }
+
+        // Try fallback path for images
+        if (asset.Type == StoryAssetPathMapper.AssetType.Image)
+        {
+            var altPath = StoryAssetPathMapper.BuildDraftPath(
+                new StoryAssetPathMapper.AssetInfo(asset.Filename, asset.Type, null),
+                userEmail,
+                storyId);
+            var altClient = _sas.GetBlobClient(_sas.DraftContainer, altPath);
+            if (await altClient.ExistsAsync(ct))
             {
-                if (asset.Type == StoryAssetPathMapper.AssetType.Image)
-                {
-                    var altPath = StoryAssetPathMapper.BuildDraftPath(
-                        new StoryAssetPathMapper.AssetInfo(asset.Filename, asset.Type, null),
-                        user.Email,
-                        storyId);
-                    var altClient = ep._sas.GetBlobClient(ep._sas.DraftContainer, altPath);
-                    if (await altClient.ExistsAsync(ct))
-                    {
-                        sourceBlobPath = altPath;
-                        sourceClient = altClient;
-                    }
-                    else
-                    {
-                        ep._logger.LogWarning("Publish asset not found in draft container: storyId={StoryId} filename={Filename}", storyId, asset.Filename);
-                        return TypedResults.BadRequest($"Draft asset not found: {asset.Filename}");
-                    }
-                }
-                else
-                {
-                    ep._logger.LogWarning("Publish asset not found in draft container: storyId={StoryId} filename={Filename}", storyId, asset.Filename);
-                    return TypedResults.BadRequest($"Draft asset not found: {asset.Filename}");
-                }
-            }
-
-            var targetBlobPath = StoryAssetPathMapper.BuildPublishedPath(asset, user.Email, storyId);
-            var sourceSas = await ep._sas.GetReadSasAsync(ep._sas.DraftContainer, sourceBlobPath, TimeSpan.FromMinutes(10), ct);
-
-            var targetClient = ep._sas.GetBlobClient(ep._sas.PublishedContainer, targetBlobPath);
-            var pollUntil = DateTime.UtcNow.AddSeconds(30);
-
-            var _ = await targetClient.StartCopyFromUriAsync(sourceSas, cancellationToken: ct);
-
-            while (true)
-            {
-                var props = await targetClient.GetPropertiesAsync(cancellationToken: ct);
-                if (props.Value.CopyStatus == CopyStatus.Success)
-                {
-                    break;
-                }
-                if (props.Value.CopyStatus == CopyStatus.Failed || props.Value.CopyStatus == CopyStatus.Aborted)
-                {
-                    ep._logger.LogError("Publish copy failed: storyId={StoryId} filename={Filename}", storyId, asset.Filename);
-                    return TypedResults.BadRequest($"Failed to copy asset: {asset.Filename}");
-                }
-                if (DateTime.UtcNow > pollUntil)
-                {
-                    ep._logger.LogError("Publish copy timeout: storyId={StoryId} filename={Filename}", storyId, asset.Filename);
-                    return TypedResults.BadRequest($"Timeout while copying asset: {asset.Filename}");
-                }
-                await Task.Delay(250, ct);
+                return (altPath, null);
             }
         }
 
-        var newVersion = await ep._publisher.UpsertFromCraftAsync(craft, user.Email, langTag, ct);
+        _logger.LogWarning("Publish asset not found in draft container: storyId={StoryId} filename={Filename}", storyId, asset.Filename);
+        return (null, TypedResults.BadRequest($"Draft asset not found: {asset.Filename}"));
+    }
+
+    private async Task<IResult?> CopyAssetWithPollingAsync(
+        string sourceBlobPath,
+        StoryAssetPathMapper.AssetInfo asset,
+        string userEmail,
+        string storyId,
+        CancellationToken ct)
+    {
+        var targetBlobPath = StoryAssetPathMapper.BuildPublishedPath(asset, userEmail, storyId);
+        var sourceSas = await _sas.GetReadSasAsync(_sas.DraftContainer, sourceBlobPath, TimeSpan.FromMinutes(10), ct);
+
+        var targetClient = _sas.GetBlobClient(_sas.PublishedContainer, targetBlobPath);
+        var pollUntil = DateTime.UtcNow.AddSeconds(30);
+
+        var _ = await targetClient.StartCopyFromUriAsync(sourceSas, cancellationToken: ct);
+
+        while (true)
+        {
+            var props = await targetClient.GetPropertiesAsync(cancellationToken: ct);
+            if (props.Value.CopyStatus == CopyStatus.Success)
+            {
+                break;
+            }
+            if (props.Value.CopyStatus == CopyStatus.Failed || props.Value.CopyStatus == CopyStatus.Aborted)
+            {
+                _logger.LogError("Publish copy failed: storyId={StoryId} filename={Filename}", storyId, asset.Filename);
+                return TypedResults.BadRequest($"Failed to copy asset: {asset.Filename}");
+            }
+            if (DateTime.UtcNow > pollUntil)
+            {
+                _logger.LogError("Publish copy timeout: storyId={StoryId} filename={Filename}", storyId, asset.Filename);
+                return TypedResults.BadRequest($"Timeout while copying asset: {asset.Filename}");
+            }
+            await Task.Delay(250, ct);
+        }
+
+        return null;
+    }
+
+    private async Task FinalizePublishingAsync(
+        StoryCraft craft,
+        string userEmail,
+        string langTag,
+        int assetsCount,
+        string storyId,
+        CancellationToken ct)
+    {
+        var newVersion = await _publisher.UpsertFromCraftAsync(craft, userEmail, langTag, ct);
         craft.Status = StoryStatus.Published.ToDb();
         craft.BaseVersion = newVersion;
-        await ep._crafts.SaveAsync(craft, ct);
-        ep._logger.LogInformation("Published story: storyId={StoryId} assets={Count}", storyId, assets.Count);
-        return TypedResults.Ok(new PublishResponse());
+        await _crafts.SaveAsync(craft, ct);
+        _logger.LogInformation("Published story: storyId={StoryId} assets={Count}", storyId, assetsCount);
     }
 }
 
