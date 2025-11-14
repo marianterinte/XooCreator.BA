@@ -315,7 +315,7 @@ public class SeedDataService
                                 Caption = tileSeed.Caption,
                                 Text = tileSeed.Text,
                                 ImageUrl = tileSeed.ImageUrl,
-                                AudioUrl = null, // Independent stories don't have audio
+                                // Audio and Video are now language-specific (not set in seed data for now)
                                 Question = tileSeed.Question,  // Set question for quiz tiles
                                 StoryDefinitionId = storyId // Set the foreign key
                             };

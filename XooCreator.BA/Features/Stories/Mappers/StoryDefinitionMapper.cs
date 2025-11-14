@@ -56,7 +56,7 @@ public static class StoryDefinitionMapper
                     Caption = tileSeed.Caption,
                     Text = tileSeed.Text,
                     ImageUrl = NormalizeTileImagePathForSeeds(seedData.StoryId, tileSeed.TileId, tileSeed.ImageUrl),
-                    AudioUrl = tileSeed.AudioUrl,
+                    // Audio and Video are now language-specific (not set in seed data for now)
                     Question = tileSeed.Question
                 };
 
@@ -131,7 +131,7 @@ public static class StoryDefinitionMapper
                     Caption = tileSeed.Caption,
                     Text = tileSeed.Text,
                     ImageUrl = tileSeed.ImageUrl,
-                    AudioUrl = tileSeed.AudioUrl,
+                    // Audio and Video are now language-specific (not set in seed data for now)
                     Question = tileSeed.Question
                 };
 
