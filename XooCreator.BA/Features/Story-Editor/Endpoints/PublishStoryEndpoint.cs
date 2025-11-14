@@ -14,11 +14,12 @@ using Microsoft.Extensions.Logging;
 using XooCreator.BA.Data.Enums;
 using Azure.Storage.Blobs;
 using XooCreator.BA.Data;
+using XooCreator.BA.Features.StoryEditor.Models;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 
 [Endpoint]
-public class PublishStoryEndpoint
+public partial class PublishStoryEndpoint
 {
     private readonly IStoryCraftsRepository _crafts;
     private readonly IUserContextService _userContext;
@@ -35,56 +36,6 @@ public class PublishStoryEndpoint
         _sas = sas;
         _logger = logger;
         _publisher = publisher;
-    }
-
-    public record PublishResponse
-    {
-        public bool Ok { get; init; } = true;
-        public string Status { get; init; } = "Published";
-    }
-
-    /// <summary>
-    /// Strong-typed result for asset copy operations.
-    /// Eliminates the need for complex casts and provides clear error information.
-    /// </summary>
-    private record AssetCopyResult
-    {
-        public bool HasError => ErrorResult != null;
-        public Results<Ok<PublishResponse>, NotFound, BadRequest<string>, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>? ErrorResult { get; init; }
-        public string? AssetFilename { get; init; }
-        public string? ErrorMessage { get; init; }
-
-        public static AssetCopyResult Success() => new AssetCopyResult { ErrorResult = null };
-        
-        public static AssetCopyResult AssetNotFound(string filename, string storyId)
-        {
-            return new AssetCopyResult
-            {
-                ErrorResult = TypedResults.BadRequest($"Draft asset not found: {filename}. StoryId: {storyId}"),
-                AssetFilename = filename,
-                ErrorMessage = $"Draft asset not found: {filename}"
-            };
-        }
-
-        public static AssetCopyResult CopyFailed(string filename, string storyId, string reason)
-        {
-            return new AssetCopyResult
-            {
-                ErrorResult = TypedResults.BadRequest($"Failed to copy asset '{filename}': {reason}. StoryId: {storyId}"),
-                AssetFilename = filename,
-                ErrorMessage = $"Failed to copy asset '{filename}': {reason}"
-            };
-        }
-
-        public static AssetCopyResult CopyTimeout(string filename, string storyId)
-        {
-            return new AssetCopyResult
-            {
-                ErrorResult = TypedResults.BadRequest($"Timeout while copying asset '{filename}'. StoryId: {storyId}"),
-                AssetFilename = filename,
-                ErrorMessage = $"Timeout while copying asset '{filename}'"
-            };
-        }
     }
 
     [Route("/api/{locale}/stories/{storyId}/publish")]
