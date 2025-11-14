@@ -61,13 +61,14 @@ public partial class PublishStoryEndpoint
         var permissionResult = ep.ValidatePublishPermissions(user, craft);
         if (permissionResult != null) return permissionResult;
 
-        // Copy assets to published container
-        var assets = StoryAssetPathMapper.ExtractAssets(craft, langTag);
-        var copyResult = await ep.CopyAssetsToPublishedAsync(assets, user.Email, storyId, ct);
+        // Collect assets for all available languages
+        // Images are common (extract once), Audio/Video are language-specific (extract per language)
+        var allAssets = ep.CollectAllAssets(craft);
+        var copyResult = await ep.CopyAssetsToPublishedAsync(allAssets, user.Email, storyId, ct);
         if (copyResult.HasError) return copyResult.ErrorResult;
 
         // Finalize publishing
-        await ep.FinalizePublishingAsync(craft, user.Email, langTag, assets.Count, storyId, ct);
+        await ep.FinalizePublishingAsync(craft, user.Email, langTag, allAssets.Count, storyId, ct);
 
         return TypedResults.Ok(new PublishResponse());
     }
@@ -105,6 +106,58 @@ public partial class PublishStoryEndpoint
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Collects all assets from the craft for all available languages.
+    /// Images are common (extracted once), Audio/Video are language-specific (extracted per language).
+    /// </summary>
+    private List<StoryAssetPathMapper.AssetInfo> CollectAllAssets(StoryCraft craft)
+    {
+        var allAssets = new List<StoryAssetPathMapper.AssetInfo>();
+        var processedImages = new HashSet<string>(); // Deduplicate images (they're common)
+        
+        // Extract images once (they're common for all languages)
+        if (!string.IsNullOrWhiteSpace(craft.CoverImageUrl) && !processedImages.Contains(craft.CoverImageUrl))
+        {
+            allAssets.Add(new StoryAssetPathMapper.AssetInfo(craft.CoverImageUrl, StoryAssetPathMapper.AssetType.Image, null));
+            processedImages.Add(craft.CoverImageUrl);
+        }
+
+        foreach (var tile in craft.Tiles)
+        {
+            // Image is common for all languages (extract once)
+            if (!string.IsNullOrWhiteSpace(tile.ImageUrl) && !processedImages.Contains(tile.ImageUrl))
+            {
+                allAssets.Add(new StoryAssetPathMapper.AssetInfo(tile.ImageUrl, StoryAssetPathMapper.AssetType.Image, null));
+                processedImages.Add(tile.ImageUrl);
+            }
+
+            // Audio and Video are language-specific - extract for each language
+            foreach (var tileTranslation in tile.Translations)
+            {
+                var lang = tileTranslation.LanguageCode;
+                
+                if (!string.IsNullOrWhiteSpace(tileTranslation.AudioUrl))
+                {
+                    allAssets.Add(new StoryAssetPathMapper.AssetInfo(tileTranslation.AudioUrl, StoryAssetPathMapper.AssetType.Audio, lang));
+                }
+
+                if (!string.IsNullOrWhiteSpace(tileTranslation.VideoUrl))
+                {
+                    allAssets.Add(new StoryAssetPathMapper.AssetInfo(tileTranslation.VideoUrl, StoryAssetPathMapper.AssetType.Video, lang));
+                }
+            }
+        }
+
+        _logger.LogInformation(
+            "Collected assets for publish: storyId={StoryId} totalAssets={Count} images={ImageCount} audioVideo={AudioVideoCount}",
+            craft.StoryId,
+            allAssets.Count,
+            allAssets.Count(a => a.Type == StoryAssetPathMapper.AssetType.Image),
+            allAssets.Count(a => a.Type == StoryAssetPathMapper.AssetType.Audio || a.Type == StoryAssetPathMapper.AssetType.Video));
+
+        return allAssets;
     }
 
     private async Task<AssetCopyResult> CopyAssetsToPublishedAsync(
