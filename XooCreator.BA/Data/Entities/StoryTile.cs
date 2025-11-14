@@ -14,9 +14,9 @@ public class StoryTile
     // Page-specific fields
     public string? Caption { get; set; }
     public string? Text { get; set; }
+    // Image is common for all languages
     public string? ImageUrl { get; set; }
-    public string? AudioUrl { get; set; }
-    public string? VideoUrl { get; set; }
+    // Audio and Video are now language-specific (moved to StoryTileTranslation)
     
     // Quiz-specific fields
     public string? Question { get; set; }
@@ -38,6 +38,10 @@ public class StoryTileTranslation
     public string? Caption { get; set; }
     public string? Text { get; set; }
     public string? Question { get; set; }
+    
+    // Language-specific media (full published path)
+    public string? AudioUrl { get; set; }
+    public string? VideoUrl { get; set; }
 
     public StoryTile StoryTile { get; set; } = null!;
 }

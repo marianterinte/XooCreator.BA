@@ -26,9 +26,10 @@ public static class StoryAssetPathMapper
     /// <summary>
     /// Extracts all asset filenames from a StoryCraft.
     /// Returns only the filename (not full paths) as stored in the database.
+    /// Audio and Video are now language-specific and read from tile translations.
     /// </summary>
     /// <param name="craft">The story craft to extract assets from</param>
-    /// <param name="langTag">Language tag for audio assets (language-specific)</param>
+    /// <param name="langTag">Language tag for audio/video assets (language-specific)</param>
     /// <returns>List of asset information with filename, type, and language</returns>
     public static List<AssetInfo> ExtractAssets(StoryCraft craft, string langTag)
     {
@@ -43,19 +44,25 @@ public static class StoryAssetPathMapper
         // Tile assets
         foreach (var tile in craft.Tiles)
         {
+            // Image is common for all languages
             if (!string.IsNullOrWhiteSpace(tile.ImageUrl))
             {
                 results.Add(new AssetInfo(tile.ImageUrl, AssetType.Image, null));
             }
 
-            if (!string.IsNullOrWhiteSpace(tile.AudioUrl))
+            // Audio and Video are now language-specific (read from translation)
+            var tileTranslation = tile.Translations.FirstOrDefault(t => t.LanguageCode == langTag);
+            if (tileTranslation != null)
             {
-                results.Add(new AssetInfo(tile.AudioUrl, AssetType.Audio, langTag));
-            }
+                if (!string.IsNullOrWhiteSpace(tileTranslation.AudioUrl))
+                {
+                    results.Add(new AssetInfo(tileTranslation.AudioUrl, AssetType.Audio, langTag));
+                }
 
-            if (!string.IsNullOrWhiteSpace(tile.VideoUrl))
-            {
-                results.Add(new AssetInfo(tile.VideoUrl, AssetType.Video, null));
+                if (!string.IsNullOrWhiteSpace(tileTranslation.VideoUrl))
+                {
+                    results.Add(new AssetInfo(tileTranslation.VideoUrl, AssetType.Video, langTag));
+                }
             }
         }
 
@@ -64,8 +71,8 @@ public static class StoryAssetPathMapper
 
     /// <summary>
     /// Builds the published blob storage path for an asset.
-    /// Structure: {category}/tales-of-alchimalia/stories/{userEmail}/{storyId}/{filename}
-    /// For audio: {category}/tales-of-alchimalia/stories/{userEmail}/{storyId}/{lang}/{filename}
+    /// Structure: {category}/tales-of-alchimalia/stories/{userEmail}/{storyId}/{filename} (for images)
+    /// Structure: {category}/tales-of-alchimalia/stories/{userEmail}/{storyId}/{lang}/{filename} (for audio/video)
     /// </summary>
     /// <param name="asset">Asset information</param>
     /// <param name="userEmail">User email (owner of the story)</param>
@@ -83,8 +90,8 @@ public static class StoryAssetPathMapper
 
         var basePath = $"{category}/tales-of-alchimalia/stories/{userEmail}/{storyId}";
 
-        // Audio assets are language-specific in published structure
-        if (asset.Type == AssetType.Audio && !string.IsNullOrWhiteSpace(asset.Lang))
+        // Audio and Video assets are language-specific in published structure
+        if ((asset.Type == AssetType.Audio || asset.Type == AssetType.Video) && !string.IsNullOrWhiteSpace(asset.Lang))
         {
             basePath = $"{basePath}/{asset.Lang}";
         }
@@ -94,8 +101,8 @@ public static class StoryAssetPathMapper
 
     /// <summary>
     /// Builds the draft blob storage path for an asset.
-    /// Structure: draft/u/{emailEscaped}/stories/{storyId}/{filename} (for images)
-    /// Structure: draft/u/{emailEscaped}/stories/{storyId}/{lang}/{filename} (for audio/video)
+    /// Structure: draft/u/{emailEscaped}/stories/{storyId}/{filename} (for images - language-agnostic)
+    /// Structure: draft/u/{emailEscaped}/stories/{storyId}/{lang}/{filename} (for audio/video - language-specific)
     /// </summary>
     /// <param name="asset">Asset information</param>
     /// <param name="userEmail">User email (owner of the story)</param>

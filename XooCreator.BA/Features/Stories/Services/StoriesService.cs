@@ -121,8 +121,9 @@ public class StoriesService : IStoriesService
                         Caption = tileTranslation?.Caption,
                         Text = tileTranslation?.Text,
                         ImageUrl = t.ImageUrl ?? string.Empty,
-                        AudioUrl = t.AudioUrl ?? string.Empty,
-                        VideoUrl = t.VideoUrl ?? string.Empty,
+                        // Audio and Video are now language-specific (from translation)
+                        AudioUrl = tileTranslation?.AudioUrl ?? string.Empty,
+                        VideoUrl = tileTranslation?.VideoUrl ?? string.Empty,
                         Question = tileTranslation?.Question,
                         Answers = t.Answers.OrderBy(a => a.SortOrder).Select(a =>
                         {
@@ -176,7 +177,9 @@ public class StoriesService : IStoriesService
                     Caption = tileTranslation?.Caption ?? t.Caption ?? string.Empty,
                     Text = tileTranslation?.Text ?? t.Text ?? string.Empty,
                     ImageUrl = t.ImageUrl ?? string.Empty,
-                    AudioUrl = t.AudioUrl ?? string.Empty,
+                    // Audio and Video are now language-specific (from translation)
+                    AudioUrl = tileTranslation?.AudioUrl ?? string.Empty,
+                    VideoUrl = tileTranslation?.VideoUrl ?? string.Empty,
                     Question = tileTranslation?.Question ?? t.Question ?? string.Empty,
                     Answers = (t.Answers ?? new()).OrderBy(a => a.SortOrder).Select(a =>
                     {

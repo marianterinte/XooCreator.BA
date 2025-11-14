@@ -70,9 +70,9 @@ public class StoryCraftTile
     public int SortOrder { get; set; }
     
     // Non-translatable fields (same for all languages)
+    // Image is common for all languages
     public string? ImageUrl { get; set; }
-    public string? AudioUrl { get; set; }
-    public string? VideoUrl { get; set; }
+    // Audio and Video are now language-specific (moved to StoryCraftTileTranslation)
     
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
@@ -84,7 +84,7 @@ public class StoryCraftTile
 }
 
 /// <summary>
-/// Translation for StoryCraftTile (Caption, Text, Question per language)
+/// Translation for StoryCraftTile (Caption, Text, Question, Audio, Video per language)
 /// </summary>
 public class StoryCraftTileTranslation
 {
@@ -94,6 +94,10 @@ public class StoryCraftTileTranslation
     public string? Caption { get; set; }
     public string? Text { get; set; }
     public string? Question { get; set; }
+    
+    // Language-specific media (filename only in draft)
+    public string? AudioUrl { get; set; }
+    public string? VideoUrl { get; set; }
 
     public StoryCraftTile StoryCraftTile { get; set; } = null!;
 }

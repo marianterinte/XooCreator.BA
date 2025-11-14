@@ -107,14 +107,15 @@ public class ExportPublishedStoryEndpoint
                     type = t.Type,
                     sortOrder = t.SortOrder,
                     imageUrl = t.ImageUrl,
-                    videoUrl = t.VideoUrl,
-                    audioUrl = t.AudioUrl,
+                    // Audio and Video are now language-specific (in translations)
                     translations = t.Translations.Select(tr => new
                     {
                         lang = tr.LanguageCode,
                         caption = tr.Caption,
                         text = tr.Text,
-                        question = tr.Question
+                        question = tr.Question,
+                        audioUrl = tr.AudioUrl,
+                        videoUrl = tr.VideoUrl
                     }).ToList(),
                     answers = (t.Answers ?? new()).OrderBy(a => a.SortOrder).Select(a => new
                     {
@@ -132,9 +133,15 @@ public class ExportPublishedStoryEndpoint
         if (!string.IsNullOrWhiteSpace(def.CoverImageUrl)) result.Add(Normalize(def.CoverImageUrl));
         foreach (var t in def.Tiles)
         {
+            // Image is common for all languages
             if (!string.IsNullOrWhiteSpace(t.ImageUrl)) result.Add(Normalize(t.ImageUrl));
-            if (!string.IsNullOrWhiteSpace(t.VideoUrl)) result.Add(Normalize(t.VideoUrl));
-            if (!string.IsNullOrWhiteSpace(t.AudioUrl)) result.Add(Normalize(t.AudioUrl));
+            
+            // Audio and Video are now language-specific (in translations)
+            foreach (var tr in t.Translations)
+            {
+                if (!string.IsNullOrWhiteSpace(tr.AudioUrl)) result.Add(Normalize(tr.AudioUrl));
+                if (!string.IsNullOrWhiteSpace(tr.VideoUrl)) result.Add(Normalize(tr.VideoUrl));
+            }
         }
         return result.ToList();
     }

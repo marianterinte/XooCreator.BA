@@ -206,9 +206,9 @@ public class CreateDraftFromPublishedEndpoint
         {
             TileId = defTile.TileId,
             Type = defTile.Type,
+            // Image is common for all languages
             ImageUrl = ExtractFileName(defTile.ImageUrl),
-            AudioUrl = ExtractFileName(defTile.AudioUrl),
-            VideoUrl = ExtractFileName(defTile.VideoUrl),
+            // Audio and Video are now language-specific (stored in translation)
             SortOrder = sortOrder
         };
 
@@ -227,7 +227,10 @@ public class CreateDraftFromPublishedEndpoint
                 LanguageCode = tileTr.LanguageCode,
                 Caption = tileTr.Caption ?? string.Empty,
                 Text = tileTr.Text ?? string.Empty,
-                Question = tileTr.Question ?? string.Empty
+                Question = tileTr.Question ?? string.Empty,
+                // Audio and Video are language-specific (extract filename from published path)
+                AudioUrl = ExtractFileName(tileTr.AudioUrl),
+                VideoUrl = ExtractFileName(tileTr.VideoUrl)
             });
         }
     }

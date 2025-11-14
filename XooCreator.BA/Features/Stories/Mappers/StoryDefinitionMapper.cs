@@ -194,7 +194,9 @@ public static class StoryDefinitionMapper
                     Caption = TryGetCaption(t, lc) ?? t.Caption,
                     Text = TryGetText(t, lc) ?? t.Text,
                     ImageUrl = t.ImageUrl,
-                    AudioUrl = t.AudioUrl,
+                    // Audio and Video are now language-specific (from translation)
+                    AudioUrl = TryGetAudioUrl(t, lc),
+                    VideoUrl = TryGetVideoUrl(t, lc),
                     Question = TryGetQuestion(t, lc) ?? t.Question,
                     Answers = t.Answers
                         .OrderBy(a => a.SortOrder)
@@ -247,6 +249,12 @@ public static class StoryDefinitionMapper
 
     private static string? TryGetAnswerText(StoryAnswer a, string lc)
         => a.Translations?.FirstOrDefault(tr => tr.LanguageCode == lc)?.Text;
+
+    private static string? TryGetAudioUrl(StoryTile t, string lc)
+        => t.Translations?.FirstOrDefault(tr => tr.LanguageCode == lc)?.AudioUrl;
+
+    private static string? TryGetVideoUrl(StoryTile t, string lc)
+        => t.Translations?.FirstOrDefault(tr => tr.LanguageCode == lc)?.VideoUrl;
 
     #endregion
 

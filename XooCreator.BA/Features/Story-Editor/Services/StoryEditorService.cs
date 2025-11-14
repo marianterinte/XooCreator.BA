@@ -42,6 +42,7 @@ public class StoryEditorService : IStoryEditorService
         
         var lang = languageCode.ToLowerInvariant();
         var translation = craft.Translations.FirstOrDefault(t => t.LanguageCode == lang);
+        var isNewTranslation = translation == null;
         
         if (translation == null)
         {
@@ -61,6 +62,46 @@ public class StoryEditorService : IStoryEditorService
             // Update title if provided and translation already exists
             translation.Title = title;
             await _context.SaveChangesAsync(ct);
+        }
+        
+        // If this is a new translation, clone tile translations from source language (including media)
+        if (isNewTranslation)
+        {
+            // Find source language (prefer ro-ro, otherwise first available)
+            var sourceLang = craft.Translations
+                .FirstOrDefault(t => t.LanguageCode == "ro-ro")?.LanguageCode
+                ?? craft.Translations.FirstOrDefault()?.LanguageCode;
+            
+            if (sourceLang != null && sourceLang != lang)
+            {
+                foreach (var tile in craft.Tiles)
+                {
+                    var sourceTileTranslation = tile.Translations.FirstOrDefault(t => t.LanguageCode == sourceLang);
+                    if (sourceTileTranslation != null)
+                    {
+                        // Check if target translation already exists
+                        var existingTargetTranslation = tile.Translations.FirstOrDefault(t => t.LanguageCode == lang);
+                        if (existingTargetTranslation == null)
+                        {
+                            // Clone tile translation including audio/video
+                            var newTileTranslation = new StoryCraftTileTranslation
+                            {
+                                Id = Guid.NewGuid(),
+                                StoryCraftTileId = tile.Id,
+                                LanguageCode = lang,
+                                Caption = sourceTileTranslation.Caption,
+                                Text = sourceTileTranslation.Text,
+                                Question = sourceTileTranslation.Question,
+                                // Clone media from source language
+                                AudioUrl = sourceTileTranslation.AudioUrl,
+                                VideoUrl = sourceTileTranslation.VideoUrl
+                            };
+                            _context.StoryCraftTileTranslations.Add(newTileTranslation);
+                        }
+                    }
+                }
+                await _context.SaveChangesAsync(ct);
+            }
         }
     }
 
@@ -132,9 +173,9 @@ public class StoryEditorService : IStoryEditorService
                     TileId = tileDto.Id,
                     Type = tileDto.Type ?? "page",
                     SortOrder = i,
+                    // Image is common for all languages
                     ImageUrl = ExtractFileName(tileDto.ImageUrl),
-                    AudioUrl = ExtractFileName(tileDto.AudioUrl),
-                    VideoUrl = ExtractFileName(tileDto.VideoUrl),
+                    // Audio and Video are now language-specific (stored in translation)
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
@@ -146,9 +187,9 @@ public class StoryEditorService : IStoryEditorService
                 // Update existing tile
                 tile.Type = tileDto.Type ?? tile.Type;
                 tile.SortOrder = i;
+                // Image is common for all languages
                 tile.ImageUrl = ExtractFileName(tileDto.ImageUrl);
-                tile.AudioUrl = ExtractFileName(tileDto.AudioUrl);
-                tile.VideoUrl = ExtractFileName(tileDto.VideoUrl);
+                // Audio and Video are now language-specific (stored in translation)
                 tile.UpdatedAt = DateTime.UtcNow;
             }
             
@@ -163,7 +204,10 @@ public class StoryEditorService : IStoryEditorService
                     LanguageCode = languageCode,
                     Caption = tileDto.Caption,
                     Text = tileDto.Text,
-                    Question = tileDto.Question
+                    Question = tileDto.Question,
+                    // Audio and Video are language-specific
+                    AudioUrl = ExtractFileName(tileDto.AudioUrl),
+                    VideoUrl = ExtractFileName(tileDto.VideoUrl)
                 };
                 _context.StoryCraftTileTranslations.Add(tileTranslation);
             }
@@ -172,6 +216,9 @@ public class StoryEditorService : IStoryEditorService
                 tileTranslation.Caption = tileDto.Caption;
                 tileTranslation.Text = tileDto.Text;
                 tileTranslation.Question = tileDto.Question;
+                // Audio and Video are language-specific
+                tileTranslation.AudioUrl = ExtractFileName(tileDto.AudioUrl);
+                tileTranslation.VideoUrl = ExtractFileName(tileDto.VideoUrl);
             }
             
             // Update answers

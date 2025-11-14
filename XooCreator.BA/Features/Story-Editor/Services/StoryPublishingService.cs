@@ -101,8 +101,8 @@ public class StoryPublishingService : IStoryPublishingService
         
         foreach (var ctile in tilesBySort)
         {
-            _logger.LogInformation("Processing tile: tileId={TileId} imageUrl={ImageUrl} audioUrl={AudioUrl} videoUrl={VideoUrl}", 
-                ctile.TileId, ctile.ImageUrl ?? "(null)", ctile.AudioUrl ?? "(null)", ctile.VideoUrl ?? "(null)");
+            _logger.LogInformation("Processing tile: tileId={TileId} imageUrl={ImageUrl}", 
+                ctile.TileId, ctile.ImageUrl ?? "(null)");
             
             var tile = new StoryTile
             {
@@ -113,39 +113,51 @@ public class StoryPublishingService : IStoryPublishingService
                 Caption = null,
                 Text = null,
                 Question = null,
-                ImageUrl = ctile.ImageUrl,
-                AudioUrl = ctile.AudioUrl,
-                VideoUrl = ctile.VideoUrl
+                // Image is common for all languages
+                ImageUrl = ctile.ImageUrl
+                // Audio and Video are now language-specific (stored in translation)
             };
 
+            // Build published path for image (common for all languages)
             if (!string.IsNullOrWhiteSpace(ctile.ImageUrl))
             {
                 var asset = new StoryAssetPathMapper.AssetInfo(ctile.ImageUrl, StoryAssetPathMapper.AssetType.Image, null);
                 tile.ImageUrl = StoryAssetPathMapper.BuildPublishedPath(asset, ownerEmail, storyId);
             }
-            if (!string.IsNullOrWhiteSpace(ctile.VideoUrl))
-            {
-                var asset = new StoryAssetPathMapper.AssetInfo(ctile.VideoUrl, StoryAssetPathMapper.AssetType.Video, null);
-                tile.VideoUrl = StoryAssetPathMapper.BuildPublishedPath(asset, ownerEmail, storyId);
-            }
-            if (!string.IsNullOrWhiteSpace(ctile.AudioUrl))
-            {
-                var asset = new StoryAssetPathMapper.AssetInfo(ctile.AudioUrl, StoryAssetPathMapper.AssetType.Audio, langTag);
-                tile.AudioUrl = StoryAssetPathMapper.BuildPublishedPath(asset, ownerEmail, storyId);
-            }
 
             _db.StoryTiles.Add(tile);
 
-            // Translations
+            // Translations (including audio/video per language)
             foreach (var tr in ctile.Translations)
             {
+                var translationLang = tr.LanguageCode.ToLowerInvariant();
+                string? publishedAudioUrl = null;
+                string? publishedVideoUrl = null;
+
+                // Build published paths for audio (language-specific)
+                if (!string.IsNullOrWhiteSpace(tr.AudioUrl))
+                {
+                    var audioAsset = new StoryAssetPathMapper.AssetInfo(tr.AudioUrl, StoryAssetPathMapper.AssetType.Audio, translationLang);
+                    publishedAudioUrl = StoryAssetPathMapper.BuildPublishedPath(audioAsset, ownerEmail, storyId);
+                }
+
+                // Build published paths for video (language-specific)
+                if (!string.IsNullOrWhiteSpace(tr.VideoUrl))
+                {
+                    var videoAsset = new StoryAssetPathMapper.AssetInfo(tr.VideoUrl, StoryAssetPathMapper.AssetType.Video, translationLang);
+                    publishedVideoUrl = StoryAssetPathMapper.BuildPublishedPath(videoAsset, ownerEmail, storyId);
+                }
+
                 _db.StoryTileTranslations.Add(new StoryTileTranslation
                 {
                     StoryTile = tile,
-                    LanguageCode = tr.LanguageCode.ToLowerInvariant(),
+                    LanguageCode = translationLang,
                     Caption = tr.Caption,
                     Text = tr.Text,
-                    Question = tr.Question
+                    Question = tr.Question,
+                    // Audio and Video are language-specific (full published path)
+                    AudioUrl = publishedAudioUrl,
+                    VideoUrl = publishedVideoUrl
                 });
             }
 

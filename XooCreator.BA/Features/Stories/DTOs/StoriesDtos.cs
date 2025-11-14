@@ -25,6 +25,7 @@ public record StoryTileDto
     public string? Text { get; init; }
     public string? ImageUrl { get; init; }
     public string? AudioUrl { get; init; }
+    public string? VideoUrl { get; init; }
     
     // Quiz fields
     public string? Question { get; init; }
