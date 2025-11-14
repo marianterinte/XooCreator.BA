@@ -16,7 +16,7 @@ namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 public record CreateStoryRequest
 {
     public string? StoryId { get; init; }
-    public string? Lang { get; init; }
+    public string? Language { get; init; } // Standardized: use "language" instead of "lang"
     public string? Title { get; init; } // reserved for future
     public int? StoryType { get; init; } // reserved for future
 }
@@ -44,10 +44,9 @@ public class CreateStoryEndpoint
         _logger = logger;
     }
 
-    [Route("/api/{locale}/stories")]
+    [Route("/api/stories")]
     [Authorize]
     public static async Task<Results<Ok<CreateStoryResponse>, BadRequest<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
-        [FromRoute] string locale,
         [FromServices] CreateStoryEndpoint ep,
         [FromBody] CreateStoryRequest req,
         CancellationToken ct)
@@ -62,7 +61,13 @@ public class CreateStoryEndpoint
             return TypedResults.Forbid();
         }
 
-        var langTag = string.IsNullOrWhiteSpace(req.Lang) ? ep._userContext.GetRequestLocaleOrDefault("ro-ro") : req.Lang!;
+        // Language must be provided in payload (agnostic of UI language)
+        if (string.IsNullOrWhiteSpace(req.Language))
+        {
+            return TypedResults.BadRequest("Language is required in request body.");
+        }
+
+        var langTag = req.Language!.ToLowerInvariant();
         
         // Generate storyId if not provided
         string storyId = (req.StoryId ?? string.Empty).Trim();

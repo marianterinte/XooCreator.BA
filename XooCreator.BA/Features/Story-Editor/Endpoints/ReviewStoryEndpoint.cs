@@ -39,10 +39,9 @@ public class ReviewStoryEndpoint
         public string Status { get; init; } = "Approved";
     }
 
-    [Route("/api/{locale}/stories/{storyId}/review")]
+    [Route("/api/stories/{storyId}/review")]
     [Authorize]
     public static async Task<Results<Ok<ReviewResponse>, NotFound, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
-        [FromRoute] string locale,
         [FromRoute] string storyId,
         [FromServices] ReviewStoryEndpoint ep,
         [FromBody] ReviewRequest req,

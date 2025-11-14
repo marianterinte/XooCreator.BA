@@ -38,10 +38,9 @@ public class DeleteStoryEndpoint
         public string Message { get; init; } = "Story deleted successfully";
     }
 
-    [Route("/api/{locale}/stories/{storyId}")]
+    [Route("/api/stories/{storyId}")]
     [Authorize]
     public static async Task<Results<Ok<DeleteResponse>, NotFound, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandleDelete(
-        [FromRoute] string locale,
         [FromRoute] string storyId,
         [FromServices] DeleteStoryEndpoint ep,
         CancellationToken ct)

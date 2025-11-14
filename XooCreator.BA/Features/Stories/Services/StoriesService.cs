@@ -229,6 +229,7 @@ public class EditableStoryDto
     public string? Summary { get; set; }
     public int StoryType { get; set; } = 0; // 0 = AlchimaliaEpic (Tree Of Light), 1 = Indie (Independent)
     public string? Status { get; set; } // 'draft' | 'in-review' | 'approved' | 'published' (FE semantic)
+    public string? Language { get; set; } // Language code for the story (standardized: use "language" instead of "languageCode")
     public List<string>? AvailableLanguages { get; set; } // Available language codes for this story
     public List<EditableTileDto> Tiles { get; set; } = new();
 

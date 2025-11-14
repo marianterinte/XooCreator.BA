@@ -44,10 +44,9 @@ public class CreateDraftFromPublishedEndpoint
         public int BaseVersion { get; init; }
     }
 
-    [Route("/api/{locale}/stories/{storyId}/create-draft-from-published")]
+    [Route("/api/stories/{storyId}/create-draft-from-published")]
     [Authorize]
     public static async Task<Results<Ok<CreateDraftResponse>, BadRequest<string>, NotFound, UnauthorizedHttpResult, ForbidHttpResult, Conflict<string>>> HandlePost(
-        [FromRoute] string locale,
         [FromRoute] string storyId,
         [FromServices] CreateDraftFromPublishedEndpoint ep,
         CancellationToken ct)

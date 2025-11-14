@@ -37,10 +37,9 @@ public class SaveStoryEditEndpoint
         public string? StoryId { get; init; }
     }
 
-    [Route("/api/{locale}/stories/{storyId}/edit")]
+    [Route("/api/stories/{storyId}/edit")]
     [Authorize]
     public static async Task<Results<Ok<SaveResponse>, BadRequest<string>, Conflict<string>, NotFound, UnauthorizedHttpResult, ForbidHttpResult>> HandlePut(
-        [FromRoute] string locale,
         [FromRoute] string storyId,
         [FromServices] SaveStoryEditEndpoint ep,
         [FromBody] JsonDocument body,
@@ -54,8 +53,6 @@ public class SaveStoryEditEndpoint
             ep._logger.LogWarning("Save forbidden: userId={UserId} not a creator", user.Id);
             return TypedResults.Forbid();
         }
-
-        var langTag = ep._userContext.GetRequestLocaleOrDefault("ro-ro");
 
         // Generate storyId if "new" or empty
         string finalStoryId = storyId?.Trim() ?? string.Empty;
@@ -88,6 +85,14 @@ public class SaveStoryEditEndpoint
             ep._logger.LogError(ex, "Failed to deserialize story data");
             return TypedResults.BadRequest("Invalid JSON format");
         }
+
+        // Language must be provided in payload (agnostic of UI language)
+        if (string.IsNullOrWhiteSpace(dto.Language))
+        {
+            return TypedResults.BadRequest("Language is required in request body.");
+        }
+
+        var langTag = dto.Language.ToLowerInvariant();
 
         var craft = await ep._crafts.GetAsync(finalStoryId, ct);
         

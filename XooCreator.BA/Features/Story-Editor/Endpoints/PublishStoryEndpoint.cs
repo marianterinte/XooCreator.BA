@@ -39,10 +39,9 @@ public partial class PublishStoryEndpoint
         _assetService = assetService;
     }
 
-    [Route("/api/{locale}/stories/{storyId}/publish")]
+    [Route("/api/stories/{storyId}/publish")]
     [Authorize]
     public static async Task<Results<Ok<PublishResponse>, NotFound, BadRequest<string>, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
-        [FromRoute] string locale,
         [FromRoute] string storyId,
         [FromServices] PublishStoryEndpoint ep,
         CancellationToken ct)
@@ -51,8 +50,6 @@ public partial class PublishStoryEndpoint
         var authResult = await ep.ValidateAuthorizationAsync(ct);
         if (authResult.Result != null) return authResult.Result;
         var user = authResult.User!;
-
-        var langTag = ep._userContext.GetRequestLocaleOrDefault("ro-ro");
 
         // Load craft
         var craft = await ep._crafts.GetAsync(storyId, ct);
@@ -67,6 +64,11 @@ public partial class PublishStoryEndpoint
         var allAssets = ep._assetService.CollectAllAssets(craft);
         var copyResult = await ep._assetService.CopyAssetsToPublishedAsync(allAssets, user.Email, storyId, ct);
         if (copyResult.HasError) return copyResult.ErrorResult;
+
+        // Use first available translation or ro-ro as fallback for title/summary (publish processes all translations anyway)
+        var langTag = craft.Translations.FirstOrDefault(t => t.LanguageCode == "ro-ro")?.LanguageCode
+            ?? craft.Translations.FirstOrDefault()?.LanguageCode
+            ?? "ro-ro";
 
         // Finalize publishing
         await ep.FinalizePublishingAsync(craft, user.Email, langTag, allAssets.Count, storyId, ct);

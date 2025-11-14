@@ -5,6 +5,8 @@ VisualStudioVersion = 17.14.36408.4
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XooCreator.BA", "XooCreator.BA.csproj", "{3C9962A8-1CA6-4CAB-B128-4F15F81C13E5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XooCreator.Tests", "..\XooCreator.Tests\XooCreator.Tests.csproj", "{EA665297-4DC5-4A9F-A623-A4A8EE7F987B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{3C9962A8-1CA6-4CAB-B128-4F15F81C13E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3C9962A8-1CA6-4CAB-B128-4F15F81C13E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3C9962A8-1CA6-4CAB-B128-4F15F81C13E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA665297-4DC5-4A9F-A623-A4A8EE7F987B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA665297-4DC5-4A9F-A623-A4A8EE7F987B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA665297-4DC5-4A9F-A623-A4A8EE7F987B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA665297-4DC5-4A9F-A623-A4A8EE7F987B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -28,7 +28,7 @@ public class CreateTranslationEndpoint
 
     public record CreateTranslationRequest
     {
-        public required string Lang { get; init; }
+        public required string Language { get; init; } // Standardized: use "language" instead of "lang"
     }
 
     public record CreateTranslationResponse
@@ -38,10 +38,9 @@ public class CreateTranslationEndpoint
         public required string Lang { get; init; }
     }
 
-    [Route("/api/{locale}/stories/{storyId}/translations")]
+    [Route("/api/stories/{storyId}/translations")]
     [Authorize]
     public static async Task<Results<Ok<CreateTranslationResponse>, BadRequest<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
-        [FromRoute] string locale,
         [FromRoute] string storyId,
         [FromServices] CreateTranslationEndpoint ep,
         [FromBody] CreateTranslationRequest req,
@@ -60,21 +59,20 @@ public class CreateTranslationEndpoint
             return TypedResults.BadRequest("storyId is required and cannot be 'new'");
         }
 
-        if (string.IsNullOrWhiteSpace(req.Lang))
+        if (string.IsNullOrWhiteSpace(req.Language))
         {
-            return TypedResults.BadRequest("lang is required");
+            return TypedResults.BadRequest("language is required");
         }
 
-        var lang = req.Lang.ToLowerInvariant();
+        var lang = req.Language.ToLowerInvariant();
         await ep._editorService.EnsureTranslationAsync(user.Id, storyId, lang, null, ct);
         ep._logger.LogInformation("Create translation draft: userId={UserId} storyId={StoryId} lang={Lang}", user.Id, storyId, lang);
         return TypedResults.Ok(new CreateTranslationResponse { StoryId = storyId, Lang = lang });
     }
 
-    [Route("/api/{locale}/stories/{storyId}/translations/{lang}")]
+    [Route("/api/stories/{storyId}/translations/{lang}")]
     [Authorize]
     public static async Task<Results<Ok<CreateTranslationResponse>, BadRequest<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandleDelete(
-        [FromRoute] string locale,
         [FromRoute] string storyId,
         [FromRoute] string lang,
         [FromServices] CreateTranslationEndpoint ep,

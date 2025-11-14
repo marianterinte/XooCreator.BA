@@ -33,10 +33,9 @@ public class RetractStoryEndpoint
         public string Status { get; init; } = "Draft";
     }
 
-    [Route("/api/{locale}/stories/{storyId}/retract")]
+    [Route("/api/stories/{storyId}/retract")]
     [Authorize]
     public static async Task<Results<Ok<RetractResponse>, NotFound, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
-        [FromRoute] string locale,
         [FromRoute] string storyId,
         [FromServices] RetractStoryEndpoint ep,
         CancellationToken ct)

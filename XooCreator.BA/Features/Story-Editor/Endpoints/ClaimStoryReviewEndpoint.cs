@@ -33,10 +33,9 @@ public class ClaimStoryReviewEndpoint
         public string Status { get; init; } = "InReview";
     }
 
-    [Route("/api/{locale}/stories/{storyId}/claim")]
+    [Route("/api/stories/{storyId}/claim")]
     [Authorize]
     public static async Task<Results<Ok<ClaimResponse>, NotFound, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
-        [FromRoute] string locale,
         [FromRoute] string storyId,
         [FromServices] ClaimStoryReviewEndpoint ep,
         CancellationToken ct)

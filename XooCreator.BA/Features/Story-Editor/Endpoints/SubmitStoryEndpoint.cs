@@ -36,10 +36,9 @@ public class SubmitStoryEndpoint
         public string Status { get; init; } = "SentForApproval";
     }
 
-    [Route("/api/{locale}/stories/{storyId}/submit")]
+    [Route("/api/stories/{storyId}/submit")]
     [Authorize]
     public static async Task<Results<Ok<SubmitResponse>, NotFound, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
-        [FromRoute] string locale,
         [FromRoute] string storyId,
         [FromServices] SubmitStoryEndpoint ep,
         CancellationToken ct)
