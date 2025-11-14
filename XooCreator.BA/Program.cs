@@ -151,6 +151,7 @@ builder.Services.AddScoped<IStoriesRepository, StoriesRepository>();
 builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Repositories.IStoryCraftsRepository, XooCreator.BA.Features.StoryEditor.Repositories.StoryCraftsRepository>();
 builder.Services.AddScoped<IStoryEditorService, StoryEditorService>();
 builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IStoryPublishingService, XooCreator.BA.Features.StoryEditor.Services.StoryPublishingService>();
+builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IStoryPublishAssetService, XooCreator.BA.Features.StoryEditor.Services.StoryPublishAssetService>();
 
 // Story Marketplace Services
 builder.Services.AddScoped<IStoriesMarketplaceRepository, StoriesMarketplaceRepository>();
