@@ -1,12 +1,11 @@
-using Azure.Storage.Blobs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using XooCreator.BA.Infrastructure.Endpoints;
-using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Services;
 using XooCreator.BA.Infrastructure.Services.Blob;
 using XooCreator.BA.Features.Assets.DTOs;
+using XooCreator.BA.Features.StoryEditor.Mappers;
 
 namespace XooCreator.BA.Features.Assets.Endpoints;
 
@@ -75,38 +74,30 @@ public class RequestUploadEndpoint
             if (expectedSize > maxVideo) return TypedResults.BadRequest("Video too large.");
         }
 
-        // Build relative path based on kind
-        var relPath = dto.Kind switch
+        var assetType = dto.Kind switch
         {
-            "cover" => $"cover/{dto.FileName}",
-            "tile-image" => string.IsNullOrWhiteSpace(dto.TileId) ? $"tiles/{dto.FileName}" : $"tiles/{dto.TileId}/{dto.FileName}",
-            "tile-audio" => $"audio/{dto.FileName}",
-            "video" => $"video/{dto.FileName}",
-            "meta" => $"meta/{dto.FileName}",
-            _ => $"misc/{dto.FileName}"
+            "cover" => StoryAssetPathMapper.AssetType.Image,
+            "tile-image" => StoryAssetPathMapper.AssetType.Image,
+            "tile-audio" => StoryAssetPathMapper.AssetType.Audio,
+            "video" => StoryAssetPathMapper.AssetType.Video,
+            _ => StoryAssetPathMapper.AssetType.Image
         };
 
-        // Draft blob path - encode email for URL safety
-        var emailEsc = Uri.EscapeDataString(user.Email);
-        var normalizedRelPath = relPath.TrimStart('/');
-        // Images (cover and tile-image) are language-agnostic; audio and video are language-specific
-        var isLanguageAgnosticAsset = string.Equals(dto.Kind, "tile-image", StringComparison.OrdinalIgnoreCase) 
-            || string.Equals(dto.Kind, "cover", StringComparison.OrdinalIgnoreCase);
-        var blobPath = isLanguageAgnosticAsset
-            ? $"draft/u/{emailEsc}/stories/{dto.StoryId}/{normalizedRelPath}"
-            : $"draft/u/{emailEsc}/stories/{dto.StoryId}/{dto.Lang}/{normalizedRelPath}";
+        var lang = assetType == StoryAssetPathMapper.AssetType.Audio || assetType == StoryAssetPathMapper.AssetType.Video
+            ? dto.Lang
+            : null;
+        
+        var asset = new StoryAssetPathMapper.AssetInfo(dto.FileName, assetType, lang);
+        var blobPath = StoryAssetPathMapper.BuildDraftPath(asset, user.Email, dto.StoryId);
 
-        // Issue PUT SAS
         var putUri = await ep._sas.GetPutSasAsync(ep._sas.DraftContainer, blobPath, contentType!, TimeSpan.FromMinutes(10), ct);
-
-        // Public blob URL (still private container, used only for diagnostics or GET SAS issuance)
         var blobClient = ep._sas.GetBlobClient(ep._sas.DraftContainer, blobPath);
 
         return TypedResults.Ok(new RequestUploadResponse
         {
             PutUrl = putUri.ToString(),
             BlobUrl = blobClient.Uri.ToString(),
-            RelPath = relPath,
+            RelPath = dto.FileName,
             Container = ep._sas.DraftContainer,
             BlobPath = blobPath
         });

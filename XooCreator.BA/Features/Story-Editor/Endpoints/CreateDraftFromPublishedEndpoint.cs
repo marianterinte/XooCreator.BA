@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,7 +10,6 @@ using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
-using Microsoft.Extensions.Logging;
 using StoryCraftAnswerToken = XooCreator.BA.Data.Entities.StoryCraftAnswerToken;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
@@ -52,143 +52,25 @@ public class CreateDraftFromPublishedEndpoint
         [FromServices] CreateDraftFromPublishedEndpoint ep,
         CancellationToken ct)
     {
-        var user = await ep._auth0.GetCurrentUserAsync(ct);
-        if (user == null) return TypedResults.Unauthorized();
+        var authResult = await ep.ValidateAuthorizationAsync(ct);
+        if (authResult.Result != null) return (Results<Ok<CreateDraftResponse>, BadRequest<string>, NotFound, UnauthorizedHttpResult, ForbidHttpResult, Conflict<string>>)authResult.Result;
+        var user = authResult.User!;
 
-        // Only Creator or Admin can create drafts
-        if (!ep._auth0.HasRole(user, Data.Enums.UserRole.Creator) && !ep._auth0.HasRole(user, Data.Enums.UserRole.Admin))
-        {
-            ep._logger.LogWarning("User {UserId} attempted to create draft without Creator/Admin role", user.Id);
-            return TypedResults.Forbid();
-        }
+        var validationResult = ep.ValidateStoryId(storyId);
+        if (validationResult != null) return (Results<Ok<CreateDraftResponse>, BadRequest<string>, NotFound, UnauthorizedHttpResult, ForbidHttpResult, Conflict<string>>)validationResult;
 
-        if (string.IsNullOrWhiteSpace(storyId) || storyId.Equals("new", StringComparison.OrdinalIgnoreCase))
-        {
-            return TypedResults.BadRequest("storyId is required and cannot be 'new'");
-        }
+        var storyResult = await ep.LoadAndValidateStoryAsync(storyId, ct);
+        if (storyResult.Result != null) return (Results<Ok<CreateDraftResponse>, BadRequest<string>, NotFound, UnauthorizedHttpResult, ForbidHttpResult, Conflict<string>>)storyResult.Result;
+        var def = storyResult.Story!;
 
-        // Load published StoryDefinition
-        var def = await ep._db.StoryDefinitions
-            .Include(d => d.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Tokens)
-            .Include(d => d.Tiles).ThenInclude(t => t.Translations)
-            .Include(d => d.Translations)
-            .FirstOrDefaultAsync(d => d.StoryId == storyId, ct);
+        var ownershipResult = ep.ValidateOwnership(user, def);
+        if (ownershipResult != null) return (Results<Ok<CreateDraftResponse>, BadRequest<string>, NotFound, UnauthorizedHttpResult, ForbidHttpResult, Conflict<string>>)ownershipResult;
 
-        if (def == null)
-        {
-            ep._logger.LogWarning("Story not found: {StoryId}", storyId);
-            return TypedResults.NotFound();
-        }
+        var draftCheckResult = await ep.CheckExistingDraftAsync(storyId, ct);
+        if (draftCheckResult != null) return (Results<Ok<CreateDraftResponse>, BadRequest<string>, NotFound, UnauthorizedHttpResult, ForbidHttpResult, Conflict<string>>)draftCheckResult;
 
-        // Check if story is published
-        if (def.Status != StoryStatus.Published)
-        {
-            return TypedResults.BadRequest($"Story is not published (status: {def.Status})");
-        }
-
-        // Check ownership (unless Admin)
-        if (!ep._auth0.HasRole(user, Data.Enums.UserRole.Admin))
-        {
-            if (def.CreatedBy != user.Id)
-            {
-                ep._logger.LogWarning("User {UserId} attempted to create draft for story owned by {OwnerId}", user.Id, def.CreatedBy);
-                return TypedResults.Forbid();
-            }
-        }
-
-        // Check if draft already exists
-        var existingCraft = await ep._crafts.GetAsync(storyId, ct);
-        if (existingCraft != null && existingCraft.Status != StoryStatus.Published.ToDb())
-        {
-            return TypedResults.Conflict("A draft already exists for this story. Please edit the existing draft or publish it first.");
-        }
-
-        // Create new StoryCraft from published StoryDefinition
-        var craft = new StoryCraft
-        {
-            StoryId = storyId,
-            OwnerUserId = user.Id,
-            Status = StoryStatus.Draft.ToDb(),
-            StoryType = def.StoryType,
-            CoverImageUrl = def.CoverImageUrl,
-            BaseVersion = def.Version, // Set base version to current published version
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
-
-        // Copy translations
-        foreach (var defTr in def.Translations)
-        {
-            craft.Translations.Add(new StoryCraftTranslation
-            {
-                LanguageCode = defTr.LanguageCode,
-                Title = defTr.Title,
-                Summary = def.Summary // Summary is on StoryDefinition, not translation
-            });
-        }
-
-        // Copy tiles
-        var sortOrder = 0;
-        foreach (var defTile in def.Tiles.OrderBy(t => t.SortOrder))
-        {
-            var craftTile = new StoryCraftTile
-            {
-                TileId = defTile.TileId,
-                Type = defTile.Type,
-                ImageUrl = defTile.ImageUrl ?? string.Empty,
-                AudioUrl = defTile.AudioUrl ?? string.Empty,
-                VideoUrl = defTile.VideoUrl ?? string.Empty,
-                SortOrder = sortOrder++
-            };
-
-            // Copy tile translations (Caption, Text, Question are in translations, not on tile)
-            foreach (var tileTr in defTile.Translations)
-            {
-                craftTile.Translations.Add(new StoryCraftTileTranslation
-                {
-                    LanguageCode = tileTr.LanguageCode,
-                    Caption = tileTr.Caption ?? string.Empty,
-                    Text = tileTr.Text ?? string.Empty,
-                    Question = tileTr.Question ?? string.Empty
-                });
-            }
-
-            // Copy answers
-            var answerSortOrder = 0;
-            foreach (var defAnswer in defTile.Answers.OrderBy(a => a.SortOrder))
-            {
-                var craftAnswer = new StoryCraftAnswer
-                {
-                    AnswerId = defAnswer.AnswerId,
-                    SortOrder = answerSortOrder++
-                };
-
-                // Copy answer translations (Text is in translations, not on answer)
-                foreach (var answerTr in defAnswer.Translations)
-                {
-                    craftAnswer.Translations.Add(new StoryCraftAnswerTranslation
-                    {
-                        LanguageCode = answerTr.LanguageCode,
-                        Text = answerTr.Text ?? string.Empty
-                    });
-                }
-
-                // Copy tokens (correct class name is StoryCraftAnswerToken)
-                foreach (var token in defAnswer.Tokens)
-                {
-                    craftAnswer.Tokens.Add(new StoryCraftAnswerToken
-                    {
-                        Type = token.Type ?? string.Empty,
-                        Value = token.Value ?? string.Empty,
-                        Quantity = token.Quantity
-                    });
-                }
-
-                craftTile.Answers.Add(craftAnswer);
-            }
-
-            craft.Tiles.Add(craftTile);
-        }
+        // Create draft from published story
+        var craft = ep.CreateStoryCraftFromDefinition(def, storyId, user.Id);
 
         // Save the new craft
         await ep._crafts.SaveAsync(craft, ct);
@@ -200,5 +82,207 @@ public class CreateDraftFromPublishedEndpoint
             BaseVersion = def.Version
         });
     }
-}
 
+    private async Task<(AlchimaliaUser? User, IResult? Result)> ValidateAuthorizationAsync(CancellationToken ct)
+    {
+        var user = await _auth0.GetCurrentUserAsync(ct);
+        if (user == null)
+        {
+            return (null, TypedResults.Unauthorized());
+        }
+
+        if (!_auth0.HasRole(user, Data.Enums.UserRole.Creator) && !_auth0.HasRole(user, Data.Enums.UserRole.Admin))
+        {
+            _logger.LogWarning("User {UserId} attempted to create draft without Creator/Admin role", user.Id);
+            return (null, TypedResults.Forbid());
+        }
+
+        return (user, null);
+    }
+
+    private IResult? ValidateStoryId(string storyId)
+    {
+        if (string.IsNullOrWhiteSpace(storyId) || storyId.Equals("new", StringComparison.OrdinalIgnoreCase))
+        {
+            return TypedResults.BadRequest("storyId is required and cannot be 'new'");
+        }
+
+        return null;
+    }
+
+    private async Task<(StoryDefinition? Story, IResult? Result)> LoadAndValidateStoryAsync(string storyId, CancellationToken ct)
+    {
+        var def = await _db.StoryDefinitions
+            .Include(d => d.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Tokens)
+            .Include(d => d.Tiles).ThenInclude(t => t.Translations)
+            .Include(d => d.Translations)
+            .FirstOrDefaultAsync(d => d.StoryId == storyId, ct);
+
+        if (def == null)
+        {
+            _logger.LogWarning("Story not found: {StoryId}", storyId);
+            return (null, TypedResults.NotFound());
+        }
+
+        if (def.Status != StoryStatus.Published)
+        {
+            return (null, TypedResults.BadRequest($"Story is not published (status: {def.Status})"));
+        }
+
+        return (def, null);
+    }
+
+    private IResult? ValidateOwnership(AlchimaliaUser user, StoryDefinition def)
+    {
+        if (!_auth0.HasRole(user, Data.Enums.UserRole.Admin))
+        {
+            if (def.CreatedBy != user.Id)
+            {
+                _logger.LogWarning("User {UserId} attempted to create draft for story owned by {OwnerId}", user.Id, def.CreatedBy);
+                return TypedResults.Forbid();
+            }
+        }
+
+        return null;
+    }
+
+    private async Task<IResult?> CheckExistingDraftAsync(string storyId, CancellationToken ct)
+    {
+        var existingCraft = await _crafts.GetAsync(storyId, ct);
+        if (existingCraft != null && existingCraft.Status != StoryStatus.Published.ToDb())
+        {
+            return TypedResults.Conflict("A draft already exists for this story. Please edit the existing draft or publish it first.");
+        }
+
+        return null;
+    }
+
+    private StoryCraft CreateStoryCraftFromDefinition(StoryDefinition def, string storyId, Guid userId)
+    {
+        var craft = new StoryCraft
+        {
+            StoryId = storyId,
+            OwnerUserId = userId,
+            Status = StoryStatus.Draft.ToDb(),
+            StoryType = def.StoryType,
+            CoverImageUrl = ExtractFileName(def.CoverImageUrl),
+            BaseVersion = def.Version,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        CopyTranslations(craft, def);
+        CopyTiles(craft, def);
+
+        return craft;
+    }
+
+    private static void CopyTranslations(StoryCraft craft, StoryDefinition def)
+    {
+        foreach (var defTr in def.Translations)
+        {
+            craft.Translations.Add(new StoryCraftTranslation
+            {
+                LanguageCode = defTr.LanguageCode,
+                Title = defTr.Title,
+                Summary = def.Summary // Summary is on StoryDefinition, not translation
+            });
+        }
+    }
+
+    private static void CopyTiles(StoryCraft craft, StoryDefinition def)
+    {
+        var sortOrder = 0;
+        foreach (var defTile in def.Tiles.OrderBy(t => t.SortOrder))
+        {
+            var craftTile = CreateCraftTile(defTile, sortOrder++);
+            craft.Tiles.Add(craftTile);
+        }
+    }
+
+    private static StoryCraftTile CreateCraftTile(StoryTile defTile, int sortOrder)
+    {
+        var craftTile = new StoryCraftTile
+        {
+            TileId = defTile.TileId,
+            Type = defTile.Type,
+            ImageUrl = ExtractFileName(defTile.ImageUrl),
+            AudioUrl = ExtractFileName(defTile.AudioUrl),
+            VideoUrl = ExtractFileName(defTile.VideoUrl),
+            SortOrder = sortOrder
+        };
+
+        CopyTileTranslations(craftTile, defTile);
+        CopyAnswers(craftTile, defTile);
+
+        return craftTile;
+    }
+
+    private static void CopyTileTranslations(StoryCraftTile craftTile, StoryTile defTile)
+    {
+        foreach (var tileTr in defTile.Translations)
+        {
+            craftTile.Translations.Add(new StoryCraftTileTranslation
+            {
+                LanguageCode = tileTr.LanguageCode,
+                Caption = tileTr.Caption ?? string.Empty,
+                Text = tileTr.Text ?? string.Empty,
+                Question = tileTr.Question ?? string.Empty
+            });
+        }
+    }
+
+    private static void CopyAnswers(StoryCraftTile craftTile, StoryTile defTile)
+    {
+        var answerSortOrder = 0;
+        foreach (var defAnswer in defTile.Answers.OrderBy(a => a.SortOrder))
+        {
+            var craftAnswer = CreateCraftAnswer(defAnswer, answerSortOrder++);
+            craftTile.Answers.Add(craftAnswer);
+        }
+    }
+
+    private static StoryCraftAnswer CreateCraftAnswer(StoryAnswer defAnswer, int sortOrder)
+    {
+        var craftAnswer = new StoryCraftAnswer
+        {
+            AnswerId = defAnswer.AnswerId,
+            SortOrder = sortOrder
+        };
+
+        CopyAnswerTranslations(craftAnswer, defAnswer);
+        CopyTokens(craftAnswer, defAnswer);
+
+        return craftAnswer;
+    }
+
+    private static void CopyAnswerTranslations(StoryCraftAnswer craftAnswer, StoryAnswer defAnswer)
+    {
+        foreach (var answerTr in defAnswer.Translations)
+        {
+            craftAnswer.Translations.Add(new StoryCraftAnswerTranslation
+            {
+                LanguageCode = answerTr.LanguageCode,
+                Text = answerTr.Text ?? string.Empty
+            });
+        }
+    }
+
+    private static void CopyTokens(StoryCraftAnswer craftAnswer, StoryAnswer defAnswer)
+    {
+        foreach (var token in defAnswer.Tokens)
+        {
+            craftAnswer.Tokens.Add(new StoryCraftAnswerToken
+            {
+                Type = token.Type ?? string.Empty,
+                Value = token.Value ?? string.Empty,
+                Quantity = token.Quantity
+            });
+        }
+    }
+
+    private static string? ExtractFileName(string? path)
+    {
+        return string.IsNullOrWhiteSpace(path) ? null : Path.GetFileName(path);
+    }
+}

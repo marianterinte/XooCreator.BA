@@ -3,7 +3,6 @@ using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Features.Stories.Services;
-using Microsoft.EntityFrameworkCore;
 
 namespace XooCreator.BA.Features.StoryEditor.Services;
 
@@ -102,8 +101,7 @@ public class StoryEditorService : IStoryEditorService
             translation.Summary = dto.Summary;
         }
         
-        // Update craft-level fields
-        craft.CoverImageUrl = dto.CoverImageUrl;
+        craft.CoverImageUrl = ExtractFileName(dto.CoverImageUrl);
         craft.StoryType = (StoryType)(dto.StoryType);
         craft.UpdatedAt = DateTime.UtcNow;
         
@@ -134,9 +132,9 @@ public class StoryEditorService : IStoryEditorService
                     TileId = tileDto.Id,
                     Type = tileDto.Type ?? "page",
                     SortOrder = i,
-                    ImageUrl = tileDto.ImageUrl,
-                    AudioUrl = tileDto.AudioUrl,
-                    VideoUrl = tileDto.VideoUrl, // Use VideoUrl directly from DTO
+                    ImageUrl = ExtractFileName(tileDto.ImageUrl),
+                    AudioUrl = ExtractFileName(tileDto.AudioUrl),
+                    VideoUrl = ExtractFileName(tileDto.VideoUrl),
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
@@ -148,9 +146,9 @@ public class StoryEditorService : IStoryEditorService
                 // Update existing tile
                 tile.Type = tileDto.Type ?? tile.Type;
                 tile.SortOrder = i;
-                tile.ImageUrl = tileDto.ImageUrl;
-                tile.AudioUrl = tileDto.AudioUrl;
-                tile.VideoUrl = tileDto.VideoUrl; // Use VideoUrl directly from DTO
+                tile.ImageUrl = ExtractFileName(tileDto.ImageUrl);
+                tile.AudioUrl = ExtractFileName(tileDto.AudioUrl);
+                tile.VideoUrl = ExtractFileName(tileDto.VideoUrl);
                 tile.UpdatedAt = DateTime.UtcNow;
             }
             
@@ -306,5 +304,20 @@ public class StoryEditorService : IStoryEditorService
         {
             await _crafts.DeleteAsync(storyId, ct);
         }
+    }
+
+    /// <summary>
+    /// Extracts filename from a path. If input is already just a filename (no '/'), returns it as-is.
+    /// If input contains '/', extracts the filename using Path.GetFileName().
+    /// </summary>
+    private static string? ExtractFileName(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path)) return null;
+        
+        // If already just filename (no path separator), return as-is
+        if (!path.Contains('/')) return path;
+        
+        // Extract filename from path
+        return Path.GetFileName(path);
     }
 }

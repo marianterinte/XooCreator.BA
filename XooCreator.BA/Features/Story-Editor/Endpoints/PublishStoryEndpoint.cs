@@ -2,11 +2,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Azure.Storage.Blobs.Models;
-using System.Text.Json;
-using System.Collections.Generic;
-using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Features.StoryEditor.Repositories;
+using XooCreator.BA.Features.StoryEditor.Mappers;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
@@ -78,73 +76,41 @@ public class PublishStoryEndpoint
             return TypedResults.Conflict("Invalid state transition. Expected Approved.");
         }
 
-        // 1) Extract referenced asset relative paths from craft structure
-        var relPaths = ExtractAssetRelPaths(craft);
+        var assets = StoryAssetPathMapper.ExtractAssets(craft, langTag);
 
-        // 2) Copy assets: drafts -> published
-        var emailEsc = Uri.EscapeDataString(user.Email);
-        foreach (var rel in relPaths)
+        foreach (var asset in assets)
         {
-            var category = rel.StartsWith("audio/", StringComparison.OrdinalIgnoreCase)
-                ? "audio"
-                : rel.StartsWith("video/", StringComparison.OrdinalIgnoreCase)
-                    ? "video"
-                    : "images";
+            var sourceBlobPath = StoryAssetPathMapper.BuildDraftPath(asset, user.Email, storyId);
+            var sourceClient = ep._sas.GetBlobClient(ep._sas.DraftContainer, sourceBlobPath);
 
-            var normalizedRel = rel.TrimStart('/');
-            var baseDraftPath = $"draft/u/{emailEsc}/stories/{storyId}";
-            var sourcePathCandidates = new List<string>();
-            // Images (cover and tiles) are language-agnostic; audio and video are language-specific
-            var isImageAsset = rel.StartsWith("tiles/", StringComparison.OrdinalIgnoreCase) 
-                || rel.StartsWith("cover/", StringComparison.OrdinalIgnoreCase);
-
-            if (isImageAsset)
+            if (!await sourceClient.ExistsAsync(ct))
             {
-                // New structure (language-agnostic) first, then legacy with language segment
-                sourcePathCandidates.Add($"{baseDraftPath}/{normalizedRel}");
-                sourcePathCandidates.Add($"{baseDraftPath}/{langTag}/{normalizedRel}");
-            }
-            else
-            {
-                sourcePathCandidates.Add($"{baseDraftPath}/{langTag}/{normalizedRel}");
-            }
-
-            string? sourceBlobPath = null;
-            BlobClient? sourceClient = null;
-            foreach (var candidate in sourcePathCandidates)
-            {
-                var candidateClient = ep._sas.GetBlobClient(ep._sas.DraftContainer, candidate);
-                if (await candidateClient.ExistsAsync(ct))
+                if (asset.Type == StoryAssetPathMapper.AssetType.Image)
                 {
-                    sourceBlobPath = candidate;
-                    sourceClient = candidateClient;
-                    break;
+                    var altPath = StoryAssetPathMapper.BuildDraftPath(
+                        new StoryAssetPathMapper.AssetInfo(asset.Filename, asset.Type, null),
+                        user.Email,
+                        storyId);
+                    var altClient = ep._sas.GetBlobClient(ep._sas.DraftContainer, altPath);
+                    if (await altClient.ExistsAsync(ct))
+                    {
+                        sourceBlobPath = altPath;
+                        sourceClient = altClient;
+                    }
+                    else
+                    {
+                        ep._logger.LogWarning("Publish asset not found in draft container: storyId={StoryId} filename={Filename}", storyId, asset.Filename);
+                        return TypedResults.BadRequest($"Draft asset not found: {asset.Filename}");
+                    }
+                }
+                else
+                {
+                    ep._logger.LogWarning("Publish asset not found in draft container: storyId={StoryId} filename={Filename}", storyId, asset.Filename);
+                    return TypedResults.BadRequest($"Draft asset not found: {asset.Filename}");
                 }
             }
 
-            if (sourceBlobPath is null || sourceClient is null)
-            {
-                ep._logger.LogWarning("Publish asset not found in draft container: storyId={StoryId} rel={Rel}", storyId, rel);
-                return TypedResults.BadRequest($"Draft asset not found: {rel}");
-            }
-
-            // New published structure:
-            // images: images/tales-of-alchimalia/stories/{email}/{storyId}/{fileName}
-            // video:  video/tales-of-alchimalia/stories/{email}/{storyId}/{fileName}
-            // audio:  audio/tales-of-alchimalia/stories/{email}/{storyId}/{lang}/{fileName}
-            // - No 'cover' or 'tiles' folders in published
-            // - Images and videos are language-agnostic; audio is language-specific
-            var owner = user.Email; // keep '@', avoid % encoding
-            var publishedRoot = $"{category}/tales-of-alchimalia/stories/{owner}/{storyId}";
-            if (string.Equals(category, "audio", StringComparison.OrdinalIgnoreCase))
-            {
-                publishedRoot = $"{publishedRoot}/{langTag}";
-            }
-
-            var targetFileName = ComputePublishedFileName(rel, category);
-            var targetBlobPath = $"{publishedRoot}/{targetFileName}";
-
-            // Issue short-lived read SAS for the source
+            var targetBlobPath = StoryAssetPathMapper.BuildPublishedPath(asset, user.Email, storyId);
             var sourceSas = await ep._sas.GetReadSasAsync(ep._sas.DraftContainer, sourceBlobPath, TimeSpan.FromMinutes(10), ct);
 
             var targetClient = ep._sas.GetBlobClient(ep._sas.PublishedContainer, targetBlobPath);
@@ -152,7 +118,6 @@ public class PublishStoryEndpoint
 
             var _ = await targetClient.StartCopyFromUriAsync(sourceSas, cancellationToken: ct);
 
-            // Poll copy status (simple bounded loop)
             while (true)
             {
                 var props = await targetClient.GetPropertiesAsync(cancellationToken: ct);
@@ -162,129 +127,24 @@ public class PublishStoryEndpoint
                 }
                 if (props.Value.CopyStatus == CopyStatus.Failed || props.Value.CopyStatus == CopyStatus.Aborted)
                 {
-                    ep._logger.LogError("Publish copy failed: storyId={StoryId} rel={Rel}", storyId, rel);
-                    return TypedResults.BadRequest($"Failed to copy asset: {rel}");
+                    ep._logger.LogError("Publish copy failed: storyId={StoryId} filename={Filename}", storyId, asset.Filename);
+                    return TypedResults.BadRequest($"Failed to copy asset: {asset.Filename}");
                 }
                 if (DateTime.UtcNow > pollUntil)
                 {
-                    ep._logger.LogError("Publish copy timeout: storyId={StoryId} rel={Rel}", storyId, rel);
-                    return TypedResults.BadRequest($"Timeout while copying asset: {rel}");
+                    ep._logger.LogError("Publish copy timeout: storyId={StoryId} filename={Filename}", storyId, asset.Filename);
+                    return TypedResults.BadRequest($"Timeout while copying asset: {asset.Filename}");
                 }
                 await Task.Delay(250, ct);
             }
-
-            // Delete source after successful copy
-            // TODO DO NOT DELETE DRAFTS CURRENTLY.
-            //   try { await sourceClient.DeleteIfExistsAsync(cancellationToken: ct); ep._logger.LogInformation("Deleted draft asset: {Path}", sourceBlobPath); } catch { /* best-effort */ }
         }
 
-        // 3) Upsert StoryDefinition from craft (single source of truth for marketplace), bump version
         var newVersion = await ep._publisher.UpsertFromCraftAsync(craft, user.Email, langTag, ct);
-
-        // 4) Mark craft as published and record base version
         craft.Status = StoryStatus.Published.ToDb();
         craft.BaseVersion = newVersion;
         await ep._crafts.SaveAsync(craft, ct);
-        ep._logger.LogInformation("Published story: storyId={StoryId} assets={Count}", storyId, relPaths.Count);
+        ep._logger.LogInformation("Published story: storyId={StoryId} assets={Count}", storyId, assets.Count);
         return TypedResults.Ok(new PublishResponse());
-    }
-
-    private static string ComputePublishedFileName(string relPath, string category)
-    {
-        // Examples of incoming relPath (from craft JSON):
-        // - cover/0.cover.png            -> cover.png
-        // - tiles/p1/bg.webp             -> bg.webp (legacy) or p1.webp (new)
-        // - audio/1.target.wav           -> 1.target.wav (new structure)
-        // - audio/p1/4.cave.wav         -> 4.cave.wav (legacy structure)
-        // - video/p2/intro.mp4          -> intro.mp4 (legacy) or p2.mp4 (new)
-        try
-        {
-            var parts = relPath.Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-            if (parts.Length == 0) return Path.GetFileName(relPath);
-
-            if (category.Equals("cover", StringComparison.OrdinalIgnoreCase))
-            {
-                var ext = Path.GetExtension(parts[^1]);
-                return string.IsNullOrWhiteSpace(ext) ? "cover" : $"cover{ext}";
-            }
-
-            if (parts.Length >= 2 && (category.Equals("tiles", StringComparison.OrdinalIgnoreCase)
-                || category.Equals("audio", StringComparison.OrdinalIgnoreCase)
-                || category.Equals("video", StringComparison.OrdinalIgnoreCase)))
-            {
-                // Check if parts[1] is a filename (has extension) or a folder (no extension)
-                if (Path.HasExtension(parts[1]))
-                {
-                    // New structure: filename is directly in parts[1]
-                    return parts[1];
-                }
-                
-                // Legacy structure: parts[1] is tileId folder, parts[2] is the actual filename
-                if (parts.Length >= 3)
-                {
-                    return parts[2];
-                }
-                
-                // Fallback
-                return parts[^1];
-            }
-
-            // Default to last segment
-            return parts[^1];
-        }
-        catch
-        {
-            return Path.GetFileName(relPath);
-        }
-    }
-
-    private static List<string> ExtractAssetRelPaths(StoryCraft craft)
-    {
-        var results = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        
-        // Extract cover image
-        if (!string.IsNullOrWhiteSpace(craft.CoverImageUrl))
-        {
-            var coverPath = craft.CoverImageUrl;
-            if (coverPath.StartsWith("cover/", StringComparison.OrdinalIgnoreCase) ||
-                coverPath.StartsWith("tiles/", StringComparison.OrdinalIgnoreCase))
-            {
-                results.Add(coverPath);
-            }
-        }
-        
-        // Extract tile assets
-        foreach (var tile in craft.Tiles)
-        {
-            if (!string.IsNullOrWhiteSpace(tile.ImageUrl))
-            {
-                var imgPath = tile.ImageUrl;
-                if (imgPath.StartsWith("tiles/", StringComparison.OrdinalIgnoreCase))
-                {
-                    results.Add(imgPath);
-                }
-            }
-            
-            if (!string.IsNullOrWhiteSpace(tile.AudioUrl))
-            {
-                var audioPath = tile.AudioUrl;
-                if (audioPath.StartsWith("audio/", StringComparison.OrdinalIgnoreCase))
-                {
-                    results.Add(audioPath);
-                }
-            }
-            
-            if (!string.IsNullOrWhiteSpace(tile.VideoUrl))
-            {
-                var videoPath = tile.VideoUrl;
-                if (videoPath.StartsWith("video/", StringComparison.OrdinalIgnoreCase))
-                {
-                    results.Add(videoPath);
-                }
-            }
-        }
-        
-        return results.ToList();
     }
 }
 
