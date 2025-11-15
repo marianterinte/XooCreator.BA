@@ -234,7 +234,7 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var recreate = builder.Configuration.GetValue<bool>("Database:RecreateOnStart");
-        recreate = true; // Force recreation every time during development
+        recreate = false; // Force recreation every time during development
 
         if (recreate)
         {

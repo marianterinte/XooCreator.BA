@@ -1,24 +1,28 @@
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 
 namespace XooCreator.BA.Features.StoryEditor.Services;
 
 /// <summary>
-/// Service for interacting with Google AI Studio (aistudiogoogle.com) APIs.
-/// Handles Text-to-Speech and future Text Generation functionality.
+/// Service for interacting with Google Gemini TTS (via Google AI Studio).
+/// Uses Gemini 2.5 Pro Preview TTS to generate single-speaker audio.
 /// </summary>
 public interface IGoogleAIService
 {
     /// <summary>
-    /// Generates audio from text using Google Text-to-Speech API.
+    /// Generates audio from text using Gemini 2.5 Pro Preview TTS.
     /// </summary>
-    /// <param name="text">Text to convert to speech</param>
-    /// <param name="languageCode">Language code (e.g., "ro-RO", "en-US", "hu-HU")</param>
-    /// <param name="voiceName">Optional voice name. If not provided, defaults based on language</param>
-    /// <param name="ct">Cancellation token</param>
-    /// <returns>Base64-encoded audio data and format</returns>
+    /// <param name="text">Text to convert to speech.</param>
+    /// <param name="languageCode">
+    /// Language code (e.g., "ro-RO", "en-US", "hu-HU").
+    /// Currently only used for your own voice-mapping logic.
+    /// </param>
+    /// <param name="voiceName">
+    /// Optional Gemini TTS voice name (e.g., "Sulafat", "Zephyr").
+    /// If not provided, defaults based on language, with "Sulafat" as fallback.
+    /// </param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>Audio bytes and format ("wav").</returns>
     Task<(byte[] AudioData, string Format)> GenerateAudioAsync(
         string text,
         string languageCode,
@@ -32,13 +36,24 @@ public class GoogleAIService : IGoogleAIService
     private readonly string _apiKey;
     private readonly ILogger<GoogleAIService> _logger;
 
+    // Gemini 2.5 Pro Preview TTS endpoint (single- and multi-speaker capable)
+    // Docs: https://ai.google.dev/gemini-api/docs/speech-generation
+
+    //private const string TtsEndpoint =
+    //    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-preview-tts:generateContent";
+
+    // 1) Endpoint
+    private const string TtsEndpoint =
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent";
+
+
     public GoogleAIService(
         IConfiguration configuration,
         IHttpClientFactory httpClientFactory,
         ILogger<GoogleAIService> logger)
     {
         _httpClient = httpClientFactory.CreateClient();
-        _apiKey = configuration["GoogleAI:ApiKey"] 
+        _apiKey = configuration["GoogleAI:ApiKey"]
             ?? throw new InvalidOperationException("GoogleAI:ApiKey is not configured in appsettings.json");
         _logger = logger;
     }
@@ -50,111 +65,171 @@ public class GoogleAIService : IGoogleAIService
         CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(text))
-        {
             throw new ArgumentException("Text cannot be empty", nameof(text));
-        }
 
+        // Limiță de siguranță – poți ajusta după cum ai nevoie
         if (text.Length > 5000)
-        {
             throw new ArgumentException("Text exceeds maximum length of 5000 characters", nameof(text));
-        }
 
-        // Select voice based on language if not provided
+        // Default: Sulafat, sau altceva în funcție de limbă dacă vrei
         voiceName ??= GetDefaultVoiceForLanguage(languageCode);
 
         var requestBody = new
         {
-            input = new { text = text },
-            voice = new
+            // Textul de sintetizat
+            contents = new[]
             {
-                languageCode = languageCode,
-                name = voiceName,
-                ssmlGender = "NEUTRAL"
+                new
+                {
+                    parts = new[]
+                    {
+                        new { text = text }
+                    }
+                }
             },
-            audioConfig = new
+
+            // Configurare pentru TTS single-speaker
+            generationConfig = new
             {
-                audioEncoding = "LINEAR16", // WAV format
-                sampleRateHertz = 24000
-            }
+                responseModalities = new[] { "AUDIO" },
+                speechConfig = new
+                {
+                    voiceConfig = new
+                    {
+                        prebuiltVoiceConfig = new
+                        {
+                            voiceName = voiceName // ex: "Sulafat"
+                        }
+                    }
+                }
+            },
+
+            // Modelul TTS – în AI Studio vezi exact „Gemini 2.5 Pro Preview TTS”
+            model = "gemini-2.5-pro-preview-tts"
         };
 
         var json = JsonSerializer.Serialize(requestBody);
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
+        using var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        // Google Cloud Text-to-Speech API requires API key as query parameter
-        // NOTE: This must be a Google Cloud API key (from console.cloud.google.com), 
-        // NOT a Google AI Studio API key (from aistudio.google.com)
-        var url = $"https://texttospeech.googleapis.com/v1/text:synthesize?key={Uri.EscapeDataString(_apiKey)}";
-        
-        var request = new HttpRequestMessage(HttpMethod.Post, url)
+        using var request = new HttpRequestMessage(HttpMethod.Post, TtsEndpoint)
         {
             Content = content
         };
-        
-        // Set content type explicitly
-        request.Headers.Add("Content-Type", "application/json");
+
+        // API key de la aistudio.google.com
+        request.Headers.Add("x-goog-api-key", _apiKey);
 
         try
         {
-            _logger.LogInformation("Calling Google Text-to-Speech API with language: {LanguageCode}, voice: {VoiceName}", languageCode, voiceName);
-            
-            var response = await _httpClient.SendAsync(request, ct);
-            
+            _logger.LogInformation(
+                "Calling Gemini TTS with language: {LanguageCode}, voice: {VoiceName}",
+                languageCode, voiceName);
+
+            using var response = await _httpClient.SendAsync(request, ct);
+            var responseContent = await response.Content.ReadAsStringAsync(ct);
+
             if (!response.IsSuccessStatusCode)
             {
-                var errorContent = await response.Content.ReadAsStringAsync(ct);
-                _logger.LogError("Google Text-to-Speech API returned {StatusCode}: {ErrorContent}", response.StatusCode, errorContent);
+                _logger.LogError("Gemini TTS returned {StatusCode}: {ErrorContent}",
+                    response.StatusCode, responseContent);
+
+                response.EnsureSuccessStatusCode();
             }
-            
-            response.EnsureSuccessStatusCode();
 
-            var responseContent = await response.Content.ReadAsStringAsync(ct);
-            var responseJson = JsonDocument.Parse(responseContent);
+            using var doc = JsonDocument.Parse(responseContent);
+            var root = doc.RootElement;
 
-            if (!responseJson.RootElement.TryGetProperty("audioContent", out var audioContentElement))
+            // audioContent = candidates[0].content.parts[0].inlineData.data (base64 PCM)
+            if (!root.TryGetProperty("candidates", out var candidates) ||
+                candidates.GetArrayLength() == 0)
             {
-                throw new InvalidOperationException("Response does not contain audioContent");
+                throw new InvalidOperationException("No candidates returned from Gemini TTS.");
             }
 
-            var base64Audio = audioContentElement.GetString();
+            var candidate = candidates[0];
+
+            if (!candidate.TryGetProperty("content", out var contentElement))
+                throw new InvalidOperationException("Response does not contain content.");
+
+            if (!contentElement.TryGetProperty("parts", out var parts) ||
+                parts.GetArrayLength() == 0)
+            {
+                throw new InvalidOperationException("Response does not contain parts.");
+            }
+
+            var firstPart = parts[0];
+
+            if (!firstPart.TryGetProperty("inlineData", out var inlineData) ||
+                !inlineData.TryGetProperty("data", out var dataElement))
+            {
+                throw new InvalidOperationException("Response does not contain inlineData.data.");
+            }
+
+            var base64Audio = dataElement.GetString();
             if (string.IsNullOrWhiteSpace(base64Audio))
-            {
-                throw new InvalidOperationException("Audio content is empty");
-            }
+                throw new InvalidOperationException("Audio content is empty.");
 
-            var audioBytes = Convert.FromBase64String(base64Audio);
-            return (audioBytes, "wav");
-        }
-        catch (HttpRequestException ex)
-        {
-            _logger.LogError(ex, "Failed to call Google Text-to-Speech API. Status: {StatusCode}, Message: {Message}", 
-                ex.Data.Contains("StatusCode") ? ex.Data["StatusCode"] : "Unknown", ex.Message);
-            
-            // Include more details in the error message
-            var errorMessage = ex.Message;
-            if (ex.Data.Contains("StatusCode"))
-            {
-                errorMessage += $" Status Code: {ex.Data["StatusCode"]}";
-            }
-            
-            throw new InvalidOperationException($"Failed to generate audio: {errorMessage}", ex);
+            // Gemini TTS dă PCM 16-bit, 24kHz, mono; îl ambalăm într-un WAV.
+            var pcmBytes = Convert.FromBase64String(base64Audio);
+            var wavBytes = WrapPcmAsWav(pcmBytes, sampleRate: 24000, bitsPerSample: 16, channels: 1);
+
+            return (wavBytes, "wav");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error processing audio generation response");
+            _logger.LogError(ex, "Error processing Gemini TTS response");
             throw;
         }
     }
 
+    /// <summary>
+    /// Default voice mapping. Right now we just return "Sulafat" for all,
+    /// but you can tweak per-language later (e.g., children's voice for ro-RO).
+    /// </summary>
     private static string GetDefaultVoiceForLanguage(string languageCode)
     {
-        return languageCode.ToLowerInvariant() switch
-        {
-            "ro-ro" => "ro-RO-Standard-A",
-            "en-us" => "en-US-Standard-C",
-            "hu-hu" => "hu-HU-Standard-A",
-            _ => "en-US-Standard-C" // Default fallback
-        };
+        // Deocamdată totul pe Sulafat, așa cum ai cerut.
+        // Poți personaliza pe viitor, ex:
+        // "ro-ro" => "Sulafat", "en-us" => "Zephyr", etc.
+        _ = languageCode; // silence unused param warning if you don't change mapping yet
+        return "Sulafat";
+    }
+
+    /// <summary>
+    /// Wrap raw PCM (16-bit, little-endian) into a standard WAV header.
+    /// </summary>
+    private static byte[] WrapPcmAsWav(byte[] pcmData, int sampleRate, short bitsPerSample, short channels)
+    {
+        using var ms = new MemoryStream();
+        using var writer = new BinaryWriter(ms);
+
+        var subChunk2Size = pcmData.Length;
+        var chunkSize = 36 + subChunk2Size;
+        short audioFormat = 1; // PCM
+        var byteRate = sampleRate * channels * (bitsPerSample / 8);
+        short blockAlign = (short)(channels * (bitsPerSample / 8));
+
+        // RIFF header
+        writer.Write(Encoding.ASCII.GetBytes("RIFF"));
+        writer.Write(chunkSize);
+        writer.Write(Encoding.ASCII.GetBytes("WAVE"));
+
+        // fmt subchunk
+        writer.Write(Encoding.ASCII.GetBytes("fmt "));
+        writer.Write(16);                 // Subchunk1Size for PCM
+        writer.Write(audioFormat);
+        writer.Write(channels);
+        writer.Write(sampleRate);
+        writer.Write(byteRate);
+        writer.Write(blockAlign);
+        writer.Write(bitsPerSample);
+
+        // data subchunk
+        writer.Write(Encoding.ASCII.GetBytes("data"));
+        writer.Write(subChunk2Size);
+        writer.Write(pcmData);
+
+        writer.Flush();
+        return ms.ToArray();
     }
 }
-
