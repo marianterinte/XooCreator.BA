@@ -34,6 +34,7 @@ Backend-ul este organizat pe module de business în folderul `Features/`, fiecar
   - `Endpoints/` (ex: `GetMarketplaceStoriesEndpoint`, `GetStoryDetailsEndpoint`, `PurchaseStoryEndpoint`, `AcquireFreeStoryEndpoint`)
   - `Services/StoriesMarketplaceService.cs` + interfața `IStoriesMarketplaceService` (namespace: `...Market.Services`)
   - `Repositories/StoriesMarketplaceRepository.cs` + interfața `IStoriesMarketplaceRepository` (namespace: `...Market.Repositories`)
+  - `Mappers/StoryDetailsMapper.cs` (namespace: `...Market.Mappers`) - mapper dedicat pentru transformarea `StoryDefinition` → `StoryDetailsDto`
   - `DTOs/StoriesMarketplaceDtos.cs` (marketplace list, details, purchase, filters)
 - Rute API (exemple):
   - `GET /api/{locale}/tales-of-alchimalia/market`
@@ -42,6 +43,7 @@ Backend-ul este organizat pe module de business în folderul `Features/`, fiecar
   - `POST /api/{locale}/tales-of-alchimalia/market/acquire-free-story` (body: `{ storyId }`)
 - Observații:
   - Separă clar marketplace-ul de `stories` (citire). FE folosește acum bază `.../tales-of-alchimalia/market`.
+  - Logica de mapare `StoryDefinition` → `StoryDetailsDto` a fost extrasă într-un mapper dedicat (`StoryDetailsMapper`) pentru separarea responsabilităților.
 
 #### 3) Library
 - Path: `Features/Library`
@@ -110,6 +112,75 @@ Backend-ul este organizat pe module de business în folderul `Features/`, fiecar
 - Cheile de traducere pentru Bestiary/mesaje sunt salvate ca keys în DB, rezolvate la runtime prin `TreeOfLightTranslationService`
 
 ### Schimbări recente (highlights)
+
+#### Refactoring Marketplace Mapping (2024)
+- **Extragere mapper dedicat**: Logica de mapare `StoryDefinition` → `StoryDetailsDto` a fost extrasă din `StoriesMarketplaceRepository` într-un mapper dedicat `StoryDetailsMapper` (`Features/TalesOfAlchimalia/Market/Mappers/StoryDetailsMapper.cs`)
+  - Mapper-ul este înregistrat ca serviciu scoped în `Program.cs`
+  - Repository-ul injectează mapper-ul și îl folosește pentru transformări
+  - Separare clară a responsabilităților: Repository = acces date, Mapper = transformări DTO
+
+- **Eliminare proprietăți deprecated din StoryDetailsDto**:
+  - `AgeRating` (string) - eliminat
+  - `Difficulty` (string) - eliminat
+  - `IsFeatured` (bool) - eliminat
+  - `EstimatedReadingTime` (int) - eliminat
+  - Metodele asociate (`DetermineAgeRating`, `DetermineDifficulty`, `CalculateReadingTime`) au fost eliminate
+
+- **Adăugare PriceInCredits în StoryDefinition**:
+  - Proprietate nouă: `public double PriceInCredits { get; set; } = 0;` în `Data/Entities/StoryDefinition.cs`
+  - Mapare peste tot: `StoryDefinitionMapper`, `SeedDataService`, `StoryPublishingService`
+  - Preia valoarea din seed data (`seedData.Price ?? 0`)
+
+- **Unificare tipuri credite la double**:
+  - Toate proprietățile legate de credite au fost actualizate de la `int` la `double`:
+    - `StoryDefinition.PriceInCredits`: `double`
+    - `StoryDetailsDto.PriceInCredits`: `double`
+    - `StoryMarketplaceItemDto.PriceInCredits`: `double`
+    - `PurchaseStoryResponse.CreditsSpent`: `double`
+    - `PurchaseStoryResponse.RemainingCredits`: `double`
+    - `StoryPurchase.CreditsSpent`: `double`
+    - `CreditTransaction.Amount`: `double`
+    - `CreditWallet.Balance`: `double`
+    - `CreditWallet.DiscoveryBalance`: `double`
+    - `UserCreditsDto.Balance`: `double`
+    - `UserCreditsInfoDto.Discovery`: `double`
+    - `UserCreditsInfoDto.Generative`: `double`
+    - `UserCreditsInfoDto.Balance`: `double`
+    - `SpendCreditsRequest.Amount`: `double`
+    - `SpendCreditsResponse.NewBalance`: `double`
+    - `DiscoverResponseDto.DiscoveryCredits`: `double?`
+  - Eliminat toate conversiile `(int)Math.Round()` unde nu mai sunt necesare
+
+- **Curățare metode nefolosite**:
+  - Eliminat `GetPriceFromJsonOrDefaultAsync` din `StoriesMarketplaceRepository` și `AcquireFreeStoryEndpoint`
+  - Prețul se citește direct din `StoryDefinition.PriceInCredits`
+
+#### Frontend - Story Editor (2024)
+
+- **Traduceri**:
+  - Actualizat traducere română: "Teme Poveste" → "Categorie/Topic" (`ro-RO.json`)
+
+- **Stilizare UI**:
+  - Câmpul de titlu (label și input) au culoarea `goldenrod` pentru evidențiere vizuală
+  - Clase CSS: `.title-label` și `.title-input` cu stiluri dedicate
+
+- **Export JSON**:
+  - Adăugat `topicIds` (string[]) și `ageGroupIds` (string[]) în exportul JSON al story-ului
+  - Actualizat `StoryExportData` interface și `exportToJson` method
+  - Actualizat `importFromJson` pentru a suporta importul acestor câmpuri
+  - JSON-ul exportat include acum:
+    ```json
+    {
+      "storyId": "...",
+      "title": "...",
+      "storyTopic": "...",  // backward compatibility
+      "topicIds": ["edu_math", "fun_adventure"],
+      "ageGroupIds": ["preschool_3_5", "early_school_6_8"],
+      ...
+    }
+    ```
+
+#### Schimbări anterioare
 - Marketplace mutat din `Stories` în `TalesOfAlchimalia/Market` (rute noi `.../tales-of-alchimalia/market`)
 - `AcquireFreeStory` acceptă acum `storyId` doar în body, nu și în rută
 - `Library` consolidează `owned/created` (și `purchased` interogabil prin service marketplace)
