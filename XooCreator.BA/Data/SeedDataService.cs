@@ -294,6 +294,7 @@ public class SeedDataService
                         Status = StoryStatus.Published,
                         SortOrder = storyData.SortOrder,
                         IsActive = true,
+                        PriceInCredits = storyData.PriceInCredits ,
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = DateTime.UtcNow,
                         CreatedBy = ownerId,

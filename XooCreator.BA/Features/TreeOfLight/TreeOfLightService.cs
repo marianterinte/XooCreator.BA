@@ -423,7 +423,7 @@ public class TreeOfLightService : ITreeOfLightService
         return $"images/tol/stories/seed@alchimalia.com/heroes/{heroId}.png"; // Fallback image URL
     }
 
-    private async Task UpdateDiscoveryCreditsAsync(Guid userId, int discoveryCredits, string storyId)
+    private async Task UpdateDiscoveryCreditsAsync(Guid userId, double discoveryCredits, string storyId)
     {
         var wallet = await _dbContext.CreditWallets.FirstOrDefaultAsync(w => w.UserId == userId);
         if (wallet == null)

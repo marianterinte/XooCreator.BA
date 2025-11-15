@@ -67,6 +67,16 @@ public class XooDbContext : DbContext
     public DbSet<StoryCraftAnswer> StoryCraftAnswers => Set<StoryCraftAnswer>();
     public DbSet<StoryCraftAnswerTranslation> StoryCraftAnswerTranslations => Set<StoryCraftAnswerTranslation>();
     public DbSet<StoryCraftAnswerToken> StoryCraftAnswerTokens => Set<StoryCraftAnswerToken>();
+    
+    // Story Topics and Age Groups
+    public DbSet<StoryTopic> StoryTopics => Set<StoryTopic>();
+    public DbSet<StoryTopicTranslation> StoryTopicTranslations => Set<StoryTopicTranslation>();
+    public DbSet<StoryCraftTopic> StoryCraftTopics => Set<StoryCraftTopic>();
+    public DbSet<StoryDefinitionTopic> StoryDefinitionTopics => Set<StoryDefinitionTopic>();
+    public DbSet<StoryAgeGroup> StoryAgeGroups => Set<StoryAgeGroup>();
+    public DbSet<StoryAgeGroupTranslation> StoryAgeGroupTranslations => Set<StoryAgeGroupTranslation>();
+    public DbSet<StoryCraftAgeGroup> StoryCraftAgeGroups => Set<StoryCraftAgeGroup>();
+    public DbSet<StoryDefinitionAgeGroup> StoryDefinitionAgeGroups => Set<StoryDefinitionAgeGroup>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -339,6 +349,8 @@ public class XooDbContext : DbContext
             e.Property(x => x.Id).ValueGeneratedOnAdd();
             e.HasIndex(x => x.StoryId).IsUnique();
             e.HasMany(x => x.Tiles).WithOne(x => x.StoryDefinition).HasForeignKey(x => x.StoryDefinitionId).OnDelete(DeleteBehavior.Cascade);
+            e.HasMany(x => x.Topics).WithOne(x => x.StoryDefinition).HasForeignKey(x => x.StoryDefinitionId).OnDelete(DeleteBehavior.Cascade);
+            e.HasMany(x => x.AgeGroups).WithOne(x => x.StoryDefinition).HasForeignKey(x => x.StoryDefinitionId).OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<StoryDefinitionTranslation>(e =>
@@ -532,6 +544,8 @@ public class XooDbContext : DbContext
             e.HasIndex(x => x.StoryId).IsUnique();
             e.HasMany(x => x.Translations).WithOne(x => x.StoryCraft).HasForeignKey(x => x.StoryCraftId).OnDelete(DeleteBehavior.Cascade);
             e.HasMany(x => x.Tiles).WithOne(x => x.StoryCraft).HasForeignKey(x => x.StoryCraftId).OnDelete(DeleteBehavior.Cascade);
+            e.HasMany(x => x.Topics).WithOne(x => x.StoryCraft).HasForeignKey(x => x.StoryCraftId).OnDelete(DeleteBehavior.Cascade);
+            e.HasMany(x => x.AgeGroups).WithOne(x => x.StoryCraft).HasForeignKey(x => x.StoryCraftId).OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<StoryCraftTranslation>(e =>
@@ -597,6 +611,79 @@ public class XooDbContext : DbContext
             e.Property(x => x.Type).HasMaxLength(64).IsRequired();
             e.Property(x => x.Value).HasMaxLength(128).IsRequired();
             e.HasOne(x => x.StoryCraftAnswer).WithMany(x => x.Tokens).HasForeignKey(x => x.StoryCraftAnswerId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Story Topics Configuration
+        modelBuilder.Entity<StoryTopic>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.TopicId).HasMaxLength(100).IsRequired();
+            e.Property(x => x.DimensionId).HasMaxLength(50).IsRequired();
+            e.HasIndex(x => x.TopicId).IsUnique();
+            e.HasMany(x => x.Translations).WithOne(x => x.StoryTopic).HasForeignKey(x => x.StoryTopicId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<StoryTopicTranslation>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.LanguageCode).HasMaxLength(10);
+            e.HasIndex(x => new { x.StoryTopicId, x.LanguageCode }).IsUnique();
+            e.HasOne(x => x.StoryTopic)
+                .WithMany(t => t.Translations)
+                .HasForeignKey(x => x.StoryTopicId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<StoryCraftTopic>(e =>
+        {
+            e.HasKey(x => new { x.StoryCraftId, x.StoryTopicId });
+            e.HasOne(x => x.StoryCraft).WithMany(x => x.Topics).HasForeignKey(x => x.StoryCraftId);
+            e.HasOne(x => x.StoryTopic).WithMany(x => x.StoryCrafts).HasForeignKey(x => x.StoryTopicId);
+        });
+
+        modelBuilder.Entity<StoryDefinitionTopic>(e =>
+        {
+            e.HasKey(x => new { x.StoryDefinitionId, x.StoryTopicId });
+            e.HasOne(x => x.StoryDefinition).WithMany(x => x.Topics).HasForeignKey(x => x.StoryDefinitionId);
+            e.HasOne(x => x.StoryTopic).WithMany(x => x.StoryDefinitions).HasForeignKey(x => x.StoryTopicId);
+        });
+
+        // Story Age Groups Configuration
+        modelBuilder.Entity<StoryAgeGroup>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.AgeGroupId).HasMaxLength(100).IsRequired();
+            e.HasIndex(x => x.AgeGroupId).IsUnique();
+            e.HasMany(x => x.Translations).WithOne(x => x.StoryAgeGroup).HasForeignKey(x => x.StoryAgeGroupId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<StoryAgeGroupTranslation>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.LanguageCode).HasMaxLength(10);
+            e.HasIndex(x => new { x.StoryAgeGroupId, x.LanguageCode }).IsUnique();
+            e.HasOne(x => x.StoryAgeGroup)
+                .WithMany(t => t.Translations)
+                .HasForeignKey(x => x.StoryAgeGroupId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<StoryCraftAgeGroup>(e =>
+        {
+            e.HasKey(x => new { x.StoryCraftId, x.StoryAgeGroupId });
+            e.HasOne(x => x.StoryCraft).WithMany(x => x.AgeGroups).HasForeignKey(x => x.StoryCraftId);
+            e.HasOne(x => x.StoryAgeGroup).WithMany(x => x.StoryCrafts).HasForeignKey(x => x.StoryAgeGroupId);
+        });
+
+        modelBuilder.Entity<StoryDefinitionAgeGroup>(e =>
+        {
+            e.HasKey(x => new { x.StoryDefinitionId, x.StoryAgeGroupId });
+            e.HasOne(x => x.StoryDefinition).WithMany(x => x.AgeGroups).HasForeignKey(x => x.StoryDefinitionId);
+            e.HasOne(x => x.StoryAgeGroup).WithMany(x => x.StoryDefinitions).HasForeignKey(x => x.StoryAgeGroupId);
         });
     }
 

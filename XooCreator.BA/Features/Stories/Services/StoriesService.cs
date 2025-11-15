@@ -100,7 +100,9 @@ public class StoriesService : IStoriesService
                 Title = translation?.Title ?? string.Empty,
                 CoverImageUrl = craft.CoverImageUrl ?? string.Empty,
                 Summary = translation?.Summary,
-                StoryTopic = craft.StoryTopic,
+                StoryTopic = craft.StoryTopic, // Keep for backward compatibility
+                TopicIds = craft.Topics.Select(t => t.StoryTopic.TopicId).ToList(),
+                AgeGroupIds = craft.AgeGroups.Select(ag => ag.StoryAgeGroup.AgeGroupId).ToList(),
                 StoryType = (int)craft.StoryType,
                 Status = MapStatusForFrontend(StoryStatusExtensions.FromDb(craft.Status)),
                 AvailableLanguages = availableLangs,
@@ -162,7 +164,9 @@ public class StoriesService : IStoriesService
             Title = storyTranslation?.Title ?? story.Title,
             CoverImageUrl = story.CoverImageUrl ?? string.Empty,
             Summary = story.Summary ?? string.Empty,
-            StoryTopic = story.StoryTopic,
+            StoryTopic = story.StoryTopic, // Keep for backward compatibility
+            TopicIds = story.Topics?.Select(t => t.StoryTopic.TopicId).ToList() ?? new List<string>(),
+            AgeGroupIds = story.AgeGroups?.Select(ag => ag.StoryAgeGroup.AgeGroupId).ToList() ?? new List<string>(),
             StoryType = (int)story.StoryType,
             Status = MapStatusForFrontend(story.Status), // story.Status is already StoryStatus enum
             AvailableLanguages = availableLangs,
@@ -229,7 +233,9 @@ public class EditableStoryDto
     public string Title { get; set; } = string.Empty;
     public string CoverImageUrl { get; set; } = string.Empty;
     public string? Summary { get; set; }
-    public string? StoryTopic { get; set; } // Story topic/theme (e.g., "Matematică", "Literatură")
+    public string? StoryTopic { get; set; } // DEPRECATED: Use TopicIds instead. Kept for backward compatibility.
+    public List<string>? TopicIds { get; set; } // List of topic IDs (e.g., ["edu_math", "fun_adventure"])
+    public List<string>? AgeGroupIds { get; set; } // List of age group IDs (e.g., ["preschool_3_5", "early_school_6_8"])
     public int StoryType { get; set; } = 0; // 0 = AlchimaliaEpic (Tree Of Light), 1 = Indie (Independent)
     public string? Status { get; set; } // 'draft' | 'in-review' | 'approved' | 'published' (FE semantic)
     public string? Language { get; set; } // Language code for the story (standardized: use "language" instead of "languageCode")

@@ -44,6 +44,8 @@ public class StoryCraft
     // Navigation
     public List<StoryCraftTranslation> Translations { get; set; } = new();
     public List<StoryCraftTile> Tiles { get; set; } = new();
+    public List<StoryCraftTopic> Topics { get; set; } = new();
+    public List<StoryCraftAgeGroup> AgeGroups { get; set; } = new();
 }
 
 /// <summary>

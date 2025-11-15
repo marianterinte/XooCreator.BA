@@ -27,6 +27,10 @@ public class StoryCraftsRepository : IStoryCraftsRepository
             .Include(x => x.Tiles)
                 .ThenInclude(t => t.Answers)
                     .ThenInclude(a => a.Tokens)
+            .Include(x => x.Topics)
+                .ThenInclude(t => t.StoryTopic)
+            .Include(x => x.AgeGroups)
+                .ThenInclude(ag => ag.StoryAgeGroup)
             .FirstOrDefaultAsync(x => x.StoryId == id, ct);
     }
 
@@ -45,6 +49,10 @@ public class StoryCraftsRepository : IStoryCraftsRepository
             .Include(x => x.Tiles)
                 .ThenInclude(t => t.Answers)
                     .ThenInclude(a => a.Tokens)
+            .Include(x => x.Topics)
+                .ThenInclude(t => t.StoryTopic)
+            .Include(x => x.AgeGroups)
+                .ThenInclude(ag => ag.StoryAgeGroup)
             .FirstOrDefaultAsync(x => x.StoryId == id, ct);
     }
 

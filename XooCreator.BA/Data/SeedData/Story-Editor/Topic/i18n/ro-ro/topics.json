@@ -1,0 +1,255 @@
+{
+  "story_dimensions": [
+    {
+      "id": "educational",
+      "label": "Educațional",
+      "allowed_values": [
+        {
+          "id": "edu_math",
+          "label": "Matematică"
+        },
+        {
+          "id": "edu_reading",
+          "label": "Citire"
+        },
+        {
+          "id": "edu_literature",
+          "label": "Literatură"
+        },
+        {
+          "id": "edu_science",
+          "label": "Științe"
+        },
+        {
+          "id": "edu_history",
+          "label": "Istorie"
+        },
+        {
+          "id": "edu_environment",
+          "label": "Mediu și natură"
+        },
+        {
+          "id": "edu_social_skills",
+          "label": "Abilități sociale"
+        },
+        {
+          "id": "edu_critical_thinking",
+          "label": "Gândire critică"
+        },
+        {
+          "id": "edu_creativity",
+          "label": "Creativitate"
+        }
+      ]
+    },
+    {
+      "id": "fun",
+      "label": "Distractiv",
+      "allowed_values": [
+        {
+          "id": "fun_adventure",
+          "label": "Aventură"
+        },
+        {
+          "id": "fun_mystery",
+          "label": "Mister"
+        },
+        {
+          "id": "fun_wordplay",
+          "label": "Jocuri de cuvinte"
+        },
+        {
+          "id": "fun_slapstick",
+          "label": "Umor fizic"
+        },
+        {
+          "id": "fun_silly_chars",
+          "label": "Personaje trăznite"
+        },
+        {
+          "id": "fun_cute_animals",
+          "label": "Animale drăguțe"
+        },
+        {
+          "id": "fun_funny_dialogues",
+          "label": "Dialoguri haioase"
+        }
+      ]
+    },
+    {
+      "id": "emotional_depth",
+      "label": "Profunzime emoțională",
+      "allowed_values": [
+        {
+          "id": "emo_friendship",
+          "label": "Prietenie"
+        },
+        {
+          "id": "emo_empathy",
+          "label": "Empatie"
+        },
+        {
+          "id": "emo_courage",
+          "label": "Curaj"
+        },
+        {
+          "id": "emo_conflict",
+          "label": "Gestionarea conflictului"
+        },
+        {
+          "id": "emo_self_acceptance",
+          "label": "Auto-acceptare"
+        },
+        {
+          "id": "emo_joy",
+          "label": "Bucurie și celebrare"
+        },
+        {
+          "id": "emo_sadness_loss",
+          "label": "Tristețe și pierdere"
+        },
+        {
+          "id": "emo_family_bonds",
+          "label": "Legături de familie"
+        }
+      ]
+    },
+    {
+      "id": "pace_and_action",
+      "label": "Ritm și acțiune",
+      "allowed_values": [
+        {
+          "id": "pace_slow_cozy",
+          "label": "Lent și liniștit"
+        },
+        {
+          "id": "pace_balanced",
+          "label": "Echilibrat"
+        },
+        {
+          "id": "pace_fast_dynamic",
+          "label": "Rapid și dinamic"
+        },
+        {
+          "id": "pace_high_suspense",
+          "label": "Mult suspans"
+        },
+        {
+          "id": "pace_exploration",
+          "label": "Explorare"
+        },
+        {
+          "id": "pace_dialogue",
+          "label": "Dialog centric"
+        }
+      ]
+    },
+    {
+      "id": "complexity",
+      "label": "Complexitate narativă",
+      "allowed_values": [
+        {
+          "id": "cx_very_simple_linear",
+          "label": "Foarte simplă, liniară"
+        },
+        {
+          "id": "cx_simple_with_subplot",
+          "label": "Simplă cu mic subplot"
+        },
+        {
+          "id": "cx_multiple_threads",
+          "label": "Mai multe fire narative"
+        },
+        {
+          "id": "cx_twist_ending",
+          "label": "Final surpriză"
+        },
+        {
+          "id": "cx_flashbacks",
+          "label": "Flashback-uri"
+        },
+        {
+          "id": "cx_open_ending",
+          "label": "Final deschis"
+        }
+      ]
+    },
+    {
+      "id": "interactivity",
+      "label": "Interactivitate",
+      "allowed_values": [
+        {
+          "id": "int_questions",
+          "label": "Întrebări pentru cititor"
+        },
+        {
+          "id": "int_quizzes",
+          "label": "Quiz-uri"
+        },
+        {
+          "id": "int_choose_path",
+          "label": "Alege-ți drumul"
+        },
+        {
+          "id": "int_puzzles",
+          "label": "Puzzle-uri și ghicitori"
+        },
+        {
+          "id": "int_draw_scene",
+          "label": "Desenează scena ta"
+        },
+        {
+          "id": "int_write_ending",
+          "label": "Scrie-ți propriul final"
+        },
+        {
+          "id": "int_physical_actions",
+          "label": "Acțiuni fizice (ridică-te, sari)"
+        }
+      ]
+    },
+    {
+      "id": "values_and_morals",
+      "label": "Valori și mesaj",
+      "allowed_values": [
+        {
+          "id": "val_honesty",
+          "label": "Onestitate"
+        },
+        {
+          "id": "val_friendship_team",
+          "label": "Prietenie și lucru în echipă"
+        },
+        {
+          "id": "val_respect_others",
+          "label": "Respect pentru ceilalți"
+        },
+        {
+          "id": "val_respect_nature",
+          "label": "Respect pentru natură"
+        },
+        {
+          "id": "val_perseverance",
+          "label": "Perseverență"
+        },
+        {
+          "id": "val_curiosity",
+          "label": "Curiozitate"
+        },
+        {
+          "id": "val_inclusivity",
+          "label": "Incluziune și diversitate"
+        },
+        {
+          "id": "val_eco_awareness",
+          "label": "Conștientizare ecologică"
+        },
+        {
+          "id": "val_learn_from_mistakes",
+          "label": "Învățare din greșeli"
+        }
+      ]
+    }
+  ]
+}
+

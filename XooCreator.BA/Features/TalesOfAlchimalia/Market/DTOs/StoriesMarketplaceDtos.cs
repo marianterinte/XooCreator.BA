@@ -10,15 +10,11 @@ public record StoryDetailsDto
     public Guid? CreatedBy { get; init; }
     public string? CreatedByName { get; init; }
     public string? Summary { get; init; }
-    public int PriceInCredits { get; init; }
+    public double PriceInCredits { get; init; }
     public string Region { get; init; } = string.Empty;
-    public string AgeRating { get; init; } = string.Empty;
-    public string Difficulty { get; init; } = string.Empty;
     public List<string> Characters { get; init; } = new();
     public List<string> Tags { get; init; } = new();
-    public bool IsFeatured { get; init; }
     public bool IsNew { get; init; }
-    public int EstimatedReadingTime { get; init; }
     public bool IsPurchased { get; init; }
     public bool IsOwned { get; init; }
     public bool IsCompleted { get; init; }
@@ -43,7 +39,7 @@ public record StoryMarketplaceItemDto
     public Guid? CreatedBy { get; init; }
     public string? CreatedByName { get; init; }
     public string? Summary { get; init; }
-    public int PriceInCredits { get; init; }
+    public double PriceInCredits { get; init; }
     public string AgeRating { get; init; } = string.Empty;
     public List<string> Characters { get; init; } = new();
     public DateTime CreatedAt { get; init; }
@@ -62,8 +58,8 @@ public record PurchaseStoryResponse
 {
     public bool Success { get; init; }
     public string? ErrorMessage { get; init; }
-    public int RemainingCredits { get; init; }
-    public int CreditsSpent { get; init; }
+    public double RemainingCredits { get; init; }
+    public double CreditsSpent { get; init; }
 }
 
 public record GetMarketplaceStoriesResponse

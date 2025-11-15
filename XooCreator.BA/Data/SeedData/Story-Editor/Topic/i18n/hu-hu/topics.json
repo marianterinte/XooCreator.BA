@@ -1,0 +1,255 @@
+{
+  "story_dimensions": [
+    {
+      "id": "educational",
+      "label": "Oktatási",
+      "allowed_values": [
+        {
+          "id": "edu_math",
+          "label": "Matematika"
+        },
+        {
+          "id": "edu_reading",
+          "label": "Olvasás"
+        },
+        {
+          "id": "edu_literature",
+          "label": "Irodalom"
+        },
+        {
+          "id": "edu_science",
+          "label": "Tudományok"
+        },
+        {
+          "id": "edu_history",
+          "label": "Történelem"
+        },
+        {
+          "id": "edu_environment",
+          "label": "Környezet"
+        },
+        {
+          "id": "edu_social_skills",
+          "label": "Szociális készségek"
+        },
+        {
+          "id": "edu_critical_thinking",
+          "label": "Kritikus gondolkodás"
+        },
+        {
+          "id": "edu_creativity",
+          "label": "Kreativitás"
+        }
+      ]
+    },
+    {
+      "id": "fun",
+      "label": "Szórakoztató",
+      "allowed_values": [
+        {
+          "id": "fun_adventure",
+          "label": "Kaland"
+        },
+        {
+          "id": "fun_mystery",
+          "label": "Rejtély"
+        },
+        {
+          "id": "fun_wordplay",
+          "label": "Szójáték"
+        },
+        {
+          "id": "fun_slapstick",
+          "label": "Fizikai humor"
+        },
+        {
+          "id": "fun_silly_chars",
+          "label": "Vicces karakterek"
+        },
+        {
+          "id": "fun_cute_animals",
+          "label": "Aranyos állatok"
+        },
+        {
+          "id": "fun_funny_dialogues",
+          "label": "Vicces párbeszédek"
+        }
+      ]
+    },
+    {
+      "id": "emotional_depth",
+      "label": "Érzelmi mélység",
+      "allowed_values": [
+        {
+          "id": "emo_friendship",
+          "label": "Barátság"
+        },
+        {
+          "id": "emo_empathy",
+          "label": "Empátia"
+        },
+        {
+          "id": "emo_courage",
+          "label": "Bátorság"
+        },
+        {
+          "id": "emo_conflict",
+          "label": "Konfliktuskezelés"
+        },
+        {
+          "id": "emo_self_acceptance",
+          "label": "Önelfogadás"
+        },
+        {
+          "id": "emo_joy",
+          "label": "Öröm és ünneplés"
+        },
+        {
+          "id": "emo_sadness_loss",
+          "label": "Szomorúság és veszteség"
+        },
+        {
+          "id": "emo_family_bonds",
+          "label": "Családi kötelékek"
+        }
+      ]
+    },
+    {
+      "id": "pace_and_action",
+      "label": "Ütem és akció",
+      "allowed_values": [
+        {
+          "id": "pace_slow_cozy",
+          "label": "Lassú és kényelmes"
+        },
+        {
+          "id": "pace_balanced",
+          "label": "Kiegyensúlyozott"
+        },
+        {
+          "id": "pace_fast_dynamic",
+          "label": "Gyors és dinamikus"
+        },
+        {
+          "id": "pace_high_suspense",
+          "label": "Nagy feszültség"
+        },
+        {
+          "id": "pace_exploration",
+          "label": "Felfedezés-központú"
+        },
+        {
+          "id": "pace_dialogue",
+          "label": "Párbeszéd-központú"
+        }
+      ]
+    },
+    {
+      "id": "complexity",
+      "label": "Narratív komplexitás",
+      "allowed_values": [
+        {
+          "id": "cx_very_simple_linear",
+          "label": "Nagyon egyszerű, lineáris"
+        },
+        {
+          "id": "cx_simple_with_subplot",
+          "label": "Egyszerű kis mellékszálakkal"
+        },
+        {
+          "id": "cx_multiple_threads",
+          "label": "Több cselekményszál"
+        },
+        {
+          "id": "cx_twist_ending",
+          "label": "Meglepetés vég"
+        },
+        {
+          "id": "cx_flashbacks",
+          "label": "Visszaemlékezések"
+        },
+        {
+          "id": "cx_open_ending",
+          "label": "Nyitott vég"
+        }
+      ]
+    },
+    {
+      "id": "interactivity",
+      "label": "Interaktivitás",
+      "allowed_values": [
+        {
+          "id": "int_questions",
+          "label": "Kérdések az olvasónak"
+        },
+        {
+          "id": "int_quizzes",
+          "label": "Kvízek"
+        },
+        {
+          "id": "int_choose_path",
+          "label": "Válaszd ki az utat"
+        },
+        {
+          "id": "int_puzzles",
+          "label": "Rejtvények és találós kérdések"
+        },
+        {
+          "id": "int_draw_scene",
+          "label": "Rajzold meg a saját jeleneted"
+        },
+        {
+          "id": "int_write_ending",
+          "label": "Írd meg a saját végét"
+        },
+        {
+          "id": "int_physical_actions",
+          "label": "Fizikai akciók gyerekeknek"
+        }
+      ]
+    },
+    {
+      "id": "values_and_morals",
+      "label": "Értékek és erkölcs",
+      "allowed_values": [
+        {
+          "id": "val_honesty",
+          "label": "Őszinteség"
+        },
+        {
+          "id": "val_friendship_team",
+          "label": "Barátság és csapatmunka"
+        },
+        {
+          "id": "val_respect_others",
+          "label": "Tisztelet mások iránt"
+        },
+        {
+          "id": "val_respect_nature",
+          "label": "Tisztelet a természet iránt"
+        },
+        {
+          "id": "val_perseverance",
+          "label": "Kitartás"
+        },
+        {
+          "id": "val_curiosity",
+          "label": "Kíváncsiság"
+        },
+        {
+          "id": "val_inclusivity",
+          "label": "Befogadás és sokszínűség"
+        },
+        {
+          "id": "val_eco_awareness",
+          "label": "Környezettudatosság"
+        },
+        {
+          "id": "val_learn_from_mistakes",
+          "label": "Tanulás a hibákból"
+        }
+      ]
+    }
+  ]
+}
+

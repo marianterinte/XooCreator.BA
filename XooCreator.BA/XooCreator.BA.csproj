@@ -58,6 +58,8 @@
     <Content Remove="Data\SeedData\Stories\seed%40alchimalia.com\independent\i18n\hu-hu\learn-math-s1.json" />
     <Content Remove="Data\SeedData\Stories\seed%40alchimalia.com\independent\i18n\hu-hu\learn-to-read-s1.json" />
     <Content Remove="Data\SeedData\Stories\seed%40alchimalia.com\independent\i18n\ro-ro\learn-math-s1.json" />
+    <Content Remove="Data\SeedData\Story-Editor\Topic\age-groups.json" />
+    <Content Remove="Data\SeedData\Story-Editor\Topic\topics.json" />
   </ItemGroup>
 
 </Project>

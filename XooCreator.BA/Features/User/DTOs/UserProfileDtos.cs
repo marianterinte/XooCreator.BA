@@ -12,7 +12,7 @@ public record UserProfileDto
 
 public record UserCreditsDto
 {
-    public int Balance { get; init; }
+    public double Balance { get; init; }
     public bool HasEverPurchased { get; init; }
     public DateTime? LastPurchaseAt { get; init; }
     public DateTime? LastTransactionAt { get; init; }
@@ -35,7 +35,7 @@ public record GetUserProfileResponse
 
 public record SpendCreditsRequest
 {
-    public int Amount { get; init; }
+    public double Amount { get; init; }
     public required string Reference { get; init; }
 }
 
@@ -43,5 +43,5 @@ public record SpendCreditsResponse
 {
     public bool Success { get; init; }
     public string? ErrorMessage { get; init; }
-    public int NewBalance { get; init; }
+    public double NewBalance { get; init; }
 }

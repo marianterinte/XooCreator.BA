@@ -12,7 +12,7 @@ public class CreditTransaction
     public Guid Id { get; set; }
     public Guid UserId { get; set; }
     public AlchimaliaUser User { get; set; } = null!;
-    public int Amount { get; set; }
+    public double Amount { get; set; }
     public CreditTransactionType Type { get; set; }
     public string? Reference { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

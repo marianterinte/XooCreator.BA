@@ -1,3 +1,4 @@
+using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.Enums;
 
 namespace XooCreator.BA.Data;
@@ -18,6 +19,7 @@ public class StoryDefinition
     public int SortOrder { get; set; }
     public bool IsActive { get; set; } = true;
     public int Version { get; set; } = 1; // Global version, increments on publish
+    public double PriceInCredits { get; set; } = 0; // Price in credits for purchasing the story
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     public Guid? CreatedBy { get; set; } // User who created the story
@@ -26,6 +28,8 @@ public class StoryDefinition
     // Navigation
     public List<StoryTile> Tiles { get; set; } = new();
     public List<StoryDefinitionTranslation> Translations { get; set; } = new();
+    public List<StoryDefinitionTopic> Topics { get; set; } = new();
+    public List<StoryDefinitionAgeGroup> AgeGroups { get; set; } = new();
 }
 
 public class StoryDefinitionTranslation

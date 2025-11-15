@@ -4,6 +4,7 @@ using XooCreator.BA.Data;
 using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Data.SeedData.DTOs;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.DTOs;
+using XooCreator.BA.Features.TalesOfAlchimalia.Market.Mappers;
 
 namespace XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories;
 
@@ -16,20 +17,22 @@ public interface IStoriesMarketplaceRepository
     Task<List<string>> GetAvailableRegionsAsync();
     Task<List<string>> GetAvailableAgeRatingsAsync();
     Task<List<string>> GetAvailableCharactersAsync();
-    Task<bool> PurchaseStoryAsync(Guid userId, string storyId, int creditsSpent);
+    Task<bool> PurchaseStoryAsync(Guid userId, string storyId, double creditsSpent);
     Task<bool> IsStoryPurchasedAsync(Guid userId, string storyId);
     Task<List<StoryMarketplaceItemDto>> GetUserPurchasedStoriesAsync(Guid userId, string locale);
     Task<StoryDetailsDto?> GetStoryDetailsAsync(string storyId, Guid userId, string locale);
-    Task<int> GetComputedPriceAsync(string storyId);
+    Task<double> GetComputedPriceAsync(string storyId);
 }
 
 public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
 {
     private readonly XooDbContext _context;
+    private readonly StoryDetailsMapper _storyDetailsMapper;
 
-    public StoriesMarketplaceRepository(XooDbContext context)
+    public StoriesMarketplaceRepository(XooDbContext context, StoryDetailsMapper storyDetailsMapper)
     {
         _context = context;
+        _storyDetailsMapper = storyDetailsMapper;
     }
 
     public async Task<List<StoryMarketplaceItemDto>> GetMarketplaceStoriesAsync(Guid userId, string locale, SearchStoriesRequest request)
@@ -183,7 +186,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             .ToList();
     }
 
-    public async Task<bool> PurchaseStoryAsync(Guid userId, string storyId, int creditsSpent)
+    public async Task<bool> PurchaseStoryAsync(Guid userId, string storyId, double creditsSpent)
     {
         using var transaction = await _context.Database.BeginTransactionAsync();
         try
@@ -301,7 +304,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
 
         // Normalize locale to lowercase for mapping
         var normalizedLocale = (locale ?? "ro-ro").ToLowerInvariant();
-        return await MapToStoryDetailsFromDefinitionAsync(def, normalizedLocale, isPurchased, isOwned, isCompleted, progressPercentage);
+        return await _storyDetailsMapper.MapToStoryDetailsFromDefinitionAsync(def, normalizedLocale, isPurchased, isOwned, isCompleted, progressPercentage);
     }
 
     // Removed old MapToStoryDetailsDto using StoryMarketplaceInfo
@@ -407,54 +410,6 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         return characters;
     }
 
-    private async Task<int> GetPriceFromJsonOrDefaultAsync(string storyId)
-    {
-        // Try to load price from JSON files (independent stories)
-        var baseDir = AppDomain.CurrentDomain.BaseDirectory;
-        var locales = new[] { "ro-ro", "en-us", "hu-hu" };
-        
-        foreach (var locale in locales)
-        {
-            var dir = Path.Combine(baseDir, "Data", "SeedData", "Stories", "seed@alchimalia.com", "independent", "i18n", locale);
-            var filePath = Path.Combine(dir, $"{storyId}.json");
-            
-            if (File.Exists(filePath))
-            {
-                try
-                {
-                    var json = await File.ReadAllTextAsync(filePath);
-                    var seed = JsonSerializer.Deserialize<StorySeedData>(json, new JsonSerializerOptions
-                    {
-                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                        PropertyNameCaseInsensitive = true
-                    });
-                    
-                    if (seed?.Price.HasValue == true)
-                    {
-                        return seed.Price.Value;
-                    }
-                }
-                catch
-                {
-                    // If JSON parsing fails, continue to next locale or default
-                }
-            }
-        }
-        return 0;
-    }
-
-    private int CalculateReadingTime(string storyId)
-    {
-        // Estimate reading time based on story type
-        if (storyId.Contains("intro"))
-            return 15; // Longer intro stories
-        if (storyId.Contains("s1"))
-            return 10; // Season 1 stories
-        if (storyId.Contains("s2"))
-            return 12; // Season 2 stories
-        return 8; // Default reading time
-    }
-
     // New helpers for mapping from StoryDefinition directly
     private async Task<List<StoryMarketplaceItemDto>> MapToMarketplaceListAsync(List<StoryDefinition> defs, string locale)
     {
@@ -500,7 +455,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             CreatedBy = def.CreatedBy,
             CreatedByName = authorName,
             Summary = summary,
-            PriceInCredits = await GetPriceFromJsonOrDefaultAsync(def.StoryId),
+            PriceInCredits = def.PriceInCredits,
             AgeRating = DetermineAgeRating(def.StoryId),
             Characters = ExtractCharactersFromStoryId(def.StoryId),
             CreatedAt = def.CreatedAt,
@@ -511,58 +466,12 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         };
     }
 
-    private async Task<StoryDetailsDto?> MapToStoryDetailsFromDefinitionAsync(StoryDefinition def, string locale, bool isPurchased, bool isOwned, bool isCompleted, int progressPercentage)
+
+    public async Task<double> GetComputedPriceAsync(string storyId)
     {
-        var translation = def.Translations?.FirstOrDefault(t => t.LanguageCode == locale);
-        var title = translation?.Title ?? def.Title;
-        string? authorName = null;
-        if (def.CreatedBy.HasValue)
-        {
-            authorName = await _context.Set<AlchimaliaUser>()
-                .Where(u => u.Id == def.CreatedBy.Value)
-                .Select(u => u.Name)
-                .FirstOrDefaultAsync();
-        }
-
-        var summary = GetSummaryFromJson(def.StoryId, locale) ?? def.Summary ?? string.Empty;
-
-        return new StoryDetailsDto
-        {
-            Id = def.StoryId,
-            Title = title,
-            CoverImageUrl = def.CoverImageUrl,
-            CreatedBy = def.CreatedBy,
-            CreatedByName = authorName,
-            Summary = summary,
-            PriceInCredits = await GetPriceFromJsonOrDefaultAsync(def.StoryId),
-            Region = ExtractRegionFromStoryId(def.StoryId),
-            AgeRating = DetermineAgeRating(def.StoryId),
-            Difficulty = DetermineDifficulty(def.StoryId),
-            Characters = ExtractCharactersFromStoryId(def.StoryId),
-            Tags = new List<string>(),
-            IsFeatured = false,
-            IsNew = false,
-            EstimatedReadingTime = CalculateReadingTime(def.StoryId),
-            IsPurchased = isPurchased,
-            IsOwned = isOwned,
-            IsCompleted = isCompleted,
-            ProgressPercentage = progressPercentage,
-            CreatedAt = def.CreatedAt,
-            UnlockedStoryHeroes = new List<string>(),
-            StoryTopic = def.StoryTopic,
-            StoryType = def.StoryType.ToString(),
-            Status = def.Status.ToString(),
-            SortOrder = def.SortOrder,
-            IsActive = def.IsActive,
-            UpdatedAt = def.UpdatedAt,
-            UpdatedBy = def.UpdatedBy,
-            AvailableLanguages = def.Translations?.Select(t => t.LanguageCode).OrderBy(l => l).ToList() ?? new List<string>()
-        };
-    }
-
-    public async Task<int> GetComputedPriceAsync(string storyId)
-    {
-        return await GetPriceFromJsonOrDefaultAsync(storyId);
+        var def = await _context.StoryDefinitions
+            .FirstOrDefaultAsync(s => s.StoryId == storyId);
+        return def?.PriceInCredits ?? 0;
     }
 
 }

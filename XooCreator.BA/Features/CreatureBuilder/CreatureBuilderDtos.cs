@@ -13,10 +13,10 @@ public record UserAwareCreatureBuilderDataDto(
 );
 
 public record UserCreditsInfoDto(
-    int Balance,
+    double Balance,
     bool HasEverPurchased,
-    int Discovery,
-    int Generative
+    double Discovery,
+    double Generative
 );
 
 public record DiscoverRequestDto(DiscoverCombinationDto Combination, DiscoverSelectionDto? Selection);
@@ -35,5 +35,5 @@ public record DiscoverResponseDto(
     bool AlreadyDiscovered,
     DiscoverItemDto? Item,
     string? ErrorMessage,
-    int? DiscoveryCredits
+    double? DiscoveryCredits
 );

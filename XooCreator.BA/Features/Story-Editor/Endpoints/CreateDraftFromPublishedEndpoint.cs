@@ -115,6 +115,8 @@ public class CreateDraftFromPublishedEndpoint
             .Include(d => d.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Tokens)
             .Include(d => d.Tiles).ThenInclude(t => t.Translations)
             .Include(d => d.Translations)
+            .Include(d => d.Topics).ThenInclude(t => t.StoryTopic)
+            .Include(d => d.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
             .FirstOrDefaultAsync(d => d.StoryId == storyId, ct);
 
         if (def == null)
@@ -173,8 +175,36 @@ public class CreateDraftFromPublishedEndpoint
 
         CopyTranslations(craft, def);
         CopyTiles(craft, def);
+        CopyTopics(craft, def);
+        CopyAgeGroups(craft, def);
 
         return craft;
+    }
+
+    private static void CopyTopics(StoryCraft craft, StoryDefinition def)
+    {
+        foreach (var defTopic in def.Topics)
+        {
+            craft.Topics.Add(new StoryCraftTopic
+            {
+                StoryCraftId = craft.Id,
+                StoryTopicId = defTopic.StoryTopicId,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+    }
+
+    private static void CopyAgeGroups(StoryCraft craft, StoryDefinition def)
+    {
+        foreach (var defAgeGroup in def.AgeGroups)
+        {
+            craft.AgeGroups.Add(new StoryCraftAgeGroup
+            {
+                StoryCraftId = craft.Id,
+                StoryAgeGroupId = defAgeGroup.StoryAgeGroupId,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
     }
 
     private static void CopyTranslations(StoryCraft craft, StoryDefinition def)

@@ -1,0 +1,255 @@
+{
+  "story_dimensions": [
+    {
+      "id": "educational",
+      "label": "Educational",
+      "allowed_values": [
+        {
+          "id": "edu_math",
+          "label": "Math"
+        },
+        {
+          "id": "edu_reading",
+          "label": "Reading"
+        },
+        {
+          "id": "edu_literature",
+          "label": "Literature"
+        },
+        {
+          "id": "edu_science",
+          "label": "Science (bio/chem/phys)"
+        },
+        {
+          "id": "edu_history",
+          "label": "History"
+        },
+        {
+          "id": "edu_environment",
+          "label": "Environment"
+        },
+        {
+          "id": "edu_social_skills",
+          "label": "Social skills"
+        },
+        {
+          "id": "edu_critical_thinking",
+          "label": "Critical thinking"
+        },
+        {
+          "id": "edu_creativity",
+          "label": "Creativity"
+        }
+      ]
+    },
+    {
+      "id": "fun",
+      "label": "Fun",
+      "allowed_values": [
+        {
+          "id": "fun_adventure",
+          "label": "Adventure fun"
+        },
+        {
+          "id": "fun_mystery",
+          "label": "Mystery fun"
+        },
+        {
+          "id": "fun_wordplay",
+          "label": "Wordplay humor"
+        },
+        {
+          "id": "fun_slapstick",
+          "label": "Slapstick humor"
+        },
+        {
+          "id": "fun_silly_chars",
+          "label": "Silly characters"
+        },
+        {
+          "id": "fun_cute_animals",
+          "label": "Cute animals"
+        },
+        {
+          "id": "fun_funny_dialogues",
+          "label": "Funny dialogues"
+        }
+      ]
+    },
+    {
+      "id": "emotional_depth",
+      "label": "Emotional depth",
+      "allowed_values": [
+        {
+          "id": "emo_friendship",
+          "label": "Friendship"
+        },
+        {
+          "id": "emo_empathy",
+          "label": "Empathy"
+        },
+        {
+          "id": "emo_courage",
+          "label": "Courage"
+        },
+        {
+          "id": "emo_conflict",
+          "label": "Dealing with conflict"
+        },
+        {
+          "id": "emo_self_acceptance",
+          "label": "Self-acceptance"
+        },
+        {
+          "id": "emo_joy",
+          "label": "Joy and celebration"
+        },
+        {
+          "id": "emo_sadness_loss",
+          "label": "Sadness and loss"
+        },
+        {
+          "id": "emo_family_bonds",
+          "label": "Family bonds"
+        }
+      ]
+    },
+    {
+      "id": "pace_and_action",
+      "label": "Pace and action",
+      "allowed_values": [
+        {
+          "id": "pace_slow_cozy",
+          "label": "Slow and cozy"
+        },
+        {
+          "id": "pace_balanced",
+          "label": "Balanced pace"
+        },
+        {
+          "id": "pace_fast_dynamic",
+          "label": "Fast and dynamic"
+        },
+        {
+          "id": "pace_high_suspense",
+          "label": "High suspense"
+        },
+        {
+          "id": "pace_exploration",
+          "label": "Exploration-focused"
+        },
+        {
+          "id": "pace_dialogue",
+          "label": "Dialogue-focused"
+        }
+      ]
+    },
+    {
+      "id": "complexity",
+      "label": "Narrative complexity",
+      "allowed_values": [
+        {
+          "id": "cx_very_simple_linear",
+          "label": "Very simple linear"
+        },
+        {
+          "id": "cx_simple_with_subplot",
+          "label": "Simple with small subplot"
+        },
+        {
+          "id": "cx_multiple_threads",
+          "label": "Multiple plot threads"
+        },
+        {
+          "id": "cx_twist_ending",
+          "label": "Twist ending"
+        },
+        {
+          "id": "cx_flashbacks",
+          "label": "Flashbacks"
+        },
+        {
+          "id": "cx_open_ending",
+          "label": "Open ending"
+        }
+      ]
+    },
+    {
+      "id": "interactivity",
+      "label": "Interactivity",
+      "allowed_values": [
+        {
+          "id": "int_questions",
+          "label": "Questions for reader"
+        },
+        {
+          "id": "int_quizzes",
+          "label": "Quizzes"
+        },
+        {
+          "id": "int_choose_path",
+          "label": "Choose-your-path"
+        },
+        {
+          "id": "int_puzzles",
+          "label": "Puzzles and riddles"
+        },
+        {
+          "id": "int_draw_scene",
+          "label": "Draw your own scene"
+        },
+        {
+          "id": "int_write_ending",
+          "label": "Write your own ending"
+        },
+        {
+          "id": "int_physical_actions",
+          "label": "Physical actions for kids"
+        }
+      ]
+    },
+    {
+      "id": "values_and_morals",
+      "label": "Values and morals",
+      "allowed_values": [
+        {
+          "id": "val_honesty",
+          "label": "Honesty"
+        },
+        {
+          "id": "val_friendship_team",
+          "label": "Friendship and teamwork"
+        },
+        {
+          "id": "val_respect_others",
+          "label": "Respect for others"
+        },
+        {
+          "id": "val_respect_nature",
+          "label": "Respect for nature"
+        },
+        {
+          "id": "val_perseverance",
+          "label": "Perseverance"
+        },
+        {
+          "id": "val_curiosity",
+          "label": "Curiosity"
+        },
+        {
+          "id": "val_inclusivity",
+          "label": "Inclusivity and diversity"
+        },
+        {
+          "id": "val_eco_awareness",
+          "label": "Eco awareness"
+        },
+        {
+          "id": "val_learn_from_mistakes",
+          "label": "Learning from mistakes"
+        }
+      ]
+    }
+  ]
+}
+

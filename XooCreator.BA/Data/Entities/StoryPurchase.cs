@@ -8,7 +8,7 @@ public class StoryPurchase
     public Guid Id { get; set; }
     public Guid UserId { get; set; }
     public string StoryId { get; set; } = string.Empty;
-    public int CreditsSpent { get; set; }
+    public double CreditsSpent { get; set; }
     public DateTime PurchasedAt { get; set; } = DateTime.UtcNow;
     
     // Navigation properties

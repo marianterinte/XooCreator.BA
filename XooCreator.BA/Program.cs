@@ -5,20 +5,17 @@ using Npgsql;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Repositories;
 using XooCreator.BA.Services;
-using XooCreator.BA.Features.TreeOfLight;
-using XooCreator.BA.Features.Stories;
-using XooCreator.BA.Features.Payment;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Errors;
 using XooCreator.BA.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Authorization;
 using XooCreator.BA.Features.Stories.Services;
 using XooCreator.BA.Features.Payment.Services;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Services;
+using XooCreator.BA.Features.TalesOfAlchimalia.Market.Mappers;
 using XooCreator.BA.Features.TreeOfHeroes.Services;
 using XooCreator.BA.Features.TreeOfHeroes.Repositories;
 using XooCreator.BA.Features.TreeOfLight.Services;
@@ -133,6 +130,7 @@ builder.Services.AddScoped<ISeedDiscoveryService, SeedDiscoveryService>();
 builder.Services.AddScoped<IBestiaryFileUpdater, BestiaryFileUpdater>();
 builder.Services.AddScoped<IHeroDefinitionSeedService, HeroDefinitionSeedService>();
 builder.Services.AddScoped<IHeroTreeProvider, HeroTreeProvider>();
+builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IStoryTopicsSeedService, XooCreator.BA.Features.StoryEditor.Services.StoryTopicsSeedService>();
 
 
 builder.Services.AddScoped<IUserProfileService, UserProfileService>();
@@ -154,6 +152,7 @@ builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IStoryPub
 builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IStoryPublishAssetService, XooCreator.BA.Features.StoryEditor.Services.StoryPublishAssetService>();
 
 // Story Marketplace Services
+builder.Services.AddScoped<StoryDetailsMapper>();
 builder.Services.AddScoped<IStoriesMarketplaceRepository, StoriesMarketplaceRepository>();
 builder.Services.AddScoped<IStoriesMarketplaceService, StoriesMarketplaceService>();
 
@@ -225,9 +224,10 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<XooDbContext>();
     var storiesService = scope.ServiceProvider.GetRequiredService<IStoriesService>();
     var treeModelService = scope.ServiceProvider.GetRequiredService<ITreeModelService>();
-    var discoverySeeder = scope.ServiceProvider.GetRequiredService<ISeedDiscoveryService>();
-    var bestiaryUpdater = scope.ServiceProvider.GetRequiredService<IBestiaryFileUpdater>();
-    var heroDefinitionSeeder = scope.ServiceProvider.GetRequiredService<IHeroDefinitionSeedService>();
+        var discoverySeeder = scope.ServiceProvider.GetRequiredService<ISeedDiscoveryService>();
+        var bestiaryUpdater = scope.ServiceProvider.GetRequiredService<IBestiaryFileUpdater>();
+        var heroDefinitionSeeder = scope.ServiceProvider.GetRequiredService<IHeroDefinitionSeedService>();
+        var storyTopicsSeeder = scope.ServiceProvider.GetRequiredService<XooCreator.BA.Features.StoryEditor.Services.IStoryTopicsSeedService>();
 
     try
     {
@@ -287,6 +287,10 @@ using (var scope = app.Services.CreateScope())
         // Seed hero definitions
         await heroDefinitionSeeder.SeedHeroDefinitionsAsync();
         Console.WriteLine("✅ Hero definitions seeded");
+
+        // Seed story topics and age groups
+        await storyTopicsSeeder.SeedTopicsAndAgeGroupsAsync();
+        Console.WriteLine("✅ Story topics and age groups seeded");
 
         // CRITICAL: Stories must be seeded BEFORE TreeModel 
         // because TreeStoryNodes have FK constraints to StoryDefinitions

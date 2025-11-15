@@ -1,0 +1,33 @@
+{
+  "age_groups": [
+    {
+      "id": "preschool_3_5",
+      "label": "Preșcolari",
+      "min_age": 3,
+      "max_age": 5,
+      "description": "Povești foarte simple, multe imagini, propoziții scurte, interactivitate fizică și emoții clare."
+    },
+    {
+      "id": "early_school_6_8",
+      "label": "Școlari mici",
+      "min_age": 6,
+      "max_age": 8,
+      "description": "Povești cu un fir narativ clar, personaje memorabile, prime noțiuni educaționale explicite."
+    },
+    {
+      "id": "middle_school_9_12",
+      "label": "Copii mari",
+      "min_age": 9,
+      "max_age": 12,
+      "description": "Povești cu conflict mai complex, umor mai subtil, primele dileme morale și science-fantasy mai bogat."
+    },
+    {
+      "id": "teens_13_16",
+      "label": "Adolescenți",
+      "min_age": 13,
+      "max_age": 16,
+      "description": "Povești cu teme identitare, moralitate nuanțată, simbolism și complexitate narativă crescută."
+    }
+  ]
+}
+

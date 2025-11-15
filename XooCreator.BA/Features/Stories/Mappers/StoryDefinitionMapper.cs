@@ -40,6 +40,7 @@ public static class StoryDefinitionMapper
             StoryType = StoryType.Indie,
             Status = StoryStatus.Published,
             IsActive = true,
+            PriceInCredits = seedData.Price ?? 0,
             CreatedBy = ownerId,
             UpdatedBy = ownerId
         };
@@ -115,6 +116,7 @@ public static class StoryDefinitionMapper
             StoryType = storyType,
             Status = StoryStatus.Published,
             IsActive = true,
+            PriceInCredits = seedData.Price ?? 0,
             CreatedBy = seedUserId, // Use seed user if provided, otherwise null (backward compatible)
             UpdatedBy = seedUserId
         };

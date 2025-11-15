@@ -1,0 +1,33 @@
+{
+  "age_groups": [
+    {
+      "id": "preschool_3_5",
+      "label": "Óvodás",
+      "min_age": 3,
+      "max_age": 5,
+      "description": "Nagyon egyszerű történetek, sok kép, rövid mondatok, fizikai interaktivitás és világos érzelmek."
+    },
+    {
+      "id": "early_school_6_8",
+      "label": "Kisiskolás",
+      "min_age": 6,
+      "max_age": 8,
+      "description": "Történetek világos narratív szállal, emlékezetes karakterekkel, első explicit oktatási fogalmakkal."
+    },
+    {
+      "id": "middle_school_9_12",
+      "label": "Nagyiskolás",
+      "min_age": 9,
+      "max_age": 12,
+      "description": "Történetek összetettebb konfliktussal, finomabb humorral, első erkölcsi dilemmákkal és gazdagabb sci-fi fantasy elemekkel."
+    },
+    {
+      "id": "teens_13_16",
+      "label": "Serdülő",
+      "min_age": 13,
+      "max_age": 16,
+      "description": "Történetek identitási témákkal, árnyalt erkölcsösséggel, szimbolizmussal és megnövelt narratív komplexitással."
+    }
+  ]
+}
+

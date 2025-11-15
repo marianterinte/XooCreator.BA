@@ -1,0 +1,33 @@
+{
+  "age_groups": [
+    {
+      "id": "preschool_3_5",
+      "label": "Preschool",
+      "min_age": 3,
+      "max_age": 5,
+      "description": "Very simple stories, lots of images, short sentences, physical interactivity and clear emotions."
+    },
+    {
+      "id": "early_school_6_8",
+      "label": "Early school",
+      "min_age": 6,
+      "max_age": 8,
+      "description": "Stories with a clear narrative thread, memorable characters, first explicit educational concepts."
+    },
+    {
+      "id": "middle_school_9_12",
+      "label": "Middle school",
+      "min_age": 9,
+      "max_age": 12,
+      "description": "Stories with more complex conflict, subtler humor, first moral dilemmas and richer science-fantasy."
+    },
+    {
+      "id": "teens_13_16",
+      "label": "Teens",
+      "min_age": 13,
+      "max_age": 16,
+      "description": "Stories with identity themes, nuanced morality, symbolism and increased narrative complexity."
+    }
+  ]
+}
+

@@ -33,7 +33,15 @@ public class StoryPublishingService : IStoryPublishingService
             .Include(d => d.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Tokens)
             .Include(d => d.Tiles).ThenInclude(t => t.Translations)
             .Include(d => d.Translations)
+            .Include(d => d.Topics)
+            .Include(d => d.AgeGroups)
             .FirstOrDefaultAsync(d => d.StoryId == storyId, ct);
+        
+        // Load craft with topics and age groups
+        craft = await _db.StoryCrafts
+            .Include(c => c.Topics).ThenInclude(t => t.StoryTopic)
+            .Include(c => c.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
+            .FirstOrDefaultAsync(c => c.Id == craft.Id, ct) ?? craft;
 
         var isNew = def == null;
         if (isNew)
@@ -47,7 +55,8 @@ public class StoryPublishingService : IStoryPublishingService
                 Status = StoryStatus.Published,
                 IsActive = true,
                 SortOrder = 0,
-                Version = 1
+                Version = 1,
+                PriceInCredits = 0 // Default price, can be updated later
             };
             _db.StoryDefinitions.Add(def);
         }
@@ -83,6 +92,19 @@ public class StoryPublishingService : IStoryPublishingService
             if (existingDefTr.Count > 0)
             {
                 _db.StoryDefinitionTranslations.RemoveRange(existingDefTr);
+            }
+
+            // Remove existing topics and age groups
+            var existingTopics = await _db.StoryDefinitionTopics.Where(t => t.StoryDefinitionId == def.Id).ToListAsync(ct);
+            if (existingTopics.Count > 0)
+            {
+                _db.StoryDefinitionTopics.RemoveRange(existingTopics);
+            }
+
+            var existingAgeGroups = await _db.StoryDefinitionAgeGroups.Where(ag => ag.StoryDefinitionId == def.Id).ToListAsync(ct);
+            if (existingAgeGroups.Count > 0)
+            {
+                _db.StoryDefinitionAgeGroups.RemoveRange(existingAgeGroups);
             }
         }
 
@@ -197,6 +219,28 @@ public class StoryPublishingService : IStoryPublishingService
                     });
                 }
             }
+        }
+
+        // Copy topics from craft to definition
+        foreach (var craftTopic in craft.Topics)
+        {
+            _db.StoryDefinitionTopics.Add(new StoryDefinitionTopic
+            {
+                StoryDefinitionId = def.Id,
+                StoryTopicId = craftTopic.StoryTopicId,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+
+        // Copy age groups from craft to definition
+        foreach (var craftAgeGroup in craft.AgeGroups)
+        {
+            _db.StoryDefinitionAgeGroups.Add(new StoryDefinitionAgeGroup
+            {
+                StoryDefinitionId = def.Id,
+                StoryAgeGroupId = craftAgeGroup.StoryAgeGroupId,
+                CreatedAt = DateTime.UtcNow
+            });
         }
 
         await _db.SaveChangesAsync(ct);

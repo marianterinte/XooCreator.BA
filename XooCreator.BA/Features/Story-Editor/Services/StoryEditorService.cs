@@ -3,6 +3,7 @@ using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Features.Stories.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace XooCreator.BA.Features.StoryEditor.Services;
 
@@ -143,14 +144,80 @@ public class StoryEditorService : IStoryEditorService
         }
         
         craft.CoverImageUrl = ExtractFileName(dto.CoverImageUrl);
-        craft.StoryTopic = dto.StoryTopic;
+        craft.StoryTopic = dto.StoryTopic; // Keep for backward compatibility
         craft.StoryType = (StoryType)(dto.StoryType);
         craft.UpdatedAt = DateTime.UtcNow;
+        
+        // Update topics (many-to-many)
+        await UpdateTopicsAsync(craft, dto.TopicIds ?? new(), ct);
+        
+        // Update age groups (many-to-many)
+        await UpdateAgeGroupsAsync(craft, dto.AgeGroupIds ?? new(), ct);
         
         // Update tiles
         await UpdateTilesAsync(craft, dto.Tiles ?? new(), lang, ct);
         
         await _context.SaveChangesAsync(ct);
+    }
+
+    private async Task UpdateTopicsAsync(StoryCraft craft, List<string> topicIds, CancellationToken ct)
+    {
+        // Remove existing topics
+        var existingTopics = _context.StoryCraftTopics
+            .Where(t => t.StoryCraftId == craft.Id)
+            .ToList();
+        _context.StoryCraftTopics.RemoveRange(existingTopics);
+
+        if (topicIds == null || topicIds.Count == 0)
+        {
+            return;
+        }
+
+        // Get topic entities by TopicId
+        var topics = await _context.StoryTopics
+            .Where(t => topicIds.Contains(t.TopicId))
+            .ToListAsync(ct);
+
+        // Add new topics
+        foreach (var topic in topics)
+        {
+            _context.StoryCraftTopics.Add(new StoryCraftTopic
+            {
+                StoryCraftId = craft.Id,
+                StoryTopicId = topic.Id,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+    }
+
+    private async Task UpdateAgeGroupsAsync(StoryCraft craft, List<string> ageGroupIds, CancellationToken ct)
+    {
+        // Remove existing age groups
+        var existingAgeGroups = _context.StoryCraftAgeGroups
+            .Where(ag => ag.StoryCraftId == craft.Id)
+            .ToList();
+        _context.StoryCraftAgeGroups.RemoveRange(existingAgeGroups);
+
+        if (ageGroupIds == null || ageGroupIds.Count == 0)
+        {
+            return;
+        }
+
+        // Get age group entities by AgeGroupId
+        var ageGroups = await _context.StoryAgeGroups
+            .Where(ag => ageGroupIds.Contains(ag.AgeGroupId))
+            .ToListAsync(ct);
+
+        // Add new age groups
+        foreach (var ageGroup in ageGroups)
+        {
+            _context.StoryCraftAgeGroups.Add(new StoryCraftAgeGroup
+            {
+                StoryCraftId = craft.Id,
+                StoryAgeGroupId = ageGroup.Id,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
     }
 
     private async Task UpdateTilesAsync(StoryCraft craft, List<EditableTileDto> tiles, string languageCode, CancellationToken ct)

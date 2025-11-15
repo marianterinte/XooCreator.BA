@@ -8,6 +8,9 @@ public class StoryDefinitionSeedData
     public string? StoryTopic { get; set; } // Story topic/theme (e.g., "Matematică", "Literatură")
     public string? Summary { get; set; } // Story summary/description
     public int SortOrder { get; set; }
+
+    public double PriceInCredits { get; set; } = 0; // Price in credits for purchasing the story
+
     public List<string> UnlockedStoryHeroes { get; set; } = new();
     public List<StoryTileSeedData> Tiles { get; set; } = new();
 }
