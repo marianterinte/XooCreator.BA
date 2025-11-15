@@ -165,6 +165,7 @@ public class CreateDraftFromPublishedEndpoint
             Status = StoryStatus.Draft.ToDb(),
             StoryType = def.StoryType,
             CoverImageUrl = ExtractFileName(def.CoverImageUrl),
+            StoryTopic = def.StoryTopic,
             BaseVersion = def.Version,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow

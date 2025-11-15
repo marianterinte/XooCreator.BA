@@ -100,6 +100,7 @@ public class StoriesService : IStoriesService
                 Title = translation?.Title ?? string.Empty,
                 CoverImageUrl = craft.CoverImageUrl ?? string.Empty,
                 Summary = translation?.Summary,
+                StoryTopic = craft.StoryTopic,
                 StoryType = (int)craft.StoryType,
                 Status = MapStatusForFrontend(StoryStatusExtensions.FromDb(craft.Status)),
                 AvailableLanguages = availableLangs,
@@ -161,6 +162,7 @@ public class StoriesService : IStoriesService
             Title = storyTranslation?.Title ?? story.Title,
             CoverImageUrl = story.CoverImageUrl ?? string.Empty,
             Summary = story.Summary ?? string.Empty,
+            StoryTopic = story.StoryTopic,
             StoryType = (int)story.StoryType,
             Status = MapStatusForFrontend(story.Status), // story.Status is already StoryStatus enum
             AvailableLanguages = availableLangs,
@@ -227,6 +229,7 @@ public class EditableStoryDto
     public string Title { get; set; } = string.Empty;
     public string CoverImageUrl { get; set; } = string.Empty;
     public string? Summary { get; set; }
+    public string? StoryTopic { get; set; } // Story topic/theme (e.g., "Matematică", "Literatură")
     public int StoryType { get; set; } = 0; // 0 = AlchimaliaEpic (Tree Of Light), 1 = Indie (Independent)
     public string? Status { get; set; } // 'draft' | 'in-review' | 'approved' | 'published' (FE semantic)
     public string? Language { get; set; } // Language code for the story (standardized: use "language" instead of "languageCode")

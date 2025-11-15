@@ -143,6 +143,7 @@ public class StoryEditorService : IStoryEditorService
         }
         
         craft.CoverImageUrl = ExtractFileName(dto.CoverImageUrl);
+        craft.StoryTopic = dto.StoryTopic;
         craft.StoryType = (StoryType)(dto.StoryType);
         craft.UpdatedAt = DateTime.UtcNow;
         

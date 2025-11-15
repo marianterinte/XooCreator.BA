@@ -23,6 +23,8 @@ public class StoryCraft
 
     public string? CoverImageUrl { get; set; }
     
+    public string? StoryTopic { get; set; } // e.g., "Matematică", "Literatură" - topic/theme of the story
+    
     public StoryType StoryType { get; set; } = StoryType.AlchimaliaEpic; // Type of story (Epic vs Indie)
     
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

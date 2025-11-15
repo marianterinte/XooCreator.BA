@@ -271,8 +271,6 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         return await MapToMarketplaceListAsync(defs, normalizedLocale);
     }
 
-    // Removed SeedMarketplaceDataAsync (no longer needed without StoryMarketplaceInfos)
-
     public async Task<StoryDetailsDto?> GetStoryDetailsAsync(string storyId, Guid userId, string locale)
     {
         var def = await _context.StoryDefinitions
