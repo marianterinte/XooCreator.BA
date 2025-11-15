@@ -10,12 +10,12 @@ namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 [Endpoint]
 public class GenerateAudioEndpoint
 {
-    private readonly IGoogleAIService _googleAI;
+    private readonly IGoogleTtsService _googleTts;
     private readonly IAuth0UserService _auth0;
 
-    public GenerateAudioEndpoint(IGoogleAIService googleAI, IAuth0UserService auth0)
+    public GenerateAudioEndpoint(IGoogleTtsService googleTts, IAuth0UserService auth0)
     {
-        _googleAI = googleAI;
+        _googleTts = googleTts;
         _auth0 = auth0;
     }
 
@@ -64,7 +64,7 @@ public class GenerateAudioEndpoint
 
         try
         {
-            var (audioData, format) = await ep._googleAI.GenerateAudioAsync(
+            var (audioData, format) = await ep._googleTts.GenerateAudioAsync(
                 request.Text,
                 request.LanguageCode,
                 request.VoiceName,

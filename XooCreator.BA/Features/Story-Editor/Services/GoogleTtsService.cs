@@ -5,12 +5,12 @@ namespace XooCreator.BA.Features.StoryEditor.Services;
 
 /// <summary>
 /// Service for interacting with Google Gemini TTS (via Google AI Studio).
-/// Uses Gemini 2.5 Pro Preview TTS to generate single-speaker audio.
+/// Uses Gemini TTS to generate single-speaker audio.
 /// </summary>
-public interface IGoogleAIService
+public interface IGoogleTtsService
 {
     /// <summary>
-    /// Generates audio from text using Gemini 2.5 Pro Preview TTS.
+    /// Generates audio from text using Gemini TTS.
     /// </summary>
     /// <param name="text">Text to convert to speech.</param>
     /// <param name="languageCode">
@@ -30,31 +30,23 @@ public interface IGoogleAIService
         CancellationToken ct = default);
 }
 
-public class GoogleAIService : IGoogleAIService
+public class GoogleTtsService : IGoogleTtsService
 {
     private readonly HttpClient _httpClient;
     private readonly string _apiKey;
-    private readonly ILogger<GoogleAIService> _logger;
+    private readonly string _ttsEndpoint;
+    private readonly ILogger<GoogleTtsService> _logger;
 
-    // Gemini 2.5 Pro Preview TTS endpoint (single- and multi-speaker capable)
-    // Docs: https://ai.google.dev/gemini-api/docs/speech-generation
-
-    //private const string TtsEndpoint =
-    //    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-preview-tts:generateContent";
-
-    // 1) Endpoint
-    private const string TtsEndpoint =
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent";
-
-
-    public GoogleAIService(
+    public GoogleTtsService(
         IConfiguration configuration,
         IHttpClientFactory httpClientFactory,
-        ILogger<GoogleAIService> logger)
+        ILogger<GoogleTtsService> logger)
     {
         _httpClient = httpClientFactory.CreateClient();
         _apiKey = configuration["GoogleAI:ApiKey"]
             ?? throw new InvalidOperationException("GoogleAI:ApiKey is not configured in appsettings.json");
+        _ttsEndpoint = configuration["GoogleAI:Tts:Endpoint"]
+            ?? throw new InvalidOperationException("GoogleAI:Tts:Endpoint is not configured in appsettings.json");
         _logger = logger;
     }
 
@@ -111,7 +103,7 @@ public class GoogleAIService : IGoogleAIService
         var json = JsonSerializer.Serialize(requestBody);
         using var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        using var request = new HttpRequestMessage(HttpMethod.Post, TtsEndpoint)
+        using var request = new HttpRequestMessage(HttpMethod.Post, _ttsEndpoint)
         {
             Content = content
         };
