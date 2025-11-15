@@ -56,7 +56,7 @@ public class StoryPublishingService : IStoryPublishingService
                 IsActive = true,
                 SortOrder = 0,
                 Version = 1,
-                PriceInCredits = 0 // Default price, can be updated later
+                PriceInCredits = craft.PriceInCredits
             };
             _db.StoryDefinitions.Add(def);
         }
@@ -67,6 +67,7 @@ public class StoryPublishingService : IStoryPublishingService
         def.Summary = craft.Translations.FirstOrDefault(t => t.LanguageCode == langTag)?.Summary ?? def.Summary;
         def.StoryTopic = craft.StoryTopic ?? def.StoryTopic;
         def.StoryType = craft.StoryType;
+        def.PriceInCredits = craft.PriceInCredits;
         def.Status = StoryStatus.Published;
         def.UpdatedAt = DateTime.UtcNow;
         // Version bump for existing definitions
