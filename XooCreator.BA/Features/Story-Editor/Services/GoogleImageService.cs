@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Net;
+using System.Text;
 using System.Text.Json;
 
 namespace XooCreator.BA.Features.StoryEditor.Services;
@@ -58,11 +59,8 @@ public class GoogleImageService : IGoogleImageService
 {
     private readonly HttpClient _httpClient;
     private readonly string _apiKey;
+    private readonly string _imageEndpoint;
     private readonly ILogger<GoogleImageService> _logger;
-
-    // Nano Banana / Gemini 2.5 Flash Image endpoint (REST) :contentReference[oaicite:1]{index=1}
-    private const string ImageEndpoint =
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent";
 
     public GoogleImageService(
         IConfiguration configuration,
@@ -72,6 +70,8 @@ public class GoogleImageService : IGoogleImageService
         _httpClient = httpClientFactory.CreateClient();
         _apiKey = configuration["GoogleAI:ApiKey"]
             ?? throw new InvalidOperationException("GoogleAI:ApiKey is not configured in appsettings.json");
+        _imageEndpoint = configuration["GoogleAI:Image:Endpoint"]
+            ?? throw new InvalidOperationException("GoogleAI:Image:Endpoint is not configured in appsettings.json");
         _logger = logger;
     }
 
@@ -130,7 +130,7 @@ public class GoogleImageService : IGoogleImageService
         var json = JsonSerializer.Serialize(requestBody);
         using var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        using var request = new HttpRequestMessage(HttpMethod.Post, ImageEndpoint)
+        using var request = new HttpRequestMessage(HttpMethod.Post, _imageEndpoint)
         {
             Content = content
         };
@@ -152,6 +152,15 @@ public class GoogleImageService : IGoogleImageService
                     "Gemini Image API returned {StatusCode}: {Body}",
                     (int)response.StatusCode,
                     responseContent);
+
+                // Check for quota/availability errors
+                if (response.StatusCode == HttpStatusCode.TooManyRequests)
+                {
+                    var errorMessage = "Image generation model is not available in your current plan. " +
+                                     "The model may require a paid plan or may not be available in your region. " +
+                                     "Please check your Google AI Studio plan and quotas.";
+                    throw new InvalidOperationException(errorMessage);
+                }
 
                 response.EnsureSuccessStatusCode();
             }
