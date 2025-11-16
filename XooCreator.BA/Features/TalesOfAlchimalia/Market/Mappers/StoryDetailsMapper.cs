@@ -4,16 +4,19 @@ using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.SeedData.DTOs;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.DTOs;
+using XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories;
 
 namespace XooCreator.BA.Features.TalesOfAlchimalia.Market.Mappers;
 
 public class StoryDetailsMapper
 {
     private readonly XooDbContext _context;
+    private readonly IStoryReviewsRepository? _reviewsRepository;
 
-    public StoryDetailsMapper(XooDbContext context)
+    public StoryDetailsMapper(XooDbContext context, IStoryReviewsRepository? reviewsRepository = null)
     {
         _context = context;
+        _reviewsRepository = reviewsRepository;
     }
 
     public async Task<StoryDetailsDto> MapToStoryDetailsFromDefinitionAsync(
@@ -22,7 +25,8 @@ public class StoryDetailsMapper
         bool isPurchased, 
         bool isOwned, 
         bool isCompleted, 
-        int progressPercentage)
+        int progressPercentage,
+        Guid? userId = null)
     {
         var translation = def.Translations?.FirstOrDefault(t => t.LanguageCode == locale);
         var title = translation?.Title ?? def.Title;
@@ -37,6 +41,24 @@ public class StoryDetailsMapper
         }
 
         var summary = GetSummaryFromJson(def.StoryId, locale) ?? def.Summary ?? string.Empty;
+
+        // Get review statistics
+        double averageRating = 0;
+        int totalReviews = 0;
+        StoryReviewDto? userReview = null;
+
+        if (_reviewsRepository != null)
+        {
+            var stats = await _reviewsRepository.GetReviewStatisticsAsync(def.StoryId);
+            averageRating = stats.AverageRating;
+            totalReviews = stats.TotalCount;
+
+            // Get user's review if userId is provided
+            if (userId.HasValue)
+            {
+                userReview = await _reviewsRepository.GetUserReviewAsync(userId.Value, def.StoryId);
+            }
+        }
 
         return new StoryDetailsDto
         {
@@ -64,7 +86,10 @@ public class StoryDetailsMapper
             IsActive = def.IsActive,
             UpdatedAt = def.UpdatedAt,
             UpdatedBy = def.UpdatedBy,
-            AvailableLanguages = def.Translations?.Select(t => t.LanguageCode).OrderBy(l => l).ToList() ?? new List<string>()
+            AvailableLanguages = def.Translations?.Select(t => t.LanguageCode).OrderBy(l => l).ToList() ?? new List<string>(),
+            AverageRating = averageRating,
+            TotalReviews = totalReviews,
+            UserReview = userReview
         };
     }
 

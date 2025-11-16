@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using XooCreator.BA.Data;
 
 namespace XooCreator.BA.Data.Repositories;
 
@@ -36,9 +35,23 @@ public class UserRepository : IUserRepository
             user.Picture = picture;
             user.LastLoginAt = DateTime.UtcNow;
             user.UpdatedAt = DateTime.UtcNow;
+            
+            // Hardcoded: marian.terinte@gmail.com gets all roles (update on each login)
+            if (email.Equals("marian.terinte@gmail.com", StringComparison.OrdinalIgnoreCase))
+            {
+                var userRoles = GetAllRoles();
+                user.Role = userRoles.First();
+                user.Roles = userRoles;
+            }
+            
             await _db.SaveChangesAsync(ct);
             return user;
         }
+
+        // Hardcoded: marian.terinte@gmail.com gets all roles
+        var roles = email.Equals("marian.terinte@gmail.com", StringComparison.OrdinalIgnoreCase)
+            ? GetAllRoles()
+            : new List<Data.Enums.UserRole> { Data.Enums.UserRole.Reader };
 
         user = new AlchimaliaUser { 
             Id = Guid.NewGuid(), 
@@ -48,7 +61,8 @@ public class UserRepository : IUserRepository
             LastName = lastName,
             Email = email,
             Picture = picture,
-            Role = Data.Enums.UserRole.Reader, // Default role
+            Role = roles.First(), // Default role (first role for backward compatibility)
+            Roles = roles,
             CreatedAt = DateTime.UtcNow,
             LastLoginAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
@@ -58,5 +72,17 @@ public class UserRepository : IUserRepository
         
         await _db.SaveChangesAsync(ct);
         return user;
+    }
+
+    private static List<Data.Enums.UserRole> GetAllRoles()
+    {
+        return new List<Data.Enums.UserRole> 
+        { 
+            Data.Enums.UserRole.Reader, 
+            Data.Enums.UserRole.Creator, 
+            Data.Enums.UserRole.Reviewer, 
+            Data.Enums.UserRole.Admin, 
+            Data.Enums.UserRole.PremiumCreator 
+        };
     }
 }

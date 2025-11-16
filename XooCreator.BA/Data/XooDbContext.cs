@@ -56,6 +56,7 @@ public class XooDbContext : DbContext
     
     // Story Marketplace
     public DbSet<StoryPurchase> StoryPurchases => Set<StoryPurchase>();
+    public DbSet<StoryReview> StoryReviews => Set<StoryReview>();
     
     // User Story Relations
     public DbSet<UserOwnedStories> UserOwnedStories => Set<UserOwnedStories>();
@@ -77,6 +78,10 @@ public class XooDbContext : DbContext
     public DbSet<StoryAgeGroupTranslation> StoryAgeGroupTranslations => Set<StoryAgeGroupTranslation>();
     public DbSet<StoryCraftAgeGroup> StoryCraftAgeGroups => Set<StoryCraftAgeGroup>();
     public DbSet<StoryDefinitionAgeGroup> StoryDefinitionAgeGroups => Set<StoryDefinitionAgeGroup>();
+    
+    // Story Feedback
+    public DbSet<StoryFeedback> StoryFeedbacks => Set<StoryFeedback>();
+    public DbSet<StoryFeedbackPreference> StoryFeedbackPreferences => Set<StoryFeedbackPreference>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -507,6 +512,19 @@ public class XooDbContext : DbContext
             e.HasOne(x => x.Story).WithMany().HasForeignKey(x => x.StoryId).HasPrincipalKey(s => s.StoryId).OnDelete(DeleteBehavior.Cascade);
         });
 
+        // Story Reviews Entity Configuration
+        modelBuilder.Entity<StoryReview>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.HasIndex(x => new { x.UserId, x.StoryId }).IsUnique();
+            e.Property(x => x.Rating).IsRequired();
+            e.Property(x => x.Comment).HasMaxLength(2000);
+            e.Property(x => x.StoryId).HasMaxLength(200).IsRequired();
+            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.Story).WithMany().HasForeignKey(x => x.StoryId).HasPrincipalKey(s => s.StoryId).OnDelete(DeleteBehavior.Cascade);
+        });
+
         // Removed StoryMarketplaceInfo entity mapping
 
         // User Owned Stories Configuration
@@ -530,6 +548,44 @@ public class XooDbContext : DbContext
             e.Property(x => x.CreationNotes).HasMaxLength(1000);
             e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
             e.HasOne(x => x.StoryDefinition).WithMany().HasForeignKey(x => x.StoryDefinitionId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Story Feedback Configuration
+        modelBuilder.Entity<StoryFeedback>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.StoryId).HasMaxLength(200).IsRequired();
+            e.Property(x => x.Email).HasMaxLength(256).IsRequired();
+            e.Property(x => x.FeedbackText).HasMaxLength(5000).IsRequired();
+            // Configure lists as PostgreSQL JSON arrays
+            e.Property(x => x.WhatLiked)
+                .HasConversion(
+                    v => System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions?)null),
+                    v => System.Text.Json.JsonSerializer.Deserialize<List<string>>(v, (System.Text.Json.JsonSerializerOptions?)null) ?? new List<string>())
+                .HasColumnType("jsonb");
+            e.Property(x => x.WhatDisliked)
+                .HasConversion(
+                    v => System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions?)null),
+                    v => System.Text.Json.JsonSerializer.Deserialize<List<string>>(v, (System.Text.Json.JsonSerializerOptions?)null) ?? new List<string>())
+                .HasColumnType("jsonb");
+            e.Property(x => x.WhatCouldBeBetter)
+                .HasConversion(
+                    v => System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions?)null),
+                    v => System.Text.Json.JsonSerializer.Deserialize<List<string>>(v, (System.Text.Json.JsonSerializerOptions?)null) ?? new List<string>())
+                .HasColumnType("jsonb");
+            e.HasIndex(x => new { x.UserId, x.StoryId }).IsUnique(); // One feedback per user per story
+            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Story Feedback Preference Configuration
+        modelBuilder.Entity<StoryFeedbackPreference>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.StoryId).HasMaxLength(200).IsRequired();
+            e.HasIndex(x => new { x.UserId, x.StoryId }).IsUnique(); // One preference per user per story
+            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
         });
 
         base.OnModelCreating(modelBuilder);

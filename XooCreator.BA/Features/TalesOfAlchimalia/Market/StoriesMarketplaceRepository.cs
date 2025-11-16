@@ -304,7 +304,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
 
         // Normalize locale to lowercase for mapping
         var normalizedLocale = (locale ?? "ro-ro").ToLowerInvariant();
-        return await _storyDetailsMapper.MapToStoryDetailsFromDefinitionAsync(def, normalizedLocale, isPurchased, isOwned, isCompleted, progressPercentage);
+        return await _storyDetailsMapper.MapToStoryDetailsFromDefinitionAsync(def, normalizedLocale, isPurchased, isOwned, isCompleted, progressPercentage, userId);
     }
 
     // Removed old MapToStoryDetailsDto using StoryMarketplaceInfo

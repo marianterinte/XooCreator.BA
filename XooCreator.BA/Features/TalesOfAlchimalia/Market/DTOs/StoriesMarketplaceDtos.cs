@@ -28,7 +28,11 @@ public record StoryDetailsDto
     public bool IsActive { get; init; }
     public DateTime UpdatedAt { get; init; }
     public Guid? UpdatedBy { get; init; }
-    public List<string> AvailableLanguages { get; init; } = new(); 
+    public List<string> AvailableLanguages { get; init; } = new();
+    // Review statistics
+    public double AverageRating { get; init; }
+    public int TotalReviews { get; init; }
+    public StoryReviewDto? UserReview { get; init; } // Current user's review if exists
 }
 
 public record StoryMarketplaceItemDto
@@ -92,6 +96,75 @@ public record GetUserPurchasedStoriesResponse
 {
     public List<StoryMarketplaceItemDto> PurchasedStories { get; init; } = new();
     public int TotalCount { get; init; }
+}
+
+// Story Review DTOs
+public record StoryReviewDto
+{
+    public Guid Id { get; init; }
+    public Guid UserId { get; init; }
+    public string UserName { get; init; } = string.Empty;
+    public string? UserPicture { get; init; }
+    public string StoryId { get; init; } = string.Empty;
+    public int Rating { get; init; }
+    public string? Comment { get; init; }
+    public DateTime CreatedAt { get; init; }
+    public DateTime UpdatedAt { get; init; }
+    public bool IsOwnReview { get; init; } // True if this is the current user's review
+}
+
+public record CreateStoryReviewRequest
+{
+    public required string StoryId { get; init; }
+    public required int Rating { get; init; } // 1-5
+    public string? Comment { get; init; }
+}
+
+public record CreateStoryReviewResponse
+{
+    public bool Success { get; init; }
+    public string? ErrorMessage { get; init; }
+    public StoryReviewDto? Review { get; init; }
+}
+
+public record UpdateStoryReviewRequest
+{
+    public required Guid ReviewId { get; init; }
+    public required int Rating { get; init; } // 1-5
+    public string? Comment { get; init; }
+}
+
+public record UpdateStoryReviewResponse
+{
+    public bool Success { get; init; }
+    public string? ErrorMessage { get; init; }
+    public StoryReviewDto? Review { get; init; }
+}
+
+public record DeleteStoryReviewResponse
+{
+    public bool Success { get; init; }
+    public string? ErrorMessage { get; init; }
+}
+
+public record GetStoryReviewsRequest
+{
+    public required string StoryId { get; init; }
+    public int Page { get; init; } = 1;
+    public int PageSize { get; init; } = 20;
+    public string? SortBy { get; init; } = "createdAt"; // createdAt, rating
+    public string SortOrder { get; init; } = "desc"; // asc, desc
+}
+
+public record GetStoryReviewsResponse
+{
+    public List<StoryReviewDto> Reviews { get; init; } = new();
+    public int TotalCount { get; init; }
+    public int Page { get; init; }
+    public int PageSize { get; init; }
+    public bool HasMore { get; init; }
+    public double AverageRating { get; init; }
+    public Dictionary<int, int> RatingDistribution { get; init; } = new(); // Rating -> Count
 }
 
 

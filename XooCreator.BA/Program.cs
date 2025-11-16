@@ -157,12 +157,18 @@ builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IGoogleIm
 builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IGoogleFullStoryService, XooCreator.BA.Features.StoryEditor.Services.GoogleFullStoryService>();
 
 // Story Marketplace Services
+builder.Services.AddScoped<XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories.IStoryReviewsRepository, XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories.StoryReviewsRepository>();
+builder.Services.AddScoped<XooCreator.BA.Features.TalesOfAlchimalia.Market.Services.IStoryReviewsService, XooCreator.BA.Features.TalesOfAlchimalia.Market.Services.StoryReviewsService>();
 builder.Services.AddScoped<StoryDetailsMapper>();
 builder.Services.AddScoped<IStoriesMarketplaceRepository, StoriesMarketplaceRepository>();
 builder.Services.AddScoped<IStoriesMarketplaceService, StoriesMarketplaceService>();
 
 // Payment services
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+
+// Story Feedback
+builder.Services.AddScoped<XooCreator.BA.Features.StoryFeedback.Repositories.IStoryFeedbackRepository, XooCreator.BA.Features.StoryFeedback.Repositories.StoryFeedbackRepository>();
+builder.Services.AddScoped<XooCreator.BA.Features.StoryFeedback.Services.IStoryFeedbackService, XooCreator.BA.Features.StoryFeedback.Services.StoryFeedbackService>();
 
 var auth0Section = builder.Configuration.GetSection("Auth0");
 var auth0Domain = auth0Section["Domain"];
@@ -237,7 +243,7 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var recreate = builder.Configuration.GetValue<bool>("Database:RecreateOnStart");
-        recreate = false; // Force recreation every time during development
+        recreate = true; // Force recreation every time during development
 
         if (recreate)
         {
