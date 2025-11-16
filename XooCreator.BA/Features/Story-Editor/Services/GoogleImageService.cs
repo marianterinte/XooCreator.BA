@@ -208,10 +208,10 @@ public class GoogleImageService : IGoogleImageService
                 }
             }
 
-            // Luăm ultimele 3 pagini
-            var last3Pages = allTiles
+            // Luăm ultimele 2 pagini (optimizare costuri - 2 pagini sunt suficiente pentru context)
+            var lastPages = allTiles
                 .OrderBy(t => t.TryGetProperty("sortOrder", out var so) ? so.GetInt32() : int.MaxValue)
-                .TakeLast(3)
+                .TakeLast(2)
                 .ToList();
 
             // Construim JSON-ul optimizat
@@ -223,9 +223,9 @@ public class GoogleImageService : IGoogleImageService
             if (!string.IsNullOrEmpty(summary))
                 optimized["summary"] = summary;
 
-            // Convertim ultimele 3 pagini în obiecte simple (doar câmpurile esențiale)
+            // Convertim ultimele pagini în obiecte simple (doar câmpurile esențiale)
             var optimizedTiles = new List<object>();
-            foreach (var tile in last3Pages)
+            foreach (var tile in lastPages)
             {
                 var tileObj = new Dictionary<string, object?>();
                 if (tile.TryGetProperty("tileId", out var tid))
@@ -258,8 +258,7 @@ public class GoogleImageService : IGoogleImageService
     }
 
     /// <summary>
-    /// Prompt engineering pentru ilustrația de pagină de poveste.
-    /// Modelul primește JSON-ul optimizat (ultimele 3 pagini + summary), textul tile-ului curent și trebuie să ilustreze scena descrisă.
+    /// Prompt engineering pentru ilustrația de pagină de poveste - optimizat pentru tokeni.
     /// </summary>
     private static string BuildImagePrompt(
         string storyJson,
@@ -268,35 +267,17 @@ public class GoogleImageService : IGoogleImageService
         string? extraInstructions)
     {
         var sb = new StringBuilder();
-        sb.AppendLine("You are an illustrator for a children's picture book app called XooCreator.");
-        sb.AppendLine("The user sends you a JSON document that defines a story with pages/tiles.");
-        sb.AppendLine("Your job is to generate ONE illustration image for the CURRENT page/tile.");
-        sb.AppendLine("Assume the current page is the one the user is editing now,");
-        sb.AppendLine("and the story JSON you receive is the full story context.");
+        sb.AppendLine("Children's book illustrator. Generate ONE illustration for the current page.");
+        sb.AppendLine("Rules: Colorful, friendly style. No text in image. Landscape. Keep characters/locations consistent.");
+        sb.AppendLine($"Language: {languageCode}.");
         sb.AppendLine();
-        sb.AppendLine("Rules:");
-        sb.AppendLine("- Keep characters, locations and mood consistent with the previous pages.");
-        sb.AppendLine("- Use a colorful, friendly style suitable for young children.");
-        sb.AppendLine("- DO NOT draw any text inside the image (no captions, no speech bubbles).");
-        sb.AppendLine("- Imagine this as a storybook page illustration (landscape aspect ratio).");
-        sb.AppendLine($"- The story language is: {languageCode}. The visual style should fit this culture if relevant.");
-        sb.AppendLine("- If a reference image is provided with this prompt, use it as reference for style and characters.");
+        sb.AppendLine($"Context: {storyJson}");
         sb.AppendLine();
-        sb.AppendLine("Here is the recent story context (last 3 pages + summary):");
-        sb.AppendLine(storyJson);
-        sb.AppendLine();
-        sb.AppendLine("--- CURRENT TILE TEXT ---");
-        sb.AppendLine("Generate an image that illustrates this specific scene:");
-        sb.AppendLine(tileText);
-        sb.AppendLine("--- END OF TILE TEXT ---");
-        sb.AppendLine();
-        sb.AppendLine("Now, based on the story context and the tile text above, create a single, coherent illustration for this scene.");
+        sb.AppendLine($"Illustrate this scene: {tileText}");
 
         if (!string.IsNullOrWhiteSpace(extraInstructions))
         {
-            sb.AppendLine();
-            sb.AppendLine("Additional instructions from the user (consider these along with the reference image if provided):");
-            sb.AppendLine(extraInstructions);
+            sb.AppendLine($"Style notes: {extraInstructions}");
         }
 
         return sb.ToString();
@@ -305,33 +286,102 @@ public class GoogleImageService : IGoogleImageService
     /// <summary>
     /// Extrage prima imagine din răspunsul Gemini (inlineData data + mimeType).
     /// </summary>
-    private static (byte[] ImageData, string MimeType) ExtractImageFromResponse(string responseJson)
+    private (byte[] ImageData, string MimeType) ExtractImageFromResponse(string responseJson)
     {
         using var doc = JsonDocument.Parse(responseJson);
         var root = doc.RootElement;
 
+        // Check for prompt feedback (safety issues)
+        if (root.TryGetProperty("promptFeedback", out var promptFeedback))
+        {
+            if (promptFeedback.TryGetProperty("blockReason", out var blockReason))
+            {
+                var reason = blockReason.GetString();
+                _logger.LogWarning("Gemini blocked the image generation prompt. Reason: {BlockReason}", reason);
+                throw new InvalidOperationException($"Image generation was blocked by Gemini safety filters. Reason: {reason}");
+            }
+        }
+
         if (!root.TryGetProperty("candidates", out var candidates) ||
             candidates.GetArrayLength() == 0)
         {
-            throw new InvalidOperationException("No candidates returned from Gemini image API.");
+            _logger.LogError("Gemini image response has no candidates. Full response: {Response}", responseJson);
+            throw new InvalidOperationException("No candidates returned from Gemini image API. The response may have been blocked or failed.");
         }
 
         var candidate = candidates[0];
 
-        if (!candidate.TryGetProperty("content", out var contentElement) ||
-            !contentElement.TryGetProperty("parts", out var parts) ||
-            parts.GetArrayLength() == 0)
+        // Check finish reason (why generation stopped)
+        // Valid reasons: STOP (normal completion), MAX_TOKENS (reached token limit but content is valid)
+        // Invalid reasons: SAFETY, RECITATION (blocked by filters)
+        if (candidate.TryGetProperty("finishReason", out var finishReason))
         {
-            throw new InvalidOperationException("Gemini image response does not contain content parts.");
+            var reason = finishReason.GetString();
+            
+            // MAX_TOKENS is a valid completion - model reached output limit but generated valid content
+            if (reason == "MAX_TOKENS")
+            {
+                _logger.LogInformation("Gemini image generation reached max output tokens limit. Generated content will be extracted.");
+                // Continue to extract content - this is not an error
+            }
+            else if (reason != "STOP" && reason != null)
+            {
+                _logger.LogWarning("Gemini image generation finished with reason: {FinishReason}", reason);
+                
+                // If blocked by safety, provide more details
+                if (reason == "SAFETY" || reason == "RECITATION")
+                {
+                    var safetyDetails = new StringBuilder();
+                    if (candidate.TryGetProperty("safetyRatings", out var safetyRatings))
+                    {
+                        foreach (var rating in safetyRatings.EnumerateArray())
+                        {
+                            if (rating.TryGetProperty("category", out var cat) &&
+                                rating.TryGetProperty("probability", out var prob))
+                            {
+                                var category = cat.GetString();
+                                var probability = prob.GetString();
+                                safetyDetails.AppendLine($"{category}: {probability}");
+                            }
+                        }
+                    }
+                    
+                    var errorMsg = $"Image generation was blocked by safety filters. Finish reason: {reason}";
+                    if (safetyDetails.Length > 0)
+                        errorMsg += $"\nSafety ratings: {safetyDetails}";
+                    
+                    throw new InvalidOperationException(errorMsg);
+                }
+                
+                throw new InvalidOperationException($"Image generation finished unexpectedly. Reason: {reason}");
+            }
         }
 
+        // Check if content exists
+        if (!candidate.TryGetProperty("content", out var contentElement))
+        {
+            _logger.LogError("Gemini image candidate has no content property. Full response: {Response}", responseJson);
+            throw new InvalidOperationException("Gemini image response candidate does not contain a content property.");
+        }
+
+        // Check if parts exist
+        if (!contentElement.TryGetProperty("parts", out var parts) ||
+            parts.GetArrayLength() == 0)
+        {
+            _logger.LogError("Gemini image response has no content parts. Candidate: {Candidate}", candidate.GetRawText());
+            throw new InvalidOperationException("Gemini image response does not contain content parts. The content may have been blocked or the response format is unexpected.");
+        }
+
+        // Extract image from parts
         foreach (var part in parts.EnumerateArray())
         {
             // Acceptă atât inlineData cât și inline_data (just in case)
             if (part.TryGetProperty("inlineData", out var inlineData) ||
                 part.TryGetProperty("inline_data", out inlineData))
             {
-                var dataElement = inlineData.GetProperty("data");
+                if (!inlineData.TryGetProperty("data", out var dataElement))
+                    continue;
+
                 var base64 = dataElement.GetString();
 
                 if (string.IsNullOrWhiteSpace(base64))
@@ -348,6 +398,7 @@ public class GoogleImageService : IGoogleImageService
             }
         }
 
-        throw new InvalidOperationException("No inline image data found in Gemini response.");
+        _logger.LogError("No inline image data found in Gemini response. Parts count: {PartsCount}", parts.GetArrayLength());
+        throw new InvalidOperationException("No inline image data found in Gemini response. The model may not have generated an image.");
     }
 }

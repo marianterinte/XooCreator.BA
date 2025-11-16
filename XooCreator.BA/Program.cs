@@ -154,6 +154,7 @@ builder.Services.AddHttpClient(); // For GoogleTtsService, GoogleTextService and
 builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IGoogleAudioGeneratorService, XooCreator.BA.Features.StoryEditor.Services.GoogleAudioGeneratorService>();
 builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IGoogleTextService, XooCreator.BA.Features.StoryEditor.Services.GoogleTextService>();
 builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IGoogleImageService, XooCreator.BA.Features.StoryEditor.Services.GoogleImageService>();
+builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IGoogleFullStoryService, XooCreator.BA.Features.StoryEditor.Services.GoogleFullStoryService>();
 
 // Story Marketplace Services
 builder.Services.AddScoped<StoryDetailsMapper>();

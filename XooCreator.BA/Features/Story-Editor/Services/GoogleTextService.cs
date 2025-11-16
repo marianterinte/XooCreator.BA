@@ -83,7 +83,7 @@ public class GoogleTextService : IGoogleTextService
                 }
             },
 
-            // Conținutul efectiv: îi dai doar ultimele 3 pagini + summary (optimizat)
+            // Conținutul efectiv: optimizat pentru tokeni
             contents = new[]
             {
                 new
@@ -92,24 +92,19 @@ public class GoogleTextService : IGoogleTextService
                     {
                         new
                         {
-                            text =
-                                "Here is the recent story context (last 3 pages + summary) as JSON:\n\n" +
-                                optimizedJson +
-                                "\n\n--- END OF STORY CONTEXT ---\n\n" +
-                                "Read the story so far and imagine the next page. " +
-                                "Now generate ONLY the text for the next page."
+                            text = $"Story: {optimizedJson}\n\nGenerate next page text only."
                         }
                     }
                 }
             },
 
-            // Config de generare – poți regla ce vrei aici
+            // Config de generare – optimizat pentru costuri
             generationConfig = new
             {
                 temperature = 0.9,      // mai creativ un pic
                 topP = 0.9,
                 topK = 40,
-                maxOutputTokens = 512,  // arhisuficient pentru o pagină
+                maxOutputTokens = 1024,  // Optimizat: suficient pentru o pagină de poveste (200-500 tokeni reali)
                 response_mime_type = "text/plain"
             },
 
@@ -184,10 +179,10 @@ public class GoogleTextService : IGoogleTextService
                 }
             }
 
-            // Luăm ultimele 3 pagini
-            var last3Pages = allTiles
+            // Luăm ultimele 2 pagini (optimizare costuri - 2 pagini sunt suficiente pentru context)
+            var lastPages = allTiles
                 .OrderBy(t => t.TryGetProperty("sortOrder", out var so) ? so.GetInt32() : int.MaxValue)
-                .TakeLast(3)
+                .TakeLast(2)
                 .ToList();
 
             // Construim JSON-ul optimizat
@@ -199,9 +194,9 @@ public class GoogleTextService : IGoogleTextService
             if (!string.IsNullOrEmpty(summary))
                 optimized["summary"] = summary;
 
-            // Convertim ultimele 3 pagini în obiecte simple (doar câmpurile esențiale)
+            // Convertim ultimele pagini în obiecte simple (doar câmpurile esențiale)
             var optimizedTiles = new List<object>();
-            foreach (var tile in last3Pages)
+            foreach (var tile in lastPages)
             {
                 var tileObj = new Dictionary<string, object?>();
                 if (tile.TryGetProperty("tileId", out var tid))
@@ -234,27 +229,18 @@ public class GoogleTextService : IGoogleTextService
     }
 
     /// <summary>
-    /// Builds the long system instruction explaining exactly what we want.
+    /// Builds the system instruction - optimized for token efficiency.
     /// </summary>
     private static string BuildSystemInstruction(string languageCode, string? extraInstructions)
     {
         var sb = new StringBuilder();
-        sb.AppendLine("You are a children's story writing assistant for an app called XooCreator.");
-        sb.AppendLine("The user sends you a JSON document that describes a picture book / story.");
-        sb.AppendLine("The JSON can contain arrays like \"tiles\" or \"pages\", with text, images and audio references.");
-        sb.AppendLine("Your job is to continue the story by inventing the NEXT PAGE ONLY.");
-        sb.AppendLine("Read all existing pages carefully and keep consistency for characters, tone and setting.");
-        sb.AppendLine("Output ONLY the text for the next page, in the same style and tone.");
-        sb.AppendLine("Do NOT repeat text from previous pages.");
-        sb.AppendLine("Do NOT output JSON, keys, quotes, explanations, titles, or anything else.");
-        sb.AppendLine("Just return the plain story text for the next page.");
-        sb.AppendLine($"Write the answer in language: {languageCode}.");
+        sb.AppendLine("Children's story assistant. Continue the story with the NEXT PAGE text only.");
+        sb.AppendLine("Keep characters, tone, and setting consistent. Output plain text only, no JSON/explanations.");
+        sb.AppendLine($"Language: {languageCode}.");
 
         if (!string.IsNullOrWhiteSpace(extraInstructions))
         {
-            sb.AppendLine();
-            sb.AppendLine("Additional style instructions from the user:");
-            sb.AppendLine(extraInstructions);
+            sb.AppendLine($"Style: {extraInstructions}");
         }
 
         return sb.ToString();
@@ -263,26 +249,93 @@ public class GoogleTextService : IGoogleTextService
     /// <summary>
     /// Extracts the concatenated text from Gemini's GenerateContentResponse JSON.
     /// </summary>
-    private static string ExtractTextFromResponse(string responseJson)
+    private string ExtractTextFromResponse(string responseJson)
     {
         using var doc = JsonDocument.Parse(responseJson);
         var root = doc.RootElement;
 
+        // Check for prompt feedback (safety issues)
+        if (root.TryGetProperty("promptFeedback", out var promptFeedback))
+        {
+            if (promptFeedback.TryGetProperty("blockReason", out var blockReason))
+            {
+                var reason = blockReason.GetString();
+                _logger.LogWarning("Gemini blocked the prompt. Reason: {BlockReason}", reason);
+                throw new InvalidOperationException($"Content generation was blocked by Gemini safety filters. Reason: {reason}");
+            }
+        }
+
         if (!root.TryGetProperty("candidates", out var candidates) ||
             candidates.GetArrayLength() == 0)
         {
-            throw new InvalidOperationException("No candidates returned from Gemini.");
+            _logger.LogError("Gemini response has no candidates. Full response: {Response}", responseJson);
+            throw new InvalidOperationException("No candidates returned from Gemini. The response may have been blocked or failed.");
         }
 
         var candidate = candidates[0];
 
-        if (!candidate.TryGetProperty("content", out var contentElement) ||
-            !contentElement.TryGetProperty("parts", out var parts) ||
-            parts.GetArrayLength() == 0)
+        // Check finish reason (why generation stopped)
+        // Valid reasons: STOP (normal completion), MAX_TOKENS (reached token limit but content is valid)
+        // Invalid reasons: SAFETY, RECITATION (blocked by filters)
+        if (candidate.TryGetProperty("finishReason", out var finishReason))
         {
-            throw new InvalidOperationException("Gemini response does not contain content parts.");
+            var reason = finishReason.GetString();
+            
+            // MAX_TOKENS is a valid completion - model reached output limit but generated valid content
+            if (reason == "MAX_TOKENS")
+            {
+                _logger.LogInformation("Gemini reached max output tokens limit. Generated content will be extracted.");
+                // Continue to extract content - this is not an error
+            }
+            else if (reason != "STOP" && reason != null)
+            {
+                _logger.LogWarning("Gemini finished with reason: {FinishReason}", reason);
+                
+                // If blocked by safety, provide more details
+                if (reason == "SAFETY" || reason == "RECITATION")
+                {
+                    var safetyDetails = new StringBuilder();
+                    if (candidate.TryGetProperty("safetyRatings", out var safetyRatings))
+                    {
+                        foreach (var rating in safetyRatings.EnumerateArray())
+                        {
+                            if (rating.TryGetProperty("category", out var cat) &&
+                                rating.TryGetProperty("probability", out var prob))
+                            {
+                                var category = cat.GetString();
+                                var probability = prob.GetString();
+                                safetyDetails.AppendLine($"{category}: {probability}");
+                            }
+                        }
+                    }
+                    
+                    var errorMsg = $"Content generation was blocked by safety filters. Finish reason: {reason}";
+                    if (safetyDetails.Length > 0)
+                        errorMsg += $"\nSafety ratings: {safetyDetails}";
+                    
+                    throw new InvalidOperationException(errorMsg);
+                }
+                
+                throw new InvalidOperationException($"Content generation finished unexpectedly. Reason: {reason}");
+            }
         }
 
+        // Check if content exists
+        if (!candidate.TryGetProperty("content", out var contentElement))
+        {
+            _logger.LogError("Gemini candidate has no content property. Full response: {Response}", responseJson);
+            throw new InvalidOperationException("Gemini response candidate does not contain a content property.");
+        }
+
+        // Check if parts exist
+        if (!contentElement.TryGetProperty("parts", out var parts) ||
+            parts.GetArrayLength() == 0)
+        {
+            _logger.LogError("Gemini response has no content parts. Candidate: {Candidate}", candidate.GetRawText());
+            throw new InvalidOperationException("Gemini response does not contain content parts. The content may have been blocked or the response format is unexpected.");
+        }
+
+        // Extract text from parts
         var sb = new StringBuilder();
         foreach (var part in parts.EnumerateArray())
         {
@@ -296,7 +349,10 @@ public class GoogleTextService : IGoogleTextService
 
         var result = sb.ToString().Trim();
         if (string.IsNullOrEmpty(result))
-            throw new InvalidOperationException("Generated text is empty.");
+        {
+            _logger.LogWarning("Gemini returned empty text. Parts count: {PartsCount}", parts.GetArrayLength());
+            throw new InvalidOperationException("Generated text is empty. The model may have returned no text content.");
+        }
 
         return result;
     }
