@@ -31,11 +31,14 @@ public interface IGoogleFullStoryService
         List<string>? ageGroupIds = null,
         List<string>? topicIds = null,
         int numberOfPages = 5,
+        string? storyInstructions = null,
+        bool generateImages = false,
+        bool generateAudio = false,
         CancellationToken ct = default);
 }
 
 /// <summary>
-/// Represents a generated story page with text and image.
+/// Represents a generated story page with text, image, and audio.
 /// </summary>
 public class GeneratedStoryPage
 {
@@ -44,6 +47,8 @@ public class GeneratedStoryPage
     public string Caption { get; set; } = string.Empty;
     public byte[]? ImageData { get; set; }
     public string ImageMimeType { get; set; } = "image/png";
+    public byte[]? AudioData { get; set; }
+    public string AudioFormat { get; set; } = "wav";
 }
 
 /// <summary>
@@ -54,15 +59,18 @@ public class GoogleFullStoryService : IGoogleFullStoryService
 {
     private readonly IGoogleTextService _textService;
     private readonly IGoogleImageService _imageService;
+    private readonly IGoogleAudioGeneratorService _audioService;
     private readonly ILogger<GoogleFullStoryService> _logger;
 
     public GoogleFullStoryService(
         IGoogleTextService textService,
         IGoogleImageService imageService,
+        IGoogleAudioGeneratorService audioService,
         ILogger<GoogleFullStoryService> logger)
     {
         _textService = textService;
         _imageService = imageService;
+        _audioService = audioService;
         _logger = logger;
     }
 
@@ -73,6 +81,9 @@ public class GoogleFullStoryService : IGoogleFullStoryService
         List<string>? ageGroupIds = null,
         List<string>? topicIds = null,
         int numberOfPages = 5,
+        string? storyInstructions = null,
+        bool generateImages = false,
+        bool generateAudio = false,
         CancellationToken ct = default)
     {
         if (numberOfPages < 1 || numberOfPages > 10)
@@ -108,42 +119,72 @@ public class GoogleFullStoryService : IGoogleFullStoryService
                 ageGroupIds,
                 topicIds);
 
+            // Combine extra instructions with story instructions
+            var extraInstructions = BuildExtraInstructions(ageGroupIds, topicIds, storyInstructions);
+
             var pageText = await _textService.GenerateNextPageAsync(
                 storyJsonForPage,
                 languageCode,
-                BuildExtraInstructions(ageGroupIds, topicIds),
+                extraInstructions,
                 ct);
 
             // Extract caption (first sentence or first 50 chars)
             var caption = ExtractCaption(pageText);
 
-            // Generate image for this page
+            // Generate image for this page (if requested)
             byte[]? imageData = null;
             string imageMimeType = "image/png";
 
-            try
+            if (generateImages)
             {
-                // Use previous page's image as reference for consistency (if available)
-                byte[]? referenceImage = pages.Count > 0 && pages[^1].ImageData != null
-                    ? pages[^1].ImageData
-                    : null;
+                try
+                {
+                    // Use previous page's image as reference for consistency (if available)
+                    byte[]? referenceImage = pages.Count > 0 && pages[^1].ImageData != null
+                        ? pages[^1].ImageData
+                        : null;
 
-                var (imgData, mimeType) = await _imageService.GenerateStoryImageAsync(
-                    storyJsonForPage,
-                    pageText,
-                    languageCode,
-                    BuildExtraInstructions(ageGroupIds, topicIds),
-                    referenceImage,
-                    referenceImageMimeType: pages.Count > 0 ? pages[^1].ImageMimeType : null,
-                    ct);
+                    var (imgData, mimeType) = await _imageService.GenerateStoryImageAsync(
+                        storyJsonForPage,
+                        pageText,
+                        languageCode,
+                        extraInstructions,
+                        referenceImage,
+                        referenceImageMimeType: pages.Count > 0 ? pages[^1].ImageMimeType : null,
+                        ct);
 
-                imageData = imgData;
-                imageMimeType = mimeType;
+                    imageData = imgData;
+                    imageMimeType = mimeType;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to generate image for page {PageNumber}, continuing without image", pageNum);
+                    // Continue without image - text is more important
+                }
             }
-            catch (Exception ex)
+
+            // Generate audio for this page (if requested)
+            byte[]? audioData = null;
+            string audioFormat = "wav";
+
+            if (generateAudio)
             {
-                _logger.LogWarning(ex, "Failed to generate image for page {PageNumber}, continuing without image", pageNum);
-                // Continue without image - text is more important
+                try
+                {
+                    var (audData, format) = await _audioService.GenerateAudioAsync(
+                        pageText,
+                        languageCode,
+                        null, // Use default voice
+                        ct);
+
+                    audioData = audData;
+                    audioFormat = format;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to generate audio for page {PageNumber}, continuing without audio", pageNum);
+                    // Continue without audio
+                }
             }
 
             var page = new GeneratedStoryPage
@@ -152,7 +193,9 @@ public class GoogleFullStoryService : IGoogleFullStoryService
                 Text = pageText,
                 Caption = caption,
                 ImageData = imageData,
-                ImageMimeType = imageMimeType
+                ImageMimeType = imageMimeType,
+                AudioData = audioData,
+                AudioFormat = audioFormat
             };
 
             pages.Add(page);
@@ -243,9 +286,9 @@ public class GoogleFullStoryService : IGoogleFullStoryService
     }
 
     /// <summary>
-    /// Builds extra instructions based on age groups and topics.
+    /// Builds extra instructions based on age groups, topics, and story instructions.
     /// </summary>
-    private static string? BuildExtraInstructions(List<string>? ageGroupIds, List<string>? topicIds)
+    private static string? BuildExtraInstructions(List<string>? ageGroupIds, List<string>? topicIds, string? storyInstructions)
     {
         var instructions = new List<string>();
 
@@ -257,6 +300,11 @@ public class GoogleFullStoryService : IGoogleFullStoryService
         if (topicIds != null && topicIds.Count > 0)
         {
             instructions.Add($"Story themes: {string.Join(", ", topicIds)}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(storyInstructions))
+        {
+            instructions.Add($"Story building instructions: {storyInstructions}");
         }
 
         return instructions.Count > 0 ? string.Join(". ", instructions) : null;

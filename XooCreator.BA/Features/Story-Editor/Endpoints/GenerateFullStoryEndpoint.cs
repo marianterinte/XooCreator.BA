@@ -28,7 +28,10 @@ public class GenerateFullStoryEndpoint
         string LanguageCode,
         List<string>? AgeGroupIds = null,
         List<string>? TopicIds = null,
-        int NumberOfPages = 5
+        int NumberOfPages = 5,
+        string? StoryInstructions = null,
+        bool GenerateImages = false,
+        bool GenerateAudio = false
     );
 
     public record GeneratedPageDto(
@@ -36,7 +39,9 @@ public class GenerateFullStoryEndpoint
         string Text,
         string Caption,
         string? ImageBase64,
-        string ImageMimeType
+        string ImageMimeType,
+        string? AudioBase64,
+        string AudioFormat
     );
 
     public record GenerateFullStoryResponse(
@@ -83,6 +88,11 @@ public class GenerateFullStoryEndpoint
             return TypedResults.BadRequest("NumberOfPages must be between 1 and 10");
         }
 
+        if (request.StoryInstructions != null && request.StoryInstructions.Length > 3000)
+        {
+            return TypedResults.BadRequest("StoryInstructions must not exceed 3000 characters");
+        }
+
         try
         {
             var generatedPages = await ep._fullStoryService.GenerateFullStoryAsync(
@@ -92,15 +102,20 @@ public class GenerateFullStoryEndpoint
                 request.AgeGroupIds,
                 request.TopicIds,
                 request.NumberOfPages,
+                request.StoryInstructions,
+                request.GenerateImages,
+                request.GenerateAudio,
                 ct);
 
-            // Convert to DTO with base64 images
+            // Convert to DTO with base64 images and audio
             var pageDtos = generatedPages.Select(page => new GeneratedPageDto(
                 PageNumber: page.PageNumber,
                 Text: page.Text,
                 Caption: page.Caption,
                 ImageBase64: page.ImageData != null ? Convert.ToBase64String(page.ImageData) : null,
-                ImageMimeType: page.ImageMimeType
+                ImageMimeType: page.ImageMimeType,
+                AudioBase64: page.AudioData != null ? Convert.ToBase64String(page.AudioData) : null,
+                AudioFormat: page.AudioFormat
             )).ToList();
 
             return TypedResults.Ok(new GenerateFullStoryResponse(

@@ -208,10 +208,10 @@ public class GoogleImageService : IGoogleImageService
                 }
             }
 
-            // Luăm ultimele 2 pagini (optimizare costuri - 2 pagini sunt suficiente pentru context)
+            // Luăm ultimele 2-3 pagini (optimizare costuri - 2-3 pagini sunt suficiente pentru context)
             var lastPages = allTiles
                 .OrderBy(t => t.TryGetProperty("sortOrder", out var so) ? so.GetInt32() : int.MaxValue)
-                .TakeLast(2)
+                .TakeLast(3)
                 .ToList();
 
             // Construim JSON-ul optimizat
@@ -267,17 +267,13 @@ public class GoogleImageService : IGoogleImageService
         string? extraInstructions)
     {
         var sb = new StringBuilder();
-        sb.AppendLine("Children's book illustrator. Generate ONE illustration for the current page.");
-        sb.AppendLine("Rules: Colorful, friendly style. No text in image. Landscape. Keep characters/locations consistent.");
-        sb.AppendLine($"Language: {languageCode}.");
-        sb.AppendLine();
+        sb.AppendLine("Children's book illustration. Colorful, friendly. No text. Landscape. Consistent style.");
         sb.AppendLine($"Context: {storyJson}");
-        sb.AppendLine();
-        sb.AppendLine($"Illustrate this scene: {tileText}");
+        sb.AppendLine($"Scene: {tileText}");
 
         if (!string.IsNullOrWhiteSpace(extraInstructions))
         {
-            sb.AppendLine($"Style notes: {extraInstructions}");
+            sb.AppendLine($"Style: {extraInstructions}");
         }
 
         return sb.ToString();

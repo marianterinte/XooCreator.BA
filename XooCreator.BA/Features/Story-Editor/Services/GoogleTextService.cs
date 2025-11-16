@@ -179,10 +179,10 @@ public class GoogleTextService : IGoogleTextService
                 }
             }
 
-            // Luăm ultimele 2 pagini (optimizare costuri - 2 pagini sunt suficiente pentru context)
+            // Luăm ultimele 2-3 pagini (optimizare costuri - 2-3 pagini sunt suficiente pentru context)
             var lastPages = allTiles
                 .OrderBy(t => t.TryGetProperty("sortOrder", out var so) ? so.GetInt32() : int.MaxValue)
-                .TakeLast(2)
+                .TakeLast(3)
                 .ToList();
 
             // Construim JSON-ul optimizat
@@ -234,13 +234,12 @@ public class GoogleTextService : IGoogleTextService
     private static string BuildSystemInstruction(string languageCode, string? extraInstructions)
     {
         var sb = new StringBuilder();
-        sb.AppendLine("Children's story assistant. Continue the story with the NEXT PAGE text only.");
-        sb.AppendLine("Keep characters, tone, and setting consistent. Output plain text only, no JSON/explanations.");
+        sb.AppendLine("Children's story. Continue with NEXT PAGE text only. Keep consistent. Plain text.");
         sb.AppendLine($"Language: {languageCode}.");
 
         if (!string.IsNullOrWhiteSpace(extraInstructions))
         {
-            sb.AppendLine($"Style: {extraInstructions}");
+            sb.AppendLine($"Instructions: {extraInstructions}");
         }
 
         return sb.ToString();
