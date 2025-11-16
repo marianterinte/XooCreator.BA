@@ -7,7 +7,7 @@ namespace XooCreator.BA.Features.StoryEditor.Services;
 /// Service for interacting with Google Gemini TTS (via Google AI Studio).
 /// Uses Gemini TTS to generate single-speaker audio.
 /// </summary>
-public interface IGoogleTtsService
+public interface IGoogleAudioGeneratorService
 {
     /// <summary>
     /// Generates audio from text using Gemini TTS.
@@ -30,17 +30,17 @@ public interface IGoogleTtsService
         CancellationToken ct = default);
 }
 
-public class GoogleTtsService : IGoogleTtsService
+public class GoogleAudioGeneratorService : IGoogleAudioGeneratorService
 {
     private readonly HttpClient _httpClient;
     private readonly string _apiKey;
     private readonly string _ttsEndpoint;
-    private readonly ILogger<GoogleTtsService> _logger;
+    private readonly ILogger<GoogleAudioGeneratorService> _logger;
 
-    public GoogleTtsService(
+    public GoogleAudioGeneratorService(
         IConfiguration configuration,
         IHttpClientFactory httpClientFactory,
-        ILogger<GoogleTtsService> logger)
+        ILogger<GoogleAudioGeneratorService> logger)
     {
         _httpClient = httpClientFactory.CreateClient();
         _apiKey = configuration["GoogleAI:ApiKey"]

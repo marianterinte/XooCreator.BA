@@ -10,10 +10,10 @@ namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 [Endpoint]
 public class GenerateAudioEndpoint
 {
-    private readonly IGoogleTtsService _googleTts;
+    private readonly IGoogleAudioGeneratorService _googleTts;
     private readonly IAuth0UserService _auth0;
 
-    public GenerateAudioEndpoint(IGoogleTtsService googleTts, IAuth0UserService auth0)
+    public GenerateAudioEndpoint(IGoogleAudioGeneratorService googleTts, IAuth0UserService auth0)
     {
         _googleTts = googleTts;
         _auth0 = auth0;
