@@ -162,6 +162,8 @@ builder.Services.AddScoped<XooCreator.BA.Features.TalesOfAlchimalia.Market.Servi
 builder.Services.AddScoped<StoryDetailsMapper>();
 builder.Services.AddScoped<IStoriesMarketplaceRepository, StoriesMarketplaceRepository>();
 builder.Services.AddScoped<IStoriesMarketplaceService, StoriesMarketplaceService>();
+builder.Services.AddScoped<XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories.IFavoritesRepository, XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories.FavoritesRepository>();
+builder.Services.AddScoped<XooCreator.BA.Features.TalesOfAlchimalia.Market.Services.IFavoritesService, XooCreator.BA.Features.TalesOfAlchimalia.Market.Services.FavoritesService>();
 
 // Payment services
 builder.Services.AddScoped<IPaymentService, PaymentService>();

@@ -51,6 +51,8 @@ public record StoryMarketplaceItemDto
     public string StoryType { get; init; } = string.Empty;
     public string Status { get; init; } = string.Empty;
     public List<string> AvailableLanguages { get; init; } = new(); // e.g., ["ro-ro", "en-us", "hu-hu"]
+    public bool IsPurchased { get; init; } = false;
+    public bool IsOwned { get; init; } = false;
 }
 
 public record PurchaseStoryRequest

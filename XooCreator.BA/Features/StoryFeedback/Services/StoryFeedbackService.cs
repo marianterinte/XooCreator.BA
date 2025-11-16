@@ -18,16 +18,18 @@ public class StoryFeedbackService : IStoryFeedbackService
         if (string.IsNullOrWhiteSpace(request.StoryId))
             return new SubmitStoryFeedbackResponse { Success = false, ErrorMessage = "StoryId is required" };
 
-        if (string.IsNullOrWhiteSpace(request.FeedbackText))
-            return new SubmitStoryFeedbackResponse { Success = false, ErrorMessage = "FeedbackText is required" };
+        // Allow feedback if either feedbackText is provided or there are selections in whatCouldBeBetter
+        var hasFeedbackText = !string.IsNullOrWhiteSpace(request.FeedbackText);
+        var hasSelections = request.WhatCouldBeBetter != null && request.WhatCouldBeBetter.Count > 0;
+        
+        if (!hasFeedbackText && !hasSelections)
+            return new SubmitStoryFeedbackResponse { Success = false, ErrorMessage = "Either feedback text or improvement selections are required" };
 
         var feedback = await _repository.CreateFeedbackAsync(
             userId, 
             request.StoryId, 
             email, 
-            request.FeedbackText, 
-            request.WhatLiked ?? new List<string>(), 
-            request.WhatDisliked ?? new List<string>(), 
+            request.FeedbackText ?? string.Empty, 
             request.WhatCouldBeBetter ?? new List<string>(), 
             ct);
         
@@ -92,8 +94,6 @@ public class StoryFeedbackService : IStoryFeedbackService
             UserEmail = f.Email,
             StoryId = f.StoryId,
             FeedbackText = f.FeedbackText,
-            WhatLiked = f.WhatLiked ?? new List<string>(),
-            WhatDisliked = f.WhatDisliked ?? new List<string>(),
             WhatCouldBeBetter = f.WhatCouldBeBetter ?? new List<string>(),
             CreatedAt = f.CreatedAt
         }).ToList();

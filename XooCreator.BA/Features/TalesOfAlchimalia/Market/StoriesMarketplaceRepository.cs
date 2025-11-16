@@ -132,7 +132,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             .ToListAsync();
 
         // Map from StoryDefinition directly
-        return await MapToMarketplaceListAsync(stories, normalizedLocale);
+        return await MapToMarketplaceListAsync(stories, normalizedLocale, userId);
     }
 
     public async Task<List<StoryMarketplaceItemDto>> GetFeaturedStoriesAsync(Guid userId, string locale)
@@ -147,7 +147,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             .Take(5)
             .ToListAsync();
 
-        return await MapToMarketplaceListAsync(featuredStories, normalizedLocale);
+        return await MapToMarketplaceListAsync(featuredStories, normalizedLocale, userId);
     }
 
     public async Task<List<string>> GetAvailableRegionsAsync()
@@ -271,7 +271,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             .Where(s => ids.Contains(s.StoryId))
             .ToListAsync();
         var normalizedLocale = (locale ?? "ro-ro").ToLowerInvariant();
-        return await MapToMarketplaceListAsync(defs, normalizedLocale);
+        return await MapToMarketplaceListAsync(defs, normalizedLocale, userId);
     }
 
     public async Task<StoryDetailsDto?> GetStoryDetailsAsync(string storyId, Guid userId, string locale)
@@ -411,17 +411,17 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
     }
 
     // New helpers for mapping from StoryDefinition directly
-    private async Task<List<StoryMarketplaceItemDto>> MapToMarketplaceListAsync(List<StoryDefinition> defs, string locale)
+    private async Task<List<StoryMarketplaceItemDto>> MapToMarketplaceListAsync(List<StoryDefinition> defs, string locale, Guid userId)
     {
         var result = new List<StoryMarketplaceItemDto>();
         foreach (var def in defs)
         {
-            result.Add(await MapToMarketplaceItemFromDefinitionAsync(def, locale));
+            result.Add(await MapToMarketplaceItemFromDefinitionAsync(def, locale, userId));
         }
         return result;
     }
 
-    private async Task<StoryMarketplaceItemDto> MapToMarketplaceItemFromDefinitionAsync(StoryDefinition def, string locale)
+    private async Task<StoryMarketplaceItemDto> MapToMarketplaceItemFromDefinitionAsync(StoryDefinition def, string locale, Guid userId)
     {
         var translation = def.Translations?.FirstOrDefault(t => t.LanguageCode == locale);
         var title = translation?.Title ?? def.Title;
@@ -447,6 +447,15 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             ?? def.Summary 
             ?? string.Empty;
 
+        // Check if user has purchased this story
+        var isPurchased = await _context.StoryPurchases
+            .AnyAsync(sp => sp.UserId == userId && sp.StoryId == def.StoryId);
+
+        // Check if user owns this story (UserOwnedStories)
+        var ownedRow = await _context.UserOwnedStories
+            .AnyAsync(uos => uos.UserId == userId && uos.StoryDefinitionId == def.Id);
+        var isOwned = isPurchased || ownedRow;
+
         return new StoryMarketplaceItemDto
         {
             Id = def.StoryId,
@@ -462,7 +471,9 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             StoryTopic = def.StoryTopic,
             StoryType = def.StoryType.ToString(),
             Status = def.Status.ToString(),
-            AvailableLanguages = availableLanguages
+            AvailableLanguages = availableLanguages,
+            IsPurchased = isPurchased,
+            IsOwned = isOwned
         };
     }
 
