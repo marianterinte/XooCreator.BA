@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Linq;
+using System.Net;
 using System.Text;
 using System.Text.Json;
 
@@ -90,7 +91,10 @@ public class GoogleImageService : IGoogleImageService
         if (string.IsNullOrWhiteSpace(tileText))
             throw new ArgumentException("Tile text cannot be empty", nameof(tileText));
 
-        var prompt = BuildImagePrompt(storyJson, tileText, languageCode, extraInstructions);
+        // Optimizare: extragem doar ultimele 3 pagini + summary pentru a reduce tokenii
+        var optimizedJson = ExtractOptimizedStoryContext(storyJson);
+
+        var prompt = BuildImagePrompt(optimizedJson, tileText, languageCode, extraInstructions);
 
         // Construim parts: text + (opțional) imagine de referință
         var parts = new List<object>
@@ -175,8 +179,87 @@ public class GoogleImageService : IGoogleImageService
     }
 
     /// <summary>
+    /// Extracts only the last 3 pages + summary from the full story JSON to reduce token costs.
+    /// </summary>
+    private static string ExtractOptimizedStoryContext(string fullStoryJson)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(fullStoryJson);
+            var root = doc.RootElement;
+
+            // Extragem metadata esențială
+            var storyId = root.TryGetProperty("storyId", out var sid) ? sid.GetString() : null;
+            var title = root.TryGetProperty("title", out var t) ? t.GetString() : null;
+            var summary = root.TryGetProperty("summary", out var s) ? s.GetString() : null;
+
+            // Extragem tiles și filtrăm doar paginile (nu quiz-urile)
+            var allTiles = new List<JsonElement>();
+            if (root.TryGetProperty("tiles", out var tiles) && tiles.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var tile in tiles.EnumerateArray())
+                {
+                    // Luăm doar tile-urile de tip "page"
+                    if (tile.TryGetProperty("type", out var type) && 
+                        type.GetString()?.Equals("page", StringComparison.OrdinalIgnoreCase) == true)
+                    {
+                        allTiles.Add(tile);
+                    }
+                }
+            }
+
+            // Luăm ultimele 3 pagini
+            var last3Pages = allTiles
+                .OrderBy(t => t.TryGetProperty("sortOrder", out var so) ? so.GetInt32() : int.MaxValue)
+                .TakeLast(3)
+                .ToList();
+
+            // Construim JSON-ul optimizat
+            var optimized = new Dictionary<string, object?>();
+            if (!string.IsNullOrEmpty(storyId))
+                optimized["storyId"] = storyId;
+            if (!string.IsNullOrEmpty(title))
+                optimized["title"] = title;
+            if (!string.IsNullOrEmpty(summary))
+                optimized["summary"] = summary;
+
+            // Convertim ultimele 3 pagini în obiecte simple (doar câmpurile esențiale)
+            var optimizedTiles = new List<object>();
+            foreach (var tile in last3Pages)
+            {
+                var tileObj = new Dictionary<string, object?>();
+                if (tile.TryGetProperty("tileId", out var tid))
+                    tileObj["tileId"] = tid.GetString();
+                if (tile.TryGetProperty("type", out var ttype))
+                    tileObj["type"] = ttype.GetString();
+                if (tile.TryGetProperty("sortOrder", out var tso))
+                    tileObj["sortOrder"] = tso.GetInt32();
+                if (tile.TryGetProperty("caption", out var cap))
+                    tileObj["caption"] = cap.GetString();
+                if (tile.TryGetProperty("text", out var txt))
+                    tileObj["text"] = txt.GetString();
+                // Nu includem imageUrl, audioUrl etc. pentru a reduce tokenii
+
+                optimizedTiles.Add(tileObj);
+            }
+
+            optimized["tiles"] = optimizedTiles;
+
+            return JsonSerializer.Serialize(optimized, new JsonSerializerOptions
+            {
+                WriteIndented = false // Compact pentru a reduce tokenii
+            });
+        }
+        catch (Exception)
+        {
+            // Dacă parsing-ul eșuează, returnăm JSON-ul original (fallback)
+            return fullStoryJson;
+        }
+    }
+
+    /// <summary>
     /// Prompt engineering pentru ilustrația de pagină de poveste.
-    /// Modelul primește JSON-ul complet, textul tile-ului curent și trebuie să ilustreze scena descrisă.
+    /// Modelul primește JSON-ul optimizat (ultimele 3 pagini + summary), textul tile-ului curent și trebuie să ilustreze scena descrisă.
     /// </summary>
     private static string BuildImagePrompt(
         string storyJson,
@@ -199,7 +282,7 @@ public class GoogleImageService : IGoogleImageService
         sb.AppendLine($"- The story language is: {languageCode}. The visual style should fit this culture if relevant.");
         sb.AppendLine("- If a reference image is provided with this prompt, use it as reference for style and characters.");
         sb.AppendLine();
-        sb.AppendLine("Here is the full story JSON (context):");
+        sb.AppendLine("Here is the recent story context (last 3 pages + summary):");
         sb.AppendLine(storyJson);
         sb.AppendLine();
         sb.AppendLine("--- CURRENT TILE TEXT ---");

@@ -96,8 +96,9 @@ public class GoogleAudioGeneratorService : IGoogleAudioGeneratorService
                 }
             },
 
-            // Modelul TTS – în AI Studio vezi exact „Gemini 2.5 Pro Preview TTS”
-            model = "gemini-2.5-pro-preview-tts"
+            // Modelul TTS – folosim Flash pentru costuri mai mici
+            // Notă: modelul este determinat de endpoint-ul din appsettings.json
+            // Nu specificăm model aici pentru a evita conflicte cu endpoint-ul
         };
 
         var json = JsonSerializer.Serialize(requestBody);

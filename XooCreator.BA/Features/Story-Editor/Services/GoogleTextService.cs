@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Linq;
+using System.Text;
 using System.Text.Json;
 
 namespace XooCreator.BA.Features.StoryEditor.Services;
@@ -40,12 +41,8 @@ public class GoogleTextService : IGoogleTextService
 {
     private readonly HttpClient _httpClient;
     private readonly string _apiKey;
+    private readonly string _textEndpoint;
     private readonly ILogger<GoogleTextService> _logger;
-
-    // Text generation endpoint (Gemini 2.5 Flash)
-    // Docs: https://ai.google.dev/gemini-api/docs/text-generation :contentReference[oaicite:1]{index=1}
-    private const string TextEndpoint =
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
     public GoogleTextService(
         IConfiguration configuration,
@@ -55,6 +52,8 @@ public class GoogleTextService : IGoogleTextService
         _httpClient = httpClientFactory.CreateClient();
         _apiKey = configuration["GoogleAI:ApiKey"]
             ?? throw new InvalidOperationException("GoogleAI:ApiKey is not configured in appsettings.json");
+        _textEndpoint = configuration["GoogleAI:Text:Endpoint"]
+            ?? throw new InvalidOperationException("GoogleAI:Text:Endpoint is not configured in appsettings.json");
         _logger = logger;
     }
 
@@ -66,6 +65,9 @@ public class GoogleTextService : IGoogleTextService
     {
         if (string.IsNullOrWhiteSpace(storyJson))
             throw new ArgumentException("Story JSON cannot be empty", nameof(storyJson));
+
+        // Optimizare: extragem doar ultimele 3 pagini + summary pentru a reduce tokenii
+        var optimizedJson = ExtractOptimizedStoryContext(storyJson);
 
         // Prompt engineering – system instruction: ce vrei TU de la model
         var systemInstructionText = BuildSystemInstruction(languageCode, extraInstructions);
@@ -81,7 +83,7 @@ public class GoogleTextService : IGoogleTextService
                 }
             },
 
-            // Conținutul efectiv: îi dai JSON-ul poveștii
+            // Conținutul efectiv: îi dai doar ultimele 3 pagini + summary (optimizat)
             contents = new[]
             {
                 new
@@ -91,9 +93,9 @@ public class GoogleTextService : IGoogleTextService
                         new
                         {
                             text =
-                                "Here is the story definition as JSON:\n\n" +
-                                storyJson +
-                                "\n\n--- END OF STORY JSON ---\n\n" +
+                                "Here is the recent story context (last 3 pages + summary) as JSON:\n\n" +
+                                optimizedJson +
+                                "\n\n--- END OF STORY CONTEXT ---\n\n" +
                                 "Read the story so far and imagine the next page. " +
                                 "Now generate ONLY the text for the next page."
                         }
@@ -118,7 +120,7 @@ public class GoogleTextService : IGoogleTextService
         var json = JsonSerializer.Serialize(requestBody);
         using var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        using var request = new HttpRequestMessage(HttpMethod.Post, TextEndpoint)
+        using var request = new HttpRequestMessage(HttpMethod.Post, _textEndpoint)
         {
             Content = content
         };
@@ -149,6 +151,85 @@ public class GoogleTextService : IGoogleTextService
         {
             _logger.LogError(ex, "Error while generating next story page.");
             throw;
+        }
+    }
+
+    /// <summary>
+    /// Extracts only the last 3 pages + summary from the full story JSON to reduce token costs.
+    /// </summary>
+    private static string ExtractOptimizedStoryContext(string fullStoryJson)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(fullStoryJson);
+            var root = doc.RootElement;
+
+            // Extragem metadata esențială
+            var storyId = root.TryGetProperty("storyId", out var sid) ? sid.GetString() : null;
+            var title = root.TryGetProperty("title", out var t) ? t.GetString() : null;
+            var summary = root.TryGetProperty("summary", out var s) ? s.GetString() : null;
+
+            // Extragem tiles și filtrăm doar paginile (nu quiz-urile)
+            var allTiles = new List<JsonElement>();
+            if (root.TryGetProperty("tiles", out var tiles) && tiles.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var tile in tiles.EnumerateArray())
+                {
+                    // Luăm doar tile-urile de tip "page"
+                    if (tile.TryGetProperty("type", out var type) && 
+                        type.GetString()?.Equals("page", StringComparison.OrdinalIgnoreCase) == true)
+                    {
+                        allTiles.Add(tile);
+                    }
+                }
+            }
+
+            // Luăm ultimele 3 pagini
+            var last3Pages = allTiles
+                .OrderBy(t => t.TryGetProperty("sortOrder", out var so) ? so.GetInt32() : int.MaxValue)
+                .TakeLast(3)
+                .ToList();
+
+            // Construim JSON-ul optimizat
+            var optimized = new Dictionary<string, object?>();
+            if (!string.IsNullOrEmpty(storyId))
+                optimized["storyId"] = storyId;
+            if (!string.IsNullOrEmpty(title))
+                optimized["title"] = title;
+            if (!string.IsNullOrEmpty(summary))
+                optimized["summary"] = summary;
+
+            // Convertim ultimele 3 pagini în obiecte simple (doar câmpurile esențiale)
+            var optimizedTiles = new List<object>();
+            foreach (var tile in last3Pages)
+            {
+                var tileObj = new Dictionary<string, object?>();
+                if (tile.TryGetProperty("tileId", out var tid))
+                    tileObj["tileId"] = tid.GetString();
+                if (tile.TryGetProperty("type", out var ttype))
+                    tileObj["type"] = ttype.GetString();
+                if (tile.TryGetProperty("sortOrder", out var tso))
+                    tileObj["sortOrder"] = tso.GetInt32();
+                if (tile.TryGetProperty("caption", out var cap))
+                    tileObj["caption"] = cap.GetString();
+                if (tile.TryGetProperty("text", out var txt))
+                    tileObj["text"] = txt.GetString();
+                // Nu includem imageUrl, audioUrl etc. pentru a reduce tokenii
+
+                optimizedTiles.Add(tileObj);
+            }
+
+            optimized["tiles"] = optimizedTiles;
+
+            return JsonSerializer.Serialize(optimized, new JsonSerializerOptions
+            {
+                WriteIndented = false // Compact pentru a reduce tokenii
+            });
+        }
+        catch (Exception)
+        {
+            // Dacă parsing-ul eșuează, returnăm JSON-ul original (fallback)
+            return fullStoryJson;
         }
     }
 
