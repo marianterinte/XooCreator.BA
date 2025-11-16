@@ -86,6 +86,9 @@ public class Auth0UserService : IAuth0UserService
         // Admin has all permissions
         if (roles.Contains(UserRole.Admin)) return true;
 
+        // PremiumCreator has all Creator permissions plus premium features
+        if (roles.Contains(UserRole.PremiumCreator) && (role == UserRole.Creator || role == UserRole.PremiumCreator || role == UserRole.Reader)) return true;
+
         // Creator has Creator and Reader permissions
         if (roles.Contains(UserRole.Creator) && role <= UserRole.Creator) return true;
 

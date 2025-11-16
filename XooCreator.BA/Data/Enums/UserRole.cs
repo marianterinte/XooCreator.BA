@@ -23,6 +23,11 @@ public enum UserRole
     /// <summary>
     /// Admin - administrator with full system access
     /// </summary>
-    Admin = 2
+    Admin = 2,
+
+    /// <summary>
+    /// PremiumCreator - creator with premium features and extended permissions
+    /// </summary>
+    PremiumCreator = 4
 }
 
