@@ -57,11 +57,11 @@ public class XooDbContext : DbContext
     // Story Marketplace
     public DbSet<StoryPurchase> StoryPurchases => Set<StoryPurchase>();
     public DbSet<StoryReview> StoryReviews => Set<StoryReview>();
+    public DbSet<UserFavoriteStories> UserFavoriteStories => Set<UserFavoriteStories>();
     
     // User Story Relations
     public DbSet<UserOwnedStories> UserOwnedStories => Set<UserOwnedStories>();
     public DbSet<UserCreatedStories> UserCreatedStories => Set<UserCreatedStories>();
-    public DbSet<UserFavoriteStories> UserFavoriteStories => Set<UserFavoriteStories>();
     public DbSet<StoryCraft> StoryCrafts => Set<StoryCraft>();
     public DbSet<StoryCraftTranslation> StoryCraftTranslations => Set<StoryCraftTranslation>();
     public DbSet<StoryCraftTile> StoryCraftTiles => Set<StoryCraftTile>();
@@ -101,11 +101,7 @@ public class XooDbContext : DbContext
             e.Property(x => x.Roles)
                 .HasConversion(
                     v => v.Select(r => (int)r).ToArray(),
-                    v => v.Select(r => (UserRole)r).ToList(),
-                    new ValueComparer<List<UserRole>>(
-                        (c1, c2) => c1 != null && c2 != null && c1.SequenceEqual(c2),
-                        c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                        c => c.ToList()))
+                    v => v.Select(r => (UserRole)r).ToList())
                 .HasColumnType("integer[]");
             e.Property(x => x.Email).HasMaxLength(256).IsRequired();
             e.Property(x => x.Auth0Id).HasMaxLength(256).IsRequired();
@@ -530,6 +526,22 @@ public class XooDbContext : DbContext
             e.HasOne(x => x.Story).WithMany().HasForeignKey(x => x.StoryId).HasPrincipalKey(s => s.StoryId).OnDelete(DeleteBehavior.Cascade);
         });
 
+        modelBuilder.Entity<UserFavoriteStories>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.AddedAt).IsRequired();
+            e.HasIndex(x => new { x.UserId, x.StoryDefinitionId }).IsUnique();
+            e.HasOne(x => x.User)
+                .WithMany()
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.StoryDefinition)
+                .WithMany()
+                .HasForeignKey(x => x.StoryDefinitionId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
         // Removed StoryMarketplaceInfo entity mapping
 
         // User Owned Stories Configuration
@@ -555,16 +567,6 @@ public class XooDbContext : DbContext
             e.HasOne(x => x.StoryDefinition).WithMany().HasForeignKey(x => x.StoryDefinitionId).OnDelete(DeleteBehavior.Cascade);
         });
 
-        // User Favorite Stories Configuration
-        modelBuilder.Entity<UserFavoriteStories>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.HasIndex(x => new { x.UserId, x.StoryDefinitionId }).IsUnique();
-            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
-            e.HasOne(x => x.StoryDefinition).WithMany().HasForeignKey(x => x.StoryDefinitionId).OnDelete(DeleteBehavior.Cascade);
-        });
-
         // Story Feedback Configuration
         modelBuilder.Entity<StoryFeedback>(e =>
         {
@@ -574,28 +576,20 @@ public class XooDbContext : DbContext
             e.Property(x => x.Email).HasMaxLength(256).IsRequired();
             e.Property(x => x.FeedbackText).HasMaxLength(5000).IsRequired();
             // Configure lists as PostgreSQL JSON arrays
-            var listStringComparer = new ValueComparer<List<string>>(
-                (c1, c2) => c1 != null && c2 != null && c1.SequenceEqual(c2),
-                c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v != null ? v.GetHashCode() : 0)),
-                c => c.ToList());
-
             e.Property(x => x.WhatLiked)
                 .HasConversion(
                     v => System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions?)null),
-                    v => System.Text.Json.JsonSerializer.Deserialize<List<string>>(v, (System.Text.Json.JsonSerializerOptions?)null) ?? new List<string>(),
-                    listStringComparer)
+                    v => System.Text.Json.JsonSerializer.Deserialize<List<string>>(v, (System.Text.Json.JsonSerializerOptions?)null) ?? new List<string>())
                 .HasColumnType("jsonb");
             e.Property(x => x.WhatDisliked)
                 .HasConversion(
                     v => System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions?)null),
-                    v => System.Text.Json.JsonSerializer.Deserialize<List<string>>(v, (System.Text.Json.JsonSerializerOptions?)null) ?? new List<string>(),
-                    listStringComparer)
+                    v => System.Text.Json.JsonSerializer.Deserialize<List<string>>(v, (System.Text.Json.JsonSerializerOptions?)null) ?? new List<string>())
                 .HasColumnType("jsonb");
             e.Property(x => x.WhatCouldBeBetter)
                 .HasConversion(
                     v => System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions?)null),
-                    v => System.Text.Json.JsonSerializer.Deserialize<List<string>>(v, (System.Text.Json.JsonSerializerOptions?)null) ?? new List<string>(),
-                    listStringComparer)
+                    v => System.Text.Json.JsonSerializer.Deserialize<List<string>>(v, (System.Text.Json.JsonSerializerOptions?)null) ?? new List<string>())
                 .HasColumnType("jsonb");
             e.HasIndex(x => new { x.UserId, x.StoryId }).IsUnique(); // One feedback per user per story
             e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);

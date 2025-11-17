@@ -12,6 +12,7 @@ public interface IStoryReviewsRepository
     Task<StoryReviewDto?> GetUserReviewAsync(Guid userId, string storyId);
     Task<GetStoryReviewsResponse> GetStoryReviewsAsync(string storyId, Guid? currentUserId, GetStoryReviewsRequest request);
     Task<(double AverageRating, int TotalCount, Dictionary<int, int> RatingDistribution)> GetReviewStatisticsAsync(string storyId);
+    Task<(double AverageRating, int TotalCount, Dictionary<int, int> RatingDistribution)> GetGlobalReviewStatisticsAsync();
 }
 
 public class StoryReviewsRepository : IStoryReviewsRepository
@@ -186,6 +187,28 @@ public class StoryReviewsRepository : IStoryReviewsRepository
                 ratingDistribution[i] = 0;
         }
 
+        return (averageRating, totalCount, ratingDistribution);
+    }
+
+    public async Task<(double AverageRating, int TotalCount, Dictionary<int, int> RatingDistribution)> GetGlobalReviewStatisticsAsync()
+    {
+        var reviews = await _context.StoryReviews
+            .Where(r => r.IsActive)
+            .ToListAsync();
+
+        var totalCount = reviews.Count;
+
+        var ratingDistribution = reviews
+            .GroupBy(r => r.Rating)
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        for (int i = 1; i <= 5; i++)
+        {
+            if (!ratingDistribution.ContainsKey(i))
+                ratingDistribution[i] = 0;
+        }
+
+        var averageRating = totalCount == 0 ? 0 : reviews.Average(r => r.Rating);
         return (averageRating, totalCount, ratingDistribution);
     }
 

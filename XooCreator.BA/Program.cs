@@ -159,11 +159,11 @@ builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IGoogleFu
 // Story Marketplace Services
 builder.Services.AddScoped<XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories.IStoryReviewsRepository, XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories.StoryReviewsRepository>();
 builder.Services.AddScoped<XooCreator.BA.Features.TalesOfAlchimalia.Market.Services.IStoryReviewsService, XooCreator.BA.Features.TalesOfAlchimalia.Market.Services.StoryReviewsService>();
+builder.Services.AddScoped<XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories.IFavoritesRepository, XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories.FavoritesRepository>();
+builder.Services.AddScoped<XooCreator.BA.Features.TalesOfAlchimalia.Market.Services.IFavoritesService, XooCreator.BA.Features.TalesOfAlchimalia.Market.Services.FavoritesService>();
 builder.Services.AddScoped<StoryDetailsMapper>();
 builder.Services.AddScoped<IStoriesMarketplaceRepository, StoriesMarketplaceRepository>();
 builder.Services.AddScoped<IStoriesMarketplaceService, StoriesMarketplaceService>();
-builder.Services.AddScoped<XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories.IFavoritesRepository, XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories.FavoritesRepository>();
-builder.Services.AddScoped<XooCreator.BA.Features.TalesOfAlchimalia.Market.Services.IFavoritesService, XooCreator.BA.Features.TalesOfAlchimalia.Market.Services.FavoritesService>();
 
 // Payment services
 builder.Services.AddScoped<IPaymentService, PaymentService>();

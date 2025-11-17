@@ -10,6 +10,7 @@ public interface IStoriesRepository
     Task<StoryDefinition?> GetStoryDefinitionByIdAsync(string storyId);
     Task<List<UserStoryProgressDto>> GetUserStoryProgressAsync(Guid userId, string storyId);
     Task<bool> MarkTileAsReadAsync(Guid userId, string storyId, string tileId);
+    Task ResetStoryProgressAsync(Guid userId, string storyId);
     Task<bool> StoryIdExistsAsync(string storyId);
     Task SeedStoriesAsync();
     Task SeedIndependentStoriesAsync();

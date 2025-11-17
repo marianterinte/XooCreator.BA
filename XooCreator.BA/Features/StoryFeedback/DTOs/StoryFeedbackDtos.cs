@@ -4,6 +4,8 @@ public record SubmitStoryFeedbackRequest
 {
     public string StoryId { get; init; } = string.Empty;
     public string FeedbackText { get; init; } = string.Empty; // Free text feedback
+    public List<string> WhatLiked { get; init; } = new(); // What user liked (multiple choice)
+    public List<string> WhatDisliked { get; init; } = new(); // What user didn't like (multiple choice)
     public List<string> WhatCouldBeBetter { get; init; } = new(); // What could be improved (multiple choice)
 }
 
@@ -48,6 +50,8 @@ public record FeedbackDto
     public string UserEmail { get; init; } = string.Empty;
     public string StoryId { get; init; } = string.Empty;
     public string FeedbackText { get; init; } = string.Empty;
+    public List<string> WhatLiked { get; init; } = new();
+    public List<string> WhatDisliked { get; init; } = new();
     public List<string> WhatCouldBeBetter { get; init; } = new();
     public DateTime CreatedAt { get; init; }
 }

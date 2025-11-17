@@ -20,12 +20,16 @@ public class StoryDetailsMapper
     }
 
     public async Task<StoryDetailsDto> MapToStoryDetailsFromDefinitionAsync(
-        StoryDefinition def, 
-        string locale, 
-        bool isPurchased, 
-        bool isOwned, 
-        bool isCompleted, 
+        StoryDefinition def,
+        string locale,
+        bool isPurchased,
+        bool isOwned,
+        bool isCompleted,
         int progressPercentage,
+        int completedTiles,
+        int totalTiles,
+        string? lastReadTileId = null,
+        DateTime? lastReadAt = null,
         Guid? userId = null)
     {
         var translation = def.Translations?.FirstOrDefault(t => t.LanguageCode == locale);
@@ -77,6 +81,10 @@ public class StoryDetailsMapper
             IsOwned = isOwned,
             IsCompleted = isCompleted,
             ProgressPercentage = progressPercentage,
+            CompletedTiles = completedTiles,
+            TotalTiles = totalTiles,
+            LastReadTileId = lastReadTileId,
+            LastReadAt = lastReadAt,
             CreatedAt = def.CreatedAt,
             UnlockedStoryHeroes = new List<string>(),
             StoryTopic = def.StoryTopic,

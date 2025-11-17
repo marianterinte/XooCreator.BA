@@ -294,17 +294,42 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         var isOwned = isPurchased || ownedRow;
 
         // Get user's story progress
-        var storyProgress = await _context.UserStoryReadProgress
+        var progressEntries = await _context.UserStoryReadProgress
             .Where(usp => usp.UserId == userId && usp.StoryId == storyId)
-            .CountAsync();
+            .OrderBy(usp => usp.ReadAt)
+            .ToListAsync();
 
+        var completedTiles = progressEntries.Count;
         var totalTiles = def.Tiles.Count;
-        var progressPercentage = totalTiles > 0 ? (int)((double)storyProgress / totalTiles * 100) : 0;
-        var isCompleted = progressPercentage >= 100;
+        var progressPercentage = totalTiles > 0
+            ? (int)global::System.Math.Round((double)completedTiles / global::System.Math.Max(1, totalTiles) * 100)
+            : 0;
+        var lastRead = progressEntries.LastOrDefault();
+        var isCompleted = totalTiles > 0 && completedTiles >= totalTiles;
+        if (isCompleted && progressEntries.Count > 0)
+        {
+            _context.UserStoryReadProgress.RemoveRange(progressEntries);
+            await _context.SaveChangesAsync();
+
+            completedTiles = 0;
+            lastRead = null;
+            progressPercentage = 0;
+        }
 
         // Normalize locale to lowercase for mapping
         var normalizedLocale = (locale ?? "ro-ro").ToLowerInvariant();
-        return await _storyDetailsMapper.MapToStoryDetailsFromDefinitionAsync(def, normalizedLocale, isPurchased, isOwned, isCompleted, progressPercentage, userId);
+        return await _storyDetailsMapper.MapToStoryDetailsFromDefinitionAsync(
+            def,
+            normalizedLocale,
+            isPurchased,
+            isOwned,
+            isCompleted,
+            progressPercentage,
+            completedTiles,
+            totalTiles,
+            lastRead?.TileId,
+            lastRead?.ReadAt,
+            userId);
     }
 
     // Removed old MapToStoryDetailsDto using StoryMarketplaceInfo

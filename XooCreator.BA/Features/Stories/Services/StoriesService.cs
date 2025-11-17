@@ -12,6 +12,7 @@ public interface IStoriesService
     Task<GetStoriesResponse> GetAllStoriesAsync(string locale);
     Task<GetStoryByIdResponse> GetStoryByIdAsync(Guid userId, string storyId, string locale);
     Task<MarkTileAsReadResponse> MarkTileAsReadAsync(Guid userId, MarkTileAsReadRequest request);
+    Task<ResetStoryProgressResponse> ResetStoryProgressAsync(Guid userId, ResetStoryProgressRequest request);
     Task InitializeStoriesAsync();
     Task<EditableStoryDto?> GetStoryForEditAsync(string storyId, string locale);
 }
@@ -43,6 +44,12 @@ public class StoriesService : IStoriesService
             ? await _repository.GetUserStoryProgressAsync(userId, storyId)
             : new List<UserStoryProgressDto>();
 
+        if (story != null && story.Tiles?.Count > 0 && userProgress.Count >= story.Tiles.Count)
+        {
+            await _repository.ResetStoryProgressAsync(userId, storyId);
+            userProgress = new List<UserStoryProgressDto>();
+        }
+
         return new GetStoryByIdResponse
         {
             Story = story,
@@ -65,6 +72,26 @@ public class StoriesService : IStoriesService
         catch (Exception ex)
         {
             return new MarkTileAsReadResponse
+            {
+                Success = false,
+                ErrorMessage = ex.Message
+            };
+        }
+    }
+
+    public async Task<ResetStoryProgressResponse> ResetStoryProgressAsync(Guid userId, ResetStoryProgressRequest request)
+    {
+        try
+        {
+            await _repository.ResetStoryProgressAsync(userId, request.StoryId);
+            return new ResetStoryProgressResponse
+            {
+                Success = true
+            };
+        }
+        catch (Exception ex)
+        {
+            return new ResetStoryProgressResponse
             {
                 Success = false,
                 ErrorMessage = ex.Message

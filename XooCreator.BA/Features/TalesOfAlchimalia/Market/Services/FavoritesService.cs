@@ -38,18 +38,15 @@ public class FavoritesService : IFavoritesService
     public async Task<GetMarketplaceStoriesResponse> GetFavoriteStoriesAsync(Guid userId, string locale)
     {
         var stories = await _repository.GetFavoriteStoriesAsync(userId, locale);
-        
-        // Filter out purchased stories (as per requirement)
-        var unpurchasedStories = stories.Where(s => !s.IsOwned).ToList();
 
         return new GetMarketplaceStoriesResponse
         {
-            Stories = unpurchasedStories,
+            Stories = stories,
             FeaturedStories = new List<StoryMarketplaceItemDto>(),
             AvailableRegions = new List<string>(),
             AvailableAgeRatings = new List<string>(),
             AvailableCharacters = new List<string>(),
-            TotalCount = unpurchasedStories.Count,
+            TotalCount = stories.Count,
             HasMore = false
         };
     }

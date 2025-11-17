@@ -81,6 +81,7 @@ public class StoriesRepository : IStoriesRepository
         storyId = NormalizeStoryId(storyId);
         var progress = await _context.UserStoryReadProgress
             .Where(p => p.UserId == userId && p.StoryId == storyId)
+            .OrderBy(p => p.ReadAt)
             .ToListAsync();
 
         return progress.Select(p => new UserStoryProgressDto
@@ -119,6 +120,22 @@ public class StoriesRepository : IStoriesRepository
         {
             return false;
         }
+    }
+
+    public async Task ResetStoryProgressAsync(Guid userId, string storyId)
+    {
+        storyId = NormalizeStoryId(storyId);
+        var entries = await _context.UserStoryReadProgress
+            .Where(p => p.UserId == userId && p.StoryId == storyId)
+            .ToListAsync();
+
+        if (entries.Count == 0)
+        {
+            return;
+        }
+
+        _context.UserStoryReadProgress.RemoveRange(entries);
+        await _context.SaveChangesAsync();
     }
 
     public async Task SeedStoriesAsync()

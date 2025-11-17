@@ -1,8 +1,11 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using System.Threading;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure;
+using XooCreator.BA.Infrastructure.Services;
+using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.DTOs;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Services;
 
@@ -144,6 +147,37 @@ public class GetStoryReviewsEndpoint
         };
 
         var response = await ep._reviewsService.GetStoryReviewsAsync(storyId, userId, request);
+        return TypedResults.Ok(response);
+    }
+}
+
+[Endpoint]
+public class GetGlobalReviewStatisticsEndpoint
+{
+    private readonly IStoryReviewsService _reviewsService;
+    private readonly IAuth0UserService _auth0UserService;
+
+    public GetGlobalReviewStatisticsEndpoint(IStoryReviewsService reviewsService, IAuth0UserService auth0UserService)
+    {
+        _reviewsService = reviewsService;
+        _auth0UserService = auth0UserService;
+    }
+
+    [Route("/api/{locale}/tales-of-alchimalia/market/reviews/summary")]
+    [Authorize]
+    public static async Task<Results<Ok<GlobalReviewStatisticsResponse>, UnauthorizedHttpResult, ForbidHttpResult>> HandleGet(
+        [FromRoute] string locale,
+        [FromServices] GetGlobalReviewStatisticsEndpoint ep,
+        CancellationToken ct)
+    {
+        var user = await ep._auth0UserService.GetCurrentUserAsync(ct);
+        if (user == null)
+            return TypedResults.Unauthorized();
+
+        if (!ep._auth0UserService.HasRole(user, UserRole.Admin))
+            return TypedResults.Forbid();
+
+        var response = await ep._reviewsService.GetGlobalReviewStatisticsAsync();
         return TypedResults.Ok(response);
     }
 }

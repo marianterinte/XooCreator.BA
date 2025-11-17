@@ -32,7 +32,7 @@ public class StoryFeedbackRepository : IStoryFeedbackRepository
             .AnyAsync(p => p.UserId == userId && p.StoryId == storyId && p.PreferenceType == FeedbackPreferenceType.Later, ct);
     }
 
-    public async Task<StoryFeedbackEntity?> CreateFeedbackAsync(Guid userId, string storyId, string email, string feedbackText, List<string> whatCouldBeBetter, CancellationToken ct = default)
+    public async Task<StoryFeedbackEntity?> CreateFeedbackAsync(Guid userId, string storyId, string email, string feedbackText, List<string> whatLiked, List<string> whatDisliked, List<string> whatCouldBeBetter, CancellationToken ct = default)
     {
         // Check if feedback already exists
         var existing = await _db.StoryFeedbacks
@@ -48,8 +48,8 @@ public class StoryFeedbackRepository : IStoryFeedbackRepository
             StoryId = storyId,
             Email = email,
             FeedbackText = feedbackText,
-            WhatLiked = new List<string>(), // Keep for backward compatibility but not used
-            WhatDisliked = new List<string>(), // Keep for backward compatibility but not used
+            WhatLiked = whatLiked ?? new List<string>(),
+            WhatDisliked = whatDisliked ?? new List<string>(),
             WhatCouldBeBetter = whatCouldBeBetter ?? new List<string>(),
             CreatedAt = DateTime.UtcNow
         };

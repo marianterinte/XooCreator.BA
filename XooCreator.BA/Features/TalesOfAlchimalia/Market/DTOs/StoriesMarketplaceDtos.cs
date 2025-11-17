@@ -19,6 +19,10 @@ public record StoryDetailsDto
     public bool IsOwned { get; init; }
     public bool IsCompleted { get; init; }
     public int ProgressPercentage { get; init; }
+    public int CompletedTiles { get; init; }
+    public int TotalTiles { get; init; }
+    public string? LastReadTileId { get; init; }
+    public DateTime? LastReadAt { get; init; }
     public DateTime CreatedAt { get; init; }
     public List<string> UnlockedStoryHeroes { get; init; } = new();
     public string? StoryTopic { get; init; }
@@ -167,6 +171,15 @@ public record GetStoryReviewsResponse
     public bool HasMore { get; init; }
     public double AverageRating { get; init; }
     public Dictionary<int, int> RatingDistribution { get; init; } = new(); // Rating -> Count
+}
+
+public record GlobalReviewStatisticsResponse
+{
+    public bool Success { get; init; }
+    public string? ErrorMessage { get; init; }
+    public int TotalReviews { get; init; }
+    public double AverageRating { get; init; }
+    public Dictionary<int, int> RatingDistribution { get; init; } = new();
 }
 
 

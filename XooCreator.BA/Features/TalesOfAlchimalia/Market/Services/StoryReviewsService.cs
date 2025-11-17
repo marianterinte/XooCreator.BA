@@ -9,6 +9,7 @@ public interface IStoryReviewsService
     Task<UpdateStoryReviewResponse> UpdateReviewAsync(Guid userId, UpdateStoryReviewRequest request);
     Task<DeleteStoryReviewResponse> DeleteReviewAsync(Guid userId, Guid reviewId);
     Task<GetStoryReviewsResponse> GetStoryReviewsAsync(string storyId, Guid? currentUserId, GetStoryReviewsRequest request);
+    Task<GlobalReviewStatisticsResponse> GetGlobalReviewStatisticsAsync();
 }
 
 public class StoryReviewsService : IStoryReviewsService
@@ -168,6 +169,30 @@ public class StoryReviewsService : IStoryReviewsService
                 PageSize = request.PageSize,
                 HasMore = false,
                 AverageRating = 0,
+                RatingDistribution = new Dictionary<int, int>()
+            };
+        }
+    }
+
+    public async Task<GlobalReviewStatisticsResponse> GetGlobalReviewStatisticsAsync()
+    {
+        try
+        {
+            var stats = await _repository.GetGlobalReviewStatisticsAsync();
+            return new GlobalReviewStatisticsResponse
+            {
+                Success = true,
+                TotalReviews = stats.TotalCount,
+                AverageRating = stats.AverageRating,
+                RatingDistribution = stats.RatingDistribution
+            };
+        }
+        catch (Exception ex)
+        {
+            return new GlobalReviewStatisticsResponse
+            {
+                Success = false,
+                ErrorMessage = "An error occurred while loading review statistics",
                 RatingDistribution = new Dictionary<int, int>()
             };
         }

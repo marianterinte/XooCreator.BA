@@ -74,3 +74,14 @@ public record MarkTileAsReadResponse
     public string? ErrorMessage { get; init; }
 }
 
+public record ResetStoryProgressRequest
+{
+    public required string StoryId { get; init; }
+}
+
+public record ResetStoryProgressResponse
+{
+    public bool Success { get; init; }
+    public string? ErrorMessage { get; init; }
+}
+
