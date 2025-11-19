@@ -20,13 +20,20 @@ public class ExportPublishedStoryEndpoint
     private readonly IAuth0UserService _auth0;
     private readonly IUserContextService _userContext;
     private readonly IBlobSasService _sas;
+    private readonly ILogger<ExportPublishedStoryEndpoint> _logger;
 
-    public ExportPublishedStoryEndpoint(XooDbContext db, IAuth0UserService auth0, IUserContextService userContext, IBlobSasService sas)
+    public ExportPublishedStoryEndpoint(
+        XooDbContext db, 
+        IAuth0UserService auth0, 
+        IUserContextService userContext, 
+        IBlobSasService sas,
+        ILogger<ExportPublishedStoryEndpoint> logger)
     {
         _db = db;
         _auth0 = auth0;
         _userContext = userContext;
         _sas = sas;
+        _logger = logger;
     }
 
     [Route("/api/{locale}/stories/{storyId}/export")]
@@ -40,8 +47,11 @@ public class ExportPublishedStoryEndpoint
         var user = await ep._auth0.GetCurrentUserAsync(ct);
         if (user == null) return TypedResults.Unauthorized();
 
-        // Admin only export (backup/seeding)
-        if (!ep._auth0.HasRole(user, Data.Enums.UserRole.Admin))
+        // Allow Creator (owner) or Admin to export
+        var isAdmin = ep._auth0.HasRole(user, Data.Enums.UserRole.Admin);
+        var isCreator = ep._auth0.HasRole(user, Data.Enums.UserRole.Creator);
+        
+        if (!isAdmin && !isCreator)
         {
             return TypedResults.Forbid();
         }
@@ -52,6 +62,16 @@ public class ExportPublishedStoryEndpoint
             .Include(d => d.Translations)
             .FirstOrDefaultAsync(d => d.StoryId == storyId, ct);
         if (def == null) return TypedResults.NotFound();
+
+        // If not Admin, verify ownership
+        if (!isAdmin)
+        {
+            if (!def.CreatedBy.HasValue || def.CreatedBy.Value != user.Id)
+            {
+                ep._logger.LogWarning("Export forbidden: userId={UserId} storyId={StoryId} not owner", user.Id, storyId);
+                return TypedResults.Forbid();
+            }
+        }
 
         var exportObj = BuildExportJson(def);
         var exportJson = JsonSerializer.Serialize(exportObj, new JsonSerializerOptions { WriteIndented = true });
