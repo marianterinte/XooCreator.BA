@@ -1,0 +1,90 @@
+name: Deploy XooCreator.BA Dev to Azure Web App
+
+on:
+  push:
+    branches: [ "DEV" ]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  WORKING_DIRECTORY: 'XooCreator.BA'
+  PUBLISH_DIR: './publish'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore
+        run: dotnet restore XooCreator.BA.csproj
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+      - name: Build
+        run: dotnet build XooCreator.BA.csproj --configuration Release --no-restore
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+      - name: Publish
+        run: dotnet publish XooCreator.BA.csproj --configuration Release --no-build --output ${{ env.PUBLISH_DIR }}
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+      - name: Verify Stories folder in publish output
+        run: |
+          echo "Checking if Stories folder exists in publish output..."
+          ls -la ${{ env.WORKING_DIRECTORY }}/${{ env.PUBLISH_DIR }}/Data/SeedData/ || true
+          if [ -d "${{ env.WORKING_DIRECTORY }}/${{ env.PUBLISH_DIR }}/Data/SeedData/Stories" ]; then
+            echo "✓ Stories folder found in publish output"
+            ls -la ${{ env.WORKING_DIRECTORY }}/${{ env.PUBLISH_DIR }}/Data/SeedData/Stories/ || true
+          else
+            echo "⚠️ Stories folder not found in publish output"
+          fi
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID_DEV }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID_DEV }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_DEV }}
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET_DEV }}
+
+      - name: Set Azure App Settings (DATABASE_URL, ASPNETCORE_ENVIRONMENT)
+        run: |
+          if [ -n "${{ secrets.AZURE_RESOURCE_GROUP_DEV }}" ]; then
+            echo "Using provided dev resource group: ${{ secrets.AZURE_RESOURCE_GROUP_DEV }}"
+            az webapp config appsettings set \
+              --resource-group ${{ secrets.AZURE_RESOURCE_GROUP_DEV }} \
+              --name ${{ secrets.AZURE_WEBAPP_NAME_DEV }} \
+              --settings \
+                ASPNETCORE_ENVIRONMENT=Development \
+                DATABASE_URL="${{ secrets.SUPABASE_DB_URL_DEV }}"
+          else
+            echo "Auto-discovering dev resource group..."
+            RG=$(az webapp show --name ${{ secrets.AZURE_WEBAPP_NAME_DEV }} --query resourceGroup -o tsv)
+            echo "Found resource group: $RG"
+            az webapp config appsettings set \
+              --resource-group "$RG" \
+              --name ${{ secrets.AZURE_WEBAPP_NAME_DEV }} \
+              --settings \
+                ASPNETCORE_ENVIRONMENT=Development \
+                DATABASE_URL="${{ secrets.SUPABASE_DB_URL_DEV }}"
+          fi
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ secrets.AZURE_WEBAPP_NAME_DEV }}
+          package: ${{ env.WORKING_DIRECTORY }}/${{ env.PUBLISH_DIR }}
+
+      - name: Debug Azure account
+        run: az account show
+
