@@ -1,11 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.RegularExpressions;
 using XooCreator.BA.Infrastructure.Endpoints;
-using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Services;
-using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Data;
 using XooCreator.BA.Features.StoryEditor.Services;
 using Microsoft.Extensions.Logging;
@@ -29,18 +26,20 @@ public record CreateStoryResponse
 [Endpoint]
 public class CreateStoryEndpoint
 {
-    private readonly IStoryCraftsRepository _crafts;
     private readonly IStoryEditorService _editorService;
-    private readonly IUserContextService _userContext;
     private readonly IAuth0UserService _auth0;
     private readonly ILogger<CreateStoryEndpoint> _logger;
+    private readonly IStoryIdGenerator _storyIdGenerator;
 
-    public CreateStoryEndpoint(IStoryCraftsRepository crafts, IStoryEditorService editorService, IUserContextService userContext, IAuth0UserService auth0, ILogger<CreateStoryEndpoint> logger)
+    public CreateStoryEndpoint(
+        IStoryEditorService editorService,
+        IAuth0UserService auth0,
+        IStoryIdGenerator storyIdGenerator,
+        ILogger<CreateStoryEndpoint> logger)
     {
-        _crafts = crafts;
         _editorService = editorService;
-        _userContext = userContext;
         _auth0 = auth0;
+        _storyIdGenerator = storyIdGenerator;
         _logger = logger;
     }
 
@@ -73,9 +72,7 @@ public class CreateStoryEndpoint
         string storyId = (req.StoryId ?? string.Empty).Trim();
         if (string.IsNullOrWhiteSpace(storyId))
         {
-            // Generate storyId: email-s1, email-s2, etc.
-            var storyCount = await ep._crafts.CountDistinctStoryIdsByOwnerAsync(user.Id, ct);
-            storyId = $"{user.Email}-s{storyCount + 1}";
+            storyId = await ep._storyIdGenerator.GenerateNextAsync(user.Id, user.Email, ct);
             ep._logger.LogInformation("Generated storyId: {StoryId} for userId={UserId}", storyId, user.Id);
         }
 
