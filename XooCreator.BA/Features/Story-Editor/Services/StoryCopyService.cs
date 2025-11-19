@@ -1,5 +1,3 @@
-using System.IO;
-using System.Linq;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.Enums;
@@ -13,13 +11,15 @@ public interface IStoryCopyService
         StoryCraft sourceCraft,
         Guid ownerUserId,
         string newStoryId,
-        CancellationToken ct);
+        CancellationToken ct,
+        bool isCopy = false);
 
     Task<StoryCraft> CreateCopyFromDefinitionAsync(
         StoryDefinition definition,
         Guid ownerUserId,
         string newStoryId,
-        CancellationToken ct);
+        CancellationToken ct,
+        bool isCopy = false);
 }
 
 /// <summary>
@@ -42,19 +42,21 @@ public class StoryCopyService : IStoryCopyService
         StoryCraft sourceCraft,
         Guid ownerUserId,
         string newStoryId,
-        CancellationToken ct)
+        CancellationToken ct,
+        bool isCopy = false)
     {
         ArgumentNullException.ThrowIfNull(sourceCraft);
         ValidateInputs(ownerUserId, newStoryId);
 
-        var craft = CloneCraftFromCraft(sourceCraft, ownerUserId, newStoryId);
+        var craft = CloneCraftFromCraft(sourceCraft, ownerUserId, newStoryId, isCopy);
         await _craftsRepository.SaveAsync(craft, ct);
 
         _logger.LogInformation(
-            "Story copied from draft: sourceStoryId={SourceStoryId} -> newStoryId={NewStoryId} owner={OwnerId}",
+            "Story copied from draft: sourceStoryId={SourceStoryId} -> newStoryId={NewStoryId} owner={OwnerId} isCopy={IsCopy}",
             sourceCraft.StoryId,
             newStoryId,
-            ownerUserId);
+            ownerUserId,
+            isCopy);
 
         return craft;
     }
@@ -63,30 +65,32 @@ public class StoryCopyService : IStoryCopyService
         StoryDefinition definition,
         Guid ownerUserId,
         string newStoryId,
-        CancellationToken ct)
+        CancellationToken ct,
+        bool isCopy = false)
     {
         ArgumentNullException.ThrowIfNull(definition);
         ValidateInputs(ownerUserId, newStoryId);
 
-        var craft = CloneCraftFromDefinition(definition, ownerUserId, newStoryId);
+        var craft = CloneCraftFromDefinition(definition, ownerUserId, newStoryId, isCopy);
         await _craftsRepository.SaveAsync(craft, ct);
 
         _logger.LogInformation(
-            "Story copied from published definition: sourceStoryId={SourceStoryId} -> newStoryId={NewStoryId} owner={OwnerId}",
+            "Story copied from published definition: sourceStoryId={SourceStoryId} -> newStoryId={NewStoryId} owner={OwnerId} isCopy={IsCopy}",
             definition.StoryId,
             newStoryId,
-            ownerUserId);
+            ownerUserId,
+            isCopy);
 
         return craft;
     }
 
-    private static StoryCraft CloneCraftFromCraft(StoryCraft source, Guid ownerUserId, string newStoryId)
+    private static StoryCraft CloneCraftFromCraft(StoryCraft source, Guid ownerUserId, string newStoryId, bool isCopy = false)
     {
         var craft = CreateBaseCraft(ownerUserId, newStoryId, source.StoryType, source.StoryTopic, source.CoverImageUrl);
         craft.PriceInCredits = source.PriceInCredits;
         craft.BaseVersion = source.BaseVersion;
 
-        CopyCraftTranslations(source, craft);
+        CopyCraftTranslations(source, craft, isCopy);
         CopyCraftTiles(source, craft);
         CopyCraftTopics(source, craft);
         CopyCraftAgeGroups(source, craft);
@@ -94,13 +98,13 @@ public class StoryCopyService : IStoryCopyService
         return craft;
     }
 
-    private static StoryCraft CloneCraftFromDefinition(StoryDefinition definition, Guid ownerUserId, string newStoryId)
+    private static StoryCraft CloneCraftFromDefinition(StoryDefinition definition, Guid ownerUserId, string newStoryId, bool isCopy = false)
     {
         var craft = CreateBaseCraft(ownerUserId, newStoryId, definition.StoryType, definition.StoryTopic, ExtractFileName(definition.CoverImageUrl));
         craft.PriceInCredits = definition.PriceInCredits;
         craft.BaseVersion = definition.Version;
 
-        CopyDefinitionTranslations(definition, craft);
+        CopyDefinitionTranslations(definition, craft, isCopy);
         CopyDefinitionTiles(definition, craft);
         CopyDefinitionTopics(definition, craft);
         CopyDefinitionAgeGroups(definition, craft);
@@ -123,14 +127,21 @@ public class StoryCopyService : IStoryCopyService
         };
     }
 
-    private static void CopyCraftTranslations(StoryCraft source, StoryCraft target)
+    private static void CopyCraftTranslations(StoryCraft source, StoryCraft target, bool isCopy = false)
     {
         foreach (var translation in source.Translations)
         {
+            var title = translation.Title;
+            // For copy operations, prefix title with "Copy of "
+            if (isCopy && !string.IsNullOrWhiteSpace(title) && !title.StartsWith("Copy of ", StringComparison.OrdinalIgnoreCase))
+            {
+                title = $"Copy of {title}";
+            }
+            
             target.Translations.Add(new StoryCraftTranslation
             {
                 LanguageCode = translation.LanguageCode,
-                Title = translation.Title,
+                Title = title,
                 Summary = translation.Summary
             });
         }
@@ -221,14 +232,21 @@ public class StoryCopyService : IStoryCopyService
         }
     }
 
-    private static void CopyDefinitionTranslations(StoryDefinition definition, StoryCraft target)
+    private static void CopyDefinitionTranslations(StoryDefinition definition, StoryCraft target, bool isCopy = false)
     {
         foreach (var defTr in definition.Translations)
         {
+            var title = defTr.Title;
+            // For copy operations, prefix title with "Copy of "
+            if (isCopy && !string.IsNullOrWhiteSpace(title) && !title.StartsWith("Copy of ", StringComparison.OrdinalIgnoreCase))
+            {
+                title = $"Copy of {title}";
+            }
+            
             target.Translations.Add(new StoryCraftTranslation
             {
                 LanguageCode = defTr.LanguageCode,
-                Title = defTr.Title,
+                Title = title,
                 Summary = definition.Summary
             });
         }

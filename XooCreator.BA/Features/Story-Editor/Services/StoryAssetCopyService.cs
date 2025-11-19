@@ -3,6 +3,7 @@ using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Features.StoryEditor.Mappers;
 using XooCreator.BA.Features.StoryEditor.Models;
 using XooCreator.BA.Infrastructure.Services.Blob;
+using Azure.Storage.Blobs.Models;
 
 namespace XooCreator.BA.Features.StoryEditor.Services;
 
@@ -112,7 +113,7 @@ public class StoryAssetCopyService : IStoryAssetCopyService
         return results;
     }
 
-    public Task<AssetCopyResult> CopyDraftToDraftAsync(
+    public async Task<AssetCopyResult> CopyDraftToDraftAsync(
         IEnumerable<StoryAssetPathMapper.AssetInfo> assets,
         string sourceEmail,
         string sourceStoryId,
@@ -121,18 +122,51 @@ public class StoryAssetCopyService : IStoryAssetCopyService
         CancellationToken ct)
     {
         _logger.LogInformation(
-            "Draft → Draft asset copy scheduled: source={SourceEmail}/{SourceStoryId} target={TargetEmail}/{TargetStoryId} assets={Count}",
+            "Draft → Draft asset copy started: source={SourceEmail}/{SourceStoryId} target={TargetEmail}/{TargetStoryId} assets={Count}",
             sourceEmail,
             sourceStoryId,
             targetEmail,
             targetStoryId,
             assets.Count());
 
-        // Implementation will be added in a follow-up step (placeholder).
-        return Task.FromResult(AssetCopyResult.Success());
+        foreach (var asset in assets)
+        {
+            var sourcePath = StoryAssetPathMapper.BuildDraftPath(asset, sourceEmail, sourceStoryId);
+            var sourceClient = _sasService.GetBlobClient(_sasService.DraftContainer, sourcePath);
+
+            if (!await sourceClient.ExistsAsync(ct))
+            {
+                _logger.LogWarning(
+                    "Source asset not found in draft: source={SourceEmail}/{SourceStoryId} filename={Filename} path={Path}",
+                    sourceEmail, sourceStoryId, asset.Filename, sourcePath);
+                continue;
+            }
+
+            var targetPath = StoryAssetPathMapper.BuildDraftPath(asset, targetEmail, targetStoryId);
+            var copyResult = await CopyAssetWithPollingAsync(
+                sourcePath,
+                targetPath,
+                asset,
+                targetEmail,
+                targetStoryId,
+                _sasService.DraftContainer,
+                _sasService.DraftContainer,
+                ct);
+
+            if (copyResult.HasError)
+            {
+                return copyResult;
+            }
+        }
+
+        _logger.LogInformation(
+            "Draft → Draft asset copy completed: source={SourceEmail}/{SourceStoryId} target={TargetEmail}/{TargetStoryId}",
+            sourceEmail, sourceStoryId, targetEmail, targetStoryId);
+
+        return AssetCopyResult.Success();
     }
 
-    public Task<AssetCopyResult> CopyPublishedToDraftAsync(
+    public async Task<AssetCopyResult> CopyPublishedToDraftAsync(
         IEnumerable<StoryAssetPathMapper.AssetInfo> assets,
         string publishedOwnerEmail,
         string sourceStoryId,
@@ -141,15 +175,114 @@ public class StoryAssetCopyService : IStoryAssetCopyService
         CancellationToken ct)
     {
         _logger.LogInformation(
-            "Published → Draft asset copy scheduled: publishedOwner={OwnerEmail} source={SourceStoryId} target={TargetEmail}/{TargetStoryId} assets={Count}",
+            "Published → Draft asset copy started: publishedOwner={OwnerEmail} source={SourceStoryId} target={TargetEmail}/{TargetStoryId} assets={Count}",
             publishedOwnerEmail,
             sourceStoryId,
             targetEmail,
             targetStoryId,
             assets.Count());
 
-        // Implementation will be added in a follow-up step (placeholder).
-        return Task.FromResult(AssetCopyResult.Success());
+        foreach (var asset in assets)
+        {
+            var sourcePath = StoryAssetPathMapper.BuildPublishedPath(asset, publishedOwnerEmail, sourceStoryId);
+            var sourceClient = _sasService.GetBlobClient(_sasService.PublishedContainer, sourcePath);
+
+            if (!await sourceClient.ExistsAsync(ct))
+            {
+                _logger.LogWarning(
+                    "Source asset not found in published: owner={OwnerEmail} storyId={StoryId} filename={Filename} path={Path}",
+                    publishedOwnerEmail, sourceStoryId, asset.Filename, sourcePath);
+                continue;
+            }
+
+            var targetPath = StoryAssetPathMapper.BuildDraftPath(asset, targetEmail, targetStoryId);
+            var copyResult = await CopyAssetWithPollingAsync(
+                sourcePath,
+                targetPath,
+                asset,
+                targetEmail,
+                targetStoryId,
+                _sasService.PublishedContainer,
+                _sasService.DraftContainer,
+                ct);
+
+            if (copyResult.HasError)
+            {
+                return copyResult;
+            }
+        }
+
+        _logger.LogInformation(
+            "Published → Draft asset copy completed: owner={OwnerEmail} source={SourceStoryId} target={TargetEmail}/{TargetStoryId}",
+            publishedOwnerEmail, sourceStoryId, targetEmail, targetStoryId);
+
+        return AssetCopyResult.Success();
+    }
+
+    private async Task<AssetCopyResult> CopyAssetWithPollingAsync(
+        string sourceBlobPath,
+        string targetBlobPath,
+        StoryAssetPathMapper.AssetInfo asset,
+        string targetEmail,
+        string targetStoryId,
+        string sourceContainer,
+        string targetContainer,
+        CancellationToken ct)
+    {
+        try
+        {
+            var sourceSas = await _sasService.GetReadSasAsync(sourceContainer, sourceBlobPath, TimeSpan.FromMinutes(10), ct);
+            var targetClient = _sasService.GetBlobClient(targetContainer, targetBlobPath);
+            var pollUntil = DateTime.UtcNow.AddSeconds(30);
+
+            _logger.LogDebug(
+                "Starting asset copy: storyId={StoryId} filename={Filename} source={SourcePath} target={TargetPath}",
+                targetStoryId, asset.Filename, sourceBlobPath, targetBlobPath);
+
+            var copyOperation = await targetClient.StartCopyFromUriAsync(sourceSas, cancellationToken: ct);
+
+            while (true)
+            {
+                var props = await targetClient.GetPropertiesAsync(cancellationToken: ct);
+                var copyStatus = props.Value.CopyStatus;
+
+                if (copyStatus == CopyStatus.Success)
+                {
+                    _logger.LogDebug(
+                        "Asset copy succeeded: storyId={StoryId} filename={Filename}",
+                        targetStoryId, asset.Filename);
+                    break;
+                }
+
+                if (copyStatus == CopyStatus.Failed || copyStatus == CopyStatus.Aborted)
+                {
+                    var errorDetails = $"CopyStatus: {copyStatus}";
+                    _logger.LogError(
+                        "Asset copy failed: storyId={StoryId} filename={Filename} status={Status} source={SourcePath} target={TargetPath}",
+                        targetStoryId, asset.Filename, copyStatus, sourceBlobPath, targetBlobPath);
+                    return AssetCopyResult.CopyFailed(asset.Filename, targetStoryId, errorDetails);
+                }
+
+                if (DateTime.UtcNow > pollUntil)
+                {
+                    _logger.LogError(
+                        "Asset copy timeout: storyId={StoryId} filename={Filename} source={SourcePath} target={TargetPath}",
+                        targetStoryId, asset.Filename, sourceBlobPath, targetBlobPath);
+                    return AssetCopyResult.CopyTimeout(asset.Filename, targetStoryId);
+                }
+
+                await Task.Delay(250, ct);
+            }
+
+            return AssetCopyResult.Success();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                "Exception during asset copy: storyId={StoryId} filename={Filename} source={SourcePath}",
+                targetStoryId, asset.Filename, sourceBlobPath);
+            return AssetCopyResult.CopyFailed(asset.Filename, targetStoryId, ex.Message);
+        }
     }
 }
 

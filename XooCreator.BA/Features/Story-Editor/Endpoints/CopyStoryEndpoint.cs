@@ -96,13 +96,14 @@ public class CopyStoryEndpoint
         var newStoryId = await ep._storyIdGenerator.GenerateNextAsync(currentUser.Id, currentUser.Email, ct);
         StoryCraft newCraft;
 
+        // For copy operations, set isCopy=true to prefix title with "Copy of "
         if (craft != null)
         {
-            newCraft = await ep._storyCopyService.CreateCopyFromCraftAsync(craft, currentUser.Id, newStoryId, ct);
+            newCraft = await ep._storyCopyService.CreateCopyFromCraftAsync(craft, currentUser.Id, newStoryId, ct, isCopy: true);
         }
         else
         {
-            newCraft = await ep._storyCopyService.CreateCopyFromDefinitionAsync(definition!, currentUser.Id, newStoryId, ct);
+            newCraft = await ep._storyCopyService.CreateCopyFromDefinitionAsync(definition!, currentUser.Id, newStoryId, ct, isCopy: true);
         }
 
         ep._logger.LogInformation(
