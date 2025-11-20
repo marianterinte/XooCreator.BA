@@ -88,6 +88,10 @@ public class UnpublishStoryEndpoint
 
         var ownerUserId = storyOwner?.UserId ?? def.CreatedBy;
         var ownerEmail = storyOwner?.User?.Email;
+        if (string.IsNullOrWhiteSpace(ownerEmail))
+        {
+            ownerEmail = ep.TryExtractOwnerEmail(def);
+        }
 
         var isAdmin = ep._auth0.HasRole(user, UserRole.Admin);
         if (!isAdmin)
@@ -113,11 +117,6 @@ public class UnpublishStoryEndpoint
         if (lastPublishAudit != null && DateTime.UtcNow - lastPublishAudit.CreatedAt < MinPublishAge)
         {
             return TypedResults.Conflict("Story was recently published. Please wait at least 2 minutes before unpublishing.");
-        }
-
-        if (string.IsNullOrWhiteSpace(ownerEmail))
-        {
-            ownerEmail = ep.TryExtractOwnerEmail(def) ?? user.Email;
         }
 
         using var tx = await ep._db.Database.BeginTransactionAsync(ct);
