@@ -153,6 +153,8 @@ builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IStoryPub
 builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IStoryIdGenerator, XooCreator.BA.Features.StoryEditor.Services.StoryIdGenerator>();
 builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IStoryAssetCopyService, XooCreator.BA.Features.StoryEditor.Services.StoryAssetCopyService>();
 builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IStoryCopyService, XooCreator.BA.Features.StoryEditor.Services.StoryCopyService>();
+builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IStoryDraftAssetCleanupService, XooCreator.BA.Features.StoryEditor.Services.StoryDraftAssetCleanupService>();
+builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IStoryPublishedAssetCleanupService, XooCreator.BA.Features.StoryEditor.Services.StoryPublishedAssetCleanupService>();
 builder.Services.AddHttpClient(); // For GoogleTtsService, GoogleTextService and GoogleImageService
 builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IGoogleAudioGeneratorService, XooCreator.BA.Features.StoryEditor.Services.GoogleAudioGeneratorService>();
 builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IGoogleTextService, XooCreator.BA.Features.StoryEditor.Services.GoogleTextService>();
@@ -248,7 +250,7 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var recreate = builder.Configuration.GetValue<bool>("Database:RecreateOnStart");
-        recreate = false; // Force recreation every time during development
+        recreate = true; // Force recreation every time during development
 
         if (recreate)
         {

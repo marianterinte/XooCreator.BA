@@ -11,5 +11,6 @@ public interface IBlobSasService
     Task<Uri> GetPutSasAsync(string container, string blobPath, string contentType, TimeSpan ttl, CancellationToken ct = default);
     Task<Uri> GetReadSasAsync(string container, string blobPath, TimeSpan ttl, CancellationToken ct = default);
     BlobClient GetBlobClient(string container, string blobPath);
+    BlobContainerClient GetContainerClient(string container);
 }
 

@@ -229,12 +229,24 @@ public class StoryCraftsRepository : IStoryCraftsRepository
     public async Task DeleteAsync(string storyId, CancellationToken ct = default)
     {
         var id = (storyId ?? string.Empty).Trim();
-        var craft = await _context.StoryCrafts.FirstOrDefaultAsync(x => x.StoryId == id, ct);
-        if (craft != null)
+        if (string.IsNullOrEmpty(id)) return;
+
+        var craft = await _context.StoryCrafts
+            .Include(c => c.Translations)
+            .Include(c => c.Tiles).ThenInclude(t => t.Translations)
+            .Include(c => c.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Translations)
+            .Include(c => c.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Tokens)
+            .Include(c => c.Topics)
+            .Include(c => c.AgeGroups)
+            .FirstOrDefaultAsync(x => x.StoryId == id, ct);
+
+        if (craft == null)
         {
-            _context.StoryCrafts.Remove(craft);
-            await _context.SaveChangesAsync(ct);
+            return;
         }
+
+        _context.StoryCrafts.Remove(craft);
+        await _context.SaveChangesAsync(ct);
     }
 
     public async Task<List<string>> GetAvailableLanguagesAsync(string storyId, CancellationToken ct = default)

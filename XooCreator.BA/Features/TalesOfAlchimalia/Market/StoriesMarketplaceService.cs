@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
+using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.DTOs;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories;
 
@@ -12,6 +13,12 @@ public interface IStoriesMarketplaceService
     Task<GetUserPurchasedStoriesResponse> GetUserPurchasedStoriesAsync(Guid userId, string locale);
     Task<StoryDetailsDto?> GetStoryDetailsAsync(string storyId, Guid userId, string locale);
     Task InitializeMarketplaceAsync(); // Keep for Program.cs startup
+    Task EnsureStoryReaderAsync(Guid userId, string storyId, StoryAcquisitionSource source);
+    Task<int> GetStoryReadersCountAsync(string storyId);
+    Task<List<StoryReadersAggregate>> GetTopStoriesByReadersAsync(int limit);
+    Task<List<StoryReadersTrendPoint>> GetReadersTrendAsync(int days);
+    Task<List<StoryReadersCorrelationItem>> GetReadersVsReviewsAsync(int limit);
+    Task<int> GetTotalReadersAsync();
 }
 
 public class StoriesMarketplaceService : IStoriesMarketplaceService
@@ -111,6 +118,8 @@ public class StoriesMarketplaceService : IStoriesMarketplaceService
                 };
             }
 
+            await _repository.EnsureStoryReaderAsync(userId, request.StoryId, StoryAcquisitionSource.Purchase);
+
             // Get updated credit balance
             var updatedWallet = await _context.CreditWallets.FirstOrDefaultAsync(w => w.UserId == userId);
             var remainingCredits = updatedWallet?.DiscoveryBalance ?? 0;
@@ -180,4 +189,22 @@ public class StoriesMarketplaceService : IStoriesMarketplaceService
             throw;
         }
     }
+
+    public Task EnsureStoryReaderAsync(Guid userId, string storyId, StoryAcquisitionSource source) =>
+        _repository.EnsureStoryReaderAsync(userId, storyId, source);
+
+    public Task<int> GetStoryReadersCountAsync(string storyId) =>
+        _repository.GetStoryReadersCountAsync(storyId);
+
+    public Task<List<StoryReadersAggregate>> GetTopStoriesByReadersAsync(int limit) =>
+        _repository.GetTopStoriesByReadersAsync(limit);
+
+    public Task<List<StoryReadersTrendPoint>> GetReadersTrendAsync(int days) =>
+        _repository.GetReadersTrendAsync(days);
+
+    public Task<List<StoryReadersCorrelationItem>> GetReadersVsReviewsAsync(int limit) =>
+        _repository.GetReadersVsReviewsAsync(limit);
+
+    public Task<int> GetTotalReadersAsync() =>
+        _repository.GetTotalReadersAsync();
 }

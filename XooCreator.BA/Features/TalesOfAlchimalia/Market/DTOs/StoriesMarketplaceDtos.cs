@@ -37,6 +37,7 @@ public record StoryDetailsDto
     public double AverageRating { get; init; }
     public int TotalReviews { get; init; }
     public StoryReviewDto? UserReview { get; init; } // Current user's review if exists
+    public int ReadersCount { get; init; }
 }
 
 public record StoryMarketplaceItemDto
@@ -57,6 +58,9 @@ public record StoryMarketplaceItemDto
     public List<string> AvailableLanguages { get; init; } = new(); // e.g., ["ro-ro", "en-us", "hu-hu"]
     public bool IsPurchased { get; init; } = false;
     public bool IsOwned { get; init; } = false;
+    public int ReadersCount { get; init; }
+    public double AverageRating { get; init; }
+    public int TotalReviews { get; init; }
 }
 
 public record PurchaseStoryRequest
@@ -181,5 +185,21 @@ public record GlobalReviewStatisticsResponse
     public double AverageRating { get; init; }
     public Dictionary<int, int> RatingDistribution { get; init; } = new();
 }
+
+public record ReadersSummaryResponse
+{
+    public bool Success { get; init; }
+    public string? ErrorMessage { get; init; }
+    public int TotalReaders { get; init; }
+    public List<ReadersLeaderboardItem> TopStories { get; init; } = new();
+    public List<ReadersTrendPointDto> Trend { get; init; } = new();
+    public List<ReadersCorrelationItemDto> RatingCorrelation { get; init; } = new();
+}
+
+public record ReadersLeaderboardItem(string StoryId, string Title, int ReadersCount, double AverageRating);
+
+public record ReadersTrendPointDto(string Date, int ReadersCount);
+
+public record ReadersCorrelationItemDto(string StoryId, string Title, int ReadersCount, int ReviewsCount, double AverageRating);
 
 

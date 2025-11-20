@@ -32,6 +32,9 @@ public class BlobSasService : IBlobSasService
         return containerClient.GetBlobClient(blobPath);
     }
 
+    public BlobContainerClient GetContainerClient(string container)
+        => _blobServiceClient.GetBlobContainerClient(container);
+
     public async Task<Uri> GetPutSasAsync(string container, string blobPath, string contentType, TimeSpan ttl, CancellationToken ct = default)
     {
         // Ensure container exists (no-op if it does)

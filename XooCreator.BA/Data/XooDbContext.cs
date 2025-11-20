@@ -58,10 +58,12 @@ public class XooDbContext : DbContext
     public DbSet<StoryPurchase> StoryPurchases => Set<StoryPurchase>();
     public DbSet<StoryReview> StoryReviews => Set<StoryReview>();
     public DbSet<UserFavoriteStories> UserFavoriteStories => Set<UserFavoriteStories>();
+    public DbSet<StoryReader> StoryReaders => Set<StoryReader>();
     
     // User Story Relations
     public DbSet<UserOwnedStories> UserOwnedStories => Set<UserOwnedStories>();
     public DbSet<UserCreatedStories> UserCreatedStories => Set<UserCreatedStories>();
+    public DbSet<StoryPublicationAudit> StoryPublicationAudits => Set<StoryPublicationAudit>();
     public DbSet<StoryCraft> StoryCrafts => Set<StoryCraft>();
     public DbSet<StoryCraftTranslation> StoryCraftTranslations => Set<StoryCraftTranslation>();
     public DbSet<StoryCraftTile> StoryCraftTiles => Set<StoryCraftTile>();
@@ -347,6 +349,21 @@ public class XooDbContext : DbContext
         {
             e.HasKey(x => x.Id);
             e.Property(x => x.Name).IsRequired();
+        });
+
+        modelBuilder.Entity<StoryReader>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.StoryId).HasMaxLength(100).IsRequired();
+            e.Property(x => x.AcquiredAt).IsRequired();
+            e.Property(x => x.AcquisitionSource).HasConversion<int>();
+            e.HasIndex(x => x.StoryId);
+            e.HasIndex(x => new { x.UserId, x.StoryId }).IsUnique();
+            e.HasOne(x => x.User)
+                .WithMany()
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<StoryDefinition>(e =>
@@ -757,6 +774,22 @@ public class XooDbContext : DbContext
             e.HasKey(x => new { x.StoryDefinitionId, x.StoryAgeGroupId });
             e.HasOne(x => x.StoryDefinition).WithMany(x => x.AgeGroups).HasForeignKey(x => x.StoryDefinitionId);
             e.HasOne(x => x.StoryAgeGroup).WithMany(x => x.StoryDefinitions).HasForeignKey(x => x.StoryAgeGroupId);
+        });
+
+        modelBuilder.Entity<StoryPublicationAudit>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.StoryId).HasMaxLength(200).IsRequired();
+            e.Property(x => x.PerformedByEmail).HasMaxLength(256).IsRequired();
+            e.Property(x => x.Action).IsRequired();
+            e.Property(x => x.Notes).HasMaxLength(2000);
+            e.HasIndex(x => x.StoryId);
+            e.HasIndex(x => x.StoryDefinitionId);
+            e.HasOne(x => x.StoryDefinition)
+                .WithMany()
+                .HasForeignKey(x => x.StoryDefinitionId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 
