@@ -56,7 +56,9 @@ public class StoryPublishingService : IStoryPublishingService
                 IsActive = true,
                 SortOrder = 0,
                 Version = 1,
-                PriceInCredits = craft.PriceInCredits
+                PriceInCredits = craft.PriceInCredits,
+                CreatedBy = craft.OwnerUserId,
+                UpdatedBy = craft.OwnerUserId
             };
             _db.StoryDefinitions.Add(def);
         }
@@ -69,7 +71,13 @@ public class StoryPublishingService : IStoryPublishingService
         def.StoryType = craft.StoryType;
         def.PriceInCredits = craft.PriceInCredits;
         def.Status = StoryStatus.Published;
+        def.IsActive = true;
         def.UpdatedAt = DateTime.UtcNow;
+        def.UpdatedBy = craft.OwnerUserId;
+        if (!def.CreatedBy.HasValue)
+        {
+            def.CreatedBy = craft.OwnerUserId;
+        }
         // Version bump for existing definitions
         if (!isNew)
         {
@@ -244,8 +252,51 @@ public class StoryPublishingService : IStoryPublishingService
             });
         }
 
+        await UpsertUserCreatedStoryAsync(def, craft.OwnerUserId, ct);
+        LogPublication(def, craft.OwnerUserId, ownerEmail, StoryPublicationAction.Publish, null);
         await _db.SaveChangesAsync(ct);
         return def.Version;
+    }
+
+    private async Task UpsertUserCreatedStoryAsync(StoryDefinition def, Guid ownerUserId, CancellationToken ct)
+    {
+        var userStory = await _db.UserCreatedStories
+            .FirstOrDefaultAsync(x => x.StoryDefinitionId == def.Id, ct);
+
+        if (userStory == null)
+        {
+            userStory = new UserCreatedStories
+            {
+                Id = Guid.NewGuid(),
+                StoryDefinitionId = def.Id,
+                UserId = ownerUserId,
+                CreatedAt = DateTime.UtcNow
+            };
+            _db.UserCreatedStories.Add(userStory);
+        }
+
+        userStory.IsPublished = true;
+        userStory.PublishedAt = DateTime.UtcNow;
+    }
+
+    private void LogPublication(
+        StoryDefinition def,
+        Guid performedByUserId,
+        string performedByEmail,
+        StoryPublicationAction action,
+        string? notes)
+    {
+        _db.StoryPublicationAudits.Add(new StoryPublicationAudit
+        {
+            Id = Guid.NewGuid(),
+            StoryDefinitionId = def.Id,
+            StoryId = def.StoryId,
+            PerformedByUserId = performedByUserId,
+            PerformedByEmail = performedByEmail,
+            Action = action,
+            Notes = notes,
+            CreatedAt = DateTime.UtcNow
+        });
     }
 }
 

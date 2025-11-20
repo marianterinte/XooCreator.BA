@@ -38,7 +38,7 @@ public class GetUserCreatedStoriesEndpoint
         var publishedStories = await ep._context.UserCreatedStories
             .Include(ucs => ucs.StoryDefinition)
             .ThenInclude(sd => sd.Translations.Where(t => t.LanguageCode == locale))
-            .Where(ucs => ucs.UserId == userId)
+            .Where(ucs => ucs.UserId == userId && ucs.IsPublished && ucs.StoryDefinition.IsActive)
             .Select(ucs => new CreatedStoryDto
             {
                 Id = ucs.StoryDefinition.Id,

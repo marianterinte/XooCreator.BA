@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Features.StoryEditor.Repositories;
+using XooCreator.BA.Features.StoryEditor.Services;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
@@ -20,16 +21,18 @@ public partial class PublishStoryEndpoint
     private readonly IUserContextService _userContext;
     private readonly IAuth0UserService _auth0;
     private readonly ILogger<PublishStoryEndpoint> _logger;
-    private readonly XooCreator.BA.Features.StoryEditor.Services.IStoryPublishingService _publisher;
-    private readonly XooCreator.BA.Features.StoryEditor.Services.IStoryPublishAssetService _assetService;
+    private readonly IStoryPublishingService _publisher;
+    private readonly IStoryPublishAssetService _assetService;
+    private readonly IStoryDraftAssetCleanupService _cleanupService;
 
     public PublishStoryEndpoint(
         IStoryCraftsRepository crafts, 
         IUserContextService userContext, 
         IAuth0UserService auth0, 
         ILogger<PublishStoryEndpoint> logger, 
-        XooCreator.BA.Features.StoryEditor.Services.IStoryPublishingService publisher,
-        XooCreator.BA.Features.StoryEditor.Services.IStoryPublishAssetService assetService)
+        IStoryPublishingService publisher,
+        IStoryPublishAssetService assetService,
+        IStoryDraftAssetCleanupService cleanupService)
     {
         _crafts = crafts;
         _userContext = userContext;
@@ -37,6 +40,7 @@ public partial class PublishStoryEndpoint
         _logger = logger;
         _publisher = publisher;
         _assetService = assetService;
+        _cleanupService = cleanupService;
     }
 
     [Route("/api/stories/{storyId}/publish")]
@@ -120,10 +124,15 @@ public partial class PublishStoryEndpoint
         CancellationToken ct)
     {
         var newVersion = await _publisher.UpsertFromCraftAsync(craft, userEmail, langTag, ct);
-        craft.Status = StoryStatus.Published.ToDb();
-        craft.BaseVersion = newVersion;
-        await _crafts.SaveAsync(craft, ct);
-        _logger.LogInformation("Published story: storyId={StoryId} assets={Count}", storyId, assetsCount);
+
+        await _cleanupService.DeleteDraftAssetsAsync(userEmail, storyId, ct);
+        await _crafts.DeleteAsync(storyId, ct);
+
+        _logger.LogInformation(
+            "Published story: storyId={StoryId} version={Version} assets={Count} draftDeleted=true",
+            storyId,
+            newVersion,
+            assetsCount);
     }
 }
 
