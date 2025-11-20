@@ -399,7 +399,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             {
                 StoryId = g.Key,
                 ReadersCount = g.Count(),
-                LastAcquiredAt = g.Max(x => x.AcquiredAt)
+                LastAcquiredAt = g.Max(x => (DateTime?)x.AcquiredAt) ?? DateTime.MinValue
             })
             .OrderByDescending(x => x.ReadersCount)
             .ThenByDescending(x => x.LastAcquiredAt)
@@ -447,40 +447,64 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
     {
         limit = limit <= 0 ? 10 : limit;
 
-        var readersQuery = _context.StoryReaders
+        // Materialize readers aggregation
+        var readersData = await _context.StoryReaders
             .GroupBy(sr => sr.StoryId)
             .Select(g => new
             {
                 StoryId = g.Key,
                 ReadersCount = g.Count(),
-                LastAcquiredAt = g.Max(x => x.AcquiredAt)
-            });
+                LastAcquiredAt = g.Max(x => (DateTime?)x.AcquiredAt) ?? DateTime.MinValue
+            })
+            .OrderByDescending(x => x.ReadersCount)
+            .ThenByDescending(x => x.LastAcquiredAt)
+            .Take(limit)
+            .ToListAsync();
 
-        var reviewQuery = _context.StoryReviews
+        if (readersData.Count == 0)
+        {
+            return new List<StoryReadersCorrelationItem>();
+        }
+
+        var storyIds = readersData.Select(r => r.StoryId).ToList();
+
+        // Materialize reviews aggregation
+        var reviewsData = await _context.StoryReviews
+            .Where(r => storyIds.Contains(r.StoryId))
             .GroupBy(r => r.StoryId)
             .Select(g => new
             {
                 StoryId = g.Key,
                 ReviewsCount = g.Count(),
-                AverageRating = g.Average(r => (double)r.Rating)
-            });
-
-        var query =
-            from readers in readersQuery
-            join story in _context.StoryDefinitions on readers.StoryId equals story.StoryId
-            join review in reviewQuery on readers.StoryId equals review.StoryId into reviewGroup
-            from review in reviewGroup.DefaultIfEmpty()
-            orderby readers.ReadersCount descending, readers.LastAcquiredAt descending
-            select new StoryReadersCorrelationItem(
-                readers.StoryId,
-                story.Title,
-                readers.ReadersCount,
-                review != null ? review.ReviewsCount : 0,
-                review != null ? Math.Round(review.AverageRating, 2) : 0);
-
-        return await query
-            .Take(limit)
+                AverageRating = g.Count() > 0 ? (double?)g.Average(r => (double)r.Rating) : null
+            })
             .ToListAsync();
+
+        // Get story titles
+        var storyTitles = await _context.StoryDefinitions
+            .Where(sd => storyIds.Contains(sd.StoryId))
+            .Select(sd => new { sd.StoryId, sd.Title })
+            .ToListAsync();
+
+        // Build dictionaries for lookups
+        var titleMap = storyTitles.ToDictionary(s => s.StoryId, s => s.Title ?? s.StoryId);
+        var reviewMap = reviewsData.ToDictionary(r => r.StoryId, r => new { r.ReviewsCount, r.AverageRating });
+
+        // Build result in memory
+        return readersData
+            .Select(reader =>
+            {
+                titleMap.TryGetValue(reader.StoryId, out var title);
+                reviewMap.TryGetValue(reader.StoryId, out var review);
+
+                return new StoryReadersCorrelationItem(
+                    reader.StoryId,
+                    title ?? reader.StoryId,
+                    reader.ReadersCount,
+                    review != null ? review.ReviewsCount : 0,
+                    review != null && review.AverageRating.HasValue ? Math.Round(review.AverageRating.Value, 2) : 0.0);
+            })
+            .ToList();
     }
 
     public Task<int> GetTotalReadersAsync()

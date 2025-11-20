@@ -46,34 +46,58 @@ public class GetReadersSummaryEndpoint
             return TypedResults.Forbid();
         }
 
-        var totalReaders = await ep._marketplaceService.GetTotalReadersAsync();
-        var leaderboard = await ep.BuildLeaderboardAsync(ct);
-        var trendPoints = await ep._marketplaceService.GetReadersTrendAsync(7);
-        var trend = trendPoints
-            .Select(tp => new ReadersTrendPointDto(tp.Date.ToString("yyyy-MM-dd"), tp.ReadersCount))
-            .ToList();
-
-        var correlationRaw = await ep._marketplaceService.GetReadersVsReviewsAsync(10);
-        var correlation = correlationRaw
-            .Select(item => new ReadersCorrelationItemDto(
-                item.StoryId,
-                item.Title,
-                item.ReadersCount,
-                item.ReviewsCount,
-                item.AverageRating))
-            .ToList();
-
-        var response = new ReadersSummaryResponse
+        try
         {
-            Success = true,
-            ErrorMessage = null,
-            TotalReaders = totalReaders,
-            TopStories = leaderboard,
-            Trend = trend,
-            RatingCorrelation = correlation
-        };
+            var totalReaders = await ep._marketplaceService.GetTotalReadersAsync();
+            var leaderboard = await ep.BuildLeaderboardAsync(ct);
+            var trendPoints = await ep._marketplaceService.GetReadersTrendAsync(7);
+            var trend = trendPoints
+                .Select(tp => new ReadersTrendPointDto(tp.Date.ToString("yyyy-MM-dd"), tp.ReadersCount))
+                .ToList();
 
-        return TypedResults.Ok(response);
+            var correlationRaw = await ep._marketplaceService.GetReadersVsReviewsAsync(10);
+            var correlation = correlationRaw
+                .Select(item => new ReadersCorrelationItemDto(
+                    item.StoryId,
+                    item.Title,
+                    item.ReadersCount,
+                    item.ReviewsCount,
+                    item.AverageRating))
+                .ToList();
+
+            var response = new ReadersSummaryResponse
+            {
+                Success = true,
+                ErrorMessage = null,
+                TotalReaders = totalReaders,
+                TopStories = leaderboard,
+                Trend = trend,
+                RatingCorrelation = correlation
+            };
+
+            return TypedResults.Ok(response);
+        }
+        catch (Exception ex)
+        {
+            var errorDetails = $"Exception: {ex.GetType().Name}\n" +
+                              $"Message: {ex.Message}\n" +
+                              $"StackTrace: {ex.StackTrace}\n" +
+                              (ex.InnerException != null ? $"InnerException: {ex.InnerException.GetType().Name} - {ex.InnerException.Message}\n" : "");
+
+            Console.WriteLine($"ERROR in GetReadersSummaryEndpoint: {errorDetails}");
+
+            var errorResponse = new ReadersSummaryResponse
+            {
+                Success = false,
+                ErrorMessage = errorDetails,
+                TotalReaders = 0,
+                TopStories = new List<ReadersLeaderboardItem>(),
+                Trend = new List<ReadersTrendPointDto>(),
+                RatingCorrelation = new List<ReadersCorrelationItemDto>()
+            };
+
+            return TypedResults.Ok(errorResponse);
+        }
     }
 
     private async Task<List<ReadersLeaderboardItem>> BuildLeaderboardAsync(CancellationToken ct)
@@ -94,11 +118,11 @@ public class GetReadersSummaryEndpoint
         var ratings = await _context.StoryReviews
             .Where(r => storyIds.Contains(r.StoryId))
             .GroupBy(r => r.StoryId)
-            .Select(g => new { StoryId = g.Key, Average = g.Average(r => (double)r.Rating) })
+            .Select(g => new { StoryId = g.Key, Average = g.Count() > 0 ? (double?)g.Average(r => (double)r.Rating) : null })
             .ToListAsync(ct);
 
-        var storyMap = stories.ToDictionary(s => s.StoryId, s => s.Title);
-        var ratingMap = ratings.ToDictionary(r => r.StoryId, r => Math.Round(r.Average, 2));
+        var storyMap = stories.ToDictionary(s => s.StoryId, s => s.Title ?? s.StoryId);
+        var ratingMap = ratings.ToDictionary(r => r.StoryId, r => r.Average.HasValue ? Math.Round(r.Average.Value, 2) : 0.0);
 
         return aggregates
             .Select(a =>
