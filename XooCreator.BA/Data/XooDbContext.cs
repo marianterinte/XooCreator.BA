@@ -58,6 +58,7 @@ public class XooDbContext : DbContext
     public DbSet<StoryPurchase> StoryPurchases => Set<StoryPurchase>();
     public DbSet<StoryReview> StoryReviews => Set<StoryReview>();
     public DbSet<UserFavoriteStories> UserFavoriteStories => Set<UserFavoriteStories>();
+    public DbSet<StoryReader> StoryReaders => Set<StoryReader>();
     
     // User Story Relations
     public DbSet<UserOwnedStories> UserOwnedStories => Set<UserOwnedStories>();
@@ -348,6 +349,21 @@ public class XooDbContext : DbContext
         {
             e.HasKey(x => x.Id);
             e.Property(x => x.Name).IsRequired();
+        });
+
+        modelBuilder.Entity<StoryReader>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.StoryId).HasMaxLength(100).IsRequired();
+            e.Property(x => x.AcquiredAt).IsRequired();
+            e.Property(x => x.AcquisitionSource).HasConversion<int>();
+            e.HasIndex(x => x.StoryId);
+            e.HasIndex(x => new { x.UserId, x.StoryId }).IsUnique();
+            e.HasOne(x => x.User)
+                .WithMany()
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<StoryDefinition>(e =>

@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Data;
+using XooCreator.BA.Data.Enums;
+using XooCreator.BA.Features.TalesOfAlchimalia.Market.Services;
 
 namespace XooCreator.BA.Features.TalesOfAlchimalia.Market.Endpoints;
 
@@ -13,11 +15,16 @@ public class AcquireFreeStoryEndpoint
 {
     private readonly XooDbContext _context;
     private readonly IUserContextService _userContext;
+    private readonly IStoriesMarketplaceService _marketplaceService;
 
-    public AcquireFreeStoryEndpoint(XooDbContext context, IUserContextService userContext)
+    public AcquireFreeStoryEndpoint(
+        XooDbContext context,
+        IUserContextService userContext,
+        IStoriesMarketplaceService marketplaceService)
     {
         _context = context;
         _userContext = userContext;
+        _marketplaceService = marketplaceService;
     }
 
     public record GetFreeStoryResponse(bool Success, string? ErrorMessage);
@@ -63,6 +70,11 @@ public class AcquireFreeStoryEndpoint
             PurchaseReference = "FREE_GET"
         });
         await ep._context.SaveChangesAsync();
+
+        await ep._marketplaceService.EnsureStoryReaderAsync(
+            userId.Value,
+            finalStoryId,
+            StoryAcquisitionSource.FreeClaim);
 
         return TypedResults.Ok(new GetFreeStoryResponse(true, null));
     }

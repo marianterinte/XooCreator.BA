@@ -30,7 +30,8 @@ public class StoryDetailsMapper
         int totalTiles,
         string? lastReadTileId = null,
         DateTime? lastReadAt = null,
-        Guid? userId = null)
+        Guid? userId = null,
+        int readersCount = 0)
     {
         var translation = def.Translations?.FirstOrDefault(t => t.LanguageCode == locale);
         var title = translation?.Title ?? def.Title;
@@ -97,7 +98,8 @@ public class StoryDetailsMapper
             AvailableLanguages = def.Translations?.Select(t => t.LanguageCode).OrderBy(l => l).ToList() ?? new List<string>(),
             AverageRating = averageRating,
             TotalReviews = totalReviews,
-            UserReview = userReview
+            UserReview = userReview,
+            ReadersCount = readersCount
         };
     }
 
