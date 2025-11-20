@@ -132,8 +132,17 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             .Take(request.PageSize)
             .ToListAsync();
 
-        // Map from StoryDefinition directly
-        return await MapToMarketplaceListAsync(stories, normalizedLocale, userId);
+        var dtoList = await MapToMarketplaceListAsync(stories, normalizedLocale, userId);
+
+        if (string.Equals(request.SortBy, "readers", StringComparison.OrdinalIgnoreCase))
+        {
+            var ordered = string.Equals(request.SortOrder, "asc", StringComparison.OrdinalIgnoreCase)
+                ? dtoList.OrderBy(d => d.ReadersCount)
+                : dtoList.OrderByDescending(d => d.ReadersCount);
+            dtoList = ordered.ToList();
+        }
+
+        return dtoList;
     }
 
     private IQueryable<StoryDefinition> ApplySorting(IQueryable<StoryDefinition> query, SearchStoriesRequest request)
@@ -146,9 +155,6 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             "title" => sortOrderDesc ? query.OrderByDescending(s => s.Title) : query.OrderBy(s => s.Title),
             "date" => sortOrderDesc ? query.OrderByDescending(s => s.CreatedAt) : query.OrderBy(s => s.CreatedAt),
             "price" => sortOrderDesc ? query.OrderByDescending(s => s.PriceInCredits) : query.OrderBy(s => s.PriceInCredits),
-            "readers" => sortOrderDesc
-                ? query.OrderByDescending(s => _context.StoryReaders.Count(sr => sr.StoryId == s.StoryId))
-                : query.OrderBy(s => _context.StoryReaders.Count(sr => sr.StoryId == s.StoryId)),
             _ => sortOrderDesc ? query.OrderByDescending(s => s.SortOrder) : query.OrderBy(s => s.SortOrder)
         };
     }
@@ -387,16 +393,22 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
     {
         limit = limit <= 0 ? 10 : limit;
 
-        return await _context.StoryReaders
+        var raw = await _context.StoryReaders
             .GroupBy(sr => sr.StoryId)
-            .Select(g => new StoryReadersAggregate(
-                g.Key,
-                g.Count(),
-                g.Max(x => x.AcquiredAt)))
+            .Select(g => new
+            {
+                StoryId = g.Key,
+                ReadersCount = g.Count(),
+                LastAcquiredAt = g.Max(x => x.AcquiredAt)
+            })
             .OrderByDescending(x => x.ReadersCount)
             .ThenByDescending(x => x.LastAcquiredAt)
             .Take(limit)
             .ToListAsync();
+
+        return raw
+            .Select(x => new StoryReadersAggregate(x.StoryId, x.ReadersCount, x.LastAcquiredAt))
+            .ToList();
     }
 
     public async Task<List<StoryReadersTrendPoint>> GetReadersTrendAsync(int days)
@@ -475,13 +487,6 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
     {
         return _context.StoryReaders.CountAsync();
     }
-
-    public Task<int> GetTotalReadersAsync()
-    {
-        return _context.StoryReaders.CountAsync();
-    }
-
-    // Removed old MapToStoryDetailsDto using StoryMarketplaceInfo
 
     private string? GetSummaryFromJson(string storyId, string locale)
     {
