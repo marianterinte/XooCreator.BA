@@ -12,7 +12,7 @@ public static class SeedUserHelper
 {
     public const string SeedUserEmail = "seed@alchimalia.com";
     public const string SeedUserAuth0Id = "seed|seed@alchimalia.com"; // Special Auth0Id format for seed user
-    public const string SeedUserName = "Alchimalia Seed";
+    public const string SeedUserName = "Alchimalia";
     
     /// <summary>
     /// Gets or creates the seed user in the database.
@@ -54,7 +54,7 @@ public static class SeedUserHelper
                 Email = SeedUserEmail,
                 Name = SeedUserName,
                 FirstName = "Alchimalia",
-                LastName = "Seed",
+                LastName = "",
                 Role = UserRole.Admin, // Seed user should have Admin role for system stories
                 Roles = new List<UserRole> { UserRole.Admin, UserRole.Creator }, // Multiple roles
                 CreatedAt = DateTime.UtcNow,
