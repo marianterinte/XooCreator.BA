@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using XooCreator.BA.Features.StoryEditor.Services;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
@@ -11,11 +12,19 @@ namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 public class GenerateAudioEndpoint
 {
     private readonly IGoogleAudioGeneratorService _googleTts;
+    private readonly IOpenAIAudioGeneratorService _openAITts;
+    private readonly IConfiguration _configuration;
     private readonly IAuth0UserService _auth0;
 
-    public GenerateAudioEndpoint(IGoogleAudioGeneratorService googleTts, IAuth0UserService auth0)
+    public GenerateAudioEndpoint(
+        IGoogleAudioGeneratorService googleTts,
+        IOpenAIAudioGeneratorService openAITts,
+        IConfiguration configuration,
+        IAuth0UserService auth0)
     {
         _googleTts = googleTts;
+        _openAITts = openAITts;
+        _configuration = configuration;
         _auth0 = auth0;
     }
 
@@ -23,7 +32,8 @@ public class GenerateAudioEndpoint
         string Text,
         string TileId,
         string LanguageCode,
-        string? VoiceName = null
+        string? VoiceName = null,
+        string? Provider = null  // Optional: "Google" or "OpenAI"
     );
 
     public record GenerateAudioResponse(
@@ -62,13 +72,38 @@ public class GenerateAudioEndpoint
             return TypedResults.BadRequest("LanguageCode is required");
         }
 
+        // Determine provider: from request, or from config, or default to OpenAI
+        var provider = request.Provider?.ToLowerInvariant() 
+            ?? ep._configuration["AIGeneration:Provider"]?.ToLowerInvariant() 
+            ?? "openai";
+
+        if (provider != "google" && provider != "openai")
+        {
+            return TypedResults.BadRequest("Provider must be either 'Google' or 'OpenAI'");
+        }
+
         try
         {
-            var (audioData, format) = await ep._googleTts.GenerateAudioAsync(
-                request.Text,
-                request.LanguageCode,
-                request.VoiceName,
-                ct);
+            (byte[] audioData, string format) result;
+            
+            if (provider == "openai")
+            {
+                result = await ep._openAITts.GenerateAudioAsync(
+                    request.Text,
+                    request.LanguageCode,
+                    request.VoiceName,
+                    ct);
+            }
+            else
+            {
+                result = await ep._googleTts.GenerateAudioAsync(
+                    request.Text,
+                    request.LanguageCode,
+                    request.VoiceName,
+                    ct);
+            }
+
+            var (audioData, format) = result;
 
             var base64Audio = Convert.ToBase64String(audioData);
             var previewUrl = $"data:audio/{format};base64,{base64Audio}";

@@ -161,6 +161,12 @@ builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IGoogleTe
 builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IGoogleImageService, XooCreator.BA.Features.StoryEditor.Services.GoogleImageService>();
 builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IGoogleFullStoryService, XooCreator.BA.Features.StoryEditor.Services.GoogleFullStoryService>();
 
+// OpenAI Services
+builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IOpenAIAudioGeneratorService, XooCreator.BA.Features.StoryEditor.Services.OpenAIAudioGeneratorService>();
+builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IOpenAITextService, XooCreator.BA.Features.StoryEditor.Services.OpenAITextService>();
+builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IOpenAIImageService, XooCreator.BA.Features.StoryEditor.Services.OpenAIImageService>();
+builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IOpenAIFullStoryService, XooCreator.BA.Features.StoryEditor.Services.OpenAIFullStoryService>();
+
 // Story Marketplace Services
 builder.Services.AddScoped<XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories.IStoryReviewsRepository, XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories.StoryReviewsRepository>();
 builder.Services.AddScoped<XooCreator.BA.Features.TalesOfAlchimalia.Market.Services.IStoryReviewsService, XooCreator.BA.Features.TalesOfAlchimalia.Market.Services.StoryReviewsService>();

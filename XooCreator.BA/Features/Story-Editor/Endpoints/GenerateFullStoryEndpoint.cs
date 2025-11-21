@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using XooCreator.BA.Features.StoryEditor.Services;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
@@ -11,14 +12,20 @@ namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 [Endpoint]
 public class GenerateFullStoryEndpoint
 {
-    private readonly IGoogleFullStoryService _fullStoryService;
+    private readonly IGoogleFullStoryService _googleFullStoryService;
+    private readonly IOpenAIFullStoryService _openAIFullStoryService;
+    private readonly IConfiguration _configuration;
     private readonly IAuth0UserService _auth0;
 
     public GenerateFullStoryEndpoint(
-        IGoogleFullStoryService fullStoryService,
+        IGoogleFullStoryService googleFullStoryService,
+        IOpenAIFullStoryService openAIFullStoryService,
+        IConfiguration configuration,
         IAuth0UserService auth0)
     {
-        _fullStoryService = fullStoryService;
+        _googleFullStoryService = googleFullStoryService;
+        _openAIFullStoryService = openAIFullStoryService;
+        _configuration = configuration;
         _auth0 = auth0;
     }
 
@@ -31,7 +38,8 @@ public class GenerateFullStoryEndpoint
         int NumberOfPages = 5,
         string? StoryInstructions = null,
         bool GenerateImages = false,
-        bool GenerateAudio = false
+        bool GenerateAudio = false,
+        string? Provider = null
     );
 
     public record GeneratedPageDto(
@@ -93,19 +101,48 @@ public class GenerateFullStoryEndpoint
             return TypedResults.BadRequest("StoryInstructions must not exceed 3000 characters");
         }
 
+        // Determine provider: from request, or from config, or default to Google
+        var provider = request.Provider?.ToLowerInvariant() 
+            ?? ep._configuration["AIGeneration:Provider"]?.ToLowerInvariant() 
+            ?? "google";
+
+        if (provider != "google" && provider != "openai")
+        {
+            return TypedResults.BadRequest("Provider must be either 'Google' or 'OpenAI'");
+        }
+
         try
         {
-            var generatedPages = await ep._fullStoryService.GenerateFullStoryAsync(
-                request.Title,
-                request.Summary,
-                request.LanguageCode,
-                request.AgeGroupIds,
-                request.TopicIds,
-                request.NumberOfPages,
-                request.StoryInstructions,
-                request.GenerateImages,
-                request.GenerateAudio,
-                ct);
+            List<GeneratedStoryPage> generatedPages;
+            
+            if (provider == "openai")
+            {
+                generatedPages = await ep._openAIFullStoryService.GenerateFullStoryAsync(
+                    request.Title,
+                    request.Summary,
+                    request.LanguageCode,
+                    request.AgeGroupIds,
+                    request.TopicIds,
+                    request.NumberOfPages,
+                    request.StoryInstructions,
+                    request.GenerateImages,
+                    request.GenerateAudio,
+                    ct);
+            }
+            else
+            {
+                generatedPages = await ep._googleFullStoryService.GenerateFullStoryAsync(
+                    request.Title,
+                    request.Summary,
+                    request.LanguageCode,
+                    request.AgeGroupIds,
+                    request.TopicIds,
+                    request.NumberOfPages,
+                    request.StoryInstructions,
+                    request.GenerateImages,
+                    request.GenerateAudio,
+                    ct);
+            }
 
             // Convert to DTO with base64 images and audio
             var pageDtos = generatedPages.Select(page => new GeneratedPageDto(
