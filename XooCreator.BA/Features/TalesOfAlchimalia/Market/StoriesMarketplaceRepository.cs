@@ -318,10 +318,15 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         var isOwned = isPurchased || ownedRow;
 
         // Get user's story progress
-        var progressEntries = await _context.UserStoryReadProgress
-            .Where(usp => usp.UserId == userId && usp.StoryId == storyId)
+        // Use case-insensitive comparison to ensure we get the correct progress
+        var allProgress = await _context.UserStoryReadProgress
+            .Where(usp => usp.UserId == userId)
             .OrderBy(usp => usp.ReadAt)
             .ToListAsync();
+        
+        var progressEntries = allProgress
+            .Where(usp => string.Equals(usp.StoryId, storyId, StringComparison.OrdinalIgnoreCase))
+            .ToList();
 
         var completedTiles = progressEntries.Count;
         var totalTiles = def.Tiles.Count;

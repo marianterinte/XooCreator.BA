@@ -79,12 +79,20 @@ public class StoriesRepository : IStoriesRepository
     public async Task<List<UserStoryProgressDto>> GetUserStoryProgressAsync(Guid userId, string storyId)
     {
         storyId = NormalizeStoryId(storyId);
-        var progress = await _context.UserStoryReadProgress
-            .Where(p => p.UserId == userId && p.StoryId == storyId)
+        // Get all progress for this user first, then filter case-insensitively in memory
+        // This ensures we get the correct progress even if there are inconsistencies in how StoryId was stored
+        var allProgress = await _context.UserStoryReadProgress
+            .Where(p => p.UserId == userId)
             .OrderBy(p => p.ReadAt)
             .ToListAsync();
 
-        return progress.Select(p => new UserStoryProgressDto
+        // Filter in memory for case-insensitive match
+        // This handles any existing data inconsistencies (e.g., "intro-pufpuf" vs "Intro-PufPuf")
+        var filteredProgress = allProgress
+            .Where(p => string.Equals(p.StoryId, storyId, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        return filteredProgress.Select(p => new UserStoryProgressDto
         {
             StoryId = p.StoryId,
             TileId = p.TileId,
@@ -97,8 +105,13 @@ public class StoriesRepository : IStoriesRepository
         try
         {
             storyId = NormalizeStoryId(storyId);
-            var existing = await _context.UserStoryReadProgress
-                .FirstOrDefaultAsync(p => p.UserId == userId && p.StoryId == storyId && p.TileId == tileId);
+            // Check for existing progress with case-insensitive comparison
+            var allProgress = await _context.UserStoryReadProgress
+                .Where(p => p.UserId == userId && p.TileId == tileId)
+                .ToListAsync();
+            
+            var existing = allProgress
+                .FirstOrDefault(p => string.Equals(p.StoryId, storyId, StringComparison.OrdinalIgnoreCase));
 
             if (existing != null)
             {
@@ -108,7 +121,7 @@ public class StoriesRepository : IStoriesRepository
             var readProgress = new UserStoryReadProgress
             {
                 UserId = userId,
-                StoryId = storyId,
+                StoryId = storyId, // Store normalized storyId
                 TileId = tileId
             };
 
@@ -125,9 +138,14 @@ public class StoriesRepository : IStoriesRepository
     public async Task ResetStoryProgressAsync(Guid userId, string storyId)
     {
         storyId = NormalizeStoryId(storyId);
-        var entries = await _context.UserStoryReadProgress
-            .Where(p => p.UserId == userId && p.StoryId == storyId)
+        // Get all progress for this user and filter case-insensitively in memory
+        var allEntries = await _context.UserStoryReadProgress
+            .Where(p => p.UserId == userId)
             .ToListAsync();
+
+        var entries = allEntries
+            .Where(p => string.Equals(p.StoryId, storyId, StringComparison.OrdinalIgnoreCase))
+            .ToList();
 
         if (entries.Count == 0)
         {
