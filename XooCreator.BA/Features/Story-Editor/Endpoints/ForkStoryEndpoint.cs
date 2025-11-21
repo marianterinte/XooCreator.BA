@@ -84,7 +84,7 @@ public class ForkStoryEndpoint
             return TypedResults.NotFound();
         }
 
-        var newStoryId = await ep._storyIdGenerator.GenerateNextAsync(currentUser.Id, currentUser.Email, ct);
+        var newStoryId = await ep._storyIdGenerator.GenerateNextAsync(currentUser.Id, currentUser.FirstName, currentUser.LastName, ct);
         StoryCraft newCraft;
 
         if (craft != null)

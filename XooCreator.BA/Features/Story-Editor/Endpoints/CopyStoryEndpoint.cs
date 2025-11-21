@@ -93,7 +93,7 @@ public class CopyStoryEndpoint
             return TypedResults.Forbid();
         }
 
-        var newStoryId = await ep._storyIdGenerator.GenerateNextAsync(currentUser.Id, currentUser.Email, ct);
+        var newStoryId = await ep._storyIdGenerator.GenerateNextAsync(currentUser.Id, currentUser.FirstName, currentUser.LastName, ct);
         StoryCraft newCraft;
 
         // For copy operations, set isCopy=true to prefix title with "Copy of "

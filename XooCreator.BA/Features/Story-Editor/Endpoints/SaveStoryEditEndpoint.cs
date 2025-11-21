@@ -20,14 +20,16 @@ public class SaveStoryEditEndpoint
     private readonly IStoryEditorService _editorService;
     private readonly IUserContextService _userContext;
     private readonly IAuth0UserService _auth0;
+    private readonly IStoryIdGenerator _storyIdGenerator;
     private readonly ILogger<SaveStoryEditEndpoint> _logger;
 
-    public SaveStoryEditEndpoint(IStoryCraftsRepository crafts, IStoryEditorService editorService, IUserContextService userContext, IAuth0UserService auth0, ILogger<SaveStoryEditEndpoint> logger)
+    public SaveStoryEditEndpoint(IStoryCraftsRepository crafts, IStoryEditorService editorService, IUserContextService userContext, IAuth0UserService auth0, IStoryIdGenerator storyIdGenerator, ILogger<SaveStoryEditEndpoint> logger)
     {
         _crafts = crafts;
         _editorService = editorService;
         _userContext = userContext;
         _auth0 = auth0;
+        _storyIdGenerator = storyIdGenerator;
         _logger = logger;
     }
 
@@ -60,9 +62,8 @@ public class SaveStoryEditEndpoint
         
         if (isNewStory)
         {
-            // Generate storyId: email-s1, email-s2, etc.
-            var storyCount = await ep._crafts.CountDistinctStoryIdsByOwnerAsync(user.Id, ct);
-            finalStoryId = $"{user.Email}-s{storyCount + 1}";
+            // Generate storyId using firstname/lastname + timestamp
+            finalStoryId = await ep._storyIdGenerator.GenerateNextAsync(user.Id, user.FirstName, user.LastName, ct);
             ep._logger.LogInformation("Generated storyId: {StoryId} for userId={UserId}", finalStoryId, user.Id);
         }
 

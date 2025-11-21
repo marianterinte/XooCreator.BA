@@ -72,7 +72,7 @@ public class CreateStoryEndpoint
         string storyId = (req.StoryId ?? string.Empty).Trim();
         if (string.IsNullOrWhiteSpace(storyId))
         {
-            storyId = await ep._storyIdGenerator.GenerateNextAsync(user.Id, user.Email, ct);
+            storyId = await ep._storyIdGenerator.GenerateNextAsync(user.Id, user.FirstName, user.LastName, ct);
             ep._logger.LogInformation("Generated storyId: {StoryId} for userId={UserId}", storyId, user.Id);
         }
 
