@@ -66,22 +66,29 @@ public class StoryFeedbackService : IStoryFeedbackService
 
     public async Task<CheckFeedbackStatusResponse> CheckStatusAsync(Guid userId, string storyId, CancellationToken ct = default)
     {
+        // Check for this specific story
         var hasSubmitted = await _repository.HasUserSubmittedFeedbackAsync(userId, storyId, ct);
         var hasDeclined = await _repository.HasUserDeclinedFeedbackAsync(userId, storyId, ct);
         var hasPostponed = await _repository.HasUserPostponedFeedbackAsync(userId, storyId, ct);
 
+        // Also check for global preference (applies to all stories)
+        var hasGlobalDeclined = await _repository.HasUserDeclinedFeedbackAsync(userId, "global", ct);
+        var hasGlobalSubmitted = await _repository.HasUserSubmittedFeedbackAsync(userId, "global", ct);
+        var hasGlobalPostponed = await _repository.HasUserPostponedFeedbackAsync(userId, "global", ct);
+
         // Show modal if:
-        // - User hasn't submitted feedback
-        // - User hasn't declined feedback
-        // - User hasn't postponed (or if they postponed, we can show again after some time - for now, we show again)
-        var shouldShow = !hasSubmitted && !hasDeclined;
+        // - User hasn't submitted feedback for this story OR globally
+        // - User hasn't declined feedback for this story OR globally
+        // - User hasn't postponed feedback globally (if they postponed globally, don't show again)
+        // - If user declined or postponed globally, never show modal again
+        var shouldShow = !hasSubmitted && !hasDeclined && !hasGlobalDeclined && !hasGlobalSubmitted && !hasGlobalPostponed;
 
         return new CheckFeedbackStatusResponse
         {
             ShouldShowModal = shouldShow,
-            HasSubmittedFeedback = hasSubmitted,
-            HasDeclinedFeedback = hasDeclined,
-            HasPostponedFeedback = hasPostponed
+            HasSubmittedFeedback = hasSubmitted || hasGlobalSubmitted,
+            HasDeclinedFeedback = hasDeclined || hasGlobalDeclined,
+            HasPostponedFeedback = hasPostponed || hasGlobalPostponed
         };
     }
 
