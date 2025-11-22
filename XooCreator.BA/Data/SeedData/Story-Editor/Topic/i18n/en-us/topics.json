@@ -255,11 +255,11 @@
       ]
     },
     {
-      "id": "populara",
-      "label": "Popular Story",
+      "id": "classic",
+      "label": "Popular Story (classic)",
       "allowed_values": [
         {
-          "id": "populara_author",
+          "id": "classic_author",
           "label": "Author"
         }
       ]

@@ -255,11 +255,11 @@
       ]
     },
     {
-      "id": "populara",
-      "label": "Népszerű Történet",
+      "id": "classic",
+      "label": "Népszerű Történet (klasszikus)",
       "allowed_values": [
         {
-          "id": "populara_author",
+          "id": "classic_author",
           "label": "Író"
         }
       ]

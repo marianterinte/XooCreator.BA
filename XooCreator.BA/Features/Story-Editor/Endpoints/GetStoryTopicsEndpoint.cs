@@ -1,9 +1,10 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
-using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Infrastructure.Endpoints;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
@@ -69,7 +70,8 @@ public class GetStoryTopicsEndpoint
                         SortOrder: t.SortOrder
                     )).OrderBy(t => t.SortOrder).ToList()
                 ))
-                .OrderBy(d => d.Id)
+                .OrderBy(d => d.Id == "classic" ? 0 : 1)
+                .ThenBy(d => d.Id)
                 .ToList();
 
             return TypedResults.Ok(new TopicsResponse(Dimensions: dimensions));
@@ -82,7 +84,14 @@ public class GetStoryTopicsEndpoint
 
     private static string GetDimensionLabel(string dimensionId, string lang)
     {
-        // For now, return a simple label. We can add dimension translations later if needed
+        // Try to load from JSON files first
+        var label = GetDimensionLabelFromJson(dimensionId, lang);
+        if (!string.IsNullOrEmpty(label))
+        {
+            return label;
+        }
+
+        // Fallback to hardcoded values if JSON not found
         return dimensionId switch
         {
             "educational" => lang == "ro-ro" ? "Educațional" : lang == "hu-hu" ? "Oktatási" : "Educational",
@@ -92,9 +101,50 @@ public class GetStoryTopicsEndpoint
             "complexity" => lang == "ro-ro" ? "Complexitate narativă" : lang == "hu-hu" ? "Narratív komplexitás" : "Narrative complexity",
             "interactivity" => lang == "ro-ro" ? "Interactivitate" : lang == "hu-hu" ? "Interaktivitás" : "Interactivity",
             "values_and_morals" => lang == "ro-ro" ? "Valori și mesaj" : lang == "hu-hu" ? "Értékek és erkölcs" : "Values and morals",
-            "populara" => lang == "ro-ro" ? "Poveste Populară" : lang == "hu-hu" ? "Népszerű Történet" : "Popular Story",
+            "classic" => lang == "ro-ro" ? "Poveste Populară (clasică)" : lang == "hu-hu" ? "Népszerű Történet (klasszikus)" : "Popular Story (classic)",
             _ => dimensionId
         };
+    }
+
+    private static string GetDimensionLabelFromJson(string dimensionId, string lang)
+    {
+        try
+        {
+            var basePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SeedData", "Story-Editor", "Topic", "i18n");
+            var jsonPath = Path.Combine(basePath, lang, "topics.json");
+            
+            if (!File.Exists(jsonPath))
+            {
+                return string.Empty;
+            }
+
+            var json = File.ReadAllText(jsonPath);
+            var data = JsonSerializer.Deserialize<TopicsSeedData>(json, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            var dimension = data?.StoryDimensions?.FirstOrDefault(d => d.Id == dimensionId);
+            return dimension?.Label ?? string.Empty;
+        }
+        catch
+        {
+            // If anything fails, return empty to use fallback
+            return string.Empty;
+        }
+    }
+
+    // DTOs for JSON deserialization
+    private class TopicsSeedData
+    {
+        [JsonPropertyName("story_dimensions")]
+        public List<StoryDimensionSeedData>? StoryDimensions { get; set; }
+    }
+
+    private class StoryDimensionSeedData
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Label { get; set; } = string.Empty;
     }
 }
 

@@ -255,11 +255,11 @@
       ]
     },
     {
-      "id": "populara",
-      "label": "Poveste Populară",
+      "id": "classic",
+      "label": "Poveste Populară (clasică)",
       "allowed_values": [
         {
-          "id": "populara_author",
+          "id": "classic_author",
           "label": "Scriitor"
         }
       ]
