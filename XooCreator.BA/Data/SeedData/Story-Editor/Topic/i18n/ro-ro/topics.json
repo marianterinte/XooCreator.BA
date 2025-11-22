@@ -256,7 +256,7 @@
     },
     {
       "id": "populara",
-      "label": "Populară",
+      "label": "Poveste Populară",
       "allowed_values": [
         {
           "id": "populara_author",
