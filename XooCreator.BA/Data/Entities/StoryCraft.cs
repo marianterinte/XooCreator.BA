@@ -26,7 +26,8 @@ public class StoryCraft
     public string? StoryTopic { get; set; } // e.g., "Matematică", "Literatură" - topic/theme of the story
     
     [MaxLength(200)]
-    public string? AuthorName { get; set; } // Name of the author/writer if the story has an author
+    public string? AuthorName { get; set; } // Name of the author/writer if the story has an author (for "Other" option)
+    public Guid? ClassicAuthorId { get; set; } // Reference to ClassicAuthor if a classic author is selected
     
     public StoryType StoryType { get; set; } = StoryType.AlchimaliaEpic; // Type of story (Epic vs Indie)
     
@@ -51,6 +52,7 @@ public class StoryCraft
     public List<StoryCraftTile> Tiles { get; set; } = new();
     public List<StoryCraftTopic> Topics { get; set; } = new();
     public List<StoryCraftAgeGroup> AgeGroups { get; set; } = new();
+    public ClassicAuthor? ClassicAuthor { get; set; }
 }
 
 /// <summary>

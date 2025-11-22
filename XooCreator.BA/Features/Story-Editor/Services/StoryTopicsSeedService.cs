@@ -10,6 +10,7 @@ namespace XooCreator.BA.Features.StoryEditor.Services;
 public interface IStoryTopicsSeedService
 {
     Task SeedTopicsAndAgeGroupsAsync(CancellationToken ct = default);
+    Task SeedClassicAuthorsAsync(CancellationToken ct = default);
 }
 
 public class StoryTopicsSeedService : IStoryTopicsSeedService
@@ -33,6 +34,7 @@ public class StoryTopicsSeedService : IStoryTopicsSeedService
         {
             await SeedTopicsAsync(ct);
             await SeedAgeGroupsAsync(ct);
+            await SeedClassicAuthorsAsync(ct);
             _logger.LogInformation("✅ Story topics and age groups seeded successfully");
         }
         catch (Exception ex)
@@ -40,6 +42,130 @@ public class StoryTopicsSeedService : IStoryTopicsSeedService
             _logger.LogError(ex, "❌ Failed to seed story topics and age groups");
             throw;
         }
+    }
+
+    public async Task SeedClassicAuthorsAsync(CancellationToken ct = default)
+    {
+        _logger.LogInformation("🌱 Starting to seed classic authors...");
+
+        try
+        {
+            var authorsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SeedData", "Story-Editor", "authors.json");
+            
+            if (!File.Exists(authorsPath))
+            {
+                _logger.LogWarning("Authors file not found: {Path}", authorsPath);
+                return;
+            }
+
+            var json = await File.ReadAllTextAsync(authorsPath, ct);
+            var authorsData = JsonSerializer.Deserialize<AuthorsSeedData>(json, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            if (authorsData == null)
+            {
+                _logger.LogWarning("No authors data found in {Path}", authorsPath);
+                return;
+            }
+
+            // Seed Romanian authors
+            await SeedAuthorsForLanguageAsync("ro-ro", authorsData.RomanianAuthors ?? new List<string>(), ct);
+            
+            // Seed Hungarian authors
+            await SeedAuthorsForLanguageAsync("hu-hu", authorsData.HungarianAuthors ?? new List<string>(), ct);
+            
+            // Seed English/American authors
+            await SeedAuthorsForLanguageAsync("en-us", authorsData.EnglishAmericanAuthors ?? new List<string>(), ct);
+
+            _logger.LogInformation("✅ Classic authors seeded successfully");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ Failed to seed classic authors");
+            throw;
+        }
+    }
+
+    private async Task SeedAuthorsForLanguageAsync(string languageCode, List<string> authorNames, CancellationToken ct)
+    {
+        int sortOrder = 0;
+        foreach (var authorName in authorNames)
+        {
+            // Generate AuthorId from name (lowercase, replace spaces and special chars with hyphens)
+            var authorId = GenerateAuthorId(authorName);
+
+            var existingAuthor = await _context.ClassicAuthors
+                .FirstOrDefaultAsync(a => a.AuthorId == authorId && a.LanguageCode == languageCode, ct);
+
+            if (existingAuthor == null)
+            {
+                var author = new ClassicAuthor
+                {
+                    Id = Guid.NewGuid(),
+                    AuthorId = authorId,
+                    Name = authorName,
+                    LanguageCode = languageCode,
+                    SortOrder = sortOrder++,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+                _context.ClassicAuthors.Add(author);
+                _logger.LogInformation("Created classic author: {AuthorId} ({Name}) for {Language}", 
+                    authorId, authorName, languageCode);
+            }
+            else
+            {
+                // Update name and sort order if changed
+                existingAuthor.Name = authorName;
+                existingAuthor.SortOrder = sortOrder++;
+                existingAuthor.UpdatedAt = DateTime.UtcNow;
+                _logger.LogInformation("Updated classic author: {AuthorId} ({Name}) for {Language}", 
+                    authorId, authorName, languageCode);
+            }
+        }
+
+        await _context.SaveChangesAsync(ct);
+    }
+
+    private string GenerateAuthorId(string authorName)
+    {
+        // Convert to lowercase, replace spaces and special characters with hyphens
+        var authorId = authorName.ToLowerInvariant()
+            .Replace(" ", "-")
+            .Replace("ă", "a")
+            .Replace("â", "a")
+            .Replace("î", "i")
+            .Replace("ș", "s")
+            .Replace("ț", "t")
+            .Replace("á", "a")
+            .Replace("é", "e")
+            .Replace("í", "i")
+            .Replace("ó", "o")
+            .Replace("ö", "o")
+            .Replace("ő", "o")
+            .Replace("ú", "u")
+            .Replace("ü", "u")
+            .Replace("ű", "u")
+            .Replace(".", "")
+            .Replace(",", "")
+            .Replace("'", "")
+            .Replace("\"", "")
+            .Replace("(", "")
+            .Replace(")", "");
+        
+        // Remove multiple consecutive hyphens
+        while (authorId.Contains("--"))
+        {
+            authorId = authorId.Replace("--", "-");
+        }
+        
+        // Remove leading/trailing hyphens
+        authorId = authorId.Trim('-');
+        
+        return authorId;
     }
 
     private async Task SeedTopicsAsync(CancellationToken ct)
@@ -302,6 +428,18 @@ public class StoryTopicsSeedService : IStoryTopicsSeedService
         [JsonPropertyName("max_age")]
         public int MaxAge { get; set; }
         public string? Description { get; set; }
+    }
+
+    private class AuthorsSeedData
+    {
+        [JsonPropertyName("romanian_authors")]
+        public List<string>? RomanianAuthors { get; set; }
+        
+        [JsonPropertyName("hungarian_authors")]
+        public List<string>? HungarianAuthors { get; set; }
+        
+        [JsonPropertyName("english_american_authors")]
+        public List<string>? EnglishAmericanAuthors { get; set; }
     }
 }
 

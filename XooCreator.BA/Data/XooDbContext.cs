@@ -82,6 +82,9 @@ public class XooDbContext : DbContext
     public DbSet<StoryCraftAgeGroup> StoryCraftAgeGroups => Set<StoryCraftAgeGroup>();
     public DbSet<StoryDefinitionAgeGroup> StoryDefinitionAgeGroups => Set<StoryDefinitionAgeGroup>();
     
+    // Classic Authors
+    public DbSet<ClassicAuthor> ClassicAuthors => Set<ClassicAuthor>();
+    
     // Story Feedback
     public DbSet<StoryFeedback> StoryFeedbacks => Set<StoryFeedback>();
     public DbSet<StoryFeedbackPreference> StoryFeedbackPreferences => Set<StoryFeedbackPreference>();
@@ -374,6 +377,10 @@ public class XooDbContext : DbContext
             e.HasMany(x => x.Tiles).WithOne(x => x.StoryDefinition).HasForeignKey(x => x.StoryDefinitionId).OnDelete(DeleteBehavior.Cascade);
             e.HasMany(x => x.Topics).WithOne(x => x.StoryDefinition).HasForeignKey(x => x.StoryDefinitionId).OnDelete(DeleteBehavior.Cascade);
             e.HasMany(x => x.AgeGroups).WithOne(x => x.StoryDefinition).HasForeignKey(x => x.StoryDefinitionId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.ClassicAuthor)
+                .WithMany(x => x.StoryDefinitions)
+                .HasForeignKey(x => x.ClassicAuthorId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<StoryDefinitionTranslation>(e =>
@@ -636,6 +643,10 @@ public class XooDbContext : DbContext
             e.HasMany(x => x.Tiles).WithOne(x => x.StoryCraft).HasForeignKey(x => x.StoryCraftId).OnDelete(DeleteBehavior.Cascade);
             e.HasMany(x => x.Topics).WithOne(x => x.StoryCraft).HasForeignKey(x => x.StoryCraftId).OnDelete(DeleteBehavior.Cascade);
             e.HasMany(x => x.AgeGroups).WithOne(x => x.StoryCraft).HasForeignKey(x => x.StoryCraftId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.ClassicAuthor)
+                .WithMany()
+                .HasForeignKey(x => x.ClassicAuthorId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<StoryCraftTranslation>(e =>
@@ -760,6 +771,17 @@ public class XooDbContext : DbContext
                 .WithMany(t => t.Translations)
                 .HasForeignKey(x => x.StoryAgeGroupId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<ClassicAuthor>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.AuthorId).HasMaxLength(100).IsRequired();
+            e.Property(x => x.Name).HasMaxLength(200).IsRequired();
+            e.Property(x => x.LanguageCode).HasMaxLength(10).IsRequired();
+            e.HasIndex(x => x.AuthorId).IsUnique();
+            e.HasIndex(x => new { x.LanguageCode, x.SortOrder });
         });
 
         modelBuilder.Entity<StoryCraftAgeGroup>(e =>

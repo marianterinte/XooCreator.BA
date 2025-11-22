@@ -129,6 +129,7 @@ public class StoriesService : IStoriesService
                 Summary = translation?.Summary,
                 StoryTopic = craft.StoryTopic, // Keep for backward compatibility
                 AuthorName = craft.AuthorName,
+                ClassicAuthorId = craft.ClassicAuthorId,
                 TopicIds = craft.Topics.Select(t => t.StoryTopic.TopicId).ToList(),
                 AgeGroupIds = craft.AgeGroups.Select(ag => ag.StoryAgeGroup.AgeGroupId).ToList(),
                 PriceInCredits = craft.PriceInCredits,
@@ -194,6 +195,8 @@ public class StoriesService : IStoriesService
             CoverImageUrl = story.CoverImageUrl ?? string.Empty,
             Summary = story.Summary ?? string.Empty,
             StoryTopic = story.StoryTopic, // Keep for backward compatibility
+            AuthorName = story.AuthorName,
+            ClassicAuthorId = story.ClassicAuthorId,
             TopicIds = story.Topics?.Select(t => t.StoryTopic.TopicId).ToList() ?? new List<string>(),
             AgeGroupIds = story.AgeGroups?.Select(ag => ag.StoryAgeGroup.AgeGroupId).ToList() ?? new List<string>(),
             PriceInCredits = story.PriceInCredits,
@@ -266,7 +269,8 @@ public class EditableStoryDto
     public string? StoryTopic { get; set; } // DEPRECATED: Use TopicIds instead. Kept for backward compatibility.
     public List<string>? TopicIds { get; set; } // List of topic IDs (e.g., ["edu_math", "fun_adventure"])
     public List<string>? AgeGroupIds { get; set; } // List of age group IDs (e.g., ["preschool_3_5", "early_school_6_8"])
-    public string? AuthorName { get; set; } // Name of the author/writer if the story has an author
+    public string? AuthorName { get; set; } // Name of the author/writer if the story has an author (for "Other" option)
+    public Guid? ClassicAuthorId { get; set; } // Reference to ClassicAuthor if a classic author is selected
     public double PriceInCredits { get; set; } = 0; // Price in credits for purchasing the story
     public int StoryType { get; set; } = 0; // 0 = AlchimaliaEpic (Tree Of Light), 1 = Indie (Independent)
     public string? Status { get; set; } // 'draft' | 'in-review' | 'approved' | 'published' (FE semantic)
