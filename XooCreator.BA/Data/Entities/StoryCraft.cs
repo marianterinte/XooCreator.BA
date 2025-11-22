@@ -25,6 +25,9 @@ public class StoryCraft
     
     public string? StoryTopic { get; set; } // e.g., "Matematică", "Literatură" - topic/theme of the story
     
+    [MaxLength(200)]
+    public string? AuthorName { get; set; } // Name of the author/writer if the story has an author
+    
     public StoryType StoryType { get; set; } = StoryType.AlchimaliaEpic; // Type of story (Epic vs Indie)
     
     public double PriceInCredits { get; set; } = 0; // Price in credits for purchasing the story

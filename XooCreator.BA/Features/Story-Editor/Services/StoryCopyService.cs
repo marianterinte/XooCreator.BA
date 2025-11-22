@@ -88,6 +88,7 @@ public class StoryCopyService : IStoryCopyService
     {
         var craft = CreateBaseCraft(ownerUserId, newStoryId, source.StoryType, source.StoryTopic, source.CoverImageUrl);
         craft.PriceInCredits = source.PriceInCredits;
+        craft.AuthorName = source.AuthorName;
         craft.BaseVersion = source.BaseVersion;
 
         CopyCraftTranslations(source, craft, isCopy);
@@ -102,6 +103,7 @@ public class StoryCopyService : IStoryCopyService
     {
         var craft = CreateBaseCraft(ownerUserId, newStoryId, definition.StoryType, definition.StoryTopic, ExtractFileName(definition.CoverImageUrl));
         craft.PriceInCredits = definition.PriceInCredits;
+        craft.AuthorName = definition.AuthorName;
         craft.BaseVersion = definition.Version;
 
         CopyDefinitionTranslations(definition, craft, isCopy);

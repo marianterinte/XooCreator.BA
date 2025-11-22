@@ -92,6 +92,7 @@ public class GetStoryTopicsEndpoint
             "complexity" => lang == "ro-ro" ? "Complexitate narativă" : lang == "hu-hu" ? "Narratív komplexitás" : "Narrative complexity",
             "interactivity" => lang == "ro-ro" ? "Interactivitate" : lang == "hu-hu" ? "Interaktivitás" : "Interactivity",
             "values_and_morals" => lang == "ro-ro" ? "Valori și mesaj" : lang == "hu-hu" ? "Értékek és erkölcs" : "Values and morals",
+            "populara" => lang == "ro-ro" ? "Populară" : lang == "hu-hu" ? "Népszerű" : "Popular",
             _ => dimensionId
         };
     }

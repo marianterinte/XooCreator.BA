@@ -73,6 +73,10 @@
         {
           "id": "fun_funny_dialogues",
           "label": "Vicces párbeszédek"
+        },
+        {
+          "id": "fun_popular_story",
+          "label": "Népszerű történet"
         }
       ]
     },
@@ -247,6 +251,16 @@
         {
           "id": "val_learn_from_mistakes",
           "label": "Tanulás a hibákból"
+        }
+      ]
+    },
+    {
+      "id": "populara",
+      "label": "Népszerű",
+      "allowed_values": [
+        {
+          "id": "populara_author",
+          "label": "Író"
         }
       ]
     }

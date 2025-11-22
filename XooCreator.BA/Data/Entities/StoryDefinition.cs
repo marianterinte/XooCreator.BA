@@ -14,6 +14,7 @@ public class StoryDefinition
     public string? CoverImageUrl { get; set; }
     public string? Summary { get; set; }
     public string? StoryTopic { get; set; } // e.g., "main", "intro", "special" - topic/theme of the story
+    public string? AuthorName { get; set; } // Name of the author/writer if the story has an author
     public StoryType StoryType { get; set; } = StoryType.AlchimaliaEpic; // Type of story (Epic vs Indie)
     public StoryStatus Status { get; set; } = StoryStatus.Published; // Publication status
     public int SortOrder { get; set; }

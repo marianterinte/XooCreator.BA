@@ -145,6 +145,7 @@ public class StoryEditorService : IStoryEditorService
         
         craft.CoverImageUrl = ExtractFileName(dto.CoverImageUrl);
         craft.StoryTopic = dto.StoryTopic; // Keep for backward compatibility
+        craft.AuthorName = dto.AuthorName; // Save author name
         craft.StoryType = (StoryType)(dto.StoryType);
         craft.PriceInCredits = dto.PriceInCredits;
         craft.UpdatedAt = DateTime.UtcNow;

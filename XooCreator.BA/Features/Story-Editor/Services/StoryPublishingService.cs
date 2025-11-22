@@ -51,6 +51,7 @@ public class StoryPublishingService : IStoryPublishingService
                 StoryId = storyId,
                 Title = craft.Translations.FirstOrDefault(t => t.LanguageCode == langTag)?.Title ?? storyId,
                 StoryTopic = craft.StoryTopic,
+                AuthorName = craft.AuthorName,
                 StoryType = craft.StoryType,
                 Status = StoryStatus.Published,
                 IsActive = true,
@@ -68,6 +69,7 @@ public class StoryPublishingService : IStoryPublishingService
             ?? def.Title;
         def.Summary = craft.Translations.FirstOrDefault(t => t.LanguageCode == langTag)?.Summary ?? def.Summary;
         def.StoryTopic = craft.StoryTopic ?? def.StoryTopic;
+        def.AuthorName = craft.AuthorName ?? def.AuthorName;
         def.StoryType = craft.StoryType;
         def.PriceInCredits = craft.PriceInCredits;
         def.Status = StoryStatus.Published;

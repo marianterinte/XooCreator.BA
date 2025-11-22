@@ -73,6 +73,10 @@
         {
           "id": "fun_funny_dialogues",
           "label": "Dialoguri haioase"
+        },
+        {
+          "id": "fun_popular_story",
+          "label": "Poveste populară"
         }
       ]
     },
@@ -247,6 +251,16 @@
         {
           "id": "val_learn_from_mistakes",
           "label": "Învățare din greșeli"
+        }
+      ]
+    },
+    {
+      "id": "populara",
+      "label": "Populară",
+      "allowed_values": [
+        {
+          "id": "populara_author",
+          "label": "Scriitor"
         }
       ]
     }

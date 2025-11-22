@@ -73,6 +73,10 @@
         {
           "id": "fun_funny_dialogues",
           "label": "Funny dialogues"
+        },
+        {
+          "id": "fun_popular_story",
+          "label": "Popular story"
         }
       ]
     },
@@ -247,6 +251,16 @@
         {
           "id": "val_learn_from_mistakes",
           "label": "Learning from mistakes"
+        }
+      ]
+    },
+    {
+      "id": "populara",
+      "label": "Popular",
+      "allowed_values": [
+        {
+          "id": "populara_author",
+          "label": "Author"
         }
       ]
     }
