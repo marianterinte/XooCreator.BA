@@ -1,0 +1,52 @@
+{
+  "romanian_authors": [
+    "Ion Creangă",
+    "Petre Ispirescu",
+    "Ioan Slavici",
+    "Mihai Eminescu",
+    "Barbu Ștefănescu Delavrancea",
+    "Emil Gârleanu",
+    "I. Al. Brătescu-Voinești",
+    "Călin Gruia",
+    "Otilia Cazimir",
+    "Dumitru Almaș",
+    "Cezar Petrescu",
+    "Gellu Naum",
+    "Ana Blandiana",
+    "Mircea Sântimbreanu",
+    "Octav Pancu-Iași",
+    "Lucia Olteanu",
+    "Alexandru Mitru",
+    "Mihail Sadoveanu",
+    "Gala Galaction",
+    "Grigore Băjenaru"
+  ],
+  "hungarian_authors": [
+    "Benedek Elek",
+    "István Fekete",
+    "Ervin Lázár",
+    "Mihály Fazekas",
+    "Magda Szabó",
+    "Zsigmond Móricz",
+    "Sándor Weöres",
+    "Sándor Petőfi",
+    "Kálmán Mikszáth",
+    "József Attila"
+  ],
+  "english_american_authors": [
+    "Lewis Carroll",
+    "Beatrix Potter",
+    "A. A. Milne",
+    "J. M. Barrie",
+    "L. Frank Baum",
+    "Dr. Seuss",
+    "Roald Dahl",
+    "C. S. Lewis",
+    "E. B. White",
+    "Shel Silverstein",
+    "Maurice Sendak",
+    "J. K. Rowling",
+    "Enid Blyton"
+  ]
+}
+
