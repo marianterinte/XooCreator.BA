@@ -1,5 +1,3 @@
-using XooCreator.BA.Data;
-
 namespace XooCreator.BA.Features.TalesOfAlchimalia.Market.DTOs;
 
 public record StoryDetailsDto
@@ -51,6 +49,7 @@ public record StoryMarketplaceItemDto
     public double PriceInCredits { get; init; }
     public string AgeRating { get; init; } = string.Empty;
     public List<string> Characters { get; init; } = new();
+    public List<string> Tags { get; init; } = new(); // Topic IDs (e.g., ["classic_author", "edu_math"])
     public DateTime CreatedAt { get; init; }
     public string? StoryTopic { get; init; }
     public string StoryType { get; init; } = string.Empty;

@@ -50,6 +50,8 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         
         var query = _context.StoryDefinitions
             .Include(s => s.Translations)
+            .Include(s => s.Topics)
+                .ThenInclude(t => t.StoryTopic)
             .Where(s => s.IsActive);
 
         // Filtre implicite: doar Published + StoryType = Indie (dacă nu s-au cerut categorii specifice)
@@ -166,6 +168,8 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         
         var featuredStories = await _context.StoryDefinitions
             .Include(s => s.Translations)
+            .Include(s => s.Topics)
+                .ThenInclude(t => t.StoryTopic)
             .Where(s => s.IsActive && s.Status == StoryStatus.Published)
             .OrderBy(s => s.SortOrder)
             .Take(5)
@@ -292,6 +296,8 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         var ids = purchasedStories.Select(sp => sp.StoryId).ToList();
         var defs = await _context.StoryDefinitions
             .Include(s => s.Translations)
+            .Include(s => s.Topics)
+                .ThenInclude(t => t.StoryTopic)
             .Where(s => ids.Contains(s.StoryId))
             .ToListAsync();
         var normalizedLocale = (locale ?? "ro-ro").ToLowerInvariant();
@@ -701,6 +707,12 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             .AnyAsync(uos => uos.UserId == userId && uos.StoryDefinitionId == def.Id);
         var isOwned = isPurchased || ownedRow;
 
+        // Extract topic IDs from Topics collection
+        var topicIds = def.Topics?
+            .Select(t => t.StoryTopic?.TopicId)
+            .Where(topicId => !string.IsNullOrEmpty(topicId))
+            .ToList() ?? new List<string?>();
+        
         return new StoryMarketplaceItemDto
         {
             Id = def.StoryId,
@@ -712,6 +724,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             PriceInCredits = def.PriceInCredits,
             AgeRating = DetermineAgeRating(def.StoryId),
             Characters = ExtractCharactersFromStoryId(def.StoryId),
+            Tags = topicIds.Where(t => t != null).Select(t => t!).ToList(),
             CreatedAt = def.CreatedAt,
             StoryTopic = def.StoryTopic,
             StoryType = def.StoryType.ToString(),
