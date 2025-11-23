@@ -64,4 +64,8 @@
     <Content Remove="Data\SeedData\Story-Editor\Topic\topics.json" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Scripts\" />
+  </ItemGroup>
+
 </Project>

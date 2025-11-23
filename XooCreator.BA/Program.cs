@@ -3,28 +3,19 @@ using Microsoft.OpenApi.Models;
 using XooCreator.BA.Infrastructure.Swagger;
 using Npgsql;
 using XooCreator.BA.Data;
-using XooCreator.BA.Data.Repositories;
 using XooCreator.BA.Services;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Errors;
-using XooCreator.BA.Infrastructure.Services;
+using XooCreator.BA.Infrastructure.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using XooCreator.BA.Features.Stories.Services;
-using XooCreator.BA.Features.Payment.Services;
-using XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories;
-using XooCreator.BA.Features.TalesOfAlchimalia.Market.Services;
-using XooCreator.BA.Features.TalesOfAlchimalia.Market.Mappers;
-using XooCreator.BA.Features.TreeOfHeroes.Services;
-using XooCreator.BA.Features.TreeOfHeroes.Repositories;
 using XooCreator.BA.Features.TreeOfLight.Services;
-using XooCreator.BA.Features.TreeOfLight.Repositories;
-using XooCreator.BA.Features.User.Services;
-using XooCreator.BA.Infrastructure.Services.Blob;
-using XooCreator.BA.Features.Stories.Repositories;
 using XooCreator.BA.Features.StoryEditor.Services;
-using XooCreator.BA.Features.StoryEditor.Repositories;
+using XooCreator.BA.Features.TalesOfAlchimalia.Market.Services;
+using XooCreator.BA.Data.Services;
+using XooCreator.BA.Data.Interceptors;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -114,74 +105,17 @@ builder.Services.AddDbContext<XooDbContext>(options =>
     }
 
     options.UseNpgsql(cs);
+    
+    // Add interceptor to automatically make migration SQL commands idempotent
+    // This transforms CREATE TABLE, CREATE INDEX, ALTER TABLE ADD CONSTRAINT, etc.
+    // to use IF NOT EXISTS, making all migrations safe to run multiple times
+    var loggerFactory = builder.Services.BuildServiceProvider().GetService<ILoggerFactory>();
+    var logger = loggerFactory?.CreateLogger<IdempotentMigrationCommandInterceptor>();
+    options.AddInterceptors(new IdempotentMigrationCommandInterceptor(logger));
 });
 
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<XooCreator.BA.Features.UserAdministration.Repositories.IUserAdministrationRepository, XooCreator.BA.Features.UserAdministration.Repositories.UserAdministrationRepository>();
-builder.Services.AddScoped<XooCreator.BA.Features.UserAdministration.Services.IUserAdministrationService, XooCreator.BA.Features.UserAdministration.Services.UserAdministrationService>();
-
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<IAuth0UserService, Auth0UserService>();
-builder.Services.AddScoped<IUserContextService, UserContextService>();
-builder.Services.AddSingleton<IBlobSasService, BlobSasService>();
-builder.Services.AddScoped<IDbHealthService, DbHealthService>();
-builder.Services.AddScoped<ICreatureBuilderService, CreatureBuilderService>();
-builder.Services.AddScoped<ISeedDiscoveryService, SeedDiscoveryService>();
-builder.Services.AddScoped<IBestiaryFileUpdater, BestiaryFileUpdater>();
-builder.Services.AddScoped<IHeroDefinitionSeedService, HeroDefinitionSeedService>();
-builder.Services.AddScoped<IHeroTreeProvider, HeroTreeProvider>();
-builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IStoryTopicsSeedService, XooCreator.BA.Features.StoryEditor.Services.StoryTopicsSeedService>();
-
-
-builder.Services.AddScoped<IUserProfileService, UserProfileService>();
-
-builder.Services.AddScoped<ITreeOfLightTranslationService, TreeOfLightTranslationService>();
-builder.Services.AddScoped<ITreeOfLightRepository, TreeOfLightRepository>();
-builder.Services.AddScoped<ITreeOfLightService, TreeOfLightService>();
-builder.Services.AddScoped<ITreeModelRepository, TreeModelRepository>();
-builder.Services.AddScoped<ITreeModelService, TreeModelService>();
-
-builder.Services.AddScoped<ITreeOfHeroesRepository, TreeOfHeroesRepository>();
-builder.Services.AddScoped<ITreeOfHeroesService, TreeOfHeroesService>();
-
-builder.Services.AddScoped<IStoriesService, StoriesService>();
-builder.Services.AddScoped<IStoriesRepository, StoriesRepository>();
-builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Repositories.IStoryCraftsRepository, XooCreator.BA.Features.StoryEditor.Repositories.StoryCraftsRepository>();
-builder.Services.AddScoped<IStoryEditorService, StoryEditorService>();
-builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IStoryPublishingService, XooCreator.BA.Features.StoryEditor.Services.StoryPublishingService>();
-builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IStoryPublishAssetService, XooCreator.BA.Features.StoryEditor.Services.StoryPublishAssetService>();
-builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IStoryIdGenerator, XooCreator.BA.Features.StoryEditor.Services.StoryIdGenerator>();
-builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IStoryAssetCopyService, XooCreator.BA.Features.StoryEditor.Services.StoryAssetCopyService>();
-builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IStoryCopyService, XooCreator.BA.Features.StoryEditor.Services.StoryCopyService>();
-builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IStoryDraftAssetCleanupService, XooCreator.BA.Features.StoryEditor.Services.StoryDraftAssetCleanupService>();
-builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IStoryPublishedAssetCleanupService, XooCreator.BA.Features.StoryEditor.Services.StoryPublishedAssetCleanupService>();
-builder.Services.AddHttpClient(); // For GoogleTtsService, GoogleTextService and GoogleImageService
-builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IGoogleAudioGeneratorService, XooCreator.BA.Features.StoryEditor.Services.GoogleAudioGeneratorService>();
-builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IGoogleTextService, XooCreator.BA.Features.StoryEditor.Services.GoogleTextService>();
-builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IGoogleImageService, XooCreator.BA.Features.StoryEditor.Services.GoogleImageService>();
-builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IGoogleFullStoryService, XooCreator.BA.Features.StoryEditor.Services.GoogleFullStoryService>();
-
-// OpenAI Services
-builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IOpenAIAudioGeneratorService, XooCreator.BA.Features.StoryEditor.Services.OpenAIAudioGeneratorService>();
-builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IOpenAITextService, XooCreator.BA.Features.StoryEditor.Services.OpenAITextService>();
-builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IOpenAIImageService, XooCreator.BA.Features.StoryEditor.Services.OpenAIImageService>();
-builder.Services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IOpenAIFullStoryService, XooCreator.BA.Features.StoryEditor.Services.OpenAIFullStoryService>();
-
-// Story Marketplace Services
-builder.Services.AddScoped<XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories.IStoryReviewsRepository, XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories.StoryReviewsRepository>();
-builder.Services.AddScoped<XooCreator.BA.Features.TalesOfAlchimalia.Market.Services.IStoryReviewsService, XooCreator.BA.Features.TalesOfAlchimalia.Market.Services.StoryReviewsService>();
-builder.Services.AddScoped<XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories.IFavoritesRepository, XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories.FavoritesRepository>();
-builder.Services.AddScoped<XooCreator.BA.Features.TalesOfAlchimalia.Market.Services.IFavoritesService, XooCreator.BA.Features.TalesOfAlchimalia.Market.Services.FavoritesService>();
-builder.Services.AddScoped<StoryDetailsMapper>();
-builder.Services.AddScoped<IStoriesMarketplaceRepository, StoriesMarketplaceRepository>();
-builder.Services.AddScoped<IStoriesMarketplaceService, StoriesMarketplaceService>();
-
-// Payment services
-builder.Services.AddScoped<IPaymentService, PaymentService>();
-
-// Story Feedback
-builder.Services.AddScoped<XooCreator.BA.Features.StoryFeedback.Repositories.IStoryFeedbackRepository, XooCreator.BA.Features.StoryFeedback.Repositories.StoryFeedbackRepository>();
-builder.Services.AddScoped<XooCreator.BA.Features.StoryFeedback.Services.IStoryFeedbackService, XooCreator.BA.Features.StoryFeedback.Services.StoryFeedbackService>();
+// Register all application services using extension methods
+builder.Services.AddApplicationServices();
 
 var auth0Section = builder.Configuration.GetSection("Auth0");
 var auth0Domain = auth0Section["Domain"];
@@ -246,12 +180,13 @@ app.UseAuthorization();
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<XooDbContext>();
+    var migrationService = scope.ServiceProvider.GetRequiredService<IDatabaseMigrationService>();
     var storiesService = scope.ServiceProvider.GetRequiredService<IStoriesService>();
     var treeModelService = scope.ServiceProvider.GetRequiredService<ITreeModelService>();
-        var discoverySeeder = scope.ServiceProvider.GetRequiredService<ISeedDiscoveryService>();
-        var bestiaryUpdater = scope.ServiceProvider.GetRequiredService<IBestiaryFileUpdater>();
-        var heroDefinitionSeeder = scope.ServiceProvider.GetRequiredService<IHeroDefinitionSeedService>();
-        var storyTopicsSeeder = scope.ServiceProvider.GetRequiredService<XooCreator.BA.Features.StoryEditor.Services.IStoryTopicsSeedService>();
+    var discoverySeeder = scope.ServiceProvider.GetRequiredService<ISeedDiscoveryService>();
+    var bestiaryUpdater = scope.ServiceProvider.GetRequiredService<IBestiaryFileUpdater>();
+    var heroDefinitionSeeder = scope.ServiceProvider.GetRequiredService<IHeroDefinitionSeedService>();
+    var storyTopicsSeeder = scope.ServiceProvider.GetRequiredService<IStoryTopicsSeedService>();
 
     try
     {
@@ -272,8 +207,12 @@ using (var scope = app.Services.CreateScope())
                 await context.Database.ExecuteSqlRawAsync("CREATE SCHEMA public;");
                 Console.WriteLine("✅ Schema recreated successfully");
                 
-                // Apply migrations to recreate all tables
-                await context.Database.MigrateAsync();
+                // Apply migrations using the robust migration service
+                var migrationSuccess = await migrationService.ApplyMigrationsAsync();
+                if (!migrationSuccess)
+                {
+                    throw new InvalidOperationException("Failed to apply migrations after schema recreation");
+                }
                 Console.WriteLine("✅ Migrations applied successfully");
             }
             catch (Exception ex)
@@ -283,7 +222,11 @@ using (var scope = app.Services.CreateScope())
                 // Fallback: try normal migration in case schema operations failed
                 try
                 {
-                    await context.Database.MigrateAsync();
+                    var migrationSuccess = await migrationService.ApplyMigrationsAsync();
+                    if (!migrationSuccess)
+                    {
+                        throw new InvalidOperationException("Failed to apply migrations in fallback");
+                    }
                     Console.WriteLine("✅ Fallback migration applied");
                 }
                 catch (Exception migEx)
@@ -295,8 +238,49 @@ using (var scope = app.Services.CreateScope())
         }
         else
         {
-            // Normal migration path for production
-            await context.Database.MigrateAsync();
+            // Robust incremental migration path for production
+            // Uses idempotent operations - can be safely run multiple times
+            Console.WriteLine("🔄 Checking for pending migrations...");
+            
+            var pendingMigrations = await migrationService.GetPendingMigrationsAsync();
+            if (pendingMigrations.Count > 0)
+            {
+                Console.WriteLine($"🔄 Found {pendingMigrations.Count} pending migration(s): {string.Join(", ", pendingMigrations)}");
+            }
+            
+            var migrationSuccess = await migrationService.ApplyMigrationsAsync();
+            if (!migrationSuccess)
+            {
+                // Log detailed error information instead of throwing
+                Console.WriteLine("❌ CRITICAL: Failed to apply database migrations!");
+                Console.WriteLine("❌ The application cannot start with an inconsistent database state.");
+                Console.WriteLine("❌ Please check the logs above for detailed error information.");
+                Console.WriteLine("❌ Common causes:");
+                Console.WriteLine("   - Migration contains non-idempotent operations (CREATE TABLE instead of CREATE TABLE IF NOT EXISTS)");
+                Console.WriteLine("   - Database schema conflicts with migration expectations");
+                Console.WriteLine("   - Missing dependencies or permissions");
+                Console.WriteLine("❌ Action required: Fix the migration issue and restart the application.");
+                
+                // Get applied migrations for diagnostic information
+                try
+                {
+                    var appliedMigrations = await migrationService.GetAppliedMigrationsAsync();
+                    Console.WriteLine($"ℹ️  Successfully applied migrations: {string.Join(", ", appliedMigrations)}");
+                }
+                catch (Exception diagEx)
+                {
+                    Console.WriteLine($"⚠️  Could not retrieve applied migrations: {diagEx.Message}");
+                }
+                
+                // Only throw if we absolutely cannot continue
+                // This gives clear information about what went wrong
+                throw new InvalidOperationException(
+                    "Database migration failed. Check the logs above for details. " +
+                    "The application cannot start with an inconsistent database state. " +
+                    "Please fix the migration issue and restart.");
+            }
+            
+            Console.WriteLine("✅ Database migrations completed");
         }
 
         Console.WriteLine("🌱 Starting data seeding...");
