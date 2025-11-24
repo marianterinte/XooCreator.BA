@@ -156,6 +156,13 @@
       "caption": "Indulás",
       "text": "Elmondta az apjának, hogy el kell mennie, felfedezni. Nem mondhatta el a császárnak, hogy békét akar hozni — ennyi hódítás után ez volt az utolsó, amit a nagy Pufus Alchimus hallani akart. Felszállt a birodalom egyik űrhajójára és elindult...",
       "imageUrl": "images/tol/stories/seed@alchimalia.com/loi-intro/15.leavingkk.png"
+    },
+    {
+      "tileId": "16",
+      "type": "video",
+      "sortOrder": 16,
+      "caption": "Crystal",
+      "videoUrl": "video/tol/stories/seed@alchimalia.com/loi-intro/tol-cristal.mp4"
     }
   ]
 }

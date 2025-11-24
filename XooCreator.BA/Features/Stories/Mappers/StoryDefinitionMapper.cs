@@ -125,6 +125,23 @@ public static class StoryDefinitionMapper
         {
             foreach (var tileSeed in seedData.Tiles)
             {
+                // For video tiles, don't set ImageUrl if VideoUrl is provided (VideoUrl goes to translation)
+                // Only set ImageUrl if it's not a video path or if it's a real image
+                string? imageUrl = tileSeed.ImageUrl;
+                if (tileSeed.Type?.Equals("video", StringComparison.OrdinalIgnoreCase) == true 
+                    && !string.IsNullOrWhiteSpace(tileSeed.VideoUrl))
+                {
+                    // If VideoUrl is provided, don't use ImageUrl for video tiles
+                    // ImageUrl should be null or a thumbnail image, not the video path
+                    // Always set ImageUrl to null for video tiles when VideoUrl is provided
+                    // (unless ImageUrl is explicitly set and is NOT a video path - e.g., a thumbnail)
+                    if (string.IsNullOrWhiteSpace(imageUrl) || imageUrl.StartsWith("video/", StringComparison.OrdinalIgnoreCase))
+                    {
+                        imageUrl = null; // Don't set video path as ImageUrl, or null if not provided
+                    }
+                    // If imageUrl is provided and doesn't start with "video/", keep it (it's a thumbnail)
+                }
+                
                 var tile = new StoryTile
                 {
                     TileId = tileSeed.TileId,
@@ -132,8 +149,8 @@ public static class StoryDefinitionMapper
                     SortOrder = tileSeed.SortOrder,
                     Caption = tileSeed.Caption,
                     Text = tileSeed.Text,
-                    ImageUrl = tileSeed.ImageUrl,
-                    // Audio and Video are now language-specific (not set in seed data for now)
+                    ImageUrl = imageUrl,
+                    // Audio and Video are now language-specific (stored in translation)
                     Question = tileSeed.Question
                 };
 

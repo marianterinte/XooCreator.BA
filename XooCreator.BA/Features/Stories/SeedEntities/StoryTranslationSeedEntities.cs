@@ -31,6 +31,8 @@ internal sealed class TileTranslationSeed
     public string? Caption { get; set; }
     public string? Text { get; set; }
     public string? Question { get; set; }
+    public string? AudioUrl { get; set; }
+    public string? VideoUrl { get; set; }
     public List<AnswerTranslationSeed>? Answers { get; set; }
 }
 

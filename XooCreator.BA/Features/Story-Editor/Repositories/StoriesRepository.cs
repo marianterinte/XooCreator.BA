@@ -167,22 +167,146 @@ public class StoriesRepository : IStoriesRepository
                 .Select(s => s.StoryId)
                 .ToListAsync();
             
-            if (existingMainStories.Count == mainStoryIds.Length) 
-            {
-                return;
-            }
-            
             var stories = await LoadStoriesFromJsonAsync(LanguageCode.RoRo.ToFolder());
-            foreach (var story in stories)
+            
+            // If stories already exist, update them; otherwise create new ones
+            if (existingMainStories.Count == mainStoryIds.Length)
             {
-                _context.StoryDefinitions.Add(story);
+                // Stories exist, but we need to ensure ro-ro translations are created/updated for VideoUrl and AudioUrl
+                // This handles the case where translations were not created initially
+                // Also need to fix ImageUrl for video tiles that have VideoUrl in translation
             }
-            await _context.SaveChangesAsync();
+            else
+            {
+                // Create new stories
+                foreach (var story in stories)
+                {
+                    _context.StoryDefinitions.Add(story);
+                }
+                await _context.SaveChangesAsync();
+            }
 
             var processedDefTranslations = new HashSet<(Guid, string)>();
             var processedTileTranslations = new HashSet<(Guid, string)>();
             var processedAnswerTranslations = new HashSet<(Guid, string)>();
 
+            // Process ro-ro translations first (base language) to handle VideoUrl and AudioUrl
+            // This runs for both new and existing stories to ensure translations are created/updated
+            var roRoTranslations = await LoadStoryTranslationsFromJsonAsync(LanguageCode.RoRo.ToTag());
+            foreach (var tr in roRoTranslations)
+            {
+                var def = await _context.StoryDefinitions
+                    .Include(s => s.Tiles)
+                        .ThenInclude(t => t.Answers)
+                    .Include(s => s.Tiles)
+                        .ThenInclude(t => t.Translations)
+                    .FirstOrDefaultAsync(s => s.StoryId == tr.StoryId);
+                if (def == null) continue;
+
+                if (tr.Tiles == null) continue;
+
+                foreach (var t in tr.Tiles)
+                {
+                    var dbTile = def.Tiles.FirstOrDefault(x => x.TileId == t.TileId);
+                    if (dbTile == null) continue;
+
+                    var tileKey = (dbTile.Id, tr.Locale);
+                    
+                    // Build video URL with language prefix if VideoUrl is provided
+                    string? videoUrl = null;
+                    if (!string.IsNullOrWhiteSpace(t.VideoUrl))
+                    {
+                        // If VideoUrl starts with "video/tol/", insert language code after "video/"
+                        // Example: "video/tol/stories/..." -> "video/ro-ro/tol/stories/..."
+                        if (t.VideoUrl.StartsWith("video/tol/", StringComparison.OrdinalIgnoreCase))
+                        {
+                            videoUrl = $"video/{tr.Locale}/tol/{t.VideoUrl.Substring("video/tol/".Length)}";
+                        }
+                        else
+                        {
+                            videoUrl = t.VideoUrl;
+                        }
+                    }
+                    
+                    // Build audio URL with language prefix if AudioUrl is provided
+                    string? audioUrl = null;
+                    if (!string.IsNullOrWhiteSpace(t.AudioUrl))
+                    {
+                        // If AudioUrl starts with "audio/tol/", insert language code after "audio/"
+                        // Example: "audio/tol/stories/..." -> "audio/ro-ro/tol/stories/..."
+                        if (t.AudioUrl.StartsWith("audio/tol/", StringComparison.OrdinalIgnoreCase))
+                        {
+                            audioUrl = $"audio/{tr.Locale}/tol/{t.AudioUrl.Substring("audio/tol/".Length)}";
+                        }
+                        else
+                        {
+                            audioUrl = t.AudioUrl;
+                        }
+                    }
+                    
+                    // Check if translation already exists
+                    var existingTranslation = dbTile.Translations.FirstOrDefault(trans => trans.LanguageCode == tr.Locale);
+                    if (existingTranslation != null)
+                    {
+                        // Update existing translation
+                        if (!string.IsNullOrWhiteSpace(videoUrl))
+                        {
+                            existingTranslation.VideoUrl = videoUrl;
+                        }
+                        if (!string.IsNullOrWhiteSpace(audioUrl))
+                        {
+                            existingTranslation.AudioUrl = audioUrl;
+                        }
+                        // Update other fields only if they are provided in seed data (don't overwrite with null)
+                        // This preserves manually edited translations if seed data doesn't have values
+                        if (t.Caption != null) existingTranslation.Caption = t.Caption;
+                        if (t.Text != null) existingTranslation.Text = t.Text;
+                        if (t.Question != null) existingTranslation.Question = t.Question;
+                        
+                        // If this is a video tile and VideoUrl is set, ensure ImageUrl is null (not the video path)
+                        if (dbTile.Type?.Equals("video", StringComparison.OrdinalIgnoreCase) == true 
+                            && !string.IsNullOrWhiteSpace(videoUrl))
+                        {
+                            if (!string.IsNullOrWhiteSpace(dbTile.ImageUrl) && dbTile.ImageUrl.StartsWith("video/", StringComparison.OrdinalIgnoreCase))
+                            {
+                                dbTile.ImageUrl = null; // Clear video path from ImageUrl
+                            }
+                        }
+                    }
+                    else if (!processedTileTranslations.Contains(tileKey))
+                    {
+                        // Only create translation if there's VideoUrl, AudioUrl, or other translation-specific data
+                        if (!string.IsNullOrWhiteSpace(videoUrl) || !string.IsNullOrWhiteSpace(audioUrl) 
+                            || !string.IsNullOrWhiteSpace(t.Caption) || !string.IsNullOrWhiteSpace(t.Text) || !string.IsNullOrWhiteSpace(t.Question))
+                        {
+                            _context.StoryTileTranslations.Add(new StoryTileTranslation
+                            {
+                                StoryTileId = dbTile.Id,
+                                LanguageCode = tr.Locale,
+                                Caption = t.Caption,
+                                Text = t.Text,
+                                Question = t.Question,
+                                AudioUrl = audioUrl,
+                                VideoUrl = videoUrl
+                            });
+                            processedTileTranslations.Add(tileKey);
+                            
+                            // If this is a video tile and VideoUrl is set, ensure ImageUrl is null (not the video path)
+                            if (dbTile.Type?.Equals("video", StringComparison.OrdinalIgnoreCase) == true 
+                                && !string.IsNullOrWhiteSpace(videoUrl))
+                            {
+                                if (!string.IsNullOrWhiteSpace(dbTile.ImageUrl) && dbTile.ImageUrl.StartsWith("video/", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    dbTile.ImageUrl = null; // Clear video path from ImageUrl
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            await _context.SaveChangesAsync();
+
+            // Process other languages
             foreach (var lc in LanguageCodeExtensions.All().Where(x => x != LanguageCode.RoRo))
             {
                 var translations = await LoadStoryTranslationsFromJsonAsync(lc.ToTag());
@@ -221,13 +345,47 @@ public class StoriesRepository : IStoriesRepository
                         var tileKey = (dbTile.Id, tr.Locale);
                         if (!processedTileTranslations.Contains(tileKey))
                         {
+                            // Build video URL with language prefix if VideoUrl is provided
+                            string? videoUrl = null;
+                            if (!string.IsNullOrWhiteSpace(t.VideoUrl))
+                            {
+                                // If VideoUrl starts with "video/tol/", insert language code after "video/"
+                                // Example: "video/tol/stories/..." -> "video/ro-ro/tol/stories/..."
+                                if (t.VideoUrl.StartsWith("video/tol/", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    videoUrl = $"video/{tr.Locale}/tol/{t.VideoUrl.Substring("video/tol/".Length)}";
+                                }
+                                else
+                                {
+                                    videoUrl = t.VideoUrl;
+                                }
+                            }
+                            
+                            // Build audio URL with language prefix if AudioUrl is provided
+                            string? audioUrl = null;
+                            if (!string.IsNullOrWhiteSpace(t.AudioUrl))
+                            {
+                                // If AudioUrl starts with "audio/tol/", insert language code after "audio/"
+                                // Example: "audio/tol/stories/..." -> "audio/ro-ro/tol/stories/..."
+                                if (t.AudioUrl.StartsWith("audio/tol/", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    audioUrl = $"audio/{tr.Locale}/tol/{t.AudioUrl.Substring("audio/tol/".Length)}";
+                                }
+                                else
+                                {
+                                    audioUrl = t.AudioUrl;
+                                }
+                            }
+                            
                             _context.StoryTileTranslations.Add(new StoryTileTranslation
                             {
                                 StoryTileId = dbTile.Id,
                                 LanguageCode = tr.Locale,
                                 Caption = t.Caption,
                                 Text = t.Text,
-                                Question = t.Question
+                                Question = t.Question,
+                                AudioUrl = audioUrl,
+                                VideoUrl = videoUrl
                             });
                             processedTileTranslations.Add(tileKey);
                         }
@@ -359,13 +517,47 @@ public class StoriesRepository : IStoriesRepository
                     var existsTile = await _context.StoryTileTranslations.AnyAsync(e => e.StoryTileId == dbTile.Id && e.LanguageCode == tr.Locale);
                     if (!existsTile)
                     {
+                        // Build video URL with language prefix if VideoUrl is provided
+                        string? videoUrl = null;
+                        if (!string.IsNullOrWhiteSpace(t.VideoUrl))
+                        {
+                            // If VideoUrl starts with "video/tol/", insert language code after "video/"
+                            // Example: "video/tol/stories/..." -> "video/ro-ro/tol/stories/..."
+                            if (t.VideoUrl.StartsWith("video/tol/", StringComparison.OrdinalIgnoreCase))
+                            {
+                                videoUrl = $"video/{tr.Locale}/tol/{t.VideoUrl.Substring("video/tol/".Length)}";
+                            }
+                            else
+                            {
+                                videoUrl = t.VideoUrl;
+                            }
+                        }
+                        
+                        // Build audio URL with language prefix if AudioUrl is provided
+                        string? audioUrl = null;
+                        if (!string.IsNullOrWhiteSpace(t.AudioUrl))
+                        {
+                            // If AudioUrl starts with "audio/tol/", insert language code after "audio/"
+                            // Example: "audio/tol/stories/..." -> "audio/ro-ro/tol/stories/..."
+                            if (t.AudioUrl.StartsWith("audio/tol/", StringComparison.OrdinalIgnoreCase))
+                            {
+                                audioUrl = $"audio/{tr.Locale}/tol/{t.AudioUrl.Substring("audio/tol/".Length)}";
+                            }
+                            else
+                            {
+                                audioUrl = t.AudioUrl;
+                            }
+                        }
+                        
                         _context.StoryTileTranslations.Add(new StoryTileTranslation
                         {
                             StoryTileId = dbTile.Id,
                             LanguageCode = tr.Locale,
                             Caption = t.Caption,
                             Text = t.Text,
-                            Question = t.Question
+                            Question = t.Question,
+                            AudioUrl = audioUrl,
+                            VideoUrl = videoUrl
                         });
                     }
                     processedTileTranslations.Add(tileKey);
@@ -565,6 +757,8 @@ public class StoriesRepository : IStoriesRepository
                     Caption = t.Caption,
                     Text = t.Text,
                     Question = t.Question,
+                    AudioUrl = t.AudioUrl,
+                    VideoUrl = t.VideoUrl,
                     Answers = t.Answers?.Select(a => new AnswerTranslationSeed
                     {
                         AnswerId = a.AnswerId,
@@ -622,6 +816,8 @@ public class StoriesRepository : IStoriesRepository
                             Caption = t.Caption,
                             Text = t.Text,
                             Question = t.Question,
+                            AudioUrl = t.AudioUrl,
+                            VideoUrl = t.VideoUrl,
                             Answers = t.Answers?.Select(a => new AnswerTranslationSeed
                             {
                                 AnswerId = a.AnswerId,
