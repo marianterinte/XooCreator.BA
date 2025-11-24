@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using XooCreator.BA.Features.Stories.Services;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Endpoints;
-using XooCreator.BA.Features.Stories.Services;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 
@@ -36,5 +35,3 @@ public class GetStoryEditEndpoint
         return TypedResults.Ok(editable);
     }
 }
-
-

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
+using XooCreator.BA.Infrastructure.Seeding;
 
 namespace XooCreator.BA.Features.StoryEditor.Services;
 
@@ -94,7 +95,7 @@ public class StoryTopicsSeedService : IStoryTopicsSeedService
         foreach (var authorName in authorNames)
         {
             // Generate AuthorId from name (lowercase, replace spaces and special chars with hyphens)
-            var authorId = GenerateAuthorId(authorName);
+            var authorId = SeedingUtils.GenerateAuthorId(authorName);
 
             var existingAuthor = await _context.ClassicAuthors
                 .FirstOrDefaultAsync(a => a.AuthorId == authorId && a.LanguageCode == languageCode, ct);
@@ -128,44 +129,6 @@ public class StoryTopicsSeedService : IStoryTopicsSeedService
         }
 
         await _context.SaveChangesAsync(ct);
-    }
-
-    private string GenerateAuthorId(string authorName)
-    {
-        // Convert to lowercase, replace spaces and special characters with hyphens
-        var authorId = authorName.ToLowerInvariant()
-            .Replace(" ", "-")
-            .Replace("ă", "a")
-            .Replace("â", "a")
-            .Replace("î", "i")
-            .Replace("ș", "s")
-            .Replace("ț", "t")
-            .Replace("á", "a")
-            .Replace("é", "e")
-            .Replace("í", "i")
-            .Replace("ó", "o")
-            .Replace("ö", "o")
-            .Replace("ő", "o")
-            .Replace("ú", "u")
-            .Replace("ü", "u")
-            .Replace("ű", "u")
-            .Replace(".", "")
-            .Replace(",", "")
-            .Replace("'", "")
-            .Replace("\"", "")
-            .Replace("(", "")
-            .Replace(")", "");
-        
-        // Remove multiple consecutive hyphens
-        while (authorId.Contains("--"))
-        {
-            authorId = authorId.Replace("--", "-");
-        }
-        
-        // Remove leading/trailing hyphens
-        authorId = authorId.Trim('-');
-        
-        return authorId;
     }
 
     private async Task SeedTopicsAsync(CancellationToken ct)

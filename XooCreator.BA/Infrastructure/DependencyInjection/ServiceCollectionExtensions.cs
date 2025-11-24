@@ -12,6 +12,8 @@ using XooCreator.BA.Features.TreeOfLight.Repositories;
 using XooCreator.BA.Features.Stories.Services;
 using XooCreator.BA.Features.Stories.Repositories;
 using XooCreator.BA.Features.StoryEditor.Services;
+using XooCreator.BA.Features.StoryEditor.Services.Content;
+using XooCreator.BA.Features.StoryEditor.Services.Cloning;
 using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Services;
@@ -94,7 +96,22 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IStoriesService, StoriesService>();
         services.AddScoped<IStoriesRepository, StoriesRepository>();
         services.AddScoped<IStoryCraftsRepository, StoryCraftsRepository>();
+        
+        // Refactored Story Editor Services (Content Management)
+        services.AddScoped<IStoryDraftManager, StoryDraftManager>();
+        services.AddScoped<IStoryTranslationManager, StoryTranslationManager>();
+        services.AddScoped<IStoryOwnershipService, StoryOwnershipService>();
+        services.AddScoped<IStoryAnswerUpdater, StoryAnswerUpdater>();
+        services.AddScoped<IStoryTileUpdater, StoryTileUpdater>();
+        
+        // Cloning Services (unified logic for Copy/Fork/New Version)
+        services.AddScoped<IStorySourceMapper, StorySourceMapper>();
+        services.AddScoped<IStoryCloner, StoryCloner>();
+        
+        // Main Story Editor Service (Facade)
         services.AddScoped<IStoryEditorService, StoryEditorService>();
+        
+        // Story Publishing & Asset Management
         services.AddScoped<IStoryPublishingService, StoryPublishingService>();
         services.AddScoped<IStoryPublishAssetService, StoryPublishAssetService>();
         services.AddScoped<IStoryIdGenerator, StoryIdGenerator>();

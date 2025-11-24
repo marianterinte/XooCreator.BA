@@ -1,21 +1,16 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
-using XooCreator.BA.Infrastructure.Swagger;
-using Npgsql;
 using XooCreator.BA.Data;
-using XooCreator.BA.Services;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Errors;
 using XooCreator.BA.Infrastructure.DependencyInjection;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
+using XooCreator.BA.Infrastructure.Configuration;
 using XooCreator.BA.Features.Stories.Services;
 using XooCreator.BA.Features.TreeOfLight.Services;
 using XooCreator.BA.Features.StoryEditor.Services;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Services;
 using XooCreator.BA.Data.Services;
-using XooCreator.BA.Data.Interceptors;
+using XooCreator.BA.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,143 +24,16 @@ builder.Services.AddLogging();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddEndpointDefinitions();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "XooCreator.BA",
-        Version = "v1.0.0",
-        Description = "XooCreator Backend API"
-    });
-    c.OperationFilter<LocaleParameterOperationFilter>();
-    c.OperationFilter<BusinessFolderTagOperationFilter>();
+builder.Services.AddSwaggerConfiguration();
 
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "Enter 'Bearer {token}'"
-    });
+builder.Services.AddCorsConfiguration();
 
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
-});
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll", policy =>
-        policy
-            .SetIsOriginAllowed(_ => true) // acceptă orice Origin; va întoarce Originul cererii (nu "*")
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowCredentials()
-            .SetPreflightMaxAge(TimeSpan.FromHours(24))
-    );
-
-});
-
-builder.Services.AddDbContext<XooDbContext>(options =>
-{
-    var dbUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
-    string cs;
-    if (!string.IsNullOrWhiteSpace(dbUrl))
-    {
-        var uri = new Uri(dbUrl);
-        var userInfo = uri.UserInfo.Split(':');
-        var npg = new NpgsqlConnectionStringBuilder
-        {
-            Host = uri.Host,
-            Port = uri.Port,
-            Username = userInfo.ElementAtOrDefault(0) ?? "postgres",
-            Password = userInfo.ElementAtOrDefault(1) ?? string.Empty,
-            Database = uri.AbsolutePath.Trim('/'),
-            SslMode = SslMode.Require
-        };
-        cs = npg.ConnectionString;
-    }
-    else
-    {
-        cs = builder.Configuration.GetConnectionString("Postgres")
-            ?? "Host=localhost;Port=5432;Database=xoo_db;Username=postgres;Password=admin";
-    }
-
-    options.UseNpgsql(cs);
-    
-    // Add interceptor to automatically make migration SQL commands idempotent
-    // This transforms CREATE TABLE, CREATE INDEX, ALTER TABLE ADD CONSTRAINT, etc.
-    // to use IF NOT EXISTS, making all migrations safe to run multiple times
-    var loggerFactory = builder.Services.BuildServiceProvider().GetService<ILoggerFactory>();
-    var logger = loggerFactory?.CreateLogger<IdempotentMigrationCommandInterceptor>();
-    options.AddInterceptors(new IdempotentMigrationCommandInterceptor(logger));
-});
+builder.Services.AddDatabaseConfiguration(builder.Configuration);
 
 // Register all application services using extension methods
 builder.Services.AddApplicationServices();
 
-var auth0Section = builder.Configuration.GetSection("Auth0");
-var auth0Domain = auth0Section["Domain"];
-var auth0Audience = auth0Section["Audience"];
-
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(options =>
-{
-    options.MapInboundClaims = false;
-    options.Authority = $"https://{auth0Domain}";
-    options.Audience = auth0Audience;
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidIssuer = $"https://{auth0Domain}/",
-        ValidateAudience = true,
-        ValidAudience = auth0Audience,
-        ValidateLifetime = true
-    };
-
-    options.Events = new JwtBearerEvents
-    {
-        OnAuthenticationFailed = context =>
-        {
-            Console.WriteLine($"[JWT] Authentication failed: {context.Exception.Message}");
-            return Task.CompletedTask;
-        },
-        OnChallenge = context =>
-        {
-            if (context.AuthenticateFailure != null)
-            {
-                Console.WriteLine($"[JWT] Challenge failed: {context.AuthenticateFailure.Message}");
-            }
-            return Task.CompletedTask;
-        },
-        OnTokenValidated = context =>
-        {
-            var iss = context.Principal?.FindFirst("iss")?.Value ?? "<none>";
-            var aud = string.Join(",", context.Principal?.FindAll("aud").Select(c => c.Value) ?? Array.Empty<string>());
-            var sub = context.Principal?.FindFirst("sub")?.Value ?? "<none>";
-            Console.WriteLine($"[JWT] Token validated. iss={iss} aud={aud} sub={sub}");
-            return Task.CompletedTask;
-        }
-    };
-});
-
-builder.Services.AddAuthorization();
+builder.Services.AddAuthConfiguration(builder.Configuration);
 
 var app = builder.Build();
 app.UseCors("AllowAll");

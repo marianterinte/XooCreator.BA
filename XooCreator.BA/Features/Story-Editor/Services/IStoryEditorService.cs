@@ -1,6 +1,6 @@
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Enums;
-using XooCreator.BA.Features.Stories.Services;
+using XooCreator.BA.Features.StoryEditor.Services.Content;
 
 namespace XooCreator.BA.Features.StoryEditor.Services;
 
