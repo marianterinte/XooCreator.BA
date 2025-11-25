@@ -67,8 +67,7 @@ jobs:
               --name ${{ secrets.AZURE_WEBAPP_NAME }} \
               --settings \
                 ASPNETCORE_ENVIRONMENT=Production \
-                AZURE_PG_URL_PROD="${{ secrets.AZURE_PG_URL_PROD }}" \
-                DATABASE_URL="${{ secrets.AZURE_PG_URL_PROD }}"
+                DATABASE_URL="${{ secrets.SUPABASE_DB_URL }}"
           else
             # Method 2: Auto-discover resource group
             echo "Auto-discovering resource group..."
@@ -79,8 +78,7 @@ jobs:
               --name ${{ secrets.AZURE_WEBAPP_NAME }} \
               --settings \
                 ASPNETCORE_ENVIRONMENT=Production \
-                AZURE_PG_URL_PROD="${{ secrets.AZURE_PG_URL_PROD }}" \
-                DATABASE_URL="${{ secrets.AZURE_PG_URL_PROD }}"
+                DATABASE_URL="${{ secrets.SUPABASE_DB_URL }}"
           fi
 
       - name: Deploy to Azure Web App

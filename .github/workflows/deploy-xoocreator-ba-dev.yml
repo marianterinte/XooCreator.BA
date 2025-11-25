@@ -63,8 +63,7 @@ jobs:
               --name ${{ secrets.AZURE_WEBAPP_NAME_DEV }} \
               --settings \
                 ASPNETCORE_ENVIRONMENT=Development \
-                SUPABASE_DB_URL="${{ secrets.SUPABASE_DB_URL }}" \
-                DATABASE_URL="${{ secrets.SUPABASE_DB_URL }}"
+                DATABASE_URL="${{ secrets.SUPABASE_DB_URL_DEV }}"
           else
             echo "Auto-discovering dev resource group..."
             RG=$(az webapp show --name ${{ secrets.AZURE_WEBAPP_NAME_DEV }} --query resourceGroup -o tsv)
@@ -74,8 +73,7 @@ jobs:
               --name ${{ secrets.AZURE_WEBAPP_NAME_DEV }} \
               --settings \
                 ASPNETCORE_ENVIRONMENT=Development \
-                SUPABASE_DB_URL="${{ secrets.SUPABASE_DB_URL }}" \
-                DATABASE_URL="${{ secrets.SUPABASE_DB_URL }}"
+                DATABASE_URL="${{ secrets.SUPABASE_DB_URL_DEV }}"
           fi
 
       - name: Deploy to Azure Web App
