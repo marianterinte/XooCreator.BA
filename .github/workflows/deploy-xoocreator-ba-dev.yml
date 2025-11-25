@@ -54,7 +54,7 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS_DEV }}
 
-      - name: Set Azure App Settings (DATABASE_URL, ASPNETCORE_ENVIRONMENT)
+      - name: Set Azure App Settings (ASPNETCORE_ENVIRONMENT)
         run: |
           if [ -n "${{ secrets.AZURE_RESOURCE_GROUP_DEV }}" ]; then
             echo "Using provided dev resource group: ${{ secrets.AZURE_RESOURCE_GROUP_DEV }}"
@@ -62,9 +62,7 @@ jobs:
               --resource-group ${{ secrets.AZURE_RESOURCE_GROUP_DEV }} \
               --name ${{ secrets.AZURE_WEBAPP_NAME_DEV }} \
               --settings \
-                ASPNETCORE_ENVIRONMENT=Development \
-                SUPABASE_DB_URL="${{ secrets.SUPABASE_DB_URL }}" \
-                DATABASE_URL="${{ secrets.SUPABASE_DB_URL }}"
+                ASPNETCORE_ENVIRONMENT=Development
           else
             echo "Auto-discovering dev resource group..."
             RG=$(az webapp show --name ${{ secrets.AZURE_WEBAPP_NAME_DEV }} --query resourceGroup -o tsv)
@@ -73,9 +71,7 @@ jobs:
               --resource-group "$RG" \
               --name ${{ secrets.AZURE_WEBAPP_NAME_DEV }} \
               --settings \
-                ASPNETCORE_ENVIRONMENT=Development \
-                SUPABASE_DB_URL="${{ secrets.SUPABASE_DB_URL }}" \
-                DATABASE_URL="${{ secrets.SUPABASE_DB_URL }}"
+                ASPNETCORE_ENVIRONMENT=Development
           fi
 
       - name: Deploy to Azure Web App
