@@ -14,29 +14,7 @@ public static class DatabaseConfiguration
     {
         services.AddDbContext<XooDbContext>(options =>
         {
-            var dbUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
-            string cs;
-            if (!string.IsNullOrWhiteSpace(dbUrl))
-            {
-                var uri = new Uri(dbUrl);
-                var userInfo = uri.UserInfo.Split(':');
-                var npg = new NpgsqlConnectionStringBuilder
-                {
-                    Host = uri.Host,
-                    Port = uri.Port,
-                    Username = userInfo.ElementAtOrDefault(0) ?? "postgres",
-                    Password = userInfo.ElementAtOrDefault(1) ?? string.Empty,
-                    Database = uri.AbsolutePath.Trim('/'),
-                    SslMode = SslMode.Require
-                };
-                cs = npg.ConnectionString;
-            }
-            else
-            {
-                cs = configuration.GetConnectionString("Postgres")
-                    ?? "Host=localhost;Port=5432;Database=xoo_db;Username=postgres;Password=admin";
-            }
-
+            var cs = ResolveConnectionString(configuration);
             options.UseNpgsql(cs);
             
             // Add interceptor to automatically make migration SQL commands idempotent
@@ -48,5 +26,63 @@ public static class DatabaseConfiguration
         });
 
         return services;
+    }
+
+    private static string ResolveConnectionString(IConfiguration configuration)
+    {
+        var dbUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+
+        if (string.IsNullOrWhiteSpace(dbUrl))
+        {
+            var configured = configuration.GetConnectionString("Postgres");
+            if (!string.IsNullOrWhiteSpace(configured))
+            {
+                if (configured.StartsWith("env:", StringComparison.OrdinalIgnoreCase))
+                {
+                    var envName = configured.Substring(4).Trim();
+                    if (!string.IsNullOrWhiteSpace(envName))
+                    {
+                        dbUrl = Environment.GetEnvironmentVariable(envName);
+                    }
+                }
+                else
+                {
+                    dbUrl = configured;
+                }
+            }
+        }
+
+        if (string.IsNullOrWhiteSpace(dbUrl))
+        {
+            return "Host=localhost;Port=5432;Database=xoo_db;Username=postgres;Password=admin";
+        }
+
+        return BuildConnectionString(dbUrl);
+    }
+
+    private static string BuildConnectionString(string value)
+    {
+        if (!value.Contains("://", StringComparison.Ordinal))
+        {
+            return value;
+        }
+
+        if (!Uri.TryCreate(value, UriKind.Absolute, out var uri))
+        {
+            return value;
+        }
+
+        var userInfo = uri.UserInfo.Split(':', 2);
+        var npg = new NpgsqlConnectionStringBuilder
+        {
+            Host = uri.Host,
+            Port = uri.Port,
+            Username = userInfo.ElementAtOrDefault(0) ?? "postgres",
+            Password = userInfo.ElementAtOrDefault(1) ?? string.Empty,
+            Database = uri.AbsolutePath.Trim('/'),
+            SslMode = SslMode.Require
+        };
+
+        return npg.ConnectionString;
     }
 }
