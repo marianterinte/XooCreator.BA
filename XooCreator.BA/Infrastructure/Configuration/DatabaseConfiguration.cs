@@ -25,7 +25,10 @@ public static class DatabaseConfiguration
                 cs = builder.ConnectionString;
             }
             
-            options.UseNpgsql(cs);
+            options.UseNpgsql(cs, npgsqlOptions =>
+            {
+                npgsqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", dbSchema);
+            });
             
             // Add interceptor to automatically make migration SQL commands idempotent
             // This transforms CREATE TABLE, CREATE INDEX, ALTER TABLE ADD CONSTRAINT, etc.

@@ -72,6 +72,10 @@ public class IdempotentMigrationCommandInterceptor : DbCommandInterceptor
         if (string.IsNullOrWhiteSpace(sql))
             return sql;
 
+        // Let EF handle __EFMigrationsHistory table without modifications
+        if (sql.Contains("__EFMigrationsHistory", StringComparison.OrdinalIgnoreCase))
+            return sql;
+
         var originalSql = sql;
         var transformedSql = sql;
 
