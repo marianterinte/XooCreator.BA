@@ -391,6 +391,38 @@ if (startupException != null)
 // Map endpoints (Endpoint Discovery)
 app.MapDiscoveredEndpoints();
 
+if (app.Environment.IsDevelopment())
+{
+    app.MapGet("/debug/db-state", async (
+        IDatabaseMigrationService migrationService,
+        XooDbContext context) =>
+    {
+        var conn = context.Database.GetDbConnection();
+        var connBuilder = new NpgsqlConnectionStringBuilder(conn.ConnectionString);
+
+        var info = new
+        {
+            Connection = new
+            {
+                Host = connBuilder.Host,
+                Port = connBuilder.Port,
+                Database = connBuilder.Database,
+                User = connBuilder.Username,
+                SslMode = connBuilder.SslMode.ToString()
+            },
+            ConfiguredSchema = context.Model.GetDefaultSchema(),
+            ForcedSchema = Environment.GetEnvironmentVariable("DB_FORCE_SCHEMA"),
+            CanConnect = await context.Database.CanConnectAsync(),
+            AppliedMigrations = await migrationService.GetAppliedMigrationsAsync(),
+            PendingMigrations = await migrationService.GetPendingMigrationsAsync()
+        };
+
+        return Results.Json(info);
+    })
+    .WithTags("Debug")
+    .WithName("GetDatabaseState");
+}
+
 // Sample protected minimal endpoint
 app.MapGet("/api/protected/ping", () => Results.Ok(new { ok = true, ts = DateTimeOffset.UtcNow }))
     .WithTags("Auth")
