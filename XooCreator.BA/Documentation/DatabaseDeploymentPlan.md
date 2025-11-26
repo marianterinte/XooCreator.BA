@@ -17,8 +17,9 @@ Asigurăm un flux determinist de provisionare și migrare pentru baza de date `a
 1. **Config App Service (Dev)**
    - Setează explicit `ASPNETCORE_ENVIRONMENT=Development`.
    - Păstrează `AZURE_PG_CONNSTRING_DEV` în Application Settings și, opțional, setează `DATABASE_URL` cu aceeași valoare pentru fallback rapid.
+   - Pentru rularea pe schema `public`, setează `DB_FORCE_SCHEMA=public` și lasă `Database__Schema` necompletat (sau la `alchimalia_schema` dacă vrei să revii).
 2. **Cod**
-   - Interceptorul (`IdempotentMigrationCommandInterceptor`) să folosească schema din config (`alchimalia_schema`) pentru toate verificările din `information_schema`/`pg_indexes`.
+   - Interceptorul (`IdempotentMigrationCommandInterceptor`) folosește schema din config/override (`Database:Schema` sau `DB_FORCE_SCHEMA`) pentru toate verificările din `information_schema`/`pg_indexes`.
    - `DatabaseConfiguration` transmite schema către interceptor și configurează `SearchPath` + `__EFMigrationsHistory` pe aceeași schema.
 3. **Pipeline**
    - YAML-ul de deploy pe `dev` să ruleze `dotnet publish` + deploy (deja existent).  
@@ -35,6 +36,6 @@ Asigurăm un flux determinist de provisionare și migrare pentru baza de date `a
 - [ ] Environment-ul dev are toate connection string-urile + flag-urile corecte.
 - [ ] `dotnet ef migrations add` a fost rulat local pentru schimbările noi (dacă este cazul).
 - [ ] Pipeline-ul finalizează fără erori și App Service pornește fără `startupException`.
-- [ ] În schema `alchimalia_schema` apar tabelele/coloanele noi.
+- [ ] În schema target (`alchimalia_schema` sau `public`, în funcție de `DB_FORCE_SCHEMA`) apar tabelele/coloanele noi.
 - [ ] `RecreateOnStart` este readus la `false` când nu se mai dorește drop complet.
 

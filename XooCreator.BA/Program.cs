@@ -77,6 +77,13 @@ using (var scope = app.Services.CreateScope())
         logger.LogInformation("🚀 Starting database initialization...");
         var recreate = builder.Configuration.GetValue<bool>("Database:RecreateOnStart");
         var dbSchema = builder.Configuration.GetValue<string>("Database:Schema") ?? "public";
+        var forcedSchema = Environment.GetEnvironmentVariable("DB_FORCE_SCHEMA");
+        if (!string.IsNullOrWhiteSpace(forcedSchema))
+        {
+            dbSchema = forcedSchema.Trim();
+            logger.LogInformation("🔄 Schema override detected via DB_FORCE_SCHEMA: {Schema}", dbSchema);
+            Console.WriteLine($"🔄 Schema override detected via DB_FORCE_SCHEMA: {dbSchema}");
+        }
         logger.LogInformation("📊 Database configuration - RecreateOnStart: {Recreate}, Schema: {Schema}", recreate, dbSchema);
 
         try

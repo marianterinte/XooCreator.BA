@@ -16,6 +16,12 @@ public static class DatabaseConfiguration
         {
             var cs = ResolveConnectionString(configuration);
             var dbSchema = configuration.GetValue<string>("Database:Schema") ?? "public";
+
+            var forcedSchema = Environment.GetEnvironmentVariable("DB_FORCE_SCHEMA");
+            if (!string.IsNullOrWhiteSpace(forcedSchema))
+            {
+                dbSchema = forcedSchema.Trim();
+            }
             
             // Add search_path to connection string if schema is not public
             if (dbSchema != "public")
