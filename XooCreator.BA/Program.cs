@@ -79,6 +79,40 @@ using (var scope = app.Services.CreateScope())
         var dbSchema = builder.Configuration.GetValue<string>("Database:Schema") ?? "public";
         logger.LogInformation("📊 Database configuration - RecreateOnStart: {Recreate}, Schema: {Schema}", recreate, dbSchema);
 
+        try
+        {
+            var dbConnection = context.Database.GetDbConnection();
+            var connectionBuilder = new NpgsqlConnectionStringBuilder(dbConnection.ConnectionString);
+            var sanitizedInfo = $"{connectionBuilder.Host}:{connectionBuilder.Port}/{connectionBuilder.Database} (User={connectionBuilder.Username}, SSL Mode={connectionBuilder.SslMode})";
+            logger.LogInformation("🔍 Target database: {Info}", sanitizedInfo);
+            Console.WriteLine($"🔍 Target database: {sanitizedInfo}");
+        }
+        catch (Exception parseEx)
+        {
+            logger.LogWarning(parseEx, "⚠️ Could not parse connection string for logging");
+            Console.WriteLine($"⚠️ Could not parse connection string for logging: {parseEx.Message}");
+        }
+
+        try
+        {
+            var connectivityOk = await context.Database.CanConnectAsync();
+            if (!connectivityOk)
+            {
+                logger.LogError("❌ Database connectivity test failed");
+                Console.WriteLine("❌ Database connectivity test failed");
+                throw new InvalidOperationException("Cannot connect to the configured database. Check network/firewall settings and credentials.");
+            }
+
+            logger.LogInformation("✅ Database connectivity test succeeded");
+            Console.WriteLine("✅ Database connectivity test succeeded");
+        }
+        catch (Exception connectEx)
+        {
+            logger.LogCritical(connectEx, "❌ Exception while testing database connectivity");
+            Console.WriteLine($"❌ Exception while testing database connectivity: {connectEx.Message}");
+            throw;
+        }
+
         if (recreate)
         {
             Console.WriteLine("🔄 Forcing database recreation via schema drop...");
