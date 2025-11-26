@@ -63,7 +63,7 @@ jobs:
             --name ${{ env.AZURE_WEBAPP_NAME_DEV }} \
             --settings \
               ASPNETCORE_ENVIRONMENT=Development \
-              ConnectionStrings__Postgres="${{ secrets.AZURE_PG_CONNSTRING_DEV }}" \
+              ConnectionStrings__Postgres="${{ secrets.AZURE_POSTGRES_CONNSTRING_DEV }}" \
               DB_FORCE_SCHEMA=public \
               Database__RecreateOnStart=false \
               Auth0__Domain=dev-fn01a0ex74zrocwb.us.auth0.com \
@@ -74,7 +74,3 @@ jobs:
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME_DEV }}
           package: ${{ env.WORKING_DIRECTORY }}/${{ env.PUBLISH_DIR }}
-
-      - name: Debug Azure account
-        run: az account show
-
