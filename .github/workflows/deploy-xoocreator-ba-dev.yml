@@ -64,6 +64,7 @@ jobs:
             --settings \
               ASPNETCORE_ENVIRONMENT=Development \
               ConnectionStrings__Postgres="${{ secrets.AZURE_POSTGRES_CONNSTRING_DEV }}" \
+              DB_FORCE_SCHEMA=alchimalia_schema \
               Database__RecreateOnStart=true \
               Auth0__Domain=dev-fn01a0ex74zrocwb.us.auth0.com \
               Auth0__Audience=https://alchimalia-be-dev-f5bad0c2f0dmh6au.westeurope-01.azurewebsites.net
