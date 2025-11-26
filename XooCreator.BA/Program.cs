@@ -109,7 +109,7 @@ using (var scope = app.Services.CreateScope())
                     Console.WriteLine("❌ Check the detailed error logs ABOVE for the exact failure reason.");
                     Console.WriteLine("═══════════════════════════════════════════════════════════");
                     Console.WriteLine("");
-                    throw new InvalidOperationException("Failed to apply migrations after schema recreation. Check logs above for details.");
+                    throw new InvalidOperationException("Failed to apply migrations after schema recreation. Check logs above for details.", ex);
                 }
                 Console.WriteLine("✅ Migrations applied successfully");
             }
@@ -135,7 +135,7 @@ using (var scope = app.Services.CreateScope())
                     if (!migrationSuccess)
                     {
                         Console.WriteLine("❌ Fallback migration also failed. Check logs above for details.");
-                        throw new InvalidOperationException("Failed to apply migrations in fallback. Check logs above for details.");
+                        throw new InvalidOperationException("Failed to apply migrations in fallback. Check logs above for details.", migEx);
                     }
                     Console.WriteLine("✅ Fallback migration applied");
                 }
