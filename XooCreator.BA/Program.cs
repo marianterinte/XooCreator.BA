@@ -75,16 +75,8 @@ using (var scope = app.Services.CreateScope())
     try
     {
         logger.LogInformation("🚀 Starting database initialization...");
-        var recreate = builder.Configuration.GetValue<bool>("Database:RecreateOnStart");
         var dbSchema = builder.Configuration.GetValue<string>("Database:Schema") ?? "alchimalia_schema";
-        var forcedSchema = Environment.GetEnvironmentVariable("DB_FORCE_SCHEMA");
-        if (!string.IsNullOrWhiteSpace(forcedSchema))
-        {
-            dbSchema = forcedSchema.Trim();
-            logger.LogInformation("🔄 Schema override detected via DB_FORCE_SCHEMA: {Schema}", dbSchema);
-            Console.WriteLine($"🔄 Schema override detected via DB_FORCE_SCHEMA: {dbSchema}");
-        }
-        logger.LogInformation("📊 Database configuration - RecreateOnStart: {Recreate}, Schema: {Schema}", recreate, dbSchema);
+        logger.LogInformation("📊 Database schema: {Schema}", dbSchema);
 
         try
         {
@@ -120,146 +112,38 @@ using (var scope = app.Services.CreateScope())
             throw;
         }
 
-        if (recreate)
+        var schemaName = QuoteIdentifier(dbSchema);
+        Console.WriteLine($"🔄 Ensuring schema '{dbSchema}' exists...");
+        await context.Database.ExecuteSqlRawAsync($"CREATE SCHEMA IF NOT EXISTS {schemaName};");
+        Console.WriteLine($"✅ Schema '{dbSchema}' ensured");
+
+        Console.WriteLine("🔄 Checking for pending migrations...");
+        var pendingMigrations = await migrationService.GetPendingMigrationsAsync();
+        if (pendingMigrations.Count > 0)
         {
-            Console.WriteLine("🔄 Forcing database recreation via schema drop...");
-            Console.WriteLine($"📊 Target schema: {dbSchema}");
-            
-            try
-            {
-                // Method that works on cloud platforms (Supabase, Railway, etc.)
-                // Drop and recreate the schema (removes all tables, data, etc.)
-                var schemaName = QuoteIdentifier(dbSchema);
-                Console.WriteLine($"🔄 Dropping schema {dbSchema}...");
-                await context.Database.ExecuteSqlRawAsync($"DROP SCHEMA IF EXISTS {schemaName} CASCADE;");
-                Console.WriteLine("✅ Schema dropped successfully");
-                
-                Console.WriteLine($"🔄 Creating schema {dbSchema}...");
-                await context.Database.ExecuteSqlRawAsync($"CREATE SCHEMA {schemaName};");
-                Console.WriteLine("✅ Schema recreated successfully");
-                
-                // Apply migrations using the robust migration service
-                Console.WriteLine("🔄 Applying migrations to recreated schema...");
-                var migrationSuccess = await migrationService.ApplyMigrationsAsync();
-                if (!migrationSuccess)
-                {
-                    Console.WriteLine("");
-                    Console.WriteLine("═══════════════════════════════════════════════════════════");
-                    Console.WriteLine("❌ CRITICAL: Failed to apply migrations after schema recreation!");
-                    Console.WriteLine("═══════════════════════════════════════════════════════════");
-                    Console.WriteLine("❌ Check the detailed error logs ABOVE for the exact failure reason.");
-                    Console.WriteLine("═══════════════════════════════════════════════════════════");
-                    Console.WriteLine("");
-                    throw new InvalidOperationException("Failed to apply migrations after schema recreation. Check logs above for details.");
-                }
-                Console.WriteLine("✅ Migrations applied successfully");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("");
-                Console.WriteLine("═══════════════════════════════════════════════════════════");
-                Console.WriteLine($"❌ Schema recreation failed: {ex.GetType().Name}");
-                Console.WriteLine($"❌ Error: {ex.Message}");
-                if (ex is Npgsql.PostgresException pgEx)
-                {
-                    Console.WriteLine($"❌ PostgreSQL Error Code: {pgEx.SqlState}");
-                    Console.WriteLine($"❌ PostgreSQL Error Detail: {pgEx.Detail ?? "N/A"}");
-                }
-                Console.WriteLine("═══════════════════════════════════════════════════════════");
-                Console.WriteLine("");
-                
-                // Fallback: try normal migration in case schema operations failed
-                Console.WriteLine("🔄 Attempting fallback: normal migration path...");
-                try
-                {
-                    var migrationSuccess = await migrationService.ApplyMigrationsAsync();
-                    if (!migrationSuccess)
-                    {
-                        Console.WriteLine("❌ Fallback migration also failed. Check logs above for details.");
-                        throw new InvalidOperationException("Failed to apply migrations in fallback. Check logs above for details.");
-                    }
-                    Console.WriteLine("✅ Fallback migration applied");
-                }
-                catch (Exception migEx)
-                {
-                    Console.WriteLine("");
-                    Console.WriteLine("═══════════════════════════════════════════════════════════");
-                    Console.WriteLine($"❌ Even fallback migration failed: {migEx.GetType().Name}");
-                    Console.WriteLine($"❌ Error: {migEx.Message}");
-                    if (migEx is Npgsql.PostgresException fallbackPgEx)
-                    {
-                        Console.WriteLine($"❌ PostgreSQL Error Code: {fallbackPgEx.SqlState}");
-                        Console.WriteLine($"❌ PostgreSQL Error Detail: {fallbackPgEx.Detail ?? "N/A"}");
-                    }
-                    Console.WriteLine("═══════════════════════════════════════════════════════════");
-                    Console.WriteLine("");
-                    throw;
-                }
-            }
+            Console.WriteLine($"🔄 Found {pendingMigrations.Count} pending migration(s): {string.Join(", ", pendingMigrations)}");
         }
         else
         {
-            // Ensure schema exists before running migrations
-            var schemaName = QuoteIdentifier(dbSchema);
-            Console.WriteLine($"🔄 Ensuring schema '{dbSchema}' exists...");
-            await context.Database.ExecuteSqlRawAsync($"CREATE SCHEMA IF NOT EXISTS {schemaName};");
-            Console.WriteLine($"✅ Schema '{dbSchema}' ensured");
-            
-            // Robust incremental migration path for production
-            // Uses idempotent operations - can be safely run multiple times
-            Console.WriteLine("🔄 Checking for pending migrations...");
-            
-            var pendingMigrations = await migrationService.GetPendingMigrationsAsync();
-            if (pendingMigrations.Count > 0)
-            {
-                Console.WriteLine($"🔄 Found {pendingMigrations.Count} pending migration(s): {string.Join(", ", pendingMigrations)}");
-            }
-            else
-            {
-                Console.WriteLine("✅ No pending migrations found");
-            }
-            
-            Console.WriteLine($"📊 Using schema: {dbSchema}");
-            var migrationSuccess = await migrationService.ApplyMigrationsAsync();
-            if (!migrationSuccess)
-            {
-                // Log detailed error information instead of throwing
-                Console.WriteLine("");
-                Console.WriteLine("═══════════════════════════════════════════════════════════");
-                Console.WriteLine("❌ CRITICAL: Failed to apply database migrations!");
-                Console.WriteLine("═══════════════════════════════════════════════════════════");
-                Console.WriteLine("❌ The application cannot start with an inconsistent database state.");
-                Console.WriteLine("❌ Please check the detailed error logs ABOVE for the exact failure reason.");
-                Console.WriteLine("❌ Common causes:");
-                Console.WriteLine("   - Migration contains non-idempotent operations (CREATE TABLE instead of CREATE TABLE IF NOT EXISTS)");
-                Console.WriteLine("   - Database schema conflicts with migration expectations");
-                Console.WriteLine("   - Missing dependencies or permissions");
-                Console.WriteLine("   - Schema does not exist or wrong schema name configured");
-                Console.WriteLine("❌ Action required: Fix the migration issue and restart the application.");
-                Console.WriteLine("═══════════════════════════════════════════════════════════");
-                Console.WriteLine("");
-                
-                // Get applied migrations for diagnostic information
-                try
-                {
-                    var appliedMigrations = await migrationService.GetAppliedMigrationsAsync();
-                    Console.WriteLine($"ℹ️  Successfully applied migrations: {string.Join(", ", appliedMigrations)}");
-                }
-                catch (Exception diagEx)
-                {
-                    Console.WriteLine($"⚠️  Could not retrieve applied migrations: {diagEx.Message}");
-                }
-                
-                // Only throw if we absolutely cannot continue
-                // This gives clear information about what went wrong
-                throw new InvalidOperationException(
-                    "Database migration failed. Check the logs above for details. " +
-                    "The application cannot start with an inconsistent database state. " +
-                    "Please fix the migration issue and restart.");
-            }
-            
-            Console.WriteLine("✅ Database migrations completed");
+            Console.WriteLine("✅ No pending migrations found");
         }
+
+        Console.WriteLine("🔄 Applying migrations...");
+        var migrationApplied = await migrationService.ApplyMigrationsAsync();
+        if (!migrationApplied)
+        {
+            Console.WriteLine("");
+            Console.WriteLine("═══════════════════════════════════════════════════════════");
+            Console.WriteLine("❌ CRITICAL: Failed to apply database migrations!");
+            Console.WriteLine("═══════════════════════════════════════════════════════════");
+            Console.WriteLine("❌ The application cannot start with an inconsistent database state.");
+            Console.WriteLine("❌ Please check the detailed error logs ABOVE for the exact failure reason.");
+            Console.WriteLine("═══════════════════════════════════════════════════════════");
+            Console.WriteLine("");
+            throw new InvalidOperationException("Database migration failed. Check the logs above for details.");
+        }
+
+        Console.WriteLine("✅ Database migrations completed");
 
         logger.LogInformation("🌱 Starting data seeding...");
         Console.WriteLine("🌱 Starting data seeding...");
@@ -306,19 +190,6 @@ using (var scope = app.Services.CreateScope())
         await treeModelService.InitializeTreeModelAsync();
         logger.LogInformation("✅ Tree model initialized");
         Console.WriteLine("✅ Tree model initialized");
-
-        if (recreate)
-        {
-            logger.LogInformation("🌱 Updating credit wallets...");
-            var wallets = await context.CreditWallets.ToListAsync();
-            foreach (var w in wallets)
-            {
-                if (w.DiscoveryBalance < 5) w.DiscoveryBalance = 5;
-            }
-            await context.SaveChangesAsync();
-            logger.LogInformation("✅ Credit wallets updated");
-            Console.WriteLine("✅ Credit wallets updated");
-        }
 
         logger.LogInformation("🎉 Database setup completed successfully!");
         Console.WriteLine("🎉 Database setup completed successfully!");
