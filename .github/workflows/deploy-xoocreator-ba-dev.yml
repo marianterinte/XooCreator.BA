@@ -13,6 +13,8 @@ env:
   DOTNET_VERSION: '8.0.x'
   WORKING_DIRECTORY: 'XooCreator.BA'
   PUBLISH_DIR: './publish'
+  AZURE_WEBAPP_NAME_DEV: 'alchimalia-be-dev'
+  AZURE_RESOURCE_GROUP_DEV: 'alchimalia'
 
 jobs:
   build-and-deploy:
@@ -56,38 +58,21 @@ jobs:
 
       - name: Set Azure App Settings (ASPNETCORE_ENVIRONMENT)
         run: |
-          if [ -n "${{ secrets.AZURE_RESOURCE_GROUP_DEV }}" ]; then
-            echo "Using provided dev resource group: ${{ secrets.AZURE_RESOURCE_GROUP_DEV }}"
-            az webapp config appsettings set \
-              --resource-group ${{ secrets.AZURE_RESOURCE_GROUP_DEV }} \
-              --name ${{ secrets.AZURE_WEBAPP_NAME_DEV }} \
-              --settings \
-                ASPNETCORE_ENVIRONMENT=Development \
-                ConnectionStrings__Postgres="${{ secrets.AZURE_PG_CONNSTRING_DEV }}" \
-                Database__Schema=alchimalia_schema \
-                Database__RecreateOnStart=true \
-                Auth0__Domain=dev-fn01a0ex74zrocwb.us.auth0.com \
-                Auth0__Audience=https://alchimalia-be-dev-f5bad0c2f0dmh6au.westeurope-01.azurewebsites.net
-          else
-            echo "Auto-discovering dev resource group..."
-            RG=$(az webapp show --name ${{ secrets.AZURE_WEBAPP_NAME_DEV }} --query resourceGroup -o tsv)
-            echo "Found resource group: $RG"
-            az webapp config appsettings set \
-              --resource-group "$RG" \
-              --name ${{ secrets.AZURE_WEBAPP_NAME_DEV }} \
-              --settings \
-                ASPNETCORE_ENVIRONMENT=Development \
-                ConnectionStrings__Postgres="${{ secrets.AZURE_PG_CONNSTRING_DEV }}" \
-                Database__Schema=alchimalia_schema \
-                Database__RecreateOnStart=true \
-                Auth0__Domain=dev-fn01a0ex74zrocwb.us.auth0.com \
-                Auth0__Audience=https://alchimalia-be-dev-f5bad0c2f0dmh6au.westeurope-01.azurewebsites.net
-          fi
+          az webapp config appsettings set \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP_DEV }} \
+            --name ${{ env.AZURE_WEBAPP_NAME_DEV }} \
+            --settings \
+              ASPNETCORE_ENVIRONMENT=Development \
+              ConnectionStrings__Postgres="${{ secrets.AZURE_PG_CONNSTRING_DEV }}" \
+              Database__Schema=alchimalia_schema \
+              Database__RecreateOnStart=true \
+              Auth0__Domain=dev-fn01a0ex74zrocwb.us.auth0.com \
+              Auth0__Audience=https://alchimalia-be-dev-f5bad0c2f0dmh6au.westeurope-01.azurewebsites.net
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: ${{ secrets.AZURE_WEBAPP_NAME_DEV }}
+          app-name: ${{ env.AZURE_WEBAPP_NAME_DEV }}
           package: ${{ env.WORKING_DIRECTORY }}/${{ env.PUBLISH_DIR }}
 
       - name: Debug Azure account
