@@ -62,7 +62,9 @@ jobs:
               --resource-group ${{ secrets.AZURE_RESOURCE_GROUP_DEV }} \
               --name ${{ secrets.AZURE_WEBAPP_NAME_DEV }} \
               --settings \
-                ASPNETCORE_ENVIRONMENT=Development
+                ASPNETCORE_ENVIRONMENT=Development \
+                Auth0__Domain=dev-fn01a0ex74zrocwb.us.auth0.com \
+                Auth0__Audience=https://alchimalia-be-dev-f5bad0c2f0dmh6au.westeurope-01.azurewebsites.net/
           else
             echo "Auto-discovering dev resource group..."
             RG=$(az webapp show --name ${{ secrets.AZURE_WEBAPP_NAME_DEV }} --query resourceGroup -o tsv)
@@ -71,7 +73,9 @@ jobs:
               --resource-group "$RG" \
               --name ${{ secrets.AZURE_WEBAPP_NAME_DEV }} \
               --settings \
-                ASPNETCORE_ENVIRONMENT=Development
+                ASPNETCORE_ENVIRONMENT=Development \
+                Auth0__Domain=dev-fn01a0ex74zrocwb.us.auth0.com \
+                Auth0__Audience=https://alchimalia-be-dev-f5bad0c2f0dmh6au.westeurope-01.azurewebsites.net/
           fi
 
       - name: Deploy to Azure Web App
