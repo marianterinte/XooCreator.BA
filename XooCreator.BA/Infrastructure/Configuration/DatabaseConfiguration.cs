@@ -15,7 +15,7 @@ public static class DatabaseConfiguration
         services.AddDbContext<XooDbContext>(options =>
         {
             var cs = ResolveConnectionString(configuration);
-            var dbSchema = configuration.GetValue<string>("Database:Schema") ?? "public";
+            var dbSchema = configuration.GetValue<string>("Database:Schema") ?? "alchimalia_schema";
 
             var forcedSchema = Environment.GetEnvironmentVariable("DB_FORCE_SCHEMA");
             if (!string.IsNullOrWhiteSpace(forcedSchema))

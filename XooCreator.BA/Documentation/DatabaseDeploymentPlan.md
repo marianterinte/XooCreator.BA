@@ -16,11 +16,11 @@ Asigurăm un flux determinist de provisionare și migrare pentru baza de date `a
 
 1. **Config App Service (Dev)**
    - Setează explicit `ASPNETCORE_ENVIRONMENT=Development`.
-   - Stochează conexiunea Azure PostgreSQL în secretul `AZURE_POSTGRES_CONNSTRING_DEV` (folosit de pipeline) sau direct în `ConnectionStrings__Postgres`.
-   - Pentru rularea pe schema `public`, setează `DB_FORCE_SCHEMA=public` și lasă `Database__Schema` necompletat (sau la `alchimalia_schema` dacă vrei să revii).
+   - Stochează conexiunea Azure PostgreSQL în secretul `AZURE_POSTGRES_CONNSTRING_DEV` (folosit de pipeline) sau direct în `ConnectionStrings__Postgres` și include `SearchPath=alchimalia_schema`.
+   - Folosește `DB_FORCE_SCHEMA` doar pentru scenarii temporare (implicit schema rămâne `alchimalia_schema`).
 2. **Cod**
-   - Interceptorul (`IdempotentMigrationCommandInterceptor`) folosește schema din config/override (`Database:Schema` sau `DB_FORCE_SCHEMA`) pentru toate verificările din `information_schema`/`pg_indexes`.
-   - `DatabaseConfiguration` transmite schema către interceptor și configurează `SearchPath` + `__EFMigrationsHistory` pe aceeași schema.
+   - Interceptorul (`IdempotentMigrationCommandInterceptor`) folosește schema din config (sau override) pentru toate verificările din `information_schema`/`pg_indexes`.
+   - `DatabaseConfiguration` transmite schema către interceptor și configurează `SearchPath` + `__EFMigrationsHistory` pe aceeași schemă.
 3. **Pipeline**
    - YAML-ul de deploy pe `dev` să ruleze `dotnet publish` + deploy (deja existent).  
    - După implementarea schimbărilor de mai sus, un restart cu `RecreateOnStart=true` va droppa schema și va recrea complet baza. Convertirea la `false` se face după ce baza e sincronizată.
@@ -33,9 +33,9 @@ Asigurăm un flux determinist de provisionare și migrare pentru baza de date `a
 
 ## Checklist la fiecare deploy
 
-- [ ] Environment-ul dev are toate connection string-urile + flag-urile corecte (`AZURE_POSTGRES_CONNSTRING_DEV` / `ConnectionStrings__Postgres`).
+- [ ] Environment-ul dev are toate connection string-urile + flag-urile corecte (`AZURE_POSTGRES_CONNSTRING_DEV` / `ConnectionStrings__Postgres`) și include `SearchPath=alchimalia_schema`.
 - [ ] `dotnet ef migrations add` a fost rulat local pentru schimbările noi (dacă este cazul).
 - [ ] Pipeline-ul finalizează fără erori și App Service pornește fără `startupException`.
-- [ ] În schema target (`alchimalia_schema` sau `public`, în funcție de `DB_FORCE_SCHEMA`) apar tabelele/coloanele noi.
-- [ ] `RecreateOnStart` este readus la `false` când nu se mai dorește drop complet.
+- [ ] În schema `alchimalia_schema` apar tabelele/coloanele noi (sau în schema override dacă ai setat `DB_FORCE_SCHEMA`).
+- [ ] `RecreateOnStart` este menținut la `true` pentru deploy-urile complete din dev; setează manual `false` doar dacă vrei migrarea incrementală.
 

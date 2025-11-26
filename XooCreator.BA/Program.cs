@@ -76,7 +76,7 @@ using (var scope = app.Services.CreateScope())
     {
         logger.LogInformation("🚀 Starting database initialization...");
         var recreate = builder.Configuration.GetValue<bool>("Database:RecreateOnStart");
-        var dbSchema = builder.Configuration.GetValue<string>("Database:Schema") ?? "public";
+        var dbSchema = builder.Configuration.GetValue<string>("Database:Schema") ?? "alchimalia_schema";
         var forcedSchema = Environment.GetEnvironmentVariable("DB_FORCE_SCHEMA");
         if (!string.IsNullOrWhiteSpace(forcedSchema))
         {
