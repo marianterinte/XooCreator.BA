@@ -27,12 +27,13 @@ public static class DatabaseConfiguration
             
             options.UseNpgsql(cs);
             
+            // DISABLED: Temporarily disabled idempotent migration interceptor
             // Add interceptor to automatically make migration SQL commands idempotent
             // This transforms CREATE TABLE, CREATE INDEX, ALTER TABLE ADD CONSTRAINT, etc.
             // to use IF NOT EXISTS, making all migrations safe to run multiple times
-            var loggerFactory = services.BuildServiceProvider().GetService<ILoggerFactory>();
-            var logger = loggerFactory?.CreateLogger<IdempotentMigrationCommandInterceptor>();
-            options.AddInterceptors(new IdempotentMigrationCommandInterceptor(logger));
+            // var loggerFactory = services.BuildServiceProvider().GetService<ILoggerFactory>();
+            // var logger = loggerFactory?.CreateLogger<IdempotentMigrationCommandInterceptor>();
+            // options.AddInterceptors(new IdempotentMigrationCommandInterceptor(logger));
         });
 
         return services;

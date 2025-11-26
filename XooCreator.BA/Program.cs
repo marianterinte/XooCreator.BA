@@ -64,7 +64,8 @@ using (var scope = app.Services.CreateScope())
 {
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
     var context = scope.ServiceProvider.GetRequiredService<XooDbContext>();
-    var migrationService = scope.ServiceProvider.GetRequiredService<IDatabaseMigrationService>();
+    // DISABLED: Temporarily disabled robust migration service
+    // var migrationService = scope.ServiceProvider.GetRequiredService<IDatabaseMigrationService>();
     var storiesService = scope.ServiceProvider.GetRequiredService<IStoriesService>();
     var treeModelService = scope.ServiceProvider.GetRequiredService<ITreeModelService>();
     var discoverySeeder = scope.ServiceProvider.GetRequiredService<ISeedDiscoveryService>();
@@ -97,20 +98,9 @@ using (var scope = app.Services.CreateScope())
                 await context.Database.ExecuteSqlRawAsync($"CREATE SCHEMA {schemaName};");
                 Console.WriteLine("✅ Schema recreated successfully");
                 
-                // Apply migrations using the robust migration service
+                // Apply migrations directly using EF Core's built-in method
                 Console.WriteLine("🔄 Applying migrations to recreated schema...");
-                var migrationSuccess = await migrationService.ApplyMigrationsAsync();
-                if (!migrationSuccess)
-                {
-                    Console.WriteLine("");
-                    Console.WriteLine("═══════════════════════════════════════════════════════════");
-                    Console.WriteLine("❌ CRITICAL: Failed to apply migrations after schema recreation!");
-                    Console.WriteLine("═══════════════════════════════════════════════════════════");
-                    Console.WriteLine("❌ Check the detailed error logs ABOVE for the exact failure reason.");
-                    Console.WriteLine("═══════════════════════════════════════════════════════════");
-                    Console.WriteLine("");
-                    throw new InvalidOperationException("Failed to apply migrations after schema recreation. Check logs above for details.");
-                }
+                await context.Database.MigrateAsync();
                 Console.WriteLine("✅ Migrations applied successfully");
             }
             catch (Exception ex)
@@ -131,12 +121,7 @@ using (var scope = app.Services.CreateScope())
                 Console.WriteLine("🔄 Attempting fallback: normal migration path...");
                 try
                 {
-                    var migrationSuccess = await migrationService.ApplyMigrationsAsync();
-                    if (!migrationSuccess)
-                    {
-                        Console.WriteLine("❌ Fallback migration also failed. Check logs above for details.");
-                        throw new InvalidOperationException("Failed to apply migrations in fallback. Check logs above for details.");
-                    }
+                    await context.Database.MigrateAsync();
                     Console.WriteLine("✅ Fallback migration applied");
                 }
                 catch (Exception migEx)
@@ -158,66 +143,19 @@ using (var scope = app.Services.CreateScope())
         }
         else
         {
+            // DISABLED: Robust incremental migration path temporarily disabled
+            // Using simple migration approach instead
             // Ensure schema exists before running migrations
             var schemaName = QuoteIdentifier(dbSchema);
             Console.WriteLine($"🔄 Ensuring schema '{dbSchema}' exists...");
             await context.Database.ExecuteSqlRawAsync($"CREATE SCHEMA IF NOT EXISTS {schemaName};");
             Console.WriteLine($"✅ Schema '{dbSchema}' ensured");
             
-            // Robust incremental migration path for production
-            // Uses idempotent operations - can be safely run multiple times
-            Console.WriteLine("🔄 Checking for pending migrations...");
-            
-            var pendingMigrations = await migrationService.GetPendingMigrationsAsync();
-            if (pendingMigrations.Count > 0)
-            {
-                Console.WriteLine($"🔄 Found {pendingMigrations.Count} pending migration(s): {string.Join(", ", pendingMigrations)}");
-            }
-            else
-            {
-                Console.WriteLine("✅ No pending migrations found");
-            }
-            
+            // Simple migration path - using EF Core's built-in method directly
             Console.WriteLine($"📊 Using schema: {dbSchema}");
-            var migrationSuccess = await migrationService.ApplyMigrationsAsync();
-            if (!migrationSuccess)
-            {
-                // Log detailed error information instead of throwing
-                Console.WriteLine("");
-                Console.WriteLine("═══════════════════════════════════════════════════════════");
-                Console.WriteLine("❌ CRITICAL: Failed to apply database migrations!");
-                Console.WriteLine("═══════════════════════════════════════════════════════════");
-                Console.WriteLine("❌ The application cannot start with an inconsistent database state.");
-                Console.WriteLine("❌ Please check the detailed error logs ABOVE for the exact failure reason.");
-                Console.WriteLine("❌ Common causes:");
-                Console.WriteLine("   - Migration contains non-idempotent operations (CREATE TABLE instead of CREATE TABLE IF NOT EXISTS)");
-                Console.WriteLine("   - Database schema conflicts with migration expectations");
-                Console.WriteLine("   - Missing dependencies or permissions");
-                Console.WriteLine("   - Schema does not exist or wrong schema name configured");
-                Console.WriteLine("❌ Action required: Fix the migration issue and restart the application.");
-                Console.WriteLine("═══════════════════════════════════════════════════════════");
-                Console.WriteLine("");
-                
-                // Get applied migrations for diagnostic information
-                try
-                {
-                    var appliedMigrations = await migrationService.GetAppliedMigrationsAsync();
-                    Console.WriteLine($"ℹ️  Successfully applied migrations: {string.Join(", ", appliedMigrations)}");
-                }
-                catch (Exception diagEx)
-                {
-                    Console.WriteLine($"⚠️  Could not retrieve applied migrations: {diagEx.Message}");
-                }
-                
-                // Only throw if we absolutely cannot continue
-                // This gives clear information about what went wrong
-                throw new InvalidOperationException(
-                    "Database migration failed. Check the logs above for details. " +
-                    "The application cannot start with an inconsistent database state. " +
-                    "Please fix the migration issue and restart.");
-            }
-            
-            Console.WriteLine("✅ Database migrations completed");
+            Console.WriteLine("🔄 Applying migrations...");
+            await context.Database.MigrateAsync();
+            Console.WriteLine("✅ Migrations applied successfully");
         }
 
         logger.LogInformation("🌱 Starting data seeding...");
