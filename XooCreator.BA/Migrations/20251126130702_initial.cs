@@ -9,16 +9,20 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace XooCreator.BA.Migrations
 {
     /// <inheritdoc />
-    public partial class iit : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.EnsureSchema(
+                name: "alchimalia_schema");
+
             migrationBuilder.AlterDatabase()
                 .Annotation("Npgsql:PostgresExtension:uuid-ossp", ",,");
 
             migrationBuilder.CreateTable(
                 name: "AlchimaliaUsers",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -42,6 +46,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "BestiaryItems",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -59,6 +64,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "BodyParts",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Key = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
@@ -73,6 +79,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "BuilderConfigs",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -87,6 +94,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "ClassicAuthors",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -105,6 +113,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "HeroClickMessages",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -122,6 +131,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "HeroDefinitions",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
@@ -147,6 +157,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "HeroMessages",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -165,6 +176,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Regions",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -177,6 +189,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "StoryAgeGroups",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -195,6 +208,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "StoryHeroes",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -212,6 +226,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "StoryTopics",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -229,6 +244,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "TreeConfigurations",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
@@ -242,6 +258,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "CreditTransactions",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -257,6 +274,7 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_CreditTransactions_AlchimaliaUsers_UserId",
                         column: x => x.UserId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "AlchimaliaUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -264,6 +282,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "CreditWallets",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
@@ -277,6 +296,7 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_CreditWallets_AlchimaliaUsers_UserId",
                         column: x => x.UserId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "AlchimaliaUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -284,6 +304,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "HeroProgress",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -299,6 +320,7 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_HeroProgress_AlchimaliaUsers_UserId",
                         column: x => x.UserId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "AlchimaliaUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -306,6 +328,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "HeroTreeProgress",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -324,6 +347,7 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_HeroTreeProgress_AlchimaliaUsers_UserId",
                         column: x => x.UserId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "AlchimaliaUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -331,6 +355,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Jobs",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -349,6 +374,7 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_Jobs_AlchimaliaUsers_UserId",
                         column: x => x.UserId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "AlchimaliaUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -356,6 +382,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "StoryFeedbackPreferences",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -371,6 +398,7 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_StoryFeedbackPreferences_AlchimaliaUsers_UserId",
                         column: x => x.UserId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "AlchimaliaUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -378,6 +406,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "StoryFeedbacks",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -396,6 +425,7 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_StoryFeedbacks_AlchimaliaUsers_UserId",
                         column: x => x.UserId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "AlchimaliaUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -403,6 +433,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "StoryReaders",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -417,6 +448,7 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_StoryReaders_AlchimaliaUsers_UserId",
                         column: x => x.UserId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "AlchimaliaUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -424,6 +456,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Trees",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -439,6 +472,7 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_Trees_AlchimaliaUsers_UserId",
                         column: x => x.UserId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "AlchimaliaUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -446,6 +480,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "UserStoryReadProgress",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -460,6 +495,7 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_UserStoryReadProgress_AlchimaliaUsers_UserId",
                         column: x => x.UserId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "AlchimaliaUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -467,6 +503,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "UserTokenBalances",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -483,6 +520,7 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_UserTokenBalances_AlchimaliaUsers_UserId",
                         column: x => x.UserId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "AlchimaliaUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -490,6 +528,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "UserBestiary",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -504,12 +543,14 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_UserBestiary_AlchimaliaUsers_UserId",
                         column: x => x.UserId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "AlchimaliaUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_UserBestiary_BestiaryItems_BestiaryItemId",
                         column: x => x.BestiaryItemId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "BestiaryItems",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -517,6 +558,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "BodyPartTranslations",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -530,6 +572,7 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_BodyPartTranslations_BodyParts_BodyPartKey",
                         column: x => x.BodyPartKey,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "BodyParts",
                         principalColumn: "Key",
                         onDelete: ReferentialAction.Cascade);
@@ -537,6 +580,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "StoryCrafts",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -565,6 +609,7 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_StoryCrafts_ClassicAuthors_ClassicAuthorId",
                         column: x => x.ClassicAuthorId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "ClassicAuthors",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.SetNull);
@@ -572,6 +617,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "StoryDefinitions",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -600,6 +646,7 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_StoryDefinitions_ClassicAuthors_ClassicAuthorId",
                         column: x => x.ClassicAuthorId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "ClassicAuthors",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.SetNull);
@@ -607,6 +654,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "HeroDefinitionTranslations",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -622,6 +670,7 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_HeroDefinitionTranslations_HeroDefinitions_HeroDefinitionId",
                         column: x => x.HeroDefinitionId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "HeroDefinitions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -629,6 +678,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Animals",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -643,6 +693,7 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_Animals_Regions_RegionId",
                         column: x => x.RegionId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "Regions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -650,6 +701,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "StoryAgeGroupTranslations",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -664,6 +716,7 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_StoryAgeGroupTranslations_StoryAgeGroups_StoryAgeGroupId",
                         column: x => x.StoryAgeGroupId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "StoryAgeGroups",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -671,6 +724,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "StoryHeroUnlocks",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -685,6 +739,7 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_StoryHeroUnlocks_StoryHeroes_StoryHeroId",
                         column: x => x.StoryHeroId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "StoryHeroes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -692,6 +747,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "StoryTopicTranslations",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -705,6 +761,7 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_StoryTopicTranslations_StoryTopics_StoryTopicId",
                         column: x => x.StoryTopicId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "StoryTopics",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -712,6 +769,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "StoryProgress",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -728,12 +786,14 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_StoryProgress_AlchimaliaUsers_UserId",
                         column: x => x.UserId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "AlchimaliaUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_StoryProgress_TreeConfigurations_TreeConfigurationId",
                         column: x => x.TreeConfigurationId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "TreeConfigurations",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -741,6 +801,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "TreeProgress",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -758,12 +819,14 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_TreeProgress_AlchimaliaUsers_UserId",
                         column: x => x.UserId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "AlchimaliaUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_TreeProgress_TreeConfigurations_TreeConfigurationId",
                         column: x => x.TreeConfigurationId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "TreeConfigurations",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -771,6 +834,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "TreeRegions",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
@@ -789,6 +853,7 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_TreeRegions_TreeConfigurations_TreeConfigurationId",
                         column: x => x.TreeConfigurationId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "TreeConfigurations",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -796,6 +861,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "TreeUnlockRules",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -817,6 +883,7 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_TreeUnlockRules_TreeConfigurations_TreeConfigurationId",
                         column: x => x.TreeConfigurationId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "TreeConfigurations",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -824,6 +891,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Creatures",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -845,18 +913,21 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_Creatures_AlchimaliaUsers_UserId",
                         column: x => x.UserId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "AlchimaliaUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Creatures_Trees_TreeId",
                         column: x => x.TreeId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "Trees",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
                 name: "TreeChoices",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -872,6 +943,7 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_TreeChoices_Trees_TreeId",
                         column: x => x.TreeId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "Trees",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -879,6 +951,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "StoryCraftAgeGroups",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     StoryCraftId = table.Column<Guid>(type: "uuid", nullable: false),
@@ -891,12 +964,14 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_StoryCraftAgeGroups_StoryAgeGroups_StoryAgeGroupId",
                         column: x => x.StoryAgeGroupId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "StoryAgeGroups",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_StoryCraftAgeGroups_StoryCrafts_StoryCraftId",
                         column: x => x.StoryCraftId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "StoryCrafts",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -904,6 +979,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "StoryCraftTiles",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -921,6 +997,7 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_StoryCraftTiles_StoryCrafts_StoryCraftId",
                         column: x => x.StoryCraftId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "StoryCrafts",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -928,6 +1005,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "StoryCraftTopics",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     StoryCraftId = table.Column<Guid>(type: "uuid", nullable: false),
@@ -940,12 +1018,14 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_StoryCraftTopics_StoryCrafts_StoryCraftId",
                         column: x => x.StoryCraftId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "StoryCrafts",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_StoryCraftTopics_StoryTopics_StoryTopicId",
                         column: x => x.StoryTopicId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "StoryTopics",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -953,6 +1033,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "StoryCraftTranslations",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -967,6 +1048,7 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_StoryCraftTranslations_StoryCrafts_StoryCraftId",
                         column: x => x.StoryCraftId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "StoryCrafts",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -974,6 +1056,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "StoryDefinitionAgeGroups",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     StoryDefinitionId = table.Column<Guid>(type: "uuid", nullable: false),
@@ -986,12 +1069,14 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_StoryDefinitionAgeGroups_StoryAgeGroups_StoryAgeGroupId",
                         column: x => x.StoryAgeGroupId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "StoryAgeGroups",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_StoryDefinitionAgeGroups_StoryDefinitions_StoryDefinitionId",
                         column: x => x.StoryDefinitionId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "StoryDefinitions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -999,6 +1084,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "StoryDefinitionTopics",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     StoryDefinitionId = table.Column<Guid>(type: "uuid", nullable: false),
@@ -1011,12 +1097,14 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_StoryDefinitionTopics_StoryDefinitions_StoryDefinitionId",
                         column: x => x.StoryDefinitionId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "StoryDefinitions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_StoryDefinitionTopics_StoryTopics_StoryTopicId",
                         column: x => x.StoryTopicId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "StoryTopics",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -1024,6 +1112,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "StoryDefinitionTranslations",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -1037,6 +1126,7 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_StoryDefinitionTranslations_StoryDefinitions_StoryDefinitio~",
                         column: x => x.StoryDefinitionId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "StoryDefinitions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -1044,6 +1134,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "StoryPublicationAudits",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -1061,6 +1152,7 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_StoryPublicationAudits_StoryDefinitions_StoryDefinitionId",
                         column: x => x.StoryDefinitionId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "StoryDefinitions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -1068,6 +1160,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "StoryPurchases",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -1082,12 +1175,14 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_StoryPurchases_AlchimaliaUsers_UserId",
                         column: x => x.UserId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "AlchimaliaUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_StoryPurchases_StoryDefinitions_StoryId",
                         column: x => x.StoryId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "StoryDefinitions",
                         principalColumn: "StoryId",
                         onDelete: ReferentialAction.Cascade);
@@ -1095,6 +1190,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "StoryReviews",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -1112,12 +1208,14 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_StoryReviews_AlchimaliaUsers_UserId",
                         column: x => x.UserId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "AlchimaliaUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_StoryReviews_StoryDefinitions_StoryId",
                         column: x => x.StoryId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "StoryDefinitions",
                         principalColumn: "StoryId",
                         onDelete: ReferentialAction.Cascade);
@@ -1125,6 +1223,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "StoryTiles",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -1145,6 +1244,7 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_StoryTiles_StoryDefinitions_StoryDefinitionId",
                         column: x => x.StoryDefinitionId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "StoryDefinitions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -1152,6 +1252,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "UserCreatedStories",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -1168,12 +1269,14 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_UserCreatedStories_AlchimaliaUsers_UserId",
                         column: x => x.UserId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "AlchimaliaUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_UserCreatedStories_StoryDefinitions_StoryDefinitionId",
                         column: x => x.StoryDefinitionId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "StoryDefinitions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -1181,6 +1284,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "UserFavoriteStories",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -1194,12 +1298,14 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_UserFavoriteStories_AlchimaliaUsers_UserId",
                         column: x => x.UserId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "AlchimaliaUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_UserFavoriteStories_StoryDefinitions_StoryDefinitionId",
                         column: x => x.StoryDefinitionId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "StoryDefinitions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -1207,6 +1313,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "UserOwnedStories",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -1222,12 +1329,14 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_UserOwnedStories_AlchimaliaUsers_UserId",
                         column: x => x.UserId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "AlchimaliaUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_UserOwnedStories_StoryDefinitions_StoryDefinitionId",
                         column: x => x.StoryDefinitionId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "StoryDefinitions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -1235,6 +1344,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "AnimalPartSupports",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     AnimalId = table.Column<Guid>(type: "uuid", nullable: false),
@@ -1246,12 +1356,14 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_AnimalPartSupports_Animals_AnimalId",
                         column: x => x.AnimalId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "Animals",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_AnimalPartSupports_BodyParts_PartKey",
                         column: x => x.PartKey,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "BodyParts",
                         principalColumn: "Key",
                         onDelete: ReferentialAction.Cascade);
@@ -1259,6 +1371,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "AnimalTranslations",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -1272,6 +1385,7 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_AnimalTranslations_Animals_AnimalId",
                         column: x => x.AnimalId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "Animals",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -1279,6 +1393,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "TreeStoryNodes",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -1297,18 +1412,21 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_TreeStoryNodes_StoryDefinitions_StoryId",
                         column: x => x.StoryId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "StoryDefinitions",
                         principalColumn: "StoryId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_TreeStoryNodes_TreeConfigurations_TreeConfigurationId",
                         column: x => x.TreeConfigurationId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "TreeConfigurations",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_TreeStoryNodes_TreeRegions_RegionId",
                         column: x => x.RegionId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "TreeRegions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -1316,6 +1434,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "StoryCraftAnswers",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -1330,6 +1449,7 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_StoryCraftAnswers_StoryCraftTiles_StoryCraftTileId",
                         column: x => x.StoryCraftTileId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "StoryCraftTiles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -1337,6 +1457,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "StoryCraftTileTranslations",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -1354,6 +1475,7 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_StoryCraftTileTranslations_StoryCraftTiles_StoryCraftTileId",
                         column: x => x.StoryCraftTileId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "StoryCraftTiles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -1361,6 +1483,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "StoryAnswers",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -1377,6 +1500,7 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_StoryAnswers_StoryTiles_StoryTileId",
                         column: x => x.StoryTileId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "StoryTiles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -1384,6 +1508,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "StoryTileTranslations",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -1401,6 +1526,7 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_StoryTileTranslations_StoryTiles_StoryTileId",
                         column: x => x.StoryTileId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "StoryTiles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -1408,6 +1534,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "StoryCraftAnswerTokens",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -1422,6 +1549,7 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_StoryCraftAnswerTokens_StoryCraftAnswers_StoryCraftAnswerId",
                         column: x => x.StoryCraftAnswerId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "StoryCraftAnswers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -1429,6 +1557,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "StoryCraftAnswerTranslations",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -1442,6 +1571,7 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_StoryCraftAnswerTranslations_StoryCraftAnswers_StoryCraftAn~",
                         column: x => x.StoryCraftAnswerId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "StoryCraftAnswers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -1449,6 +1579,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "StoryAnswerTokens",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -1463,6 +1594,7 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_StoryAnswerTokens_StoryAnswers_StoryAnswerId",
                         column: x => x.StoryAnswerId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "StoryAnswers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -1470,6 +1602,7 @@ namespace XooCreator.BA.Migrations
 
             migrationBuilder.CreateTable(
                 name: "StoryAnswerTranslations",
+                schema: "alchimalia_schema",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -1483,17 +1616,20 @@ namespace XooCreator.BA.Migrations
                     table.ForeignKey(
                         name: "FK_StoryAnswerTranslations_StoryAnswers_StoryAnswerId",
                         column: x => x.StoryAnswerId,
+                        principalSchema: "alchimalia_schema",
                         principalTable: "StoryAnswers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.InsertData(
+                schema: "alchimalia_schema",
                 table: "AlchimaliaUsers",
                 columns: new[] { "Id", "Auth0Id", "CreatedAt", "Email", "FirstName", "HasVisitedImaginationLaboratory", "LastLoginAt", "LastName", "Name", "Picture", "Role", "Roles", "UpdatedAt" },
-                values: new object[] { new Guid("33333333-3333-3333-3333-333333333333"), "alchimalia-admin-sub", new DateTime(2025, 11, 23, 16, 50, 58, 9, DateTimeKind.Utc).AddTicks(9675), "alchimalia@admin.com", "Marian", false, new DateTime(2025, 11, 23, 16, 50, 58, 9, DateTimeKind.Utc).AddTicks(9678), "Teacher", "Marian Teacher", null, 2, new[] { 2 }, new DateTime(2025, 11, 23, 16, 50, 58, 9, DateTimeKind.Utc).AddTicks(9680) });
+                values: new object[] { new Guid("33333333-3333-3333-3333-333333333333"), "alchimalia-admin-sub", new DateTime(2025, 11, 26, 13, 7, 0, 81, DateTimeKind.Utc).AddTicks(8391), "alchimalia@admin.com", "Marian", false, new DateTime(2025, 11, 26, 13, 7, 0, 81, DateTimeKind.Utc).AddTicks(8392), "Teacher", "Marian Teacher", null, 2, new[] { 2 }, new DateTime(2025, 11, 26, 13, 7, 0, 81, DateTimeKind.Utc).AddTicks(8392) });
 
             migrationBuilder.InsertData(
+                schema: "alchimalia_schema",
                 table: "BodyParts",
                 columns: new[] { "Key", "Image", "IsBaseLocked", "Name" },
                 values: new object[,]
@@ -1509,73 +1645,78 @@ namespace XooCreator.BA.Migrations
                 });
 
             migrationBuilder.InsertData(
+                schema: "alchimalia_schema",
                 table: "BuilderConfigs",
                 columns: new[] { "Id", "BaseUnlockedAnimalIds", "BaseUnlockedBodyPartKeys" },
                 values: new object[] { 1, "[\"00000000-0000-0000-0000-000000000001\",\"00000000-0000-0000-0000-000000000002\",\"00000000-0000-0000-0000-000000000003\"]", "[\"head\",\"body\",\"arms\"]" });
 
             migrationBuilder.InsertData(
+                schema: "alchimalia_schema",
                 table: "HeroClickMessages",
                 columns: new[] { "Id", "AudioUrl", "CreatedAt", "HeroId", "IsActive", "MessageKey", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { new Guid("48d1cbbf-81d4-4c33-8281-b81f5248269c"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_click_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(9290), "grubot", true, "hero_grubot_click_message", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(9290) },
-                    { new Guid("c0ddf31a-9917-40f0-971b-d8806abd07a5"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_click_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(9287), "linkaro", true, "hero_linkaro_click_message", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(9287) },
-                    { new Guid("c1a2208f-d0f0-4f60-9ef5-09fe070a6544"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_click_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(9282), "puf-puf", true, "hero_puf-puf_click_message", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(9283) }
+                    { new Guid("a0f84b3d-d6e8-430c-a703-639cc14853c4"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_click_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 78, DateTimeKind.Utc).AddTicks(1174), "puf-puf", true, "hero_puf-puf_click_message", new DateTime(2025, 11, 26, 13, 7, 0, 78, DateTimeKind.Utc).AddTicks(1175) },
+                    { new Guid("b7e0b1de-8545-42ea-b67e-72e0a580d9c8"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_click_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 78, DateTimeKind.Utc).AddTicks(1183), "linkaro", true, "hero_linkaro_click_message", new DateTime(2025, 11, 26, 13, 7, 0, 78, DateTimeKind.Utc).AddTicks(1183) },
+                    { new Guid("ba8fa861-51ab-4972-9ddb-ed7c02181a44"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_click_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 78, DateTimeKind.Utc).AddTicks(1188), "grubot", true, "hero_grubot_click_message", new DateTime(2025, 11, 26, 13, 7, 0, 78, DateTimeKind.Utc).AddTicks(1188) }
                 });
 
             migrationBuilder.InsertData(
+                schema: "alchimalia_schema",
                 table: "HeroDefinitions",
                 columns: new[] { "Id", "CourageCost", "CreatedAt", "CreativityCost", "CuriosityCost", "Image", "IsUnlocked", "PositionX", "PositionY", "PrerequisitesJson", "RewardsJson", "SafetyCost", "ThinkingCost", "Type", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { "grubot", 0, new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(9597), 0, 0, "images/heroes/grubot.png", false, 0.0, 0.0, "[]", "[]", 0, 0, "STORY_HERO", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(9597) },
-                    { "linkaro", 0, new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(9594), 0, 0, "images/heroes/linkaro.png", false, 0.0, 0.0, "[]", "[]", 0, 0, "STORY_HERO", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(9594) },
-                    { "puf-puf", 0, new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(9585), 0, 0, "images/heroes/pufpufblink.gif", false, 0.0, 0.0, "[]", "[]", 0, 0, "STORY_HERO", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(9587) }
+                    { "grubot", 0, new DateTime(2025, 11, 26, 13, 7, 0, 78, DateTimeKind.Utc).AddTicks(1483), 0, 0, "images/heroes/grubot.png", false, 0.0, 0.0, "[]", "[]", 0, 0, "STORY_HERO", new DateTime(2025, 11, 26, 13, 7, 0, 78, DateTimeKind.Utc).AddTicks(1483) },
+                    { "linkaro", 0, new DateTime(2025, 11, 26, 13, 7, 0, 78, DateTimeKind.Utc).AddTicks(1480), 0, 0, "images/heroes/linkaro.png", false, 0.0, 0.0, "[]", "[]", 0, 0, "STORY_HERO", new DateTime(2025, 11, 26, 13, 7, 0, 78, DateTimeKind.Utc).AddTicks(1481) },
+                    { "puf-puf", 0, new DateTime(2025, 11, 26, 13, 7, 0, 78, DateTimeKind.Utc).AddTicks(1474), 0, 0, "images/heroes/pufpufblink.gif", false, 0.0, 0.0, "[]", "[]", 0, 0, "STORY_HERO", new DateTime(2025, 11, 26, 13, 7, 0, 78, DateTimeKind.Utc).AddTicks(1476) }
                 });
 
             migrationBuilder.InsertData(
+                schema: "alchimalia_schema",
                 table: "HeroMessages",
                 columns: new[] { "Id", "AudioUrl", "CreatedAt", "HeroId", "IsActive", "MessageKey", "RegionId", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { new Guid("0057405e-9319-47bb-95e4-ffc4a655cf84"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_kelo_ketis_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(731), "puf-puf", true, "hero_puf-puf_region_kelo_ketis_message", "kelo-ketis", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(732) },
-                    { new Guid("07edc092-0fbe-41cf-b356-bacd9cc2e519"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_neptunia_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(751), "linkaro", true, "hero_linkaro_region_neptunia_message", "neptunia", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(752) },
-                    { new Guid("0b267b36-0a9c-4f0f-979c-79cf21a6a2a4"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_sylvaria_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(765), "grubot", true, "hero_grubot_region_sylvaria_message", "sylvaria", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(765) },
-                    { new Guid("0b276248-9c65-4572-b612-fae8ee1017e0"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_terra_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(737), "linkaro", true, "hero_linkaro_region_terra_message", "terra", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(738) },
-                    { new Guid("0cf85245-7ac4-48df-8382-fc08e12978a7"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_mechanika_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(740), "linkaro", true, "hero_linkaro_region_mechanika_message", "mechanika", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(741) },
-                    { new Guid("15374801-c972-4952-a70b-c9ffed83bc5d"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_gateway_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(734), "linkaro", true, "hero_linkaro_region_gateway_message", "gateway", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(734) },
-                    { new Guid("1cb8cdb8-7e57-44b5-9034-eb7e07962803"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_gateway_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(756), "grubot", true, "hero_grubot_region_gateway_message", "gateway", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(756) },
-                    { new Guid("1f2a2793-d2f2-4b59-a1b6-2223438ef19a"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_mechanika_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(760), "grubot", true, "hero_grubot_region_mechanika_message", "mechanika", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(761) },
-                    { new Guid("260b3ffb-8702-42b5-bd48-5610b46b5530"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_aetherion_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(730), "puf-puf", true, "hero_puf-puf_region_aetherion_message", "aetherion", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(730) },
-                    { new Guid("36086bd8-b638-4aa1-b4ea-32064293cd13"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_pyron_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(769), "grubot", true, "hero_grubot_region_pyron_message", "pyron", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(769) },
-                    { new Guid("39dfc127-cf58-4d67-93ec-a6776126df47"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_zephyra_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(747), "linkaro", true, "hero_linkaro_region_zephyra_message", "zephyra", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(747) },
-                    { new Guid("44701ce7-bd68-4710-ae69-29994c98a72c"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_sylvaria_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(743), "linkaro", true, "hero_linkaro_region_sylvaria_message", "sylvaria", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(743) },
-                    { new Guid("4867f126-332c-4414-87ba-83fd8b3e42d1"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_zephyra_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(724), "puf-puf", true, "hero_puf-puf_region_zephyra_message", "zephyra", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(724) },
-                    { new Guid("4bcdc89a-936b-48ab-bea1-918dd6e08b81"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_lunaria_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(739), "linkaro", true, "hero_linkaro_region_lunaria_message", "lunaria", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(739) },
-                    { new Guid("54f758e6-c60c-40a6-9fc5-330599076362"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_crystalia_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(766), "grubot", true, "hero_grubot_region_crystalia_message", "crystalia", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(766) },
-                    { new Guid("57f34bc7-5097-4a91-86b5-1efc68614663"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_aetherion_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(753), "linkaro", true, "hero_linkaro_region_aetherion_message", "aetherion", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(753) },
-                    { new Guid("5b896115-d654-43d7-8926-81eba0881108"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_terra_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(757), "grubot", true, "hero_grubot_region_terra_message", "terra", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(758) },
-                    { new Guid("71c026da-bcfe-46aa-b723-dcd303635ddd"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_sylvaria_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(663), "puf-puf", true, "hero_puf-puf_region_sylvaria_message", "sylvaria", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(663) },
-                    { new Guid("74364d73-920b-4485-a0cd-439ddc0df77f"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_oceanica_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(762), "grubot", true, "hero_grubot_region_oceanica_message", "oceanica", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(762) },
-                    { new Guid("78a76730-dd66-40e2-bb6b-aca6d397bdff"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_zephyra_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(767), "grubot", true, "hero_grubot_region_zephyra_message", "zephyra", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(768) },
-                    { new Guid("79f4a3ef-9167-443b-86b1-d180d1be44b2"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_lunaria_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(759), "grubot", true, "hero_grubot_region_lunaria_message", "lunaria", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(759) },
-                    { new Guid("7fcb0ad3-8099-4426-92cf-cef90b6c3dcb"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_kelo_ketis_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(754), "linkaro", true, "hero_linkaro_region_kelo_ketis_message", "kelo-ketis", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(754) },
-                    { new Guid("9b02619d-dee4-4829-ab2d-5c5693f8ba29"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_pyron_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(749), "linkaro", true, "hero_linkaro_region_pyron_message", "pyron", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(749) },
-                    { new Guid("9c28e258-04c6-4ecf-8813-ef7483191d7b"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_pyron_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(726), "puf-puf", true, "hero_puf-puf_region_pyron_message", "pyron", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(726) },
-                    { new Guid("a3223a1d-facc-4208-824b-b77fac83888f"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_oceanica_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(742), "linkaro", true, "hero_linkaro_region_oceanica_message", "oceanica", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(742) },
-                    { new Guid("aa6ab052-1092-44a7-81ba-a6d8d6d10c0e"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_gateway_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(643), "puf-puf", true, "hero_puf-puf_region_gateway_message", "gateway", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(644) },
-                    { new Guid("b7817557-35e1-4ffa-b12a-02a3ded1d656"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_lunaria_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(648), "puf-puf", true, "hero_puf-puf_region_lunaria_message", "lunaria", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(648) },
-                    { new Guid("c3908326-e0bd-4279-a4ec-14cc9133eac6"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_aetherion_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(773), "grubot", true, "hero_grubot_region_aetherion_message", "aetherion", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(773) },
-                    { new Guid("c456b66e-d1c6-4d98-ad4c-01ad8f9b06c3"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_kelo_ketis_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(774), "grubot", true, "hero_grubot_region_kelo_ketis_message", "kelo-ketis", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(774) },
-                    { new Guid("c6e1c9f0-1821-44d3-8092-4e402af57dbb"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_neptunia_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(728), "puf-puf", true, "hero_puf-puf_region_neptunia_message", "neptunia", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(728) },
-                    { new Guid("dc1af10e-724c-4551-b4d0-1309453b5a13"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_crystalia_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(722), "puf-puf", true, "hero_puf-puf_region_crystalia_message", "crystalia", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(722) },
-                    { new Guid("dd03e3ce-873b-4a0a-a2e4-3cdbea933b86"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_terra_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(646), "puf-puf", true, "hero_puf-puf_region_terra_message", "terra", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(646) },
-                    { new Guid("f2054881-5528-4a8f-b81e-a1732d7c2f72"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_crystalia_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(746), "linkaro", true, "hero_linkaro_region_crystalia_message", "crystalia", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(746) },
-                    { new Guid("f2331011-1728-4814-9e23-3f37ce52f44a"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_oceanica_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(650), "puf-puf", true, "hero_puf-puf_region_oceanica_message", "oceanica", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(650) },
-                    { new Guid("f7a1c400-354d-432d-bbab-a5187e9d8ac0"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_neptunia_message.wav", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(770), "grubot", true, "hero_grubot_region_neptunia_message", "neptunia", new DateTime(2025, 11, 23, 16, 50, 58, 3, DateTimeKind.Utc).AddTicks(771) }
+                    { new Guid("06b71164-0587-4dfc-ba7c-f3b7dc7c07af"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_aetherion_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(798), "linkaro", true, "hero_linkaro_region_aetherion_message", "aetherion", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(798) },
+                    { new Guid("1615a4b4-f007-4809-a4f5-cefda4cba1c6"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_sylvaria_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(790), "linkaro", true, "hero_linkaro_region_sylvaria_message", "sylvaria", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(791) },
+                    { new Guid("191a94fc-314a-4de9-be91-cbc59063a459"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_aetherion_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(778), "puf-puf", true, "hero_puf-puf_region_aetherion_message", "aetherion", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(779) },
+                    { new Guid("1a8841ab-d18c-41bd-9eee-de56ad6886ce"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_crystalia_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(810), "grubot", true, "hero_grubot_region_crystalia_message", "crystalia", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(810) },
+                    { new Guid("1ebf523e-d5c1-4599-a0b5-160e5b014da3"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_gateway_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(782), "linkaro", true, "hero_linkaro_region_gateway_message", "gateway", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(782) },
+                    { new Guid("24fd0c3b-a5f8-4b95-9a6d-a2f59f01cd49"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_zephyra_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(794), "linkaro", true, "hero_linkaro_region_zephyra_message", "zephyra", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(794) },
+                    { new Guid("26b88439-578e-4faf-b8a6-9d5c19655d18"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_oceanica_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(789), "linkaro", true, "hero_linkaro_region_oceanica_message", "oceanica", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(789) },
+                    { new Guid("33da935c-c222-4f68-a401-56c2a3ffb1eb"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_kelo_ketis_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(800), "linkaro", true, "hero_linkaro_region_kelo_ketis_message", "kelo-ketis", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(800) },
+                    { new Guid("34a5e5e0-c6c9-4843-92a3-43437c6f0bce"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_pyron_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(775), "puf-puf", true, "hero_puf-puf_region_pyron_message", "pyron", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(775) },
+                    { new Guid("34d26b90-46ee-40f8-9404-be1083880486"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_neptunia_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(796), "linkaro", true, "hero_linkaro_region_neptunia_message", "neptunia", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(797) },
+                    { new Guid("36e3b0f2-ca8d-4c60-92a7-f770ff5320e5"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_oceanica_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(731), "puf-puf", true, "hero_puf-puf_region_oceanica_message", "oceanica", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(731) },
+                    { new Guid("38da6973-f3a9-4fc6-9938-8ec6d7f8440b"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_terra_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(784), "linkaro", true, "hero_linkaro_region_terra_message", "terra", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(784) },
+                    { new Guid("45123c10-ebc8-4b42-bf78-5b8a84122707"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_sylvaria_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(808), "grubot", true, "hero_grubot_region_sylvaria_message", "sylvaria", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(809) },
+                    { new Guid("4d3aab52-edb0-4526-a131-d1379ea8c639"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_pyron_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(814), "grubot", true, "hero_grubot_region_pyron_message", "pyron", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(814) },
+                    { new Guid("4e192b39-a164-477f-b4c7-0f308bb9511c"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_gateway_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(802), "grubot", true, "hero_grubot_region_gateway_message", "gateway", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(802) },
+                    { new Guid("5022d96c-9a02-4eff-9efd-62ac41626b72"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_kelo_ketis_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(818), "grubot", true, "hero_grubot_region_kelo_ketis_message", "kelo-ketis", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(818) },
+                    { new Guid("51bbe0cd-5a70-424d-aa10-f04460cac20e"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_lunaria_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(804), "grubot", true, "hero_grubot_region_lunaria_message", "lunaria", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(805) },
+                    { new Guid("69e9fb57-4cfe-4eef-b3b7-3a50c42f5179"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_terra_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(803), "grubot", true, "hero_grubot_region_terra_message", "terra", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(803) },
+                    { new Guid("72cf7428-ff96-48d5-94ce-3cdb7cce29f7"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_lunaria_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(729), "puf-puf", true, "hero_puf-puf_region_lunaria_message", "lunaria", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(729) },
+                    { new Guid("749304c3-8da7-47ad-8c1a-56c361e37e7f"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_neptunia_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(815), "grubot", true, "hero_grubot_region_neptunia_message", "neptunia", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(815) },
+                    { new Guid("75feef7d-b93e-403a-8d99-e3de16aab45e"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_lunaria_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(785), "linkaro", true, "hero_linkaro_region_lunaria_message", "lunaria", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(785) },
+                    { new Guid("8ce283b2-17c4-45a5-8b65-76bac1809e7d"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_gateway_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(725), "puf-puf", true, "hero_puf-puf_region_gateway_message", "gateway", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(725) },
+                    { new Guid("8d5fba3d-26df-4378-9cd9-415fc6f0a1de"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_terra_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(727), "puf-puf", true, "hero_puf-puf_region_terra_message", "terra", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(728) },
+                    { new Guid("980ca44d-defe-476a-81dc-88f26e83b71e"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_aetherion_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(817), "grubot", true, "hero_grubot_region_aetherion_message", "aetherion", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(817) },
+                    { new Guid("9be224f2-1338-4393-8d6f-3eebcb56a9b3"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_crystalia_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(793), "linkaro", true, "hero_linkaro_region_crystalia_message", "crystalia", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(793) },
+                    { new Guid("c9de12f9-0c2f-4044-8324-53cb9c2c5e63"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_mechanika_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(806), "grubot", true, "hero_grubot_region_mechanika_message", "mechanika", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(806) },
+                    { new Guid("cc98481f-049d-4dcf-99e1-0ffdf1299a56"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_mechanika_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(788), "linkaro", true, "hero_linkaro_region_mechanika_message", "mechanika", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(788) },
+                    { new Guid("cfb1d2c6-94da-4c98-a021-dc3a9bd8ab85"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_zephyra_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(773), "puf-puf", true, "hero_puf-puf_region_zephyra_message", "zephyra", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(774) },
+                    { new Guid("d4ebbb34-6e90-4dd3-b429-a7f80499ef32"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_kelo_ketis_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(780), "puf-puf", true, "hero_puf-puf_region_kelo_ketis_message", "kelo-ketis", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(780) },
+                    { new Guid("d5355528-0b0a-4f3f-a920-2c274ea01b85"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_zephyra_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(812), "grubot", true, "hero_grubot_region_zephyra_message", "zephyra", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(812) },
+                    { new Guid("dbecc783-f7bd-4368-bd49-cc41efe0a24c"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_neptunia_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(776), "puf-puf", true, "hero_puf-puf_region_neptunia_message", "neptunia", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(777) },
+                    { new Guid("dd977dee-8ab6-4eac-afd5-a87f389225b4"), "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_oceanica_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(807), "grubot", true, "hero_grubot_region_oceanica_message", "oceanica", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(807) },
+                    { new Guid("deb00e86-40b4-401c-8201-f8880b9ff017"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_crystalia_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(766), "puf-puf", true, "hero_puf-puf_region_crystalia_message", "crystalia", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(766) },
+                    { new Guid("ed2bec96-0766-4335-b1c3-5890fdb64540"), "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_sylvaria_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(732), "puf-puf", true, "hero_puf-puf_region_sylvaria_message", "sylvaria", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(732) },
+                    { new Guid("eea7c66c-cf90-49fb-92e3-c1284fe9750e"), "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_pyron_message.wav", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(795), "linkaro", true, "hero_linkaro_region_pyron_message", "pyron", new DateTime(2025, 11, 26, 13, 7, 0, 77, DateTimeKind.Utc).AddTicks(795) }
                 });
 
             migrationBuilder.InsertData(
+                schema: "alchimalia_schema",
                 table: "Regions",
                 columns: new[] { "Id", "Name" },
                 values: new object[,]
@@ -1590,16 +1731,18 @@ namespace XooCreator.BA.Migrations
                 });
 
             migrationBuilder.InsertData(
+                schema: "alchimalia_schema",
                 table: "StoryHeroes",
                 columns: new[] { "Id", "CreatedAt", "HeroId", "ImageUrl", "IsActive", "UnlockConditionJson", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { new Guid("00000000-0000-0000-0000-000000000100"), new DateTime(2025, 11, 23, 16, 50, 58, 1, DateTimeKind.Utc).AddTicks(7763), "puf-puf", "images/tol/stories/seed@alchimalia.com/intro-pufpuf/heroes/pufpufblink.gif", true, "{\"Type\":\"story_completion\",\"RequiredStories\":[\"intro-pufpuf\"],\"MinProgress\":100}", new DateTime(2025, 11, 23, 16, 50, 58, 1, DateTimeKind.Utc).AddTicks(7763) },
-                    { new Guid("11111111-1111-1111-1111-111111111100"), new DateTime(2025, 11, 23, 16, 50, 58, 1, DateTimeKind.Utc).AddTicks(7801), "linkaro", "images/tol/stories/seed@alchimalia.com/lunaria-s1/heroes/linkaro.png", true, "{\"Type\":\"story_completion\",\"RequiredStories\":[\"lunaria-s1\"],\"MinProgress\":100}", new DateTime(2025, 11, 23, 16, 50, 58, 1, DateTimeKind.Utc).AddTicks(7801) },
-                    { new Guid("22222222-2222-2222-2222-222222222200"), new DateTime(2025, 11, 23, 16, 50, 58, 1, DateTimeKind.Utc).AddTicks(7816), "grubot", "images/tol/stories/seed@alchimalia.com/mechanika-s1/heroes/grubot.png", true, "{\"Type\":\"story_completion\",\"RequiredStories\":[\"mechanika-s1\"],\"MinProgress\":100}", new DateTime(2025, 11, 23, 16, 50, 58, 1, DateTimeKind.Utc).AddTicks(7816) }
+                    { new Guid("00000000-0000-0000-0000-000000000100"), new DateTime(2025, 11, 26, 13, 7, 0, 75, DateTimeKind.Utc).AddTicks(2386), "puf-puf", "images/tol/stories/seed@alchimalia.com/intro-pufpuf/heroes/pufpufblink.gif", true, "{\"Type\":\"story_completion\",\"RequiredStories\":[\"intro-pufpuf\"],\"MinProgress\":100}", new DateTime(2025, 11, 26, 13, 7, 0, 75, DateTimeKind.Utc).AddTicks(2387) },
+                    { new Guid("11111111-1111-1111-1111-111111111100"), new DateTime(2025, 11, 26, 13, 7, 0, 75, DateTimeKind.Utc).AddTicks(2434), "linkaro", "images/tol/stories/seed@alchimalia.com/lunaria-s1/heroes/linkaro.png", true, "{\"Type\":\"story_completion\",\"RequiredStories\":[\"lunaria-s1\"],\"MinProgress\":100}", new DateTime(2025, 11, 26, 13, 7, 0, 75, DateTimeKind.Utc).AddTicks(2434) },
+                    { new Guid("22222222-2222-2222-2222-222222222200"), new DateTime(2025, 11, 26, 13, 7, 0, 75, DateTimeKind.Utc).AddTicks(2460), "grubot", "images/tol/stories/seed@alchimalia.com/mechanika-s1/heroes/grubot.png", true, "{\"Type\":\"story_completion\",\"RequiredStories\":[\"mechanika-s1\"],\"MinProgress\":100}", new DateTime(2025, 11, 26, 13, 7, 0, 75, DateTimeKind.Utc).AddTicks(2461) }
                 });
 
             migrationBuilder.InsertData(
+                schema: "alchimalia_schema",
                 table: "Animals",
                 columns: new[] { "Id", "Label", "RegionId", "Src" },
                 values: new object[,]
@@ -1641,36 +1784,40 @@ namespace XooCreator.BA.Migrations
                 });
 
             migrationBuilder.InsertData(
+                schema: "alchimalia_schema",
                 table: "BodyPartTranslations",
                 columns: new[] { "Id", "BodyPartKey", "LanguageCode", "Name" },
                 values: new object[,]
                 {
-                    { new Guid("40d9c4c8-f418-4835-a716-c638e68bf37b"), "arms", "en-us", "Arms" },
-                    { new Guid("5dbdd1a3-d908-4a51-b45d-5e8eab4f4a0e"), "tail", "en-us", "Tail" },
-                    { new Guid("61a163da-1d2f-459b-b19f-ee677845e670"), "wings", "en-us", "Wings" },
-                    { new Guid("b4795b0f-f3c5-4240-9512-60457b2d74f9"), "body", "en-us", "Body" },
-                    { new Guid("bbe4cd5b-9297-42fe-8091-4ce26ca55c03"), "horns", "en-us", "Horns" },
-                    { new Guid("c65ddee9-b69b-494c-9a4e-fecb8bdbdae2"), "head", "en-us", "Head" },
-                    { new Guid("d5da56af-d165-4859-8d09-b49781c6344d"), "horn", "en-us", "Horn" },
-                    { new Guid("fdad36e0-30ff-4232-8437-ce05e05ee360"), "legs", "en-us", "Legs" }
+                    { new Guid("0258f9e4-7552-44db-b8d9-5d66d5e43e75"), "horns", "en-us", "Horns" },
+                    { new Guid("0f6b2077-6953-4e8e-abf2-b0f8ecf56dff"), "body", "en-us", "Body" },
+                    { new Guid("1b65f4b2-7699-4755-b9c9-095ea3d39f42"), "head", "en-us", "Head" },
+                    { new Guid("3f00ec35-08fe-4390-ad2b-1c37946cc3c1"), "arms", "en-us", "Arms" },
+                    { new Guid("41543fc2-d7c0-45e3-882e-84792ae354a1"), "legs", "en-us", "Legs" },
+                    { new Guid("8a2f2c49-5fb7-4d10-af75-74657db35166"), "tail", "en-us", "Tail" },
+                    { new Guid("a00d8eea-9cf4-4e70-8d88-ee08b48d8628"), "wings", "en-us", "Wings" },
+                    { new Guid("bd6e8ea8-a187-4fa5-b3b3-aae06e2c2d1d"), "horn", "en-us", "Horn" }
                 });
 
             migrationBuilder.InsertData(
+                schema: "alchimalia_schema",
                 table: "CreditWallets",
                 columns: new[] { "UserId", "Balance", "DiscoveryBalance", "UpdatedAt" },
-                values: new object[] { new Guid("33333333-3333-3333-3333-333333333333"), 1000.0, 0.0, new DateTime(2025, 11, 23, 16, 50, 58, 10, DateTimeKind.Utc).AddTicks(249) });
+                values: new object[] { new Guid("33333333-3333-3333-3333-333333333333"), 1000.0, 0.0, new DateTime(2025, 11, 26, 13, 7, 0, 81, DateTimeKind.Utc).AddTicks(8464) });
 
             migrationBuilder.InsertData(
+                schema: "alchimalia_schema",
                 table: "StoryHeroUnlocks",
                 columns: new[] { "Id", "CreatedAt", "StoryHeroId", "StoryId", "UnlockOrder" },
                 values: new object[,]
                 {
-                    { new Guid("18a40e57-7e7f-458c-b2ac-0a0c44c054de"), new DateTime(2025, 11, 23, 16, 50, 58, 2, DateTimeKind.Utc).AddTicks(3545), new Guid("11111111-1111-1111-1111-111111111100"), "lunaria-s1", 1 },
-                    { new Guid("319dfc43-c869-4a7d-bc16-284cd444bcf0"), new DateTime(2025, 11, 23, 16, 50, 58, 2, DateTimeKind.Utc).AddTicks(3571), new Guid("22222222-2222-2222-2222-222222222200"), "mechanika-s1", 1 },
-                    { new Guid("afd8820a-9013-4940-ab49-6b85ea0e8698"), new DateTime(2025, 11, 23, 16, 50, 58, 2, DateTimeKind.Utc).AddTicks(3512), new Guid("00000000-0000-0000-0000-000000000100"), "intro-pufpuf", 1 }
+                    { new Guid("5917492b-7306-4435-b859-4e6c7834ea72"), new DateTime(2025, 11, 26, 13, 7, 0, 76, DateTimeKind.Utc).AddTicks(1379), new Guid("11111111-1111-1111-1111-111111111100"), "lunaria-s1", 1 },
+                    { new Guid("b39fb353-5e5c-4db0-949e-0f6f0da63bf5"), new DateTime(2025, 11, 26, 13, 7, 0, 76, DateTimeKind.Utc).AddTicks(1333), new Guid("00000000-0000-0000-0000-000000000100"), "intro-pufpuf", 1 },
+                    { new Guid("d344e091-237a-4b7c-b606-126dd7b9294f"), new DateTime(2025, 11, 26, 13, 7, 0, 76, DateTimeKind.Utc).AddTicks(1442), new Guid("22222222-2222-2222-2222-222222222200"), "mechanika-s1", 1 }
                 });
 
             migrationBuilder.InsertData(
+                schema: "alchimalia_schema",
                 table: "AnimalPartSupports",
                 columns: new[] { "AnimalId", "PartKey" },
                 values: new object[,]
@@ -1824,467 +1971,544 @@ namespace XooCreator.BA.Migrations
                 });
 
             migrationBuilder.InsertData(
+                schema: "alchimalia_schema",
                 table: "AnimalTranslations",
                 columns: new[] { "Id", "AnimalId", "Label", "LanguageCode" },
                 values: new object[,]
                 {
-                    { new Guid("029a2eda-569e-422e-884b-ef034e7ad463"), new Guid("00000000-0000-0000-0000-000000000002"), "Hippo", "en-us" },
-                    { new Guid("10ac5b61-672e-4bf2-a4b0-491a7bc579c4"), new Guid("00000000-0000-0000-0000-00000000001b"), "Gray Wolf", "en-us" },
-                    { new Guid("13897d54-5ded-4036-8acf-fd47575a126e"), new Guid("00000000-0000-0000-0000-00000000001a"), "Saiga Antelope", "en-us" },
-                    { new Guid("1623b7be-e7a9-427f-a729-712b4b00f384"), new Guid("00000000-0000-0000-0000-00000000001e"), "Cow", "en-us" },
-                    { new Guid("23830767-a076-46d5-b140-2a6611d0b4e4"), new Guid("00000000-0000-0000-0000-00000000001f"), "Sheep", "en-us" },
-                    { new Guid("30784c40-b25f-44a2-8c8b-05f1a04f61a7"), new Guid("00000000-0000-0000-0000-000000000009"), "Deer", "en-us" },
-                    { new Guid("324a0e15-aba2-4d78-807b-8d8d8d14600c"), new Guid("00000000-0000-0000-0000-000000000020"), "Horse", "en-us" },
-                    { new Guid("3fc267b3-d939-4326-bfe6-4ee3763dc17e"), new Guid("00000000-0000-0000-0000-000000000016"), "Giraffe", "en-us" },
-                    { new Guid("4b2c8f07-8d14-46cc-aa13-0b8eb8d8e938"), new Guid("00000000-0000-0000-0000-000000000017"), "Zebra", "en-us" },
-                    { new Guid("4ca47c58-ec13-451b-b074-b2502aa73ba6"), new Guid("00000000-0000-0000-0000-000000000014"), "Lion", "en-us" },
-                    { new Guid("5c81de42-0826-4a98-a999-564e83275403"), new Guid("00000000-0000-0000-0000-000000000001"), "Bunny", "en-us" },
-                    { new Guid("609ac415-f2e4-41c3-ba57-874a92a03513"), new Guid("00000000-0000-0000-0000-000000000005"), "Fox", "en-us" },
-                    { new Guid("6a7698a1-f406-4593-bf18-bf8fae42d8f8"), new Guid("00000000-0000-0000-0000-000000000012"), "Capuchin Monkey", "en-us" },
-                    { new Guid("6de2c277-7254-4902-a6d1-df78cd6844da"), new Guid("00000000-0000-0000-0000-000000000010"), "Toucan", "en-us" },
-                    { new Guid("76831d5d-4a5c-4792-95fe-496f328e5dca"), new Guid("00000000-0000-0000-0000-00000000000a"), "Duck", "en-us" },
-                    { new Guid("81665c7d-f51a-455a-abe8-fadbd661adae"), new Guid("00000000-0000-0000-0000-000000000003"), "Giraffe", "en-us" },
-                    { new Guid("8ae43451-1b47-4128-a639-eb69ebd7bc4c"), new Guid("00000000-0000-0000-0000-000000000013"), "Poison Dart Frog", "en-us" },
-                    { new Guid("8c1557c7-3e20-4de9-91c4-0f462ac765e3"), new Guid("00000000-0000-0000-0000-00000000001c"), "Przewalski's Horse", "en-us" },
-                    { new Guid("8ead6be7-ba8c-48da-8af0-e3008b95b009"), new Guid("00000000-0000-0000-0000-00000000001d"), "Steppe Eagle", "en-us" },
-                    { new Guid("9389ca61-c70e-4bb0-8a90-e8d07cee380f"), new Guid("00000000-0000-0000-0000-00000000000d"), "Ostrich", "en-us" },
-                    { new Guid("957a9f69-d8a9-46f9-a8ee-8d4c84343f78"), new Guid("00000000-0000-0000-0000-00000000000c"), "Elephant", "en-us" },
-                    { new Guid("a5ed4a09-eb1f-46dc-895d-8e6eef6bae2f"), new Guid("00000000-0000-0000-0000-000000000018"), "Rhinoceros", "en-us" },
-                    { new Guid("adfb7e99-5409-4985-b1c8-c8915a3b3ecd"), new Guid("00000000-0000-0000-0000-000000000022"), "Pig", "en-us" },
-                    { new Guid("af1254a6-a65a-43db-b14c-ad82f0c2dfc3"), new Guid("00000000-0000-0000-0000-00000000000f"), "Jaguar", "en-us" },
-                    { new Guid("b8323586-667c-4ddd-b189-82df43b01988"), new Guid("00000000-0000-0000-0000-000000000021"), "Chicken", "en-us" },
-                    { new Guid("be987ee9-b213-4fe0-9126-6233eb43a9ea"), new Guid("00000000-0000-0000-0000-000000000019"), "Bison", "en-us" },
-                    { new Guid("c117b4dc-e3f7-459f-bafc-07cd9f260cbd"), new Guid("00000000-0000-0000-0000-000000000006"), "Cat", "en-us" },
-                    { new Guid("cf00ff98-917a-455e-a9f7-907bdeb4a897"), new Guid("00000000-0000-0000-0000-00000000000e"), "Parrot", "en-us" },
-                    { new Guid("cfbd2b8a-6b72-47fa-afb8-a8daf9189c36"), new Guid("00000000-0000-0000-0000-000000000011"), "Anaconda", "en-us" },
-                    { new Guid("e05cd11d-0ac2-4360-bcf2-99b3a0597149"), new Guid("00000000-0000-0000-0000-000000000004"), "Dog", "en-us" },
-                    { new Guid("e3c9d017-3107-40b2-8d7d-ef0e543a8d78"), new Guid("00000000-0000-0000-0000-00000000000b"), "Eagle", "en-us" },
-                    { new Guid("e65cf4bd-9864-4e91-a7a6-27713769ed2d"), new Guid("00000000-0000-0000-0000-000000000008"), "Camel", "en-us" },
-                    { new Guid("f5a7ec80-0a7f-497d-b96e-2a88160fb118"), new Guid("00000000-0000-0000-0000-000000000007"), "Monkey", "en-us" },
-                    { new Guid("ff1689d9-291f-452e-8706-d027c2b34128"), new Guid("00000000-0000-0000-0000-000000000015"), "African Elephant", "en-us" }
+                    { new Guid("077ba966-e21b-43c7-85eb-6cc81b3ec02c"), new Guid("00000000-0000-0000-0000-000000000014"), "Lion", "en-us" },
+                    { new Guid("0b09b527-e739-4f96-8769-779668eea671"), new Guid("00000000-0000-0000-0000-00000000000e"), "Parrot", "en-us" },
+                    { new Guid("0ee423d0-0282-46e3-a488-d218f857d6ed"), new Guid("00000000-0000-0000-0000-00000000000c"), "Elephant", "en-us" },
+                    { new Guid("1b7629af-8f36-4dff-b13f-33d2901cb9ed"), new Guid("00000000-0000-0000-0000-000000000017"), "Zebra", "en-us" },
+                    { new Guid("1d5c61b7-0383-4b63-953b-7291aaca8df4"), new Guid("00000000-0000-0000-0000-00000000000b"), "Eagle", "en-us" },
+                    { new Guid("2ac13777-9797-4bfd-ad5e-1f274ced50c4"), new Guid("00000000-0000-0000-0000-000000000003"), "Giraffe", "en-us" },
+                    { new Guid("2fd59b6b-94b7-4af0-8be8-2105266e7616"), new Guid("00000000-0000-0000-0000-000000000018"), "Rhinoceros", "en-us" },
+                    { new Guid("325f41b3-e002-4e5d-b9e2-dc29b4a1c6b7"), new Guid("00000000-0000-0000-0000-000000000002"), "Hippo", "en-us" },
+                    { new Guid("3c689385-9df6-4380-ab38-75d072d2a420"), new Guid("00000000-0000-0000-0000-00000000000a"), "Duck", "en-us" },
+                    { new Guid("440d28a2-b12f-42ef-ad10-89c0ea48e719"), new Guid("00000000-0000-0000-0000-000000000022"), "Pig", "en-us" },
+                    { new Guid("47e8df49-f387-42b3-9505-41a5d77e5af4"), new Guid("00000000-0000-0000-0000-00000000001c"), "Przewalski's Horse", "en-us" },
+                    { new Guid("4b5a1d01-3a95-45c6-8866-28c6f247c73a"), new Guid("00000000-0000-0000-0000-000000000004"), "Dog", "en-us" },
+                    { new Guid("53cccf67-268b-4161-891c-4a2ac5857d02"), new Guid("00000000-0000-0000-0000-000000000006"), "Cat", "en-us" },
+                    { new Guid("544f5085-923b-48d4-82cf-093f793224ac"), new Guid("00000000-0000-0000-0000-00000000001f"), "Sheep", "en-us" },
+                    { new Guid("60b6dd16-b673-4f30-bb64-08aaffd93ed2"), new Guid("00000000-0000-0000-0000-000000000010"), "Toucan", "en-us" },
+                    { new Guid("6938c2c1-1949-4025-bc70-3b28524fceac"), new Guid("00000000-0000-0000-0000-000000000020"), "Horse", "en-us" },
+                    { new Guid("6b9c9eee-d9e3-45d2-91dc-51407627e102"), new Guid("00000000-0000-0000-0000-000000000013"), "Poison Dart Frog", "en-us" },
+                    { new Guid("7493bb37-eeaf-4f8b-a21e-d4062709c87c"), new Guid("00000000-0000-0000-0000-00000000000d"), "Ostrich", "en-us" },
+                    { new Guid("77a643c8-3891-48d1-91ae-83aceb8900b0"), new Guid("00000000-0000-0000-0000-000000000011"), "Anaconda", "en-us" },
+                    { new Guid("7e2eb6fd-c3fb-4249-881a-dceb5542fbe4"), new Guid("00000000-0000-0000-0000-00000000001e"), "Cow", "en-us" },
+                    { new Guid("8419a335-9d1a-445e-91c6-1e3a8e52f201"), new Guid("00000000-0000-0000-0000-000000000012"), "Capuchin Monkey", "en-us" },
+                    { new Guid("8a0de3f1-7a65-4b2c-b47d-47cb4366d50e"), new Guid("00000000-0000-0000-0000-00000000001b"), "Gray Wolf", "en-us" },
+                    { new Guid("8d37c7cc-e7ef-4f42-b3e3-65d22bb07ff2"), new Guid("00000000-0000-0000-0000-000000000015"), "African Elephant", "en-us" },
+                    { new Guid("926b282d-3829-40e0-8842-091724059701"), new Guid("00000000-0000-0000-0000-000000000008"), "Camel", "en-us" },
+                    { new Guid("aad8b834-2cd6-4198-9b73-36cd17470a53"), new Guid("00000000-0000-0000-0000-000000000019"), "Bison", "en-us" },
+                    { new Guid("af7ee26b-320b-449f-9f54-f5498351c577"), new Guid("00000000-0000-0000-0000-00000000000f"), "Jaguar", "en-us" },
+                    { new Guid("b0678ea3-d4d1-4696-8af6-c5951817ce56"), new Guid("00000000-0000-0000-0000-000000000001"), "Bunny", "en-us" },
+                    { new Guid("b5ba515a-5caa-4636-af47-1d43549c654c"), new Guid("00000000-0000-0000-0000-000000000009"), "Deer", "en-us" },
+                    { new Guid("b5d53a57-90d0-41b6-af85-0d76f24acfbb"), new Guid("00000000-0000-0000-0000-00000000001d"), "Steppe Eagle", "en-us" },
+                    { new Guid("bd370553-675d-4d6a-ad6f-ad4d9b55e260"), new Guid("00000000-0000-0000-0000-000000000016"), "Giraffe", "en-us" },
+                    { new Guid("ce1c998e-8505-416e-8d05-bd9a3766bac4"), new Guid("00000000-0000-0000-0000-00000000001a"), "Saiga Antelope", "en-us" },
+                    { new Guid("ce977c8d-8c66-4930-9f69-6d74a72b91e9"), new Guid("00000000-0000-0000-0000-000000000021"), "Chicken", "en-us" },
+                    { new Guid("d64a406e-4f1e-4125-a33a-018ae3bd0380"), new Guid("00000000-0000-0000-0000-000000000005"), "Fox", "en-us" },
+                    { new Guid("da00d113-b7e3-48f0-ac89-da40572bac14"), new Guid("00000000-0000-0000-0000-000000000007"), "Monkey", "en-us" }
                 });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AlchimaliaUsers_Auth0Id",
+                schema: "alchimalia_schema",
                 table: "AlchimaliaUsers",
                 column: "Auth0Id",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_AnimalPartSupports_PartKey",
+                schema: "alchimalia_schema",
                 table: "AnimalPartSupports",
                 column: "PartKey");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Animals_RegionId",
+                schema: "alchimalia_schema",
                 table: "Animals",
                 column: "RegionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AnimalTranslations_AnimalId_LanguageCode",
+                schema: "alchimalia_schema",
                 table: "AnimalTranslations",
                 columns: new[] { "AnimalId", "LanguageCode" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_BodyPartTranslations_BodyPartKey_LanguageCode",
+                schema: "alchimalia_schema",
                 table: "BodyPartTranslations",
                 columns: new[] { "BodyPartKey", "LanguageCode" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_ClassicAuthors_AuthorId",
+                schema: "alchimalia_schema",
                 table: "ClassicAuthors",
                 column: "AuthorId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_ClassicAuthors_LanguageCode_SortOrder",
+                schema: "alchimalia_schema",
                 table: "ClassicAuthors",
                 columns: new[] { "LanguageCode", "SortOrder" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Creatures_TreeId",
+                schema: "alchimalia_schema",
                 table: "Creatures",
                 column: "TreeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Creatures_UserId",
+                schema: "alchimalia_schema",
                 table: "Creatures",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CreditTransactions_UserId",
+                schema: "alchimalia_schema",
                 table: "CreditTransactions",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_HeroClickMessages_HeroId",
+                schema: "alchimalia_schema",
                 table: "HeroClickMessages",
                 column: "HeroId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_HeroDefinitions_Id",
+                schema: "alchimalia_schema",
                 table: "HeroDefinitions",
                 column: "Id",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_HeroDefinitionTranslations_HeroDefinitionId_LanguageCode",
+                schema: "alchimalia_schema",
                 table: "HeroDefinitionTranslations",
                 columns: new[] { "HeroDefinitionId", "LanguageCode" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_HeroMessages_HeroId_RegionId",
+                schema: "alchimalia_schema",
                 table: "HeroMessages",
                 columns: new[] { "HeroId", "RegionId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_HeroProgress_UserId_HeroId_HeroType",
+                schema: "alchimalia_schema",
                 table: "HeroProgress",
                 columns: new[] { "UserId", "HeroId", "HeroType" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_HeroTreeProgress_UserId_NodeId",
+                schema: "alchimalia_schema",
                 table: "HeroTreeProgress",
                 columns: new[] { "UserId", "NodeId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Jobs_UserId",
+                schema: "alchimalia_schema",
                 table: "Jobs",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Regions_Name",
+                schema: "alchimalia_schema",
                 table: "Regions",
                 column: "Name",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryAgeGroups_AgeGroupId",
+                schema: "alchimalia_schema",
                 table: "StoryAgeGroups",
                 column: "AgeGroupId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryAgeGroupTranslations_StoryAgeGroupId_LanguageCode",
+                schema: "alchimalia_schema",
                 table: "StoryAgeGroupTranslations",
                 columns: new[] { "StoryAgeGroupId", "LanguageCode" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryAnswers_StoryTileId_AnswerId",
+                schema: "alchimalia_schema",
                 table: "StoryAnswers",
                 columns: new[] { "StoryTileId", "AnswerId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryAnswerTokens_StoryAnswerId",
+                schema: "alchimalia_schema",
                 table: "StoryAnswerTokens",
                 column: "StoryAnswerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryAnswerTranslations_StoryAnswerId_LanguageCode",
+                schema: "alchimalia_schema",
                 table: "StoryAnswerTranslations",
                 columns: new[] { "StoryAnswerId", "LanguageCode" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryCraftAgeGroups_StoryAgeGroupId",
+                schema: "alchimalia_schema",
                 table: "StoryCraftAgeGroups",
                 column: "StoryAgeGroupId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryCraftAnswers_StoryCraftTileId_AnswerId",
+                schema: "alchimalia_schema",
                 table: "StoryCraftAnswers",
                 columns: new[] { "StoryCraftTileId", "AnswerId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryCraftAnswerTokens_StoryCraftAnswerId",
+                schema: "alchimalia_schema",
                 table: "StoryCraftAnswerTokens",
                 column: "StoryCraftAnswerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryCraftAnswerTranslations_StoryCraftAnswerId_LanguageCode",
+                schema: "alchimalia_schema",
                 table: "StoryCraftAnswerTranslations",
                 columns: new[] { "StoryCraftAnswerId", "LanguageCode" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryCrafts_ClassicAuthorId",
+                schema: "alchimalia_schema",
                 table: "StoryCrafts",
                 column: "ClassicAuthorId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryCrafts_StoryId",
+                schema: "alchimalia_schema",
                 table: "StoryCrafts",
                 column: "StoryId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryCraftTiles_StoryCraftId_TileId",
+                schema: "alchimalia_schema",
                 table: "StoryCraftTiles",
                 columns: new[] { "StoryCraftId", "TileId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryCraftTileTranslations_StoryCraftTileId_LanguageCode",
+                schema: "alchimalia_schema",
                 table: "StoryCraftTileTranslations",
                 columns: new[] { "StoryCraftTileId", "LanguageCode" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryCraftTopics_StoryTopicId",
+                schema: "alchimalia_schema",
                 table: "StoryCraftTopics",
                 column: "StoryTopicId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryCraftTranslations_StoryCraftId_LanguageCode",
+                schema: "alchimalia_schema",
                 table: "StoryCraftTranslations",
                 columns: new[] { "StoryCraftId", "LanguageCode" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryDefinitionAgeGroups_StoryAgeGroupId",
+                schema: "alchimalia_schema",
                 table: "StoryDefinitionAgeGroups",
                 column: "StoryAgeGroupId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryDefinitions_ClassicAuthorId",
+                schema: "alchimalia_schema",
                 table: "StoryDefinitions",
                 column: "ClassicAuthorId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryDefinitions_StoryId",
+                schema: "alchimalia_schema",
                 table: "StoryDefinitions",
                 column: "StoryId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryDefinitionTopics_StoryTopicId",
+                schema: "alchimalia_schema",
                 table: "StoryDefinitionTopics",
                 column: "StoryTopicId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryDefinitionTranslations_StoryDefinitionId_LanguageCode",
+                schema: "alchimalia_schema",
                 table: "StoryDefinitionTranslations",
                 columns: new[] { "StoryDefinitionId", "LanguageCode" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryFeedbackPreferences_UserId_StoryId",
+                schema: "alchimalia_schema",
                 table: "StoryFeedbackPreferences",
                 columns: new[] { "UserId", "StoryId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryFeedbacks_UserId_StoryId",
+                schema: "alchimalia_schema",
                 table: "StoryFeedbacks",
                 columns: new[] { "UserId", "StoryId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryHeroes_HeroId",
+                schema: "alchimalia_schema",
                 table: "StoryHeroes",
                 column: "HeroId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryHeroUnlocks_StoryHeroId_StoryId",
+                schema: "alchimalia_schema",
                 table: "StoryHeroUnlocks",
                 columns: new[] { "StoryHeroId", "StoryId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryProgress_TreeConfigurationId",
+                schema: "alchimalia_schema",
                 table: "StoryProgress",
                 column: "TreeConfigurationId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryProgress_UserId_StoryId_TreeConfigurationId",
+                schema: "alchimalia_schema",
                 table: "StoryProgress",
                 columns: new[] { "UserId", "StoryId", "TreeConfigurationId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryPublicationAudits_StoryDefinitionId",
+                schema: "alchimalia_schema",
                 table: "StoryPublicationAudits",
                 column: "StoryDefinitionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryPublicationAudits_StoryId",
+                schema: "alchimalia_schema",
                 table: "StoryPublicationAudits",
                 column: "StoryId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryPurchases_StoryId",
+                schema: "alchimalia_schema",
                 table: "StoryPurchases",
                 column: "StoryId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryPurchases_UserId_StoryId",
+                schema: "alchimalia_schema",
                 table: "StoryPurchases",
                 columns: new[] { "UserId", "StoryId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryReaders_StoryId",
+                schema: "alchimalia_schema",
                 table: "StoryReaders",
                 column: "StoryId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryReaders_UserId_StoryId",
+                schema: "alchimalia_schema",
                 table: "StoryReaders",
                 columns: new[] { "UserId", "StoryId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryReviews_StoryId",
+                schema: "alchimalia_schema",
                 table: "StoryReviews",
                 column: "StoryId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryReviews_UserId_StoryId",
+                schema: "alchimalia_schema",
                 table: "StoryReviews",
                 columns: new[] { "UserId", "StoryId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryTiles_StoryDefinitionId_TileId",
+                schema: "alchimalia_schema",
                 table: "StoryTiles",
                 columns: new[] { "StoryDefinitionId", "TileId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryTileTranslations_StoryTileId_LanguageCode",
+                schema: "alchimalia_schema",
                 table: "StoryTileTranslations",
                 columns: new[] { "StoryTileId", "LanguageCode" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryTopics_TopicId",
+                schema: "alchimalia_schema",
                 table: "StoryTopics",
                 column: "TopicId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_StoryTopicTranslations_StoryTopicId_LanguageCode",
+                schema: "alchimalia_schema",
                 table: "StoryTopicTranslations",
                 columns: new[] { "StoryTopicId", "LanguageCode" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_TreeChoices_TreeId_Tier",
+                schema: "alchimalia_schema",
                 table: "TreeChoices",
                 columns: new[] { "TreeId", "Tier" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_TreeProgress_TreeConfigurationId",
+                schema: "alchimalia_schema",
                 table: "TreeProgress",
                 column: "TreeConfigurationId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TreeProgress_UserId_RegionId_TreeConfigurationId",
+                schema: "alchimalia_schema",
                 table: "TreeProgress",
                 columns: new[] { "UserId", "RegionId", "TreeConfigurationId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_TreeRegions_Id_TreeConfigurationId",
+                schema: "alchimalia_schema",
                 table: "TreeRegions",
                 columns: new[] { "Id", "TreeConfigurationId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_TreeRegions_TreeConfigurationId",
+                schema: "alchimalia_schema",
                 table: "TreeRegions",
                 column: "TreeConfigurationId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Trees_UserId",
+                schema: "alchimalia_schema",
                 table: "Trees",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TreeStoryNodes_RegionId",
+                schema: "alchimalia_schema",
                 table: "TreeStoryNodes",
                 column: "RegionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TreeStoryNodes_StoryId_RegionId_TreeConfigurationId",
+                schema: "alchimalia_schema",
                 table: "TreeStoryNodes",
                 columns: new[] { "StoryId", "RegionId", "TreeConfigurationId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_TreeStoryNodes_TreeConfigurationId",
+                schema: "alchimalia_schema",
                 table: "TreeStoryNodes",
                 column: "TreeConfigurationId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TreeUnlockRules_TreeConfigurationId",
+                schema: "alchimalia_schema",
                 table: "TreeUnlockRules",
                 column: "TreeConfigurationId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserBestiary_BestiaryItemId",
+                schema: "alchimalia_schema",
                 table: "UserBestiary",
                 column: "BestiaryItemId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserBestiary_UserId_BestiaryItemId_BestiaryType",
+                schema: "alchimalia_schema",
                 table: "UserBestiary",
                 columns: new[] { "UserId", "BestiaryItemId", "BestiaryType" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserCreatedStories_StoryDefinitionId",
+                schema: "alchimalia_schema",
                 table: "UserCreatedStories",
                 column: "StoryDefinitionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserCreatedStories_UserId_StoryDefinitionId",
+                schema: "alchimalia_schema",
                 table: "UserCreatedStories",
                 columns: new[] { "UserId", "StoryDefinitionId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserFavoriteStories_StoryDefinitionId",
+                schema: "alchimalia_schema",
                 table: "UserFavoriteStories",
                 column: "StoryDefinitionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserFavoriteStories_UserId_StoryDefinitionId",
+                schema: "alchimalia_schema",
                 table: "UserFavoriteStories",
                 columns: new[] { "UserId", "StoryDefinitionId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserOwnedStories_StoryDefinitionId",
+                schema: "alchimalia_schema",
                 table: "UserOwnedStories",
                 column: "StoryDefinitionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserOwnedStories_UserId_StoryDefinitionId",
+                schema: "alchimalia_schema",
                 table: "UserOwnedStories",
                 columns: new[] { "UserId", "StoryDefinitionId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserStoryReadProgress_UserId_StoryId_TileId",
+                schema: "alchimalia_schema",
                 table: "UserStoryReadProgress",
                 columns: new[] { "UserId", "StoryId", "TileId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserTokenBalances_UserId_Type_Value",
+                schema: "alchimalia_schema",
                 table: "UserTokenBalances",
                 columns: new[] { "UserId", "Type", "Value" },
                 unique: true);
@@ -2294,196 +2518,260 @@ namespace XooCreator.BA.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "AnimalPartSupports");
+                name: "AnimalPartSupports",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "AnimalTranslations");
+                name: "AnimalTranslations",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "BodyPartTranslations");
+                name: "BodyPartTranslations",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "BuilderConfigs");
+                name: "BuilderConfigs",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "Creatures");
+                name: "Creatures",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "CreditTransactions");
+                name: "CreditTransactions",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "CreditWallets");
+                name: "CreditWallets",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "HeroClickMessages");
+                name: "HeroClickMessages",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "HeroDefinitionTranslations");
+                name: "HeroDefinitionTranslations",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "HeroMessages");
+                name: "HeroMessages",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "HeroProgress");
+                name: "HeroProgress",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "HeroTreeProgress");
+                name: "HeroTreeProgress",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "Jobs");
+                name: "Jobs",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "StoryAgeGroupTranslations");
+                name: "StoryAgeGroupTranslations",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "StoryAnswerTokens");
+                name: "StoryAnswerTokens",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "StoryAnswerTranslations");
+                name: "StoryAnswerTranslations",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "StoryCraftAgeGroups");
+                name: "StoryCraftAgeGroups",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "StoryCraftAnswerTokens");
+                name: "StoryCraftAnswerTokens",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "StoryCraftAnswerTranslations");
+                name: "StoryCraftAnswerTranslations",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "StoryCraftTileTranslations");
+                name: "StoryCraftTileTranslations",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "StoryCraftTopics");
+                name: "StoryCraftTopics",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "StoryCraftTranslations");
+                name: "StoryCraftTranslations",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "StoryDefinitionAgeGroups");
+                name: "StoryDefinitionAgeGroups",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "StoryDefinitionTopics");
+                name: "StoryDefinitionTopics",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "StoryDefinitionTranslations");
+                name: "StoryDefinitionTranslations",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "StoryFeedbackPreferences");
+                name: "StoryFeedbackPreferences",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "StoryFeedbacks");
+                name: "StoryFeedbacks",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "StoryHeroUnlocks");
+                name: "StoryHeroUnlocks",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "StoryProgress");
+                name: "StoryProgress",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "StoryPublicationAudits");
+                name: "StoryPublicationAudits",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "StoryPurchases");
+                name: "StoryPurchases",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "StoryReaders");
+                name: "StoryReaders",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "StoryReviews");
+                name: "StoryReviews",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "StoryTileTranslations");
+                name: "StoryTileTranslations",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "StoryTopicTranslations");
+                name: "StoryTopicTranslations",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "TreeChoices");
+                name: "TreeChoices",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "TreeProgress");
+                name: "TreeProgress",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "TreeStoryNodes");
+                name: "TreeStoryNodes",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "TreeUnlockRules");
+                name: "TreeUnlockRules",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "UserBestiary");
+                name: "UserBestiary",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "UserCreatedStories");
+                name: "UserCreatedStories",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "UserFavoriteStories");
+                name: "UserFavoriteStories",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "UserOwnedStories");
+                name: "UserOwnedStories",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "UserStoryReadProgress");
+                name: "UserStoryReadProgress",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "UserTokenBalances");
+                name: "UserTokenBalances",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "Animals");
+                name: "Animals",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "BodyParts");
+                name: "BodyParts",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "HeroDefinitions");
+                name: "HeroDefinitions",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "StoryAnswers");
+                name: "StoryAnswers",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "StoryCraftAnswers");
+                name: "StoryCraftAnswers",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "StoryAgeGroups");
+                name: "StoryAgeGroups",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "StoryHeroes");
+                name: "StoryHeroes",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "StoryTopics");
+                name: "StoryTopics",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "Trees");
+                name: "Trees",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "TreeRegions");
+                name: "TreeRegions",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "BestiaryItems");
+                name: "BestiaryItems",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "Regions");
+                name: "Regions",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "StoryTiles");
+                name: "StoryTiles",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "StoryCraftTiles");
+                name: "StoryCraftTiles",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "AlchimaliaUsers");
+                name: "AlchimaliaUsers",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "TreeConfigurations");
+                name: "TreeConfigurations",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "StoryDefinitions");
+                name: "StoryDefinitions",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "StoryCrafts");
+                name: "StoryCrafts",
+                schema: "alchimalia_schema");
 
             migrationBuilder.DropTable(
-                name: "ClassicAuthors");
+                name: "ClassicAuthors",
+                schema: "alchimalia_schema");
         }
     }
 }

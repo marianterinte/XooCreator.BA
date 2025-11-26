@@ -20,6 +20,9 @@ if (!string.IsNullOrWhiteSpace(portEnv))
     builder.WebHost.UseUrls($"http://0.0.0.0:{portEnv}");
 }
 
+static string QuoteIdentifier(string identifier)
+    => $"\"{identifier.Replace("\"", "\"\"")}\"";
+
 builder.Services.AddLogging();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -60,6 +63,7 @@ using (var scope = app.Services.CreateScope())
     {
         var recreate = builder.Configuration.GetValue<bool>("Database:RecreateOnStart");
         var forceSchemaDrop = builder.Configuration.GetValue<bool>("Database:ForceSchemaDrop");
+        var dbSchema = builder.Configuration.GetValue<string>("Database:Schema") ?? "public";
 
         if (forceSchemaDrop)
         {
@@ -75,10 +79,11 @@ using (var scope = app.Services.CreateScope())
             {
                 // Method that works on cloud platforms (Supabase, Railway, etc.)
                 // Drop and recreate the public schema (removes all tables, data, etc.)
-                await context.Database.ExecuteSqlRawAsync("DROP SCHEMA public CASCADE;");
+                var schemaName = QuoteIdentifier(dbSchema);
+                await context.Database.ExecuteSqlRawAsync($"DROP SCHEMA IF EXISTS {schemaName} CASCADE;");
                 Console.WriteLine("✅ Schema dropped successfully");
                 
-                await context.Database.ExecuteSqlRawAsync("CREATE SCHEMA public;");
+                await context.Database.ExecuteSqlRawAsync($"CREATE SCHEMA {schemaName};");
                 Console.WriteLine("✅ Schema recreated successfully");
                 
                 // Apply migrations using the robust migration service
