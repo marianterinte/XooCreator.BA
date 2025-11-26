@@ -14,6 +14,12 @@ public class XooDbContext : DbContext
     public XooDbContext(DbContextOptions<XooDbContext> options, IConfiguration configuration) : base(options)
     {
         _defaultSchema = configuration.GetValue<string>("Database:Schema") ?? "public";
+
+        var forcedSchema = Environment.GetEnvironmentVariable("DB_FORCE_SCHEMA");
+        if (!string.IsNullOrWhiteSpace(forcedSchema))
+        {
+            _defaultSchema = forcedSchema.Trim();
+        }
     }
 
     public DbSet<AlchimaliaUser> AlchimaliaUsers => Set<AlchimaliaUser>();
