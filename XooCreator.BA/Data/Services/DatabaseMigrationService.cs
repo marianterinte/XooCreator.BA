@@ -49,12 +49,14 @@ public class DatabaseMigrationService : IDatabaseMigrationService
         try
         {
             await EnsureSchemaExistsAsync(cancellationToken);
+            var schema = GetDefaultSchema();
+            var schemaName = $"\"{schema.Replace("\"", "\"\"")}\"";
             // Create migrations history table using idempotent SQL
             // This table is created by EF Core automatically, but we ensure it exists
             // in case the database was created manually or partially migrated
             await _context.Database.ExecuteSqlRawAsync(
-                @"
-                    CREATE TABLE IF NOT EXISTS ""__EFMigrationsHistory"" (
+                $@"
+                    CREATE TABLE IF NOT EXISTS {schemaName}.""__EFMigrationsHistory"" (
                         ""MigrationId"" character varying(150) NOT NULL,
                         ""ProductVersion"" character varying(32) NOT NULL,
                         CONSTRAINT ""PK___EFMigrationsHistory"" PRIMARY KEY (""MigrationId"")
@@ -223,27 +225,27 @@ public class DatabaseMigrationService : IDatabaseMigrationService
     {
         try
         {
+            var schema = GetDefaultSchema();
+            var schemaName = $"\"{schema.Replace("\"", "\"\"")}\"";
             // Ensure ClassicAuthorId exists in StoryDefinitions
-            await _context.Database.ExecuteSqlRawAsync(@"
+            await _context.Database.ExecuteSqlRawAsync($@"
                 DO $$
-                DECLARE target_schema text := current_schema();
                 BEGIN
-                    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE LOWER(table_name) = 'storydefinitions' AND table_schema = target_schema) THEN
-                        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE LOWER(table_name) = 'storydefinitions' AND LOWER(column_name) = 'classicauthorid' AND table_schema = target_schema) THEN
-                            ALTER TABLE ""StoryDefinitions"" ADD COLUMN ""ClassicAuthorId"" uuid NULL;
+                    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE LOWER(table_name) = 'storydefinitions' AND table_schema = '{schema}') THEN
+                        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE LOWER(table_name) = 'storydefinitions' AND LOWER(column_name) = 'classicauthorid' AND table_schema = '{schema}') THEN
+                            ALTER TABLE {schemaName}.""StoryDefinitions"" ADD COLUMN ""ClassicAuthorId"" uuid NULL;
                         END IF;
                     END IF;
                 END $$;
             ", cancellationToken);
 
             // Ensure ClassicAuthorId exists in StoryCrafts
-            await _context.Database.ExecuteSqlRawAsync(@"
+            await _context.Database.ExecuteSqlRawAsync($@"
                 DO $$
-                DECLARE target_schema text := current_schema();
                 BEGIN
-                    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE LOWER(table_name) = 'storycrafts' AND table_schema = target_schema) THEN
-                        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE LOWER(table_name) = 'storycrafts' AND LOWER(column_name) = 'classicauthorid' AND table_schema = target_schema) THEN
-                            ALTER TABLE ""StoryCrafts"" ADD COLUMN ""ClassicAuthorId"" uuid NULL;
+                    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE LOWER(table_name) = 'storycrafts' AND table_schema = '{schema}') THEN
+                        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE LOWER(table_name) = 'storycrafts' AND LOWER(column_name) = 'classicauthorid' AND table_schema = '{schema}') THEN
+                            ALTER TABLE {schemaName}.""StoryCrafts"" ADD COLUMN ""ClassicAuthorId"" uuid NULL;
                         END IF;
                     END IF;
                 END $$;

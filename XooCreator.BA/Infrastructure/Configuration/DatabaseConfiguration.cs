@@ -15,6 +15,16 @@ public static class DatabaseConfiguration
         services.AddDbContext<XooDbContext>(options =>
         {
             var cs = ResolveConnectionString(configuration);
+            var dbSchema = configuration.GetValue<string>("Database:Schema") ?? "public";
+            
+            // Add search_path to connection string if schema is not public
+            if (dbSchema != "public")
+            {
+                var builder = new NpgsqlConnectionStringBuilder(cs);
+                builder.SearchPath = dbSchema;
+                cs = builder.ConnectionString;
+            }
+            
             options.UseNpgsql(cs);
             
             // Add interceptor to automatically make migration SQL commands idempotent

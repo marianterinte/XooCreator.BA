@@ -110,6 +110,11 @@ using (var scope = app.Services.CreateScope())
         }
         else
         {
+            // Ensure schema exists before running migrations
+            var schemaName = QuoteIdentifier(dbSchema);
+            await context.Database.ExecuteSqlRawAsync($"CREATE SCHEMA IF NOT EXISTS {schemaName};");
+            Console.WriteLine($"✅ Schema '{dbSchema}' ensured");
+            
             // Robust incremental migration path for production
             // Uses idempotent operations - can be safely run multiple times
             Console.WriteLine("🔄 Checking for pending migrations...");
