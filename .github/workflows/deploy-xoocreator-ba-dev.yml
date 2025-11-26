@@ -66,9 +66,8 @@ jobs:
                 ConnectionStrings__Postgres="${{ secrets.AZURE_PG_CONNSTRING_DEV }}" \
                 Database__Schema=alchimalia_schema \
                 Database__RecreateOnStart=false \
-                Database__ForceSchemaDrop=false \
                 Auth0__Domain=dev-fn01a0ex74zrocwb.us.auth0.com \
-                Auth0__Audience=https://alchimalia-be-dev-f5bad0c2f0dmh6au.westeurope-01.azurewebsites.net/
+                Auth0__Audience=https://alchimalia-be-dev-f5bad0c2f0dmh6au.westeurope-01.azurewebsites.net
           else
             echo "Auto-discovering dev resource group..."
             RG=$(az webapp show --name ${{ secrets.AZURE_WEBAPP_NAME_DEV }} --query resourceGroup -o tsv)
@@ -81,9 +80,8 @@ jobs:
                 ConnectionStrings__Postgres="${{ secrets.AZURE_PG_CONNSTRING_DEV }}" \
                 Database__Schema=alchimalia_schema \
                 Database__RecreateOnStart=false \
-                Database__ForceSchemaDrop=false \
                 Auth0__Domain=dev-fn01a0ex74zrocwb.us.auth0.com \
-                Auth0__Audience=https://alchimalia-be-dev-f5bad0c2f0dmh6au.westeurope-01.azurewebsites.net/
+                Auth0__Audience=https://alchimalia-be-dev-f5bad0c2f0dmh6au.westeurope-01.azurewebsites.net
           fi
 
       - name: Deploy to Azure Web App
