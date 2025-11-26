@@ -35,7 +35,7 @@ public static class DatabaseConfiguration
             // to use IF NOT EXISTS, making all migrations safe to run multiple times
             var loggerFactory = services.BuildServiceProvider().GetService<ILoggerFactory>();
             var logger = loggerFactory?.CreateLogger<IdempotentMigrationCommandInterceptor>();
-            options.AddInterceptors(new IdempotentMigrationCommandInterceptor(logger));
+            options.AddInterceptors(new IdempotentMigrationCommandInterceptor(dbSchema, logger));
         });
 
         return services;
