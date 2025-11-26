@@ -47,6 +47,15 @@ public static class DatabaseConfiguration
 
         if (string.IsNullOrWhiteSpace(dbUrl))
         {
+            var envConnectionString = Environment.GetEnvironmentVariable("ConnectionStrings__Postgres");
+            if (!string.IsNullOrWhiteSpace(envConnectionString))
+            {
+                dbUrl = envConnectionString;
+            }
+        }
+
+        if (string.IsNullOrWhiteSpace(dbUrl))
+        {
             var configured = configuration.GetConnectionString("Postgres");
             if (!string.IsNullOrWhiteSpace(configured))
             {
