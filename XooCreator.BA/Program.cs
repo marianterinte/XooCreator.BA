@@ -59,7 +59,13 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var recreate = builder.Configuration.GetValue<bool>("Database:RecreateOnStart");
-        recreate = false; // Force recreation every time during development
+        var forceSchemaDrop = builder.Configuration.GetValue<bool>("Database:ForceSchemaDrop");
+
+        if (forceSchemaDrop)
+        {
+            Console.WriteLine("⚠️ Database:ForceSchemaDrop=true -> schema will be dropped on startup.");
+            recreate = true;
+        }
 
         if (recreate)
         {

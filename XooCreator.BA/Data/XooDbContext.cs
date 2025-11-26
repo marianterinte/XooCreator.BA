@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System.Linq;
+using Microsoft.Extensions.Configuration;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.Enums;
 
@@ -8,7 +9,12 @@ namespace XooCreator.BA.Data;
 
 public class XooDbContext : DbContext
 {
-    public XooDbContext(DbContextOptions<XooDbContext> options) : base(options) { }
+    private readonly string _defaultSchema = "public";
+
+    public XooDbContext(DbContextOptions<XooDbContext> options, IConfiguration configuration) : base(options)
+    {
+        _defaultSchema = configuration.GetValue<string>("Database:Schema") ?? "public";
+    }
 
     public DbSet<AlchimaliaUser> AlchimaliaUsers => Set<AlchimaliaUser>();
     public DbSet<CreditWallet> CreditWallets => Set<CreditWallet>();
@@ -91,6 +97,7 @@ public class XooDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasDefaultSchema(_defaultSchema);
         modelBuilder.HasPostgresExtension("uuid-ossp");
 
         modelBuilder.Entity<AlchimaliaUser>(e =>
