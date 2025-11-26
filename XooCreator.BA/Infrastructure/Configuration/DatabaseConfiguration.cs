@@ -49,43 +49,40 @@ public static class DatabaseConfiguration
 
     private static string ResolveConnectionString(IConfiguration configuration)
     {
-        var dbUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
-
-        if (string.IsNullOrWhiteSpace(dbUrl))
+        var envConnectionString = Environment.GetEnvironmentVariable("ConnectionStrings__Postgres");
+        if (!string.IsNullOrWhiteSpace(envConnectionString))
         {
-            var envConnectionString = Environment.GetEnvironmentVariable("ConnectionStrings__Postgres");
-            if (!string.IsNullOrWhiteSpace(envConnectionString))
-            {
-                dbUrl = envConnectionString;
-            }
+            return BuildConnectionString(envConnectionString);
         }
 
-        if (string.IsNullOrWhiteSpace(dbUrl))
+        var configured = configuration.GetConnectionString("Postgres");
+        if (!string.IsNullOrWhiteSpace(configured))
         {
-            var configured = configuration.GetConnectionString("Postgres");
-            if (!string.IsNullOrWhiteSpace(configured))
+            if (configured.StartsWith("env:", StringComparison.OrdinalIgnoreCase))
             {
-                if (configured.StartsWith("env:", StringComparison.OrdinalIgnoreCase))
+                var envName = configured.Substring(4).Trim();
+                if (!string.IsNullOrWhiteSpace(envName))
                 {
-                    var envName = configured.Substring(4).Trim();
-                    if (!string.IsNullOrWhiteSpace(envName))
+                    var value = Environment.GetEnvironmentVariable(envName);
+                    if (!string.IsNullOrWhiteSpace(value))
                     {
-                        dbUrl = Environment.GetEnvironmentVariable(envName);
+                        return BuildConnectionString(value);
                     }
                 }
-                else
-                {
-                    dbUrl = configured;
-                }
+            }
+            else
+            {
+                return BuildConnectionString(configured);
             }
         }
 
-        if (string.IsNullOrWhiteSpace(dbUrl))
+        var dbUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+        if (!string.IsNullOrWhiteSpace(dbUrl))
         {
-            return "Host=localhost;Port=5432;Database=xoo_db;Username=postgres;Password=admin";
+            return BuildConnectionString(dbUrl);
         }
 
-        return BuildConnectionString(dbUrl);
+        return "Host=localhost;Port=5432;Database=xoo_db;Username=postgres;Password=admin";
     }
 
     private static string BuildConnectionString(string value)
