@@ -153,6 +153,26 @@ Implementăm un mecanism determinist de aplicare a scripturilor SQL (fără EF M
   cd BA/XooCreator.BA/Database/Scripts/Generators
   pwsh ./Generate-HeroDefinitionsSql.ps1
   ```
+- ✅ `V0005__seed_main_stories.sql` aduce în DB toate poveștile „canonice” (`Data/SeedData/Stories/seed@alchimalia.com/i18n/*`). Include tiles, answers, tokens și traducerile lor + normalizează automat căile către assets/audio/video. Generator:  
+  ```powershell
+  cd BA/XooCreator.BA/Database/Scripts/Generators
+  pwsh ./Generate-StoriesSql.ps1 -Mode main -OutputPath ../V0005__seed_main_stories.sql
+  ```
+- ✅ `V0006__seed_indie_stories.sql` înserează poveștile „independent” (`Data/SeedData/Stories/seed@alchimalia.com/independent/i18n/*`) cu aceleași reguli de normalizare și idempotentă; `CreatedBy/UpdatedBy` sunt setate pe GUID-ul seed. Generator:  
+  ```powershell
+  cd BA/XooCreator.BA/Database/Scripts/Generators
+  pwsh ./Generate-StoriesSql.ps1 -Mode indie -OutputPath ../V0006__seed_indie_stories.sql
+  ```
+- ✅ `V0007__seed_tree_model.sql` transpune în DB configurațiile Tree of Light (`TreeConfigurations`, `TreeRegions`, `TreeStoryNodes`, `TreeUnlockRules`) direct din `Data/SeedData/TreeOfLight/*.json`. ID-urile pentru noduri/reguli sunt deterministe (MD5 → int) iar insert-urile sunt idempotente (`ON CONFLICT`). Generator:  
+  ```powershell
+  cd BA/XooCreator.BA/Database/Scripts/Generators
+  pwsh ./Generate-TreeModelSql.ps1
+  ```
+- ✅ `V0008__seed_lab_of_imagination.sql` mută toate datele folosite de Creature Builder din `Data/SeedData/LaboratoryOfImagination/i18n/*` în tabelele `BodyParts`, `Regions`, `Animals`, `AnimalPartSupports` + traducerile aferente (`BodyPartTranslations`, `AnimalTranslations`). Include toate localele disponibile (ro-ro, en-us, hu-hu), folosește `uuid_generate_v5` pentru IDs stabile și `ON CONFLICT` pentru idempotentă. Generator:  
+  ```powershell
+  cd BA/XooCreator.BA/Database/Scripts/Generators
+  pwsh ./Generate-LabOfImaginationSql.ps1
+  ```
 - ℹ️ Pentru a regenera `V0002`:  
   ```powershell
   cd BA/XooCreator.BA/Database/Scripts/Generators

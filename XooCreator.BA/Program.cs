@@ -28,9 +28,6 @@ if (!string.IsNullOrWhiteSpace(portEnv))
     builder.WebHost.UseUrls($"http://0.0.0.0:{portEnv}");
 }
 
-static string QuoteIdentifier(string identifier)
-    => $"\"{identifier.Replace("\"", "\"\"")}\"";
-
 builder.Services.AddLogging();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -59,22 +56,15 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 
-// Auto-migrate database on startup + initializare date
+// Connectivity check only - schema/scripts handled via XooCreator.DbScriptRunner
 using (var scope = app.Services.CreateScope())
 {
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
     var context = scope.ServiceProvider.GetRequiredService<XooDbContext>();
-    var migrationService = scope.ServiceProvider.GetRequiredService<IDatabaseMigrationService>();
-    var storiesService = scope.ServiceProvider.GetRequiredService<IStoriesService>();
-    var treeModelService = scope.ServiceProvider.GetRequiredService<ITreeModelService>();
-    var discoverySeeder = scope.ServiceProvider.GetRequiredService<ISeedDiscoveryService>();
-    var bestiaryUpdater = scope.ServiceProvider.GetRequiredService<IBestiaryFileUpdater>();
-    var heroDefinitionSeeder = scope.ServiceProvider.GetRequiredService<IHeroDefinitionSeedService>();
-    var storyTopicsSeeder = scope.ServiceProvider.GetRequiredService<IStoryTopicsSeedService>();
 
     try
     {
-        logger.LogInformation("🚀 Starting database initialization...");
+        logger.LogInformation("🚀 Starting database connectivity check...");
         var dbSchema = builder.Configuration.GetValue<string>("Database:Schema") ?? "alchimalia_schema";
         logger.LogInformation("📊 Database schema: {Schema}", dbSchema);
 
@@ -112,87 +102,8 @@ using (var scope = app.Services.CreateScope())
             throw;
         }
 
-        var schemaName = QuoteIdentifier(dbSchema);
-        Console.WriteLine($"🔄 Ensuring schema '{dbSchema}' exists...");
-        await context.Database.ExecuteSqlRawAsync($"CREATE SCHEMA IF NOT EXISTS {schemaName};");
-        Console.WriteLine($"✅ Schema '{dbSchema}' ensured");
-
-        Console.WriteLine("🔄 Checking for pending migrations...");
-        var pendingMigrations = await migrationService.GetPendingMigrationsAsync();
-        if (pendingMigrations.Count > 0)
-        {
-            Console.WriteLine($"🔄 Found {pendingMigrations.Count} pending migration(s): {string.Join(", ", pendingMigrations)}");
-        }
-        else
-        {
-            Console.WriteLine("✅ No pending migrations found");
-        }
-
-        Console.WriteLine("🔄 Applying migrations...");
-        var migrationApplied = await migrationService.ApplyMigrationsAsync();
-        if (!migrationApplied)
-        {
-            Console.WriteLine("");
-            Console.WriteLine("═══════════════════════════════════════════════════════════");
-            Console.WriteLine("❌ CRITICAL: Failed to apply database migrations!");
-            Console.WriteLine("═══════════════════════════════════════════════════════════");
-            Console.WriteLine("❌ The application cannot start with an inconsistent database state.");
-            Console.WriteLine("❌ Please check the detailed error logs ABOVE for the exact failure reason.");
-            Console.WriteLine("═══════════════════════════════════════════════════════════");
-            Console.WriteLine("");
-            throw new InvalidOperationException("Database migration failed. Check the logs above for details.");
-        }
-
-        Console.WriteLine("✅ Database migrations completed");
-
-        logger.LogInformation("🌱 Starting data seeding...");
-        Console.WriteLine("🌱 Starting data seeding...");
-
-        // Seed discovery items (63 combos)
-        logger.LogInformation("🌱 Seeding discovery items...");
-        await discoverySeeder.EnsureSeedAsync();
-        logger.LogInformation("✅ Discovery items seeded");
-        Console.WriteLine("✅ Discovery items seeded");
-
-        logger.LogInformation("🌱 Updating bestiary image file names...");
-        await bestiaryUpdater.EnsureImageFileNamesAsync();
-        logger.LogInformation("✅ Bestiary images updated");
-        Console.WriteLine("✅ Bestiary images updated");
-        
-        // Seed hero definitions
-        logger.LogInformation("🌱 Seeding hero definitions...");
-        await heroDefinitionSeeder.SeedHeroDefinitionsAsync();
-        logger.LogInformation("✅ Hero definitions seeded");
-        Console.WriteLine("✅ Hero definitions seeded");
-
-        // Seed story topics and age groups
-        logger.LogInformation("🌱 Seeding story topics and age groups...");
-        await storyTopicsSeeder.SeedTopicsAndAgeGroupsAsync();
-        logger.LogInformation("✅ Story topics and age groups seeded");
-        Console.WriteLine("✅ Story topics and age groups seeded");
-
-        // CRITICAL: Stories must be seeded BEFORE TreeModel 
-        // because TreeStoryNodes have FK constraints to StoryDefinitions
-        logger.LogInformation("🌱 Initializing stories...");
-        await storiesService.InitializeStoriesAsync();
-        logger.LogInformation("✅ Stories initialized");
-        Console.WriteLine("✅ Stories initialized");
-
-        // Initialize marketplace data for all stories (including independent ones)
-        logger.LogInformation("🌱 Initializing marketplace data...");
-        var marketplaceService = scope.ServiceProvider.GetRequiredService<IStoriesMarketplaceService>();
-        await marketplaceService.InitializeMarketplaceAsync();
-        logger.LogInformation("✅ Marketplace data initialized");
-        Console.WriteLine("✅ Marketplace data initialized");
-
-        // Now seed the tree model (which references stories)
-        logger.LogInformation("🌱 Initializing tree model...");
-        await treeModelService.InitializeTreeModelAsync();
-        logger.LogInformation("✅ Tree model initialized");
-        Console.WriteLine("✅ Tree model initialized");
-
-        logger.LogInformation("🎉 Database setup completed successfully!");
-        Console.WriteLine("🎉 Database setup completed successfully!");
+        logger.LogInformation("✅ Database connectivity verified. Database objects must be managed via XooCreator.DbScriptRunner scripts (V0001+).");
+        Console.WriteLine("🎉 Connectivity OK. Apply SQL scripts via XooCreator.DbScriptRunner before running the app.");
     }
     catch (Exception ex)
     {
