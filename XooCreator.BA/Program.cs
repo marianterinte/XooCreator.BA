@@ -172,7 +172,7 @@ if (startupException != null)
 // Map endpoints (Endpoint Discovery)
 app.MapDiscoveredEndpoints();
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName == "Local")
 {
     app.MapGet("/debug/db-state", async (XooDbContext context) =>
     {
