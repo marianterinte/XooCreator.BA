@@ -1,5 +1,5 @@
 ﻿-- Auto-generated from Data/SeedData/SharedConfigs/hero-tree.json + BookOfHeroes/i18n/*/hero-tree.json
--- Run date: 2025-11-27 08:13:24+02:00
+-- Run date: 2025-11-27 08:14:07+02:00
 
 DO $$
 BEGIN
@@ -106,7 +106,7 @@ INSERT INTO alchimalia_schema."HeroDefinitions"
      "PrerequisitesJson", "RewardsJson", "IsUnlocked", "PositionX", "PositionY", "Image", "CreatedAt", "UpdatedAt")
 VALUES
     ('hero_brave_puppy', 'hero', 1, 0, 0, 0, 0,
-     '"alchimalia_hero"', '[]', FALSE, -150, -200, 'images/toh/heroes/hero_brave_puppy.jpg', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+     '["alchimalia_hero"]', '[]', FALSE, -150, -200, 'images/toh/heroes/hero_brave_puppy.jpg', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "CourageCost" = EXCLUDED."CourageCost",
@@ -150,7 +150,7 @@ INSERT INTO alchimalia_schema."HeroDefinitions"
      "PrerequisitesJson", "RewardsJson", "IsUnlocked", "PositionX", "PositionY", "Image", "CreatedAt", "UpdatedAt")
 VALUES
     ('hero_brave_pup_lvl2', 'hero', 2, 0, 0, 0, 0,
-     '"hero_brave_puppy"', '[]', FALSE, -150, -280, 'images/toh/heroes/hero_guardian_dog.jpg', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+     '["hero_brave_puppy"]', '[]', FALSE, -150, -280, 'images/toh/heroes/hero_guardian_dog.jpg', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "CourageCost" = EXCLUDED."CourageCost",
@@ -194,7 +194,7 @@ INSERT INTO alchimalia_schema."HeroDefinitions"
      "PrerequisitesJson", "RewardsJson", "IsUnlocked", "PositionX", "PositionY", "Image", "CreatedAt", "UpdatedAt")
 VALUES
     ('hero_brave_pup_lvl3', 'hero', 3, 0, 0, 0, 0,
-     '"hero_brave_pup_lvl2"', '[]', FALSE, -150, -360, 'images/toh/heroes/hero_legendary_dog.jpg', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+     '["hero_brave_pup_lvl2"]', '[]', FALSE, -150, -360, 'images/toh/heroes/hero_legendary_dog.jpg', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "CourageCost" = EXCLUDED."CourageCost",
@@ -238,7 +238,7 @@ INSERT INTO alchimalia_schema."HeroDefinitions"
      "PrerequisitesJson", "RewardsJson", "IsUnlocked", "PositionX", "PositionY", "Image", "CreatedAt", "UpdatedAt")
 VALUES
     ('hero_curious_cat', 'hero', 0, 1, 0, 0, 0,
-     '"alchimalia_hero"', '[]', FALSE, 150, -200, 'images/toh/heroes/hero_curious_cat.jpg', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+     '["alchimalia_hero"]', '[]', FALSE, 150, -200, 'images/toh/heroes/hero_curious_cat.jpg', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "CourageCost" = EXCLUDED."CourageCost",
@@ -282,7 +282,7 @@ INSERT INTO alchimalia_schema."HeroDefinitions"
      "PrerequisitesJson", "RewardsJson", "IsUnlocked", "PositionX", "PositionY", "Image", "CreatedAt", "UpdatedAt")
 VALUES
     ('hero_curious_cat_lvl2', 'hero', 0, 2, 0, 0, 0,
-     '"hero_curious_cat"', '[]', FALSE, 150, -280, 'images/toh/heroes/hero_explorer_cat.jpg', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+     '["hero_curious_cat"]', '[]', FALSE, 150, -280, 'images/toh/heroes/hero_explorer_cat.jpg', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "CourageCost" = EXCLUDED."CourageCost",
@@ -326,7 +326,7 @@ INSERT INTO alchimalia_schema."HeroDefinitions"
      "PrerequisitesJson", "RewardsJson", "IsUnlocked", "PositionX", "PositionY", "Image", "CreatedAt", "UpdatedAt")
 VALUES
     ('hero_curious_cat_lvl3', 'hero', 0, 3, 0, 0, 0,
-     '"hero_curious_cat_lvl2"', '[]', FALSE, 150, -360, 'images/toh/heroes/hero_oracle_cat.jpg', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+     '["hero_curious_cat_lvl2"]', '[]', FALSE, 150, -360, 'images/toh/heroes/hero_oracle_cat.jpg', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "CourageCost" = EXCLUDED."CourageCost",
@@ -370,7 +370,7 @@ INSERT INTO alchimalia_schema."HeroDefinitions"
      "PrerequisitesJson", "RewardsJson", "IsUnlocked", "PositionX", "PositionY", "Image", "CreatedAt", "UpdatedAt")
 VALUES
     ('hero_wise_owl', 'hero', 0, 0, 1, 0, 0,
-     '"alchimalia_hero"', '[]', FALSE, 0, -220, 'images/toh/heroes/hero_wise_owl.jpg', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+     '["alchimalia_hero"]', '[]', FALSE, 0, -220, 'images/toh/heroes/hero_wise_owl.jpg', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "CourageCost" = EXCLUDED."CourageCost",
@@ -414,7 +414,7 @@ INSERT INTO alchimalia_schema."HeroDefinitions"
      "PrerequisitesJson", "RewardsJson", "IsUnlocked", "PositionX", "PositionY", "Image", "CreatedAt", "UpdatedAt")
 VALUES
     ('hero_wise_owl_lvl2', 'hero', 0, 0, 2, 0, 0,
-     '"hero_wise_owl"', '[]', FALSE, 0, -300, 'images/toh/heroes/hero_scholar_owl.jpg', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+     '["hero_wise_owl"]', '[]', FALSE, 0, -300, 'images/toh/heroes/hero_scholar_owl.jpg', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "CourageCost" = EXCLUDED."CourageCost",
@@ -458,7 +458,7 @@ INSERT INTO alchimalia_schema."HeroDefinitions"
      "PrerequisitesJson", "RewardsJson", "IsUnlocked", "PositionX", "PositionY", "Image", "CreatedAt", "UpdatedAt")
 VALUES
     ('hero_wise_owl_lvl3', 'hero', 0, 0, 3, 0, 0,
-     '"hero_wise_owl_lvl2"', '[]', FALSE, 0, -380, 'images/toh/heroes/hero_ancient_owl.jpg', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+     '["hero_wise_owl_lvl2"]', '[]', FALSE, 0, -380, 'images/toh/heroes/hero_ancient_owl.jpg', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "CourageCost" = EXCLUDED."CourageCost",
@@ -502,7 +502,7 @@ INSERT INTO alchimalia_schema."HeroDefinitions"
      "PrerequisitesJson", "RewardsJson", "IsUnlocked", "PositionX", "PositionY", "Image", "CreatedAt", "UpdatedAt")
 VALUES
     ('hero_playful_horse', 'hero', 0, 0, 0, 1, 0,
-     '"alchimalia_hero"', '[]', FALSE, -200, -280, 'images/toh/heroes/hero_playful_horse.jpg', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+     '["alchimalia_hero"]', '[]', FALSE, -200, -280, 'images/toh/heroes/hero_playful_horse.jpg', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "CourageCost" = EXCLUDED."CourageCost",
@@ -546,7 +546,7 @@ INSERT INTO alchimalia_schema."HeroDefinitions"
      "PrerequisitesJson", "RewardsJson", "IsUnlocked", "PositionX", "PositionY", "Image", "CreatedAt", "UpdatedAt")
 VALUES
     ('hero_playful_horse_lvl2', 'hero', 0, 0, 0, 2, 0,
-     '"hero_playful_horse"', '[]', FALSE, -200, -360, 'images/toh/heroes/hero_artistic_horse.jpg', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+     '["hero_playful_horse"]', '[]', FALSE, -200, -360, 'images/toh/heroes/hero_artistic_horse.jpg', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "CourageCost" = EXCLUDED."CourageCost",
@@ -590,7 +590,7 @@ INSERT INTO alchimalia_schema."HeroDefinitions"
      "PrerequisitesJson", "RewardsJson", "IsUnlocked", "PositionX", "PositionY", "Image", "CreatedAt", "UpdatedAt")
 VALUES
     ('hero_playful_horse_lvl3', 'hero', 0, 0, 0, 3, 0,
-     '"hero_playful_horse_lvl2"', '[]', FALSE, -200, -440, 'images/toh/heroes/hero_genius_horse.jpg', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+     '["hero_playful_horse_lvl2"]', '[]', FALSE, -200, -440, 'images/toh/heroes/hero_genius_horse.jpg', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "CourageCost" = EXCLUDED."CourageCost",
@@ -634,7 +634,7 @@ INSERT INTO alchimalia_schema."HeroDefinitions"
      "PrerequisitesJson", "RewardsJson", "IsUnlocked", "PositionX", "PositionY", "Image", "CreatedAt", "UpdatedAt")
 VALUES
     ('hero_cautious_hedgehog', 'hero', 0, 0, 0, 0, 1,
-     '"alchimalia_hero"', '[]', FALSE, 200, -280, 'images/toh/heroes/hero_cautious_hedgehog.jpg', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+     '["alchimalia_hero"]', '[]', FALSE, 200, -280, 'images/toh/heroes/hero_cautious_hedgehog.jpg', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "CourageCost" = EXCLUDED."CourageCost",
@@ -678,7 +678,7 @@ INSERT INTO alchimalia_schema."HeroDefinitions"
      "PrerequisitesJson", "RewardsJson", "IsUnlocked", "PositionX", "PositionY", "Image", "CreatedAt", "UpdatedAt")
 VALUES
     ('hero_cautious_hedgehog_lvl2', 'hero', 0, 0, 0, 0, 2,
-     '"hero_cautious_hedgehog"', '[]', FALSE, 200, -380, 'images/toh/heroes/hero_shieldquill.jpg', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+     '["hero_cautious_hedgehog"]', '[]', FALSE, 200, -380, 'images/toh/heroes/hero_shieldquill.jpg', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "CourageCost" = EXCLUDED."CourageCost",
@@ -722,7 +722,7 @@ INSERT INTO alchimalia_schema."HeroDefinitions"
      "PrerequisitesJson", "RewardsJson", "IsUnlocked", "PositionX", "PositionY", "Image", "CreatedAt", "UpdatedAt")
 VALUES
     ('hero_cautious_hedgehog_lvl3', 'hero', 0, 0, 0, 0, 3,
-     '"hero_cautious_hedgehog_lvl2"', '[]', FALSE, 200, -480, 'images/toh/heroes/hero_wardenspike.jpg', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+     '["hero_cautious_hedgehog_lvl2"]', '[]', FALSE, 200, -480, 'images/toh/heroes/hero_wardenspike.jpg', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "CourageCost" = EXCLUDED."CourageCost",

@@ -130,9 +130,25 @@ foreach ($node in $structure.nodes) {
     $safety = Get-CostValue $costs 'safety'
 
     $prerequisites = Get-PropValue $node 'prerequisites'
+    if ($null -eq $prerequisites) { $prerequisites = @() }
+    elseif ($prerequisites -isnot [System.Collections.IEnumerable] -or $prerequisites -is [string]) {
+        $prerequisites = @($prerequisites)
+    }
+    else {
+        $prerequisites = @($prerequisites)
+    }
+
     $rewards = Get-PropValue $node 'rewards'
-    $prereqJson = To-JsonLiteral ($prerequisites ?? @())
-    $rewardsJson = To-JsonLiteral ($rewards ?? @())
+    if ($null -eq $rewards) { $rewards = @() }
+    elseif ($rewards -isnot [System.Collections.IEnumerable] -or $rewards -is [string]) {
+        $rewards = @($rewards)
+    }
+    else {
+        $rewards = @($rewards)
+    }
+
+    $prereqJson = To-JsonLiteral $prerequisites
+    $rewardsJson = To-JsonLiteral $rewards
 
     $posXValue = Get-PropValue $node 'positionX'
     if ($null -eq $posXValue) { $posXValue = 0 }

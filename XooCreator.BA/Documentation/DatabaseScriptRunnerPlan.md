@@ -148,6 +148,11 @@ Implementăm un mecanism determinist de aplicare a scripturilor SQL (fără EF M
   cd BA/XooCreator.BA/Database/Scripts/Generators
   pwsh ./Generate-StoryTopicsSql.ps1
   ```
+- ✅ `V0004__seed_hero_definitions.sql` populează `HeroDefinitions` + `HeroDefinitionTranslations` din `SharedConfigs/hero-tree.json` și `BookOfHeroes/i18n/*/hero-tree.json` (aceleași date folosite de `HeroDefinitionSeedService`). Generator:  
+  ```powershell
+  cd BA/XooCreator.BA/Database/Scripts/Generators
+  pwsh ./Generate-HeroDefinitionsSql.ps1
+  ```
 - ℹ️ Pentru a regenera `V0002`:  
   ```powershell
   cd BA/XooCreator.BA/Database/Scripts/Generators
