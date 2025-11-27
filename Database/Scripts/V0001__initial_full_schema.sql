@@ -6,22 +6,6 @@
 
 START TRANSACTION;
 
-DO $EF$
-BEGIN
-    IF NOT EXISTS(SELECT 1 FROM pg_namespace WHERE nspname = 'alchimalia_schema') THEN
-        CREATE SCHEMA alchimalia_schema;
-    END IF;
-END $EF$;
-
-DO $EF$
-BEGIN
-    IF NOT EXISTS(SELECT 1 FROM pg_namespace WHERE nspname = 'alchimalia_schema') THEN
-        CREATE SCHEMA alchimalia_schema;
-    END IF;
-END $EF$;
-
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
 CREATE TABLE alchimalia_schema."AlchimaliaUsers" (
     "Id" uuid NOT NULL,
     "Auth0Id" character varying(256) NOT NULL,
