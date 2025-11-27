@@ -1,6 +1,6 @@
 # Soluție Robustă pentru Migrări Incrementale
 
-> **⚠️ TEMPORAR DEZACTIVAT:** Această soluție este temporar dezactivată pentru debugging. Se folosește acum logica simplă cu `recreate=true` și `MigrateAsync()` direct.
+> **ℹ️ Notă (2025-11-27):** Document istoric. Producția folosește acum `Database/Scripts` + `XooCreator.DbScriptRunner` (fără `DatabaseMigrationService/MigrateAsync`). Secțiunile de mai jos rămân ca referință pentru abordarea EF Core anterioară.
 
 ## Prezentare Generală
 

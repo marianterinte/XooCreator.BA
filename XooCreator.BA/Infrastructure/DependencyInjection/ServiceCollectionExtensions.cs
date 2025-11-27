@@ -21,7 +21,6 @@ using XooCreator.BA.Features.TalesOfAlchimalia.Market.Mappers;
 using XooCreator.BA.Features.Payment.Services;
 using XooCreator.BA.Features.StoryFeedback.Repositories;
 using XooCreator.BA.Features.StoryFeedback.Services;
-using XooCreator.BA.Data.Services;
 
 namespace XooCreator.BA.Infrastructure.DependencyInjection;
 
@@ -37,9 +36,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserContextService, UserContextService>();
         services.AddSingleton<IBlobSasService, BlobSasService>();
         services.AddScoped<IDbHealthService, DbHealthService>();
-        
-        // Register database migration service for robust incremental migrations
-        services.AddScoped<IDatabaseMigrationService, DatabaseMigrationService>();
         
         return services;
     }

@@ -8,9 +8,9 @@ Asigurăm un flux determinist de provisionare și migrare pentru baza de date `a
 
 ## Observații cheie
 
-- `appsettings.Development.json` citește connection string-ul din `AZURE_PG_CONNSTRING_DEV`. Dacă App Service rulează cu `ASPNETCORE_ENVIRONMENT=Production`, se folosește `AZURE_PG_URL_PROD`; în lipsa acesteia, fallback-ul este un connection string local (`localhost`).  
-- `Program.cs` dropează schema când flag-ul `RecreateOnStart` este `true`, apoi folosește `DatabaseMigrationService` pentru a rula `MigrateAsync`.
-- Interceptorul de migrare avea verificări hardcodate pe `table_schema = 'public'`, ceea ce împiedica unele operații (indexuri, coloane) să fie aplicate pe schema personalizată.
+- `ConnectionStrings__Postgres` trebuie să conțină `SearchPath=alchimalia_schema` și este populat în App Service din secretul `AZURE_POSTGRES_CONNSTRING_<ENV>`.
+- `Program.cs` nu mai rulează `DatabaseMigrationService` / `MigrateAsync`; aplicația doar testează conectivitatea și afișează o pagină de eroare dacă DB-ul nu este pregătit.
+- Structura DB este controlată 100% de scripturile incremental numerotate (`Database/Scripts/V0001__*.sql`) rulate prin `XooCreator.DbScriptRunner` și urmărite în `alchimalia_schema.schema_versions`.
 
 ## Plan de acțiune recomandat
 
@@ -18,21 +18,22 @@ Asigurăm un flux determinist de provisionare și migrare pentru baza de date `a
    - Setează explicit `ASPNETCORE_ENVIRONMENT=Development`.
    - Stochează conexiunea Azure PostgreSQL în secretul `AZURE_POSTGRES_CONNSTRING_DEV` (folosit de pipeline) sau direct în `ConnectionStrings__Postgres` și include `SearchPath=alchimalia_schema`.
 2. **Cod**
-   - Schema implicită rămâne `alchimalia_schema`; aplicația nu mai face drop automat, ci rulează `ApplyMigrationsAsync()` la fiecare startup.
-   - `DatabaseConfiguration` configurează `SearchPath` + `__EFMigrationsHistory` pe schema din configurare.
+   - Schema implicită rămâne `alchimalia_schema`; aplicația doar verifică conectivitatea la startup, iar migrarea este responsabilitatea scripturilor SQL.
+   - `DatabaseConfiguration` continue să seteze `SearchPath` și să folosească `alchimalia_schema` drept schemă implicită.
 3. **Pipeline**
    - YAML-ul de deploy pe `dev` rulează `dotnet publish` + deploy și setează connection string-ul Azure; nu mai sunt necesare flag-uri suplimentare.
 4. **Testare**
    - Test manual local: rulează aplicația cu setările dev (folosind același connection string, eventual printr-un tunnel) și confirmă că migrarea + seeding-ul se execută.
    - Test în Azure: monitorizează Log Stream pentru mesajele de migrare și confirmă apariția tabelelor în `alchimalia_schema`.
 5. **Stabilizare**
-   - Migrarea rulează incremental la fiecare pornire; pentru schimbări mai mari poți rula scripturi SQL manual.
-   - Monitorizează `DatabaseMigrationService` pentru erori și folosește `/debug/db-state` pentru diagnostic rapid.
+   - Migrarea rulează incremental prin `Database Scripts Runner` (local + GitHub Actions); aplicația trebuie lansată doar după ce `schema_versions` confirmă ultimul script.
+   - Monitorizează joburile `Database Scripts Runner` și folosește endpoint-ul `/debug/db-state` (doar în Development) pentru a inspecta înregistrările din `schema_versions`.
+   - Pentru situații în care schema trebuie resetată complet, rulează `dotnet run --project XooCreator.DbScriptRunner -- --connection "...conn..." --rollback V0001` (execută `R0001__drop_schema.sql`, recreează schema și `schema_versions`, apoi rerulează scripturile forward).
 
 ## Checklist la fiecare deploy
 
 - [ ] Environment-ul dev are connection string-ul corect (`AZURE_POSTGRES_CONNSTRING_DEV` / `ConnectionStrings__Postgres`) și include `SearchPath=alchimalia_schema`.
-- [ ] `dotnet ef migrations add` a fost rulat local pentru schimbările noi (dacă este cazul).
+- [ ] Pentru schimbări de schemă s-au generat scripturi noi `VXXXX__*.sql` + eventual generator PowerShell.
 - [ ] Pipeline-ul finalizează fără erori și App Service pornește fără `startupException`.
 - [ ] În schema `alchimalia_schema` apar tabelele/coloanele noi.
 

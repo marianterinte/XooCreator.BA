@@ -11,7 +11,6 @@ using XooCreator.BA.Features.Stories.Services;
 using XooCreator.BA.Features.TreeOfLight.Services;
 using XooCreator.BA.Features.StoryEditor.Services;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Services;
-using XooCreator.BA.Data.Services;
 using XooCreator.BA.Services;
 
 // Store startup exception for display
@@ -175,12 +174,54 @@ app.MapDiscoveredEndpoints();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapGet("/debug/db-state", async (
-        IDatabaseMigrationService migrationService,
-        XooDbContext context) =>
+    app.MapGet("/debug/db-state", async (XooDbContext context) =>
     {
-        var conn = context.Database.GetDbConnection();
-        var connBuilder = new NpgsqlConnectionStringBuilder(conn.ConnectionString);
+        var dbConnection = context.Database.GetDbConnection();
+        var connBuilder = new NpgsqlConnectionStringBuilder(dbConnection.ConnectionString);
+        var schema = context.Model.GetDefaultSchema() ?? "alchimalia_schema";
+        var schemaIdentifier = schema.Replace("\"", "\"\"");
+
+        var versions = new List<object>();
+        string? versionsError = null;
+
+        try
+        {
+            await context.Database.OpenConnectionAsync();
+            await using var command = dbConnection.CreateCommand();
+            command.CommandText = $"""
+                                   SELECT script_name, checksum, executed_at, execution_time_ms, status
+                                   FROM "{schemaIdentifier}"."schema_versions"
+                                   ORDER BY executed_at;
+                                   """;
+
+            await using var reader = await command.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                var executedAt = reader.GetFieldValue<DateTime>(2);
+                var executedAtUtc = DateTime.SpecifyKind(executedAt, DateTimeKind.Utc);
+
+                versions.Add(new
+                {
+                    Script = reader.GetString(0),
+                    Checksum = reader.GetString(1),
+                    ExecutedAtUtc = executedAtUtc,
+                    ExecutionTimeMs = reader.IsDBNull(3) ? (long?)null : reader.GetInt64(3),
+                    Status = reader.GetString(4)
+                });
+            }
+        }
+        catch (PostgresException ex) when (ex.SqlState == "42P01")
+        {
+            versionsError = $"Table {schema}.schema_versions not found. Run V0001__initial_full_schema.sql via XooCreator.DbScriptRunner.";
+        }
+        catch (Exception ex)
+        {
+            versionsError = $"Failed to read schema_versions: {ex.Message}";
+        }
+        finally
+        {
+            await context.Database.CloseConnectionAsync();
+        }
 
         var info = new
         {
@@ -192,11 +233,12 @@ if (app.Environment.IsDevelopment())
                 User = connBuilder.Username,
                 SslMode = connBuilder.SslMode.ToString()
             },
-            ConfiguredSchema = context.Model.GetDefaultSchema(),
+            ConfiguredSchema = schema,
             ForcedSchema = Environment.GetEnvironmentVariable("DB_FORCE_SCHEMA"),
             CanConnect = await context.Database.CanConnectAsync(),
-            AppliedMigrations = await migrationService.GetAppliedMigrationsAsync(),
-            PendingMigrations = await migrationService.GetPendingMigrationsAsync()
+            SchemaVersions = versions,
+            SchemaVersionsError = versionsError,
+            UtcTimestamp = DateTimeOffset.UtcNow
         };
 
         return Results.Json(info);
