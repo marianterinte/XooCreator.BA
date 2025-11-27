@@ -140,7 +140,7 @@ Implementăm un mecanism determinist de aplicare a scripturilor SQL (fără EF M
   ```
   Opțiuni suportate: `--connection`, `--schema`, `--scripts-path`, `--rollbacks-path`, `--dry-run`, `--rollback V0003`. Valorile pot veni și din `ConnectionStrings__Postgres` sau `DB_RUNNER_CONNECTIONSTRING`.
 - ✅ Runner-ul creează/folosește tabela `alchimalia_schema.schema_versions`, verifică checksum-ul (SHA256) și scrie status `Succeeded` sau `RolledBack` împreună cu durata execuției.
-- ✅ Structura de directoare `Database/Scripts` + `Database/Scripts/Rollbacks` este prezentă în repo. Primul script (`V0001__initial_full_schema.sql`) a fost exportat din migrarea `20251126184048_InitialFullSchema` folosind `dotnet tool run dotnet-ef migrations script ...`.
+- ✅ Structura de directoare `Database/Scripts` + `Database/Scripts/Rollbacks` este prezentă în repo. Primul script (`V0001__initial_full_schema.sql`) a fost exportat din migrarea `20251126184048_InitialFullSchema` folosind `dotnet tool run dotnet-ef migrations script ...` și a fost curățat de blocurile duplicate `DO $$ ... CREATE SCHEMA ...` + `CREATE EXTENSION "uuid-ossp"` pentru compatibilitate cu Azure.
 - ✅ În rădăcina backend-ului există un manifest local `.config/dotnet-tools.json` care fixează `dotnet-ef` la versiunea 8.0.11 (evităm conflictul cu instalația globală 10.x).
 - ✅ `V0002__seed_bestiary_items.sql` înserează toate combinațiile Bestiary generate din `Data/SeedData/Discovery/i18n/<locale>/discover-bestiary.json`. Scriptul este produs determinist cu `Database/Scripts/Generators/Generate-BestiarySql.ps1` (cheile se generează determinist în PowerShell, fără dependență de extensii Postgres, și rămân idempotente prin `ON CONFLICT ("Id")`).
 - ✅ `V0003__seed_story_topics_age_groups_authors.sql` aduce în DB toate topic-urile + traducerile, grupele de vârstă + descrierile și lista de autori clasici din `Data/SeedData/Story-Editor/**`. Generator:  
@@ -163,7 +163,7 @@ Implementăm un mecanism determinist de aplicare a scripturilor SQL (fără EF M
   cd BA/XooCreator.BA/Database/Scripts/Generators
   pwsh ./Generate-StoriesSql.ps1 -Mode indie -OutputPath ../V0006__seed_indie_stories.sql
   ```
-- ✅ `V0007__seed_tree_model.sql` transpune în DB configurațiile Tree of Light (`TreeConfigurations`, `TreeRegions`, `TreeStoryNodes`, `TreeUnlockRules`) direct din `Data/SeedData/TreeOfLight/*.json`. ID-urile pentru noduri/reguli sunt deterministe (MD5 → int) iar insert-urile sunt idempotente (`ON CONFLICT`). Generator:  
+- ✅ `V0007__seed_tree_model.sql` transpune în DB configurațiile Tree of Light (`TreeConfigurations`, `TreeRegions`, `TreeStoryNodes`, `TreeUnlockRules`) direct din `Data/SeedData/TreeOfLight/*.json`. ID-urile pentru noduri/reguli sunt deterministe (MD5 → int) iar insert-urile sunt idempotente (`ON CONFLICT`). Generatorul nu mai inserează `CREATE EXTENSION` (100% compatibil Azure):  
   ```powershell
   cd BA/XooCreator.BA/Database/Scripts/Generators
   pwsh ./Generate-TreeModelSql.ps1
