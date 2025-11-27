@@ -14,14 +14,19 @@ public class BlobSasService : IBlobSasService
     public BlobSasService(IConfiguration configuration)
     {
         var section = configuration.GetSection("AzureStorage");
-        var conn = section["ConnectionString"];
+        var conn = ResolveConfiguredValue(section["ConnectionString"])
+                   ?? Environment.GetEnvironmentVariable("AzureStorage__ConnectionString");
         if (string.IsNullOrWhiteSpace(conn))
         {
             throw new InvalidOperationException("AzureStorage:ConnectionString is not configured.");
         }
 
-        DraftContainer = section["DraftContainer"] ?? "alchimalia-drafts";
-        PublishedContainer = section["PublishedContainer"] ?? "alchimaliacontent";
+        DraftContainer = ResolveConfiguredValue(section["DraftContainer"])
+                         ?? Environment.GetEnvironmentVariable("AzureStorage__DraftContainer")
+                         ?? "alchimalia-drafts";
+        PublishedContainer = ResolveConfiguredValue(section["PublishedContainer"])
+                             ?? Environment.GetEnvironmentVariable("AzureStorage__PublishedContainer")
+                             ?? "alchimaliacontent";
 
         _blobServiceClient = new BlobServiceClient(conn);
     }
@@ -71,6 +76,19 @@ public class BlobSasService : IBlobSasService
         var sasUri = blobClient.GenerateSasUri(sasBuilder);
         return Task.FromResult(sasUri);
     }
+    private static string? ResolveConfiguredValue(string? configured)
+    {
+        if (string.IsNullOrWhiteSpace(configured))
+        {
+            return null;
+        }
+
+        if (configured.StartsWith("env:", StringComparison.OrdinalIgnoreCase))
+        {
+            var envKey = configured[4..].Trim();
+            return string.IsNullOrWhiteSpace(envKey) ? null : Environment.GetEnvironmentVariable(envKey);
+        }
+
+        return configured;
+    }
 }
-
-
