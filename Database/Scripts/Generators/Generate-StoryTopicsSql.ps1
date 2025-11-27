@@ -9,6 +9,7 @@ $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repoRoot = Resolve-Path (Join-Path $scriptRoot ".." ".." "..")
 $timestamp = "2025-01-01T00:00:00Z"
 $namespaceGuid = "00000000-0000-0000-0000-000000000000"
+. (Join-Path $scriptRoot "GuidUtils.ps1")
 
 function Get-FullPath {
     param([string]$RelativePath)
@@ -21,9 +22,9 @@ function Escape-Sql {
     return $Value.Replace("'", "''")
 }
 
-function Get-GuidExpr {
+function New-GuidLiteral {
     param([string]$Key)
-    return "uuid_generate_v5('$namespaceGuid', '$Key')"
+    return Get-GuidLiteral -NamespaceGuid $namespaceGuid -Name $Key
 }
 
 function Get-AuthorId {
@@ -141,21 +142,12 @@ $runStamp = Get-Date -Format "yyyy-MM-dd HH:mm:ssK"
 $lines.Add("-- Auto-generated from Data/SeedData/Story-Editor (topics, age groups, authors)")
 $lines.Add("-- Run date: $runStamp")
 $lines.Add("")
-$lines.Add('DO $$')
-$lines.Add('BEGIN')
-$lines.Add("    IF NOT EXISTS (")
-$lines.Add("        SELECT 1 FROM pg_extension WHERE extname = 'uuid-ossp'")
-$lines.Add("    ) THEN")
-$lines.Add("        CREATE EXTENSION IF NOT EXISTS ""uuid-ossp"";")
-$lines.Add("    END IF;")
-$lines.Add('END $$;')
-$lines.Add("")
 $lines.Add("BEGIN;")
 $lines.Add("")
 
 $lines.Add("-- Story Topics")
 foreach ($topic in ($topicMap.Values | Sort-Object SortOrder)) {
-    $topicIdExpr = Get-GuidExpr "story-topic:$($topic.TopicId)"
+    $topicIdExpr = New-GuidLiteral "story-topic:$($topic.TopicId)"
     $sql = @"
 INSERT INTO alchimalia_schema."StoryTopics"
     ("Id", "TopicId", "DimensionId", "SortOrder", "IsActive", "CreatedAt", "UpdatedAt")
@@ -171,7 +163,7 @@ SET "DimensionId" = EXCLUDED."DimensionId",
 
     foreach ($locale in ($topic.Labels.Keys | Sort-Object)) {
         $label = Escape-Sql $topic.Labels[$locale]
-        $translationId = Get-GuidExpr "story-topic-tr:$($topic.TopicId)|$locale"
+        $translationId = New-GuidLiteral "story-topic-tr:$($topic.TopicId)|$locale"
         $translationSql = @"
 INSERT INTO alchimalia_schema."StoryTopicTranslations"
     ("Id", "StoryTopicId", "LanguageCode", "Label")
@@ -186,7 +178,7 @@ SET "Label" = EXCLUDED."Label";
 
 $lines.Add("-- Story Age Groups")
 foreach ($group in ($ageGroupMap.Values | Sort-Object SortOrder)) {
-    $groupIdExpr = Get-GuidExpr "story-age-group:$($group.AgeGroupId)"
+    $groupIdExpr = New-GuidLiteral "story-age-group:$($group.AgeGroupId)"
     $sql = @"
 INSERT INTO alchimalia_schema."StoryAgeGroups"
     ("Id", "AgeGroupId", "MinAge", "MaxAge", "SortOrder", "IsActive", "CreatedAt", "UpdatedAt")
@@ -204,7 +196,7 @@ SET "MinAge" = EXCLUDED."MinAge",
     foreach ($locale in ($group.Labels.Keys | Sort-Object)) {
         $label = Escape-Sql $group.Labels[$locale]
         $description = Escape-Sql ($group.Descriptions[$locale])
-        $translationId = Get-GuidExpr "story-age-group-tr:$($group.AgeGroupId)|$locale"
+        $translationId = New-GuidLiteral "story-age-group-tr:$($group.AgeGroupId)|$locale"
         $translationSql = @"
 INSERT INTO alchimalia_schema."StoryAgeGroupTranslations"
     ("Id", "StoryAgeGroupId", "LanguageCode", "Label", "Description")
@@ -220,7 +212,7 @@ SET "Label" = EXCLUDED."Label",
 
 $lines.Add("-- Classic Authors")
 foreach ($author in $authors) {
-    $authorIdExpr = Get-GuidExpr "classic-author:$($author.AuthorId)"
+    $authorIdExpr = New-GuidLiteral "classic-author:$($author.AuthorId)"
     $name = Escape-Sql $author.Name
     $sql = @"
 INSERT INTO alchimalia_schema."ClassicAuthors"

@@ -1,14 +1,5 @@
 ﻿-- Auto-generated from Data/SeedData/LaboratoryOfImagination
--- Run date: 2025-11-27 10:07:23+02:00
-
-DO $$
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1 FROM pg_extension WHERE extname = 'uuid-ossp'
-    ) THEN
-        CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-    END IF;
-END $$;
+-- Run date: 2025-11-27 12:00:45+02:00
 
 BEGIN;
 
@@ -82,127 +73,127 @@ SET "Name" = EXCLUDED."Name",
 INSERT INTO alchimalia_schema."BodyPartTranslations"
     ("Id", "BodyPartKey", "LanguageCode", "Name")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'bodypart:arms:en-us'), 'arms', 'en-us', 'Arms')
+    ('34aad965-979f-522f-b373-0bec09d41c02', 'arms', 'en-us', 'Arms')
 ON CONFLICT ("BodyPartKey", "LanguageCode") DO UPDATE
 SET "Name" = EXCLUDED."Name";
 INSERT INTO alchimalia_schema."BodyPartTranslations"
     ("Id", "BodyPartKey", "LanguageCode", "Name")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'bodypart:body:en-us'), 'body', 'en-us', 'Body')
+    ('ebe2e344-7cc4-5734-91ce-16837f6a3a60', 'body', 'en-us', 'Body')
 ON CONFLICT ("BodyPartKey", "LanguageCode") DO UPDATE
 SET "Name" = EXCLUDED."Name";
 INSERT INTO alchimalia_schema."BodyPartTranslations"
     ("Id", "BodyPartKey", "LanguageCode", "Name")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'bodypart:head:en-us'), 'head', 'en-us', 'Head')
+    ('749c09f3-37c7-5ca1-bb0b-604e662099ed', 'head', 'en-us', 'Head')
 ON CONFLICT ("BodyPartKey", "LanguageCode") DO UPDATE
 SET "Name" = EXCLUDED."Name";
 INSERT INTO alchimalia_schema."BodyPartTranslations"
     ("Id", "BodyPartKey", "LanguageCode", "Name")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'bodypart:horn:en-us'), 'horn', 'en-us', 'Horn')
+    ('001043f6-e38d-5ed1-8af1-f8bb4df77345', 'horn', 'en-us', 'Horn')
 ON CONFLICT ("BodyPartKey", "LanguageCode") DO UPDATE
 SET "Name" = EXCLUDED."Name";
 INSERT INTO alchimalia_schema."BodyPartTranslations"
     ("Id", "BodyPartKey", "LanguageCode", "Name")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'bodypart:horns:en-us'), 'horns', 'en-us', 'Horns')
+    ('fafe417f-7bde-5702-b108-5fa2bc9ff274', 'horns', 'en-us', 'Horns')
 ON CONFLICT ("BodyPartKey", "LanguageCode") DO UPDATE
 SET "Name" = EXCLUDED."Name";
 INSERT INTO alchimalia_schema."BodyPartTranslations"
     ("Id", "BodyPartKey", "LanguageCode", "Name")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'bodypart:legs:en-us'), 'legs', 'en-us', 'Legs')
+    ('9c86d4a1-9508-5a39-bd0c-49f70afcb21c', 'legs', 'en-us', 'Legs')
 ON CONFLICT ("BodyPartKey", "LanguageCode") DO UPDATE
 SET "Name" = EXCLUDED."Name";
 INSERT INTO alchimalia_schema."BodyPartTranslations"
     ("Id", "BodyPartKey", "LanguageCode", "Name")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'bodypart:tail:en-us'), 'tail', 'en-us', 'Tail')
+    ('ac24dbf4-3476-58aa-949a-39b349284471', 'tail', 'en-us', 'Tail')
 ON CONFLICT ("BodyPartKey", "LanguageCode") DO UPDATE
 SET "Name" = EXCLUDED."Name";
 INSERT INTO alchimalia_schema."BodyPartTranslations"
     ("Id", "BodyPartKey", "LanguageCode", "Name")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'bodypart:wings:en-us'), 'wings', 'en-us', 'Wings')
+    ('10523761-eb5b-5801-9b75-0422acc7bcbe', 'wings', 'en-us', 'Wings')
 ON CONFLICT ("BodyPartKey", "LanguageCode") DO UPDATE
 SET "Name" = EXCLUDED."Name";
 INSERT INTO alchimalia_schema."BodyPartTranslations"
     ("Id", "BodyPartKey", "LanguageCode", "Name")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'bodypart:arms:hu-hu'), 'arms', 'hu-hu', 'Karok')
+    ('88bcd6fd-f1d3-5dde-a73e-76cb87c23bcc', 'arms', 'hu-hu', 'Karok')
 ON CONFLICT ("BodyPartKey", "LanguageCode") DO UPDATE
 SET "Name" = EXCLUDED."Name";
 INSERT INTO alchimalia_schema."BodyPartTranslations"
     ("Id", "BodyPartKey", "LanguageCode", "Name")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'bodypart:body:hu-hu'), 'body', 'hu-hu', 'Test')
+    ('6a147f99-7576-5dae-bd65-47cc51bc7335', 'body', 'hu-hu', 'Test')
 ON CONFLICT ("BodyPartKey", "LanguageCode") DO UPDATE
 SET "Name" = EXCLUDED."Name";
 INSERT INTO alchimalia_schema."BodyPartTranslations"
     ("Id", "BodyPartKey", "LanguageCode", "Name")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'bodypart:head:hu-hu'), 'head', 'hu-hu', 'Fej')
+    ('300e7872-dc00-5277-b17b-33c77334ec31', 'head', 'hu-hu', 'Fej')
 ON CONFLICT ("BodyPartKey", "LanguageCode") DO UPDATE
 SET "Name" = EXCLUDED."Name";
 INSERT INTO alchimalia_schema."BodyPartTranslations"
     ("Id", "BodyPartKey", "LanguageCode", "Name")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'bodypart:legs:hu-hu'), 'legs', 'hu-hu', 'Lábak')
+    ('80cb25bf-35d6-5726-884d-5012089e8e24', 'legs', 'hu-hu', 'Lábak')
 ON CONFLICT ("BodyPartKey", "LanguageCode") DO UPDATE
 SET "Name" = EXCLUDED."Name";
 INSERT INTO alchimalia_schema."BodyPartTranslations"
     ("Id", "BodyPartKey", "LanguageCode", "Name")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'bodypart:tail:hu-hu'), 'tail', 'hu-hu', 'Farok')
+    ('1469b33d-d555-5836-a7cf-7e590b9e7561', 'tail', 'hu-hu', 'Farok')
 ON CONFLICT ("BodyPartKey", "LanguageCode") DO UPDATE
 SET "Name" = EXCLUDED."Name";
 INSERT INTO alchimalia_schema."BodyPartTranslations"
     ("Id", "BodyPartKey", "LanguageCode", "Name")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'bodypart:arms:ro-ro'), 'arms', 'ro-ro', 'Arms')
+    ('a2c1e64c-0681-51cd-adf7-38d7bc418f2b', 'arms', 'ro-ro', 'Arms')
 ON CONFLICT ("BodyPartKey", "LanguageCode") DO UPDATE
 SET "Name" = EXCLUDED."Name";
 INSERT INTO alchimalia_schema."BodyPartTranslations"
     ("Id", "BodyPartKey", "LanguageCode", "Name")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'bodypart:body:ro-ro'), 'body', 'ro-ro', 'Body')
+    ('87d1d6d6-885b-552c-9134-a7b3e617e725', 'body', 'ro-ro', 'Body')
 ON CONFLICT ("BodyPartKey", "LanguageCode") DO UPDATE
 SET "Name" = EXCLUDED."Name";
 INSERT INTO alchimalia_schema."BodyPartTranslations"
     ("Id", "BodyPartKey", "LanguageCode", "Name")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'bodypart:head:ro-ro'), 'head', 'ro-ro', 'Head')
+    ('df3deb66-b952-5ae1-a6ce-02c162633191', 'head', 'ro-ro', 'Head')
 ON CONFLICT ("BodyPartKey", "LanguageCode") DO UPDATE
 SET "Name" = EXCLUDED."Name";
 INSERT INTO alchimalia_schema."BodyPartTranslations"
     ("Id", "BodyPartKey", "LanguageCode", "Name")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'bodypart:horn:ro-ro'), 'horn', 'ro-ro', 'Horn')
+    ('9687305d-ab33-5e17-979e-09c481e6cdf0', 'horn', 'ro-ro', 'Horn')
 ON CONFLICT ("BodyPartKey", "LanguageCode") DO UPDATE
 SET "Name" = EXCLUDED."Name";
 INSERT INTO alchimalia_schema."BodyPartTranslations"
     ("Id", "BodyPartKey", "LanguageCode", "Name")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'bodypart:horns:ro-ro'), 'horns', 'ro-ro', 'Horns')
+    ('54c0b975-3498-5471-94b0-10d0e6521cbd', 'horns', 'ro-ro', 'Horns')
 ON CONFLICT ("BodyPartKey", "LanguageCode") DO UPDATE
 SET "Name" = EXCLUDED."Name";
 INSERT INTO alchimalia_schema."BodyPartTranslations"
     ("Id", "BodyPartKey", "LanguageCode", "Name")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'bodypart:legs:ro-ro'), 'legs', 'ro-ro', 'Legs')
+    ('069d9165-9e43-56a0-830f-24bc2be7ad26', 'legs', 'ro-ro', 'Legs')
 ON CONFLICT ("BodyPartKey", "LanguageCode") DO UPDATE
 SET "Name" = EXCLUDED."Name";
 INSERT INTO alchimalia_schema."BodyPartTranslations"
     ("Id", "BodyPartKey", "LanguageCode", "Name")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'bodypart:tail:ro-ro'), 'tail', 'ro-ro', 'Tail')
+    ('b4b926f9-6a03-52d2-8e85-735e932844db', 'tail', 'ro-ro', 'Tail')
 ON CONFLICT ("BodyPartKey", "LanguageCode") DO UPDATE
 SET "Name" = EXCLUDED."Name";
 INSERT INTO alchimalia_schema."BodyPartTranslations"
     ("Id", "BodyPartKey", "LanguageCode", "Name")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'bodypart:wings:ro-ro'), 'wings', 'ro-ro', 'Wings')
+    ('6235a0d7-d1b5-5aac-8727-29f5bac6be39', 'wings', 'ro-ro', 'Wings')
 ON CONFLICT ("BodyPartKey", "LanguageCode") DO UPDATE
 SET "Name" = EXCLUDED."Name";
 
@@ -562,451 +553,451 @@ SET "Label" = EXCLUDED."Label",
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000001:en-us'), '00000000-0000-0000-0000-000000000001', 'en-us', 'Bunny')
+    ('2b664536-ac22-53dc-bd9a-0c38b2a306e8', '00000000-0000-0000-0000-000000000001', 'en-us', 'Bunny')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000002:en-us'), '00000000-0000-0000-0000-000000000002', 'en-us', 'Hippo')
+    ('2270be93-6826-5569-8956-7ca4d1b58327', '00000000-0000-0000-0000-000000000002', 'en-us', 'Hippo')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000003:en-us'), '00000000-0000-0000-0000-000000000003', 'en-us', 'Giraffe')
+    ('94db2f44-9672-552e-bd40-e5d9d30a5df1', '00000000-0000-0000-0000-000000000003', 'en-us', 'Giraffe')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000004:en-us'), '00000000-0000-0000-0000-000000000004', 'en-us', 'Dog')
+    ('6d1da6a9-e1d5-5ee6-b603-07f70a401a78', '00000000-0000-0000-0000-000000000004', 'en-us', 'Dog')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000005:en-us'), '00000000-0000-0000-0000-000000000005', 'en-us', 'Fox')
+    ('31606018-f93c-5c48-b78a-c854c8f2165a', '00000000-0000-0000-0000-000000000005', 'en-us', 'Fox')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000006:en-us'), '00000000-0000-0000-0000-000000000006', 'en-us', 'Cat')
+    ('f5565cdb-f363-5768-be90-e3a8366fdefb', '00000000-0000-0000-0000-000000000006', 'en-us', 'Cat')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000007:en-us'), '00000000-0000-0000-0000-000000000007', 'en-us', 'Monkey')
+    ('6d7cefc4-a150-57b3-a685-89f12ef10cc2', '00000000-0000-0000-0000-000000000007', 'en-us', 'Monkey')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000008:en-us'), '00000000-0000-0000-0000-000000000008', 'en-us', 'Camel')
+    ('4b643445-6f15-5fcb-bc99-77675b5d5020', '00000000-0000-0000-0000-000000000008', 'en-us', 'Camel')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000009:en-us'), '00000000-0000-0000-0000-000000000009', 'en-us', 'Deer')
+    ('8c655700-4c81-5786-bf0f-b77525889dde', '00000000-0000-0000-0000-000000000009', 'en-us', 'Deer')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-00000000000a:en-us'), '00000000-0000-0000-0000-00000000000a', 'en-us', 'Duck')
+    ('972ab141-0e7d-5766-9a2a-c7b83c097dfe', '00000000-0000-0000-0000-00000000000a', 'en-us', 'Duck')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-00000000000b:en-us'), '00000000-0000-0000-0000-00000000000b', 'en-us', 'Eagle')
+    ('353825d8-adb8-57da-8573-8622f0cdae32', '00000000-0000-0000-0000-00000000000b', 'en-us', 'Eagle')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-00000000000c:en-us'), '00000000-0000-0000-0000-00000000000c', 'en-us', 'Elephant')
+    ('94dc10e5-d30f-55c8-a8d8-8515b2eab0c3', '00000000-0000-0000-0000-00000000000c', 'en-us', 'Elephant')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-00000000000d:en-us'), '00000000-0000-0000-0000-00000000000d', 'en-us', 'Ostrich')
+    ('c2fc3673-fd7b-5e51-a323-a48def77f9a6', '00000000-0000-0000-0000-00000000000d', 'en-us', 'Ostrich')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-00000000000e:en-us'), '00000000-0000-0000-0000-00000000000e', 'en-us', 'Parrot')
+    ('2f94f559-1847-5a9f-9228-78c31526baeb', '00000000-0000-0000-0000-00000000000e', 'en-us', 'Parrot')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-00000000000f:en-us'), '00000000-0000-0000-0000-00000000000f', 'en-us', 'Jaguar')
+    ('5815c432-b35a-50b2-8b05-ffac28ba8241', '00000000-0000-0000-0000-00000000000f', 'en-us', 'Jaguar')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000010:en-us'), '00000000-0000-0000-0000-000000000010', 'en-us', 'Toucan')
+    ('54a16dcc-04db-5d8a-bb6d-f20344610eaf', '00000000-0000-0000-0000-000000000010', 'en-us', 'Toucan')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000011:en-us'), '00000000-0000-0000-0000-000000000011', 'en-us', 'Anaconda')
+    ('317144e5-a3f9-5ae7-8bcc-03e5ac1eeeba', '00000000-0000-0000-0000-000000000011', 'en-us', 'Anaconda')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000012:en-us'), '00000000-0000-0000-0000-000000000012', 'en-us', 'Capuchin Monkey')
+    ('596d096a-4dba-525d-ba58-02d63621ec38', '00000000-0000-0000-0000-000000000012', 'en-us', 'Capuchin Monkey')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000013:en-us'), '00000000-0000-0000-0000-000000000013', 'en-us', 'Poison Dart Frog')
+    ('8424883e-c570-5154-bea7-aaa6620ce616', '00000000-0000-0000-0000-000000000013', 'en-us', 'Poison Dart Frog')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000014:en-us'), '00000000-0000-0000-0000-000000000014', 'en-us', 'Lion')
+    ('9e06031b-08a8-530e-92af-d9d7d539c7ac', '00000000-0000-0000-0000-000000000014', 'en-us', 'Lion')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000015:en-us'), '00000000-0000-0000-0000-000000000015', 'en-us', 'African Elephant')
+    ('87f7fdea-5869-5458-8d8a-e21f160a5c60', '00000000-0000-0000-0000-000000000015', 'en-us', 'African Elephant')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000016:en-us'), '00000000-0000-0000-0000-000000000016', 'en-us', 'Giraffe')
+    ('097b6812-8baa-5dc6-adcc-bdd57a25f9e5', '00000000-0000-0000-0000-000000000016', 'en-us', 'Giraffe')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000017:en-us'), '00000000-0000-0000-0000-000000000017', 'en-us', 'Zebra')
+    ('95a174be-8ae1-5419-9c96-6ed0bdd6ee43', '00000000-0000-0000-0000-000000000017', 'en-us', 'Zebra')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000018:en-us'), '00000000-0000-0000-0000-000000000018', 'en-us', 'Rhinoceros')
+    ('ffe40398-3891-5dc6-b392-475c1002df9c', '00000000-0000-0000-0000-000000000018', 'en-us', 'Rhinoceros')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000019:en-us'), '00000000-0000-0000-0000-000000000019', 'en-us', 'Bison')
+    ('7e11a357-1bf3-5059-8cbf-47557d087f24', '00000000-0000-0000-0000-000000000019', 'en-us', 'Bison')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-00000000001a:en-us'), '00000000-0000-0000-0000-00000000001a', 'en-us', 'Saiga Antelope')
+    ('647ae114-ca39-5e07-b702-3fb9f12dd8c7', '00000000-0000-0000-0000-00000000001a', 'en-us', 'Saiga Antelope')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-00000000001b:en-us'), '00000000-0000-0000-0000-00000000001b', 'en-us', 'Gray Wolf')
+    ('b3c952e5-6f40-510f-a3b0-68bb59e0c16e', '00000000-0000-0000-0000-00000000001b', 'en-us', 'Gray Wolf')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-00000000001c:en-us'), '00000000-0000-0000-0000-00000000001c', 'en-us', 'Przewalski''s Horse')
+    ('27914744-227c-5844-abda-7bcc94d63053', '00000000-0000-0000-0000-00000000001c', 'en-us', 'Przewalski''s Horse')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-00000000001d:en-us'), '00000000-0000-0000-0000-00000000001d', 'en-us', 'Steppe Eagle')
+    ('1afb8381-c55e-59e8-a959-15384d0cb33f', '00000000-0000-0000-0000-00000000001d', 'en-us', 'Steppe Eagle')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-00000000001e:en-us'), '00000000-0000-0000-0000-00000000001e', 'en-us', 'Cow')
+    ('123e71ac-1dbb-5b0b-837a-c02d6c6e3422', '00000000-0000-0000-0000-00000000001e', 'en-us', 'Cow')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-00000000001f:en-us'), '00000000-0000-0000-0000-00000000001f', 'en-us', 'Sheep')
+    ('7de47e4c-de41-5449-9d88-4febca089fa7', '00000000-0000-0000-0000-00000000001f', 'en-us', 'Sheep')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000020:en-us'), '00000000-0000-0000-0000-000000000020', 'en-us', 'Horse')
+    ('7fb8135a-7ffd-5cdd-be81-d4a5549e3d4c', '00000000-0000-0000-0000-000000000020', 'en-us', 'Horse')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000021:en-us'), '00000000-0000-0000-0000-000000000021', 'en-us', 'Chicken')
+    ('adfd861a-13be-5755-988f-2a2f78c97e38', '00000000-0000-0000-0000-000000000021', 'en-us', 'Chicken')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000022:en-us'), '00000000-0000-0000-0000-000000000022', 'en-us', 'Pig')
+    ('ddc5383c-878d-55e9-a4c2-864187bb1179', '00000000-0000-0000-0000-000000000022', 'en-us', 'Pig')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000001:hu-hu'), '00000000-0000-0000-0000-000000000001', 'hu-hu', 'Nyuszi')
+    ('5b3c555e-8c3b-5bbf-b97d-79a7621548d6', '00000000-0000-0000-0000-000000000001', 'hu-hu', 'Nyuszi')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000002:hu-hu'), '00000000-0000-0000-0000-000000000002', 'hu-hu', 'Víziló')
+    ('935f40c6-bb78-5823-9e9f-f77fbf892943', '00000000-0000-0000-0000-000000000002', 'hu-hu', 'Víziló')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000003:hu-hu'), '00000000-0000-0000-0000-000000000003', 'hu-hu', 'Zsiráf')
+    ('45394247-643a-5fcd-9374-779a7077b9ec', '00000000-0000-0000-0000-000000000003', 'hu-hu', 'Zsiráf')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000004:hu-hu'), '00000000-0000-0000-0000-000000000004', 'hu-hu', 'Kutya')
+    ('6939ed5f-2c9b-5a11-8602-792ff5532b2d', '00000000-0000-0000-0000-000000000004', 'hu-hu', 'Kutya')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000005:hu-hu'), '00000000-0000-0000-0000-000000000005', 'hu-hu', 'Róka')
+    ('299c8d62-9a16-58f8-b20f-a588b97a3cd1', '00000000-0000-0000-0000-000000000005', 'hu-hu', 'Róka')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000006:hu-hu'), '00000000-0000-0000-0000-000000000006', 'hu-hu', 'Macska')
+    ('710a67ba-d791-5d6f-b360-069908bc9b74', '00000000-0000-0000-0000-000000000006', 'hu-hu', 'Macska')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000007:hu-hu'), '00000000-0000-0000-0000-000000000007', 'hu-hu', 'Majom')
+    ('17ca02f5-6cf8-57ba-b474-60633490e218', '00000000-0000-0000-0000-000000000007', 'hu-hu', 'Majom')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000001:ro-ro'), '00000000-0000-0000-0000-000000000001', 'ro-ro', 'Bunny')
+    ('c00fa41f-381d-500c-b21a-9ba18703220d', '00000000-0000-0000-0000-000000000001', 'ro-ro', 'Bunny')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000002:ro-ro'), '00000000-0000-0000-0000-000000000002', 'ro-ro', 'Hippo')
+    ('a4cb20a4-092b-5b86-a597-f48a5dc9ce2e', '00000000-0000-0000-0000-000000000002', 'ro-ro', 'Hippo')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000003:ro-ro'), '00000000-0000-0000-0000-000000000003', 'ro-ro', 'Giraffe')
+    ('3660beb3-c21c-5f8a-85f9-5e2a2f47de72', '00000000-0000-0000-0000-000000000003', 'ro-ro', 'Giraffe')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000004:ro-ro'), '00000000-0000-0000-0000-000000000004', 'ro-ro', 'Dog')
+    ('d75203b6-4a43-50a3-a3a2-0ba5a9ce3e7b', '00000000-0000-0000-0000-000000000004', 'ro-ro', 'Dog')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000005:ro-ro'), '00000000-0000-0000-0000-000000000005', 'ro-ro', 'Fox')
+    ('93708ccd-6e47-5574-8740-6e171490d5b8', '00000000-0000-0000-0000-000000000005', 'ro-ro', 'Fox')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000006:ro-ro'), '00000000-0000-0000-0000-000000000006', 'ro-ro', 'Cat')
+    ('f15ede48-6676-53c7-bdfd-5e9a4a715c2b', '00000000-0000-0000-0000-000000000006', 'ro-ro', 'Cat')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000007:ro-ro'), '00000000-0000-0000-0000-000000000007', 'ro-ro', 'Monkey')
+    ('0679b9a1-2c61-5fef-abc4-1cb08836bf51', '00000000-0000-0000-0000-000000000007', 'ro-ro', 'Monkey')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000008:ro-ro'), '00000000-0000-0000-0000-000000000008', 'ro-ro', 'Camel')
+    ('de8d0ab8-8d25-594e-b56f-5a7b01f749a3', '00000000-0000-0000-0000-000000000008', 'ro-ro', 'Camel')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000009:ro-ro'), '00000000-0000-0000-0000-000000000009', 'ro-ro', 'Deer')
+    ('93bea7e2-d23c-5c2b-b7a2-8de1d00e25aa', '00000000-0000-0000-0000-000000000009', 'ro-ro', 'Deer')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-00000000000a:ro-ro'), '00000000-0000-0000-0000-00000000000a', 'ro-ro', 'Duck')
+    ('87852245-b2f1-549a-83c4-a051e055ca8b', '00000000-0000-0000-0000-00000000000a', 'ro-ro', 'Duck')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-00000000000b:ro-ro'), '00000000-0000-0000-0000-00000000000b', 'ro-ro', 'Eagle')
+    ('f8942454-9d07-57a8-a0e3-827fc5557add', '00000000-0000-0000-0000-00000000000b', 'ro-ro', 'Eagle')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-00000000000c:ro-ro'), '00000000-0000-0000-0000-00000000000c', 'ro-ro', 'Elephant')
+    ('3207d833-c0c8-5641-90a9-2858305e8167', '00000000-0000-0000-0000-00000000000c', 'ro-ro', 'Elephant')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-00000000000d:ro-ro'), '00000000-0000-0000-0000-00000000000d', 'ro-ro', 'Ostrich')
+    ('b8c6e8db-b18d-5168-824e-7f75fb25c022', '00000000-0000-0000-0000-00000000000d', 'ro-ro', 'Ostrich')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-00000000000e:ro-ro'), '00000000-0000-0000-0000-00000000000e', 'ro-ro', 'Parrot')
+    ('7d53135c-2403-5eb6-8d8a-61c9e7268c00', '00000000-0000-0000-0000-00000000000e', 'ro-ro', 'Parrot')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-00000000000f:ro-ro'), '00000000-0000-0000-0000-00000000000f', 'ro-ro', 'Jaguar')
+    ('1fd51c72-5c14-5463-96e2-4156801605b6', '00000000-0000-0000-0000-00000000000f', 'ro-ro', 'Jaguar')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000010:ro-ro'), '00000000-0000-0000-0000-000000000010', 'ro-ro', 'Toucan')
+    ('23330dd9-4f71-5be1-a7f9-730d03c225ef', '00000000-0000-0000-0000-000000000010', 'ro-ro', 'Toucan')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000011:ro-ro'), '00000000-0000-0000-0000-000000000011', 'ro-ro', 'Anaconda')
+    ('f01fd99c-a653-5981-8765-807305d38ef0', '00000000-0000-0000-0000-000000000011', 'ro-ro', 'Anaconda')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000012:ro-ro'), '00000000-0000-0000-0000-000000000012', 'ro-ro', 'Capuchin Monkey')
+    ('e53d3962-2ee9-53aa-85a5-57a97becfdfb', '00000000-0000-0000-0000-000000000012', 'ro-ro', 'Capuchin Monkey')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000013:ro-ro'), '00000000-0000-0000-0000-000000000013', 'ro-ro', 'Poison Dart Frog')
+    ('1b63ae8b-2149-5a4c-b505-19f045d7548a', '00000000-0000-0000-0000-000000000013', 'ro-ro', 'Poison Dart Frog')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000014:ro-ro'), '00000000-0000-0000-0000-000000000014', 'ro-ro', 'Lion')
+    ('6fed117d-9097-59a4-84a2-7d678cfc759e', '00000000-0000-0000-0000-000000000014', 'ro-ro', 'Lion')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000015:ro-ro'), '00000000-0000-0000-0000-000000000015', 'ro-ro', 'African Elephant')
+    ('268372d8-e222-5eee-b2d3-1ff4907bcafa', '00000000-0000-0000-0000-000000000015', 'ro-ro', 'African Elephant')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000016:ro-ro'), '00000000-0000-0000-0000-000000000016', 'ro-ro', 'Giraffe')
+    ('b81c84a8-04f2-5636-8533-fb1c41c89e3c', '00000000-0000-0000-0000-000000000016', 'ro-ro', 'Giraffe')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000017:ro-ro'), '00000000-0000-0000-0000-000000000017', 'ro-ro', 'Zebra')
+    ('3a317a49-f988-5118-b3da-34b56ce08cbf', '00000000-0000-0000-0000-000000000017', 'ro-ro', 'Zebra')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000018:ro-ro'), '00000000-0000-0000-0000-000000000018', 'ro-ro', 'Rhinoceros')
+    ('65518c28-c65a-5db8-9f80-b798ff7c3bb6', '00000000-0000-0000-0000-000000000018', 'ro-ro', 'Rhinoceros')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000019:ro-ro'), '00000000-0000-0000-0000-000000000019', 'ro-ro', 'Bison')
+    ('b7cf31a4-8e6b-53a4-a9ec-31b4d3237921', '00000000-0000-0000-0000-000000000019', 'ro-ro', 'Bison')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-00000000001a:ro-ro'), '00000000-0000-0000-0000-00000000001a', 'ro-ro', 'Saiga Antelope')
+    ('43c766f7-5e1c-50f2-97f1-16c8244e4a91', '00000000-0000-0000-0000-00000000001a', 'ro-ro', 'Saiga Antelope')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-00000000001b:ro-ro'), '00000000-0000-0000-0000-00000000001b', 'ro-ro', 'Gray Wolf')
+    ('ea1da95d-6cdd-52a1-b17c-b0f2afb147d9', '00000000-0000-0000-0000-00000000001b', 'ro-ro', 'Gray Wolf')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-00000000001c:ro-ro'), '00000000-0000-0000-0000-00000000001c', 'ro-ro', 'Przewalski''s Horse')
+    ('ea50c5bd-3d51-5f6f-8cfe-9f76d64e5212', '00000000-0000-0000-0000-00000000001c', 'ro-ro', 'Przewalski''s Horse')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-00000000001d:ro-ro'), '00000000-0000-0000-0000-00000000001d', 'ro-ro', 'Steppe Eagle')
+    ('526b1da0-b6d5-5a46-b2cf-1adeb29af29e', '00000000-0000-0000-0000-00000000001d', 'ro-ro', 'Steppe Eagle')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-00000000001e:ro-ro'), '00000000-0000-0000-0000-00000000001e', 'ro-ro', 'Cow')
+    ('08d653f3-1d38-5f7e-8ba4-ef035f6aa558', '00000000-0000-0000-0000-00000000001e', 'ro-ro', 'Cow')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-00000000001f:ro-ro'), '00000000-0000-0000-0000-00000000001f', 'ro-ro', 'Sheep')
+    ('9b8a1f35-5c93-51b4-ba98-7e7992e87913', '00000000-0000-0000-0000-00000000001f', 'ro-ro', 'Sheep')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000020:ro-ro'), '00000000-0000-0000-0000-000000000020', 'ro-ro', 'Horse')
+    ('8e9e8b4d-abd3-5a4c-8cf9-22a94c40a88f', '00000000-0000-0000-0000-000000000020', 'ro-ro', 'Horse')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000021:ro-ro'), '00000000-0000-0000-0000-000000000021', 'ro-ro', 'Chicken')
+    ('6a0d324d-944b-52ba-8390-856466bbf903', '00000000-0000-0000-0000-000000000021', 'ro-ro', 'Chicken')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000'::uuid, 'animal:00000000-0000-0000-0000-000000000022:ro-ro'), '00000000-0000-0000-0000-000000000022', 'ro-ro', 'Pig')
+    ('79ddd38b-864d-52df-a13c-38187febebe5', '00000000-0000-0000-0000-000000000022', 'ro-ro', 'Pig')
 ON CONFLICT ("AnimalId", "LanguageCode") DO UPDATE
 SET "Label" = EXCLUDED."Label";
 

@@ -10,6 +10,7 @@ $repoRoot = Resolve-Path (Join-Path $scriptRoot ".." ".." "..")
 $timestamp = "2025-01-01T00:00:00Z"
 $namespaceGuid = "00000000-0000-0000-0000-000000000000"
 $invariant = [System.Globalization.CultureInfo]::InvariantCulture
+. (Join-Path $scriptRoot "GuidUtils.ps1")
 
 function Get-FullPath {
     param([string]$RelativePath)
@@ -30,9 +31,9 @@ function Escape-Sql {
     return $Value.Replace("'", "''")
 }
 
-function Get-GuidExpr {
+function New-GuidLiteral {
     param([string]$Key)
-    return "uuid_generate_v5('$namespaceGuid', '$Key')"
+    return Get-GuidLiteral -NamespaceGuid $namespaceGuid -Name $Key
 }
 
 function To-JsonLiteral {
@@ -104,15 +105,6 @@ $lines = New-Object System.Collections.Generic.List[string]
 $runStamp = Get-Date -Format "yyyy-MM-dd HH:mm:ssK"
 $lines.Add("-- Auto-generated from Data/SeedData/SharedConfigs/hero-tree.json + BookOfHeroes/i18n/*/hero-tree.json")
 $lines.Add("-- Run date: $runStamp")
-$lines.Add('')
-$lines.Add('DO $$')
-$lines.Add('BEGIN')
-$lines.Add("    IF NOT EXISTS (")
-$lines.Add("        SELECT 1 FROM pg_extension WHERE extname = 'uuid-ossp'")
-$lines.Add("    ) THEN")
-$lines.Add("        CREATE EXTENSION IF NOT EXISTS ""uuid-ossp"";")
-$lines.Add("    END IF;")
-$lines.Add('END $$;')
 $lines.Add('')
 $lines.Add('BEGIN;')
 $lines.Add('')
@@ -198,7 +190,7 @@ SET "Type" = EXCLUDED."Type",
         $story = Escape-Sql (Get-TranslationValue $dict $node.storyKey)
         if ([string]::IsNullOrWhiteSpace($story)) { $story = Escape-Sql $node.storyKey }
 
-        $translationId = Get-GuidExpr "hero-def-tr:$heroId|$locale"
+        $translationId = New-GuidLiteral "hero-def-tr:$heroId|$locale"
         $translationSql = @"
 INSERT INTO alchimalia_schema."HeroDefinitionTranslations"
     ("Id", "HeroDefinitionId", "LanguageCode", "Name", "Description", "Story")

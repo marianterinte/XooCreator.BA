@@ -11,6 +11,7 @@ $repoRoot = Resolve-Path (Join-Path $scriptRoot ".." ".." "..")
 $labRoot = Join-Path $repoRoot "XooCreator.BA" "Data" "SeedData" "LaboratoryOfImagination" "i18n"
 $timestamp = "2025-01-01T00:00:00Z"
 $uuidNamespace = "00000000-0000-0000-0000-000000000000"
+. (Join-Path $scriptRoot "GuidUtils.ps1")
 
 function Get-FullPath {
     param([string]$RelativePath)
@@ -46,10 +47,9 @@ function Normalize-AssetPath {
     return $Value.Trim()
 }
 
-function Get-UuidExpression {
+function New-GuidLiteral {
     param([string]$Key)
-    $literal = Sql-Literal $Key
-    return "uuid_generate_v5('$uuidNamespace'::uuid, $literal)"
+    return Get-GuidLiteral -NamespaceGuid $uuidNamespace -Name $Key
 }
 
 if (-not (Test-Path $labRoot)) {
@@ -109,15 +109,6 @@ $runStamp = Get-Date -Format "yyyy-MM-dd HH:mm:ssK"
 $lines.Add("-- Auto-generated from Data/SeedData/LaboratoryOfImagination")
 $lines.Add("-- Run date: $runStamp")
 $lines.Add("")
-$lines.Add('DO $$')
-$lines.Add("BEGIN")
-$lines.Add("    IF NOT EXISTS (")
-$lines.Add("        SELECT 1 FROM pg_extension WHERE extname = 'uuid-ossp'")
-$lines.Add("    ) THEN")
-$lines.Add("        CREATE EXTENSION IF NOT EXISTS ""uuid-ossp"";")
-$lines.Add("    END IF;")
-$lines.Add('END $$;')
-$lines.Add("")
 $lines.Add("BEGIN;")
 $lines.Add("")
 
@@ -150,7 +141,7 @@ foreach ($locale in $sortedBodyLocales) {
     $map = $bodyPartTranslationsByLocale[$locale]
     foreach ($key in ($map.Keys | Sort-Object)) {
         $name = $map[$key]
-        $uuidExpr = Get-UuidExpression "bodypart:${key}:${locale}"
+        $uuidExpr = New-GuidLiteral "bodypart:${key}:${locale}"
         $lines.Add(@"
 INSERT INTO alchimalia_schema."BodyPartTranslations"
     ("Id", "BodyPartKey", "LanguageCode", "Name")
@@ -215,7 +206,7 @@ foreach ($locale in $sortedAnimalLocales) {
     $map = $animalTranslationsByLocale[$locale]
     foreach ($animalId in ($map.Keys | Sort-Object)) {
         $label = $map[$animalId]
-        $uuidExpr = Get-UuidExpression "animal:${animalId}:${locale}"
+        $uuidExpr = New-GuidLiteral "animal:${animalId}:${locale}"
         $lines.Add(@"
 INSERT INTO alchimalia_schema."AnimalTranslations"
     ("Id", "AnimalId", "LanguageCode", "Label")

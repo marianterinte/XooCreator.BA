@@ -8,6 +8,8 @@ $ErrorActionPreference = "Stop"
 $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repoRoot = Resolve-Path (Join-Path $scriptRoot ".." ".." "..")
 $seedFile = Join-Path $repoRoot "XooCreator.BA" "Data" "SeedData" "Discovery" "i18n" "ro-ro" "discover-bestiary.json"
+. (Join-Path $scriptRoot "GuidUtils.ps1")
+$namespaceGuid = "00000000-0000-0000-0000-000000000000"
 
 if (-not (Test-Path $seedFile)) {
     throw "Seed file not found: $seedFile"
@@ -56,17 +58,6 @@ $headerLines = @(
     "-- Auto-generated from Data/SeedData/Discovery/i18n/ro-ro/discover-bestiary.json",
     "-- Run date: $runDate",
     "",
-    'DO $$',
-    'BEGIN',
-    '    IF NOT EXISTS (',
-    '        SELECT 1',
-    '        FROM pg_extension',
-    '        WHERE extname = ''uuid-ossp''',
-    '    ) THEN',
-    '        CREATE EXTENSION IF NOT EXISTS "uuid-ossp";',
-    '    END IF;',
-    'END $$;',
-    "",
     'BEGIN;',
     ""
 )
@@ -81,7 +72,7 @@ foreach ($item in $seedData) {
     $head = $parts[2]
 
     $comboKey = "$arms|$body|$head"
-    $idExpression = "uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'bestiary:$comboKey')"
+    $idLiteral = Get-GuidLiteral -NamespaceGuid $namespaceGuid -Name "bestiary:$comboKey"
     $name = $item.Name.Replace("'", "''")
     $story = ($item.Story ?? "").Replace("'", "''")
 
@@ -89,7 +80,7 @@ foreach ($item in $seedData) {
 INSERT INTO alchimalia_schema."BestiaryItems"
     ("Id", "ArmsKey", "BodyKey", "HeadKey", "Name", "Story", "CreatedAt")
 VALUES
-    ($idExpression, '$arms', '$body', '$head', '$name', '$story', '2025-01-01T00:00:00Z')
+    ($idLiteral, '$arms', '$body', '$head', '$name', '$story', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "ArmsKey" = EXCLUDED."ArmsKey",
     "BodyKey" = EXCLUDED."BodyKey",

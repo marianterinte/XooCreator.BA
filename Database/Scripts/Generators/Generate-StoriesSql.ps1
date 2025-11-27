@@ -14,6 +14,7 @@ $timestamp = "2025-01-01T00:00:00Z"
 $locales = @("ro-ro", "en-us", "hu-hu")
 $seedOwnerEmail = "seed@alchimalia.com"
 $indieOwnerId = "33333333-3333-3333-3333-333333333333"
+. (Join-Path $scriptRoot "GuidUtils.ps1")
 
 if (-not $OutputPath) {
     $OutputPath = if ($Mode -eq "main") { "../V0005__seed_main_stories.sql" } else { "../V0006__seed_indie_stories.sql" }
@@ -44,9 +45,9 @@ function Format-Double {
     return $Value.ToString("0.###############", [System.Globalization.CultureInfo]::InvariantCulture)
 }
 
-function New-GuidExpr {
+function New-GuidLiteral {
     param([string]$Key)
-    return "uuid_generate_v5('$namespaceGuid', '$Key')"
+    return Get-GuidLiteral -NamespaceGuid $namespaceGuid -Name $Key
 }
 
 function Map-TokenFamily {
@@ -316,15 +317,6 @@ function Build-StoriesSql {
     $lines.Add("-- Auto-generated from Data/SeedData/Stories/seed@alchimalia.com (mode: $Mode)")
     $lines.Add("-- Run date: $runStamp")
     $lines.Add("")
-    $lines.Add('DO $$')
-    $lines.Add("BEGIN")
-    $lines.Add("    IF NOT EXISTS (")
-    $lines.Add("        SELECT 1 FROM pg_extension WHERE extname = 'uuid-ossp'")
-    $lines.Add("    ) THEN")
-    $lines.Add("        CREATE EXTENSION IF NOT EXISTS ""uuid-ossp"";")
-    $lines.Add("    END IF;")
-    $lines.Add('END $$;')
-    $lines.Add("")
     $lines.Add("BEGIN;")
     $lines.Add("")
     $lines.Add("-- Story Definitions")
@@ -333,7 +325,7 @@ function Build-StoriesSql {
 
     foreach ($story in $orderedStories) {
         $storyKey = "storydef:$($story.StoryId)"
-        $storyIdExpr = New-GuidExpr $storyKey
+        $storyIdExpr = New-GuidLiteral $storyKey
         $titleLit = Sql-Literal $story.Title
         $coverLit = Sql-Literal $story.CoverImageUrl -AllowNull
         $summaryLit = Sql-Literal $story.Summary -AllowNull
@@ -371,7 +363,7 @@ SET "Title" = EXCLUDED."Title",
             if ($null -eq $storyTranslation -and $locale -ne "ro-ro") { continue }
             $title = if ($storyTranslation) { $storyTranslation.Title } else { $story.Title }
             $titleLiteral = Sql-Literal ($title ?? $story.Title)
-            $translationIdExpr = New-GuidExpr "storydeftr:$($story.StoryId)|$locale"
+            $translationIdExpr = New-GuidLiteral "storydeftr:$($story.StoryId)|$locale"
             $defTrSql = @"
 INSERT INTO alchimalia_schema."StoryDefinitionTranslations"
     ("Id", "StoryDefinitionId", "LanguageCode", "Title")
@@ -388,7 +380,7 @@ SET "Title" = EXCLUDED."Title";
 
         foreach ($tile in ($story.Tiles | Sort-Object @{Expression = { $_.SortOrder }}, @{Expression = { $_.TileId }})) {
             $tileKey = "storytile:$($story.StoryId):$($tile.TileId)"
-            $tileIdExpr = New-GuidExpr $tileKey
+            $tileIdExpr = New-GuidLiteral $tileKey
             $captionLit = Sql-Literal $tile.Caption -AllowNull
             $textLit = Sql-Literal $tile.Text -AllowNull
             $questionLit = Sql-Literal $tile.Question -AllowNull
@@ -424,7 +416,7 @@ SET "Type" = EXCLUDED."Type",
                 $questionLitLocale = Sql-Literal $question -AllowNull
                 $audioLit = Sql-Literal $audio -AllowNull
                 $videoLit = Sql-Literal $video -AllowNull
-                $tileTrId = New-GuidExpr "storytiletr:$($story.StoryId):$($tile.TileId)|$locale"
+                $tileTrId = New-GuidLiteral "storytiletr:$($story.StoryId):$($tile.TileId)|$locale"
                 $tileTrSql = @"
 INSERT INTO alchimalia_schema."StoryTileTranslations"
     ("Id", "StoryTileId", "LanguageCode", "Caption", "Text", "Question", "AudioUrl", "VideoUrl")
@@ -442,7 +434,7 @@ SET "Caption" = EXCLUDED."Caption",
 
             foreach ($answer in ($tile.Answers | Sort-Object @{Expression = { $_.SortOrder }}, @{Expression = { $_.AnswerId }})) {
                 $answerKey = "storyanswer:$($story.StoryId):$($tile.TileId):$($answer.AnswerId)"
-                $answerIdExpr = New-GuidExpr $answerKey
+                $answerIdExpr = New-GuidLiteral $answerKey
                 $answerTextLit = Sql-Literal $answer.Text
                 $answerSql = @"
 INSERT INTO alchimalia_schema."StoryAnswers"
@@ -458,7 +450,7 @@ SET "Text" = EXCLUDED."Text",
                 $tokenIndex = 0
                 foreach ($token in $answer.Tokens) {
                     $tokenKey = "storytoken:$($story.StoryId):$($tile.TileId):$($answer.AnswerId):$($token.Type):$($token.Value):$tokenIndex"
-                    $tokenIdExpr = New-GuidExpr $tokenKey
+                    $tokenIdExpr = New-GuidLiteral $tokenKey
                     $tokenSql = @"
 INSERT INTO alchimalia_schema."StoryAnswerTokens"
     ("Id", "StoryAnswerId", "Type", "Value", "Quantity")
@@ -483,7 +475,7 @@ SET "Type" = EXCLUDED."Type",
                     if ([string]::IsNullOrWhiteSpace($answerTextLocale)) {
                         $answerTextLocale = $answer.Text
                     }
-                    $answerTrId = New-GuidExpr "storyanswertr:$($story.StoryId):$($tile.TileId):$($answer.AnswerId)|$locale"
+                    $answerTrId = New-GuidLiteral "storyanswertr:$($story.StoryId):$($tile.TileId):$($answer.AnswerId)|$locale"
                     $answerTextLiteral = Sql-Literal $answerTextLocale
                     $answerTrSql = @"
 INSERT INTO alchimalia_schema."StoryAnswerTranslations"
