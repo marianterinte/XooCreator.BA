@@ -63,7 +63,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
 
-      - name: Set Azure App Settings (DATABASE_URL, ASPNETCORE_ENVIRONMENT)
+      - name: Set Azure App Settings (ASPNETCORE_ENVIRONMENT, ConnectionStrings)
         run: |
           # Method 1: Try with resource group secret if available
           if [ -n "${{ secrets.AZURE_RESOURCE_GROUP }}" ]; then
@@ -73,7 +73,7 @@ jobs:
               --name ${{ secrets.AZURE_WEBAPP_NAME }} \
               --settings \
                 ASPNETCORE_ENVIRONMENT=Production \
-                DATABASE_URL="${{ secrets.SUPABASE_DB_URL }}"
+                ConnectionStrings__Postgres="${{ secrets.AZURE_POSTGRES_CONNSTRING_PROD }}"
           else
             # Method 2: Auto-discover resource group
             echo "Auto-discovering resource group..."
@@ -84,7 +84,7 @@ jobs:
               --name ${{ secrets.AZURE_WEBAPP_NAME }} \
               --settings \
                 ASPNETCORE_ENVIRONMENT=Production \
-                DATABASE_URL="${{ secrets.SUPABASE_DB_URL }}"
+                ConnectionStrings__Postgres="${{ secrets.AZURE_POSTGRES_CONNSTRING_PROD }}"
           fi
 
       - name: Deploy to Azure Web App
