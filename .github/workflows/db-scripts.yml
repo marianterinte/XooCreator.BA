@@ -3,6 +3,7 @@ name: Database Scripts Runner
 on:
   push:
     branches:
+      - DEV
       - main
   workflow_dispatch:
     inputs:
@@ -24,9 +25,9 @@ jobs:
     name: Apply scripts (DEV)
     runs-on: ubuntu-latest
     if: >
-      github.event_name == 'push' ||
-      github.event.inputs.target == 'dev' ||
-      github.event.inputs.target == 'both'
+      (github.event_name == 'push' && github.ref == 'refs/heads/DEV') ||
+      (github.event_name == 'workflow_dispatch' &&
+        (github.event.inputs.target == 'dev' || github.event.inputs.target == 'both'))
     environment: dev
     defaults:
       run:
@@ -49,10 +50,11 @@ jobs:
   db-prod:
     name: Apply scripts (PROD)
     runs-on: ubuntu-latest
-    needs: db-dev
+    needs: []
     if: >
-      github.event_name == 'workflow_dispatch' &&
-      (github.event.inputs.target == 'prod' || github.event.inputs.target == 'both')
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' &&
+        (github.event.inputs.target == 'prod' || github.event.inputs.target == 'both'))
     environment: prod
     defaults:
       run:
