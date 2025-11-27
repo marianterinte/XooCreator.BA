@@ -59,6 +59,7 @@ public class ImportFullStoryEndpoint
         public List<string> Warnings { get; init; } = new();
         public List<string> Errors { get; init; } = new();
         public int ImportedAssets { get; init; }
+        public int TotalAssets { get; init; }
         public List<string> ImportedLanguages { get; init; } = new();
     }
 
@@ -189,6 +190,7 @@ public class ImportFullStoryEndpoint
 
             // Collect all assets from JSON
             var expectedAssets = ep.CollectExpectedAssets(root, warnings);
+            var totalAssets = expectedAssets.Count;
 
             // Upload assets from ZIP
             var uploadedAssets = await ep.UploadAssetsFromZipAsync(zip, expectedAssets, user.Email, finalStoryId, warnings, errors, uploadedBlobPaths, ct);
@@ -216,6 +218,7 @@ public class ImportFullStoryEndpoint
                 Warnings = warnings,
                 Errors = errors,
                 ImportedAssets = uploadedAssets,
+                TotalAssets = totalAssets,
                 ImportedLanguages = importedLanguages
             });
         }
