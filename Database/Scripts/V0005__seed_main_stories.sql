@@ -1,5 +1,5 @@
 ﻿-- Auto-generated from Data/SeedData/Stories/seed@alchimalia.com (mode: main)
--- Run date: 2025-11-27 10:07:08+02:00
+-- Run date: 2025-11-27 10:27:15+02:00
 
 DO $$
 BEGIN
@@ -18,7 +18,7 @@ INSERT INTO alchimalia_schema."StoryDefinitions"
      "StoryType", "Status", "SortOrder", "IsActive", "Version", "PriceInCredits",
      "CreatedAt", "UpdatedAt", "CreatedBy", "UpdatedBy")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:crystalia-s1'), 'crystalia-s1', 'Crystalia', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/crystalia-s1/0.Cover.png', NULL, NULL, NULL, NULL,
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:crystalia-s1'), 'crystalia-s1', 'Crystalia', 'images/tol/stories/seed@alchimalia.com/crystalia-s1/0.Cover.png', NULL, NULL, NULL, NULL,
      0, 5, 1, TRUE, 1, 0,
      '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z', NULL, NULL)
 ON CONFLICT ("Id") DO UPDATE
@@ -58,7 +58,7 @@ SET "Title" = EXCLUDED."Title";
 INSERT INTO alchimalia_schema."StoryTiles"
     ("Id", "StoryDefinitionId", "TileId", "Type", "SortOrder", "Caption", "Text", "ImageUrl", "Question", "CreatedAt", "UpdatedAt")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:crystalia-s1:1'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:crystalia-s1'), '1', 'page', 1, 'Crystalia', 'Crystalia', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/crystalia-s1/0.Cover.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:crystalia-s1:1'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:crystalia-s1'), '1', 'page', 1, 'Crystalia', 'Crystalia', 'images/tol/stories/seed@alchimalia.com/crystalia-s1/0.Cover.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -102,7 +102,7 @@ INSERT INTO alchimalia_schema."StoryDefinitions"
      "StoryType", "Status", "SortOrder", "IsActive", "Version", "PriceInCredits",
      "CreatedAt", "UpdatedAt", "CreatedBy", "UpdatedBy")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:intro-pufpuf'), 'intro-pufpuf', 'Marea Călătorie', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/intro-pufpuf/0.Cover.png', NULL, NULL, NULL, NULL,
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:intro-pufpuf'), 'intro-pufpuf', 'Marea Călătorie', 'images/tol/stories/seed@alchimalia.com/intro-pufpuf/0.Cover.png', NULL, NULL, NULL, NULL,
      0, 5, 1, TRUE, 1, 0,
      '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z', NULL, NULL)
 ON CONFLICT ("Id") DO UPDATE
@@ -142,7 +142,7 @@ SET "Title" = EXCLUDED."Title";
 INSERT INTO alchimalia_schema."StoryTiles"
     ("Id", "StoryDefinitionId", "TileId", "Type", "SortOrder", "Caption", "Text", "ImageUrl", "Question", "CreatedAt", "UpdatedAt")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:intro-pufpuf:1'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:intro-pufpuf'), '1', 'page', 1, 'Chemarea', 'Puf-Puf călătorea prin adâncul universului când liniștea cosmică fu spartă de un vuiet straniu, ca un oftat al stelelor. \nInstrumentele pâlpâiră, iar busola stelară desenă spirale fără sens. \nCu lăbuța pe parbrizul de cuarț, el simți mai mult, decât auzi, că cineva îl cheamă pe nume dintr-un loc foarte, foarte vechi.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/intro-pufpuf/1.puf-puf-flying.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:intro-pufpuf:1'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:intro-pufpuf'), '1', 'page', 1, 'Chemarea', 'Puf-Puf călătorea prin adâncul universului când liniștea cosmică fu spartă de un vuiet straniu, ca un oftat al stelelor. \nInstrumentele pâlpâiră, iar busola stelară desenă spirale fără sens. \nCu lăbuța pe parbrizul de cuarț, el simți mai mult, decât auzi, că cineva îl cheamă pe nume dintr-un loc foarte, foarte vechi.', 'images/tol/stories/seed@alchimalia.com/intro-pufpuf/1.puf-puf-flying.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -186,7 +186,7 @@ SET "Caption" = EXCLUDED."Caption",
 INSERT INTO alchimalia_schema."StoryTiles"
     ("Id", "StoryDefinitionId", "TileId", "Type", "SortOrder", "Caption", "Text", "ImageUrl", "Question", "CreatedAt", "UpdatedAt")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:intro-pufpuf:2'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:intro-pufpuf'), '2', 'page', 2, 'Prăbușirea', 'Un fulger de lumină înghiți nava și o azvârli într-un vârtej orbitor. Paratrăsnetele de plasmă se topiră, cârma se blocă, iar carena spintecă norii înainte să muște din pământul uscat. Când tăcerea reveni, aerul mirosea a uscăciune și arșiță. \nPuf-Puf își atinse urechea zgâriată, privi copacii uriași și… nu știa unde se afla, de unde a plecat și de ce. Doar că ajunsese într-un loc străin care îi stârnea curiozitatea.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/intro-pufpuf/2.puf-puf-hurt.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:intro-pufpuf:2'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:intro-pufpuf'), '2', 'page', 2, 'Prăbușirea', 'Un fulger de lumină înghiți nava și o azvârli într-un vârtej orbitor. Paratrăsnetele de plasmă se topiră, cârma se blocă, iar carena spintecă norii înainte să muște din pământul uscat. Când tăcerea reveni, aerul mirosea a uscăciune și arșiță. \nPuf-Puf își atinse urechea zgâriată, privi copacii uriași și… nu știa unde se afla, de unde a plecat și de ce. Doar că ajunsese într-un loc străin care îi stârnea curiozitatea.', 'images/tol/stories/seed@alchimalia.com/intro-pufpuf/2.puf-puf-hurt.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -229,7 +229,7 @@ SET "Caption" = EXCLUDED."Caption",
 INSERT INTO alchimalia_schema."StoryTiles"
     ("Id", "StoryDefinitionId", "TileId", "Type", "SortOrder", "Caption", "Text", "ImageUrl", "Question", "CreatedAt", "UpdatedAt")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:intro-pufpuf:3'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:intro-pufpuf'), '3', 'page', 3, 'Cristalul SOS', 'La bord, în modulul SOS, un cristal străvechi pulsa ca o inimă adormită. \nPuf-Puf deschise panoul, iar lumina cristalului proiectă în aer o hartă parcă vie.\nRamuri de lumină, poteci care se împleteau la infinit, unele căi erau stinse, altele scânteiau ca semne. \nToate convergeau într-un singur nod: Copacul Luminii.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/intro-pufpuf/3.puf-puf-crystal.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:intro-pufpuf:3'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:intro-pufpuf'), '3', 'page', 3, 'Cristalul SOS', 'La bord, în modulul SOS, un cristal străvechi pulsa ca o inimă adormită. \nPuf-Puf deschise panoul, iar lumina cristalului proiectă în aer o hartă parcă vie.\nRamuri de lumină, poteci care se împleteau la infinit, unele căi erau stinse, altele scânteiau ca semne. \nToate convergeau într-un singur nod: Copacul Luminii.', 'images/tol/stories/seed@alchimalia.com/intro-pufpuf/3.puf-puf-crystal.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -274,7 +274,7 @@ SET "Caption" = EXCLUDED."Caption",
 INSERT INTO alchimalia_schema."StoryTiles"
     ("Id", "StoryDefinitionId", "TileId", "Type", "SortOrder", "Caption", "Text", "ImageUrl", "Question", "CreatedAt", "UpdatedAt")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:intro-pufpuf:4'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:intro-pufpuf'), '4', 'page', 4, 'Întâlnirea', 'Frunzele Copacului foșneau ca o șoaptă când Puf-Puf îți iese în cale și îți zâmbește parcă amintindu-și ceva, puțin câte puțin. Puf-Puf „-Hei, tu. Da, ție îți vorbesc. Eu sunt Puf-Puf, o pisică vorbitoare de pe planeta Kelo-Ketis... nava mea e puțin șifonată, moralul însă e încă sus. \nCopacul ne-a pus față în față și, sincer, tu pari genul care să știe ce face. Adică ai privirea aia de ai mai reparat două-trei nave spațiale marțea seara. \nMă poți ajuta, te rog, să îmi repar nava și să mă întorc acasă? Cristalul este cheia. Trebuie să îl descifrăm.\nCristalul părea să proiecteze într-o hologramă, aproape vie, un copac luminos, plin de mistere. ', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/intro-pufpuf/puf-puf-home-planet.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:intro-pufpuf:4'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:intro-pufpuf'), '4', 'page', 4, 'Întâlnirea', 'Frunzele Copacului foșneau ca o șoaptă când Puf-Puf îți iese în cale și îți zâmbește parcă amintindu-și ceva, puțin câte puțin. Puf-Puf „-Hei, tu. Da, ție îți vorbesc. Eu sunt Puf-Puf, o pisică vorbitoare de pe planeta Kelo-Ketis... nava mea e puțin șifonată, moralul însă e încă sus. \nCopacul ne-a pus față în față și, sincer, tu pari genul care să știe ce face. Adică ai privirea aia de ai mai reparat două-trei nave spațiale marțea seara. \nMă poți ajuta, te rog, să îmi repar nava și să mă întorc acasă? Cristalul este cheia. Trebuie să îl descifrăm.\nCristalul părea să proiecteze într-o hologramă, aproape vie, un copac luminos, plin de mistere. ', 'images/tol/stories/seed@alchimalia.com/intro-pufpuf/puf-puf-home-planet.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -319,7 +319,7 @@ SET "Caption" = EXCLUDED."Caption",
 INSERT INTO alchimalia_schema."StoryTiles"
     ("Id", "StoryDefinitionId", "TileId", "Type", "SortOrder", "Caption", "Text", "ImageUrl", "Question", "CreatedAt", "UpdatedAt")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:intro-pufpuf:5'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:intro-pufpuf'), '5', 'quiz', 5, NULL, NULL, 'images/tales-of-alchimalia/stories/seed@alchimalia.com/intro-pufpuf/4.TreeOfLight.png', 'Puf-Puf îți cere ajutorul să vorbești cu cristalul SOS care arată harta. Ce ar fi cel mai important lucru de întrebat la început?', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:intro-pufpuf:5'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:intro-pufpuf'), '5', 'quiz', 5, NULL, NULL, 'images/tol/stories/seed@alchimalia.com/intro-pufpuf/4.TreeOfLight.png', 'Puf-Puf îți cere ajutorul să vorbești cu cristalul SOS care arată harta. Ce ar fi cel mai important lucru de întrebat la început?', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -566,7 +566,7 @@ SET "Text" = EXCLUDED."Text";
 INSERT INTO alchimalia_schema."StoryTiles"
     ("Id", "StoryDefinitionId", "TileId", "Type", "SortOrder", "Caption", "Text", "ImageUrl", "Question", "CreatedAt", "UpdatedAt")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:intro-pufpuf:6'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:intro-pufpuf'), '6', 'page', 6, 'Curaj', 'Puf-Puf: - Să mergem mai aproape, o vom rezolva noi. Mă bucur că te-am găsit.\nAmândoi mergeți cu pași mici către copac.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/intro-pufpuf/5.puf-puf-tree-of-light.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:intro-pufpuf:6'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:intro-pufpuf'), '6', 'page', 6, 'Curaj', 'Puf-Puf: - Să mergem mai aproape, o vom rezolva noi. Mă bucur că te-am găsit.\nAmândoi mergeți cu pași mici către copac.', 'images/tol/stories/seed@alchimalia.com/intro-pufpuf/5.puf-puf-tree-of-light.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -611,7 +611,7 @@ INSERT INTO alchimalia_schema."StoryDefinitions"
      "StoryType", "Status", "SortOrder", "IsActive", "Version", "PriceInCredits",
      "CreatedAt", "UpdatedAt", "CreatedBy", "UpdatedBy")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:loi-intro'), 'loi-intro', 'Originea Păcii', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/loi-intro/0.cover.png', NULL, NULL, NULL, NULL,
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:loi-intro'), 'loi-intro', 'Originea Păcii', 'images/tol/stories/seed@alchimalia.com/loi-intro/0.cover.png', NULL, NULL, NULL, NULL,
      0, 5, 1, TRUE, 1, 0,
      '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z', NULL, NULL)
 ON CONFLICT ("Id") DO UPDATE
@@ -653,7 +653,7 @@ INSERT INTO alchimalia_schema."StoryTiles"
 VALUES
     (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:loi-intro:1'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:loi-intro'), '1', 'page', 1, 'Două lumi, două tabere', 'În Alchimalia existau două lumi foarte apropiate, dar aflate în război. 
 Lunaria, planeta iepurilor, cu câmpii de morcovi și vizuini cat vezi cu ochii si  
-Kelo-Ketis, planeta pisicilor, condusă de un împărat razboinic. Granițele erau reci, iar podurile, rupte, desi erau atat de aproape pisicile si iepurii erau dusmani.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/loi-intro/1.two-worlds.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+Kelo-Ketis, planeta pisicilor, condusă de un împărat razboinic. Granițele erau reci, iar podurile, rupte, desi erau atat de aproape pisicile si iepurii erau dusmani.', 'images/tol/stories/seed@alchimalia.com/loi-intro/1.two-worlds.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -699,7 +699,7 @@ SET "Caption" = EXCLUDED."Caption",
 INSERT INTO alchimalia_schema."StoryTiles"
     ("Id", "StoryDefinitionId", "TileId", "Type", "SortOrder", "Caption", "Text", "ImageUrl", "Question", "CreatedAt", "UpdatedAt")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:loi-intro:2'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:loi-intro'), '2', 'page', 2, 'Împăratul Pufus Alchimus', 'Pe Kelo-Ketis domnea Împăratul Pufus Alchimus, un războinic cunoscut pentru cuceriri și pentru setea de luptă. Războiul cu iepurii ținea de mult, iar armele vorbeau mai tare decât poveștile. Împăratul spera că într-o bună zi imperiul său se va întinde pe tot tărâmul Alchimaliei.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/loi-intro/2.emperor.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:loi-intro:2'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:loi-intro'), '2', 'page', 2, 'Împăratul Pufus Alchimus', 'Pe Kelo-Ketis domnea Împăratul Pufus Alchimus, un războinic cunoscut pentru cuceriri și pentru setea de luptă. Războiul cu iepurii ținea de mult, iar armele vorbeau mai tare decât poveștile. Împăratul spera că într-o bună zi imperiul său se va întinde pe tot tărâmul Alchimaliei.', 'images/tol/stories/seed@alchimalia.com/loi-intro/2.emperor.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -742,7 +742,7 @@ INSERT INTO alchimalia_schema."StoryTiles"
     ("Id", "StoryDefinitionId", "TileId", "Type", "SortOrder", "Caption", "Text", "ImageUrl", "Question", "CreatedAt", "UpdatedAt")
 VALUES
     (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:loi-intro:3'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:loi-intro'), '3', 'page', 3, 'Fiul cel curios', 'Împăratului i s-a născut un fiu: Puf-Puf Alchimus, a fost numit. 
-Tatăl voia un luptător, dar Puf-Puf iubea matematica, jocurile cu elemente și visa la alchemie. Era mai mult explorator decât soldat. Petrece tot timpul in laboratorul sau unde incerca diverse combinatii intre elemente si citea o gramada de scrieri si retete stravechi.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/loi-intro/3.curious-son.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+Tatăl voia un luptător, dar Puf-Puf iubea matematica, jocurile cu elemente și visa la alchemie. Era mai mult explorator decât soldat. Petrece tot timpul in laboratorul sau unde incerca diverse combinatii intre elemente si citea o gramada de scrieri si retete stravechi.', 'images/tol/stories/seed@alchimalia.com/loi-intro/3.curious-son.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -786,7 +786,7 @@ SET "Caption" = EXCLUDED."Caption",
 INSERT INTO alchimalia_schema."StoryTiles"
     ("Id", "StoryDefinitionId", "TileId", "Type", "SortOrder", "Caption", "Text", "ImageUrl", "Question", "CreatedAt", "UpdatedAt")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:loi-intro:4'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:loi-intro'), '4', 'page', 4, 'Prieteni peste graniță', 'Deși era război, prietenia își găsea drum. Un iepure negru și o pisică albă se întâlneau în secret și își povesteau lumea, se jucau când pe Lunaria, când pe Ketis. Nu semănau a dușmani. Semănau cu doi copii curioși.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/loi-intro/4.friends.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:loi-intro:4'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:loi-intro'), '4', 'page', 4, 'Prieteni peste graniță', 'Deși era război, prietenia își găsea drum. Un iepure negru și o pisică albă se întâlneau în secret și își povesteau lumea, se jucau când pe Lunaria, când pe Ketis. Nu semănau a dușmani. Semănau cu doi copii curioși.', 'images/tol/stories/seed@alchimalia.com/loi-intro/4.friends.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -830,7 +830,7 @@ INSERT INTO alchimalia_schema."StoryTiles"
 VALUES
     (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:loi-intro:5'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:loi-intro'), '5', 'page', 5, 'Piatra din Lunaria', 'Pe Ketis, Puf-Puf i-a surprins privind o piatră verde adusă de pe Lunaria, lucind ca un smarald. 
 „ - Ține-ne secretul prieteniei și îți dăm piatra”, i-a șoptit iepurele. 
-Puf-Puf a promis.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/loi-intro/5.lunaria-stone.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+Puf-Puf a promis.', 'images/tol/stories/seed@alchimalia.com/loi-intro/5.lunaria-stone.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -877,7 +877,7 @@ SET "Caption" = EXCLUDED."Caption",
 INSERT INTO alchimalia_schema."StoryTiles"
     ("Id", "StoryDefinitionId", "TileId", "Type", "SortOrder", "Caption", "Text", "ImageUrl", "Question", "CreatedAt", "UpdatedAt")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:loi-intro:6'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:loi-intro'), '6', 'page', 6, 'Licoarea verde-aurie', 'Cu piatra, Puf-Puf a făcut un elixir. Când atingea metalul, acesta devenea aur. Bucurie mare! S-au gandit sa si bea, descoperind ca acesta are un gust bun, a împărțit licoarea cu prietenii — mici înghițituri, multe râsete.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/loi-intro/6.elixir.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:loi-intro:6'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:loi-intro'), '6', 'page', 6, 'Licoarea verde-aurie', 'Cu piatra, Puf-Puf a făcut un elixir. Când atingea metalul, acesta devenea aur. Bucurie mare! S-au gandit sa si bea, descoperind ca acesta are un gust bun, a împărțit licoarea cu prietenii — mici înghițituri, multe râsete.', 'images/tol/stories/seed@alchimalia.com/loi-intro/6.elixir.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -919,7 +919,7 @@ SET "Caption" = EXCLUDED."Caption",
 INSERT INTO alchimalia_schema."StoryTiles"
     ("Id", "StoryDefinitionId", "TileId", "Type", "SortOrder", "Caption", "Text", "ImageUrl", "Question", "CreatedAt", "UpdatedAt")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:loi-intro:7'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:loi-intro'), '7', 'page', 7, 'Somn la umbra copacului', 'Obosiți, au adormit la umbra unui copac foarte înalt. Licoarea s-a scurs încet la rădăcini. Piatra verde încălzea pământul cu o lumină blândă.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/loi-intro/7.tree-nap.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:loi-intro:7'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:loi-intro'), '7', 'page', 7, 'Somn la umbra copacului', 'Obosiți, au adormit la umbra unui copac foarte înalt. Licoarea s-a scurs încet la rădăcini. Piatra verde încălzea pământul cu o lumină blândă.', 'images/tol/stories/seed@alchimalia.com/loi-intro/7.tree-nap.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -962,7 +962,7 @@ INSERT INTO alchimalia_schema."StoryTiles"
     ("Id", "StoryDefinitionId", "TileId", "Type", "SortOrder", "Caption", "Text", "ImageUrl", "Question", "CreatedAt", "UpdatedAt")
 VALUES
     (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:loi-intro:8'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:loi-intro'), '8', 'page', 8, 'Mâțo-Iepurele', 'Când s-au trezit, lângă ei stătea o ființă ciudată, frumoasă: cu grația unei pisici și blândețea unui iepure. Se uita la ei fără teamă.
-- Buna eu sunt Mâțo-Iepurele! Am venit sa aduc Pacea...', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/loi-intro/8.matso-iepurele.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+- Buna eu sunt Mâțo-Iepurele! Am venit sa aduc Pacea...', 'images/tol/stories/seed@alchimalia.com/loi-intro/8.matso-iepurele.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -1007,7 +1007,7 @@ SET "Caption" = EXCLUDED."Caption",
 INSERT INTO alchimalia_schema."StoryTiles"
     ("Id", "StoryDefinitionId", "TileId", "Type", "SortOrder", "Caption", "Text", "ImageUrl", "Question", "CreatedAt", "UpdatedAt")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:loi-intro:q1'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:loi-intro'), 'q1', 'quiz', 9, NULL, NULL, 'images/tales-of-alchimalia/stories/seed@alchimalia.com/loi-intro/9.quiz.png', 'Piatra, licoarea și prietenia au chemat Mâțo-Iepurele pentru a aduce pacea. ce faceți mai întâi?
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:loi-intro:q1'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:loi-intro'), 'q1', 'quiz', 9, NULL, NULL, 'images/tol/stories/seed@alchimalia.com/loi-intro/9.quiz.png', 'Piatra, licoarea și prietenia au chemat Mâțo-Iepurele pentru a aduce pacea. ce faceți mai întâi?
 
 Pastram pacea cu orice pret.
 ', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
@@ -1188,7 +1188,7 @@ INSERT INTO alchimalia_schema."StoryTiles"
 VALUES
     (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:loi-intro:9'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:loi-intro'), '9', 'page', 10, 'Mesajul păcii', '„Eu port pacea dintre lumi”, a spus Mâțo-Iepurele. „Din prietenie, piatră și licoare s-a născut un pod, a spus Puf-Puf.
 Războaiele se sting când înveți să amesteci bine lucrurile.” 
-Puf-Puf a înțeles că alchimia nu e doar despre metale, ci și despre inimi.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/loi-intro/10.message.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+Puf-Puf a înțeles că alchimia nu e doar despre metale, ci și despre inimi.', 'images/tol/stories/seed@alchimalia.com/loi-intro/10.message.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -1236,7 +1236,7 @@ SET "Caption" = EXCLUDED."Caption",
 INSERT INTO alchimalia_schema."StoryTiles"
     ("Id", "StoryDefinitionId", "TileId", "Type", "SortOrder", "Caption", "Text", "ImageUrl", "Question", "CreatedAt", "UpdatedAt")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:loi-intro:10'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:loi-intro'), '10', 'page', 11, 'Hotărârea lui Puf-Puf', 'În acea zi, Puf-Puf era bucuruos ca alesese sa fie un alchimist. Va căuta căi între lumi, nu războaie. Iar Mâțo-Iepurele avea să devină, cândva, semnul că pacea poate fi creată, nu doar găsită.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/loi-intro/11.choice.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:loi-intro:10'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:loi-intro'), '10', 'page', 11, 'Hotărârea lui Puf-Puf', 'În acea zi, Puf-Puf era bucuruos ca alesese sa fie un alchimist. Va căuta căi între lumi, nu războaie. Iar Mâțo-Iepurele avea să devină, cândva, semnul că pacea poate fi creată, nu doar găsită.', 'images/tol/stories/seed@alchimalia.com/loi-intro/11.choice.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -1280,7 +1280,7 @@ INSERT INTO alchimalia_schema."StoryTiles"
 VALUES
     (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:loi-intro:12'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:loi-intro'), '12', 'page', 12, 'Vraja', 'Puf-Puf stătea chiar la granița dintre planete când iepurele păși înapoi pe Lunaria, vrând să-l conducă acasă în secret. Când totul era liniștit, o vrajă misterioasă făcu ca Lunaria să se desprindă de Kelo-Ketis și să dispară pentru totdeauna. Mâțo-Iepurele dispăruse și el.
 
-Puf-Puf: „Trebuie să aflu ce s-a întâmplat!” Și, cu pași grăbiți, merse din nou spre copac.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/loi-intro/12.the-spell.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+Puf-Puf: „Trebuie să aflu ce s-a întâmplat!” Și, cu pași grăbiți, merse din nou spre copac.', 'images/tol/stories/seed@alchimalia.com/loi-intro/12.the-spell.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -1327,7 +1327,7 @@ SET "Caption" = EXCLUDED."Caption",
 INSERT INTO alchimalia_schema."StoryTiles"
     ("Id", "StoryDefinitionId", "TileId", "Type", "SortOrder", "Caption", "Text", "ImageUrl", "Question", "CreatedAt", "UpdatedAt")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:loi-intro:13'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:loi-intro'), '13', 'page', 13, '...', 'Ruptura dintre lumi era plina de mister, Puf-Puf ajunse repede in dreptul copacului care se transforamsera incredibil in ceva plin de lumina si mister.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/loi-intro/13.tobecontinued.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:loi-intro:13'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:loi-intro'), '13', 'page', 13, '...', 'Ruptura dintre lumi era plina de mister, Puf-Puf ajunse repede in dreptul copacului care se transforamsera incredibil in ceva plin de lumina si mister.', 'images/tol/stories/seed@alchimalia.com/loi-intro/13.tobecontinued.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -1371,7 +1371,7 @@ INSERT INTO alchimalia_schema."StoryTiles"
 VALUES
     (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:loi-intro:14'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:loi-intro'), '14', 'page', 14, 'Copacul luminii', 'În fața lui Puf-Puf se afla ceva atât de frumos și, totodată, de nerecunoscut. Marele copac devenise plin de lumină, iar din loc în loc se auzeau șoapte.
 „Trebuie să cauți pacea... cristalul este cheia...”, se auzi de undeva, din rădăcina copacului.
-Puf-Puf săpă la rădăcina copacului și găsi un cristal care părea să comunice cu el.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/loi-intro/14.tol.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+Puf-Puf săpă la rădăcina copacului și găsi un cristal care părea să comunice cu el.', 'images/tol/stories/seed@alchimalia.com/loi-intro/14.tol.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -1417,7 +1417,7 @@ SET "Caption" = EXCLUDED."Caption",
 INSERT INTO alchimalia_schema."StoryTiles"
     ("Id", "StoryDefinitionId", "TileId", "Type", "SortOrder", "Caption", "Text", "ImageUrl", "Question", "CreatedAt", "UpdatedAt")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:loi-intro:15'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:loi-intro'), '15', 'page', 15, 'Plecarea', 'Îi spuse tatălui său că trebuie să plece, să exploreze; nu putea să-i spună Împăratului că vrea să aducă tocmai pacea — după atâta muncă de cucerire, acesta era ultimul lucru pe care marele Pufus Alchimus ar fi vrut să-l audă. Se urcă într-una dintre navele spațiale ale Imperiului și plecă.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/loi-intro/15.leavingkk.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:loi-intro:15'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:loi-intro'), '15', 'page', 15, 'Plecarea', 'Îi spuse tatălui său că trebuie să plece, să exploreze; nu putea să-i spună Împăratului că vrea să aducă tocmai pacea — după atâta muncă de cucerire, acesta era ultimul lucru pe care marele Pufus Alchimus ar fi vrut să-l audă. Se urcă într-una dintre navele spațiale ale Imperiului și plecă.', 'images/tol/stories/seed@alchimalia.com/loi-intro/15.leavingkk.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -1503,7 +1503,7 @@ INSERT INTO alchimalia_schema."StoryDefinitions"
      "StoryType", "Status", "SortOrder", "IsActive", "Version", "PriceInCredits",
      "CreatedAt", "UpdatedAt", "CreatedBy", "UpdatedBy")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:lunaria-s1'), 'lunaria-s1', 'Linkaro', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/lunaria-s1/0.Cover.png', NULL, NULL, NULL, NULL,
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:lunaria-s1'), 'lunaria-s1', 'Linkaro', 'images/tol/stories/seed@alchimalia.com/lunaria-s1/0.Cover.png', NULL, NULL, NULL, NULL,
      0, 5, 1, TRUE, 1, 0,
      '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z', NULL, NULL)
 ON CONFLICT ("Id") DO UPDATE
@@ -1563,7 +1563,7 @@ Intrați: tu, Puf-Puf și iepurele negru. Dincolo, o piață cu steaguri în for
 — Eu țin direcția după cristal, zise Puf-Puf.
 — Iar eu știu potecile, zise iepurele negru.
 
-Strângeți sigiliul, treceți pe sub steagurile în semilună și porniți spre Muntele Negru.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/lunaria-s1/1.portal-council.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+Strângeți sigiliul, treceți pe sub steagurile în semilună și porniți spre Muntele Negru.', 'images/tol/stories/seed@alchimalia.com/lunaria-s1/1.portal-council.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -1675,7 +1675,7 @@ După panta abruptă, vântul se liniștește ca la un semn. Ceața se rupe în 
 
 — Am ajuns, șoptește iepurele, cu o ușurare vizibilă.
 — Frumos loc, spune Puf-Puf. Parcă te cheamă să intri.
-— Hai, bate tu la poartă, zici. Eu țin sigiliul pregătit.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/lunaria-s1/2.white-mountain-road.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+— Hai, bate tu la poartă, zici. Eu țin sigiliul pregătit.', 'images/tol/stories/seed@alchimalia.com/lunaria-s1/2.white-mountain-road.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -1747,7 +1747,7 @@ SET "Caption" = EXCLUDED."Caption",
 INSERT INTO alchimalia_schema."StoryTiles"
     ("Id", "StoryDefinitionId", "TileId", "Type", "SortOrder", "Caption", "Text", "ImageUrl", "Question", "CreatedAt", "UpdatedAt")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:lunaria-s1:3'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:lunaria-s1'), '3', 'page', 3, 'Sala Liniștii', 'În curte, călugări pisici și iepuri se antrenează în tăcere. Le spuneți despre boala din oraș. Se privesc mirați: n-au auzit.\n„Trebuie să vorbiți cu marele maestru”, spune un călugăr și vă conduce într-o încăpere luminoasă. O siluetă stă cu spatele, în meditație.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/lunaria-s1/3.silent-hall.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:lunaria-s1:3'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:lunaria-s1'), '3', 'page', 3, 'Sala Liniștii', 'În curte, călugări pisici și iepuri se antrenează în tăcere. Le spuneți despre boala din oraș. Se privesc mirați: n-au auzit.\n„Trebuie să vorbiți cu marele maestru”, spune un călugăr și vă conduce într-o încăpere luminoasă. O siluetă stă cu spatele, în meditație.', 'images/tol/stories/seed@alchimalia.com/lunaria-s1/3.silent-hall.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -1800,7 +1800,7 @@ VALUES
 
 Îi descrieți boala din oraș.
 
-— Vă trebuie Pietrele Vieții, cu esență de vindecare, spune Linkaro. Le găsiți sub o streașină de stâncă — o cornișă expusă. Culegeți-le cu grijă, doar pe cele care lucesc ușor.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/lunaria-s1/4.linkaro.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+— Vă trebuie Pietrele Vieții, cu esență de vindecare, spune Linkaro. Le găsiți sub o streașină de stâncă — o cornișă expusă. Culegeți-le cu grijă, doar pe cele care lucesc ușor.', 'images/tol/stories/seed@alchimalia.com/lunaria-s1/4.linkaro.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -1881,7 +1881,7 @@ Când rafala se oprește, vă aplecați încet.
 
 Două pietre se desprind blând și cad în pânză. A treia licărește mai tare, apoi se liniștește.
 — Trei ajung, zice Puf-Puf. Restul rămân muntelui.
-— Să nu le slăbim suflul, încuviințează iepurele. Plecăm.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/lunaria-s1/5.life-stones.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+— Să nu le slăbim suflul, încuviințează iepurele. Plecăm.', 'images/tol/stories/seed@alchimalia.com/lunaria-s1/5.life-stones.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -1959,7 +1959,7 @@ SET "Caption" = EXCLUDED."Caption",
 INSERT INTO alchimalia_schema."StoryTiles"
     ("Id", "StoryDefinitionId", "TileId", "Type", "SortOrder", "Caption", "Text", "ImageUrl", "Question", "CreatedAt", "UpdatedAt")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:lunaria-s1:6'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:lunaria-s1'), '6', 'quiz', 6, NULL, NULL, 'images/tales-of-alchimalia/stories/seed@alchimalia.com/lunaria-s1/6.quiz.png', 'Pietrele verzi pulsează sub cornișă. Nu cer forță, ci felul în care te apropii. Cum le culegi fără să le stingi lumina?', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:lunaria-s1:6'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:lunaria-s1'), '6', 'quiz', 6, NULL, NULL, 'images/tol/stories/seed@alchimalia.com/lunaria-s1/6.quiz.png', 'Pietrele verzi pulsează sub cornișă. Nu cer forță, ci felul în care te apropii. Cum le culegi fără să le stingi lumina?', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -2214,7 +2214,7 @@ VALUES
 — Când aburul capătă o sclipire verde, opriți focul. E gata.
 
 — Simplu și curat, zice Puf-Puf.
-— Clar, adaugi tu. Începem chiar acum.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/lunaria-s1/7.recipe.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+— Clar, adaugi tu. Începem chiar acum.', 'images/tol/stories/seed@alchimalia.com/lunaria-s1/7.recipe.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -2288,7 +2288,7 @@ VALUES
 Când aburul prinde o nuanță smarald, turnați în căni mici.
 — Pe rând, îi îndeamnă iepurele negru. Un gât, apoi respirați.
 
-Iepurii bolnavi beau câte o înghițitură. Urechile li se ridică, pieptul se liniștește, ochii capătă luciu. În piață se aude din nou foșnetul pașilor, râsete scurte, vorbă domoală. Steagurile în semilună fâlfâie ușor — murmurul străzii revine.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/lunaria-s1/8.soup-city.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+Iepurii bolnavi beau câte o înghițitură. Urechile li se ridică, pieptul se liniștește, ochii capătă luciu. În piață se aude din nou foșnetul pașilor, râsete scurte, vorbă domoală. Steagurile în semilună fâlfâie ușor — murmurul străzii revine.', 'images/tol/stories/seed@alchimalia.com/lunaria-s1/8.soup-city.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -2362,7 +2362,7 @@ Linkaro vă însoțește până la marginea pieței.
 — Notăm, zice Puf-Puf: Lunaria răspunde bine la grijă și la plan.
 — Iar pasul următor îl alegem împreună, adaugi tu.
 Iepurele negru dă din cap:
-— Dimineață, stabilim drumul.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/lunaria-s1/9.healing.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+— Dimineață, stabilim drumul.', 'images/tol/stories/seed@alchimalia.com/lunaria-s1/9.healing.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -2430,7 +2430,7 @@ INSERT INTO alchimalia_schema."StoryDefinitions"
      "StoryType", "Status", "SortOrder", "IsActive", "Version", "PriceInCredits",
      "CreatedAt", "UpdatedAt", "CreatedBy", "UpdatedBy")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:lunaria-s2'), 'lunaria-s2', 'Semnalul', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/lunaria-s2/0.Cover.png', NULL, NULL, NULL, NULL,
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:lunaria-s2'), 'lunaria-s2', 'Semnalul', 'images/tol/stories/seed@alchimalia.com/lunaria-s2/0.Cover.png', NULL, NULL, NULL, NULL,
      0, 5, 1, TRUE, 1, 0,
      '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z', NULL, NULL)
 ON CONFLICT ("Id") DO UPDATE
@@ -2474,7 +2474,7 @@ VALUES
 Puf-Puf ridică lupa spre cristal:
 — Prea liniște pentru Lunaria. Ținem urechile ciulite.
 Iepurele negru încuviințează:
-— Mergem încet.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/lunaria-s2/1.arrival.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+— Mergem încet.', 'images/tol/stories/seed@alchimalia.com/lunaria-s2/1.arrival.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -2535,7 +2535,7 @@ Iepurele negru își rotește urechile:
 Vă aplecați și înaintați pe două rânduri paralele, cu pași scurți. În pământ se văd urme fine și un fir subțire, îngropat pe jumătate. Ping-ul revine: mai lent, apoi iarăși scurt.
 — Tu rămâi pe stânga, spune Puf-Puf. Eu intru din dreapta.
 — Când ridici laba, mă opresc, zici tu.
-— Fix. Ne apropiem încet, fără să atingem cablul.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/lunaria-s2/2.ping.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+— Fix. Ne apropiem încet, fără să atingem cablul.', 'images/tol/stories/seed@alchimalia.com/lunaria-s2/2.ping.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -2604,7 +2604,7 @@ Puf-Puf, în șoaptă:
 — Model iepure. Blând, dar căzut.
 
 Iepurele negru se apleacă:
-— Îl putem reporni?', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/lunaria-s2/3.moon-tree.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+— Îl putem reporni?', 'images/tol/stories/seed@alchimalia.com/lunaria-s2/3.moon-tree.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -2671,7 +2671,7 @@ Iepurele negru scoate un morcov și zâmbește:
 — Nu direct, îl corectează Puf-Puf. Dar fibra de Lunkarot — morcovul acela special de pe Lunaria — poate ține loc de jumper, iar sucul lui răcește bine traseele. Contează ritmul, nu forța.
 
 — Atunci tăiem o fibră subțire și picurăm încet, spui tu.
-— Fix așa, încuviințează Puf-Puf.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/lunaria-s2/4.broken-circuit.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+— Fix așa, încuviințează Puf-Puf.', 'images/tol/stories/seed@alchimalia.com/lunaria-s2/4.broken-circuit.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -2734,7 +2734,7 @@ SET "Caption" = EXCLUDED."Caption",
 INSERT INTO alchimalia_schema."StoryTiles"
     ("Id", "StoryDefinitionId", "TileId", "Type", "SortOrder", "Caption", "Text", "ImageUrl", "Question", "CreatedAt", "UpdatedAt")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:lunaria-s2:5'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:lunaria-s2'), '5', 'quiz', 5, NULL, NULL, 'images/tales-of-alchimalia/stories/seed@alchimalia.com/lunaria-s2/5.quiz.png', 'Circuitul cere ritm, nu împingere. Aveți Lunkarot pentru un jumper moale si sucul care raceste. Care e mișcarea ta aici, ca să-l repari, fără să agravezi fisura?', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:lunaria-s2:5'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:lunaria-s2'), '5', 'quiz', 5, NULL, NULL, 'images/tol/stories/seed@alchimalia.com/lunaria-s2/5.quiz.png', 'Circuitul cere ritm, nu împingere. Aveți Lunkarot pentru un jumper moale si sucul care raceste. Care e mișcarea ta aici, ca să-l repari, fără să agravezi fisura?', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -2988,7 +2988,7 @@ Puf-Puf zâmbește:
 — Îți stă bine cu viața înapoi.
 — Mulțumesc, răspunde Grubot. M-am rătăcit după o furtună de câmp magnetic. Casa mea e Mechanika. Pot decola, apoi am nevoie de încărcare.
 — Notat, spui tu.
-— Salvez coordonatele. Când deschideți ruta, vă aștept acolo, confirmă Grubot.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/lunaria-s2/6.grubot-talks.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+— Salvez coordonatele. Când deschideți ruta, vă aștept acolo, confirmă Grubot.', 'images/tol/stories/seed@alchimalia.com/lunaria-s2/6.grubot-talks.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -3054,7 +3054,7 @@ VALUES
     (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:lunaria-s2:7'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:lunaria-s2'), '7', 'page', 7, 'Plecarea', 'Propulsoarele lui Grubot şuieră ușor. Se ridică deasupra câmpiilor portocalii, face o voltă scurtă și zboară spre orizont.
 — Un prieten nou, o rută viitoare. Continuăm, zice Puf-Puf.
 Iepurele negru zâmbește:
-— Drumul e clar: înainte.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/lunaria-s2/7.departure.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+— Drumul e clar: înainte.', 'images/tol/stories/seed@alchimalia.com/lunaria-s2/7.departure.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -3107,7 +3107,7 @@ INSERT INTO alchimalia_schema."StoryDefinitions"
      "StoryType", "Status", "SortOrder", "IsActive", "Version", "PriceInCredits",
      "CreatedAt", "UpdatedAt", "CreatedBy", "UpdatedBy")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:mechanika-s1'), 'mechanika-s1', 'Magnus', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/mechanika-s1/0.Cover.png', NULL, NULL, NULL, NULL,
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:mechanika-s1'), 'mechanika-s1', 'Magnus', 'images/tol/stories/seed@alchimalia.com/mechanika-s1/0.Cover.png', NULL, NULL, NULL, NULL,
      0, 5, 1, TRUE, 1, 0,
      '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z', NULL, NULL)
 ON CONFLICT ("Id") DO UPDATE
@@ -3156,7 +3156,7 @@ Un țiuit scurt. Apoi tăcere.
 — Ținem direcția după pulsul cristalului, spui tu.
 — Pe sub conducte, aproape de balustradă, zice iepurele negru.
 
-Rătăciți câteva minute printre țevi, nituri și aburi reci, urmărind pulsația slabă a cristalului.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/mechanika-s1/1.fog.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+Rătăciți câteva minute printre țevi, nituri și aburi reci, urmărind pulsația slabă a cristalului.', 'images/tol/stories/seed@alchimalia.com/mechanika-s1/1.fog.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -3230,7 +3230,7 @@ VALUES
 — V-am detectat după semnătura cristalului și… o urmă chimică familiară: Lunkarot, spune robotul Grubot.
 Puf-Puf râde:
 — Nas digital bun.
-— Promisiunea e promisiune, continuă Grubot. Mi-ați dat puls; eu vă dau vedere. Urmați-mă la Turnul de Control.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/mechanika-s1/2.grubot.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+— Promisiunea e promisiune, continuă Grubot. Mi-ați dat puls; eu vă dau vedere. Urmați-mă la Turnul de Control.', 'images/tol/stories/seed@alchimalia.com/mechanika-s1/2.grubot.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -3291,7 +3291,7 @@ VALUES
 
 — Cu ăsta căutăm planeta mea? întreabă Puf-Puf.
 — În mod normal scanează traseele orașului, răspunde Grubot. Dar cu adaptorul de cristal îl putem regla pe semnătura planetei tale.
-— Atunci îl montăm acum, zici tu.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/mechanika-s1/3.control-tower.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+— Atunci îl montăm acum, zici tu.', 'images/tol/stories/seed@alchimalia.com/mechanika-s1/3.control-tower.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -3354,7 +3354,7 @@ o piatră din Lunaria pentru „Ochiul Verde” — piesa care calibrează spect
 energie stocată pentru bobinele de focalizare.
 
 — Avem un rezervor sub turn: încărcat, dar instabil, adaugă Grubot.
-— Dacă aveți piatra, o montez acum; dacă nu, pregătim locașul și stabilizăm bobinele.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/mechanika-s1/4.missing.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+— Dacă aveți piatra, o montez acum; dacă nu, pregătim locașul și stabilizăm bobinele.', 'images/tol/stories/seed@alchimalia.com/mechanika-s1/4.missing.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -3423,7 +3423,7 @@ SET "Caption" = EXCLUDED."Caption",
 INSERT INTO alchimalia_schema."StoryTiles"
     ("Id", "StoryDefinitionId", "TileId", "Type", "SortOrder", "Caption", "Text", "ImageUrl", "Question", "CreatedAt", "UpdatedAt")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:mechanika-s1:5'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:mechanika-s1'), '5', 'quiz', 5, NULL, NULL, 'images/tales-of-alchimalia/stories/seed@alchimalia.com/mechanika-s1/5.quiz.png', 'Rezervorul are energie, dar conexiunea la bobine cere finețe. Ce mișcare alegi ca să pornești telescopul fără să forțezi?', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:mechanika-s1:5'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:mechanika-s1'), '5', 'quiz', 5, NULL, NULL, 'images/tol/stories/seed@alchimalia.com/mechanika-s1/5.quiz.png', 'Rezervorul are energie, dar conexiunea la bobine cere finețe. Ce mișcare alegi ca să pornești telescopul fără să forțezi?', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -3736,7 +3736,7 @@ INSERT INTO alchimalia_schema."StoryTiles"
 VALUES
     (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:mechanika-s1:6'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:mechanika-s1'), '6', 'page', 6, 'Focalizare', 'Telescopul se trezește. Oglinzile se aliniază, hologramele se aprind, iar pe ele se ramifică linii de lumină. Un traseu pulsează mai tare — un fir care vă cheamă.
 
-— Arată-ne Kelo-Ketis! spune Puf-Puf.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/mechanika-s1/6.focus.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+— Arată-ne Kelo-Ketis! spune Puf-Puf.', 'images/tol/stories/seed@alchimalia.com/mechanika-s1/6.focus.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -3787,7 +3787,7 @@ VALUES
     (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:mechanika-s1:7'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:mechanika-s1'), '7', 'page', 7, 'Harta se adâncește', 'Grubot tastează rapid.
 — Semnal clar. Fixez coordonatele și salvez schema rutei pentru deschiderea portalului.
 Puf-Puf zâmbește scurt:
-— Primul pas mare e bifat.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/mechanika-s1/7.map-deepens.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+— Primul pas mare e bifat.', 'images/tol/stories/seed@alchimalia.com/mechanika-s1/7.map-deepens.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -3844,7 +3844,7 @@ VALUES
 Puf-Puf chicotește:
 — Le pun lângă biscuiții de motivație.
 
-— Bună combinație: energie și moral, zici tu.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/mechanika-s1/8.reward.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+— Bună combinație: energie și moral, zici tu.', 'images/tol/stories/seed@alchimalia.com/mechanika-s1/8.reward.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -3909,7 +3909,7 @@ VALUES
 — Ok, echipă. Următoarea ramură? zice Puf-Puf.
 — Est, pe pasarela principală, propune iepurele negru. E cea mai curată.
 — Confirm, spune Grubot. Indicatorii arată vânt mai slab pe acolo.
-— Atunci est să fie, închei tu. Mergem.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/mechanika-s1/9.ahead.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+— Atunci est să fie, închei tu. Mergem.', 'images/tol/stories/seed@alchimalia.com/mechanika-s1/9.ahead.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -3968,7 +3968,7 @@ INSERT INTO alchimalia_schema."StoryDefinitions"
      "StoryType", "Status", "SortOrder", "IsActive", "Version", "PriceInCredits",
      "CreatedAt", "UpdatedAt", "CreatedBy", "UpdatedBy")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:sylvaria-s1'), 'sylvaria-s1', 'Sylvaria', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/sylvaria-s1/0.Cover.png', NULL, NULL, NULL, NULL,
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:sylvaria-s1'), 'sylvaria-s1', 'Sylvaria', 'images/tol/stories/seed@alchimalia.com/sylvaria-s1/0.Cover.png', NULL, NULL, NULL, NULL,
      0, 5, 1, TRUE, 1, 0,
      '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z', NULL, NULL)
 ON CONFLICT ("Id") DO UPDATE
@@ -4008,7 +4008,7 @@ SET "Title" = EXCLUDED."Title";
 INSERT INTO alchimalia_schema."StoryTiles"
     ("Id", "StoryDefinitionId", "TileId", "Type", "SortOrder", "Caption", "Text", "ImageUrl", "Question", "CreatedAt", "UpdatedAt")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:sylvaria-s1:1'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:sylvaria-s1'), '1', 'page', 1, 'Sylvaria', 'Sylvaria', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/sylvaria-s1/0.Cover.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:sylvaria-s1:1'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:sylvaria-s1'), '1', 'page', 1, 'Sylvaria', 'Sylvaria', 'images/tol/stories/seed@alchimalia.com/sylvaria-s1/0.Cover.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -4052,7 +4052,7 @@ INSERT INTO alchimalia_schema."StoryDefinitions"
      "StoryType", "Status", "SortOrder", "IsActive", "Version", "PriceInCredits",
      "CreatedAt", "UpdatedAt", "CreatedBy", "UpdatedBy")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:terra-s1'), 'terra-s1', 'Umbra de la Fermă', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/terra-s1/0.Cover.png', NULL, NULL, NULL, NULL,
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:terra-s1'), 'terra-s1', 'Umbra de la Fermă', 'images/tol/stories/seed@alchimalia.com/terra-s1/0.Cover.png', NULL, NULL, NULL, NULL,
      0, 5, 1, TRUE, 1, 0,
      '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z', NULL, NULL)
 ON CONFLICT ("Id") DO UPDATE
@@ -4094,7 +4094,7 @@ INSERT INTO alchimalia_schema."StoryTiles"
 VALUES
     (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:terra-s1:1'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:terra-s1'), '1', 'page', 1, 'Sosirea', 'Puf-Puf decide să exploreze planeta pe care tocmai a aterizat. Mergeți împreună și după câteva ore, o fermă, unde sunt mai mulți săteni, vă iese în cale. Totul pare în ordine o perioadă, dar oamenii își sunt îngrijorați și privesc cerul ca pe un oaspete nepoftit. \
 Puf-Puf își încrețește mustățile.\
-Puf-Puf: - Oare de ce e lumea așa de speriată? De ce toți stau de parcă își țin respirația?', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/terra-s1/1.arrival.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+Puf-Puf: - Oare de ce e lumea așa de speriată? De ce toți stau de parcă își țin respirația?', 'images/tol/stories/seed@alchimalia.com/terra-s1/1.arrival.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -4142,7 +4142,7 @@ SET "Caption" = EXCLUDED."Caption",
 INSERT INTO alchimalia_schema."StoryTiles"
     ("Id", "StoryDefinitionId", "TileId", "Type", "SortOrder", "Caption", "Text", "ImageUrl", "Question", "CreatedAt", "UpdatedAt")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:terra-s1:2'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:terra-s1'), '2', 'page', 2, 'Tăcerea stranie', 'Niciun cocoș nu cântă, niciun câine nu latră, nici greierii nu-și găsesc corul. Liniștea apasă, groasă, ca o pătură udă. Puf-Puf se uită la tine.\nPuf-Puf: - E ca și cum natura ar număra până la zece și n-ar îndrăzni să spună: zece!', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/terra-s1/2.silence.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:terra-s1:2'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:terra-s1'), '2', 'page', 2, 'Tăcerea stranie', 'Niciun cocoș nu cântă, niciun câine nu latră, nici greierii nu-și găsesc corul. Liniștea apasă, groasă, ca o pătură udă. Puf-Puf se uită la tine.\nPuf-Puf: - E ca și cum natura ar număra până la zece și n-ar îndrăzni să spună: zece!', 'images/tol/stories/seed@alchimalia.com/terra-s1/2.silence.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -4185,7 +4185,7 @@ SET "Caption" = EXCLUDED."Caption",
 INSERT INTO alchimalia_schema."StoryTiles"
     ("Id", "StoryDefinitionId", "TileId", "Type", "SortOrder", "Caption", "Text", "ImageUrl", "Question", "CreatedAt", "UpdatedAt")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:terra-s1:3'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:terra-s1'), '3', 'page', 3, 'Șoaptele oamenilor', 'Un bătrân se apropie cu pași mărunți.\nBătrânul: -E… o umbră... coboară din cer la apus. Animalele fug, grânele se culcă la pământ. Zicem că-i un blestem. \nPuf-Puf: - Blestem sau semn, tot o cauză are. Hai să prindem urma!', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/terra-s1/3.whispers.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:terra-s1:3'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:terra-s1'), '3', 'page', 3, 'Șoaptele oamenilor', 'Un bătrân se apropie cu pași mărunți.\nBătrânul: -E… o umbră... coboară din cer la apus. Animalele fug, grânele se culcă la pământ. Zicem că-i un blestem. \nPuf-Puf: - Blestem sau semn, tot o cauză are. Hai să prindem urma!', 'images/tol/stories/seed@alchimalia.com/terra-s1/3.whispers.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -4231,7 +4231,7 @@ SET "Caption" = EXCLUDED."Caption",
 INSERT INTO alchimalia_schema."StoryTiles"
     ("Id", "StoryDefinitionId", "TileId", "Type", "SortOrder", "Caption", "Text", "ImageUrl", "Question", "CreatedAt", "UpdatedAt")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:terra-s1:4'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:terra-s1'), '4', 'page', 4, 'Prima noapte', 'Soarele se scurge după dealuri, iar vântul aduce un foșnet nou, neliniștit. Deasupra norilor, ceva mare se mișcă. Umbră peste câmpuri, iar luna parcă se dă la o parte. Puf-Puf își ține respirația o clipă și zâmbește puțin: \nPuf-Puf:- OK… asta nu e doar vreme schimbătoare.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/terra-s1/4.first-night.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:terra-s1:4'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:terra-s1'), '4', 'page', 4, 'Prima noapte', 'Soarele se scurge după dealuri, iar vântul aduce un foșnet nou, neliniștit. Deasupra norilor, ceva mare se mișcă. Umbră peste câmpuri, iar luna parcă se dă la o parte. Puf-Puf își ține respirația o clipă și zâmbește puțin: \nPuf-Puf:- OK… asta nu e doar vreme schimbătoare.', 'images/tol/stories/seed@alchimalia.com/terra-s1/4.first-night.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -4274,7 +4274,7 @@ SET "Caption" = EXCLUDED."Caption",
 INSERT INTO alchimalia_schema."StoryTiles"
     ("Id", "StoryDefinitionId", "TileId", "Type", "SortOrder", "Caption", "Text", "ImageUrl", "Question", "CreatedAt", "UpdatedAt")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:terra-s1:5'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:terra-s1'), '5', 'page', 5, 'Vibrația pământului', 'Pământul tresare, ușor la început, apoi ca un pas greoi. Aerul miroase a fum și a cenușă curată, ca după o scânteie. În lanul culcat, se ghicește o siluetă uriașă care pâlpâie intermitent, ca un far rănit.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/terra-s1/5.vibration.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:terra-s1:5'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:terra-s1'), '5', 'page', 5, 'Vibrația pământului', 'Pământul tresare, ușor la început, apoi ca un pas greoi. Aerul miroase a fum și a cenușă curată, ca după o scânteie. În lanul culcat, se ghicește o siluetă uriașă care pâlpâie intermitent, ca un far rănit.', 'images/tol/stories/seed@alchimalia.com/terra-s1/5.vibration.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -4316,7 +4316,7 @@ SET "Caption" = EXCLUDED."Caption",
 INSERT INTO alchimalia_schema."StoryTiles"
     ("Id", "StoryDefinitionId", "TileId", "Type", "SortOrder", "Caption", "Text", "ImageUrl", "Question", "CreatedAt", "UpdatedAt")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:terra-s1:6'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:terra-s1'), '6', 'page', 6, 'Creatura', 'Din umbre iese la iveală o pasăre imensă, cu pene ca jarul și ochi de cristal. Aripa stângă îi atârnă grea; fiecare bătaie ridică scântei care se sting pe apă. Nu e un blestem: e o ființă rătăcită din altă lume, căzută într-un loc care nu o înțelege încă.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/terra-s1/6.creature.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:terra-s1:6'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:terra-s1'), '6', 'page', 6, 'Creatura', 'Din umbre iese la iveală o pasăre imensă, cu pene ca jarul și ochi de cristal. Aripa stângă îi atârnă grea; fiecare bătaie ridică scântei care se sting pe apă. Nu e un blestem: e o ființă rătăcită din altă lume, căzută într-un loc care nu o înțelege încă.', 'images/tol/stories/seed@alchimalia.com/terra-s1/6.creature.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -4358,7 +4358,7 @@ SET "Caption" = EXCLUDED."Caption",
 INSERT INTO alchimalia_schema."StoryTiles"
     ("Id", "StoryDefinitionId", "TileId", "Type", "SortOrder", "Caption", "Text", "ImageUrl", "Question", "CreatedAt", "UpdatedAt")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:terra-s1:7'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:terra-s1'), '7', 'page', 7, 'Legătura', 'Puf-Puf se apropie încet, îți face semn din cap și apoi îți vorbește pe șoptite.\nPuf-Puf: - E din Copacul Luminii! Dacă o ajutăm, ne poate arăta un drum ascuns pe Terra. \nPasărea te privește drept, fără teamă; în ochii ei se văd brazde și stele. \nPuf-Puf: - Tu ai mâini bune, zice Puf-Puf cu un zâmbet. \nPuf-Puf: - Și eu am… comentarii utile. Încearcă tu primul!', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/terra-s1/7.bond.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:terra-s1:7'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:terra-s1'), '7', 'page', 7, 'Legătura', 'Puf-Puf se apropie încet, îți face semn din cap și apoi îți vorbește pe șoptite.\nPuf-Puf: - E din Copacul Luminii! Dacă o ajutăm, ne poate arăta un drum ascuns pe Terra. \nPasărea te privește drept, fără teamă; în ochii ei se văd brazde și stele. \nPuf-Puf: - Tu ai mâini bune, zice Puf-Puf cu un zâmbet. \nPuf-Puf: - Și eu am… comentarii utile. Încearcă tu primul!', 'images/tol/stories/seed@alchimalia.com/terra-s1/7.bond.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -4404,7 +4404,7 @@ SET "Caption" = EXCLUDED."Caption",
 INSERT INTO alchimalia_schema."StoryTiles"
     ("Id", "StoryDefinitionId", "TileId", "Type", "SortOrder", "Caption", "Text", "ImageUrl", "Question", "CreatedAt", "UpdatedAt")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:terra-s1:8'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:terra-s1'), '8', 'quiz', 8, NULL, NULL, 'images/tales-of-alchimalia/stories/seed@alchimalia.com/terra-s1/8.quiz.png', 'Cum ajuți pasărea rănită?', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:terra-s1:8'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:terra-s1'), '8', 'quiz', 8, NULL, NULL, 'images/tol/stories/seed@alchimalia.com/terra-s1/8.quiz.png', 'Cum ajuți pasărea rănită?', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -4651,7 +4651,7 @@ SET "Text" = EXCLUDED."Text";
 INSERT INTO alchimalia_schema."StoryTiles"
     ("Id", "StoryDefinitionId", "TileId", "Type", "SortOrder", "Caption", "Text", "ImageUrl", "Question", "CreatedAt", "UpdatedAt")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:terra-s1:9'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:terra-s1'), '9', 'page', 9, 'Drumul deschis', 'După ajutorul vostru, pasărea își strânge aripa rănită la piept și, cu un efort calm, își întinde cealaltă. O dungă de lumină se desprinde din penele ei și taie câmpul ca o potecă nouă. \nPuf-Puf: - Uite-l!, spune Puf-Puf, cu un fel de mândrie jucăușă. \nPuf-Puf: - Drumul care n-a existat până acum cinci minute.\nPasărea ridică privirea spre nori, apoi către voi. Puf-Puf primește o pană, în semn de recunoștință, și știe că pasărea va deveni, de acum înainte, protectoarea satului. Pana cea mare, magică, alimentează o energie nebănuită.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/terra-s1/9.path.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:terra-s1:9'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:terra-s1'), '9', 'page', 9, 'Drumul deschis', 'După ajutorul vostru, pasărea își strânge aripa rănită la piept și, cu un efort calm, își întinde cealaltă. O dungă de lumină se desprinde din penele ei și taie câmpul ca o potecă nouă. \nPuf-Puf: - Uite-l!, spune Puf-Puf, cu un fel de mândrie jucăușă. \nPuf-Puf: - Drumul care n-a existat până acum cinci minute.\nPasărea ridică privirea spre nori, apoi către voi. Puf-Puf primește o pană, în semn de recunoștință, și știe că pasărea va deveni, de acum înainte, protectoarea satului. Pana cea mare, magică, alimentează o energie nebănuită.', 'images/tol/stories/seed@alchimalia.com/terra-s1/9.path.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -4701,7 +4701,7 @@ INSERT INTO alchimalia_schema."StoryDefinitions"
      "StoryType", "Status", "SortOrder", "IsActive", "Version", "PriceInCredits",
      "CreatedAt", "UpdatedAt", "CreatedBy", "UpdatedBy")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:terra-s2'), 'terra-s2', 'Un nou prieten', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/terra-s2/0.Cover.png', NULL, NULL, NULL, NULL,
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:terra-s2'), 'terra-s2', 'Un nou prieten', 'images/tol/stories/seed@alchimalia.com/terra-s2/0.Cover.png', NULL, NULL, NULL, NULL,
      0, 5, 1, TRUE, 1, 0,
      '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z', NULL, NULL)
 ON CONFLICT ("Id") DO UPDATE
@@ -4741,7 +4741,7 @@ SET "Title" = EXCLUDED."Title";
 INSERT INTO alchimalia_schema."StoryTiles"
     ("Id", "StoryDefinitionId", "TileId", "Type", "SortOrder", "Caption", "Text", "ImageUrl", "Question", "CreatedAt", "UpdatedAt")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:terra-s2:1'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:terra-s2'), '1', 'page', 1, 'Ținta: Lentila Lunii', 'Împăratul Puf-Puf nu și-a reparat nava, iar despre Pământ habar nu are unde se află față de Kelo-Ketis. A auzit, în schimb, de un artefact rar: Lentila Lunii. Cu ea, cristalul mărește harta și puteți căuta mai adânc ruta spre Kelo-Ketis. Ținta indică o zonă cu stânci joase și iarbă înaltă, la marginea unei păduri.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/terra-s2/1.target.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:terra-s2:1'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:terra-s2'), '1', 'page', 1, 'Ținta: Lentila Lunii', 'Împăratul Puf-Puf nu și-a reparat nava, iar despre Pământ habar nu are unde se află față de Kelo-Ketis. A auzit, în schimb, de un artefact rar: Lentila Lunii. Cu ea, cristalul mărește harta și puteți căuta mai adânc ruta spre Kelo-Ketis. Ținta indică o zonă cu stânci joase și iarbă înaltă, la marginea unei păduri.', 'images/tol/stories/seed@alchimalia.com/terra-s2/1.target.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -4783,7 +4783,7 @@ SET "Caption" = EXCLUDED."Caption",
 INSERT INTO alchimalia_schema."StoryTiles"
     ("Id", "StoryDefinitionId", "TileId", "Type", "SortOrder", "Caption", "Text", "ImageUrl", "Question", "CreatedAt", "UpdatedAt")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:terra-s2:2'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:terra-s2'), '2', 'page', 2, 'Urme ciudate', 'În iarbă apar urme mici, în zigzag, care dispar lângă un buștean scobit. Pe lângă ele, cozi de morcov „gustate artistic”.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/terra-s2/2.tracks.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:terra-s2:2'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:terra-s2'), '2', 'page', 2, 'Urme ciudate', 'În iarbă apar urme mici, în zigzag, care dispar lângă un buștean scobit. Pe lângă ele, cozi de morcov „gustate artistic”.', 'images/tol/stories/seed@alchimalia.com/terra-s2/2.tracks.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -4825,7 +4825,7 @@ SET "Caption" = EXCLUDED."Caption",
 INSERT INTO alchimalia_schema."StoryTiles"
     ("Id", "StoryDefinitionId", "TileId", "Type", "SortOrder", "Caption", "Text", "ImageUrl", "Question", "CreatedAt", "UpdatedAt")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:terra-s2:3'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:terra-s2'), '3', 'page', 3, 'Iepurele negru', 'Din buștean sare un iepure negru, cu blana mată și ochi mari. „Bună! Eu sunt… uneori aici, uneori pe Lunaria. Depinde cum clipești”, spune, apoi râde. „Știu unde e Lentila. Și am nevoie de ajutor să ajung acasă, pe Lunaria. Dacă mă ajutați, vă arăt drumul către Lentilă.”\nPuf-Puf:"Lunaria? parca stiu planeta asta...sa mergem..."', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/terra-s2/3.black-rabbit.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:terra-s2:3'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:terra-s2'), '3', 'page', 3, 'Iepurele negru', 'Din buștean sare un iepure negru, cu blana mată și ochi mari. „Bună! Eu sunt… uneori aici, uneori pe Lunaria. Depinde cum clipești”, spune, apoi râde. „Știu unde e Lentila. Și am nevoie de ajutor să ajung acasă, pe Lunaria. Dacă mă ajutați, vă arăt drumul către Lentilă.”\nPuf-Puf:"Lunaria? parca stiu planeta asta...sa mergem..."', 'images/tol/stories/seed@alchimalia.com/terra-s2/3.black-rabbit.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -4869,7 +4869,7 @@ SET "Caption" = EXCLUDED."Caption",
 INSERT INTO alchimalia_schema."StoryTiles"
     ("Id", "StoryDefinitionId", "TileId", "Type", "SortOrder", "Caption", "Text", "ImageUrl", "Question", "CreatedAt", "UpdatedAt")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:terra-s2:4'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:terra-s2'), '4', 'page', 4, 'Locul lentilei', 'Ghidați de iepure, ajungeți la o grotă scurtă, rece, cu apă până la gleznă. Pe tavan atârnă cristale palide; pe o stâncă, un disc translucid — Lentila Lunii — prins între două excrescențe de piatră.', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/terra-s2/4.cave.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:terra-s2:4'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:terra-s2'), '4', 'page', 4, 'Locul lentilei', 'Ghidați de iepure, ajungeți la o grotă scurtă, rece, cu apă până la gleznă. Pe tavan atârnă cristale palide; pe o stâncă, un disc translucid — Lentila Lunii — prins între două excrescențe de piatră.', 'images/tol/stories/seed@alchimalia.com/terra-s2/4.cave.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -4911,7 +4911,7 @@ SET "Caption" = EXCLUDED."Caption",
 INSERT INTO alchimalia_schema."StoryTiles"
     ("Id", "StoryDefinitionId", "TileId", "Type", "SortOrder", "Caption", "Text", "ImageUrl", "Question", "CreatedAt", "UpdatedAt")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:terra-s2:5'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:terra-s2'), '5', 'page', 5, 'Problema mică', 'Când atingi stânca, apa face valuri și intrarea parcă „respiră”, strângându-se ușor. „Grotă sensibilă”, spune iepurele. „Faci bine, primești ieșire. Faci rău, primești duș rece.”', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/terra-s2/5.problem.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:terra-s2:5'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:terra-s2'), '5', 'page', 5, 'Problema mică', 'Când atingi stânca, apa face valuri și intrarea parcă „respiră”, strângându-se ușor. „Grotă sensibilă”, spune iepurele. „Faci bine, primești ieșire. Faci rău, primești duș rece.”', 'images/tol/stories/seed@alchimalia.com/terra-s2/5.problem.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -4953,7 +4953,7 @@ SET "Caption" = EXCLUDED."Caption",
 INSERT INTO alchimalia_schema."StoryTiles"
     ("Id", "StoryDefinitionId", "TileId", "Type", "SortOrder", "Caption", "Text", "ImageUrl", "Question", "CreatedAt", "UpdatedAt")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:terra-s2:6'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:terra-s2'), '6', 'quiz', 6, NULL, NULL, 'images/tales-of-alchimalia/stories/seed@alchimalia.com/terra-s2/6.quiz.png', 'Alege abordarea ca să scoți Lentila Lunii fără să destabilizezi grota:', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:terra-s2:6'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:terra-s2'), '6', 'quiz', 6, NULL, NULL, 'images/tol/stories/seed@alchimalia.com/terra-s2/6.quiz.png', 'Alege abordarea ca să scoți Lentila Lunii fără să destabilizezi grota:', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",
@@ -5160,7 +5160,7 @@ SET "Text" = EXCLUDED."Text";
 INSERT INTO alchimalia_schema."StoryTiles"
     ("Id", "StoryDefinitionId", "TileId", "Type", "SortOrder", "Caption", "Text", "ImageUrl", "Question", "CreatedAt", "UpdatedAt")
 VALUES
-    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:terra-s2:p6'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:terra-s2'), 'p6', 'page', 7, 'Reușita', 'Lentila iese curat, fără să tulbure grota. Iepurele bate din lăbuțe: „Bravo! Lateral e mai bine decât drept!” Pui Lentila peste cristal, iar imaginea hărții se clarifică. Iepurele te privește hotărât: „Ținem legătura. Vreau acasă, pe Lunaria — promiți că mă ajuți?”\nAcum știți unde e Lunaria: nu, nu e Luna, ci o planetă îndepărtată de Pământ. Dacă am avea o sursă de energie, poate că am putea repara nava împreună…', 'images/tales-of-alchimalia/stories/seed@alchimalia.com/terra-s2/7.success.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
+    (uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storytile:terra-s2:p6'), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'storydef:terra-s2'), 'p6', 'page', 7, 'Reușita', 'Lentila iese curat, fără să tulbure grota. Iepurele bate din lăbuțe: „Bravo! Lateral e mai bine decât drept!” Pui Lentila peste cristal, iar imaginea hărții se clarifică. Iepurele te privește hotărât: „Ținem legătura. Vreau acasă, pe Lunaria — promiți că mă ajuți?”\nAcum știți unde e Lunaria: nu, nu e Luna, ci o planetă îndepărtată de Pământ. Dacă am avea o sursă de energie, poate că am putea repara nava împreună…', 'images/tol/stories/seed@alchimalia.com/terra-s2/7.success.png', NULL, '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')
 ON CONFLICT ("Id") DO UPDATE
 SET "Type" = EXCLUDED."Type",
     "SortOrder" = EXCLUDED."SortOrder",

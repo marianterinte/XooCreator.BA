@@ -1,5 +1,5 @@
 ﻿-- Auto-generated from Data/SeedData/Stories/seed@alchimalia.com (mode: indie)
--- Run date: 2025-11-27 10:07:13+02:00
+-- Run date: 2025-11-27 10:27:23+02:00
 
 DO $$
 BEGIN

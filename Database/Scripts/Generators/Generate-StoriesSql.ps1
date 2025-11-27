@@ -78,7 +78,8 @@ function Normalize-CoverPath {
     param([string]$StoryId, [string]$CoverPath)
     if ([string]::IsNullOrWhiteSpace($CoverPath)) { return "" }
     $normalized = $CoverPath.TrimStart('/')
-    if ($normalized.StartsWith("images/tales-of-alchimalia/stories/", [StringComparison]::OrdinalIgnoreCase)) {
+    if ($normalized.StartsWith("images/tales-of-alchimalia/stories/", [StringComparison]::OrdinalIgnoreCase) -or
+        $normalized.StartsWith("images/tol/stories/", [StringComparison]::OrdinalIgnoreCase)) {
         return $normalized
     }
     $fileName = [System.IO.Path]::GetFileName($normalized)
@@ -96,7 +97,8 @@ function Normalize-TileImagePath {
     param([string]$StoryId, [string]$TileId, [string]$ImagePath)
     if ([string]::IsNullOrWhiteSpace($ImagePath)) { return $ImagePath }
     $normalized = $ImagePath.TrimStart('/')
-    if ($normalized.StartsWith("images/tales-of-alchimalia/stories/", [StringComparison]::OrdinalIgnoreCase)) {
+    if ($normalized.StartsWith("images/tales-of-alchimalia/stories/", [StringComparison]::OrdinalIgnoreCase) -or
+        $normalized.StartsWith("images/tol/stories/", [StringComparison]::OrdinalIgnoreCase)) {
         return $normalized
     }
     $fileName = [System.IO.Path]::GetFileName($normalized)
