@@ -1,5 +1,7 @@
+﻿
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 
 namespace XooCreator.BA.Data.Services;
 
@@ -24,16 +26,39 @@ public class DatabaseMigrationService : IDatabaseMigrationService
     /// Ensures the migrations history table exists (idempotent operation)
     /// This is critical for tracking which migrations have been applied
     /// </summary>
+    private string GetDefaultSchema()
+        => _context.Model.GetDefaultSchema() ?? "public";
+
+    private async Task EnsureSchemaExistsAsync(CancellationToken cancellationToken = default)
+    {
+        var schema = GetDefaultSchema();
+        try
+        {
+            await _context.Database.ExecuteSqlRawAsync(
+                $"CREATE SCHEMA IF NOT EXISTS \"{schema.Replace("\"", "\"\"")}\";",
+                cancellationToken);
+            _logger.LogDebug("✅ Schema {Schema} ensured", schema);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ Failed to ensure schema {Schema} exists", schema);
+            throw;
+        }
+    }
+
     public async Task EnsureMigrationsHistoryTableExistsAsync(CancellationToken cancellationToken = default)
     {
         try
         {
+            await EnsureSchemaExistsAsync(cancellationToken);
+            var schema = GetDefaultSchema();
+            var schemaName = $"\"{schema.Replace("\"", "\"\"")}\"";
             // Create migrations history table using idempotent SQL
             // This table is created by EF Core automatically, but we ensure it exists
             // in case the database was created manually or partially migrated
             await _context.Database.ExecuteSqlRawAsync(
-                @"
-                    CREATE TABLE IF NOT EXISTS ""__EFMigrationsHistory"" (
+                $@"
+                    CREATE TABLE IF NOT EXISTS {schemaName}.""__EFMigrationsHistory"" (
                         ""MigrationId"" character varying(150) NOT NULL,
                         ""ProductVersion"" character varying(32) NOT NULL,
                         CONSTRAINT ""PK___EFMigrationsHistory"" PRIMARY KEY (""MigrationId"")
@@ -120,10 +145,10 @@ public class DatabaseMigrationService : IDatabaseMigrationService
             _logger.LogInformation("🔄 Found {Count} pending migration(s) to apply: {Migrations}",
                 pendingMigrations.Count,
                 string.Join(", ", pendingMigrations));
-            
+
             _logger.LogInformation("📋 Currently applied migrations: {AppliedMigrations}",
-                appliedMigrationsBefore.Count > 0 
-                    ? string.Join(", ", appliedMigrationsBefore) 
+                appliedMigrationsBefore.Count > 0
+                    ? string.Join(", ", appliedMigrationsBefore)
                     : "none");
 
             // Apply all pending migrations using EF Core's built-in method
@@ -150,44 +175,101 @@ public class DatabaseMigrationService : IDatabaseMigrationService
         catch (Exception ex)
         {
             _logger.LogError(ex, "❌ Failed to apply migrations");
-            
-            // Log detailed error information to help identify the problem
-            _logger.LogError("Exception Type: {ExceptionType}", ex.GetType().FullName);
-            _logger.LogError("Exception Message: {ExceptionMessage}", ex.Message);
-            
+
+            // Also write to console for Azure log stream visibility
+            Console.WriteLine("═══════════════════════════════════════════════════════════");
+            Console.WriteLine("❌ MIGRATION FAILURE - DETAILED ERROR INFORMATION:");
+            Console.WriteLine("═══════════════════════════════════════════════════════════");
+            Console.WriteLine($"Exception Type: {ex.GetType().FullName}");
+            Console.WriteLine($"Exception Message: {ex.Message}");
+
+            // Log PostgreSQL-specific error details if available
+            if (ex is Npgsql.PostgresException pgEx)
+            {
+                Console.WriteLine($"PostgreSQL Error Code: {pgEx.SqlState}");
+                Console.WriteLine($"PostgreSQL Error Detail: {pgEx.Detail ?? "N/A"}");
+                Console.WriteLine($"PostgreSQL Error Hint: {pgEx.Hint ?? "N/A"}");
+                Console.WriteLine($"PostgreSQL Error Position: {pgEx.Position}");
+                if (!string.IsNullOrWhiteSpace(pgEx.InternalQuery))
+                {
+                    Console.WriteLine($"PostgreSQL Error Internal Query: {pgEx.InternalQuery}");
+                }
+
+                _logger.LogError("PostgreSQL Error Code: {SqlState}", pgEx.SqlState);
+                _logger.LogError("PostgreSQL Error Detail: {Detail}", pgEx.Detail ?? "N/A");
+                _logger.LogError("PostgreSQL Error Hint: {Hint}", pgEx.Hint ?? "N/A");
+                _logger.LogError("PostgreSQL Error Position: {Position}", pgEx.Position);
+                if (!string.IsNullOrWhiteSpace(pgEx.InternalQuery))
+                {
+                    _logger.LogError("PostgreSQL Error Internal Query: {InternalQuery}", pgEx.InternalQuery);
+                }
+            }
+
             if (ex.InnerException != null)
             {
-                _logger.LogError("Inner Exception: {InnerExceptionType} - {InnerExceptionMessage}",
-                    ex.InnerException.GetType().FullName, ex.InnerException.Message);
+                Console.WriteLine($"Inner Exception Type: {ex.InnerException.GetType().FullName}");
+                Console.WriteLine($"Inner Exception Message: {ex.InnerException.Message}");
+                if (ex.InnerException is Npgsql.PostgresException innerPgEx)
+                {
+                    Console.WriteLine($"Inner PostgreSQL Error Code: {innerPgEx.SqlState}");
+                    Console.WriteLine($"Inner PostgreSQL Error Detail: {innerPgEx.Detail ?? "N/A"}");
+                }
+
+                _logger.LogError("Inner Exception Type: {InnerExceptionType}", ex.InnerException.GetType().FullName);
+                _logger.LogError("Inner Exception Message: {InnerExceptionMessage}", ex.InnerException.Message);
+                if (ex.InnerException is Npgsql.PostgresException innerPgEx1)
+                {
+                    _logger.LogError("Inner PostgreSQL Error Code: {SqlState}", innerPgEx1.SqlState);
+                    _logger.LogError("Inner PostgreSQL Error Detail: {Detail}", innerPgEx1.Detail ?? "N/A");
+                }
             }
-            
+
+            // Log schema information
+            var schema = GetDefaultSchema();
+            Console.WriteLine($"Target Schema: {schema}");
+            _logger.LogError("Target Schema: {Schema}", schema);
+
             // Log which migrations were applied before the failure
             try
             {
                 var appliedMigrations = await GetAppliedMigrationsAsync(cancellationToken);
-                _logger.LogWarning("✅ Migrations successfully applied before failure: {Migrations}",
-                    appliedMigrations.Count > 0 
-                        ? string.Join(", ", appliedMigrations) 
-                        : "none");
-                
+                var appliedMsg = appliedMigrations.Count > 0
+                    ? string.Join(", ", appliedMigrations)
+                    : "none";
+                Console.WriteLine($"✅ Migrations successfully applied before failure: {appliedMsg}");
+                _logger.LogError("✅ Migrations successfully applied before failure: {Migrations}", appliedMsg);
+
                 // Try to identify which migration might have failed
                 var pendingMigrations = await GetPendingMigrationsAsync(cancellationToken);
                 if (pendingMigrations.Count > 0)
                 {
-                    _logger.LogWarning("⚠️  Migrations that were NOT applied: {Migrations}",
-                        string.Join(", ", pendingMigrations));
-                    _logger.LogWarning("💡 The first migration in the list above is likely the one that failed");
+                    var pendingMsg = string.Join(", ", pendingMigrations);
+                    Console.WriteLine($"⚠️  Migrations that were NOT applied: {pendingMsg}");
+                    Console.WriteLine("💡 The first migration in the list above is likely the one that failed");
+                    _logger.LogError("⚠️  Migrations that were NOT applied: {Migrations}", pendingMsg);
+                    _logger.LogError("💡 The first migration in the list above is likely the one that failed");
                 }
             }
             catch (Exception logEx)
             {
+                Console.WriteLine($"⚠️  Could not retrieve migration state: {logEx.Message}");
                 _logger.LogWarning(logEx, "Could not retrieve migration state for diagnostic logging");
             }
 
-            // Log stack trace for debugging (only in development)
+            // Log full stack trace at Error level so it's always visible
             if (ex.StackTrace != null)
             {
-                _logger.LogDebug("Stack Trace: {StackTrace}", ex.StackTrace);
+                Console.WriteLine("═══════════════════════════════════════════════════════════");
+                Console.WriteLine("STACK TRACE:");
+                Console.WriteLine("═══════════════════════════════════════════════════════════");
+                Console.WriteLine(ex.StackTrace);
+                Console.WriteLine("═══════════════════════════════════════════════════════════");
+
+                _logger.LogError("═══════════════════════════════════════════════════════════");
+                _logger.LogError("STACK TRACE:");
+                _logger.LogError("═══════════════════════════════════════════════════════════");
+                _logger.LogError("{StackTrace}", ex.StackTrace);
+                _logger.LogError("═══════════════════════════════════════════════════════════");
             }
 
             return false;
@@ -202,25 +284,27 @@ public class DatabaseMigrationService : IDatabaseMigrationService
     {
         try
         {
+            var schema = GetDefaultSchema();
+            var schemaName = $"\"{schema.Replace("\"", "\"\"")}\"";
             // Ensure ClassicAuthorId exists in StoryDefinitions
-            await _context.Database.ExecuteSqlRawAsync(@"
+            await _context.Database.ExecuteSqlRawAsync($@"
                 DO $$
                 BEGIN
-                    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE LOWER(table_name) = 'storydefinitions' AND table_schema = 'public') THEN
-                        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE LOWER(table_name) = 'storydefinitions' AND LOWER(column_name) = 'classicauthorid' AND table_schema = 'public') THEN
-                            ALTER TABLE ""StoryDefinitions"" ADD COLUMN ""ClassicAuthorId"" uuid NULL;
+                    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE LOWER(table_name) = 'storydefinitions' AND table_schema = '{schema}') THEN
+                        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE LOWER(table_name) = 'storydefinitions' AND LOWER(column_name) = 'classicauthorid' AND table_schema = '{schema}') THEN
+                            ALTER TABLE {schemaName}.""StoryDefinitions"" ADD COLUMN ""ClassicAuthorId"" uuid NULL;
                         END IF;
                     END IF;
                 END $$;
             ", cancellationToken);
 
             // Ensure ClassicAuthorId exists in StoryCrafts
-            await _context.Database.ExecuteSqlRawAsync(@"
+            await _context.Database.ExecuteSqlRawAsync($@"
                 DO $$
                 BEGIN
-                    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE LOWER(table_name) = 'storycrafts' AND table_schema = 'public') THEN
-                        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE LOWER(table_name) = 'storycrafts' AND LOWER(column_name) = 'classicauthorid' AND table_schema = 'public') THEN
-                            ALTER TABLE ""StoryCrafts"" ADD COLUMN ""ClassicAuthorId"" uuid NULL;
+                    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE LOWER(table_name) = 'storycrafts' AND table_schema = '{schema}') THEN
+                        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE LOWER(table_name) = 'storycrafts' AND LOWER(column_name) = 'classicauthorid' AND table_schema = '{schema}') THEN
+                            ALTER TABLE {schemaName}.""StoryCrafts"" ADD COLUMN ""ClassicAuthorId"" uuid NULL;
                         END IF;
                     END IF;
                 END $$;
@@ -235,4 +319,3 @@ public class DatabaseMigrationService : IDatabaseMigrationService
         }
     }
 }
-

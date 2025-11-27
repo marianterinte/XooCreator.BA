@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
 
 namespace XooCreator.BA.Data;
 
@@ -25,10 +26,10 @@ public sealed class XooDbContextFactory : IDesignTimeDbContextFactory<XooDbConte
         if (string.IsNullOrWhiteSpace(cs))
             throw new InvalidOperationException("Connection string 'DefaultConnection' or 'Postgres' not found.");
 
-        return new XooDbContext(
-            new DbContextOptionsBuilder<XooDbContext>()
-                .UseNpgsql(cs)
-                .Options
-        );
+        var options = new DbContextOptionsBuilder<XooDbContext>()
+            .UseNpgsql(cs)
+            .Options;
+
+        return new XooDbContext(options, config);
     }
 }

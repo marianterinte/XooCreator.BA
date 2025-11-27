@@ -14,39 +14,94 @@ public static class DatabaseConfiguration
     {
         services.AddDbContext<XooDbContext>(options =>
         {
-            var dbUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
-            string cs;
-            if (!string.IsNullOrWhiteSpace(dbUrl))
+            var cs = ResolveConnectionString(configuration);
+            var dbSchema = configuration.GetValue<string>("Database:Schema") ?? "alchimalia_schema";
+            
+            // Add search_path to connection string if schema is not public
+            if (dbSchema != "public")
             {
-                var uri = new Uri(dbUrl);
-                var userInfo = uri.UserInfo.Split(':');
-                var npg = new NpgsqlConnectionStringBuilder
-                {
-                    Host = uri.Host,
-                    Port = uri.Port,
-                    Username = userInfo.ElementAtOrDefault(0) ?? "postgres",
-                    Password = userInfo.ElementAtOrDefault(1) ?? string.Empty,
-                    Database = uri.AbsolutePath.Trim('/'),
-                    SslMode = SslMode.Require
-                };
-                cs = npg.ConnectionString;
+                var builder = new NpgsqlConnectionStringBuilder(cs);
+                builder.SearchPath = dbSchema;
+                cs = builder.ConnectionString;
             }
-            else
+            
+            options.UseNpgsql(cs, npgsqlOptions =>
             {
-                cs = configuration.GetConnectionString("Postgres")
-                    ?? "Host=localhost;Port=5432;Database=xoo_db;Username=postgres;Password=admin";
-            }
-
-            options.UseNpgsql(cs);
+                npgsqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", dbSchema);
+            });
             
             // Add interceptor to automatically make migration SQL commands idempotent
             // This transforms CREATE TABLE, CREATE INDEX, ALTER TABLE ADD CONSTRAINT, etc.
             // to use IF NOT EXISTS, making all migrations safe to run multiple times
             var loggerFactory = services.BuildServiceProvider().GetService<ILoggerFactory>();
             var logger = loggerFactory?.CreateLogger<IdempotentMigrationCommandInterceptor>();
-            options.AddInterceptors(new IdempotentMigrationCommandInterceptor(logger));
+            options.AddInterceptors(new IdempotentMigrationCommandInterceptor(dbSchema, logger));
         });
 
         return services;
+    }
+
+    private static string ResolveConnectionString(IConfiguration configuration)
+    {
+        var envConnectionString = Environment.GetEnvironmentVariable("ConnectionStrings__Postgres");
+        if (!string.IsNullOrWhiteSpace(envConnectionString))
+        {
+            return BuildConnectionString(envConnectionString);
+        }
+
+        var configured = configuration.GetConnectionString("Postgres");
+        if (!string.IsNullOrWhiteSpace(configured))
+        {
+            if (configured.StartsWith("env:", StringComparison.OrdinalIgnoreCase))
+            {
+                var envName = configured.Substring(4).Trim();
+                if (!string.IsNullOrWhiteSpace(envName))
+                {
+                    var value = Environment.GetEnvironmentVariable(envName);
+                    if (!string.IsNullOrWhiteSpace(value))
+                    {
+                        return BuildConnectionString(value);
+                    }
+                }
+            }
+            else
+            {
+                return BuildConnectionString(configured);
+            }
+        }
+
+        var dbUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+        if (!string.IsNullOrWhiteSpace(dbUrl))
+        {
+            return BuildConnectionString(dbUrl);
+        }
+
+        return "Host=localhost;Port=5432;Database=xoo_db;Username=postgres;Password=admin";
+    }
+
+    private static string BuildConnectionString(string value)
+    {
+        if (!value.Contains("://", StringComparison.Ordinal))
+        {
+            return value;
+        }
+
+        if (!Uri.TryCreate(value, UriKind.Absolute, out var uri))
+        {
+            return value;
+        }
+
+        var userInfo = uri.UserInfo.Split(':', 2);
+        var npg = new NpgsqlConnectionStringBuilder
+        {
+            Host = uri.Host,
+            Port = uri.Port,
+            Username = userInfo.ElementAtOrDefault(0) ?? "postgres",
+            Password = userInfo.ElementAtOrDefault(1) ?? string.Empty,
+            Database = uri.AbsolutePath.Trim('/'),
+            SslMode = SslMode.Require
+        };
+
+        return npg.ConnectionString;
     }
 }

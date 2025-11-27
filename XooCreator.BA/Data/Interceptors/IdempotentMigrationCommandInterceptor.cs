@@ -15,10 +15,16 @@ namespace XooCreator.BA.Data.Interceptors;
 public class IdempotentMigrationCommandInterceptor : DbCommandInterceptor
 {
     private readonly ILogger<IdempotentMigrationCommandInterceptor>? _logger;
+    private readonly string _schema;
+    private readonly string _schemaSqlLiteral;
 
-    public IdempotentMigrationCommandInterceptor(ILogger<IdempotentMigrationCommandInterceptor>? logger = null)
+    public IdempotentMigrationCommandInterceptor(
+        string schema,
+        ILogger<IdempotentMigrationCommandInterceptor>? logger = null)
     {
         _logger = logger;
+        _schema = string.IsNullOrWhiteSpace(schema) ? "public" : schema.Trim();
+        _schemaSqlLiteral = _schema.Replace("'", "''");
     }
 
     public override InterceptionResult<int> NonQueryExecuting(
@@ -70,6 +76,10 @@ public class IdempotentMigrationCommandInterceptor : DbCommandInterceptor
     private string MakeIdempotent(string sql)
     {
         if (string.IsNullOrWhiteSpace(sql))
+            return sql;
+
+        // Let EF handle __EFMigrationsHistory table without modifications
+        if (sql.Contains("__EFMigrationsHistory", StringComparison.OrdinalIgnoreCase))
             return sql;
 
         var originalSql = sql;
@@ -376,14 +386,14 @@ END $$;";
 
                 // Build idempotent version - check if all columns exist
                 var tableNameWithoutQuotes = tableName.Trim('"');
-                var columnChecks = string.Join(" AND ", columns.Select(col => 
-                    $@"EXISTS (SELECT 1 FROM information_schema.columns WHERE LOWER(table_name) = LOWER('{tableNameWithoutQuotes}') AND LOWER(column_name) = LOWER('{col}') AND table_schema = 'public')"));
+            var columnChecks = string.Join(" AND ", columns.Select(col => 
+                    $@"EXISTS (SELECT 1 FROM information_schema.columns WHERE LOWER(table_name) = LOWER('{tableNameWithoutQuotes}') AND LOWER(column_name) = LOWER('{col}') AND table_schema = '{_schemaSqlLiteral}')"));
                 
                 var idempotentSql = $@"
 DO $$
 BEGIN
     IF {columnChecks} THEN
-        IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = '{indexName}' AND schemaname = 'public') THEN
+        IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = '{indexName}' AND schemaname = '{_schemaSqlLiteral}') THEN
             CREATE {uniqueClause}INDEX ""{indexName}"" ON {tableName} ({columnsStr});
         END IF;
     END IF;
@@ -504,7 +514,7 @@ END $$;";
             SELECT 1 FROM information_schema.columns 
             WHERE LOWER(table_name) = LOWER('{tableNameWithoutQuotes}') 
             AND LOWER(column_name) = LOWER('{colName}') 
-            AND table_schema = 'public'
+            AND table_schema = '{_schemaSqlLiteral}'
         ) THEN
             ALTER TABLE {tableName} ADD COLUMN ""{colName}"" {colDef};
         END IF;");
@@ -523,7 +533,7 @@ BEGIN
     IF NOT EXISTS (
         SELECT 1 FROM information_schema.tables 
         WHERE LOWER(table_name) = LOWER('{tableNameWithoutQuotes}') 
-        AND table_schema = 'public'
+        AND table_schema = '{_schemaSqlLiteral}'
     ) THEN
         CREATE TABLE {tableName} ({tableDefinition});
     ELSE
@@ -561,15 +571,15 @@ END $$;";
 DO $$
 BEGIN
     -- Ensure ClassicAuthorId exists in StoryDefinitions
-    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE LOWER(table_name) = 'storydefinitions' AND table_schema = 'public') THEN
-        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE LOWER(table_name) = 'storydefinitions' AND LOWER(column_name) = 'classicauthorid' AND table_schema = 'public') THEN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE LOWER(table_name) = 'storydefinitions' AND table_schema = '{_schemaSqlLiteral}') THEN
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE LOWER(table_name) = 'storydefinitions' AND LOWER(column_name) = 'classicauthorid' AND table_schema = '{_schemaSqlLiteral}') THEN
             ALTER TABLE ""StoryDefinitions"" ADD COLUMN ""ClassicAuthorId"" uuid NULL;
         END IF;
     END IF;
     
     -- Ensure ClassicAuthorId exists in StoryCrafts
-    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE LOWER(table_name) = 'storycrafts' AND table_schema = 'public') THEN
-        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE LOWER(table_name) = 'storycrafts' AND LOWER(column_name) = 'classicauthorid' AND table_schema = 'public') THEN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE LOWER(table_name) = 'storycrafts' AND table_schema = '{_schemaSqlLiteral}') THEN
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE LOWER(table_name) = 'storycrafts' AND LOWER(column_name) = 'classicauthorid' AND table_schema = '{_schemaSqlLiteral}') THEN
             ALTER TABLE ""StoryCrafts"" ADD COLUMN ""ClassicAuthorId"" uuid NULL;
         END IF;
     END IF;

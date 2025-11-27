@@ -26,6 +26,12 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
+      - name: Dry-run database scripts (PROD)
+        run: dotnet run --project XooCreator.DbScriptRunner -- --connection "${{ secrets.AZURE_POSTGRES_CONNSTRING_PROD }}" --dry-run
+
+      - name: Apply database scripts (PROD)
+        run: dotnet run --project XooCreator.DbScriptRunner -- --connection "${{ secrets.AZURE_POSTGRES_CONNSTRING_PROD }}"
+
       - name: Restore
         run: dotnet restore XooCreator.BA.csproj
         working-directory: ${{ env.WORKING_DIRECTORY }}

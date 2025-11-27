@@ -1,5 +1,7 @@
 # Soluție Robustă pentru Migrări Incrementale
 
+> **⚠️ TEMPORAR DEZACTIVAT:** Această soluție este temporar dezactivată pentru debugging. Se folosește acum logica simplă cu `recreate=true` și `MigrateAsync()` direct.
+
 ## Prezentare Generală
 
 Această soluție oferă un sistem **complet automat** pentru aplicarea migrărilor de bază de date în mod incremental, fără a recrea baza de date și fără a depinde de gestionarea excepțiilor. Soluția folosește un **interceptor automat** care transformă toate comenzile SQL din migrări în operații idempotente.

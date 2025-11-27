@@ -1,5 +1,7 @@
 # Migration Idempotency Guide
 
+> **⚠️ TEMPORARILY DISABLED:** This solution is temporarily disabled for debugging. Currently using simple logic with `recreate=true` and direct `MigrateAsync()`.
+
 ## Problems
 When running migrations, you may encounter errors like:
 
