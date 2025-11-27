@@ -1,14 +1,14 @@
 ﻿-- Auto-generated from Data/SeedData/TreeOfLight/*.json
--- Run date: 2025-11-27 09:24:49+02:00
+-- Run date: 2025-11-27 10:07:18+02:00
 
-DO 
+DO $$
 BEGIN
     IF NOT EXISTS (
         SELECT 1 FROM pg_extension WHERE extname = 'uuid-ossp'
     ) THEN
         CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
     END IF;
-END ;
+END $$;
 
 BEGIN;
 

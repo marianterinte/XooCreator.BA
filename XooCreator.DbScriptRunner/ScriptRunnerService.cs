@@ -111,11 +111,18 @@ internal sealed class ScriptRunnerService
                 await transaction.CommitAsync(cancellationToken);
             }
         }
-        catch
+        catch (Exception ex)
         {
             if (transaction is not null)
             {
-                await transaction.RollbackAsync(cancellationToken);
+                try
+                {
+                    await transaction.RollbackAsync(cancellationToken);
+                }
+                catch (Exception rollbackEx)
+                {
+                    _logger.LogWarning(rollbackEx, "Rollback failed for {Script}. Original error: {Message}", script.Name, ex.Message);
+                }
             }
 
             throw;

@@ -81,7 +81,7 @@ internal sealed class SchemaVersionStore(RunnerOptions options)
 
     private async Task<bool> TableExistsAsync(NpgsqlConnection connection, CancellationToken cancellationToken)
     {
-        var sql = "SELECT to_regclass(@tableName);";
+        var sql = "SELECT to_regclass(@tableName)::text;";
         await using var cmd = new NpgsqlCommand(sql, connection);
         cmd.Parameters.AddWithValue("tableName", _options.VersionsTable);
 

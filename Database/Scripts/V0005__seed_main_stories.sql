@@ -1,14 +1,14 @@
 ﻿-- Auto-generated from Data/SeedData/Stories/seed@alchimalia.com (mode: main)
--- Run date: 2025-11-27 09:13:05+02:00
+-- Run date: 2025-11-27 10:07:08+02:00
 
-DO 
+DO $$
 BEGIN
     IF NOT EXISTS (
         SELECT 1 FROM pg_extension WHERE extname = 'uuid-ossp'
     ) THEN
         CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
     END IF;
-END ;
+END $$;
 
 BEGIN;
 

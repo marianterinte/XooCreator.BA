@@ -46,7 +46,11 @@ internal static class SqlScriptFactory
     private static bool DetectManualTransaction(string content)
     {
         var normalized = content.ToUpperInvariant();
-        return normalized.Contains("BEGIN;") && normalized.Contains("COMMIT;");
+        var hasBegin = normalized.Contains("BEGIN;") ||
+                       normalized.Contains("BEGIN ") ||
+                       normalized.Contains("START TRANSACTION");
+        var hasCommit = normalized.Contains("COMMIT;");
+        return hasBegin && hasCommit;
     }
 
     private static int ExtractOrderToken(string name)
