@@ -128,3 +128,36 @@ Implementăm un mecanism determinist de aplicare a scripturilor SQL (fără EF M
 4. Testează pe baza Azure înainte de a merge în producție.
 5. Documentează convenția de scriere a scripturilor pentru restul echipei.
 
+---
+
+### 9. Implementare curentă (2025-11-27)
+- ✅ Proiectul `XooCreator.DbScriptRunner` există în soluție și expune CLI:
+  ```bash
+  dotnet run --project XooCreator.DbScriptRunner \
+      --connection "Host=...;Username=...;Password=...;Database=...;SearchPath=alchimalia_schema" \
+      --scripts-path Database/Scripts \
+      --dry-run
+  ```
+  Opțiuni suportate: `--connection`, `--schema`, `--scripts-path`, `--rollbacks-path`, `--dry-run`, `--rollback V0003`. Valorile pot veni și din `ConnectionStrings__Postgres` sau `DB_RUNNER_CONNECTIONSTRING`.
+- ✅ Runner-ul creează/folosește tabela `alchimalia_schema.schema_versions`, verifică checksum-ul (SHA256) și scrie status `Succeeded` sau `RolledBack` împreună cu durata execuției.
+- ✅ Structura de directoare `Database/Scripts` + `Database/Scripts/Rollbacks` este prezentă în repo. Primul script (`V0001__initial_full_schema.sql`) a fost exportat din migrarea `20251126184048_InitialFullSchema` folosind `dotnet tool run dotnet-ef migrations script ...`.
+- ✅ În rădăcina backend-ului există un manifest local `.config/dotnet-tools.json` care fixează `dotnet-ef` la versiunea 8.0.11 (evităm conflictul cu instalația globală 10.x).
+- ✅ `V0002__seed_bestiary_items.sql` înserează toate combinațiile Bestiary generate din `Data/SeedData/Discovery/i18n/<locale>/discover-bestiary.json`. Scriptul este produs determinist cu `Database/Scripts/Generators/Generate-BestiarySql.ps1` (folosește `uuid_generate_v5` pentru chei stabile și este idempotent via `ON CONFLICT ("Id")`).
+- ✅ `V0003__seed_story_topics_age_groups_authors.sql` aduce în DB toate topic-urile + traducerile, grupele de vârstă + descrierile și lista de autori clasici din `Data/SeedData/Story-Editor/**`. Generator:  
+  ```powershell
+  cd BA/XooCreator.BA/Database/Scripts/Generators
+  pwsh ./Generate-StoryTopicsSql.ps1
+  ```
+- ℹ️ Pentru a regenera `V0002`:  
+  ```powershell
+  cd BA/XooCreator.BA/Database/Scripts/Generators
+  pwsh ./Generate-BestiarySql.ps1
+  ```
+- ℹ️ Toate scripturile noi trebuie să fie reproductibile din sursele din `Data/SeedData/**`. Vom adăuga generatoare similare pentru Topics/AgeGroups, Hero Tree, Stories, Tree Model, etc., astfel încât viitoare actualizări de conținut să se facă prin „source of truth” în JSON + regenerare SQL.
+- ℹ️ Fiecare script se execută în tranzacție separată; dacă fișierul conține manual `BEGIN; ... COMMIT;`, runner-ul detectează și nu mai deschide tranzacție proprie.
+- ℹ️ Modele de rulare:
+  - Execuție reală: `dotnet run --project XooCreator.DbScriptRunner -- --connection "%ConnectionStrings__Postgres%"`.
+  - Numai raport (fără modificări): adaugă `--dry-run` (nu se creează tabela `schema_versions` dacă lipsește).
+  - Rollback manual: `dotnet run --project XooCreator.DbScriptRunner -- --connection "...conn..." --rollback V0003` (caută `R0003__*.sql` în `Database/Scripts/Rollbacks`).
+- 🔜 Următorii pași rămași din plan: integrarea în pipeline (dry-run + execuție), teste pe Azure/Postgres local și actualizarea documentației aplicației pentru a elimina EF Migrations din `Program.cs`.
+
