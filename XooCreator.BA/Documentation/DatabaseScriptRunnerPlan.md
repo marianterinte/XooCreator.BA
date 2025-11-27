@@ -184,5 +184,6 @@ Implementăm un mecanism determinist de aplicare a scripturilor SQL (fără EF M
   - Execuție reală: `dotnet run --project XooCreator.DbScriptRunner -- --connection "%ConnectionStrings__Postgres%"`.
   - Numai raport (fără modificări): adaugă `--dry-run` (nu se creează tabela `schema_versions` dacă lipsește).
   - Rollback manual: `dotnet run --project XooCreator.DbScriptRunner -- --connection "...conn..." --rollback V0003` (caută `R0003__*.sql` în `Database/Scripts/Rollbacks`).
-- 🔜 Următorii pași rămași din plan: integrarea în pipeline (dry-run + execuție), teste pe Azure/Postgres local și actualizarea documentației aplicației pentru a elimina EF Migrations din `Program.cs`.
+- ✅ Integrare GitHub Actions pentru dev/prod: workflow-ul `.github/workflows/db-scripts.yml` rulează `XooCreator.DbScriptRunner` în două faze (dry-run + execuție) pentru `AZURE_POSTGRES_CONNSTRING_DEV` la fiecare push pe `main`, iar pentru producție rulează manual prin `workflow_dispatch` (`target=prod/both`) folosind `AZURE_POSTGRES_CONNSTRING_PROD`.
+- 🔜 Următorii pași rămași din plan: teste pe Azure/Postgres local suplimentare și actualizarea documentației aplicației pentru a elimina EF Migrations din `Program.cs`.
 

@@ -1,0 +1,74 @@
+name: Database Scripts Runner
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Which environment(s) to run (dev/prod/both)"
+        required: true
+        default: dev
+        type: choice
+        options:
+          - dev
+          - prod
+          - both
+
+permissions:
+  contents: read
+
+jobs:
+  db-dev:
+    name: Apply scripts (DEV)
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'push' ||
+      github.event.inputs.target == 'dev' ||
+      github.event.inputs.target == 'both'
+    environment: dev
+    defaults:
+      run:
+        working-directory: BA/XooCreator.BA
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Dry-run scripts (DEV)
+        run: dotnet run --project XooCreator.DbScriptRunner -- --connection "${{ secrets.AZURE_POSTGRES_CONNSTRING_DEV }}" --dry-run
+
+      - name: Apply scripts (DEV)
+        run: dotnet run --project XooCreator.DbScriptRunner -- --connection "${{ secrets.AZURE_POSTGRES_CONNSTRING_DEV }}"
+
+  db-prod:
+    name: Apply scripts (PROD)
+    runs-on: ubuntu-latest
+    needs: db-dev
+    if: >
+      github.event_name == 'workflow_dispatch' &&
+      (github.event.inputs.target == 'prod' || github.event.inputs.target == 'both')
+    environment: prod
+    defaults:
+      run:
+        working-directory: BA/XooCreator.BA
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Dry-run scripts (PROD)
+        run: dotnet run --project XooCreator.DbScriptRunner -- --connection "${{ secrets.AZURE_POSTGRES_CONNSTRING_PROD }}" --dry-run
+
+      - name: Apply scripts (PROD)
+        run: dotnet run --project XooCreator.DbScriptRunner -- --connection "${{ secrets.AZURE_POSTGRES_CONNSTRING_PROD }}"
+
