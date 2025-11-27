@@ -274,7 +274,7 @@ public class ImportFullStoryEndpoint
                 var filename = ExtractFilename(coverPath);
                 if (!string.IsNullOrWhiteSpace(filename))
                 {
-                    assets.Add((coverPath, new AssetInfo(filename, AssetType.Image, null)));
+                    assets.Add(CreateAssetEntry(coverPath, new AssetInfo(filename, AssetType.Image, null), isCoverImage: true));
                 }
             }
         }
@@ -293,7 +293,7 @@ public class ImportFullStoryEndpoint
                         var filename = ExtractFilename(imagePath);
                         if (!string.IsNullOrWhiteSpace(filename))
                         {
-                            assets.Add((imagePath, new AssetInfo(filename, AssetType.Image, null)));
+                        assets.Add(CreateAssetEntry(imagePath, new AssetInfo(filename, AssetType.Image, null)));
                         }
                     }
                 }
@@ -306,17 +306,20 @@ public class ImportFullStoryEndpoint
                         var lang = translation.TryGetProperty("lang", out var langElement) 
                             ? langElement.GetString() 
                             : null;
+                        var normalizedLang = string.IsNullOrWhiteSpace(lang)
+                            ? null
+                            : lang!.Trim().ToLowerInvariant();
 
                         // Audio
                         if (translation.TryGetProperty("audioUrl", out var audioElement) && audioElement.ValueKind == JsonValueKind.String)
                         {
                             var audioPath = audioElement.GetString();
-                            if (!string.IsNullOrWhiteSpace(audioPath) && !string.IsNullOrWhiteSpace(lang))
+                            if (!string.IsNullOrWhiteSpace(audioPath) && !string.IsNullOrWhiteSpace(normalizedLang))
                             {
                                 var filename = ExtractFilename(audioPath);
                                 if (!string.IsNullOrWhiteSpace(filename))
                                 {
-                                    assets.Add((audioPath, new AssetInfo(filename, AssetType.Audio, lang)));
+                                    assets.Add(CreateAssetEntry(audioPath, new AssetInfo(filename, AssetType.Audio, normalizedLang)));
                                 }
                             }
                         }
@@ -325,12 +328,12 @@ public class ImportFullStoryEndpoint
                         if (translation.TryGetProperty("videoUrl", out var videoElement) && videoElement.ValueKind == JsonValueKind.String)
                         {
                             var videoPath = videoElement.GetString();
-                            if (!string.IsNullOrWhiteSpace(videoPath) && !string.IsNullOrWhiteSpace(lang))
+                            if (!string.IsNullOrWhiteSpace(videoPath) && !string.IsNullOrWhiteSpace(normalizedLang))
                             {
                                 var filename = ExtractFilename(videoPath);
                                 if (!string.IsNullOrWhiteSpace(filename))
                                 {
-                                    assets.Add((videoPath, new AssetInfo(filename, AssetType.Video, lang)));
+                                    assets.Add(CreateAssetEntry(videoPath, new AssetInfo(filename, AssetType.Video, normalizedLang)));
                                 }
                             }
                         }
@@ -340,6 +343,62 @@ public class ImportFullStoryEndpoint
         }
 
         return assets;
+    }
+
+    private (string ZipPath, AssetInfo Asset) CreateAssetEntry(string? manifestPath, AssetInfo asset, bool isCoverImage = false)
+    {
+        var normalizedPath = NormalizeZipPath(manifestPath);
+        if (string.IsNullOrWhiteSpace(normalizedPath) || !normalizedPath.Contains('/'))
+        {
+            normalizedPath = BuildDefaultZipPath(asset, isCoverImage);
+        }
+
+        return (normalizedPath, asset);
+    }
+
+    private static string NormalizeZipPath(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return string.Empty;
+        }
+
+        var normalized = path
+            .Replace('\\', '/')
+            .TrimStart('.', '/')
+            .Trim();
+
+        while (normalized.Contains("//", StringComparison.Ordinal))
+        {
+            normalized = normalized.Replace("//", "/", StringComparison.Ordinal);
+        }
+
+        return normalized;
+    }
+
+    private string BuildDefaultZipPath(AssetInfo asset, bool isCoverImage)
+    {
+        var mediaType = asset.Type switch
+        {
+            AssetType.Image => "images",
+            AssetType.Audio => "audio",
+            AssetType.Video => "video",
+            _ => "images"
+        };
+
+        if (asset.Type == AssetType.Image)
+        {
+            return isCoverImage
+                ? $"media/{mediaType}/cover/{asset.Filename}"
+                : $"media/{mediaType}/tiles/{asset.Filename}";
+        }
+
+        if (!string.IsNullOrWhiteSpace(asset.Lang))
+        {
+            return $"media/{mediaType}/{asset.Lang}/{asset.Filename}";
+        }
+
+        return $"media/{mediaType}/{asset.Filename}";
     }
 
     private string ExtractFilename(string path)
@@ -374,14 +433,16 @@ public class ImportFullStoryEndpoint
         {
             try
             {
-                // Find asset in ZIP
+                var normalizedZipPath = NormalizeZipPath(zipPath);
+
+                // Find asset in ZIP using the full normalized path (exact match only)
                 var zipEntry = zip.Entries.FirstOrDefault(e => 
-                    e.FullName.Equals(zipPath, StringComparison.OrdinalIgnoreCase) ||
-                    e.FullName.EndsWith(asset.Filename, StringComparison.OrdinalIgnoreCase));
+                    string.Equals(NormalizeZipPath(e.FullName), normalizedZipPath, StringComparison.OrdinalIgnoreCase));
 
                 if (zipEntry == null)
                 {
-                    warnings.Add($"Asset '{asset.Filename}' referenced in JSON but not found in ZIP");
+                    var expectedPath = string.IsNullOrWhiteSpace(normalizedZipPath) ? asset.Filename : normalizedZipPath;
+                    warnings.Add($"Asset '{asset.Filename}' referenced in JSON but not found in ZIP (expected '{expectedPath}')");
                     continue;
                 }
 
