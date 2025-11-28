@@ -770,7 +770,104 @@ public class ImportFullStoryEndpoint
 
         // Save using repository
         await _crafts.SaveAsync(craft, ct);
-        _logger.LogInformation("Created StoryCraft from import: storyId={StoryId}", storyId);
+
+        // Extract and set topic IDs
+        var topicIds = new List<string>();
+        if (root.TryGetProperty("topicIds", out var topicIdsElement) && topicIdsElement.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var topicIdElement in topicIdsElement.EnumerateArray())
+            {
+                var topicId = topicIdElement.GetString();
+                if (!string.IsNullOrWhiteSpace(topicId))
+                {
+                    topicIds.Add(topicId);
+                }
+            }
+        }
+        await UpdateTopicsAsync(craft, topicIds, ct);
+
+        // Extract and set age group IDs
+        var ageGroupIds = new List<string>();
+        if (root.TryGetProperty("ageGroupIds", out var ageGroupIdsElement) && ageGroupIdsElement.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var ageGroupIdElement in ageGroupIdsElement.EnumerateArray())
+            {
+                var ageGroupId = ageGroupIdElement.GetString();
+                if (!string.IsNullOrWhiteSpace(ageGroupId))
+                {
+                    ageGroupIds.Add(ageGroupId);
+                }
+            }
+        }
+        await UpdateAgeGroupsAsync(craft, ageGroupIds, ct);
+
+        // Save again to persist topics and age groups
+        await _db.SaveChangesAsync(ct);
+
+        _logger.LogInformation("Created StoryCraft from import: storyId={StoryId} topics={TopicsCount} ageGroups={AgeGroupsCount}", 
+            storyId, topicIds.Count, ageGroupIds.Count);
+    }
+
+    private async Task UpdateTopicsAsync(StoryCraft craft, List<string> topicIds, CancellationToken ct)
+    {
+        if (topicIds == null || topicIds.Count == 0)
+        {
+            return;
+        }
+
+        // Get topic entities by TopicId
+        var topics = await _db.StoryTopics
+            .Where(t => topicIds.Contains(t.TopicId))
+            .ToListAsync(ct);
+
+        // Add new topics
+        foreach (var topic in topics)
+        {
+            _db.StoryCraftTopics.Add(new StoryCraftTopic
+            {
+                StoryCraftId = craft.Id,
+                StoryTopicId = topic.Id,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+
+        if (topics.Count < topicIds.Count)
+        {
+            var foundTopicIds = topics.Select(t => t.TopicId).ToList();
+            var missingTopicIds = topicIds.Except(foundTopicIds).ToList();
+            _logger.LogWarning("Some topic IDs not found in database: {MissingTopicIds}", string.Join(", ", missingTopicIds));
+        }
+    }
+
+    private async Task UpdateAgeGroupsAsync(StoryCraft craft, List<string> ageGroupIds, CancellationToken ct)
+    {
+        if (ageGroupIds == null || ageGroupIds.Count == 0)
+        {
+            return;
+        }
+
+        // Get age group entities by AgeGroupId
+        var ageGroups = await _db.StoryAgeGroups
+            .Where(ag => ageGroupIds.Contains(ag.AgeGroupId))
+            .ToListAsync(ct);
+
+        // Add new age groups
+        foreach (var ageGroup in ageGroups)
+        {
+            _db.StoryCraftAgeGroups.Add(new StoryCraftAgeGroup
+            {
+                StoryCraftId = craft.Id,
+                StoryAgeGroupId = ageGroup.Id,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+
+        if (ageGroups.Count < ageGroupIds.Count)
+        {
+            var foundAgeGroupIds = ageGroups.Select(ag => ag.AgeGroupId).ToList();
+            var missingAgeGroupIds = ageGroupIds.Except(foundAgeGroupIds).ToList();
+            _logger.LogWarning("Some age group IDs not found in database: {MissingAgeGroupIds}", string.Join(", ", missingAgeGroupIds));
+        }
     }
 }
 

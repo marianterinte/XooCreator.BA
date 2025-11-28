@@ -60,6 +60,8 @@ public class ExportPublishedStoryEndpoint
             .Include(d => d.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Tokens)
             .Include(d => d.Tiles).ThenInclude(t => t.Translations)
             .Include(d => d.Translations)
+            .Include(d => d.Topics).ThenInclude(t => t.StoryTopic)
+            .Include(d => d.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
             .FirstOrDefaultAsync(d => d.StoryId == storyId, ct);
         if (def == null) return TypedResults.NotFound();
 
@@ -106,6 +108,18 @@ public class ExportPublishedStoryEndpoint
 
     private static object BuildExportJson(StoryDefinition def)
     {
+        // Extract topic IDs
+        var topicIds = def.Topics?
+            .Where(t => t.StoryTopic != null)
+            .Select(t => t.StoryTopic!.TopicId)
+            .ToList() ?? new List<string>();
+
+        // Extract age group IDs
+        var ageGroupIds = def.AgeGroups?
+            .Where(ag => ag.StoryAgeGroup != null)
+            .Select(ag => ag.StoryAgeGroup!.AgeGroupId)
+            .ToList() ?? new List<string>();
+
         return new
         {
             id = def.StoryId,
@@ -114,6 +128,12 @@ public class ExportPublishedStoryEndpoint
             summary = def.Summary,
             storyType = def.StoryType,
             coverImageUrl = def.CoverImageUrl,
+            storyTopic = def.StoryTopic,
+            topicIds = topicIds,
+            ageGroupIds = ageGroupIds,
+            authorName = def.AuthorName,
+            classicAuthorId = def.ClassicAuthorId,
+            priceInCredits = def.PriceInCredits,
             translations = def.Translations.Select(t => new
             {
                 lang = t.LanguageCode,

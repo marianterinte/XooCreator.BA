@@ -184,6 +184,18 @@ public class ExportDraftStoryEndpoint
             Summary = null
         };
 
+        // Extract topic IDs
+        var topicIds = craft.Topics?
+            .Where(t => t.StoryTopic != null)
+            .Select(t => t.StoryTopic!.TopicId)
+            .ToList() ?? new List<string>();
+
+        // Extract age group IDs
+        var ageGroupIds = craft.AgeGroups?
+            .Where(ag => ag.StoryAgeGroup != null)
+            .Select(ag => ag.StoryAgeGroup!.AgeGroupId)
+            .ToList() ?? new List<string>();
+
         return new
         {
             id = craft.StoryId,
@@ -192,6 +204,12 @@ public class ExportDraftStoryEndpoint
             summary = primaryTranslation.Summary ?? craft.StoryTopic,
             storyType = craft.StoryType,
             coverImageUrl = craft.CoverImageUrl,
+            storyTopic = craft.StoryTopic,
+            topicIds = topicIds,
+            ageGroupIds = ageGroupIds,
+            authorName = craft.AuthorName,
+            classicAuthorId = craft.ClassicAuthorId,
+            priceInCredits = craft.PriceInCredits,
             translations = craft.Translations.Select(t => new
             {
                 lang = t.LanguageCode,
