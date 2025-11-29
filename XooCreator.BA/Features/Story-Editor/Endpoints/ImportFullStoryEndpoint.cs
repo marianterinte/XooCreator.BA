@@ -79,7 +79,7 @@ public class ImportFullStoryEndpoint
         var isAdmin = ep._auth0.HasRole(user, UserRole.Admin);
         var isCreator = ep._auth0.HasRole(user, UserRole.Creator);
 
-        if (!isAdmin && !isCreator)
+        if (!isAdmin || !isCreator)
         {
             return TypedResults.Forbid();
         }
@@ -132,22 +132,11 @@ public class ImportFullStoryEndpoint
 
             if (manifestEntry == null)
             {
-                errors.Add("Manifest file (manifest/{storyId}/story.json) not found in ZIP");
+                errors.Add("Manifest file (manifest/{storyId}/story.json or manifest/{storyId}/v{version}/story.json) not found in ZIP");
                 return TypedResults.BadRequest(new ImportFullStoryResponse { Success = false, Errors = errors });
             }
 
-            // Extract storyId from manifest path
-            var manifestPath = manifestEntry.FullName;
-            var storyIdMatch = Regex.Match(manifestPath, @"manifest/([^/]+)/story\.json");
-            if (!storyIdMatch.Success)
-            {
-                errors.Add("Could not extract storyId from manifest path");
-                return TypedResults.BadRequest(new ImportFullStoryResponse { Success = false, Errors = errors });
-            }
-
-            var originalStoryId = storyIdMatch.Groups[1].Value;
-
-            // Read and parse JSON
+            // Read and parse JSON first (we'll use ID from JSON as primary source)
             string jsonContent;
             await using (var manifestStream = manifestEntry.Open())
             using (var reader = new StreamReader(manifestStream, Encoding.UTF8))
@@ -169,11 +158,28 @@ public class ImportFullStoryEndpoint
 
             var root = jsonDoc.RootElement;
 
-            // Validate required fields
+            // Validate required fields and extract storyId
             if (!root.TryGetProperty("id", out var idElement) || string.IsNullOrWhiteSpace(idElement.GetString()))
             {
                 errors.Add("Missing or empty 'id' field in manifest");
                 return TypedResults.BadRequest(new ImportFullStoryResponse { Success = false, Errors = errors });
+            }
+
+            // Get storyId from JSON (primary source)
+            var originalStoryId = idElement.GetString()!;
+
+            // Also try to extract from path as validation/fallback
+            var manifestPath = manifestEntry.FullName;
+            // Pattern supports: manifest/{storyId}/story.json OR manifest/{storyId}/v{version}/story.json
+            var storyIdMatch = Regex.Match(manifestPath, @"manifest/([^/]+)(?:/v\d+)?/story\.json", RegexOptions.IgnoreCase);
+            if (storyIdMatch.Success)
+            {
+                var pathStoryId = storyIdMatch.Groups[1].Value;
+                // Warn if path ID doesn't match JSON ID (but use JSON ID as source of truth)
+                if (!string.Equals(pathStoryId, originalStoryId, StringComparison.OrdinalIgnoreCase))
+                {
+                    warnings.Add($"StoryId in path ('{pathStoryId}') doesn't match JSON ID ('{originalStoryId}'). Using JSON ID.");
+                }
             }
 
             if (!root.TryGetProperty("tiles", out var tilesElement) || tilesElement.ValueKind != JsonValueKind.Array || tilesElement.GetArrayLength() == 0)
