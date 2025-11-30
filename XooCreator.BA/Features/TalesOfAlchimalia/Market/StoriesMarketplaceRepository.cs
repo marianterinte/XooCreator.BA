@@ -15,6 +15,7 @@ public record StoryReadersCorrelationItem(string StoryId, string Title, int Read
 
 public interface IStoriesMarketplaceRepository
 {
+    Task<(List<StoryMarketplaceItemDto> Stories, int TotalCount, bool HasMore)> GetMarketplaceStoriesWithPaginationAsync(Guid userId, string locale, SearchStoriesRequest request);
     Task<List<StoryMarketplaceItemDto>> GetMarketplaceStoriesAsync(Guid userId, string locale, SearchStoriesRequest request);
     Task<List<StoryMarketplaceItemDto>> GetFeaturedStoriesAsync(Guid userId, string locale);
     Task<List<string>> GetAvailableRegionsAsync();
@@ -42,6 +43,50 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
     {
         _context = context;
         _storyDetailsMapper = storyDetailsMapper;
+    }
+
+    public async Task<(List<StoryMarketplaceItemDto> Stories, int TotalCount, bool HasMore)> GetMarketplaceStoriesWithPaginationAsync(Guid userId, string locale, SearchStoriesRequest request)
+    {
+        var normalizedLocale = (locale ?? "ro-ro").ToLowerInvariant();
+        
+        var query = _context.StoryDefinitions
+            .Include(s => s.Translations)
+            .Include(s => s.Topics)
+                .ThenInclude(t => t.StoryTopic)
+            .Where(s => s.IsActive);
+
+        // Filtre implicite: doar Published + StoryType = Indie (dacă nu s-au cerut categorii specifice)
+        query = query.Where(s => s.Status == StoryStatus.Published);
+        if (!(request.Categories?.Any() ?? false))
+        {
+            query = query.Where(s => s.StoryType == StoryType.Indie);
+        }
+
+        query = ApplySorting(query, request);
+
+        // Calculate total count BEFORE pagination
+        var totalCount = await query.CountAsync();
+
+        // Apply pagination
+        var stories = await query
+            .Skip((request.Page - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .ToListAsync();
+
+        var dtoList = await MapToMarketplaceListAsync(stories, normalizedLocale, userId);
+
+        if (string.Equals(request.SortBy, "readers", StringComparison.OrdinalIgnoreCase))
+        {
+            var ordered = string.Equals(request.SortOrder, "asc", StringComparison.OrdinalIgnoreCase)
+                ? dtoList.OrderBy(d => d.ReadersCount)
+                : dtoList.OrderByDescending(d => d.ReadersCount);
+            dtoList = ordered.ToList();
+        }
+
+        // Calculate hasMore: check if there are more items after the current page
+        var hasMore = (request.Page * request.PageSize) < totalCount;
+
+        return (dtoList, totalCount, hasMore);
     }
 
     public async Task<List<StoryMarketplaceItemDto>> GetMarketplaceStoriesAsync(Guid userId, string locale, SearchStoriesRequest request)

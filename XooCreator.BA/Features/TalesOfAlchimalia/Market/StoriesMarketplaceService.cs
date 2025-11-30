@@ -36,21 +36,13 @@ public class StoriesMarketplaceService : IStoriesMarketplaceService
     {
         try
         {
-            var stories = await _repository.GetMarketplaceStoriesAsync(userId, locale, request);
-            var featuredStories = await _repository.GetFeaturedStoriesAsync(userId, locale);
-            var availableRegions = await _repository.GetAvailableRegionsAsync();
-            var availableAgeRatings = await _repository.GetAvailableAgeRatingsAsync();
-            var availableCharacters = await _repository.GetAvailableCharactersAsync();
+            var (stories, totalCount, hasMore) = await _repository.GetMarketplaceStoriesWithPaginationAsync(userId, locale, request);
 
             return new GetMarketplaceStoriesResponse
             {
                 Stories = stories,
-                FeaturedStories = featuredStories,
-                AvailableRegions = availableRegions,
-                AvailableAgeRatings = availableAgeRatings,
-                AvailableCharacters = availableCharacters,
-                TotalCount = stories.Count,
-                HasMore = stories.Count == request.PageSize
+                TotalCount = totalCount,
+                HasMore = hasMore
             };
         }
         catch (Exception ex)
@@ -59,10 +51,6 @@ public class StoriesMarketplaceService : IStoriesMarketplaceService
             return new GetMarketplaceStoriesResponse
             {
                 Stories = new List<StoryMarketplaceItemDto>(),
-                FeaturedStories = new List<StoryMarketplaceItemDto>(),
-                AvailableRegions = new List<string>(),
-                AvailableAgeRatings = new List<string>(),
-                AvailableCharacters = new List<string>(),
                 TotalCount = 0,
                 HasMore = false
             };

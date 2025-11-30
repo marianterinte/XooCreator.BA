@@ -36,7 +36,7 @@ public class GetMarketplaceStoriesEndpoint
         [FromQuery] string sortBy = "sortOrder",
         [FromQuery] string sortOrder = "asc",
         [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 20)
+        [FromQuery] int pageSize = 5)
     {
         var userId = await ep._userContext.GetUserIdAsync();
         if (userId == null) throw new UnauthorizedAccessException("User not found");

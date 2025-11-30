@@ -78,10 +78,6 @@ public record PurchaseStoryResponse
 public record GetMarketplaceStoriesResponse
 {
     public List<StoryMarketplaceItemDto> Stories { get; init; } = new();
-    public List<StoryMarketplaceItemDto> FeaturedStories { get; init; } = new();
-    public List<string> AvailableRegions { get; init; } = new();
-    public List<string> AvailableAgeRatings { get; init; } = new();
-    public List<string> AvailableCharacters { get; init; } = new();
     public int TotalCount { get; init; }
     public bool HasMore { get; init; }
 }

@@ -42,10 +42,6 @@ public class FavoritesService : IFavoritesService
         return new GetMarketplaceStoriesResponse
         {
             Stories = stories,
-            FeaturedStories = new List<StoryMarketplaceItemDto>(),
-            AvailableRegions = new List<string>(),
-            AvailableAgeRatings = new List<string>(),
-            AvailableCharacters = new List<string>(),
             TotalCount = stories.Count,
             HasMore = false
         };
