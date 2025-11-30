@@ -166,7 +166,9 @@ public sealed class GetUserBestiaryEndpoint
             }
             
             // If not found, try the consolidated story-heroes.json file
-            var storyHeroesFilePath = Path.Combine(baseDir, "Data", "SeedData", "Translations", locale, "story-heroes.json");
+            // Normalize locale for Translations folder: lowercase -> TitleCase (hu-hu -> hu-HU)
+            var normalizedLocaleForTranslations = NormalizeLocaleForTranslationsFolder(locale);
+            var storyHeroesFilePath = Path.Combine(baseDir, "Data", "SeedData", "Translations", normalizedLocaleForTranslations, "story-heroes.json");
             
             if (File.Exists(storyHeroesFilePath))
             {
@@ -206,7 +208,7 @@ public sealed class GetUserBestiaryEndpoint
                 }
                 
                 // Try English consolidated story-heroes.json file
-                var fallbackStoryHeroesFilePath = Path.Combine(baseDir, "Data", "SeedData", "Translations", "en-us", "story-heroes.json");
+                var fallbackStoryHeroesFilePath = Path.Combine(baseDir, "Data", "SeedData", "Translations", "en-US", "story-heroes.json");
                 
                 if (File.Exists(fallbackStoryHeroesFilePath))
                 {
@@ -314,49 +316,148 @@ public sealed class GetUserBestiaryEndpoint
                 return text; // If we can't get the hero ID, return original text
             }
             
-            // Try to get the translation for the requested locale
-            var heroTreeFilePath = Path.Combine(baseDir, "Data", "SeedData", "BookOfHeroes", "i18n", locale, "hero-tree.json");
-            
-            if (File.Exists(heroTreeFilePath))
+            // If text is already a translation key, use it directly
+            if (text.StartsWith("hero_tree_", StringComparison.OrdinalIgnoreCase))
             {
-                var json = File.ReadAllText(heroTreeFilePath);
-                var heroTreeData = JsonSerializer.Deserialize<Dictionary<string, string>>(json, new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                    PropertyNameCaseInsensitive = true
-                });
-
-                // Determine if we're translating name or story
-                var field = GetTreeOfHeroesField(text);
-                var key = $"hero_tree_{heroId}_{field}";
+                // Try to get the translation for the requested locale
+                var heroTreeFilePath = Path.Combine(baseDir, "Data", "SeedData", "BookOfHeroes", "i18n", locale, "hero-tree.json");
                 
-                if (heroTreeData?.ContainsKey(key) == true)
+                if (File.Exists(heroTreeFilePath))
                 {
-                    return heroTreeData[key];
-                }
-            }
-            
-            // If not found in requested locale, try English fallback
-            if (locale != "en-us")
-            {
-                var fallbackFilePath = Path.Combine(baseDir, "Data", "SeedData", "BookOfHeroes", "i18n", "en-us", "hero-tree.json");
-                
-                if (File.Exists(fallbackFilePath))
-                {
-                    var json = File.ReadAllText(fallbackFilePath);
+                    var json = File.ReadAllText(heroTreeFilePath);
                     var heroTreeData = JsonSerializer.Deserialize<Dictionary<string, string>>(json, new JsonSerializerOptions
                     {
                         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                         PropertyNameCaseInsensitive = true
                     });
 
-                    // Determine if we're translating name or story
+                    if (heroTreeData?.ContainsKey(text) == true)
+                    {
+                        return heroTreeData[text];
+                    }
+                }
+                
+                // Fallback to English if not found in requested locale
+                if (locale != "en-us")
+                {
+                    var fallbackFilePath = Path.Combine(baseDir, "Data", "SeedData", "BookOfHeroes", "i18n", "en-us", "hero-tree.json");
+                    
+                    if (File.Exists(fallbackFilePath))
+                    {
+                        var json = File.ReadAllText(fallbackFilePath);
+                        var heroTreeData = JsonSerializer.Deserialize<Dictionary<string, string>>(json, new JsonSerializerOptions
+                        {
+                            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                            PropertyNameCaseInsensitive = true
+                        });
+
+                        if (heroTreeData?.ContainsKey(text) == true)
+                        {
+                            return heroTreeData[text];
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // Text is already translated (from database - legacy data)
+                // We need to find the translation key by searching in reference translation files
+                // Try Romanian first (most likely source for existing translated text)
+                string? foundKey = null;
+                
+                // Try Romanian translation file to find the key
+                var roFilePath = Path.Combine(baseDir, "Data", "SeedData", "BookOfHeroes", "i18n", "ro-ro", "hero-tree.json");
+                if (File.Exists(roFilePath))
+                {
+                    var json = File.ReadAllText(roFilePath);
+                    var roData = JsonSerializer.Deserialize<Dictionary<string, string>>(json, new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        PropertyNameCaseInsensitive = true
+                    });
+                    
+                    // Search for the text in Romanian translations
+                    if (roData != null)
+                    {
+                        foreach (var kvp in roData)
+                        {
+                            if (kvp.Value.Equals(text, StringComparison.OrdinalIgnoreCase))
+                            {
+                                foundKey = kvp.Key;
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                // If not found in Romanian, try English
+                if (foundKey == null)
+                {
+                    var enFilePath = Path.Combine(baseDir, "Data", "SeedData", "BookOfHeroes", "i18n", "en-us", "hero-tree.json");
+                    if (File.Exists(enFilePath))
+                    {
+                        var json = File.ReadAllText(enFilePath);
+                        var enData = JsonSerializer.Deserialize<Dictionary<string, string>>(json, new JsonSerializerOptions
+                        {
+                            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                            PropertyNameCaseInsensitive = true
+                        });
+                        
+                        if (enData != null)
+                        {
+                            foreach (var kvp in enData)
+                            {
+                                if (kvp.Value.Equals(text, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    foundKey = kvp.Key;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // If we found the key, use it to get the translation in the requested locale
+                if (foundKey != null)
+                {
+                    var heroTreeFilePath = Path.Combine(baseDir, "Data", "SeedData", "BookOfHeroes", "i18n", locale, "hero-tree.json");
+                    
+                    if (File.Exists(heroTreeFilePath))
+                    {
+                        var json = File.ReadAllText(heroTreeFilePath);
+                        var heroTreeData = JsonSerializer.Deserialize<Dictionary<string, string>>(json, new JsonSerializerOptions
+                        {
+                            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                            PropertyNameCaseInsensitive = true
+                        });
+
+                        if (heroTreeData?.ContainsKey(foundKey) == true)
+                        {
+                            return heroTreeData[foundKey];
+                        }
+                    }
+                }
+                else
+                {
+                    // Fallback: try to construct the key using the heroId and field detection
                     var field = GetTreeOfHeroesField(text);
                     var key = $"hero_tree_{heroId}_{field}";
                     
-                    if (heroTreeData?.ContainsKey(key) == true)
+                    var heroTreeFilePath = Path.Combine(baseDir, "Data", "SeedData", "BookOfHeroes", "i18n", locale, "hero-tree.json");
+                    
+                    if (File.Exists(heroTreeFilePath))
                     {
-                        return heroTreeData[key];
+                        var json = File.ReadAllText(heroTreeFilePath);
+                        var heroTreeData = JsonSerializer.Deserialize<Dictionary<string, string>>(json, new JsonSerializerOptions
+                        {
+                            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                            PropertyNameCaseInsensitive = true
+                        });
+
+                        if (heroTreeData?.ContainsKey(key) == true)
+                        {
+                            return heroTreeData[key];
+                        }
                     }
                 }
             }
@@ -369,8 +470,37 @@ public sealed class GetUserBestiaryEndpoint
         return text; // Fallback to original text
     }
 
+    /// <summary>
+    /// Normalizes locale string for Translations folder (e.g., "hu-hu" -> "hu-HU", "en-us" -> "en-US", "ro-ro" -> "ro-RO")
+    /// </summary>
+    private string NormalizeLocaleForTranslationsFolder(string locale)
+    {
+        if (string.IsNullOrEmpty(locale))
+            return "en-US";
+        
+        var parts = locale.ToLowerInvariant().Split('-');
+        if (parts.Length == 2)
+        {
+            // Convert to TitleCase: "hu-hu" -> "hu-HU"
+            return $"{parts[0]}-{parts[1].ToUpperInvariant()}";
+        }
+        
+        return locale; // Return as-is if format is unexpected
+    }
+
     private string GetTreeOfHeroesField(string text)
     {
+        // Check if text is a translation key (starts with "hero_tree_")
+        if (text.StartsWith("hero_tree_", StringComparison.OrdinalIgnoreCase))
+        {
+            // Extract field from key: "hero_tree_{heroId}_{field}"
+            var parts = text.Split('_');
+            if (parts.Length >= 4)
+            {
+                return parts[3]; // Return the field part (name, desc, story)
+            }
+        }
+        
         // Simple heuristic: if the text is relatively short (likely a name), return "name"
         // Otherwise, return "story"
         if (text.Length < 50) // Names are typically shorter

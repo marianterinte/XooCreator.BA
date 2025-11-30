@@ -120,28 +120,43 @@ public class TreeOfHeroesService : ITreeOfHeroesService
             // Save hero to bestiary
             try
             {
-                // Check if hero already exists in bestiary
+                // Build translation keys from heroId (pattern: hero_tree_{heroId}_name/story)
+                // This matches the pattern used in hero-tree.json and translation files
+                var nameKey = $"hero_tree_{request.HeroId}_name";
+                var storyKey = $"hero_tree_{request.HeroId}_story";
+                
+                // Check if hero already exists in bestiary (by ArmsKey which contains heroId)
                 var existingBestiaryItem = await _db.BestiaryItems
-                    .FirstOrDefaultAsync(bi => bi.Name == heroDefinition.Name);
+                    .FirstOrDefaultAsync(bi => bi.ArmsKey == request.HeroId);
                 
                 BestiaryItem bestiaryItem;
                 if (existingBestiaryItem == null)
                 {
                     // Create new bestiary item for this hero
+                    // Store translation keys instead of translated text (like storyhero does)
                     bestiaryItem = new BestiaryItem
                     {
                         Id = Guid.NewGuid(),
                         ArmsKey = request.HeroId, // Use HeroId as the identifier
                         BodyKey = "—", 
                         HeadKey = "—",
-                        Name = heroDefinition.Name,
-                        Story = heroDefinition.Story ?? "A hero transformed through the Tree of Heroes.",
+                        Name = nameKey,
+                        Story = storyKey,
                         CreatedAt = DateTime.UtcNow
                     };
                     _db.BestiaryItems.Add(bestiaryItem);
                 }
                 else
                 {
+                    // Update existing item to use keys if it doesn't already
+                    if (!existingBestiaryItem.Name.StartsWith("hero_tree_", StringComparison.OrdinalIgnoreCase))
+                    {
+                        existingBestiaryItem.Name = nameKey;
+                    }
+                    if (!existingBestiaryItem.Story.StartsWith("hero_tree_", StringComparison.OrdinalIgnoreCase))
+                    {
+                        existingBestiaryItem.Story = storyKey;
+                    }
                     bestiaryItem = existingBestiaryItem;
                 }
 
