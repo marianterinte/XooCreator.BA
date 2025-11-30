@@ -115,6 +115,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IStoryCopyService, StoryCopyService>();
         services.AddScoped<IStoryDraftAssetCleanupService, StoryDraftAssetCleanupService>();
         services.AddScoped<IStoryPublishedAssetCleanupService, StoryPublishedAssetCleanupService>();
+        services.AddScoped<IStoryAssetReplacementService, StoryAssetReplacementService>();
         
         return services;
     }
