@@ -126,8 +126,8 @@ public class ImportFullStoryEndpoint
             using var zip = new ZipArchive(zipStream, ZipArchiveMode.Read);
 
             // Find manifest file
-            var manifestEntry = zip.Entries.FirstOrDefault(e => 
-                e.FullName.Contains("manifest/", StringComparison.OrdinalIgnoreCase) && 
+            var manifestEntry = zip.Entries.FirstOrDefault(e =>
+                e.FullName.Contains("manifest/", StringComparison.OrdinalIgnoreCase) &&
                 e.FullName.EndsWith("story.json", StringComparison.OrdinalIgnoreCase));
 
             if (manifestEntry == null)
@@ -215,7 +215,7 @@ public class ImportFullStoryEndpoint
             // Create StoryCraft from JSON
             await ep.CreateStoryCraftFromJsonAsync(root, user.Id, finalStoryId, warnings, ct);
 
-            ep._logger.LogInformation("Import full story successful: storyId={StoryId} userId={UserId} assets={AssetsCount}", 
+            ep._logger.LogInformation("Import full story successful: storyId={StoryId} userId={UserId} assets={AssetsCount}",
                 finalStoryId, user.Id, uploadedAssets);
 
             return TypedResults.Ok(new ImportFullStoryResponse
@@ -232,7 +232,7 @@ public class ImportFullStoryEndpoint
         catch (Exception ex)
         {
             ep._logger.LogError(ex, "Import full story failed: userId={UserId}", user.Id);
-            
+
             // Rollback on any exception
             await ep.RollbackAssetsAsync(uploadedBlobPaths, ct);
 
@@ -244,7 +244,7 @@ public class ImportFullStoryEndpoint
     private async Task<string> ResolveStoryIdConflictAsync(string storyId, AlchimaliaUser user, bool isAdmin, CancellationToken ct)
     {
         var existing = await _crafts.GetAsync(storyId, ct);
-        
+
         if (existing == null)
         {
             return storyId; // No conflict
@@ -303,7 +303,7 @@ public class ImportFullStoryEndpoint
                         var filename = ExtractFilename(imagePath);
                         if (!string.IsNullOrWhiteSpace(filename))
                         {
-                        assets.Add(CreateAssetEntry(imagePath, new AssetInfo(filename, AssetType.Image, null)));
+                            assets.Add(CreateAssetEntry(imagePath, new AssetInfo(filename, AssetType.Image, null)));
                         }
                     }
                 }
@@ -313,8 +313,8 @@ public class ImportFullStoryEndpoint
                 {
                     foreach (var translation in translationsElement.EnumerateArray())
                     {
-                        var lang = translation.TryGetProperty("lang", out var langElement) 
-                            ? langElement.GetString() 
+                        var lang = translation.TryGetProperty("lang", out var langElement)
+                            ? langElement.GetString()
                             : null;
                         var normalizedLang = string.IsNullOrWhiteSpace(lang)
                             ? null
@@ -446,8 +446,8 @@ public class ImportFullStoryEndpoint
                 var normalizedZipPath = NormalizeZipPath(zipPath);
 
                 // Find asset in ZIP using the full normalized path (exact match only)
-                var zipEntry = zip.Entries.FirstOrDefault(e => 
-                    string.Equals(NormalizeZipPath(e.FullName), normalizedZipPath, StringComparison.OrdinalIgnoreCase));
+                var zipEntry = zip.Entries.FirstOrDefault(e =>
+                    ContainsPath(e, normalizedZipPath));
 
                 if (zipEntry == null)
                 {
@@ -498,7 +498,7 @@ public class ImportFullStoryEndpoint
                 // Upload to blob storage
                 var blobClient = _sas.GetBlobClient(_sas.DraftContainer, blobPath);
                 await blobClient.UploadAsync(memoryStream, overwrite: true, cancellationToken: ct);
-                
+
                 // Set content type
                 var headers = new Azure.Storage.Blobs.Models.BlobHttpHeaders { ContentType = contentType };
                 await blobClient.SetHttpHeadersAsync(headers, cancellationToken: ct);
@@ -516,6 +516,15 @@ public class ImportFullStoryEndpoint
         }
 
         return uploadedCount;
+    }
+
+    private static bool ContainsPath(ZipArchiveEntry e, string normalizedZipPath)
+    {
+        var path = NormalizeZipPath(e.FullName);
+        var result= string.Equals(path, normalizedZipPath, StringComparison.OrdinalIgnoreCase) ||
+            path.Contains(normalizedZipPath);
+        ;
+        return result;
     }
 
     private async Task RollbackAssetsAsync(List<string> blobPaths, CancellationToken ct)
@@ -712,7 +721,7 @@ public class ImportFullStoryEndpoint
                     foreach (var answer in answersElement.EnumerateArray())
                     {
                         var answerId = answer.TryGetProperty("id", out var answerIdElement) ? answerIdElement.GetString() ?? $"answer-{answerSortOrder}" : $"answer-{answerSortOrder}";
-                        
+
                         var craftAnswer = new StoryCraftAnswer
                         {
                             Id = Guid.NewGuid(),
@@ -811,7 +820,7 @@ public class ImportFullStoryEndpoint
         // Save again to persist topics and age groups
         await _db.SaveChangesAsync(ct);
 
-        _logger.LogInformation("Created StoryCraft from import: storyId={StoryId} topics={TopicsCount} ageGroups={AgeGroupsCount}", 
+        _logger.LogInformation("Created StoryCraft from import: storyId={StoryId} topics={TopicsCount} ageGroups={AgeGroupsCount}",
             storyId, topicIds.Count, ageGroupIds.Count);
     }
 
