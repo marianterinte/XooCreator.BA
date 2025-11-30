@@ -18,17 +18,20 @@ public class DeleteStoryEndpoint
     private readonly IStoryCraftsRepository _crafts;
     private readonly IStoryEditorService _editorService;
     private readonly IAuth0UserService _auth0;
+    private readonly IStoryDraftAssetCleanupService _cleanupService;
     private readonly ILogger<DeleteStoryEndpoint> _logger;
 
     public DeleteStoryEndpoint(
         IStoryCraftsRepository crafts,
         IStoryEditorService editorService,
         IAuth0UserService auth0,
+        IStoryDraftAssetCleanupService cleanupService,
         ILogger<DeleteStoryEndpoint> logger)
     {
         _crafts = crafts;
         _editorService = editorService;
         _auth0 = auth0;
+        _cleanupService = cleanupService;
         _logger = logger;
     }
 
@@ -67,8 +70,13 @@ public class DeleteStoryEndpoint
             return TypedResults.Conflict($"Cannot delete story. Only stories in Draft status can be deleted. Current status: {currentStatus.GetDescription()}");
         }
 
+        // Delete draft assets from Azure Storage before deleting from database
+        await ep._cleanupService.DeleteDraftAssetsAsync(user.Email, storyId, ct);
+        
+        // Delete draft from database
         await ep._editorService.DeleteDraftAsync(user.Id, storyId, ct);
-        ep._logger.LogInformation("Delete story: userId={UserId} storyId={StoryId}", user.Id, storyId);
+        
+        ep._logger.LogInformation("Delete story: userId={UserId} storyId={StoryId} assetsDeleted=true", user.Id, storyId);
         
         return TypedResults.Ok(new DeleteResponse());
     }
