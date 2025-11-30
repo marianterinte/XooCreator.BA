@@ -53,7 +53,19 @@ public class StoriesRepository : IStoriesRepository
                         .ThenInclude(a => a.Translations)
                 .FirstOrDefaultAsync(s => s.StoryId == storyId && s.IsActive);
 
-        return story == null ? null : StoryDefinitionMapper.MapToDtoWithLocale(story, locale);
+        if (story == null) return null;
+
+        // Get owner email from CreatedBy
+        string? ownerEmail = null;
+        if (story.CreatedBy.HasValue)
+        {
+            ownerEmail = await _context.Set<AlchimaliaUser>()
+                .Where(u => u.Id == story.CreatedBy.Value)
+                .Select(u => u.Email)
+                .FirstOrDefaultAsync();
+        }
+
+        return StoryDefinitionMapper.MapToDtoWithLocale(story, locale, ownerEmail);
     }
 
     public async Task<StoryDefinition?> GetStoryDefinitionByIdAsync(string storyId)

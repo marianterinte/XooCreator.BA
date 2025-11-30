@@ -191,7 +191,7 @@ public static class StoryDefinitionMapper
     /// <summary>
     /// Maps StoryDefinition entity to StoryContentDto with locale support.
     /// </summary>
-    public static StoryContentDto MapToDtoWithLocale(StoryDefinition story, string locale)
+    public static StoryContentDto MapToDtoWithLocale(StoryDefinition story, string locale, string? ownerEmail = null)
     {
         var lc = (locale ?? "ro-ro").ToLowerInvariant();
         var defTitle = TryGetTitle(story, lc) ?? story.Title;
@@ -230,7 +230,8 @@ public static class StoryDefinitionMapper
                                 Quantity = tok.Quantity
                             }).ToList()
                         }).ToList()
-                }).ToList()
+                }).ToList(),
+            OwnerEmail = ownerEmail
         };
     }
 

@@ -13,6 +13,7 @@ public record StoryContentDto
     public string? StoryType { get; init; }
     public List<string> UnlockedStoryHeroes { get; init; } = new();
     public List<StoryTileDto> Tiles { get; init; } = new();
+    public string? OwnerEmail { get; init; }
 }
 
 public record StoryTileDto
