@@ -66,6 +66,7 @@ public class ImportFullStoryEndpoint
 
     [Route("/api/{locale}/stories/import-full")]
     [Authorize]
+    [DisableRequestSizeLimit] // Disable request size limit for this endpoint (allows up to 500MB as per MaxZipSizeBytes)
     public static async Task<Results<Ok<ImportFullStoryResponse>, BadRequest<ImportFullStoryResponse>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
         [FromRoute] string locale,
         [FromServices] ImportFullStoryEndpoint ep,
@@ -94,7 +95,20 @@ public class ImportFullStoryEndpoint
             return TypedResults.BadRequest(new ImportFullStoryResponse { Success = false, Errors = errors });
         }
 
-        var form = await request.ReadFormAsync(ct);
+        // Disable request size limit for this specific request (for minimal APIs)
+        var feature = request.HttpContext.Features.Get<Microsoft.AspNetCore.Http.Features.IHttpMaxRequestBodySizeFeature>();
+        if (feature != null && !feature.IsReadOnly)
+        {
+            feature.MaxRequestBodySize = null; // null = unlimited
+        }
+
+        // Configure form options explicitly to allow large file uploads (up to 600MB)
+        var form = await request.ReadFormAsync(new Microsoft.AspNetCore.Http.Features.FormOptions
+        {
+            MultipartBodyLengthLimit = 600 * 1024 * 1024, // 600MB
+            ValueLengthLimit = int.MaxValue,
+            KeyLengthLimit = int.MaxValue
+        }, ct);
         var file = form.Files.GetFile("file");
 
         // Validate file
