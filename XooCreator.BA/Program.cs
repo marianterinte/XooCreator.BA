@@ -66,6 +66,10 @@ var app = builder.Build();
 // Configure detailed error page for startup errors
 StartupErrorHandler.ConfigureErrorPage(app);
 
+// IMPORTANT: LargeFileUploadMiddleware must be BEFORE UseCors to avoid CORS issues
+// This middleware disables request size limits for import-full endpoint
+app.UseMiddleware<XooCreator.BA.Infrastructure.Middleware.LargeFileUploadMiddleware>();
+
 app.UseCors("AllowAll");
 
 app.UseGlobalExceptionHandling();
