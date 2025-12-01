@@ -255,6 +255,16 @@
       ]
     },
     {
+      "id": "alchimalia_universe",
+      "label": "Alchimalia Universe",
+      "allowed_values": [
+        {
+          "id": "alchimalia_universe",
+          "label": "Alchimalia Universe"
+        }
+      ]
+    },
+    {
       "id": "classic",
       "label": "Popular Story (classic)",
       "allowed_values": [

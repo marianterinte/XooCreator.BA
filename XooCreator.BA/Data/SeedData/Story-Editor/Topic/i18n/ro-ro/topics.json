@@ -255,6 +255,16 @@
       ]
     },
     {
+      "id": "alchimalia_universe",
+      "label": "Universul Alchimalia",
+      "allowed_values": [
+        {
+          "id": "alchimalia_universe",
+          "label": "Universul Alchimalia"
+        }
+      ]
+    },
+    {
       "id": "classic",
       "label": "Poveste Populară (clasică)",
       "allowed_values": [

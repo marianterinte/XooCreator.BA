@@ -255,6 +255,16 @@
       ]
     },
     {
+      "id": "alchimalia_universe",
+      "label": "Alchimalia Univerzum",
+      "allowed_values": [
+        {
+          "id": "alchimalia_universe",
+          "label": "Alchimalia Univerzum"
+        }
+      ]
+    },
+    {
       "id": "classic",
       "label": "Népszerű Történet (klasszikus)",
       "allowed_values": [

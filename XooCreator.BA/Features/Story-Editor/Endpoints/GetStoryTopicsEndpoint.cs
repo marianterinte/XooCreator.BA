@@ -70,7 +70,7 @@ public class GetStoryTopicsEndpoint
                         SortOrder: t.SortOrder
                     )).OrderBy(t => t.SortOrder).ToList()
                 ))
-                .OrderBy(d => d.Id == "classic" ? 0 : 1)
+                .OrderBy(d => d.Id == "alchimalia_universe" ? 0 : d.Id == "classic" ? 1 : 2)
                 .ThenBy(d => d.Id)
                 .ToList();
 
@@ -94,6 +94,7 @@ public class GetStoryTopicsEndpoint
         // Fallback to hardcoded values if JSON not found
         return dimensionId switch
         {
+            "alchimalia_universe" => lang == "ro-ro" ? "Universul Alchimalia" : lang == "hu-hu" ? "Alchimalia Univerzum" : "Alchimalia Universe",
             "educational" => lang == "ro-ro" ? "Educațional" : lang == "hu-hu" ? "Oktatási" : "Educational",
             "fun" => lang == "ro-ro" ? "Distractiv" : lang == "hu-hu" ? "Szórakoztató" : "Fun",
             "emotional_depth" => lang == "ro-ro" ? "Profunzime emoțională" : lang == "hu-hu" ? "Érzelmi mélység" : "Emotional depth",
