@@ -1,0 +1,236 @@
+using System.Security.Cryptography;
+using System.Text;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using XooCreator.BA.Data;
+using XooCreator.BA.Data.Entities;
+using XooCreator.BA.Features.StoryEditor.Mappers;
+using XooCreator.BA.Infrastructure.Services.Blob;
+
+namespace XooCreator.BA.Features.StoryEditor.Services;
+
+public interface IStoryAssetLinkService
+{
+    Task SyncCoverAsync(StoryCraft craft, string ownerEmail, CancellationToken ct);
+    Task SyncTileAssetsAsync(StoryCraft craft, StoryCraftTile tile, string ownerEmail, CancellationToken ct);
+    Task RemoveTileAssetsAsync(string storyId, string tileId, CancellationToken ct);
+    Task RemoveCoverAsync(string storyId, CancellationToken ct);
+}
+
+public class StoryAssetLinkService : IStoryAssetLinkService
+{
+    private const string CoverEntityId = "__cover__";
+
+    private readonly XooDbContext _db;
+    private readonly IStoryPublishAssetService _assetService;
+    private readonly IBlobSasService _sas;
+    private readonly ILogger<StoryAssetLinkService> _logger;
+
+    public StoryAssetLinkService(
+        XooDbContext db,
+        IStoryPublishAssetService assetService,
+        IBlobSasService sas,
+        ILogger<StoryAssetLinkService> logger)
+    {
+        _db = db;
+        _assetService = assetService;
+        _sas = sas;
+        _logger = logger;
+    }
+
+    public async Task SyncCoverAsync(StoryCraft craft, string ownerEmail, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(craft.CoverImageUrl))
+        {
+            await RemoveCoverAsync(craft.StoryId, ct);
+            return;
+        }
+
+        var asset = new StoryAssetPathMapper.AssetInfo(craft.CoverImageUrl, StoryAssetPathMapper.AssetType.Image, null);
+        var assets = new List<StoryAssetPathMapper.AssetInfo> { asset };
+        var copyResult = await _assetService.CopyAssetsToPublishedAsync(assets, ownerEmail, craft.StoryId, ct);
+        if (copyResult.HasError)
+        {
+            _logger.LogWarning("Failed to copy cover asset for storyId={StoryId}", craft.StoryId);
+            return;
+        }
+
+        await UpsertLinkAsync(
+            craft.StoryId,
+            craft.LastDraftVersion,
+            CoverEntityId,
+            asset,
+            ownerEmail,
+            ct);
+    }
+
+    public async Task SyncTileAssetsAsync(StoryCraft craft, StoryCraftTile tile, string ownerEmail, CancellationToken ct)
+    {
+        var assets = CollectTileAssets(tile);
+        if (assets.Count == 0)
+        {
+            await RemoveTileAssetsAsync(craft.StoryId, tile.TileId, ct);
+            return;
+        }
+
+        var copyResult = await _assetService.CopyAssetsToPublishedAsync(assets, ownerEmail, craft.StoryId, ct);
+        if (copyResult.HasError)
+        {
+            _logger.LogWarning("Failed to copy assets for tileId={TileId} storyId={StoryId}", tile.TileId, craft.StoryId);
+            return;
+        }
+
+        foreach (var asset in assets)
+        {
+            await UpsertLinkAsync(
+                craft.StoryId,
+                craft.LastDraftVersion,
+                tile.TileId,
+                asset,
+                ownerEmail,
+                ct);
+        }
+    }
+
+    public async Task RemoveTileAssetsAsync(string storyId, string tileId, CancellationToken ct)
+    {
+        var links = await _db.StoryAssetLinks
+            .Where(x => x.StoryId == storyId && x.EntityId == tileId)
+            .ToListAsync(ct);
+
+        if (links.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var link in links)
+        {
+            await DeletePublishedAssetAsync(link.PublishedPath, ct);
+        }
+
+        _db.StoryAssetLinks.RemoveRange(links);
+    }
+
+    public async Task RemoveCoverAsync(string storyId, CancellationToken ct)
+    {
+        var links = await _db.StoryAssetLinks
+            .Where(x => x.StoryId == storyId && x.EntityId == CoverEntityId)
+            .ToListAsync(ct);
+
+        if (links.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var link in links)
+        {
+            await DeletePublishedAssetAsync(link.PublishedPath, ct);
+        }
+
+        _db.StoryAssetLinks.RemoveRange(links);
+    }
+
+    private async Task UpsertLinkAsync(
+        string storyId,
+        int draftVersion,
+        string entityId,
+        StoryAssetPathMapper.AssetInfo asset,
+        string ownerEmail,
+        CancellationToken ct)
+    {
+        var language = asset.Lang?.ToLowerInvariant();
+        var draftPath = StoryAssetPathMapper.BuildDraftPath(asset, ownerEmail, storyId);
+        var publishedPath = StoryAssetPathMapper.BuildPublishedPath(asset, ownerEmail, storyId);
+        var hash = ComputeAssetHash(asset, draftVersion);
+
+        var existing = await _db.StoryAssetLinks
+            .FirstOrDefaultAsync(x =>
+                x.StoryId == storyId &&
+                x.EntityId == entityId &&
+                x.AssetType == asset.Type.ToString() &&
+                x.LanguageCode == language &&
+                x.DraftPath == draftPath,
+                ct);
+
+        if (existing == null)
+        {
+            _db.StoryAssetLinks.Add(new StoryAssetLink
+            {
+                Id = Guid.NewGuid(),
+                StoryId = storyId,
+                DraftVersion = draftVersion,
+                LanguageCode = language,
+                AssetType = asset.Type.ToString(),
+                EntityId = entityId,
+                DraftPath = draftPath,
+                PublishedPath = publishedPath,
+                ContentHash = hash,
+                LastSyncedAt = DateTime.UtcNow,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            });
+        }
+        else
+        {
+            existing.DraftVersion = draftVersion;
+            existing.LanguageCode = language;
+            existing.PublishedPath = publishedPath;
+            existing.ContentHash = hash;
+            existing.LastSyncedAt = DateTime.UtcNow;
+            existing.UpdatedAt = DateTime.UtcNow;
+        }
+    }
+
+    private async Task DeletePublishedAssetAsync(string? publishedPath, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(publishedPath))
+        {
+            return;
+        }
+
+        try
+        {
+            var client = _sas.GetBlobClient(_sas.PublishedContainer, publishedPath);
+            await client.DeleteIfExistsAsync(cancellationToken: ct);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to delete published asset path={Path}", publishedPath);
+        }
+    }
+
+    private static string ComputeAssetHash(StoryAssetPathMapper.AssetInfo asset, int draftVersion)
+    {
+        var raw = $"{asset.Type}|{asset.Filename}|{asset.Lang}|v{draftVersion}";
+        using var sha = SHA256.Create();
+        return Convert.ToHexString(sha.ComputeHash(Encoding.UTF8.GetBytes(raw)));
+    }
+
+    private static List<StoryAssetPathMapper.AssetInfo> CollectTileAssets(StoryCraftTile tile)
+    {
+        var assets = new List<StoryAssetPathMapper.AssetInfo>();
+        if (!string.IsNullOrWhiteSpace(tile.ImageUrl))
+        {
+            assets.Add(new StoryAssetPathMapper.AssetInfo(tile.ImageUrl, StoryAssetPathMapper.AssetType.Image, null));
+        }
+
+        foreach (var translation in tile.Translations)
+        {
+            var lang = translation.LanguageCode.ToLowerInvariant();
+            if (!string.IsNullOrWhiteSpace(translation.AudioUrl))
+            {
+                assets.Add(new StoryAssetPathMapper.AssetInfo(translation.AudioUrl, StoryAssetPathMapper.AssetType.Audio, lang));
+            }
+            if (!string.IsNullOrWhiteSpace(translation.VideoUrl))
+            {
+                assets.Add(new StoryAssetPathMapper.AssetInfo(translation.VideoUrl, StoryAssetPathMapper.AssetType.Video, lang));
+            }
+        }
+
+        return assets
+            .GroupBy(a => $"{a.Type}|{a.Filename}|{a.Lang}")
+            .Select(g => g.First())
+            .ToList();
+    }
+}
+

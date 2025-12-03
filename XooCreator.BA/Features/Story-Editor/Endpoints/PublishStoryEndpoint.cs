@@ -24,6 +24,8 @@ namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 [Endpoint]
 public partial class PublishStoryEndpoint
 {
+    public record PublishRequest(bool ForceFull = false);
+
     private readonly IStoryCraftsRepository _crafts;
     private readonly IUserContextService _userContext;
     private readonly IAuth0UserService _auth0;
@@ -58,6 +60,7 @@ public partial class PublishStoryEndpoint
     public static async Task<Results<Ok<PublishResponse>, NotFound, BadRequest<string>, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
         [FromRoute] string storyId,
         [FromServices] PublishStoryEndpoint ep,
+        [FromBody] PublishRequest? request,
         CancellationToken ct)
     {
         var stopwatch = Stopwatch.StartNew();
@@ -139,7 +142,8 @@ public partial class PublishStoryEndpoint
                 ?? "ro-ro";
 
             // Finalize publishing
-            newVersion = await ep.FinalizePublishingAsync(craft, user.Email, langTag, allAssets.Count, storyId, ct);
+            var forceFull = request?.ForceFull ?? false;
+            newVersion = await ep.FinalizePublishingAsync(craft, user.Email, langTag, allAssets.Count, storyId, forceFull, ct);
 
             outcome = "Success";
             return TypedResults.Ok(new PublishResponse());
@@ -299,9 +303,10 @@ public partial class PublishStoryEndpoint
         string langTag,
         int assetsCount,
         string storyId,
+        bool forceFullPublish,
         CancellationToken ct)
     {
-        var newVersion = await _publisher.UpsertFromCraftAsync(craft, userEmail, langTag, ct);
+        var newVersion = await _publisher.UpsertFromCraftAsync(craft, userEmail, langTag, forceFullPublish, ct);
 
         await _cleanupService.DeleteDraftAssetsAsync(userEmail, storyId, ct);
         await _crafts.DeleteAsync(storyId, ct);

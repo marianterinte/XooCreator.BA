@@ -99,6 +99,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IStoryOwnershipService, StoryOwnershipService>();
         services.AddScoped<IStoryAnswerUpdater, StoryAnswerUpdater>();
         services.AddScoped<IStoryTileUpdater, StoryTileUpdater>();
+        services.AddScoped<IStoryAssetLinkService, StoryAssetLinkService>();
+        services.AddScoped<IStoryPublishChangeLogService, StoryPublishChangeLogService>();
         
         // Cloning Services (unified logic for Copy/Fork/New Version)
         services.AddScoped<IStorySourceMapper, StorySourceMapper>();

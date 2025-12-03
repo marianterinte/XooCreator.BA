@@ -47,6 +47,57 @@
    - Un worker consumă job-ul și finalizează publish-ul; răspunsul HTTP revine imediat cu status `202 Accepted`.
 6. După publicare, actualizează statisticile în memorie (`IMemoryCache`) pentru a evita reinterogarea DB în marketplace.
 
+### 3.1 Flux incremental pentru republish (“delta publish”)
+
+**Motivație:** pentru poveștile deja publicate, refacem azi tot arborele și toate assetele. Pe un plan B1 asta înseamnă CPU + I/O irosit și risc de timeout când modificăm doar 2 tile-uri. Avem nevoie de un flux care atinge strict diferențele și păstrează tranzacția cât mai scurtă.
+
+#### Date noi & migrări (vezi ghidurile de migrare atașate)
+- `StoryPublishChangeLog` (tabel nou) – coloane cheie: `Id`, `StoryId`, `DraftVersion`, `EntityType` (`Header`, `Tile`, `Answer`, `Asset`, `Metadata`), `EntityId` (ex. `tileId`), `ChangeType` (`Added`, `Updated`, `Removed`, `Renamed`), `Hash` (SHA256 pe payload), `PayloadJson`, `AssetDraftPath`, `AssetPublishedPath`, `CreatedAt`, `CreatedBy`. Ștergem înregistrările doar după publish reușit.
+- `StoryAssetLink` (tabel nou) – asociază un asset dintre `StoryCraft` și publicat: `StoryId`, `DraftVersion`, `LanguageCode`, `AssetType`, `DraftPath`, `PublishedPath`, `ContentHash`, `LastSyncedAt`. Folosim valorile vechi pentru a ști ce blob să ștergem sau să renumim.
+- Coloane pe entitățile existente:
+  - `StoryCrafts.LastDraftVersion` / `StoryDefinitions.LastPublishedVersion` pentru a ști ce draft conține modificări nepublicate.
+  - `StoryTiles.ContentHash` și `StoryTileTranslations.ContentHash` (sau checksum simplu) pentru comparație rapidă.
+
+#### Cum populăm change log-ul (în editor/draft)
+1. Când utilizatorul editează ceva în `StoryCraft`, endpoint-urile de draft scriu imediat în `StoryPublishChangeLog` o intrare per operațiune (tile nou, update, mutare assets). Nu așteptăm publish-ul pentru a calcula diff-ul.
+2. La salvare în editor prezentăm și “diff”-ul comparativ cu `StoryDefinitions` (citit după `StoryId` + `LastPublishedVersion`) pentru validare.
+3. Dacă autorul abandonează, golim doar intrările din log pentru draftul respectiv; versiunea publicată rămâne intactă.
+
+#### Pașii din `PublishStoryEndpoint` (sincron, fără queue suplimentară)
+1. Verificăm `DraftVersion > LastPublishedVersion`; altfel ieșim rapid.
+2. Deschidem o tranzacție scurtă EF:
+   - Citim toate intrările din `StoryPublishChangeLog` pentru story.
+   - Pentru `ChangeType=Updated`, folosim `ExecuteUpdateAsync` pe rândurile cu ID-uri din log; pentru `Removed` -> `ExecuteDeleteAsync`.
+   - Inserțiile se fac doar pentru ID-urile noi, fără a șterge în masă.
+   - Actualizăm `StoryDefinitions.LastPublishedVersion`, `StoryAssetLink.LastSyncedAt`, `UserCreatedStories`.
+3. În paralel cu tranzacția DB (dar în același request) rulăm copierea assetelor în loturi mici (`SemaphoreSlim` cu max 3). Pentru rename:
+   - Dacă `ContentHash` nu s-a schimbat și doar `DraftPath` este diferit, folosim `BlobBatchClient.DeleteIfExists` pe vechiul path și `CopyFromUriAsync` direct pe noul path.
+   - Dacă hash-ul diferă, copiem noul blob și marcăm vechiul `PublishedPath` pentru ștergere după confirmare.
+4. După ce toate operațiile reușesc, ștergem intrările din `StoryPublishChangeLog` pentru `StoryId` + `DraftVersion` și logăm metrika: număr tile-uri atinse, număr assete mutate, timp total.
+5. Dacă apare o eroare la un subset, tranzacția se face rollback și logul rămâne neschimbat → putem reîncerca publish-ul fără recalcul.
+
+#### Observabilitate și guard-rails
+- Loguri structured (`storyId`, `deltaTiles`, `deltaAssets`, `draftVersion`, `elapsedMs`) trimise în Application Insights.
+- Alarme când `deltaTiles` depășește praguri neașteptate pentru a detecta bug-uri în change log.
+- Fallback manual: request-ul `POST /api/stories/{storyId}/publish` acceptă corpul `{ "forceFull": true }` pentru a rula rebuild-ul complet atunci când delta nu este dorit.
+
+### 3.2 Aplicarea changelog-ului în `PublishStoryEndpoint`
+
+- Fluxul delta rulează by-default; doar dacă nu există intrări sau dacă `forceFull=true`, serviciul revine la rebuild-ul integral.
+- Pași:
+  1. Se încarcă intrările `StoryPublishChangeLog` cu `DraftVersion > LastPublishedVersion`.
+  2. Dacă există un entry `Header`, metadata-ul (`Title`, `Summary`, `Cover`, `Topics`, `AgeGroups`, `Translations`) se resincronizează din `StoryCraft`.
+  3. Pentru fiecare `TileId` cu intrări `Added`/`Updated` refolosim datele complete din `StoryCraft` (toate limbile, answers, tokens) și reconstruim doar acele rânduri în `StoryTiles`/`StoryTileTranslations`/`StoryAnswers`.
+  4. Intrările `Removed` șterg tile-ul și dependențele lui în cascada EF.
+  5. După commit actualizăm `StoryDefinition.Version`, `LastPublishedVersion` și curățăm logurile <= `LastDraftVersion`.
+- Dacă vreun pas eșuează (ex. tile-ul nu mai există în draft), publish-ul cade automat în fallback-ul complet pentru a nu bloca creatorii.
+
+### 3.3 Asset links & cleanup
+
+- `StoryAssetLinkService` sincronizează pentru fiecare tile și pentru cover legătura `draft path -> published path`, plus un hash simplu (sha256 peste filename/lang/draftVersion). În delta publish copiem numai assetele din tile-urile atinse și ștergem ce nu mai este referențiat (rename/remove).
+- La `RemoveTileAsync` se șterg și fișierele publicate aferente (via `BlobClient.DeleteIfExists`) astfel încât storage-ul să nu rămână cu zombies. Cover-ul folosește `entityId="__cover__"`.
+- Full publish rulează același serviciu, dar pentru toate tile-urile; se elimină assetele vechi înainte de rebuild astfel încât rename-urile să nu dubleze spațiul.
+
 ## 4. Fork Story – reutilizarea assetelor
 1. Ajustează `ForkStoryEndpoint` să încarce doar câmpurile necesare:
    - Creează metode `GetSummaryAsync` în `StoryCraftsRepository` care proiectează doar metadatele.

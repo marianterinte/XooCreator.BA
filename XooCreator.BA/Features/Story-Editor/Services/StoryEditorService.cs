@@ -19,6 +19,7 @@ public class StoryEditorService : IStoryEditorService
     private readonly IStoryTranslationManager _translationManager;
     private readonly IStoryOwnershipService _ownershipService;
     private readonly IStoryTileUpdater _tileUpdater;
+    private readonly IStoryPublishChangeLogService _changeLogService;
 
     public StoryEditorService(
         IStoryCraftsRepository crafts,
@@ -26,7 +27,8 @@ public class StoryEditorService : IStoryEditorService
         IStoryDraftManager draftManager,
         IStoryTranslationManager translationManager,
         IStoryOwnershipService ownershipService,
-        IStoryTileUpdater tileUpdater)
+        IStoryTileUpdater tileUpdater,
+        IStoryPublishChangeLogService changeLogService)
     {
         _crafts = crafts;
         _context = context;
@@ -34,6 +36,7 @@ public class StoryEditorService : IStoryEditorService
         _translationManager = translationManager;
         _ownershipService = ownershipService;
         _tileUpdater = tileUpdater;
+        _changeLogService = changeLogService;
     }
 
     public async Task EnsureDraftAsync(Guid ownerUserId, string storyId, StoryType? storyType = null, CancellationToken ct = default)
@@ -59,6 +62,7 @@ public class StoryEditorService : IStoryEditorService
         _ownershipService.VerifyOwnership(craft, ownerUserId);
         
         var lang = languageCode.ToLowerInvariant();
+        var snapshotBeforeChanges = _changeLogService.CaptureSnapshot(craft, lang);
         
         // Update or create translation
         var translation = craft.Translations.FirstOrDefault(t => t.LanguageCode == lang);
@@ -98,6 +102,7 @@ public class StoryEditorService : IStoryEditorService
         await _tileUpdater.UpdateTilesAsync(craft, dto.Tiles ?? new(), lang, ct);
         
         await _context.SaveChangesAsync(ct);
+        await _changeLogService.AppendChangesAsync(craft, snapshotBeforeChanges, lang, ownerUserId, ct);
     }
 
     private async Task UpdateTopicsAsync(StoryCraft craft, List<string> topicIds, CancellationToken ct)

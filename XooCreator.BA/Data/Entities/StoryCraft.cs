@@ -47,6 +47,9 @@ public class StoryCraft
     // Versioning reference: the published version from which this draft originated
     public int BaseVersion { get; set; } = 0;
     
+    // Incremental counter for changes performed in the editor (consumed by delta publish)
+    public int LastDraftVersion { get; set; } = 0;
+    
     // Navigation
     public List<StoryCraftTranslation> Translations { get; set; } = new();
     public List<StoryCraftTile> Tiles { get; set; } = new();
