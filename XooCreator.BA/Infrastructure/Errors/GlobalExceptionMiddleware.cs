@@ -1,4 +1,6 @@
 using System.Net;
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Logging;
@@ -9,11 +11,13 @@ public class GlobalExceptionMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<GlobalExceptionMiddleware> _logger;
+    private readonly TelemetryClient? _telemetryClient;
 
-    public GlobalExceptionMiddleware(RequestDelegate next, ILogger<GlobalExceptionMiddleware> logger)
+    public GlobalExceptionMiddleware(RequestDelegate next, ILogger<GlobalExceptionMiddleware> logger, TelemetryClient? telemetryClient = null)
     {
         _next = next;
         _logger = logger;
+        _telemetryClient = telemetryClient;
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -49,8 +53,37 @@ public class GlobalExceptionMiddleware
             _ => ("Unhandled server error", "Unknown", "Unknown")
         };
 
-        // Log with structured context
+        // Log with structured context using ILogger (goes to Application Insights if configured)
         _logger.LogError(ex, "{Title} | TraceId={TraceId} | Layer={Layer} | Operation={Operation}", title, traceId, layer, operation);
+
+        // Explicitly track exception in Application Insights using TelemetryClient
+        if (_telemetryClient != null)
+        {
+            var exceptionTelemetry = new ExceptionTelemetry(ex)
+            {
+                SeverityLevel = status >= 500 ? SeverityLevel.Error : SeverityLevel.Warning,
+                Properties =
+                {
+                    ["TraceId"] = traceId,
+                    ["Layer"] = layer,
+                    ["Operation"] = operation,
+                    ["Title"] = title,
+                    ["StatusCode"] = status.ToString(),
+                    ["Path"] = context.Request?.Path.Value ?? "Unknown",
+                    ["Method"] = context.Request?.Method ?? "Unknown",
+                    ["QueryString"] = context.Request?.QueryString.ToString() ?? ""
+                }
+            };
+
+            // Add custom dimensions for better filtering in Azure
+            exceptionTelemetry.Context.Operation.Id = traceId;
+            exceptionTelemetry.Context.Operation.Name = $"{context.Request?.Method} {context.Request?.Path}";
+
+            _telemetryClient.TrackException(exceptionTelemetry);
+            
+            // Flush to ensure data is sent immediately (important for exceptions)
+            _telemetryClient.Flush();
+        }
 
         var pd = new ProblemDetails
         {
