@@ -30,6 +30,11 @@ public static class DatabaseConfiguration
                 npgsqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", dbSchema);
             });
             
+            // Enable detailed EF Core command logging (includes SQL queries and execution time)
+            // This will be logged through ILogger with category "Microsoft.EntityFrameworkCore.Database.Command"
+            options.EnableSensitiveDataLogging(false); // Set to true only in development if needed
+            options.EnableDetailedErrors();
+            
             // Add interceptor to automatically make migration SQL commands idempotent
             // This transforms CREATE TABLE, CREATE INDEX, ALTER TABLE ADD CONSTRAINT, etc.
             // to use IF NOT EXISTS, making all migrations safe to run multiple times

@@ -1,3 +1,6 @@
+using System.Diagnostics;
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
@@ -14,11 +17,19 @@ public class GetMarketplaceStoriesEndpoint
 {
     private readonly IStoriesMarketplaceService _marketplaceService;
     private readonly IUserContextService _userContext;
+    private readonly ILogger<GetMarketplaceStoriesEndpoint>? _logger;
+    private readonly TelemetryClient? _telemetryClient;
 
-    public GetMarketplaceStoriesEndpoint(IStoriesMarketplaceService marketplaceService, IUserContextService userContext)
+    public GetMarketplaceStoriesEndpoint(
+        IStoriesMarketplaceService marketplaceService, 
+        IUserContextService userContext,
+        ILogger<GetMarketplaceStoriesEndpoint>? logger = null,
+        TelemetryClient? telemetryClient = null)
     {
         _marketplaceService = marketplaceService;
         _userContext = userContext;
+        _logger = logger;
+        _telemetryClient = telemetryClient;
     }
 
     [Route("/api/{locale}/tales-of-alchimalia/market")]
@@ -38,26 +49,56 @@ public class GetMarketplaceStoriesEndpoint
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 5)
     {
-        var userId = await ep._userContext.GetUserIdAsync();
-        if (userId == null) throw new UnauthorizedAccessException("User not found");
-
-        var request = new SearchStoriesRequest
+        var endpointStopwatch = Stopwatch.StartNew();
+        
+        try
         {
-            SearchTerm = searchTerm,
-            Regions = regions?.ToList() ?? new List<string>(),
-            AgeRatings = ageRatings?.ToList() ?? new List<string>(),
-            Characters = characters?.ToList() ?? new List<string>(),
-            Categories = categories?.ToList() ?? new List<string>(),
-            Difficulties = difficulties?.ToList() ?? new List<string>(),
-            CompletionStatus = completionStatus,
-            SortBy = sortBy,
-            SortOrder = sortOrder,
-            Page = page,
-            PageSize = pageSize
-        };
+            var userId = await ep._userContext.GetUserIdAsync();
+            if (userId == null) throw new UnauthorizedAccessException("User not found");
 
-        var result = await ep._marketplaceService.GetMarketplaceStoriesAsync(userId.Value, locale, request);
-        return TypedResults.Ok(result);
+            var request = new SearchStoriesRequest
+            {
+                SearchTerm = searchTerm,
+                Regions = regions?.ToList() ?? new List<string>(),
+                AgeRatings = ageRatings?.ToList() ?? new List<string>(),
+                Characters = characters?.ToList() ?? new List<string>(),
+                Categories = categories?.ToList() ?? new List<string>(),
+                Difficulties = difficulties?.ToList() ?? new List<string>(),
+                CompletionStatus = completionStatus,
+                SortBy = sortBy,
+                SortOrder = sortOrder,
+                Page = page,
+                PageSize = pageSize
+            };
+
+            var result = await ep._marketplaceService.GetMarketplaceStoriesAsync(userId.Value, locale, request);
+            
+            return TypedResults.Ok(result);
+        }
+        finally
+        {
+            endpointStopwatch.Stop();
+            var endpointDuration = endpointStopwatch.ElapsedMilliseconds;
+            
+            // Log endpoint duration
+            ep._logger?.LogInformation(
+                "GetMarketplaceStoriesEndpoint completed | Duration={Duration}ms | Locale={Locale} | Page={Page} | PageSize={PageSize}",
+                endpointDuration, locale, page, pageSize);
+            
+            // Track in Application Insights
+            if (ep._telemetryClient != null)
+            {
+                ep._telemetryClient.TrackMetric("GetMarketplaceStoriesEndpoint_Duration", endpointDuration, new Dictionary<string, string>
+                {
+                    ["Endpoint"] = "GetMarketplaceStories",
+                    ["Locale"] = locale,
+                    ["Page"] = page.ToString(),
+                    ["PageSize"] = pageSize.ToString(),
+                    ["SortBy"] = sortBy,
+                    ["SortOrder"] = sortOrder
+                });
+            }
+        }
     }
 }
 

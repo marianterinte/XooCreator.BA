@@ -12,6 +12,7 @@ using XooCreator.BA.Features.TreeOfLight.Services;
 using XooCreator.BA.Features.StoryEditor.Services;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Services;
 using XooCreator.BA.Services;
+using XooCreator.BA.Infrastructure.Middleware;
 
 // Store startup exception for display
 Exception? startupException = null;
@@ -67,6 +68,9 @@ var app = builder.Build();
 StartupErrorHandler.ConfigureErrorPage(app);
 
 app.UseCors("AllowAll");
+
+// Request performance tracking (must be before exception handling to measure full request)
+app.UseRequestPerformanceTracking();
 
 app.UseGlobalExceptionHandling();
 
