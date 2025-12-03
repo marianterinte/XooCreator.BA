@@ -1,5 +1,9 @@
+using System.Diagnostics;
 using System.Text.Json;
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Data.SeedData.DTOs;
@@ -38,55 +42,109 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
 {
     private readonly XooDbContext _context;
     private readonly StoryDetailsMapper _storyDetailsMapper;
+    private readonly ILogger<StoriesMarketplaceRepository>? _logger;
+    private readonly TelemetryClient? _telemetryClient;
 
-    public StoriesMarketplaceRepository(XooDbContext context, StoryDetailsMapper storyDetailsMapper)
+    public StoriesMarketplaceRepository(
+        XooDbContext context, 
+        StoryDetailsMapper storyDetailsMapper,
+        ILogger<StoriesMarketplaceRepository>? logger = null,
+        TelemetryClient? telemetryClient = null)
     {
         _context = context;
         _storyDetailsMapper = storyDetailsMapper;
+        _logger = logger;
+        _telemetryClient = telemetryClient;
     }
 
     public async Task<(List<StoryMarketplaceItemDto> Stories, int TotalCount, bool HasMore)> GetMarketplaceStoriesWithPaginationAsync(Guid userId, string locale, SearchStoriesRequest request)
     {
+        var stopwatch = Stopwatch.StartNew();
         var normalizedLocale = (locale ?? "ro-ro").ToLowerInvariant();
         
-        var query = _context.StoryDefinitions
-            .Include(s => s.Translations)
-            .Include(s => s.Topics)
-                .ThenInclude(t => t.StoryTopic)
-            .Where(s => s.IsActive);
-
-        // Filtre implicite: doar Published + StoryType = Indie (dacă nu s-au cerut categorii specifice)
-        query = query.Where(s => s.Status == StoryStatus.Published);
-        if (!(request.Categories?.Any() ?? false))
+        try
         {
-            query = query.Where(s => s.StoryType == StoryType.Indie);
+            var query = _context.StoryDefinitions
+                .Include(s => s.Translations)
+                .Include(s => s.Topics)
+                    .ThenInclude(t => t.StoryTopic)
+                .Where(s => s.IsActive);
+
+            // Filtre implicite: doar Published + StoryType = Indie (dacă nu s-au cerut categorii specifice)
+            query = query.Where(s => s.Status == StoryStatus.Published);
+            if (!(request.Categories?.Any() ?? false))
+            {
+                query = query.Where(s => s.StoryType == StoryType.Indie);
+            }
+
+            query = ApplySorting(query, request);
+
+            // Calculate total count BEFORE pagination
+            var totalCount = await query.CountAsync();
+
+            // Apply pagination
+            var stories = await query
+                .Skip((request.Page - 1) * request.PageSize)
+                .Take(request.PageSize)
+                .ToListAsync();
+
+            var dtoList = await MapToMarketplaceListAsync(stories, normalizedLocale, userId);
+
+            if (string.Equals(request.SortBy, "readers", StringComparison.OrdinalIgnoreCase))
+            {
+                var ordered = string.Equals(request.SortOrder, "asc", StringComparison.OrdinalIgnoreCase)
+                    ? dtoList.OrderBy(d => d.ReadersCount)
+                    : dtoList.OrderByDescending(d => d.ReadersCount);
+                dtoList = ordered.ToList();
+            }
+
+            // Calculate hasMore: check if there are more items after the current page
+            var hasMore = (request.Page * request.PageSize) < totalCount;
+
+            return (dtoList, totalCount, hasMore);
         }
-
-        query = ApplySorting(query, request);
-
-        // Calculate total count BEFORE pagination
-        var totalCount = await query.CountAsync();
-
-        // Apply pagination
-        var stories = await query
-            .Skip((request.Page - 1) * request.PageSize)
-            .Take(request.PageSize)
-            .ToListAsync();
-
-        var dtoList = await MapToMarketplaceListAsync(stories, normalizedLocale, userId);
-
-        if (string.Equals(request.SortBy, "readers", StringComparison.OrdinalIgnoreCase))
+        finally
         {
-            var ordered = string.Equals(request.SortOrder, "asc", StringComparison.OrdinalIgnoreCase)
-                ? dtoList.OrderBy(d => d.ReadersCount)
-                : dtoList.OrderByDescending(d => d.ReadersCount);
-            dtoList = ordered.ToList();
+            stopwatch.Stop();
+            var durationMs = stopwatch.ElapsedMilliseconds;
+            
+            // Log to ILogger
+            _logger?.LogInformation(
+                "GetMarketplaceStoriesWithPaginationAsync completed | Duration={DurationMs}ms | Page={Page} | PageSize={PageSize} | Locale={Locale} | UserId={UserId}",
+                durationMs, request.Page, request.PageSize, normalizedLocale, userId);
+
+            // Track as dependency in Application Insights
+            if (_telemetryClient != null)
+            {
+                var dependencyTelemetry = new DependencyTelemetry
+                {
+                    Type = "Database",
+                    Name = "GetMarketplaceStoriesWithPagination",
+                    Data = $"Page={request.Page}, PageSize={request.PageSize}, Locale={normalizedLocale}",
+                    Duration = TimeSpan.FromMilliseconds(durationMs),
+                    Success = true,
+                    Target = "PostgreSQL"
+                };
+
+                dependencyTelemetry.Properties["Page"] = request.Page.ToString();
+                dependencyTelemetry.Properties["PageSize"] = request.PageSize.ToString();
+                dependencyTelemetry.Properties["Locale"] = normalizedLocale;
+                dependencyTelemetry.Properties["SortBy"] = request.SortBy ?? "sortOrder";
+                dependencyTelemetry.Properties["SortOrder"] = request.SortOrder ?? "asc";
+                dependencyTelemetry.Properties["UserId"] = userId.ToString();
+
+                _telemetryClient.TrackDependency(dependencyTelemetry);
+                
+                // Also track as custom metric for easier querying
+                _telemetryClient.TrackMetric("MarketplaceStoriesQueryDuration", durationMs, new Dictionary<string, string>
+                {
+                    ["Operation"] = "GetMarketplaceStoriesWithPagination",
+                    ["Locale"] = normalizedLocale,
+                    ["Page"] = request.Page.ToString(),
+                    ["PageSize"] = request.PageSize.ToString()
+                });
+            }
         }
-
-        // Calculate hasMore: check if there are more items after the current page
-        var hasMore = (request.Page * request.PageSize) < totalCount;
-
-        return (dtoList, totalCount, hasMore);
     }
 
     public async Task<List<StoryMarketplaceItemDto>> GetMarketplaceStoriesAsync(Guid userId, string locale, SearchStoriesRequest request)
