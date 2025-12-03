@@ -27,6 +27,70 @@ Acest document descrie toate modificările de logging și monitoring implementat
 
 ---
 
+### 1.2. Configurare Sampling Adaptiv
+
+**Fișiere modificate:**
+- `appsettings.Production.json`
+- `appsettings.Staging.json` (opțional)
+
+**Modificări:**
+```json
+{
+  "ApplicationInsights": {
+    "ConnectionString": "...",
+    "SamplingSettings": {
+      "IsEnabled": true,
+      "MaxTelemetryItemsPerSecond": 5,
+      "EvaluationInterval": "00:00:15"
+    }
+  }
+}
+```
+
+**Scop:** Controlează volumul de telemetrie trimis (costuri & zgomot). În development poți seta `IsEnabled=false`, iar în staging/production setează pragul în funcție de trafic (de ex. 5–10 item/s).
+
+---
+
+### 1.3. Telemetry Initializer Global
+
+**Fișier nou:** `Infrastructure/Monitoring/CommonTelemetryInitializer.cs`
+
+**Rol:** atașează metadate comune (Environment, Tenant, UserRole, CorrelationId) pentru toate evenimentele fără a le seta manual în fiecare endpoint.
+
+**Exemplu de implementare:**
+```csharp
+public class CommonTelemetryInitializer : ITelemetryInitializer
+{
+    private readonly IHostEnvironment _env;
+    private readonly IUserContextService _userContext;
+
+    public CommonTelemetryInitializer(IHostEnvironment env, IUserContextService userContext)
+    {
+        _env = env;
+        _userContext = userContext;
+    }
+
+    public void Initialize(ITelemetry telemetry)
+    {
+        telemetry.Context.GlobalProperties["Environment"] = _env.EnvironmentName;
+        if (_userContext.CurrentUserId is { } userId)
+        {
+            telemetry.Context.User.Id = userId.ToString();
+            telemetry.Context.GlobalProperties["UserRole"] = _userContext.CurrentRole;
+        }
+    }
+}
+```
+
+**Înregistrare (`Program.cs`):**
+```csharp
+builder.Services.AddSingleton<ITelemetryInitializer, CommonTelemetryInitializer>();
+```
+
+**Beneficiu:** toate logurile și metricile pot fi filtrate rapid după mediu, tenant sau rol.
+
+---
+
 ## 2. Îmbunătățire GlobalExceptionMiddleware
 
 ### 2.1. Tracking Explicit de Excepții
@@ -283,6 +347,33 @@ public static async Task<Ok<GetMarketplaceStoriesResponse>> HandleGetMarketplace
 
 ---
 
+### 6.2. Tracking pentru Publish / Fork / Import / Export
+
+**Fișiere țintă:**
+- `Features/Story-Editor/Endpoints/ImportFullStoryEndpoint.cs`
+- `Features/Story-Editor/Endpoints/PublishStoryEndpoint.cs`
+- `Features/Story-Editor/Endpoints/ForkStoryEndpoint.cs`
+- `Features/Story-Editor/Endpoints/ExportDraftStoryEndpoint.cs`
+- `Features/Story-Editor/Endpoints/ExportPublishedStoryEndpoint.cs`
+
+**Acțiuni recomandate:**
+1. Adaugă `Stopwatch` și logare similară marketplace pentru:
+   - `ImportFullStory_Duration`
+   - `PublishStory_Duration`
+   - `ForkStory_Duration`
+   - `ExportDraftStory_Duration`
+   - `ExportPublishedStory_Duration`
+2. Loghează numărul de asset-uri și dimensiunea totală prelucrată:
+   - `ImportFullStory_AssetsCount`, `ImportFullStory_TotalSizeMB`
+   - `PublishStory_AssetsCopied`
+   - `ForkStory_AssetsCopied`
+3. Trackează rezultatul (Success / Partial / Failed) ca proprietate pentru a corela ușor cu telemetria de performanță.
+4. Pentru operațiile asincrone de copiere asset, trimite și `DependencyTelemetry` cu target-ul Blob Storage.
+
+**Beneficiu:** putem identifica exact fluxurile care provoacă spike-uri de latență și memorie.
+
+---
+
 ## 7. Rezumat Metrici Trackate
 
 ### 7.1. Custom Metrics în Application Insights
@@ -299,6 +390,17 @@ public static async Task<Ok<GetMarketplaceStoriesResponse>> HandleGetMarketplace
 | `GC_Gen2_Collections` | Număr colecții GC Gen2 | count |
 | `MarketplaceStoriesQueryDuration` | Durata query-urilor DB pentru marketplace | ms |
 | `GetMarketplaceStoriesEndpoint_Duration` | Durata totală a endpoint-ului marketplace | ms |
+| `ImportFullStory_Duration` | Durata totală import full story | ms |
+| `ImportFullStory_AssetsCount` | Număr asset-uri procesate la import | count |
+| `ImportFullStory_TotalSizeMB` | Dimensiune totală asset-uri importate | MB |
+| `PublishStory_Duration` | Durata totală publish | ms |
+| `PublishStory_AssetsCopied` | Număr asset-uri copiate în publish | count |
+| `ForkStory_Duration` | Durata totală fork | ms |
+| `ForkStory_AssetsCopied` | Număr asset-uri copiate la fork | count |
+| `ExportDraftStory_Duration` | Durata totală export draft | ms |
+| `ExportPublishedStory_Duration` | Durata totală export published | ms |
+
+> **Notă:** metricile noi trebuie adăugate gradual în cod; documentul funcționează ca checklist pentru implementare.
 
 ### 7.2. Dependency Telemetry
 
@@ -420,6 +522,21 @@ exceptions
 
 ---
 
+### 9.3. Pași pentru Configurarea Alertelor în Azure Portal
+
+1. Intră în `Application Insights` → `Alerts` → `+ Create alert rule`.
+2. Alege resursa Application Insights a aplicației.
+3. Configurează `Condition`:
+   - `Custom metric` → selectează, de ex., `ImportFullStory_Duration`.
+   - Operator `Greater than`, threshold `10000`, Aggregation `Average`, Period `5 minutes`.
+4. Setează `Action group` (email, Teams, webhook).
+5. Denumește alerta (ex. `ImportFullStory - Slow Operation`) și salvează.
+6. Repetă pașii pentru memorie (`WorkingSet`), GC (`GC_Gen2_Collections`) și marketplace queries.
+
+**Recomandare:** folosește `Dynamic Threshold` după ce se acumulează suficientă telemetrie pentru a obține limite adaptative.
+
+---
+
 ## 10. Fișiere Modificate
 
 ### 10.1. Fișiere Noi Create
@@ -482,6 +599,22 @@ exceptions
 - Implementează custom TelemetryInitializer pentru adăugare metadata globală
 - Configurează alerts în Azure pentru metrici critice
 - Folosește Application Insights Profiler pentru analiză detaliată de performanță
+
+---
+
+### 12.4. Application Insights Profiler & Snapshot Debugger
+
+1. **Profiler**
+   - În Azure Portal → App Service → `Application Insights` → `Profiler`.
+   - Activează profilarea continuă și verifică graficele `Most Time Consuming Operations`.
+   - Rulează scenariile grele (import/publish) și descarcă trace-urile pentru analiză locală.
+2. **Snapshot Debugger**
+   - În aceeași secțiune, activează `Snapshot Debugger`.
+   - Configurează trigger pe excepții non-tranziente (ex. import eșuat).
+   - Colectează snapshot-uri pentru a vedea starea obiectelor în momentul excepției.
+3. Documentează rezultatele în `Documentation/ApplicationInsightsLoggingEvaluation.md` pentru a crea istoric al optimizărilor.
+
+**Beneficiu:** profilarea oferă vizibilitate exactă asupra metodelor costisitoare, iar snapshot-urile ajută în debugging rapid.
 
 ---
 
