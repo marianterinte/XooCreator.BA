@@ -1,6 +1,13 @@
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
@@ -9,7 +16,6 @@ using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
 using XooCreator.BA.Infrastructure.Services.Blob;
-using Microsoft.EntityFrameworkCore;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 
@@ -21,19 +27,22 @@ public class ExportPublishedStoryEndpoint
     private readonly IUserContextService _userContext;
     private readonly IBlobSasService _sas;
     private readonly ILogger<ExportPublishedStoryEndpoint> _logger;
+    private readonly TelemetryClient? _telemetryClient;
 
     public ExportPublishedStoryEndpoint(
         XooDbContext db, 
         IAuth0UserService auth0, 
         IUserContextService userContext, 
         IBlobSasService sas,
-        ILogger<ExportPublishedStoryEndpoint> logger)
+        ILogger<ExportPublishedStoryEndpoint> logger,
+        TelemetryClient? telemetryClient = null)
     {
         _db = db;
         _auth0 = auth0;
         _userContext = userContext;
         _sas = sas;
         _logger = logger;
+        _telemetryClient = telemetryClient;
     }
 
     [Route("/api/{locale}/stories/{storyId}/export")]
@@ -44,15 +53,33 @@ public class ExportPublishedStoryEndpoint
         [FromServices] ExportPublishedStoryEndpoint ep,
         CancellationToken ct)
     {
+        var stopwatch = Stopwatch.StartNew();
+        var outcome = "Unknown";
+        string? userId = null;
+        string? userEmail = null;
+        var isAdmin = false;
+        var isCreator = false;
+        var isOwner = false;
+        int version = 0;
+        var mediaCount = 0;
+        long zipBytes = 0;
+
         var user = await ep._auth0.GetCurrentUserAsync(ct);
-        if (user == null) return TypedResults.Unauthorized();
+        if (user == null)
+        {
+            outcome = "Unauthorized";
+            return TypedResults.Unauthorized();
+        }
+        userId = user.Id.ToString();
+        userEmail = user.Email;
 
         // Allow Creator (owner) or Admin to export
-        var isAdmin = ep._auth0.HasRole(user, Data.Enums.UserRole.Admin);
-        var isCreator = ep._auth0.HasRole(user, Data.Enums.UserRole.Creator);
+        isAdmin = ep._auth0.HasRole(user, Data.Enums.UserRole.Admin);
+        isCreator = ep._auth0.HasRole(user, Data.Enums.UserRole.Creator);
         
         if (!isAdmin && !isCreator)
         {
+            outcome = "Forbidden";
             return TypedResults.Forbid();
         }
 
@@ -63,47 +90,153 @@ public class ExportPublishedStoryEndpoint
             .Include(d => d.Topics).ThenInclude(t => t.StoryTopic)
             .Include(d => d.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
             .FirstOrDefaultAsync(d => d.StoryId == storyId, ct);
-        if (def == null) return TypedResults.NotFound();
+        if (def == null)
+        {
+            outcome = "NotFound";
+            return TypedResults.NotFound();
+        }
+
+        version = def.Version;
+
+        isOwner = def.CreatedBy.HasValue && def.CreatedBy.Value == user.Id;
 
         // If not Admin, verify ownership
         if (!isAdmin)
         {
-            if (!def.CreatedBy.HasValue || def.CreatedBy.Value != user.Id)
+            if (!isOwner)
             {
                 ep._logger.LogWarning("Export forbidden: userId={UserId} storyId={StoryId} not owner", user.Id, storyId);
+                outcome = "Forbidden";
                 return TypedResults.Forbid();
             }
         }
 
-        var exportObj = BuildExportJson(def);
-        var exportJson = JsonSerializer.Serialize(exportObj, new JsonSerializerOptions { WriteIndented = true });
-        var fileName = $"{def.StoryId}-v{def.Version}.zip";
-
-        using var ms = new MemoryStream();
-        using (var zip = new ZipArchive(ms, ZipArchiveMode.Create, leaveOpen: true))
+        try
         {
-            // Add manifest JSON
-            var manifestEntry = zip.CreateEntry($"manifest/{def.StoryId}/v{def.Version}/story.json", CompressionLevel.Fastest);
-            await using (var writer = new StreamWriter(manifestEntry.Open(), new UTF8Encoding(false)))
+            var exportObj = BuildExportJson(def);
+            var exportJson = JsonSerializer.Serialize(exportObj, new JsonSerializerOptions { WriteIndented = true });
+            var fileName = $"{def.StoryId}-v{def.Version}.zip";
+
+            using var ms = new MemoryStream();
+            using (var zip = new ZipArchive(ms, ZipArchiveMode.Create, leaveOpen: true))
             {
-                await writer.WriteAsync(exportJson);
+                // Add manifest JSON
+                var manifestEntry = zip.CreateEntry($"manifest/{def.StoryId}/v{def.Version}/story.json", CompressionLevel.Fastest);
+                await using (var writer = new StreamWriter(manifestEntry.Open(), new UTF8Encoding(false)))
+                {
+                    await writer.WriteAsync(exportJson);
+                }
+
+                // Collect media paths from definition (already in published layout)
+                var mediaPaths = CollectPublishedMediaPaths(def);
+                mediaCount = mediaPaths.Count;
+                foreach (var path in mediaPaths)
+                {
+                    // Download from published container and add to ZIP preserving relative path under "media/"
+                    var client = ep._sas.GetBlobClient(ep._sas.PublishedContainer, path);
+                    var entry = zip.CreateEntry($"media/{path}".Replace('\\', '/'), CompressionLevel.Fastest);
+                    await using var entryStream = entry.Open();
+                    var download = await client.DownloadStreamingAsync(cancellationToken: ct);
+                    await download.Value.Content.CopyToAsync(entryStream, ct);
+                }
             }
 
-            // Collect media paths from definition (already in published layout)
-            var mediaPaths = CollectPublishedMediaPaths(def);
-            foreach (var path in mediaPaths)
+            zipBytes = ms.Length;
+            var bytes = ms.ToArray();
+
+            outcome = "Success";
+            return TypedResults.File(bytes, "application/zip", fileName);
+        }
+        finally
+        {
+            stopwatch.Stop();
+            ep.TrackExportTelemetry(
+                isDraft: false,
+                durationMs: stopwatch.ElapsedMilliseconds,
+                outcome: outcome,
+                locale: locale,
+                storyId: storyId,
+                userId: userId,
+                userEmail: userEmail,
+                version: version,
+                mediaCount: mediaCount,
+                zipBytes: zipBytes,
+                isAdmin: isAdmin,
+                isCreator: isCreator,
+                isOwner: isOwner);
+        }
+    }
+
+    private void TrackExportTelemetry(
+        bool isDraft,
+        long durationMs,
+        string outcome,
+        string locale,
+        string storyId,
+        string? userId,
+        string? userEmail,
+        int version,
+        int mediaCount,
+        long zipBytes,
+        bool isAdmin,
+        bool isCreator,
+        bool isOwner)
+    {
+        var zipMb = zipBytes / 1024d / 1024d;
+
+        _logger.LogInformation(
+            "Export story telemetry | storyId={StoryId} locale={Locale} outcome={Outcome} durationMs={DurationMs} mediaCount={MediaCount} zipSizeMB={ZipSizeMB:F2} isDraft={IsDraft} isAdmin={IsAdmin} isCreator={IsCreator} isOwner={IsOwner}",
+            storyId,
+            locale,
+            outcome,
+            durationMs,
+            mediaCount,
+            zipMb,
+            isDraft,
+            isAdmin,
+            isCreator,
+            isOwner);
+
+        var properties = new Dictionary<string, string?>
+        {
+            ["IsDraft"] = isDraft.ToString(CultureInfo.InvariantCulture),
+            ["Outcome"] = outcome,
+            ["Locale"] = locale,
+            ["StoryId"] = storyId,
+            ["UserId"] = userId,
+            ["UserEmail"] = userEmail,
+            ["Version"] = version.ToString(CultureInfo.InvariantCulture),
+            ["MediaCount"] = mediaCount.ToString(CultureInfo.InvariantCulture),
+            ["IsAdmin"] = isAdmin.ToString(CultureInfo.InvariantCulture),
+            ["IsCreator"] = isCreator.ToString(CultureInfo.InvariantCulture),
+            ["IsOwner"] = isOwner.ToString(CultureInfo.InvariantCulture)
+        };
+
+        TrackMetric("ExportStory_Duration", durationMs, properties);
+        TrackMetric("ExportStory_MediaCount", mediaCount, properties);
+        if (zipBytes > 0)
+        {
+            TrackMetric("ExportStory_ZipSizeMB", zipMb, properties);
+        }
+    }
+
+    private void TrackMetric(string metricName, double value, IReadOnlyDictionary<string, string?> properties)
+    {
+        if (_telemetryClient == null)
+        {
+            return;
+        }
+
+        var metric = new MetricTelemetry(metricName, value);
+        foreach (var kvp in properties)
+        {
+            if (!string.IsNullOrEmpty(kvp.Value))
             {
-                // Download from published container and add to ZIP preserving relative path under "media/"
-                var client = ep._sas.GetBlobClient(ep._sas.PublishedContainer, path);
-                var entry = zip.CreateEntry($"media/{path}".Replace('\\', '/'), CompressionLevel.Fastest);
-                await using var entryStream = entry.Open();
-                var download = await client.DownloadStreamingAsync(cancellationToken: ct);
-                await download.Value.Content.CopyToAsync(entryStream, ct);
+                metric.Properties[kvp.Key] = kvp.Value!;
             }
         }
 
-        var bytes = ms.ToArray();
-        return TypedResults.File(bytes, "application/zip", fileName);
+        _telemetryClient.TrackMetric(metric);
     }
 
     private static object BuildExportJson(StoryDefinition def)

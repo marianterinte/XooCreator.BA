@@ -1,7 +1,13 @@
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
@@ -27,6 +33,7 @@ public class ExportDraftStoryEndpoint
     private readonly IBlobSasService _sas;
     private readonly IStoryCraftsRepository _crafts;
     private readonly ILogger<ExportDraftStoryEndpoint> _logger;
+    private readonly TelemetryClient? _telemetryClient;
 
     public ExportDraftStoryEndpoint(
         XooDbContext db,
@@ -34,7 +41,8 @@ public class ExportDraftStoryEndpoint
         IUserContextService userContext,
         IBlobSasService sas,
         IStoryCraftsRepository crafts,
-        ILogger<ExportDraftStoryEndpoint> logger)
+        ILogger<ExportDraftStoryEndpoint> logger,
+        TelemetryClient? telemetryClient = null)
     {
         _db = db;
         _auth0 = auth0;
@@ -42,6 +50,7 @@ public class ExportDraftStoryEndpoint
         _sas = sas;
         _crafts = crafts;
         _logger = logger;
+        _telemetryClient = telemetryClient;
     }
 
     [Route("/api/{locale}/stories/{storyId}/export-draft")]
@@ -52,112 +61,163 @@ public class ExportDraftStoryEndpoint
         [FromServices] ExportDraftStoryEndpoint ep,
         CancellationToken ct)
     {
-        var user = await ep._auth0.GetCurrentUserAsync(ct);
-        if (user == null) return TypedResults.Unauthorized();
+        var stopwatch = Stopwatch.StartNew();
+        var outcome = "Unknown";
+        AlchimaliaUser? currentUser = null;
+        string? userId = null;
+        string? userEmail = null;
+        var isAdmin = false;
+        var isCreator = false;
+        var isOwner = false;
+        var languageCount = 0;
+        var uniqueAssetCount = 0;
+        long zipBytes = 0;
+        string? ownerEmail = null;
 
-        // Allow Creator (owner) or Admin to export
-        var isAdmin = ep._auth0.HasRole(user, UserRole.Admin);
-        var isCreator = ep._auth0.HasRole(user, UserRole.Creator);
-
-        if (!isAdmin && !isCreator)
+        try
         {
-            return TypedResults.Forbid();
-        }
-
-        var craft = await ep._crafts.GetAsync(storyId, ct);
-        if (craft == null) return TypedResults.NotFound();
-
-        // If not Admin, verify ownership
-        if (!isAdmin)
-        {
-            if (craft.OwnerUserId != user.Id)
+            currentUser = await ep._auth0.GetCurrentUserAsync(ct);
+            if (currentUser == null)
             {
-                ep._logger.LogWarning("Export draft forbidden: userId={UserId} storyId={StoryId} not owner", user.Id, storyId);
+                outcome = "Unauthorized";
+                return TypedResults.Unauthorized();
+            }
+
+            userId = currentUser.Id.ToString();
+            userEmail = currentUser.Email;
+
+            // Allow Creator (owner) or Admin to export
+            isAdmin = ep._auth0.HasRole(currentUser, UserRole.Admin);
+            isCreator = ep._auth0.HasRole(currentUser, UserRole.Creator);
+
+            if (!isAdmin && !isCreator)
+            {
+                outcome = "Forbidden";
                 return TypedResults.Forbid();
             }
-        }
 
-        // Resolve owner email for building blob paths
-        var ownerEmail = await ep.ResolveOwnerEmailAsync(craft.OwnerUserId, user, ct);
-        if (string.IsNullOrWhiteSpace(ownerEmail))
-        {
-            ep._logger.LogWarning("Export draft failed: cannot resolve owner email for storyId={StoryId} ownerId={OwnerId}", storyId, craft.OwnerUserId);
-            return TypedResults.NotFound();
-        }
-
-        // Build export JSON
-        var exportObj = BuildExportJson(craft);
-        var exportJson = JsonSerializer.Serialize(exportObj, new JsonSerializerOptions { WriteIndented = true });
-        var fileName = $"{craft.StoryId}-draft-export.zip";
-
-        // Collect all assets for all languages with metadata
-        var allAssets = new List<(AssetInfo Asset, string BlobPath, bool IsCoverImage)>();
-        var availableLanguages = craft.Translations.Select(t => t.LanguageCode).Distinct().ToList();
-
-        // Extract assets for each language
-        foreach (var lang in availableLanguages)
-        {
-            var assets = StoryAssetPathMapper.ExtractAssets(craft, lang);
-            foreach (var asset in assets)
+            var craft = await ep._crafts.GetAsync(storyId, ct);
+            if (craft == null)
             {
-                var blobPath = StoryAssetPathMapper.BuildDraftPath(asset, ownerEmail, craft.StoryId);
-                // Check if this is the cover image
-                var isCoverImage = asset.Type == StoryAssetPathMapper.AssetType.Image && 
-                                   !string.IsNullOrWhiteSpace(craft.CoverImageUrl) &&
-                                   asset.Filename.Equals(craft.CoverImageUrl, StringComparison.OrdinalIgnoreCase);
-                allAssets.Add((asset, blobPath, isCoverImage));
-            }
-        }
-
-        // Remove duplicates (same blob path)
-        var uniqueAssets = allAssets
-            .GroupBy(a => a.BlobPath, StringComparer.OrdinalIgnoreCase)
-            .Select(g => g.First())
-            .ToList();
-
-        // Build ZIP
-        using var ms = new MemoryStream();
-        using (var zip = new ZipArchive(ms, ZipArchiveMode.Create, leaveOpen: true))
-        {
-            // Add manifest JSON
-            var manifestEntry = zip.CreateEntry($"manifest/{craft.StoryId}/story.json", CompressionLevel.Fastest);
-            await using (var writer = new StreamWriter(manifestEntry.Open(), new UTF8Encoding(false)))
-            {
-                await writer.WriteAsync(exportJson);
+                outcome = "NotFound";
+                return TypedResults.NotFound();
             }
 
-            // Download and add media files from draft container
-            foreach (var (asset, blobPath, isCoverImage) in uniqueAssets)
+            isOwner = craft.OwnerUserId == currentUser.Id;
+
+            // If not Admin, verify ownership
+            if (!isAdmin && !isOwner)
             {
-                try
+                ep._logger.LogWarning("Export draft forbidden: userId={UserId} storyId={StoryId} not owner", currentUser.Id, storyId);
+                outcome = "Forbidden";
+                return TypedResults.Forbid();
+            }
+
+            // Resolve owner email for building blob paths
+            ownerEmail = await ep.ResolveOwnerEmailAsync(craft.OwnerUserId, currentUser, ct);
+            if (string.IsNullOrWhiteSpace(ownerEmail))
+            {
+                ep._logger.LogWarning("Export draft failed: cannot resolve owner email for storyId={StoryId} ownerId={OwnerId}", storyId, craft.OwnerUserId);
+                outcome = "NotFound";
+                return TypedResults.NotFound();
+            }
+
+            // Build export JSON
+            var exportObj = BuildExportJson(craft);
+            var exportJson = JsonSerializer.Serialize(exportObj, new JsonSerializerOptions { WriteIndented = true });
+            var fileName = $"{craft.StoryId}-draft-export.zip";
+
+            // Collect all assets for all languages with metadata
+            var allAssets = new List<(AssetInfo Asset, string BlobPath, bool IsCoverImage)>();
+            var availableLanguages = craft.Translations.Select(t => t.LanguageCode).Distinct().ToList();
+            languageCount = availableLanguages.Count;
+
+            // Extract assets for each language
+            foreach (var lang in availableLanguages)
+            {
+                var assets = StoryAssetPathMapper.ExtractAssets(craft, lang);
+                foreach (var asset in assets)
                 {
-                    var client = ep._sas.GetBlobClient(ep._sas.DraftContainer, blobPath);
-                    
-                    // Check if blob exists
-                    if (!await client.ExistsAsync(ct))
+                    var blobPath = StoryAssetPathMapper.BuildDraftPath(asset, ownerEmail, craft.StoryId);
+                    // Check if this is the cover image
+                    var isCoverImage = asset.Type == StoryAssetPathMapper.AssetType.Image &&
+                                       !string.IsNullOrWhiteSpace(craft.CoverImageUrl) &&
+                                       asset.Filename.Equals(craft.CoverImageUrl, StringComparison.OrdinalIgnoreCase);
+                    allAssets.Add((asset, blobPath, isCoverImage));
+                }
+            }
+
+            // Remove duplicates (same blob path)
+            var uniqueAssets = allAssets
+                .GroupBy(a => a.BlobPath, StringComparer.OrdinalIgnoreCase)
+                .Select(g => g.First())
+                .ToList();
+            uniqueAssetCount = uniqueAssets.Count;
+
+            // Build ZIP
+            using var ms = new MemoryStream();
+            using (var zip = new ZipArchive(ms, ZipArchiveMode.Create, leaveOpen: true))
+            {
+                // Add manifest JSON
+                var manifestEntry = zip.CreateEntry($"manifest/{craft.StoryId}/story.json", CompressionLevel.Fastest);
+                await using (var writer = new StreamWriter(manifestEntry.Open(), new UTF8Encoding(false)))
+                {
+                    await writer.WriteAsync(exportJson);
+                }
+
+                // Download and add media files from draft container
+                foreach (var (asset, blobPath, isCoverImage) in uniqueAssets)
+                {
+                    try
                     {
-                        ep._logger.LogWarning("Asset not found in draft storage: {BlobPath}", blobPath);
-                        continue;
-                    }
+                        var client = ep._sas.GetBlobClient(ep._sas.DraftContainer, blobPath);
 
-                    // Build ZIP entry path using asset metadata
-                    var zipEntryPath = BuildZipEntryPath(asset, isCoverImage);
-                    var entry = zip.CreateEntry(zipEntryPath, CompressionLevel.Fastest);
-                    
-                    await using var entryStream = entry.Open();
-                    var download = await client.DownloadStreamingAsync(cancellationToken: ct);
-                    await download.Value.Content.CopyToAsync(entryStream, ct);
-                }
-                catch (Exception ex)
-                {
-                    ep._logger.LogWarning(ex, "Failed to download asset from draft: {BlobPath}", blobPath);
-                    // Continue with other assets even if one fails
+                        // Check if blob exists
+                        if (!await client.ExistsAsync(ct))
+                        {
+                            ep._logger.LogWarning("Asset not found in draft storage: {BlobPath}", blobPath);
+                            continue;
+                        }
+
+                        // Build ZIP entry path using asset metadata
+                        var zipEntryPath = BuildZipEntryPath(asset, isCoverImage);
+                        var entry = zip.CreateEntry(zipEntryPath, CompressionLevel.Fastest);
+
+                        await using var entryStream = entry.Open();
+                        var download = await client.DownloadStreamingAsync(cancellationToken: ct);
+                        await download.Value.Content.CopyToAsync(entryStream, ct);
+                    }
+                    catch (Exception ex)
+                    {
+                        ep._logger.LogWarning(ex, "Failed to download asset from draft: {BlobPath}", blobPath);
+                        // Continue with other assets even if one fails
+                    }
                 }
             }
-        }
 
-        var bytes = ms.ToArray();
-        return TypedResults.File(bytes, "application/zip", fileName);
+            zipBytes = ms.Length;
+            var bytes = ms.ToArray();
+
+            outcome = "Success";
+            return TypedResults.File(bytes, "application/zip", fileName);
+        }
+        finally
+        {
+            stopwatch.Stop();
+            ep.TrackExportTelemetry(
+                durationMs: stopwatch.ElapsedMilliseconds,
+                outcome: outcome,
+                locale: locale,
+                storyId: storyId,
+                userId: userId,
+                userEmail: userEmail,
+                isAdmin: isAdmin,
+                isCreator: isCreator,
+                isOwner: isOwner,
+                languageCount: languageCount,
+                assetCount: uniqueAssetCount,
+                zipBytes: zipBytes);
+        }
     }
 
     private async Task<string?> ResolveOwnerEmailAsync(Guid ownerId, AlchimaliaUser currentUser, CancellationToken ct)
@@ -172,6 +232,78 @@ public class ExportDraftStoryEndpoint
             .Where(u => u.Id == ownerId)
             .Select(u => u.Email)
             .FirstOrDefaultAsync(ct);
+    }
+
+    private void TrackExportTelemetry(
+        long durationMs,
+        string outcome,
+        string locale,
+        string storyId,
+        string? userId,
+        string? userEmail,
+        bool isAdmin,
+        bool isCreator,
+        bool isOwner,
+        int languageCount,
+        int assetCount,
+        long zipBytes)
+    {
+        var zipMb = zipBytes / 1024d / 1024d;
+
+        _logger.LogInformation(
+            "Export draft telemetry | storyId={StoryId} locale={Locale} outcome={Outcome} durationMs={DurationMs} languages={Languages} assets={Assets} zipSizeMB={ZipSizeMB:F2} isAdmin={IsAdmin} isCreator={IsCreator} isOwner={IsOwner}",
+            storyId,
+            locale,
+            outcome,
+            durationMs,
+            languageCount,
+            assetCount,
+            zipMb,
+            isAdmin,
+            isCreator,
+            isOwner);
+
+        var properties = new Dictionary<string, string?>
+        {
+            ["IsDraft"] = bool.TrueString,
+            ["Outcome"] = outcome,
+            ["Locale"] = locale,
+            ["StoryId"] = storyId,
+            ["UserId"] = userId,
+            ["UserEmail"] = userEmail,
+            ["Languages"] = languageCount.ToString(CultureInfo.InvariantCulture),
+            ["Assets"] = assetCount.ToString(CultureInfo.InvariantCulture),
+            ["IsAdmin"] = isAdmin.ToString(CultureInfo.InvariantCulture),
+            ["IsCreator"] = isCreator.ToString(CultureInfo.InvariantCulture),
+            ["IsOwner"] = isOwner.ToString(CultureInfo.InvariantCulture)
+        };
+
+        TrackMetric("ExportStory_Duration", durationMs, properties);
+        TrackMetric("ExportStory_LanguageCount", languageCount, properties);
+        TrackMetric("ExportStory_AssetCount", assetCount, properties);
+        if (zipBytes > 0)
+        {
+            TrackMetric("ExportStory_ZipSizeMB", zipMb, properties);
+        }
+    }
+
+    private void TrackMetric(string metricName, double value, IReadOnlyDictionary<string, string?> properties)
+    {
+        if (_telemetryClient == null)
+        {
+            return;
+        }
+
+        var metric = new MetricTelemetry(metricName, value);
+        foreach (var kvp in properties)
+        {
+            if (!string.IsNullOrEmpty(kvp.Value))
+            {
+                metric.Properties[kvp.Key] = kvp.Value!;
+            }
+        }
+
+        _telemetryClient.TrackMetric(metric);
     }
 
     private static object BuildExportJson(StoryCraft craft)

@@ -1,8 +1,12 @@
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
+using System.Globalization;
 using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
@@ -28,6 +32,7 @@ public class ImportFullStoryEndpoint
     private readonly IStoryCraftsRepository _crafts;
     private readonly IStoryEditorService _editorService;
     private readonly ILogger<ImportFullStoryEndpoint> _logger;
+    private readonly TelemetryClient? _telemetryClient;
     private const long MaxZipSizeBytes = 500 * 1024 * 1024; // 500MB
     private const long MaxAssetSizeBytes = 50 * 1024 * 1024; // 50MB per asset
     private static readonly HashSet<string> AllowedExtensions = new(StringComparer.OrdinalIgnoreCase)
@@ -43,7 +48,8 @@ public class ImportFullStoryEndpoint
         IBlobSasService sas,
         IStoryCraftsRepository crafts,
         IStoryEditorService editorService,
-        ILogger<ImportFullStoryEndpoint> logger)
+        ILogger<ImportFullStoryEndpoint> logger,
+        TelemetryClient? telemetryClient = null)
     {
         _db = db;
         _auth0 = auth0;
@@ -51,6 +57,7 @@ public class ImportFullStoryEndpoint
         _crafts = crafts;
         _editorService = editorService;
         _logger = logger;
+        _telemetryClient = telemetryClient;
     }
 
     public record ImportFullStoryResponse
@@ -73,68 +80,83 @@ public class ImportFullStoryEndpoint
         HttpRequest request,
         CancellationToken ct)
     {
-        var user = await ep._auth0.GetCurrentUserAsync(ct);
-        if (user == null) return TypedResults.Unauthorized();
-
-        // Allow Creator or Admin to import
-        var isAdmin = ep._auth0.HasRole(user, UserRole.Admin);
-        var isCreator = ep._auth0.HasRole(user, UserRole.Creator);
-
-        if (!isAdmin || !isCreator)
-        {
-            return TypedResults.Forbid();
-        }
-
+        var stopwatch = Stopwatch.StartNew();
+        var outcome = "Unknown";
         var warnings = new List<string>();
         var errors = new List<string>();
-
-        // Read file from form
-        if (!request.HasFormContentType)
-        {
-            errors.Add("Request must be multipart/form-data");
-            return TypedResults.BadRequest(new ImportFullStoryResponse { Success = false, Errors = errors });
-        }
-
-        // Disable request size limit for this specific request (for minimal APIs)
-        var feature = request.HttpContext.Features.Get<Microsoft.AspNetCore.Http.Features.IHttpMaxRequestBodySizeFeature>();
-        if (feature != null && !feature.IsReadOnly)
-        {
-            feature.MaxRequestBodySize = null; // null = unlimited
-        }
-
-        // Configure form options explicitly to allow large file uploads (up to 600MB)
-        var form = await request.ReadFormAsync(new Microsoft.AspNetCore.Http.Features.FormOptions
-        {
-            MultipartBodyLengthLimit = 600 * 1024 * 1024, // 600MB
-            ValueLengthLimit = int.MaxValue,
-            KeyLengthLimit = int.MaxValue
-        }, ct);
-        var file = form.Files.GetFile("file");
-
-        // Validate file
-        if (file == null || file.Length == 0)
-        {
-            errors.Add("No file provided");
-            return TypedResults.BadRequest(new ImportFullStoryResponse { Success = false, Errors = errors });
-        }
-
-        if (file.Length > MaxZipSizeBytes)
-        {
-            errors.Add($"File size exceeds maximum allowed size of {MaxZipSizeBytes / (1024 * 1024)}MB");
-            return TypedResults.BadRequest(new ImportFullStoryResponse { Success = false, Errors = errors });
-        }
-
-        if (!file.FileName.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
-        {
-            errors.Add("File must be a ZIP archive");
-            return TypedResults.BadRequest(new ImportFullStoryResponse { Success = false, Errors = errors });
-        }
-
-        // Track uploaded assets for rollback
         var uploadedBlobPaths = new List<string>();
+        AlchimaliaUser? currentUser = null;
+        string? finalStoryId = null;
+        var totalAssets = 0;
+        var uploadedAssets = 0;
+        long referencedBytes = 0;
+        long uploadedBytes = 0;
 
         try
         {
+            currentUser = await ep._auth0.GetCurrentUserAsync(ct);
+            if (currentUser == null)
+            {
+                outcome = "Unauthorized";
+                return TypedResults.Unauthorized();
+            }
+
+            // Allow Creator or Admin to import
+            var isAdmin = ep._auth0.HasRole(currentUser, UserRole.Admin);
+            var isCreator = ep._auth0.HasRole(currentUser, UserRole.Creator);
+
+            if (!isAdmin || !isCreator)
+            {
+                outcome = "Forbidden";
+                return TypedResults.Forbid();
+            }
+
+            // Read file from form
+            if (!request.HasFormContentType)
+            {
+                outcome = "BadRequest";
+                errors.Add("Request must be multipart/form-data");
+                return TypedResults.BadRequest(new ImportFullStoryResponse { Success = false, Errors = errors });
+            }
+
+            // Disable request size limit for this specific request (for minimal APIs)
+            var feature = request.HttpContext.Features.Get<Microsoft.AspNetCore.Http.Features.IHttpMaxRequestBodySizeFeature>();
+            if (feature != null && !feature.IsReadOnly)
+            {
+                feature.MaxRequestBodySize = null; // null = unlimited
+            }
+
+            // Configure form options explicitly to allow large file uploads (up to 600MB)
+            var form = await request.ReadFormAsync(new Microsoft.AspNetCore.Http.Features.FormOptions
+            {
+                MultipartBodyLengthLimit = 600 * 1024 * 1024, // 600MB
+                ValueLengthLimit = int.MaxValue,
+                KeyLengthLimit = int.MaxValue
+            }, ct);
+            var file = form.Files.GetFile("file");
+
+            // Validate file
+            if (file == null || file.Length == 0)
+            {
+                outcome = "BadRequest";
+                errors.Add("No file provided");
+                return TypedResults.BadRequest(new ImportFullStoryResponse { Success = false, Errors = errors });
+            }
+
+            if (file.Length > MaxZipSizeBytes)
+            {
+                outcome = "BadRequest";
+                errors.Add($"File size exceeds maximum allowed size of {MaxZipSizeBytes / (1024 * 1024)}MB");
+                return TypedResults.BadRequest(new ImportFullStoryResponse { Success = false, Errors = errors });
+            }
+
+            if (!file.FileName.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+            {
+                outcome = "BadRequest";
+                errors.Add("File must be a ZIP archive");
+                return TypedResults.BadRequest(new ImportFullStoryResponse { Success = false, Errors = errors });
+            }
+
             // Extract and validate ZIP
             using var zipStream = file.OpenReadStream();
             using var zip = new ZipArchive(zipStream, ZipArchiveMode.Read);
@@ -147,6 +169,7 @@ public class ImportFullStoryEndpoint
             if (manifestEntry == null)
             {
                 errors.Add("Manifest file (manifest/{storyId}/story.json or manifest/{storyId}/v{version}/story.json) not found in ZIP");
+                outcome = "BadRequest";
                 return TypedResults.BadRequest(new ImportFullStoryResponse { Success = false, Errors = errors });
             }
 
@@ -167,6 +190,7 @@ public class ImportFullStoryEndpoint
             catch (JsonException ex)
             {
                 errors.Add($"Invalid JSON in manifest: {ex.Message}");
+                outcome = "BadRequest";
                 return TypedResults.BadRequest(new ImportFullStoryResponse { Success = false, Errors = errors });
             }
 
@@ -176,6 +200,7 @@ public class ImportFullStoryEndpoint
             if (!root.TryGetProperty("id", out var idElement) || string.IsNullOrWhiteSpace(idElement.GetString()))
             {
                 errors.Add("Missing or empty 'id' field in manifest");
+                outcome = "BadRequest";
                 return TypedResults.BadRequest(new ImportFullStoryResponse { Success = false, Errors = errors });
             }
 
@@ -199,11 +224,12 @@ public class ImportFullStoryEndpoint
             if (!root.TryGetProperty("tiles", out var tilesElement) || tilesElement.ValueKind != JsonValueKind.Array || tilesElement.GetArrayLength() == 0)
             {
                 errors.Add("Missing or empty 'tiles' array in manifest");
+                outcome = "BadRequest";
                 return TypedResults.BadRequest(new ImportFullStoryResponse { Success = false, Errors = errors });
             }
 
             // Handle storyId conflict
-            var finalStoryId = await ep.ResolveStoryIdConflictAsync(originalStoryId, user, isAdmin, ct);
+            finalStoryId = await ep.ResolveStoryIdConflictAsync(originalStoryId, currentUser, isAdmin, ct);
             if (finalStoryId != originalStoryId)
             {
                 warnings.Add($"StoryId '{originalStoryId}' already exists. Using '{finalStoryId}' instead.");
@@ -211,15 +237,19 @@ public class ImportFullStoryEndpoint
 
             // Collect all assets from JSON
             var expectedAssets = ep.CollectExpectedAssets(root, warnings);
-            var totalAssets = expectedAssets.Count;
+            totalAssets = expectedAssets.Count;
+            referencedBytes = ep.CalculateReferencedAssetBytes(zip, expectedAssets);
 
             // Upload assets from ZIP
-            var uploadedAssets = await ep.UploadAssetsFromZipAsync(zip, expectedAssets, user.Email, finalStoryId, warnings, errors, uploadedBlobPaths, ct);
+            var uploadSummary = await ep.UploadAssetsFromZipAsync(zip, expectedAssets, currentUser.Email, finalStoryId, warnings, errors, uploadedBlobPaths, ct);
+            uploadedAssets = uploadSummary.UploadedAssets;
+            uploadedBytes = uploadSummary.UploadedBytes;
 
             // If critical errors occurred during upload, rollback
             if (errors.Any(e => e.Contains("critical", StringComparison.OrdinalIgnoreCase)))
             {
                 await ep.RollbackAssetsAsync(uploadedBlobPaths, ct);
+                outcome = "CriticalAssetError";
                 return TypedResults.BadRequest(new ImportFullStoryResponse { Success = false, Errors = errors, Warnings = warnings });
             }
 
@@ -227,10 +257,11 @@ public class ImportFullStoryEndpoint
             var importedLanguages = ep.ExtractLanguages(root);
 
             // Create StoryCraft from JSON
-            await ep.CreateStoryCraftFromJsonAsync(root, user.Id, finalStoryId, warnings, ct);
+            await ep.CreateStoryCraftFromJsonAsync(root, currentUser.Id, finalStoryId, warnings, ct);
 
             ep._logger.LogInformation("Import full story successful: storyId={StoryId} userId={UserId} assets={AssetsCount}",
-                finalStoryId, user.Id, uploadedAssets);
+                finalStoryId, currentUser.Id, uploadedAssets);
+            outcome = "Success";
 
             return TypedResults.Ok(new ImportFullStoryResponse
             {
@@ -245,7 +276,8 @@ public class ImportFullStoryEndpoint
         }
         catch (Exception ex)
         {
-            ep._logger.LogError(ex, "Import full story failed: userId={UserId}", user.Id);
+            outcome = "Exception";
+            ep._logger.LogError(ex, "Import full story failed: userId={UserId}", currentUser?.Id);
 
             // Rollback on any exception
             await ep.RollbackAssetsAsync(uploadedBlobPaths, ct);
@@ -253,6 +285,95 @@ public class ImportFullStoryEndpoint
             errors.Add($"Import failed: {ex.Message}");
             return TypedResults.BadRequest(new ImportFullStoryResponse { Success = false, Errors = errors, Warnings = warnings });
         }
+        finally
+        {
+            stopwatch.Stop();
+            ep.TrackImportTelemetry(
+                stopwatch.ElapsedMilliseconds,
+                outcome,
+                locale,
+                finalStoryId,
+                currentUser?.Id,
+                totalAssets,
+                uploadedAssets,
+                referencedBytes,
+                uploadedBytes,
+                warnings.Count,
+                errors.Count);
+        }
+    }
+
+    private void TrackImportTelemetry(
+        long durationMs,
+        string outcome,
+        string locale,
+        string? storyId,
+        Guid? userId,
+        int totalAssets,
+        int uploadedAssets,
+        long referencedBytes,
+        long uploadedBytes,
+        int warningsCount,
+        int errorsCount)
+    {
+        var referencedMb = referencedBytes / 1024d / 1024d;
+        var uploadedMb = uploadedBytes / 1024d / 1024d;
+
+        _logger.LogInformation(
+            "Import full story telemetry | storyId={StoryId} locale={Locale} outcome={Outcome} durationMs={DurationMs} totalAssets={TotalAssets} uploadedAssets={UploadedAssets} referencedSizeMB={ReferencedSizeMB:F2} uploadedSizeMB={UploadedSizeMB:F2} warnings={Warnings} errors={Errors}",
+            storyId ?? "(none)",
+            locale,
+            outcome,
+            durationMs,
+            totalAssets,
+            uploadedAssets,
+            referencedMb,
+            uploadedMb,
+            warningsCount,
+            errorsCount);
+
+        var properties = new Dictionary<string, string?>
+        {
+            ["Outcome"] = outcome,
+            ["Locale"] = locale,
+            ["StoryId"] = storyId,
+            ["UserId"] = userId?.ToString(),
+            ["Warnings"] = warningsCount.ToString(CultureInfo.InvariantCulture),
+            ["Errors"] = errorsCount.ToString(CultureInfo.InvariantCulture)
+        };
+
+        TrackMetric("ImportFullStory_Duration", durationMs, properties);
+        TrackMetric("ImportFullStory_AssetsCount", totalAssets, properties);
+        TrackMetric("ImportFullStory_UploadedAssets", uploadedAssets, properties);
+
+        if (referencedBytes > 0)
+        {
+            TrackMetric("ImportFullStory_ReferencedSizeMB", referencedMb, properties);
+        }
+
+        if (uploadedBytes > 0)
+        {
+            TrackMetric("ImportFullStory_TotalSizeMB", uploadedMb, properties);
+        }
+    }
+
+    private void TrackMetric(string metricName, double value, IReadOnlyDictionary<string, string?> properties)
+    {
+        if (_telemetryClient == null)
+        {
+            return;
+        }
+
+        var metric = new MetricTelemetry(metricName, value);
+        foreach (var kvp in properties)
+        {
+            if (!string.IsNullOrEmpty(kvp.Value))
+            {
+                metric.Properties[kvp.Key] = kvp.Value!;
+            }
+        }
+
+        _telemetryClient.TrackMetric(metric);
     }
 
     private async Task<string> ResolveStoryIdConflictAsync(string storyId, AlchimaliaUser user, bool isAdmin, CancellationToken ct)
@@ -369,6 +490,24 @@ public class ImportFullStoryEndpoint
         return assets;
     }
 
+    private long CalculateReferencedAssetBytes(
+        ZipArchive zip,
+        List<(string ZipPath, AssetInfo Asset)> expectedAssets)
+    {
+        long total = 0;
+        foreach (var (zipPath, _) in expectedAssets)
+        {
+            var normalizedZipPath = NormalizeZipPath(zipPath);
+            var entry = zip.Entries.FirstOrDefault(e => ContainsPath(e, normalizedZipPath));
+            if (entry != null)
+            {
+                total += entry.Length;
+            }
+        }
+
+        return total;
+    }
+
     private (string ZipPath, AssetInfo Asset) CreateAssetEntry(string? manifestPath, AssetInfo asset, bool isCoverImage = false)
     {
         var normalizedPath = NormalizeZipPath(manifestPath);
@@ -439,7 +578,7 @@ public class ImportFullStoryEndpoint
         return parts.Length > 0 ? parts[^1] : cleanPath;
     }
 
-    private async Task<int> UploadAssetsFromZipAsync(
+    private async Task<AssetUploadSummary> UploadAssetsFromZipAsync(
         ZipArchive zip,
         List<(string ZipPath, AssetInfo Asset)> expectedAssets,
         string userEmail,
@@ -450,6 +589,7 @@ public class ImportFullStoryEndpoint
         CancellationToken ct)
     {
         var uploadedCount = 0;
+        var uploadedBytes = 0L;
         var containerClient = _sas.GetContainerClient(_sas.DraftContainer);
         await containerClient.CreateIfNotExistsAsync(cancellationToken: ct);
 
@@ -519,6 +659,7 @@ public class ImportFullStoryEndpoint
 
                 uploadedBlobPaths.Add(blobPath);
                 uploadedCount++;
+                uploadedBytes += memoryStream.Length;
 
                 _logger.LogDebug("Uploaded asset: {BlobPath} ({Size} bytes)", blobPath, memoryStream.Length);
             }
@@ -529,8 +670,10 @@ public class ImportFullStoryEndpoint
             }
         }
 
-        return uploadedCount;
+        return new AssetUploadSummary(uploadedCount, uploadedBytes);
     }
+
+    private readonly record struct AssetUploadSummary(int UploadedAssets, long UploadedBytes);
 
     private static bool ContainsPath(ZipArchiveEntry e, string normalizedZipPath)
     {
