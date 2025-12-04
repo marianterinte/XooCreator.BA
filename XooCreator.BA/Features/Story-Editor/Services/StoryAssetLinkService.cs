@@ -143,14 +143,9 @@ public class StoryAssetLinkService : IStoryAssetLinkService
         var publishedPath = StoryAssetPathMapper.BuildPublishedPath(asset, ownerEmail, storyId);
         var hash = ComputeAssetHash(asset, draftVersion);
 
+        // Check by DraftPath first (unique constraint) to avoid duplicate key violations
         var existing = await _db.StoryAssetLinks
-            .FirstOrDefaultAsync(x =>
-                x.StoryId == storyId &&
-                x.EntityId == entityId &&
-                x.AssetType == asset.Type.ToString() &&
-                x.LanguageCode == language &&
-                x.DraftPath == draftPath,
-                ct);
+            .FirstOrDefaultAsync(x => x.DraftPath == draftPath, ct);
 
         if (existing == null)
         {
@@ -172,8 +167,12 @@ public class StoryAssetLinkService : IStoryAssetLinkService
         }
         else
         {
+            // Update existing link - may have different StoryId/EntityId if asset was moved/reused
+            existing.StoryId = storyId;
             existing.DraftVersion = draftVersion;
             existing.LanguageCode = language;
+            existing.AssetType = asset.Type.ToString();
+            existing.EntityId = entityId;
             existing.PublishedPath = publishedPath;
             existing.ContentHash = hash;
             existing.LastSyncedAt = DateTime.UtcNow;

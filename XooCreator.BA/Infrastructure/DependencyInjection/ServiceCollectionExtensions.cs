@@ -1,5 +1,6 @@
 using XooCreator.BA.Data.Repositories;
 using XooCreator.BA.Infrastructure.Services;
+using XooCreator.BA.Infrastructure.Services.Queue;
 using XooCreator.BA.Infrastructure.Services.Blob;
 using XooCreator.BA.Services;
 using XooCreator.BA.Features.User.Services;
@@ -36,6 +37,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserContextService, UserContextService>();
         services.AddSingleton<IBlobSasService, BlobSasService>();
         services.AddScoped<IDbHealthService, DbHealthService>();
+        services.AddSingleton<IStoryPublishQueue, StoryPublishQueue>();
         
         return services;
     }
