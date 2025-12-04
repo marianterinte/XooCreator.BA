@@ -4,7 +4,8 @@
 
 BEGIN;
 
-CREATE TABLE IF NOT EXISTS alchimalia_schema."StoryPublishChangeLog"
+-- Use pluralized name to match EF Core conventions: StoryPublishChangeLogs
+CREATE TABLE IF NOT EXISTS alchimalia_schema."StoryPublishChangeLogs"
 (
     "Id" uuid NOT NULL,
     "StoryId" character varying(200) NOT NULL,
@@ -19,11 +20,11 @@ CREATE TABLE IF NOT EXISTS alchimalia_schema."StoryPublishChangeLog"
     "AssetPublishedPath" character varying(1024),
     "CreatedAt" timestamp with time zone NOT NULL DEFAULT (NOW() AT TIME ZONE 'UTC'),
     "CreatedBy" uuid,
-    CONSTRAINT "PK_StoryPublishChangeLog" PRIMARY KEY ("Id")
+    CONSTRAINT "PK_StoryPublishChangeLogs" PRIMARY KEY ("Id")
 );
 
-CREATE INDEX IF NOT EXISTS "IX_StoryPublishChangeLog_StoryId_DraftVersion"
-    ON alchimalia_schema."StoryPublishChangeLog" ("StoryId", "DraftVersion");
+CREATE INDEX IF NOT EXISTS "IX_StoryPublishChangeLogs_StoryId_DraftVersion"
+    ON alchimalia_schema."StoryPublishChangeLogs" ("StoryId", "DraftVersion");
 
 CREATE TABLE IF NOT EXISTS alchimalia_schema."StoryAssetLinks"
 (

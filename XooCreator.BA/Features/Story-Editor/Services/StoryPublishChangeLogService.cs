@@ -35,34 +35,42 @@ public class StoryPublishChangeLogService : IStoryPublishChangeLogService
 
     public async Task AppendChangesAsync(StoryCraft craft, StoryDraftSnapshot? previousSnapshot, string languageCode, Guid userId, CancellationToken ct)
     {
-        var freshCraft = await LoadCraftAsync(craft.Id, languageCode, ct);
-        if (freshCraft == null)
+        try
         {
-            return;
+            var freshCraft = await LoadCraftAsync(craft.Id, languageCode, ct);
+            if (freshCraft == null)
+            {
+                return;
+            }
+
+            var currentSnapshot = StoryDraftSnapshot.CreateFromCraft(freshCraft, languageCode);
+            var diffEntries = StoryDraftSnapshotDiff.Calculate(previousSnapshot, currentSnapshot, SerializerOptions);
+
+            if (diffEntries.Count == 0)
+            {
+                return;
+            }
+
+            var nextVersion = craft.LastDraftVersion + 1;
+            foreach (var entry in diffEntries)
+            {
+                entry.Id = Guid.NewGuid();
+                entry.StoryId = craft.StoryId;
+                entry.DraftVersion = nextVersion;
+                entry.LanguageCode = languageCode;
+                entry.CreatedAt = DateTime.UtcNow;
+                entry.CreatedBy = userId;
+            }
+
+            craft.LastDraftVersion = nextVersion;
+            _context.StoryPublishChangeLogs.AddRange(diffEntries);
+            await _context.SaveChangesAsync(ct);
         }
-
-        var currentSnapshot = StoryDraftSnapshot.CreateFromCraft(freshCraft, languageCode);
-        var diffEntries = StoryDraftSnapshotDiff.Calculate(previousSnapshot, currentSnapshot, SerializerOptions);
-
-        if (diffEntries.Count == 0)
+        catch (Exception ex)
         {
-            return;
-        }
 
-        var nextVersion = craft.LastDraftVersion + 1;
-        foreach (var entry in diffEntries)
-        {
-            entry.Id = Guid.NewGuid();
-            entry.StoryId = craft.StoryId;
-            entry.DraftVersion = nextVersion;
-            entry.LanguageCode = languageCode;
-            entry.CreatedAt = DateTime.UtcNow;
-            entry.CreatedBy = userId;
+            throw;
         }
-
-        craft.LastDraftVersion = nextVersion;
-        _context.StoryPublishChangeLogs.AddRange(diffEntries);
-        await _context.SaveChangesAsync(ct);
     }
 
     private async Task<StoryCraft?> LoadCraftAsync(Guid craftId, string languageCode, CancellationToken ct)
