@@ -37,7 +37,11 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserContextService, UserContextService>();
         services.AddSingleton<IBlobSasService, BlobSasService>();
         services.AddScoped<IDbHealthService, DbHealthService>();
+        services.AddSingleton<IAzureQueueClientFactory, AzureQueueClientFactory>();
         services.AddSingleton<IStoryPublishQueue, StoryPublishQueue>();
+        services.AddSingleton<IStoryImportQueue, StoryImportQueue>();
+        services.AddSingleton<IStoryForkQueue, StoryForkQueue>();
+        services.AddSingleton<IStoryForkAssetsQueue, StoryForkAssetsQueue>();
         
         return services;
     }

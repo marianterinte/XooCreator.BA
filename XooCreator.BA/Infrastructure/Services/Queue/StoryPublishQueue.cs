@@ -11,26 +11,15 @@ public class StoryPublishQueue : IStoryPublishQueue
     private readonly QueueClient _queueClient;
     private readonly ILogger<StoryPublishQueue> _logger;
 
-    public StoryPublishQueue(IConfiguration configuration, ILogger<StoryPublishQueue> logger)
+    public StoryPublishQueue(
+        IConfiguration configuration,
+        IAzureQueueClientFactory queueClientFactory,
+        ILogger<StoryPublishQueue> logger)
     {
         _logger = logger;
 
-        var section = configuration.GetSection("AzureStorage");
-        var connectionString = ResolveConfiguredValue(section["ConnectionString"])
-                               ?? Environment.GetEnvironmentVariable("AzureStorage__ConnectionString");
-        if (string.IsNullOrWhiteSpace(connectionString))
-        {
-            throw new InvalidOperationException("AzureStorage:ConnectionString is not configured.");
-        }
-
-        var queueName = ResolveConfiguredValue(section["PublishQueueName"])
-                        ?? Environment.GetEnvironmentVariable("AzureStorage__PublishQueueName")
-                        ?? "story-publish-queue";
-
-        _queueClient = new QueueClient(connectionString, queueName, new QueueClientOptions
-        {
-            MessageEncoding = QueueMessageEncoding.Base64
-        });
+        var queueName = configuration.GetSection("AzureStorage:Queues")?["Publish"];
+        _queueClient = queueClientFactory.CreateClient(queueName, "story-publish-queue");
     }
 
     public async Task EnqueueAsync(StoryPublishJob job, CancellationToken ct = default)
@@ -63,22 +52,6 @@ public class StoryPublishQueue : IStoryPublishQueue
                 job.Id, job.StoryId, _queueClient.Name);
             throw;
         }
-    }
-
-    private static string? ResolveConfiguredValue(string? configured)
-    {
-        if (string.IsNullOrWhiteSpace(configured))
-        {
-            return null;
-        }
-
-        if (configured.StartsWith("env:", StringComparison.OrdinalIgnoreCase))
-        {
-            var envKey = configured[4..].Trim();
-            return string.IsNullOrWhiteSpace(envKey) ? null : Environment.GetEnvironmentVariable(envKey);
-        }
-
-        return configured;
     }
 }
 

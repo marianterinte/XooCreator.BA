@@ -41,6 +41,9 @@ builder.Services.AddDatabaseConfiguration(builder.Configuration);
 // Register all application services using extension methods
 builder.Services.AddApplicationServices();
 builder.Services.AddHostedService<StoryPublishQueueWorker>();
+builder.Services.AddHostedService<StoryImportQueueWorker>();
+builder.Services.AddHostedService<StoryForkQueueWorker>();
+builder.Services.AddHostedService<StoryForkAssetsQueueWorker>();
 
 builder.Services.AddAuthConfiguration(builder.Configuration);
 

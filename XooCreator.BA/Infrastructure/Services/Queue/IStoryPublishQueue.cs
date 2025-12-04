@@ -6,5 +6,3 @@ public interface IStoryPublishQueue
 {
     Task EnqueueAsync(StoryPublishJob job, CancellationToken ct = default);
 }
-
-

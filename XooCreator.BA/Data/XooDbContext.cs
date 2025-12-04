@@ -73,6 +73,9 @@ public class XooDbContext : DbContext
     public DbSet<StoryPublishChangeLog> StoryPublishChangeLogs => Set<StoryPublishChangeLog>();
     public DbSet<StoryAssetLink> StoryAssetLinks => Set<StoryAssetLink>();
     public DbSet<StoryPublishJob> StoryPublishJobs => Set<StoryPublishJob>();
+    public DbSet<StoryImportJob> StoryImportJobs => Set<StoryImportJob>();
+    public DbSet<StoryForkJob> StoryForkJobs => Set<StoryForkJob>();
+    public DbSet<StoryForkAssetJob> StoryForkAssetJobs => Set<StoryForkAssetJob>();
     public DbSet<StoryCraft> StoryCrafts => Set<StoryCraft>();
     public DbSet<StoryCraftTranslation> StoryCraftTranslations => Set<StoryCraftTranslation>();
     public DbSet<StoryCraftTile> StoryCraftTiles => Set<StoryCraftTile>();
@@ -121,6 +124,46 @@ public class XooDbContext : DbContext
             e.Property(x => x.Email).HasMaxLength(256).IsRequired();
             e.Property(x => x.Auth0Id).HasMaxLength(256).IsRequired();
             e.Property(x => x.Picture).HasMaxLength(512);
+        });
+
+        modelBuilder.Entity<StoryForkJob>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedNever();
+            e.Property(x => x.SourceStoryId).HasMaxLength(256).IsRequired();
+            e.Property(x => x.SourceType).HasMaxLength(32).IsRequired();
+            e.Property(x => x.TargetStoryId).HasMaxLength(256).IsRequired();
+            e.Property(x => x.TargetOwnerEmail).HasMaxLength(256).IsRequired();
+            e.Property(x => x.RequestedByEmail).HasMaxLength(256).IsRequired();
+            e.Property(x => x.Status).HasMaxLength(32).IsRequired();
+            e.HasIndex(x => new { x.TargetStoryId, x.Status });
+        });
+
+        modelBuilder.Entity<StoryForkAssetJob>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedNever();
+            e.Property(x => x.SourceStoryId).HasMaxLength(256).IsRequired();
+            e.Property(x => x.SourceType).HasMaxLength(32).IsRequired();
+            e.Property(x => x.TargetStoryId).HasMaxLength(256).IsRequired();
+            e.Property(x => x.TargetOwnerEmail).HasMaxLength(256).IsRequired();
+            e.Property(x => x.RequestedByEmail).HasMaxLength(256).IsRequired();
+            e.Property(x => x.Status).HasMaxLength(32).IsRequired();
+            e.HasIndex(x => new { x.TargetStoryId, x.Status });
+        });
+
+        modelBuilder.Entity<StoryImportJob>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedNever();
+            e.Property(x => x.StoryId).HasMaxLength(256).IsRequired();
+            e.Property(x => x.OriginalStoryId).HasMaxLength(256);
+            e.Property(x => x.Locale).HasMaxLength(16);
+            e.Property(x => x.ZipBlobPath).HasMaxLength(512).IsRequired();
+            e.Property(x => x.ZipFileName).HasMaxLength(256);
+            e.Property(x => x.Status).HasMaxLength(32).IsRequired();
+            e.HasIndex(x => new { x.StoryId, x.Status });
+            e.HasIndex(x => x.OwnerUserId);
         });
 
         modelBuilder.Entity<CreditWallet>(e =>
