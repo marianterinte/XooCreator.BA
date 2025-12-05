@@ -169,17 +169,24 @@ public partial class ForkStoryEndpoint
                 return TypedResults.NotFound();
             }
 
+            // Fork is only allowed for published stories (definitions), not drafts (crafts)
+            // For drafts, users should use Copy instead
             if (craft != null)
             {
-                sourceType = StoryForkAssetJobSourceTypes.Draft;
-                sourceTranslations = craft.Translations.Count;
-                sourceTiles = craft.Tiles.Count;
+                outcome = "BadRequest";
+                return TypedResults.BadRequest("Fork is only available for published stories. Use Copy for draft stories.");
             }
-            else if (definition != null)
+
+            if (definition != null)
             {
                 sourceType = StoryForkAssetJobSourceTypes.Published;
                 sourceTranslations = definition.Translations.Count;
                 sourceTiles = definition.Tiles.Count;
+            }
+            else
+            {
+                outcome = "BadRequest";
+                return TypedResults.BadRequest("Fork is only available for published stories.");
             }
 
             newStoryId = await ep._storyIdGenerator.GenerateNextAsync(
