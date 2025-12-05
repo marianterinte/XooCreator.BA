@@ -112,14 +112,18 @@
 ### 5. UX & status tracking
 
 5.1. Frontend:
-- Editorul arată un banner după publish:  
-  „Publish în curs… povestea va apărea ca *Published* în listă când job-ul este gata.”
+- **Editorul** și **Lista de story-crafts** arată un banner după publish:  
+  „Publish în curs… povestea va apărea ca *Published* în listă când job-ul este gata."
+- Banner-ul apare în ambele locații:
+  - În editor (`story-editor.component`): când se face publish din editor
+  - În listă (`story-editor-list.component`): când se face publish din butonul "Publish" din listă
+- Banner-ul afișează status-ul în timp real (Queued → Running → Completed/Failed) prin polling
 - Lista de stories se bazează deja pe `Status` din backend; când publish-ul termină, statusul devine `Published` și utilizatorul îl vede la refresh.
 
-5.2. Endpoint (opțional) de status:
-- `GET /api/stories/{storyId}/publish-status`:
-  - returnează ultimul job pentru `StoryId` (`Queued`, `Running`, `Completed`, `Failed`, `Superseded`) + eventual ultimul `ErrorMessage`.
-  - Util pentru un pooling mai fin în FE (de adăugat într-o etapă ulterioară).
+5.2. Endpoint de status:
+- `GET /api/stories/{storyId}/publish-jobs/{jobId}`:
+  - returnează status-ul job-ului (`Queued`, `Running`, `Completed`, `Failed`, `Superseded`) + eventual `ErrorMessage`.
+  - Folosit de frontend pentru polling (interval: 5 secunde, max 120 încercări = 10 minute).
 
 ---
 
