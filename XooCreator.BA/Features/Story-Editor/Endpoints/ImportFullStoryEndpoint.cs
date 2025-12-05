@@ -89,6 +89,23 @@ public partial class ImportFullStoryEndpoint
         public string QueueName { get; init; } = string.Empty;
     }
 
+    public record ImportJobStatusResponse
+    {
+        public Guid JobId { get; init; }
+        public string StoryId { get; init; } = string.Empty;
+        public string OriginalStoryId { get; init; } = string.Empty;
+        public string Status { get; init; } = string.Empty;
+        public DateTime QueuedAtUtc { get; init; }
+        public DateTime? StartedAtUtc { get; init; }
+        public DateTime? CompletedAtUtc { get; init; }
+        public int ImportedAssets { get; init; }
+        public int TotalAssets { get; init; }
+        public int ImportedLanguagesCount { get; init; }
+        public string? ErrorMessage { get; init; }
+        public string? WarningSummary { get; init; }
+        public int DequeueCount { get; init; }
+    }
+
     [Route("/api/{locale}/stories/import-full")]
     [Authorize]
     [DisableRequestSizeLimit] // Disable request size limit for this endpoint (allows up to 500MB as per MaxZipSizeBytes)
@@ -1050,6 +1067,59 @@ public partial class ImportFullStoryEndpoint
             var missingAgeGroupIds = ageGroupIds.Except(foundAgeGroupIds).ToList();
             _logger.LogWarning("Some age group IDs not found in database: {MissingAgeGroupIds}", string.Join(", ", missingAgeGroupIds));
         }
+    }
+
+    [Route("/api/stories/import-jobs/{jobId:guid}")]
+    [Authorize]
+    public static async Task<Results<Ok<ImportJobStatusResponse>, NotFound, UnauthorizedHttpResult, ForbidHttpResult>> HandleGet(
+        [FromRoute] Guid jobId,
+        [FromServices] ImportFullStoryEndpoint ep,
+        CancellationToken ct)
+    {
+        var user = await ep._auth0.GetCurrentUserAsync(ct);
+        if (user == null)
+        {
+            return TypedResults.Unauthorized();
+        }
+
+        if (!ep._auth0.HasRole(user, Data.Enums.UserRole.Creator))
+        {
+            return TypedResults.Forbid();
+        }
+
+        var job = await ep._db.StoryImportJobs
+            .AsNoTracking()
+            .FirstOrDefaultAsync(j => j.Id == jobId, ct);
+
+        if (job == null)
+        {
+            return TypedResults.NotFound();
+        }
+
+        // Check if user owns the job
+        if (job.OwnerUserId != user.Id)
+        {
+            return TypedResults.Forbid();
+        }
+
+        var response = new ImportJobStatusResponse
+        {
+            JobId = job.Id,
+            StoryId = job.StoryId,
+            OriginalStoryId = job.OriginalStoryId,
+            Status = job.Status,
+            QueuedAtUtc = job.QueuedAtUtc,
+            StartedAtUtc = job.StartedAtUtc,
+            CompletedAtUtc = job.CompletedAtUtc,
+            ImportedAssets = job.ImportedAssets,
+            TotalAssets = job.TotalAssets,
+            ImportedLanguagesCount = job.ImportedLanguagesCount,
+            ErrorMessage = job.ErrorMessage,
+            WarningSummary = job.WarningSummary,
+            DequeueCount = job.DequeueCount
+        };
+
+        return TypedResults.Ok(response);
     }
 }
 

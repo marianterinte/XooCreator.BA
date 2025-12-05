@@ -34,6 +34,7 @@ public class StoryAnswerUpdater : IStoryAnswerUpdater
                     Id = Guid.NewGuid(),
                     StoryCraftTileId = tile.Id,
                     AnswerId = answerDto.Id,
+                    IsCorrect = answerDto.IsCorrect,
                     SortOrder = i,
                     CreatedAt = DateTime.UtcNow
                 };
@@ -42,6 +43,7 @@ public class StoryAnswerUpdater : IStoryAnswerUpdater
             }
             else
             {
+                answer.IsCorrect = answerDto.IsCorrect;
                 answer.SortOrder = i;
             }
             

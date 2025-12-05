@@ -107,6 +107,7 @@ public class StoryPublishingService : IStoryPublishingService
                 StoryType = craft.StoryType,
                 Status = StoryStatus.Published,
                 IsActive = true,
+                IsEvaluative = craft.IsEvaluative,
                 SortOrder = 0,
                 Version = 1,
                 PriceInCredits = craft.PriceInCredits,
@@ -122,6 +123,7 @@ public class StoryPublishingService : IStoryPublishingService
         def.AuthorName = craft.AuthorName ?? def.AuthorName;
         def.ClassicAuthorId = craft.ClassicAuthorId ?? def.ClassicAuthorId;
         def.StoryType = craft.StoryType;
+        def.IsEvaluative = craft.IsEvaluative;
         def.PriceInCredits = craft.PriceInCredits;
         def.Status = StoryStatus.Published;
         def.IsActive = true;
@@ -238,6 +240,7 @@ public class StoryPublishingService : IStoryPublishingService
         def.AuthorName = craft.AuthorName ?? def.AuthorName;
         def.ClassicAuthorId = craft.ClassicAuthorId ?? def.ClassicAuthorId;
         def.StoryType = craft.StoryType;
+        def.IsEvaluative = craft.IsEvaluative;
         def.PriceInCredits = craft.PriceInCredits;
         def.Status = StoryStatus.Published;
         def.IsActive = true;
@@ -471,6 +474,7 @@ public class StoryPublishingService : IStoryPublishingService
                 StoryTile = tile,
                 AnswerId = craftAnswer.AnswerId,
                 Text = craftAnswer.Translations.FirstOrDefault(t => t.LanguageCode == langTag)?.Text ?? string.Empty,
+                IsCorrect = craftAnswer.IsCorrect,
                 SortOrder = craftAnswer.SortOrder
             };
             _db.StoryAnswers.Add(answer);

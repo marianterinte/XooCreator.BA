@@ -23,6 +23,7 @@ public class StoryDefinition
     public int Version { get; set; } = 1; // Global version, increments on publish
     public int LastPublishedVersion { get; set; } = 0; // Draft version that produced the current publish
     public double PriceInCredits { get; set; } = 0; // Price in credits for purchasing the story
+    public bool IsEvaluative { get; set; } = false; // If true, this story contains quizzes that should be evaluated
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     public Guid? CreatedBy { get; set; } // User who created the story

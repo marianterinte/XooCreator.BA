@@ -47,6 +47,8 @@ public class XooDbContext : DbContext
     public DbSet<StoryAnswerTranslation> StoryAnswerTranslations => Set<StoryAnswerTranslation>();
     public DbSet<UserStoryReadProgress> UserStoryReadProgress => Set<UserStoryReadProgress>();
     public DbSet<StoryAnswerToken> StoryAnswerTokens => Set<StoryAnswerToken>();
+    public DbSet<StoryQuizAnswer> StoryQuizAnswers => Set<StoryQuizAnswer>();
+    public DbSet<StoryEvaluationResult> StoryEvaluationResults => Set<StoryEvaluationResult>();
     public DbSet<StoryHero> StoryHeroes => Set<StoryHero>();
     public DbSet<StoryHeroUnlock> StoryHeroUnlocks => Set<StoryHeroUnlock>();
     public DbSet<HeroMessage> HeroMessages => Set<HeroMessage>();
@@ -507,6 +509,35 @@ public class XooDbContext : DbContext
             e.Property(x => x.Id).ValueGeneratedOnAdd();
             e.HasIndex(x => new { x.UserId, x.StoryId, x.TileId }).IsUnique();
             e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
+        });
+
+        modelBuilder.Entity<StoryQuizAnswer>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.StoryId).HasMaxLength(200).IsRequired();
+            e.Property(x => x.TileId).HasMaxLength(100).IsRequired();
+            e.Property(x => x.SelectedAnswerId).HasMaxLength(50).IsRequired();
+            e.HasIndex(x => new { x.UserId, x.StoryId, x.TileId, x.SessionId });
+            e.HasIndex(x => new { x.UserId, x.StoryId });
+            e.HasIndex(x => x.SessionId);
+            e.HasOne(x => x.User)
+                .WithMany()
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<StoryEvaluationResult>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.StoryId).HasMaxLength(200).IsRequired();
+            e.HasIndex(x => new { x.UserId, x.StoryId, x.CompletedAt });
+            e.HasIndex(x => new { x.UserId, x.StoryId, x.SessionId }).IsUnique();
+            e.HasOne(x => x.User)
+                .WithMany()
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<StoryHero>(e =>

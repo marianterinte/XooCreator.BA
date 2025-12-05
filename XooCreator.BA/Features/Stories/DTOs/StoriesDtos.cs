@@ -11,6 +11,7 @@ public record StoryContentDto
     public string? Summary { get; init; }
     public string? StoryTopic { get; init; }
     public string? StoryType { get; init; }
+    public bool IsEvaluative { get; init; } = false; // If true, this story contains quizzes that should be evaluated
     public List<string> UnlockedStoryHeroes { get; init; } = new();
     public List<StoryTileDto> Tiles { get; init; } = new();
     public string? OwnerEmail { get; init; }
@@ -37,6 +38,7 @@ public record StoryAnswerDto
 {
     public required string Id { get; init; }
     public required string Text { get; init; }
+    public bool IsCorrect { get; init; } = false; // True if this is the correct answer for the quiz
     public List<TokenReward> Tokens { get; init; } = new();
 }
 

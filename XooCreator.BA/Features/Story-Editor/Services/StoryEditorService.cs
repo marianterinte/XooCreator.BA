@@ -89,6 +89,7 @@ public class StoryEditorService : IStoryEditorService
         craft.AuthorName = dto.AuthorName; // Save author name (for "Other" option)
         craft.ClassicAuthorId = dto.ClassicAuthorId; // Save classic author ID if selected
         craft.StoryType = (StoryType)(dto.StoryType);
+        craft.IsEvaluative = dto.IsEvaluative;
         craft.PriceInCredits = dto.PriceInCredits;
         craft.UpdatedAt = DateTime.UtcNow;
         

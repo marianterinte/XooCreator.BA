@@ -4,6 +4,91 @@
 
 This document outlines the complete implementation plan for adding an evaluation/scoring system to stories that contain quiz questions. When a story is marked as "evaluative", users will be scored based on their quiz answers, and results will be displayed at the end of the story.
 
+## Implementation Status
+
+### ✅ Backend - COMPLETED
+
+**Files Created:**
+- `BA/XooCreator.BA/XooCreator.BA/Data/Entities/StoryQuizAnswer.cs`
+- `BA/XooCreator.BA/XooCreator.BA/Data/Entities/StoryEvaluationResult.cs`
+- `BA/XooCreator.BA/XooCreator.BA/Features/Stories/Endpoints/SubmitQuizAnswerEndpoint.cs`
+- `BA/XooCreator.BA/XooCreator.BA/Features/Stories/Endpoints/CompleteEvaluationEndpoint.cs`
+- `BA/XooCreator.BA/Database/Scripts/V0016__add_story_evaluation_system.sql`
+
+**Files Modified:**
+- `BA/XooCreator.BA/XooCreator.BA/Data/Entities/StoryDefinition.cs` - Added `IsEvaluative`
+- `BA/XooCreator.BA/XooCreator.BA/Data/Entities/StoryAnswer.cs` - Added `IsCorrect`
+- `BA/XooCreator.BA/XooCreator.BA/Data/Entities/StoryCraft.cs` - Added `IsEvaluative` and `IsCorrect` to `StoryCraftAnswer`
+- `BA/XooCreator.BA/XooCreator.BA/Data/XooDbContext.cs` - Added DbSets and entity configurations
+- `BA/XooCreator.BA/XooCreator.BA/Data/SeedData/DTOs/StorySeedData.cs` - Added `IsEvaluative` and `IsCorrect`
+- `BA/XooCreator.BA/XooCreator.BA/Data/SeedData/DTOs/StoriesSeedData.cs` - Added `IsEvaluative` and `IsCorrect`
+- `BA/XooCreator.BA/XooCreator.BA/Features/Stories/DTOs/StoriesDtos.cs` - Added `IsEvaluative` and `IsCorrect`
+- `BA/XooCreator.BA/XooCreator.BA/Features/Stories/Mappers/StoryDefinitionMapper.cs` - Updated mappers
+- `BA/XooCreator.BA/XooCreator.BA/Features/Story-Editor/Services/Content/EditableStoryDtos.cs` - Added `IsEvaluative` and `IsCorrect`
+- `BA/XooCreator.BA/XooCreator.BA/Features/Story-Editor/Services/StoryEditorService.cs` - Save `IsEvaluative`
+- `BA/XooCreator.BA/XooCreator.BA/Features/Story-Editor/Services/Content/StoryAnswerUpdater.cs` - Save `IsCorrect`
+- `BA/XooCreator.BA/XooCreator.BA/Features/Story-Editor/Services/StoryPublishingService.cs` - Copy fields on publish
+- `BA/XooCreator.BA/XooCreator.BA/Features/Stories/Services/StoriesService.cs` - Load fields in editor
+
+**Phase 1: Data Model & Database** - ✅ COMPLETED
+- ✅ Added `IsEvaluative` to `StoryDefinition` entity
+- ✅ Added `IsEvaluative` to `StoryCraft` entity (for editor)
+- ✅ Added `IsCorrect` to `StoryAnswer` entity
+- ✅ Added `IsCorrect` to `StoryCraftAnswer` entity (for editor)
+- ✅ Created `StoryQuizAnswer` entity
+- ✅ Created `StoryEvaluationResult` entity
+- ✅ Created migration script `V0016__add_story_evaluation_system.sql`
+- ✅ Updated `XooDbContext` with new entities and configurations
+
+**Phase 2: Backend API** - ✅ COMPLETED
+- ✅ Implemented `SubmitQuizAnswerEndpoint` (`POST /api/{locale}/stories/{storyId}/quiz-answer`)
+- ✅ Implemented `CompleteEvaluationEndpoint` (`POST /api/{locale}/stories/{storyId}/complete-evaluation`)
+- ✅ Both endpoints include proper validation and error handling
+
+**Phase 3: Editor Integration** - ✅ COMPLETED
+- ✅ Added `IsEvaluative` to `EditableStoryDto`
+- ✅ Added `IsCorrect` to `EditableAnswerDto`
+- ✅ Updated `StoryEditorService.SaveDraftAsync` to save `IsEvaluative`
+- ✅ Updated `StoryAnswerUpdater` to save `IsCorrect` from DTO to `StoryCraftAnswer`
+- ✅ Updated `StoriesService.GetStoryForEditAsync` to load `IsEvaluative` and `IsCorrect`
+
+**Phase 4: Publishing Integration** - ✅ COMPLETED
+- ✅ Updated `StoryPublishingService` to copy `IsEvaluative` from `StoryCraft` to `StoryDefinition` on publish
+- ✅ Updated `StoryPublishingService` to copy `IsCorrect` from `StoryCraftAnswer` to `StoryAnswer` on publish
+
+**Phase 5: Reading Integration** - ✅ COMPLETED
+- ✅ Added `IsEvaluative` to `StoryContentDto`
+- ✅ Added `IsCorrect` to `StoryAnswerDto`
+- ✅ Updated `StoryDefinitionMapper` to include `IsEvaluative` and `IsCorrect` in DTOs
+
+**Phase 6: Seed Data** - ✅ COMPLETED
+- ✅ Updated `StoryDefinitionSeedData` and `StoryAnswerSeedData` DTOs to support `IsEvaluative` and `IsCorrect`
+- ✅ Updated `StorySeedData` and `AnswerSeedData` DTOs (legacy format)
+- ✅ Updated `StoryDefinitionMapper` to map `IsEvaluative` and `IsCorrect` from JSON seed data
+
+### ⏳ Frontend - PENDING
+
+**Phase 3: Story Reading Integration** - ⏳ PENDING
+- ⏳ Update `story-reading.component.ts` to track session (extend existing continuation mechanism)
+- ⏳ Add quiz answer submission on selection (silent, no immediate feedback)
+- ⏳ Add evaluation completion handler (navigate to separate results route)
+- ⏳ Create `evaluation-results.component` (separate route, no breaking changes)
+- ⏳ Add route for evaluation results page
+
+**Phase 4: Story Editor Integration** - ⏳ PENDING
+- ⏳ Add `isEvaluative` checkbox in story editor
+- ⏳ Add `isCorrect` checkbox/toggle for each answer in quiz tiles
+- ⏳ Update save/load logic to handle new fields
+- ⏳ Add translations
+
+**Phase 5: UI Polish** - ⏳ PENDING
+- ⏳ Add quiz progress indicator (optional)
+- ⏳ Style results screen
+- ⏳ Add animations
+
+**Phase 6: Translations** - ⏳ PENDING
+- ⏳ Add translation keys for all evaluation-related UI elements
+
 ## Goals
 
 1. **Mark stories as evaluative** - Add a flag to identify stories that should be evaluated
@@ -167,17 +252,29 @@ public class StoryEvaluationResult
 
 ### 1.4 Migration Script
 
-**File:** `V0011__add_story_evaluation_system.sql`
+**File:** `V0016__add_story_evaluation_system.sql` ✅ IMPLEMENTED
 
 ```sql
 BEGIN;
 
 -- Add IsEvaluative flag to StoryDefinitions
-ALTER TABLE alchimalia_schema."StoryDefinitions"
+ALTER TABLE "alchimalia_schema"."StoryDefinitions"
     ADD COLUMN IF NOT EXISTS "IsEvaluative" boolean NOT NULL DEFAULT false;
 
+-- Add IsEvaluative flag to StoryCrafts (for editor drafts)
+ALTER TABLE "alchimalia_schema"."StoryCrafts"
+    ADD COLUMN IF NOT EXISTS "IsEvaluative" boolean NOT NULL DEFAULT false;
+
+-- Add IsCorrect flag to StoryAnswers
+ALTER TABLE "alchimalia_schema"."StoryAnswers"
+    ADD COLUMN IF NOT EXISTS "IsCorrect" boolean NOT NULL DEFAULT false;
+
+-- Add IsCorrect flag to StoryCraftAnswers (for editor drafts)
+ALTER TABLE "alchimalia_schema"."StoryCraftAnswers"
+    ADD COLUMN IF NOT EXISTS "IsCorrect" boolean NOT NULL DEFAULT false;
+
 -- Create StoryQuizAnswer table
-CREATE TABLE IF NOT EXISTS alchimalia_schema."StoryQuizAnswers" (
+CREATE TABLE IF NOT EXISTS "alchimalia_schema"."StoryQuizAnswers" (
     "Id" uuid NOT NULL,
     "UserId" uuid NOT NULL,
     "StoryId" text NOT NULL,
@@ -192,16 +289,16 @@ CREATE TABLE IF NOT EXISTS alchimalia_schema."StoryQuizAnswers" (
 );
 
 CREATE INDEX IF NOT EXISTS "IX_StoryQuizAnswers_UserStoryTileSession" 
-    ON alchimalia_schema."StoryQuizAnswers" ("UserId", "StoryId", "TileId", "SessionId");
+    ON "alchimalia_schema"."StoryQuizAnswers" ("UserId", "StoryId", "TileId", "SessionId");
 
 CREATE INDEX IF NOT EXISTS "IX_StoryQuizAnswers_UserStory" 
-    ON alchimalia_schema."StoryQuizAnswers" ("UserId", "StoryId");
+    ON "alchimalia_schema"."StoryQuizAnswers" ("UserId", "StoryId");
 
 CREATE INDEX IF NOT EXISTS "IX_StoryQuizAnswers_Session" 
-    ON alchimalia_schema."StoryQuizAnswers" ("SessionId");
+    ON "alchimalia_schema"."StoryQuizAnswers" ("SessionId");
 
 -- Create StoryEvaluationResult table
-CREATE TABLE IF NOT EXISTS alchimalia_schema."StoryEvaluationResults" (
+CREATE TABLE IF NOT EXISTS "alchimalia_schema"."StoryEvaluationResults" (
     "Id" uuid NOT NULL,
     "UserId" uuid NOT NULL,
     "StoryId" text NOT NULL,
@@ -212,24 +309,26 @@ CREATE TABLE IF NOT EXISTS alchimalia_schema."StoryEvaluationResults" (
     "CompletedAt" timestamp with time zone NOT NULL,
     CONSTRAINT "PK_StoryEvaluationResults" PRIMARY KEY ("Id"),
     CONSTRAINT "FK_StoryEvaluationResults_AlchimaliaUsers_UserId" 
-        FOREIGN KEY ("UserId") REFERENCES alchimalia_schema."AlchimaliaUsers" ("Id") ON DELETE CASCADE,
+        FOREIGN KEY ("UserId") REFERENCES "alchimalia_schema"."AlchimaliaUsers" ("Id") ON DELETE CASCADE,
     CONSTRAINT "UQ_StoryEvaluationResults_UserStorySession" 
         UNIQUE ("UserId", "StoryId", "SessionId")
 );
 
 CREATE INDEX IF NOT EXISTS "IX_StoryEvaluationResults_UserStoryCompleted" 
-    ON alchimalia_schema."StoryEvaluationResults" ("UserId", "StoryId", "CompletedAt");
+    ON "alchimalia_schema"."StoryEvaluationResults" ("UserId", "StoryId", "CompletedAt");
 
 COMMIT;
 ```
 
 ---
 
-## Phase 2: Backend API
+## Phase 2: Backend API ✅ COMPLETED
 
-### 2.1 Submit Quiz Answer Endpoint
+### 2.1 Submit Quiz Answer Endpoint ✅ IMPLEMENTED
 
 **Endpoint:** `POST /api/{locale}/stories/{storyId}/quiz-answer`
+
+**Location:** `BA/XooCreator.BA/XooCreator.BA/Features/Stories/Endpoints/SubmitQuizAnswerEndpoint.cs`
 
 **Request:**
 ```csharp
@@ -335,9 +434,11 @@ public static async Task<Results<Ok<SubmitQuizAnswerResponse>, BadRequest<string
 }
 ```
 
-### 2.2 Complete Evaluative Story Endpoint
+### 2.2 Complete Evaluative Story Endpoint ✅ IMPLEMENTED
 
 **Endpoint:** `POST /api/{locale}/stories/{storyId}/complete-evaluation`
+
+**Location:** `BA/XooCreator.BA/XooCreator.BA/Features/Stories/Endpoints/CompleteEvaluationEndpoint.cs`
 
 **Request:**
 ```csharp
@@ -472,9 +573,11 @@ public static async Task<Results<Ok<CompleteEvaluationResponse>, BadRequest<stri
 }
 ```
 
-### 2.3 Get Evaluation History Endpoint
+### 2.3 Get Evaluation History Endpoint ⏳ NOT IMPLEMENTED (Optional for MVP)
 
 **Endpoint:** `GET /api/{locale}/stories/{storyId}/evaluation-history`
+
+**Status:** Not implemented in MVP. Can be added later if needed for displaying user's attempt history.
 
 **Response:**
 ```csharp
@@ -496,7 +599,7 @@ public record EvaluationHistoryItem
 
 ---
 
-## Phase 3: Frontend - Story Reading
+## Phase 3: Frontend - Story Reading ⏳ PENDING
 
 ### 3.1 Update Story Reading Component
 
@@ -726,11 +829,13 @@ export class EvaluationResultsComponent implements OnInit {
 
 ---
 
-## Phase 4: Story Editor Integration
+## Phase 4: Story Editor Integration ⏳ PENDING (Backend Ready ✅)
 
-### 4.1 Add Evaluation Toggle in Story Editor
+### 4.1 Add Evaluation Toggle in Story Editor ⏳ PENDING
 
-**File:** `story-basic-info-tab.component.html`
+**Backend Status:** ✅ Ready - `IsEvaluative` is already supported in `EditableStoryDto` and saved via `StoryEditorService`
+
+**File:** `story-basic-info-tab.component.html` (Frontend - to be implemented)
 
 **Add checkbox:**
 ```html
@@ -766,22 +871,30 @@ getStoryMetadata(): EditableStory {
 }
 ```
 
-### 4.2 Validation in Story Editor
+### 4.2 Validation in Story Editor ✅ IMPLEMENTED
 
 **Validation Rules:**
-- No validation for `isEvaluative` flag - it's creator's responsibility
-- Stories can have quizzes without being evaluative (they just give tokens as before)
-- If `isEvaluative = false`, no warnings or suggestions are shown
+- ✅ No validation for `isEvaluative` flag - it's creator's responsibility
+- ✅ Stories can have quizzes without being evaluative (they just give tokens as before)
+- ✅ If `isEvaluative = false`, no warnings or suggestions are shown
 
-### 4.3 Update Story Save Endpoint
+### 4.3 Update Story Save Endpoint ✅ IMPLEMENTED
 
-**Backend:** `SaveStoryEndpoint.cs`
+**Backend:** `StoryEditorService.SaveDraftAsync`
 
-**Include `IsEvaluative` in save:**
+**Implementation:**
 ```csharp
-// Update StoryDefinition
-story.IsEvaluative = dto.IsEvaluative;
+// Update StoryCraft
+craft.IsEvaluative = dto.IsEvaluative;
 ```
+
+**Status:** ✅ Already implemented - `IsEvaluative` is saved from `EditableStoryDto` to `StoryCraft` when saving draft.
+
+### 4.4 Add IsCorrect Support in Editor ⏳ PENDING (Backend Ready ✅)
+
+**Backend Status:** ✅ Ready - `IsCorrect` is already supported in `EditableAnswerDto` and saved via `StoryAnswerUpdater`
+
+**Frontend:** Need to add UI controls in story editor to mark answers as correct/incorrect for quiz tiles.
 
 ---
 
@@ -913,43 +1026,58 @@ story.IsEvaluative = dto.IsEvaluative;
 
 ## Phase 8: Implementation Order
 
-### Step 1: Database & Entities (Backend)
-1. Create migration script `V0011__add_story_evaluation_system.sql`
-2. Add `IsEvaluative` to `StoryDefinition` entity
-3. Create `StoryQuizAnswer` entity
-4. Create `StoryEvaluationResult` entity
-5. Update `XooDbContext`
+### ✅ Step 1: Database & Entities (Backend) - COMPLETED
+1. ✅ Create migration script `V0016__add_story_evaluation_system.sql`
+2. ✅ Add `IsEvaluative` to `StoryDefinition` entity
+3. ✅ Add `IsEvaluative` to `StoryCraft` entity
+4. ✅ Add `IsCorrect` to `StoryAnswer` entity
+5. ✅ Add `IsCorrect` to `StoryCraftAnswer` entity
+6. ✅ Create `StoryQuizAnswer` entity
+7. ✅ Create `StoryEvaluationResult` entity
+8. ✅ Update `XooDbContext` with new entities and configurations
 
-### Step 2: Backend API Endpoints
-1. Implement `SubmitQuizAnswerEndpoint`
-2. Implement `CompleteEvaluationEndpoint`
-3. Implement `GetEvaluationHistoryEndpoint`
-4. Add validation logic
+### ✅ Step 2: Backend API Endpoints - COMPLETED
+1. ✅ Implement `SubmitQuizAnswerEndpoint`
+2. ✅ Implement `CompleteEvaluationEndpoint`
+3. ⏳ `GetEvaluationHistoryEndpoint` - Not implemented (optional for MVP)
+4. ✅ Add validation logic
 
-### Step 3: Story Editor Integration (Frontend)
-1. Add `isEvaluative` checkbox in story editor
-2. Add validation for evaluative stories
-3. Update save/load logic
-4. Add translations
+### ✅ Step 3: Backend Editor Integration - COMPLETED
+1. ✅ Add `IsEvaluative` to `EditableStoryDto`
+2. ✅ Add `IsCorrect` to `EditableAnswerDto`
+3. ✅ Update `StoryEditorService.SaveDraftAsync` to save `IsEvaluative`
+4. ✅ Update `StoryAnswerUpdater` to save `IsCorrect`
+5. ✅ Update `StoriesService.GetStoryForEditAsync` to load both fields
+6. ✅ Update `StoryPublishingService` to copy fields on publish
 
-### Step 4: Story Reading Integration (Frontend)
-1. Update `story-reading.component.ts` to track session (extend existing continuation mechanism)
-2. Add quiz answer submission on selection (silent, no immediate feedback)
-3. Add evaluation completion handler (navigate to separate results route)
-4. Create `evaluation-results.component` (separate route, no breaking changes)
-5. Add route for evaluation results page
+### ✅ Step 4: Backend Reading Integration - COMPLETED
+1. ✅ Add `IsEvaluative` to `StoryContentDto`
+2. ✅ Add `IsCorrect` to `StoryAnswerDto`
+3. ✅ Update `StoryDefinitionMapper` to include both fields in DTOs
 
-### Step 5: UI Polish
-1. Add quiz progress indicator
-2. Add answer feedback styling
-3. Style results screen
-4. Add animations
+### ⏳ Step 5: Story Editor Integration (Frontend) - PENDING
+1. ⏳ Add `isEvaluative` checkbox in story editor
+2. ⏳ Add `isCorrect` toggle for each answer in quiz tiles
+3. ✅ Backend save/load logic already supports these fields
+4. ⏳ Add translations
 
-### Step 6: Testing
-1. Test all scenarios
-2. Test edge cases
-3. Performance testing
-4. User acceptance testing
+### ⏳ Step 6: Story Reading Integration (Frontend) - PENDING
+1. ⏳ Update `story-reading.component.ts` to track session (extend existing continuation mechanism)
+2. ⏳ Add quiz answer submission on selection (silent, no immediate feedback)
+3. ⏳ Add evaluation completion handler (navigate to separate results route)
+4. ⏳ Create `evaluation-results.component` (separate route, no breaking changes)
+5. ⏳ Add route for evaluation results page
+
+### ⏳ Step 7: UI Polish - PENDING
+1. ⏳ Add quiz progress indicator (optional)
+2. ⏳ Style results screen
+3. ⏳ Add animations
+
+### ⏳ Step 8: Testing - PENDING
+1. ⏳ Test all scenarios
+2. ⏳ Test edge cases
+3. ⏳ Performance testing
+4. ⏳ User acceptance testing
 
 ---
 
@@ -988,18 +1116,53 @@ story.IsEvaluative = dto.IsEvaluative;
 
 This implementation plan provides a robust, step-by-step approach to adding evaluation capabilities to stories. The system:
 
-- ✅ Marks stories as evaluative via `IsEvaluative` flag
-- ✅ Tracks individual quiz answers during reading (silently, no immediate feedback)
+### ✅ Backend Implementation Status
+
+**Completed:**
+- ✅ Marks stories as evaluative via `IsEvaluative` flag (both `StoryDefinition` and `StoryCraft`)
+- ✅ Stores `IsCorrect` flag on answers (both `StoryAnswer` and `StoryCraftAnswer`)
+- ✅ Tracks individual quiz answers during reading via `StoryQuizAnswer` entity
 - ✅ Calculates scores based on correct/incorrect answers (simple formula)
-- ✅ Displays results screen at completion with breakdown per quiz
-- ✅ Stores all evaluation attempts (no limit)
-- ✅ Supports multiple attempts/retries (fresh start each time)
+- ✅ Returns results with breakdown per quiz via `CompleteEvaluationEndpoint`
+- ✅ Stores all evaluation attempts via `StoryEvaluationResult` entity (no limit)
+- ✅ Supports multiple attempts/retries (fresh start each time via new SessionId)
 - ✅ Extends existing story reading continuation mechanism for session management
-- ✅ Provides feedback only at the end (results screen)
-- ✅ No breaking changes - separate component and route
+- ✅ No breaking changes - all changes are additive
 - ✅ No validation in editor - creator's responsibility
 - ✅ Allows answer overwrite if user goes back and changes answer
 - ✅ Uses current story version at completion time
+- ✅ Full editor support - `IsEvaluative` and `IsCorrect` saved/loaded from `StoryCraft`
+- ✅ Full publishing support - fields copied from `StoryCraft` to `StoryDefinition` on publish
+- ✅ Full reading support - `IsEvaluative` and `IsCorrect` exposed in DTOs
 
-The implementation is incremental, allowing for testing at each phase, and maintains backward compatibility with existing non-evaluative stories. Best score tracking and complex token configurations will be added later in parent dashboard.
+**Backend Files Created/Modified:**
+- ✅ `StoryDefinition.cs` - Added `IsEvaluative`
+- ✅ `StoryCraft.cs` - Added `IsEvaluative` and `IsCorrect` to `StoryCraftAnswer`
+- ✅ `StoryAnswer.cs` - Added `IsCorrect`
+- ✅ `StoryQuizAnswer.cs` - New entity
+- ✅ `StoryEvaluationResult.cs` - New entity
+- ✅ `XooDbContext.cs` - Added DbSets and configurations
+- ✅ `V0016__add_story_evaluation_system.sql` - Migration script
+- ✅ `SubmitQuizAnswerEndpoint.cs` - New endpoint
+- ✅ `CompleteEvaluationEndpoint.cs` - New endpoint
+- ✅ `EditableStoryDto` - Added `IsEvaluative`
+- ✅ `EditableAnswerDto` - Added `IsCorrect`
+- ✅ `StoryContentDto` - Added `IsEvaluative`
+- ✅ `StoryAnswerDto` - Added `IsCorrect`
+- ✅ `StoryDefinitionMapper` - Updated to map new fields
+- ✅ `StoryEditorService` - Updated to save `IsEvaluative`
+- ✅ `StoryAnswerUpdater` - Updated to save `IsCorrect`
+- ✅ `StoryPublishingService` - Updated to copy fields on publish
+- ✅ `StoriesService` - Updated to load fields in editor
+- ✅ Seed data DTOs - Updated to support new fields
+
+### ⏳ Frontend Implementation Status
+
+**Pending:**
+- ⏳ Story editor UI - Add checkbox for `isEvaluative` and toggles for `isCorrect` on answers
+- ⏳ Story reading - Track session, submit answers, complete evaluation
+- ⏳ Evaluation results component - Display score and breakdown
+- ⏳ Translations - Add all evaluation-related keys
+
+The backend implementation is complete and ready for frontend integration. All changes are additive and maintain backward compatibility with existing non-evaluative stories. Best score tracking and complex token configurations will be added later in parent dashboard.
 
