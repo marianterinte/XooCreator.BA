@@ -27,6 +27,7 @@ public class StoryCloner : IStoryCloner
             AuthorName = cloneData.AuthorName,
             ClassicAuthorId = cloneData.ClassicAuthorId,
             BaseVersion = cloneData.BaseVersion ?? 0,
+            IsEvaluative = cloneData.IsEvaluative,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -75,6 +76,7 @@ public class StoryCloner : IStoryCloner
                 var answer = new StoryCraftAnswer
                 {
                     AnswerId = answerData.AnswerId,
+                    IsCorrect = answerData.IsCorrect,
                     SortOrder = answerSort++
                 };
 

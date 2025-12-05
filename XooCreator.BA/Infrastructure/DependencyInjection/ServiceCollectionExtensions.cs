@@ -42,6 +42,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IStoryImportQueue, StoryImportQueue>();
         services.AddSingleton<IStoryForkQueue, StoryForkQueue>();
         services.AddSingleton<IStoryForkAssetsQueue, StoryForkAssetsQueue>();
+        services.AddSingleton<IStoryExportQueue, StoryExportQueue>();
         
         return services;
     }
@@ -124,6 +125,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IStoryDraftAssetCleanupService, StoryDraftAssetCleanupService>();
         services.AddScoped<IStoryPublishedAssetCleanupService, StoryPublishedAssetCleanupService>();
         services.AddScoped<IStoryAssetReplacementService, StoryAssetReplacementService>();
+        services.AddScoped<IStoryExportService, StoryExportService>();
         
         return services;
     }

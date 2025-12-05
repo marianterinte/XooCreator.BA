@@ -164,17 +164,19 @@ public class StoriesService : IStoriesService
                         {
                             var answerTranslation = a.Translations.FirstOrDefault(at => at.LanguageCode == lang);
                             
+                            var tokens = a.Tokens.Select(tok => new EditableTokenDto
+                            {
+                                Type = tok.Type,
+                                Value = tok.Value,
+                                Quantity = tok.Quantity
+                            }).ToList();
+                            
                             return new EditableAnswerDto
                             {
                                 Id = a.AnswerId,
                                 Text = answerTranslation?.Text ?? string.Empty,
                                 IsCorrect = a.IsCorrect,
-                                Tokens = a.Tokens.Select(tok => new EditableTokenDto
-                                {
-                                    Type = tok.Type,
-                                    Value = tok.Value,
-                                    Quantity = tok.Quantity
-                                }).ToList()
+                                Tokens = tokens
                             };
                         }).ToList()
                     };

@@ -31,15 +31,18 @@ public class SubmitQuizAnswerEndpoint
     private readonly XooDbContext _context;
     private readonly IStoriesRepository _repository;
     private readonly IUserContextService _userContext;
+    private readonly ILogger<SubmitQuizAnswerEndpoint> _logger;
 
     public SubmitQuizAnswerEndpoint(
         XooDbContext context,
         IStoriesRepository repository,
-        IUserContextService userContext)
+        IUserContextService userContext,
+        ILogger<SubmitQuizAnswerEndpoint> logger)
     {
         _context = context;
         _repository = repository;
         _userContext = userContext;
+        _logger = logger;
     }
 
     [Route("/api/{locale}/stories/{storyId}/quiz-answer")]
@@ -72,8 +75,20 @@ public class SubmitQuizAnswerEndpoint
         if (selectedAnswer == null)
             return TypedResults.BadRequest("Answer not found");
 
+        // Debug: Log all answers in quiz tile to verify IsCorrect values
+        foreach (var answer in quizTile.Answers)
+        {
+            ep._logger.LogInformation(
+                "Quiz tile answer: TileId={TileId} AnswerId={AnswerId} IsCorrect={IsCorrect}",
+                request.TileId, answer.AnswerId, answer.IsCorrect);
+        }
+
         // Check if correct (isCorrect flag from entity)
         var isCorrect = selectedAnswer.IsCorrect;
+        
+        ep._logger.LogInformation(
+            "Submit quiz answer: TileId={TileId} SelectedAnswerId={SelectedAnswerId} IsCorrect={IsCorrect}",
+            request.TileId, request.SelectedAnswerId, isCorrect);
 
         // Check if answer already exists for this session (overwrite)
         var existingAnswer = await ep._context.StoryQuizAnswers

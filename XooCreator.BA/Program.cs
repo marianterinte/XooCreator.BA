@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 using XooCreator.BA.Data;
@@ -45,6 +45,7 @@ builder.Services.AddHostedService<StoryPublishQueueWorker>();
 builder.Services.AddHostedService<StoryImportQueueWorker>();
 builder.Services.AddHostedService<StoryForkQueueWorker>();
 builder.Services.AddHostedService<StoryForkAssetsQueueWorker>();
+builder.Services.AddHostedService<StoryExportQueueWorker>();
 
 builder.Services.AddAuthConfiguration(builder.Configuration);
 

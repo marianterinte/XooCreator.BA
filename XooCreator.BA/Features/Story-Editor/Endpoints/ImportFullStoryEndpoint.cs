@@ -806,6 +806,9 @@ public partial class ImportFullStoryEndpoint
         var baseVersion = root.TryGetProperty("version", out var versionElement) && versionElement.ValueKind == JsonValueKind.Number
             ? versionElement.GetInt32()
             : 0;
+        var isEvaluative = root.TryGetProperty("isEvaluative", out var isEvaluativeElement) && isEvaluativeElement.ValueKind == JsonValueKind.True
+            ? true
+            : false;
 
         // Create StoryCraft
         var craft = new StoryCraft
@@ -821,6 +824,7 @@ public partial class ImportFullStoryEndpoint
             StoryType = storyType,
             PriceInCredits = priceInCredits,
             BaseVersion = baseVersion,
+            IsEvaluative = isEvaluative,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -905,11 +909,16 @@ public partial class ImportFullStoryEndpoint
                     {
                         var answerId = answer.TryGetProperty("id", out var answerIdElement) ? answerIdElement.GetString() ?? $"answer-{answerSortOrder}" : $"answer-{answerSortOrder}";
 
+                        var isCorrect = answer.TryGetProperty("isCorrect", out var isCorrectElement) && isCorrectElement.ValueKind == JsonValueKind.True
+                            ? true
+                            : false;
+
                         var craftAnswer = new StoryCraftAnswer
                         {
                             Id = Guid.NewGuid(),
                             StoryCraftTileId = craftTile.Id,
                             AnswerId = answerId,
+                            IsCorrect = isCorrect,
                             SortOrder = answerSortOrder++
                         };
 

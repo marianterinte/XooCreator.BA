@@ -42,15 +42,18 @@ public class CompleteEvaluationEndpoint
     private readonly XooDbContext _context;
     private readonly IStoriesRepository _repository;
     private readonly IUserContextService _userContext;
+    private readonly ILogger<CompleteEvaluationEndpoint> _logger;
 
     public CompleteEvaluationEndpoint(
         XooDbContext context,
         IStoriesRepository repository,
-        IUserContextService userContext)
+        IUserContextService userContext,
+        ILogger<CompleteEvaluationEndpoint> logger)
     {
         _context = context;
         _repository = repository;
         _userContext = userContext;
+        _logger = logger;
     }
 
     [Route("/api/{locale}/stories/{storyId}/complete-evaluation")]
@@ -86,8 +89,22 @@ public class CompleteEvaluationEndpoint
                      && a.SessionId == request.SessionId)
             .ToListAsync(ct);
 
+        // Debug: Log all answers to verify IsCorrect values
+        foreach (var answer in answers)
+        {
+            ep._logger.LogInformation(
+                "Quiz answer: TileId={TileId} SelectedAnswerId={SelectedAnswerId} IsCorrect={IsCorrect}",
+                answer.TileId, answer.SelectedAnswerId, answer.IsCorrect);
+        }
+
         // Count correct answers
         var correctAnswers = answers.Count(a => a.IsCorrect);
+        
+        // Debug: Log summary
+        ep._logger.LogInformation(
+            "Evaluation summary: TotalQuizzes={TotalQuizzes} TotalAnswers={TotalAnswers} CorrectAnswers={CorrectAnswers} ScorePercentage={ScorePercentage}",
+            totalQuizzes, answers.Count, correctAnswers, 
+            totalQuizzes > 0 ? (int)Math.Round((double)correctAnswers / totalQuizzes * 100) : 0);
 
         // Calculate score
         var scorePercentage = totalQuizzes > 0
@@ -105,7 +122,24 @@ public class CompleteEvaluationEndpoint
                 ? quizTile.Answers.FirstOrDefault(a => a.AnswerId == answer.SelectedAnswerId)
                 : null;
 
+            // Debug: Log all answers in quiz tile to verify IsCorrect values
+            foreach (var quizAnswer in quizTile.Answers)
+            {
+                ep._logger.LogInformation(
+                    "Quiz tile answer: TileId={TileId} AnswerId={AnswerId} IsCorrect={IsCorrect}",
+                    quizTile.TileId, quizAnswer.AnswerId, quizAnswer.IsCorrect);
+            }
+
+            // Find correct answer - must have IsCorrect = true
             var correctAnswer = quizTile.Answers.FirstOrDefault(a => a.IsCorrect);
+            
+            // Debug: Log if no correct answer found
+            if (correctAnswer == null)
+            {
+                ep._logger.LogWarning(
+                    "No correct answer found for quiz tile: TileId={TileId} TotalAnswers={TotalAnswers}",
+                    quizTile.TileId, quizTile.Answers.Count);
+            }
 
             // Get question text from translations or base
             var questionText = quizTile.Translations
@@ -125,6 +159,15 @@ public class CompleteEvaluationEndpoint
                     .FirstOrDefault(t => t.LanguageCode == locale.ToLowerInvariant())?.Text
                     ?? correctAnswer.Text)
                 : null;
+            
+            // Debug: Log answer details
+            ep._logger.LogInformation(
+                "Quiz detail: TileId={TileId} HasAnswer={HasAnswer} IsCorrect={IsCorrect} SelectedText={SelectedText} CorrectText={CorrectText}",
+                quizTile.TileId,
+                answer != null,
+                answer?.IsCorrect ?? false,
+                selectedAnswerText ?? "null",
+                correctAnswerText ?? "null");
 
             quizDetails.Add(new QuizAnswerDetail
             {
