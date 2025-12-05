@@ -262,6 +262,7 @@ public partial class ForkStoryEndpoint
         }
     }
 
+    [HttpGet]
     [Route("/api/stories/fork/jobs/{jobId:guid}")]
     [Authorize]
     public static async Task<
@@ -269,7 +270,7 @@ public partial class ForkStoryEndpoint
             Ok<ForkStoryJobStatusResponse>,
             NotFound,
             UnauthorizedHttpResult,
-            ForbidHttpResult>> HandleGetForkJobStatus(
+            ForbidHttpResult>> HandleGet(
         [FromRoute] Guid jobId,
         [FromServices] ForkStoryEndpoint ep,
         CancellationToken ct)
