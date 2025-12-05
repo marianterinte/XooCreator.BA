@@ -70,4 +70,8 @@
     <Folder Include="Scripts\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\XooCreator.DbScriptRunner\XooCreator.DbScriptRunner.csproj" />
+  </ItemGroup>
+
 </Project>

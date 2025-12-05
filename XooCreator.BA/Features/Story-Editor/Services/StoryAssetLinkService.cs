@@ -143,11 +143,40 @@ public class StoryAssetLinkService : IStoryAssetLinkService
         var publishedPath = StoryAssetPathMapper.BuildPublishedPath(asset, ownerEmail, storyId);
         var hash = ComputeAssetHash(asset, draftVersion);
 
-        // Check by DraftPath first (unique constraint) to avoid duplicate key violations
-        var existing = await _db.StoryAssetLinks
+        // First check if there's already an entity in the EF Core context with the same DraftPath
+        // This prevents duplicate key violations when multiple calls happen before SaveChangesAsync
+        var existingInContext = _db.ChangeTracker.Entries<StoryAssetLink>()
+            .FirstOrDefault(e => e.Entity.DraftPath == draftPath && 
+                                (e.State == Microsoft.EntityFrameworkCore.EntityState.Added || 
+                                 e.State == Microsoft.EntityFrameworkCore.EntityState.Modified ||
+                                 e.State == Microsoft.EntityFrameworkCore.EntityState.Unchanged));
+
+        if (existingInContext != null)
+        {
+            // Update the existing entity in context
+            var existing = existingInContext.Entity;
+            existing.StoryId = storyId;
+            existing.DraftVersion = draftVersion;
+            existing.LanguageCode = language;
+            existing.AssetType = asset.Type.ToString();
+            existing.EntityId = entityId;
+            existing.PublishedPath = publishedPath;
+            existing.ContentHash = hash;
+            existing.LastSyncedAt = DateTime.UtcNow;
+            existing.UpdatedAt = DateTime.UtcNow;
+            
+            if (existingInContext.State == Microsoft.EntityFrameworkCore.EntityState.Unchanged)
+            {
+                existingInContext.State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+            }
+            return;
+        }
+
+        // Check by DraftPath in database to avoid duplicate key violations
+        var existing2 = await _db.StoryAssetLinks
             .FirstOrDefaultAsync(x => x.DraftPath == draftPath, ct);
 
-        if (existing == null)
+        if (existing2 == null)
         {
             _db.StoryAssetLinks.Add(new StoryAssetLink
             {
@@ -168,15 +197,15 @@ public class StoryAssetLinkService : IStoryAssetLinkService
         else
         {
             // Update existing link - may have different StoryId/EntityId if asset was moved/reused
-            existing.StoryId = storyId;
-            existing.DraftVersion = draftVersion;
-            existing.LanguageCode = language;
-            existing.AssetType = asset.Type.ToString();
-            existing.EntityId = entityId;
-            existing.PublishedPath = publishedPath;
-            existing.ContentHash = hash;
-            existing.LastSyncedAt = DateTime.UtcNow;
-            existing.UpdatedAt = DateTime.UtcNow;
+            existing2.StoryId = storyId;
+            existing2.DraftVersion = draftVersion;
+            existing2.LanguageCode = language;
+            existing2.AssetType = asset.Type.ToString();
+            existing2.EntityId = entityId;
+            existing2.PublishedPath = publishedPath;
+            existing2.ContentHash = hash;
+            existing2.LastSyncedAt = DateTime.UtcNow;
+            existing2.UpdatedAt = DateTime.UtcNow;
         }
     }
 

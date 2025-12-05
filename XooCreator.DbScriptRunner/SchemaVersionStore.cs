@@ -2,9 +2,9 @@ using Npgsql;
 
 namespace XooCreator.DbScriptRunner;
 
-internal sealed record SchemaVersionEntry(string ScriptName, string Checksum, string Status);
+public sealed record SchemaVersionEntry(string ScriptName, string Checksum, string Status);
 
-internal sealed class SchemaVersionStore(RunnerOptions options)
+public sealed class SchemaVersionStore(RunnerOptions options)
 {
     private readonly RunnerOptions _options = options;
 

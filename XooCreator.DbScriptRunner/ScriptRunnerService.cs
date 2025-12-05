@@ -4,7 +4,7 @@ using Npgsql;
 
 namespace XooCreator.DbScriptRunner;
 
-internal sealed class ScriptRunnerService
+public sealed class ScriptRunnerService
 {
     private readonly RunnerOptions _options;
     private readonly ILogger<ScriptRunnerService> _logger;
