@@ -1,17 +1,11 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Npgsql;
 using XooCreator.BA.Data;
-using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Errors;
 using XooCreator.BA.Infrastructure.DependencyInjection;
 using XooCreator.BA.Infrastructure.Configuration;
-using XooCreator.BA.Features.Stories.Services;
-using XooCreator.BA.Features.TreeOfLight.Services;
 using XooCreator.BA.Features.StoryEditor.Services;
-using XooCreator.BA.Features.TalesOfAlchimalia.Market.Services;
-using XooCreator.BA.Services;
 using XooCreator.BA.Infrastructure.Middleware;
 using XooCreator.DbScriptRunner;
 
