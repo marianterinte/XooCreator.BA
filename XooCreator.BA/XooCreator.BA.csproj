@@ -74,17 +74,9 @@
     <ProjectReference Include="..\XooCreator.DbScriptRunner\XooCreator.DbScriptRunner.csproj" />
   </ItemGroup>
 
-  <Target Name="ExcludeDbScriptRunnerAppSettings" BeforeTargets="_GetResolvedFilesToPublish">
+  <Target Name="ExcludeDbScriptRunnerAppSettings" BeforeTargets="GetCopyToPublishDirectoryItems">
     <ItemGroup>
-      <_ResolvedFileToPublishToRemove Include="@(_ResolvedFileToPublish)" Condition="'%(_ResolvedFileToPublish.RelativePath)' == 'appsettings.json' AND $([System.String]::Copy('%(_ResolvedFileToPublish.OriginalItemSpec)').Contains('XooCreator.DbScriptRunner'))" />
-      <_ResolvedFileToPublish Remove="@(_ResolvedFileToPublishToRemove)" />
-    </ItemGroup>
-  </Target>
-  
-  <Target Name="ExcludeDbScriptRunnerAppSettingsFromResolved" BeforeTargets="ComputeFilesToPublish">
-    <ItemGroup>
-      <_ResolvedToRemove Include="@(ResolvedFileToPublish)" Condition="'%(ResolvedFileToPublish.RelativePath)' == 'appsettings.json' AND $([System.String]::Copy('%(ResolvedFileToPublish.OriginalItemSpec)').Contains('XooCreator.DbScriptRunner'))" />
-      <ResolvedFileToPublish Remove="@(_ResolvedToRemove)" />
+      <ContentWithTargetPath Remove="@(ContentWithTargetPath)" Condition="'%(Filename)' == 'appsettings' AND '%(Extension)' == '.json' AND $([System.String]::Copy('%(Identity)').Contains('XooCreator.DbScriptRunner'))" />
     </ItemGroup>
   </Target>
 
