@@ -74,10 +74,4 @@
     <ProjectReference Include="..\XooCreator.DbScriptRunner\XooCreator.DbScriptRunner.csproj" />
   </ItemGroup>
 
-  <Target Name="ExcludeDbScriptRunnerAppSettings" BeforeTargets="GetCopyToPublishDirectoryItems">
-    <ItemGroup>
-      <ContentWithTargetPath Remove="@(ContentWithTargetPath)" Condition="'%(Filename)' == 'appsettings' AND '%(Extension)' == '.json' AND $([System.String]::Copy('%(Identity)').Contains('XooCreator.DbScriptRunner'))" />
-    </ItemGroup>
-  </Target>
-
 </Project>
