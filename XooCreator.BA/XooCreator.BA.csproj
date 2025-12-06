@@ -71,14 +71,23 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\XooCreator.DbScriptRunner\XooCreator.DbScriptRunner.csproj" />
+    <ProjectReference Include="..\XooCreator.DbScriptRunner\XooCreator.DbScriptRunner.csproj">
+      <Properties>IsReferencedProject=true</Properties>
+    </ProjectReference>
   </ItemGroup>
 
   <!-- Exclude appsettings.json from DbScriptRunner when publishing to avoid NETSDK1152 conflict -->
-  <Target Name="ExcludeDbScriptRunnerAppSettings" BeforeTargets="ComputeFilesToPublish">
+  <Target Name="ExcludeDbScriptRunnerAppSettings" BeforeTargets="_GetResolvedFilesToPublish">
     <ItemGroup>
-      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" 
-        Condition="'%(ResolvedFileToPublish.RelativePath)' == 'appsettings.json' AND $([System.String]::Copy('%(ResolvedFileToPublish.OriginalItemSpec)').Contains('XooCreator.DbScriptRunner'))" />
+      <_ResolvedFileToPublishToRemove Include="@(_ResolvedFileToPublish)" Condition="'%(_ResolvedFileToPublish.RelativePath)' == 'appsettings.json' AND $([System.String]::Copy('%(_ResolvedFileToPublish.OriginalItemSpec)').Contains('XooCreator.DbScriptRunner'))" />
+      <_ResolvedFileToPublish Remove="@(_ResolvedFileToPublishToRemove)" />
+    </ItemGroup>
+  </Target>
+  
+  <Target Name="ExcludeDbScriptRunnerAppSettingsFromResolved" AfterTargets="_GetResolvedFilesToPublish" BeforeTargets="ComputeFilesToPublish">
+    <ItemGroup>
+      <_ResolvedToRemove Include="@(ResolvedFileToPublish)" Condition="'%(ResolvedFileToPublish.RelativePath)' == 'appsettings.json' AND $([System.String]::Copy('%(ResolvedFileToPublish.OriginalItemSpec)').Contains('XooCreator.DbScriptRunner'))" />
+      <ResolvedFileToPublish Remove="@(_ResolvedToRemove)" />
     </ItemGroup>
   </Target>
 
