@@ -39,10 +39,10 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: Dry-run scripts (DEV)
-        run: dotnet run --project XooCreator.BA/XooCreator.DbScriptRunner/XooCreator.DbScriptRunner.csproj -- --connection "${{ secrets.AZURE_POSTGRES_CONNSTRING_DEV }}" --scripts-path "XooCreator.BA/Database/Scripts" --dry-run
+        run: dotnet run --project XooCreator.DbScriptRunner -- --connection "${{ secrets.AZURE_POSTGRES_CONNSTRING_DEV }}" --dry-run
 
       - name: Apply scripts (DEV)
-        run: dotnet run --project XooCreator.BA/XooCreator.DbScriptRunner/XooCreator.DbScriptRunner.csproj -- --connection "${{ secrets.AZURE_POSTGRES_CONNSTRING_DEV }}" --scripts-path "XooCreator.BA/Database/Scripts"
+        run: dotnet run --project XooCreator.DbScriptRunner -- --connection "${{ secrets.AZURE_POSTGRES_CONNSTRING_DEV }}"
 
   db-prod:
     name: Apply scripts (PROD)
@@ -63,8 +63,8 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: Dry-run scripts (PROD)
-        run: dotnet run --project XooCreator.BA/XooCreator.DbScriptRunner/XooCreator.DbScriptRunner.csproj -- --connection "${{ secrets.AZURE_POSTGRES_CONNSTRING_PROD }}" --scripts-path "XooCreator.BA/Database/Scripts" --dry-run
+        run: dotnet run --project XooCreator.DbScriptRunner -- --connection "${{ secrets.AZURE_POSTGRES_CONNSTRING_PROD }}" --dry-run
 
       - name: Apply scripts (PROD)
-        run: dotnet run --project XooCreator.BA/XooCreator.DbScriptRunner/XooCreator.DbScriptRunner.csproj -- --connection "${{ secrets.AZURE_POSTGRES_CONNSTRING_PROD }}" --scripts-path "XooCreator.BA/Database/Scripts"
+        run: dotnet run --project XooCreator.DbScriptRunner -- --connection "${{ secrets.AZURE_POSTGRES_CONNSTRING_PROD }}"
 
