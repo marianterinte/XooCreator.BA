@@ -60,10 +60,15 @@ public class SubmitQuizAnswerEndpoint
 
         var sessionId = request.SessionId ?? Guid.NewGuid();
 
-        // Load story
+        // Load story - always get fresh version to ensure correct IsCorrect values
         var story = await ep._repository.GetStoryDefinitionByIdAsync(storyId);
         if (story == null)
             return TypedResults.BadRequest("Story not found");
+        
+        // Debug: Log story load
+        ep._logger.LogInformation(
+            "SubmitQuizAnswer: Loaded story {StoryId} for tile {TileId}",
+            storyId, request.TileId);
 
         // Find quiz tile
         var quizTile = story.Tiles.FirstOrDefault(t => t.TileId == request.TileId && t.Type == "quiz");
@@ -99,10 +104,16 @@ public class SubmitQuizAnswerEndpoint
 
         if (existingAnswer != null)
         {
-            // Update existing answer
+            // CRITICAL FIX: Always recalculate IsCorrect from current story version
+            // This ensures we use the correct IsCorrect value even if story was republished
+            var oldIsCorrect = existingAnswer.IsCorrect;
             existingAnswer.SelectedAnswerId = request.SelectedAnswerId;
-            existingAnswer.IsCorrect = isCorrect;
+            existingAnswer.IsCorrect = isCorrect; // Recalculated from current story version
             existingAnswer.AnsweredAt = DateTime.UtcNow;
+            
+            ep._logger.LogInformation(
+                "Updated existing quiz answer: TileId={TileId} SelectedAnswerId={SelectedAnswerId} OldIsCorrect={OldIsCorrect} NewIsCorrect={NewIsCorrect}",
+                request.TileId, request.SelectedAnswerId, oldIsCorrect, isCorrect);
         }
         else
         {
@@ -120,6 +131,10 @@ public class SubmitQuizAnswerEndpoint
             };
 
             ep._context.StoryQuizAnswers.Add(quizAnswer);
+            
+            ep._logger.LogInformation(
+                "Created new quiz answer: TileId={TileId} SelectedAnswerId={SelectedAnswerId} IsCorrect={IsCorrect}",
+                request.TileId, request.SelectedAnswerId, isCorrect);
         }
 
         await ep._context.SaveChangesAsync(ct);

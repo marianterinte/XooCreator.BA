@@ -70,9 +70,15 @@ public class CompleteEvaluationEndpoint
             return TypedResults.Unauthorized();
 
         // Load story (use current story version at completion time)
+        // CRITICAL: Force fresh load to avoid any caching issues
         var story = await ep._repository.GetStoryDefinitionByIdAsync(storyId);
         if (story == null)
             return TypedResults.BadRequest("Story not found");
+        
+        // Debug: Log story version info
+        ep._logger.LogInformation(
+            "CompleteEvaluation: Loaded story {StoryId} with {TileCount} tiles, {QuizCount} quizzes",
+            storyId, story.Tiles.Count, story.Tiles.Count(t => t.Type == "quiz"));
 
         if (!story.IsEvaluative)
             return TypedResults.BadRequest("Story is not evaluative");
@@ -82,38 +88,36 @@ public class CompleteEvaluationEndpoint
         if (totalQuizzes == 0)
             return TypedResults.BadRequest("Story has no quizzes");
 
-        // Get all answers for this session
+        // Get all answers for this session - we only need SelectedAnswerId, not IsCorrect
+        // CRITICAL: We will recalculate IsCorrect from current story version, not from stored values
         var answers = await ep._context.StoryQuizAnswers
+            .AsNoTracking()
             .Where(a => a.UserId == userId.Value
                      && a.StoryId == storyId
                      && a.SessionId == request.SessionId)
+            .Select(a => new { a.TileId, a.SelectedAnswerId, a.Id })
             .ToListAsync(ct);
 
-        // Debug: Log all answers to verify IsCorrect values
+        // Debug: Log all answers to verify what we have
+        ep._logger.LogInformation(
+            "CompleteEvaluation: Found {Count} answers for session {SessionId}",
+            answers.Count, request.SessionId);
+        
         foreach (var answer in answers)
         {
             ep._logger.LogInformation(
-                "Quiz answer: TileId={TileId} SelectedAnswerId={SelectedAnswerId} IsCorrect={IsCorrect}",
-                answer.TileId, answer.SelectedAnswerId, answer.IsCorrect);
+                "Quiz answer (from DB): TileId={TileId} SelectedAnswerId={SelectedAnswerId}",
+                answer.TileId, answer.SelectedAnswerId);
         }
-
-        // Count correct answers
-        var correctAnswers = answers.Count(a => a.IsCorrect);
-        
-        // Debug: Log summary
-        ep._logger.LogInformation(
-            "Evaluation summary: TotalQuizzes={TotalQuizzes} TotalAnswers={TotalAnswers} CorrectAnswers={CorrectAnswers} ScorePercentage={ScorePercentage}",
-            totalQuizzes, answers.Count, correctAnswers, 
-            totalQuizzes > 0 ? (int)Math.Round((double)correctAnswers / totalQuizzes * 100) : 0);
-
-        // Calculate score
-        var scorePercentage = totalQuizzes > 0
-            ? (int)Math.Round((double)correctAnswers / totalQuizzes * 100)
-            : 0;
 
         // Build quiz details breakdown
         var quizDetails = new List<QuizAnswerDetail>();
         var quizTiles = story.Tiles.Where(t => t.Type == "quiz").ToList();
+
+        // CRITICAL FIX: Always recalculate IsCorrect from current story version
+        // NEVER trust stored IsCorrect values - they may be stale
+        int correctAnswers = 0;
+        var answersToUpdate = new List<(Guid Id, bool NewIsCorrect)>();
 
         foreach (var quizTile in quizTiles)
         {
@@ -128,6 +132,30 @@ public class CompleteEvaluationEndpoint
                 ep._logger.LogInformation(
                     "Quiz tile answer: TileId={TileId} AnswerId={AnswerId} IsCorrect={IsCorrect}",
                     quizTile.TileId, quizAnswer.AnswerId, quizAnswer.IsCorrect);
+            }
+
+            // CRITICAL: Always recalculate IsCorrect from current story version
+            // Do NOT use stored IsCorrect value - it may be stale
+            bool isCorrect = false;
+            if (selectedAnswer != null)
+            {
+                isCorrect = selectedAnswer.IsCorrect;
+                
+                // Track answers that need updating
+                if (answer != null)
+                {
+                    answersToUpdate.Add((answer.Id, isCorrect));
+                }
+                
+                ep._logger.LogInformation(
+                    "Recalculated IsCorrect: TileId={TileId} SelectedAnswerId={SelectedAnswerId} IsCorrect={IsCorrect}",
+                    quizTile.TileId, answer?.SelectedAnswerId ?? "none", isCorrect);
+            }
+            else if (answer != null)
+            {
+                ep._logger.LogWarning(
+                    "Selected answer not found in current story: TileId={TileId} SelectedAnswerId={SelectedAnswerId}",
+                    quizTile.TileId, answer.SelectedAnswerId);
             }
 
             // Find correct answer - must have IsCorrect = true
@@ -165,7 +193,7 @@ public class CompleteEvaluationEndpoint
                 "Quiz detail: TileId={TileId} HasAnswer={HasAnswer} IsCorrect={IsCorrect} SelectedText={SelectedText} CorrectText={CorrectText}",
                 quizTile.TileId,
                 answer != null,
-                answer?.IsCorrect ?? false,
+                isCorrect,
                 selectedAnswerText ?? "null",
                 correctAnswerText ?? "null");
 
@@ -175,11 +203,53 @@ public class CompleteEvaluationEndpoint
                 Question = questionText,
                 SelectedAnswerId = answer?.SelectedAnswerId ?? string.Empty,
                 SelectedAnswerText = selectedAnswerText,
-                IsCorrect = answer?.IsCorrect ?? false,
-                CorrectAnswerId = answer?.IsCorrect == false ? correctAnswer?.AnswerId : null,
-                CorrectAnswerText = answer?.IsCorrect == false ? correctAnswerText : null
+                IsCorrect = isCorrect, // Always use recalculated value
+                CorrectAnswerId = !isCorrect ? correctAnswer?.AnswerId : null,
+                CorrectAnswerText = !isCorrect ? correctAnswerText : null
             });
+            
+            // Count correct answers as we build details
+            if (isCorrect)
+            {
+                correctAnswers++;
+            }
         }
+        
+        // Update all stored IsCorrect values to match current story version
+        if (answersToUpdate.Any())
+        {
+            foreach (var (id, newIsCorrect) in answersToUpdate)
+            {
+                var answerToUpdate = await ep._context.StoryQuizAnswers
+                    .FirstOrDefaultAsync(a => a.Id == id, ct);
+                
+                if (answerToUpdate != null)
+                {
+                    var oldIsCorrect = answerToUpdate.IsCorrect;
+                    answerToUpdate.IsCorrect = newIsCorrect;
+                    
+                    if (oldIsCorrect != newIsCorrect)
+                    {
+                        ep._logger.LogInformation(
+                            "Updated stored IsCorrect: AnswerId={AnswerId} OldIsCorrect={OldIsCorrect} NewIsCorrect={NewIsCorrect}",
+                            id, oldIsCorrect, newIsCorrect);
+                    }
+                }
+            }
+            
+            await ep._context.SaveChangesAsync(ct);
+        }
+        
+        // Debug: Log summary
+        ep._logger.LogInformation(
+            "Evaluation summary: TotalQuizzes={TotalQuizzes} TotalAnswers={TotalAnswers} CorrectAnswers={CorrectAnswers} ScorePercentage={ScorePercentage}",
+            totalQuizzes, answers.Count, correctAnswers, 
+            totalQuizzes > 0 ? (int)Math.Round((double)correctAnswers / totalQuizzes * 100) : 0);
+
+        // Calculate score
+        var scorePercentage = totalQuizzes > 0
+            ? (int)Math.Round((double)correctAnswers / totalQuizzes * 100)
+            : 0;
 
         // Create evaluation result
         var result = new StoryEvaluationResult
