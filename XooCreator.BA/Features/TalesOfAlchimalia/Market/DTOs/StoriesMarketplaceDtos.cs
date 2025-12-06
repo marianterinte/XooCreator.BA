@@ -60,6 +60,7 @@ public record StoryMarketplaceItemDto
     public int ReadersCount { get; init; }
     public double AverageRating { get; init; }
     public int TotalReviews { get; init; }
+    public bool IsEvaluative { get; init; } = false;
 }
 
 public record PurchaseStoryRequest
