@@ -14,6 +14,7 @@ public class StorySeedData
     public string? StoryTopic { get; set; } // Story topic/theme (e.g., "Matematică", "Literatură")
     public string? Summary { get; set; } // Story summary/description
     public int SortOrder { get; set; }
+    public bool IsEvaluative { get; set; } = false; // If true, this story contains quizzes that should be evaluated
     public int? StoryType { get; set; } // StoryType enum value: 0=AlchimaliaEpic (default), 1=Indie
     public int? Price { get; set; } // Price in credits. If not specified, default pricing logic applies
     public List<TileSeedData>? Tiles { get; set; }
@@ -37,6 +38,7 @@ public class AnswerSeedData
 {
     public string AnswerId { get; set; } = string.Empty;
     public string Text { get; set; } = string.Empty;
+    public bool IsCorrect { get; set; } = false; // True if this is the correct answer (only present in JSON for correct answers)
     public List<TokenSeedData>? Tokens { get; set; }
     public int SortOrder { get; set; }
 }

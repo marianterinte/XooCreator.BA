@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 using XooCreator.BA.Data;
@@ -13,6 +13,7 @@ using XooCreator.BA.Features.StoryEditor.Services;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Services;
 using XooCreator.BA.Services;
 using XooCreator.BA.Infrastructure.Middleware;
+using XooCreator.DbScriptRunner;
 
 // Store startup exception for display
 Exception? startupException = null;
@@ -40,6 +41,12 @@ builder.Services.AddDatabaseConfiguration(builder.Configuration);
 
 // Register all application services using extension methods
 builder.Services.AddApplicationServices();
+builder.Services.AddHostedService<StoryPublishQueueWorker>();
+builder.Services.AddHostedService<StoryVersionQueueWorker>();
+builder.Services.AddHostedService<StoryImportQueueWorker>();
+builder.Services.AddHostedService<StoryForkQueueWorker>();
+builder.Services.AddHostedService<StoryForkAssetsQueueWorker>();
+builder.Services.AddHostedService<StoryExportQueueWorker>();
 
 builder.Services.AddAuthConfiguration(builder.Configuration);
 
@@ -124,8 +131,93 @@ using (var scope = app.Services.CreateScope())
             throw;
         }
 
-        logger.LogInformation("✅ Database connectivity verified. Database objects must be managed via XooCreator.DbScriptRunner scripts (V0001+).");
-        Console.WriteLine("🎉 Connectivity OK. Apply SQL scripts via XooCreator.DbScriptRunner before running the app.");
+        logger.LogInformation("✅ Database connectivity verified.");
+        
+        // Check if we should run database scripts on startup (local development only)
+        var runScriptsOnStartup = builder.Configuration.GetValue<bool>("Database:RunScriptsOnStartup", false);
+        if (runScriptsOnStartup)
+        {
+            logger.LogInformation("📜 Database:RunScriptsOnStartup is enabled. Running SQL scripts...");
+            Console.WriteLine("📜 Running database scripts on startup...");
+            
+            try
+            {
+                var dbConnection = context.Database.GetDbConnection();
+                var connectionString = dbConnection.ConnectionString;
+                
+                // Find Database/Scripts folder relative to project root
+                // Try multiple paths: from current directory, from base directory, from solution root
+                string? scriptsPath = null;
+                var searchPaths = new[]
+                {
+                    // From project root (when running from project directory)
+                    Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "Database", "Scripts"),
+                    // From bin/Debug or bin/Release (when running compiled app)
+                    Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "Database", "Scripts"),
+                    // From solution root (BA/XooCreator.BA/Database/Scripts)
+                    Path.Combine(Directory.GetCurrentDirectory(), "..", "Database", "Scripts"),
+                    // Absolute path from base directory
+                    Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "Database", "Scripts")
+                };
+                
+                foreach (var path in searchPaths)
+                {
+                    var fullPath = Path.GetFullPath(path);
+                    if (Directory.Exists(fullPath))
+                    {
+                        // Verify it's the correct folder by checking for V*.sql files
+                        var hasScripts = Directory.EnumerateFiles(fullPath, "V*.sql", SearchOption.TopDirectoryOnly).Any();
+                        if (hasScripts)
+                        {
+                            scriptsPath = fullPath;
+                            break;
+                        }
+                    }
+                }
+                
+                if (scriptsPath == null || !Directory.Exists(scriptsPath))
+                {
+                    logger.LogWarning("⚠️ Database scripts folder not found. Searched paths: {Paths}. Skipping script execution.", 
+                        string.Join(", ", searchPaths.Select(p => Path.GetFullPath(p))));
+                    Console.WriteLine("⚠️ Database scripts folder not found. Skipping script execution.");
+                }
+                else
+                {
+                    logger.LogInformation("📁 Scripts path: {ScriptsPath}", scriptsPath);
+                    Console.WriteLine($"📁 Scripts path: {scriptsPath}");
+                    
+                    var options = new RunnerOptions
+                    {
+                        ConnectionString = connectionString,
+                        Schema = dbSchema,
+                        ScriptsPath = scriptsPath,
+                        DryRun = false
+                    };
+                    options.ApplyDefaults();
+                    
+                    var scriptLogger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>()
+                        .CreateLogger<ScriptRunnerService>();
+                    var scriptRunner = new ScriptRunnerService(options, scriptLogger);
+                    
+                    await scriptRunner.RunAsync(CancellationToken.None);
+                    
+                    logger.LogInformation("✅ Database scripts executed successfully.");
+                    Console.WriteLine("✅ Database scripts executed successfully.");
+                }
+            }
+            catch (Exception scriptEx)
+            {
+                logger.LogError(scriptEx, "❌ Failed to execute database scripts on startup");
+                Console.WriteLine($"❌ Failed to execute database scripts: {scriptEx.Message}");
+                // Don't throw - allow app to continue even if scripts fail
+                // This allows the app to start even if scripts have issues
+            }
+        }
+        else
+        {
+            logger.LogInformation("📜 Database:RunScriptsOnStartup is disabled. Database objects must be managed via XooCreator.DbScriptRunner scripts (V0001+).");
+            Console.WriteLine("📜 Database scripts will not run automatically. Use XooCreator.DbScriptRunner to apply scripts manually.");
+        }
     }
     catch (Exception ex)
     {

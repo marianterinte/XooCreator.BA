@@ -8,6 +8,7 @@ public class StoryDefinitionSeedData
     public string? StoryTopic { get; set; } // Story topic/theme (e.g., "Matematică", "Literatură")
     public string? Summary { get; set; } // Story summary/description
     public int SortOrder { get; set; }
+    public bool IsEvaluative { get; set; } = false; // If true, this story contains quizzes that should be evaluated
 
     public double PriceInCredits { get; set; } = 0; // Price in credits for purchasing the story
 
@@ -32,6 +33,7 @@ public class StoryAnswerSeedData
 {
     public string AnswerId { get; set; } = string.Empty;
     public string Text { get; set; } = string.Empty;
+    public bool IsCorrect { get; set; } = false; // True if this is the correct answer (only present in JSON for correct answers)
     public string? NextTileId { get; set; }
     public List<StoryAnswerTokenSeedData> Tokens { get; set; } = new();
 }

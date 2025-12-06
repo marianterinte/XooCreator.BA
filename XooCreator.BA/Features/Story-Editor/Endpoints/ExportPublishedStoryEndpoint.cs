@@ -8,14 +8,14 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.IO.Compression;
-using System.Text;
-using System.Text.Json;
 using XooCreator.BA.Data;
+using XooCreator.BA.Data.Entities;
+using XooCreator.BA.Features.StoryEditor.DTOs;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
 using XooCreator.BA.Infrastructure.Services.Blob;
+using XooCreator.BA.Infrastructure.Services.Queue;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 
@@ -28,6 +28,7 @@ public class ExportPublishedStoryEndpoint
     private readonly IBlobSasService _sas;
     private readonly ILogger<ExportPublishedStoryEndpoint> _logger;
     private readonly TelemetryClient? _telemetryClient;
+    private readonly IStoryExportQueue _queue;
 
     public ExportPublishedStoryEndpoint(
         XooDbContext db, 
@@ -35,6 +36,7 @@ public class ExportPublishedStoryEndpoint
         IUserContextService userContext, 
         IBlobSasService sas,
         ILogger<ExportPublishedStoryEndpoint> logger,
+        IStoryExportQueue queue,
         TelemetryClient? telemetryClient = null)
     {
         _db = db;
@@ -42,12 +44,13 @@ public class ExportPublishedStoryEndpoint
         _userContext = userContext;
         _sas = sas;
         _logger = logger;
+        _queue = queue;
         _telemetryClient = telemetryClient;
     }
 
     [Route("/api/{locale}/stories/{storyId}/export")]
     [Authorize]
-    public static async Task<Results<FileContentHttpResult, NotFound, UnauthorizedHttpResult, ForbidHttpResult>> HandleGet(
+    public static async Task<Results<Accepted<ExportResponse>, NotFound, UnauthorizedHttpResult, ForbidHttpResult>> HandleGet(
         [FromRoute] string locale,
         [FromRoute] string storyId,
         [FromServices] ExportPublishedStoryEndpoint ep,
@@ -60,9 +63,6 @@ public class ExportPublishedStoryEndpoint
         var isAdmin = false;
         var isCreator = false;
         var isOwner = false;
-        int version = 0;
-        var mediaCount = 0;
-        long zipBytes = 0;
 
         var user = await ep._auth0.GetCurrentUserAsync(ct);
         if (user == null)
@@ -84,19 +84,13 @@ public class ExportPublishedStoryEndpoint
         }
 
         var def = await ep._db.StoryDefinitions
-            .Include(d => d.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Tokens)
-            .Include(d => d.Tiles).ThenInclude(t => t.Translations)
-            .Include(d => d.Translations)
-            .Include(d => d.Topics).ThenInclude(t => t.StoryTopic)
-            .Include(d => d.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
+            .AsNoTracking()
             .FirstOrDefaultAsync(d => d.StoryId == storyId, ct);
         if (def == null)
         {
             outcome = "NotFound";
             return TypedResults.NotFound();
         }
-
-        version = def.Version;
 
         isOwner = def.CreatedBy.HasValue && def.CreatedBy.Value == user.Id;
 
@@ -113,39 +107,30 @@ public class ExportPublishedStoryEndpoint
 
         try
         {
-            var exportObj = BuildExportJson(def);
-            var exportJson = JsonSerializer.Serialize(exportObj, new JsonSerializerOptions { WriteIndented = true });
-            var fileName = $"{def.StoryId}-v{def.Version}.zip";
-
-            using var ms = new MemoryStream();
-            using (var zip = new ZipArchive(ms, ZipArchiveMode.Create, leaveOpen: true))
+            // Create export job
+            var job = new StoryExportJob
             {
-                // Add manifest JSON
-                var manifestEntry = zip.CreateEntry($"manifest/{def.StoryId}/v{def.Version}/story.json", CompressionLevel.Fastest);
-                await using (var writer = new StreamWriter(manifestEntry.Open(), new UTF8Encoding(false)))
-                {
-                    await writer.WriteAsync(exportJson);
-                }
+                Id = Guid.NewGuid(),
+                StoryId = storyId,
+                OwnerUserId = def.CreatedBy ?? user.Id,
+                RequestedByEmail = user.Email ?? string.Empty,
+                Locale = locale,
+                IsDraft = false,
+                Status = StoryExportJobStatus.Queued,
+                QueuedAtUtc = DateTime.UtcNow
+            };
 
-                // Collect media paths from definition (already in published layout)
-                var mediaPaths = CollectPublishedMediaPaths(def);
-                mediaCount = mediaPaths.Count;
-                foreach (var path in mediaPaths)
-                {
-                    // Download from published container and add to ZIP preserving relative path under "media/"
-                    var client = ep._sas.GetBlobClient(ep._sas.PublishedContainer, path);
-                    var entry = zip.CreateEntry($"media/{path}".Replace('\\', '/'), CompressionLevel.Fastest);
-                    await using var entryStream = entry.Open();
-                    var download = await client.DownloadStreamingAsync(cancellationToken: ct);
-                    await download.Value.Content.CopyToAsync(entryStream, ct);
-                }
-            }
+            ep._db.StoryExportJobs.Add(job);
+            await ep._db.SaveChangesAsync(ct);
 
-            zipBytes = ms.Length;
-            var bytes = ms.ToArray();
+            // Enqueue job
+            await ep._queue.EnqueueAsync(job, ct);
 
-            outcome = "Success";
-            return TypedResults.File(bytes, "application/zip", fileName);
+            outcome = "Queued";
+            ep._logger.LogInformation("Export job queued: jobId={JobId} storyId={StoryId} isDraft={IsDraft}",
+                job.Id, storyId, false);
+
+            return TypedResults.Accepted($"/api/stories/{storyId}/export-jobs/{job.Id}", new ExportResponse { JobId = job.Id });
         }
         finally
         {
@@ -158,9 +143,6 @@ public class ExportPublishedStoryEndpoint
                 storyId: storyId,
                 userId: userId,
                 userEmail: userEmail,
-                version: version,
-                mediaCount: mediaCount,
-                zipBytes: zipBytes,
                 isAdmin: isAdmin,
                 isCreator: isCreator,
                 isOwner: isOwner);
@@ -175,23 +157,16 @@ public class ExportPublishedStoryEndpoint
         string storyId,
         string? userId,
         string? userEmail,
-        int version,
-        int mediaCount,
-        long zipBytes,
         bool isAdmin,
         bool isCreator,
         bool isOwner)
     {
-        var zipMb = zipBytes / 1024d / 1024d;
-
         _logger.LogInformation(
-            "Export story telemetry | storyId={StoryId} locale={Locale} outcome={Outcome} durationMs={DurationMs} mediaCount={MediaCount} zipSizeMB={ZipSizeMB:F2} isDraft={IsDraft} isAdmin={IsAdmin} isCreator={IsCreator} isOwner={IsOwner}",
+            "Export story telemetry | storyId={StoryId} locale={Locale} outcome={Outcome} durationMs={DurationMs} isDraft={IsDraft} isAdmin={IsAdmin} isCreator={IsCreator} isOwner={IsOwner}",
             storyId,
             locale,
             outcome,
             durationMs,
-            mediaCount,
-            zipMb,
             isDraft,
             isAdmin,
             isCreator,
@@ -205,19 +180,12 @@ public class ExportPublishedStoryEndpoint
             ["StoryId"] = storyId,
             ["UserId"] = userId,
             ["UserEmail"] = userEmail,
-            ["Version"] = version.ToString(CultureInfo.InvariantCulture),
-            ["MediaCount"] = mediaCount.ToString(CultureInfo.InvariantCulture),
             ["IsAdmin"] = isAdmin.ToString(CultureInfo.InvariantCulture),
             ["IsCreator"] = isCreator.ToString(CultureInfo.InvariantCulture),
             ["IsOwner"] = isOwner.ToString(CultureInfo.InvariantCulture)
         };
 
-        TrackMetric("ExportStory_Duration", durationMs, properties);
-        TrackMetric("ExportStory_MediaCount", mediaCount, properties);
-        if (zipBytes > 0)
-        {
-            TrackMetric("ExportStory_ZipSizeMB", zipMb, properties);
-        }
+        TrackMetric("ExportStory_QueueDuration", durationMs, properties);
     }
 
     private void TrackMetric(string metricName, double value, IReadOnlyDictionary<string, string?> properties)
@@ -238,91 +206,4 @@ public class ExportPublishedStoryEndpoint
 
         _telemetryClient.TrackMetric(metric);
     }
-
-    private static object BuildExportJson(StoryDefinition def)
-    {
-        // Extract topic IDs
-        var topicIds = def.Topics?
-            .Where(t => t.StoryTopic != null)
-            .Select(t => t.StoryTopic!.TopicId)
-            .ToList() ?? new List<string>();
-
-        // Extract age group IDs
-        var ageGroupIds = def.AgeGroups?
-            .Where(ag => ag.StoryAgeGroup != null)
-            .Select(ag => ag.StoryAgeGroup!.AgeGroupId)
-            .ToList() ?? new List<string>();
-
-        return new
-        {
-            id = def.StoryId,
-            version = def.Version,
-            title = def.Title,
-            summary = def.Summary,
-            storyType = def.StoryType,
-            coverImageUrl = def.CoverImageUrl,
-            storyTopic = def.StoryTopic,
-            topicIds = topicIds,
-            ageGroupIds = ageGroupIds,
-            authorName = def.AuthorName,
-            classicAuthorId = def.ClassicAuthorId,
-            priceInCredits = def.PriceInCredits,
-            translations = def.Translations.Select(t => new
-            {
-                lang = t.LanguageCode,
-                title = t.Title
-            }).ToList(),
-            tiles = def.Tiles
-                .OrderBy(t => t.SortOrder)
-                .Select(t => new
-                {
-                    id = t.TileId,
-                    type = t.Type,
-                    sortOrder = t.SortOrder,
-                    imageUrl = t.ImageUrl,
-                    // Audio and Video are now language-specific (in translations)
-                    translations = t.Translations.Select(tr => new
-                    {
-                        lang = tr.LanguageCode,
-                        caption = tr.Caption,
-                        text = tr.Text,
-                        question = tr.Question,
-                        audioUrl = tr.AudioUrl,
-                        videoUrl = tr.VideoUrl
-                    }).ToList(),
-                    answers = (t.Answers ?? new()).OrderBy(a => a.SortOrder).Select(a => new
-                    {
-                        id = a.AnswerId,
-                        sortOrder = a.SortOrder,
-                        tokens = (a.Tokens ?? new()).Select(tok => new { type = tok.Type, value = tok.Value, quantity = tok.Quantity })
-                    }).ToList()
-                }).ToList()
-        };
-    }
-
-    private static List<string> CollectPublishedMediaPaths(StoryDefinition def)
-    {
-        var result = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        if (!string.IsNullOrWhiteSpace(def.CoverImageUrl)) result.Add(Normalize(def.CoverImageUrl));
-        foreach (var t in def.Tiles)
-        {
-            // Image is common for all languages
-            if (!string.IsNullOrWhiteSpace(t.ImageUrl)) result.Add(Normalize(t.ImageUrl));
-            
-            // Audio and Video are now language-specific (in translations)
-            foreach (var tr in t.Translations)
-            {
-                if (!string.IsNullOrWhiteSpace(tr.AudioUrl)) result.Add(Normalize(tr.AudioUrl));
-                if (!string.IsNullOrWhiteSpace(tr.VideoUrl)) result.Add(Normalize(tr.VideoUrl));
-            }
-        }
-        return result.ToList();
-    }
-
-    private static string Normalize(string path)
-    {
-        return path.TrimStart('/').Replace('\\', '/');
-    }
 }
-
-

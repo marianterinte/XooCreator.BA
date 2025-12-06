@@ -40,6 +40,7 @@ public static class StoryDefinitionMapper
             StoryType = StoryType.Indie,
             Status = StoryStatus.Published,
             IsActive = true,
+            IsEvaluative = seedData.IsEvaluative,
             PriceInCredits = seedData.Price ?? 0,
             CreatedBy = ownerId,
             UpdatedBy = ownerId
@@ -69,6 +70,7 @@ public static class StoryDefinitionMapper
                         {
                             AnswerId = answerSeed.AnswerId,
                             Text = answerSeed.Text,
+                            IsCorrect = answerSeed.IsCorrect,
                             TokensJson = null,
                             SortOrder = answerSeed.SortOrder
                         };
@@ -116,6 +118,7 @@ public static class StoryDefinitionMapper
             StoryType = storyType,
             Status = StoryStatus.Published,
             IsActive = true,
+            IsEvaluative = seedData.IsEvaluative,
             PriceInCredits = seedData.Price ?? 0,
             CreatedBy = seedUserId, // Use seed user if provided, otherwise null (backward compatible)
             UpdatedBy = seedUserId
@@ -162,6 +165,7 @@ public static class StoryDefinitionMapper
                         {
                             AnswerId = answerSeed.AnswerId,
                             Text = answerSeed.Text,
+                            IsCorrect = answerSeed.IsCorrect,
                             TokensJson = null,
                             SortOrder = answerSeed.SortOrder
                         };
@@ -203,6 +207,7 @@ public static class StoryDefinitionMapper
             Summary = story.Summary,
             StoryTopic = story.StoryTopic,
             StoryType = story.StoryType.ToString(),
+            IsEvaluative = story.IsEvaluative,
             UnlockedStoryHeroes = GetUnlockedHeroesFromSeed(story.StoryId),
             Tiles = story.Tiles
                 .OrderBy(t => t.SortOrder)
@@ -223,6 +228,7 @@ public static class StoryDefinitionMapper
                         {
                             Id = a.AnswerId,
                             Text = TryGetAnswerText(a, lc) ?? a.Text,
+                            IsCorrect = a.IsCorrect,
                             Tokens = a.Tokens.Select(tok => new TokenReward
                             {
                                 Type = Enum.TryParse<TokenFamily>(tok.Type, true, out var fam) ? fam : TokenFamily.Personality,

@@ -32,6 +32,7 @@ public class StoryCraft
     public StoryType StoryType { get; set; } = StoryType.AlchimaliaEpic; // Type of story (Epic vs Indie)
     
     public double PriceInCredits { get; set; } = 0; // Price in credits for purchasing the story
+    public bool IsEvaluative { get; set; } = false; // If true, this story contains quizzes that should be evaluated
     
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
@@ -46,6 +47,9 @@ public class StoryCraft
 
     // Versioning reference: the published version from which this draft originated
     public int BaseVersion { get; set; } = 0;
+    
+    // Incremental counter for changes performed in the editor (consumed by delta publish)
+    public int LastDraftVersion { get; set; } = 0;
     
     // Navigation
     public List<StoryCraftTranslation> Translations { get; set; } = new();
@@ -121,6 +125,7 @@ public class StoryCraftAnswer
     public Guid Id { get; set; }
     public Guid StoryCraftTileId { get; set; }
     public string AnswerId { get; set; } = string.Empty; // e.g., "a", "b", "c"
+    public bool IsCorrect { get; set; } = false; // True if this is the correct answer for the quiz
     public int SortOrder { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     

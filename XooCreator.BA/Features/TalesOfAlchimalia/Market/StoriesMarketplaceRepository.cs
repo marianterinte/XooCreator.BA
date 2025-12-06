@@ -837,7 +837,8 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             IsOwned = isOwned,
             ReadersCount = readersCount,
             AverageRating = Math.Round(averageRating, 2),
-            TotalReviews = totalReviews
+            TotalReviews = totalReviews,
+            IsEvaluative = def.IsEvaluative
         };
     }
 

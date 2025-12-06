@@ -5,6 +5,7 @@ using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Features.Stories.Services;
 using XooCreator.BA.Features.Stories.DTOs;
+using XooCreator.BA.Features.StoryEditor.Services.Content;
 
 namespace XooCreator.BA.Features.Stories.Endpoints;
 

@@ -26,6 +26,7 @@ public class StorySourceMapper : IStorySourceMapper
             AuthorName = source.AuthorName,
             ClassicAuthorId = source.ClassicAuthorId,
             BaseVersion = source.BaseVersion,
+            IsEvaluative = source.IsEvaluative,
             Translations = source.Translations.Select(t => new TranslationCloneData
             {
                 LanguageCode = t.LanguageCode,
@@ -51,6 +52,7 @@ public class StorySourceMapper : IStorySourceMapper
                 Answers = tile.Answers.OrderBy(a => a.SortOrder).Select(answer => new AnswerCloneData
                 {
                     AnswerId = answer.AnswerId,
+                    IsCorrect = answer.IsCorrect,
                     Translations = answer.Translations.Select(at => new AnswerTranslationCloneData
                     {
                         LanguageCode = at.LanguageCode,
@@ -80,6 +82,7 @@ public class StorySourceMapper : IStorySourceMapper
             AuthorName = definition.AuthorName,
             ClassicAuthorId = definition.ClassicAuthorId,
             BaseVersion = definition.Version,
+            IsEvaluative = definition.IsEvaluative,
             Translations = definition.Translations.Select(t => new TranslationCloneData
             {
                 LanguageCode = t.LanguageCode,
@@ -105,6 +108,7 @@ public class StorySourceMapper : IStorySourceMapper
                 Answers = tile.Answers.OrderBy(a => a.SortOrder).Select(answer => new AnswerCloneData
                 {
                     AnswerId = answer.AnswerId,
+                    IsCorrect = answer.IsCorrect,
                     Translations = answer.Translations.Select(at => new AnswerTranslationCloneData
                     {
                         LanguageCode = at.LanguageCode,
@@ -139,6 +143,7 @@ public class StoryCloneData
     public string? AuthorName { get; set; }
     public Guid? ClassicAuthorId { get; set; }
     public int? BaseVersion { get; set; }
+    public bool IsEvaluative { get; set; } = false; // If true, this story contains quizzes that should be evaluated
     public List<TranslationCloneData> Translations { get; set; } = new();
     public List<TileCloneData> Tiles { get; set; } = new();
     public List<Guid> Topics { get; set; } = new();
@@ -174,6 +179,7 @@ public class TileTranslationCloneData
 public class AnswerCloneData
 {
     public string AnswerId { get; set; } = string.Empty;
+    public bool IsCorrect { get; set; } = false; // True if this is the correct answer for the quiz
     public List<AnswerTranslationCloneData> Translations { get; set; } = new();
     public List<TokenCloneData> Tokens { get; set; } = new();
 }

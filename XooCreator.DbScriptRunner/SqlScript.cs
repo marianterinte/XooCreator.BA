@@ -3,7 +3,7 @@ using System.Text;
 
 namespace XooCreator.DbScriptRunner;
 
-internal sealed record SqlScript(
+public sealed record SqlScript(
     string Name,
     string FullPath,
     string Content,
@@ -12,7 +12,7 @@ internal sealed record SqlScript(
     bool IsRollback,
     int Order);
 
-internal static class SqlScriptFactory
+public static class SqlScriptFactory
 {
     public static SqlScript FromFile(string path, bool isRollback)
     {

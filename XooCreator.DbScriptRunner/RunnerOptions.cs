@@ -2,7 +2,7 @@ using System.Globalization;
 
 namespace XooCreator.DbScriptRunner;
 
-internal sealed class RunnerOptions
+public sealed class RunnerOptions
 {
     public string? ConnectionString { get; set; }
     public string? ScriptsPath { get; set; }

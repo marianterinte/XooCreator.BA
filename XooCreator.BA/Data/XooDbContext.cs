@@ -47,6 +47,8 @@ public class XooDbContext : DbContext
     public DbSet<StoryAnswerTranslation> StoryAnswerTranslations => Set<StoryAnswerTranslation>();
     public DbSet<UserStoryReadProgress> UserStoryReadProgress => Set<UserStoryReadProgress>();
     public DbSet<StoryAnswerToken> StoryAnswerTokens => Set<StoryAnswerToken>();
+    public DbSet<StoryQuizAnswer> StoryQuizAnswers => Set<StoryQuizAnswer>();
+    public DbSet<StoryEvaluationResult> StoryEvaluationResults => Set<StoryEvaluationResult>();
     public DbSet<StoryHero> StoryHeroes => Set<StoryHero>();
     public DbSet<StoryHeroUnlock> StoryHeroUnlocks => Set<StoryHeroUnlock>();
     public DbSet<HeroMessage> HeroMessages => Set<HeroMessage>();
@@ -70,6 +72,14 @@ public class XooDbContext : DbContext
     public DbSet<UserOwnedStories> UserOwnedStories => Set<UserOwnedStories>();
     public DbSet<UserCreatedStories> UserCreatedStories => Set<UserCreatedStories>();
     public DbSet<StoryPublicationAudit> StoryPublicationAudits => Set<StoryPublicationAudit>();
+    public DbSet<StoryPublishChangeLog> StoryPublishChangeLogs => Set<StoryPublishChangeLog>();
+    public DbSet<StoryAssetLink> StoryAssetLinks => Set<StoryAssetLink>();
+    public DbSet<StoryPublishJob> StoryPublishJobs => Set<StoryPublishJob>();
+    public DbSet<StoryVersionJob> StoryVersionJobs => Set<StoryVersionJob>();
+    public DbSet<StoryImportJob> StoryImportJobs => Set<StoryImportJob>();
+    public DbSet<StoryForkJob> StoryForkJobs => Set<StoryForkJob>();
+    public DbSet<StoryForkAssetJob> StoryForkAssetJobs => Set<StoryForkAssetJob>();
+    public DbSet<StoryExportJob> StoryExportJobs => Set<StoryExportJob>();
     public DbSet<StoryCraft> StoryCrafts => Set<StoryCraft>();
     public DbSet<StoryCraftTranslation> StoryCraftTranslations => Set<StoryCraftTranslation>();
     public DbSet<StoryCraftTile> StoryCraftTiles => Set<StoryCraftTile>();
@@ -118,6 +128,46 @@ public class XooDbContext : DbContext
             e.Property(x => x.Email).HasMaxLength(256).IsRequired();
             e.Property(x => x.Auth0Id).HasMaxLength(256).IsRequired();
             e.Property(x => x.Picture).HasMaxLength(512);
+        });
+
+        modelBuilder.Entity<StoryForkJob>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedNever();
+            e.Property(x => x.SourceStoryId).HasMaxLength(256).IsRequired();
+            e.Property(x => x.SourceType).HasMaxLength(32).IsRequired();
+            e.Property(x => x.TargetStoryId).HasMaxLength(256).IsRequired();
+            e.Property(x => x.TargetOwnerEmail).HasMaxLength(256).IsRequired();
+            e.Property(x => x.RequestedByEmail).HasMaxLength(256).IsRequired();
+            e.Property(x => x.Status).HasMaxLength(32).IsRequired();
+            e.HasIndex(x => new { x.TargetStoryId, x.Status });
+        });
+
+        modelBuilder.Entity<StoryForkAssetJob>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedNever();
+            e.Property(x => x.SourceStoryId).HasMaxLength(256).IsRequired();
+            e.Property(x => x.SourceType).HasMaxLength(32).IsRequired();
+            e.Property(x => x.TargetStoryId).HasMaxLength(256).IsRequired();
+            e.Property(x => x.TargetOwnerEmail).HasMaxLength(256).IsRequired();
+            e.Property(x => x.RequestedByEmail).HasMaxLength(256).IsRequired();
+            e.Property(x => x.Status).HasMaxLength(32).IsRequired();
+            e.HasIndex(x => new { x.TargetStoryId, x.Status });
+        });
+
+        modelBuilder.Entity<StoryImportJob>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedNever();
+            e.Property(x => x.StoryId).HasMaxLength(256).IsRequired();
+            e.Property(x => x.OriginalStoryId).HasMaxLength(256);
+            e.Property(x => x.Locale).HasMaxLength(16);
+            e.Property(x => x.ZipBlobPath).HasMaxLength(512).IsRequired();
+            e.Property(x => x.ZipFileName).HasMaxLength(256);
+            e.Property(x => x.Status).HasMaxLength(32).IsRequired();
+            e.HasIndex(x => new { x.StoryId, x.Status });
+            e.HasIndex(x => x.OwnerUserId);
         });
 
         modelBuilder.Entity<CreditWallet>(e =>
@@ -381,6 +431,7 @@ public class XooDbContext : DbContext
             e.HasKey(x => x.Id);
             e.Property(x => x.Id).ValueGeneratedOnAdd();
             e.HasIndex(x => x.StoryId).IsUnique();
+            e.Property(x => x.LastPublishedVersion).HasDefaultValue(0);
             e.HasMany(x => x.Tiles).WithOne(x => x.StoryDefinition).HasForeignKey(x => x.StoryDefinitionId).OnDelete(DeleteBehavior.Cascade);
             e.HasMany(x => x.Topics).WithOne(x => x.StoryDefinition).HasForeignKey(x => x.StoryDefinitionId).OnDelete(DeleteBehavior.Cascade);
             e.HasMany(x => x.AgeGroups).WithOne(x => x.StoryDefinition).HasForeignKey(x => x.StoryDefinitionId).OnDelete(DeleteBehavior.Cascade);
@@ -406,6 +457,7 @@ public class XooDbContext : DbContext
         {
             e.HasKey(x => x.Id);
             e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.ContentHash).HasMaxLength(128);
             e.HasIndex(x => new { x.StoryDefinitionId, x.TileId }).IsUnique();
             e.HasOne(x => x.StoryDefinition).WithMany(x => x.Tiles).HasForeignKey(x => x.StoryDefinitionId);
             e.HasMany(x => x.Answers).WithOne(x => x.StoryTile).HasForeignKey(x => x.StoryTileId).OnDelete(DeleteBehavior.Cascade);
@@ -416,6 +468,7 @@ public class XooDbContext : DbContext
             e.HasKey(x => x.Id);
             e.Property(x => x.Id).ValueGeneratedOnAdd();
             e.Property(x => x.LanguageCode).HasMaxLength(10);
+            e.Property(x => x.ContentHash).HasMaxLength(128);
             e.HasIndex(x => new { x.StoryTileId, x.LanguageCode }).IsUnique();
             e.HasOne(x => x.StoryTile)
                 .WithMany(t => t.Translations)
@@ -458,6 +511,35 @@ public class XooDbContext : DbContext
             e.Property(x => x.Id).ValueGeneratedOnAdd();
             e.HasIndex(x => new { x.UserId, x.StoryId, x.TileId }).IsUnique();
             e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
+        });
+
+        modelBuilder.Entity<StoryQuizAnswer>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.StoryId).HasMaxLength(200).IsRequired();
+            e.Property(x => x.TileId).HasMaxLength(100).IsRequired();
+            e.Property(x => x.SelectedAnswerId).HasMaxLength(50).IsRequired();
+            e.HasIndex(x => new { x.UserId, x.StoryId, x.TileId, x.SessionId });
+            e.HasIndex(x => new { x.UserId, x.StoryId });
+            e.HasIndex(x => x.SessionId);
+            e.HasOne(x => x.User)
+                .WithMany()
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<StoryEvaluationResult>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.StoryId).HasMaxLength(200).IsRequired();
+            e.HasIndex(x => new { x.UserId, x.StoryId, x.CompletedAt });
+            e.HasIndex(x => new { x.UserId, x.StoryId, x.SessionId }).IsUnique();
+            e.HasOne(x => x.User)
+                .WithMany()
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<StoryHero>(e =>
@@ -645,6 +727,7 @@ public class XooDbContext : DbContext
             e.Property(x => x.StoryId).HasMaxLength(200).IsRequired();
             e.Property(x => x.Status).HasMaxLength(20).IsRequired();
             e.Property(x => x.UpdatedAt).IsRequired();
+            e.Property(x => x.LastDraftVersion).HasDefaultValue(0);
             e.HasIndex(x => x.StoryId).IsUnique();
             e.HasMany(x => x.Translations).WithOne(x => x.StoryCraft).HasForeignKey(x => x.StoryCraftId).OnDelete(DeleteBehavior.Cascade);
             e.HasMany(x => x.Tiles).WithOne(x => x.StoryCraft).HasForeignKey(x => x.StoryCraftId).OnDelete(DeleteBehavior.Cascade);
@@ -819,6 +902,62 @@ public class XooDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(x => x.StoryDefinitionId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<StoryPublishChangeLog>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.StoryId).HasMaxLength(200).IsRequired();
+            e.Property(x => x.LanguageCode).HasMaxLength(10).IsRequired();
+            e.Property(x => x.EntityType).HasMaxLength(32).IsRequired();
+            e.Property(x => x.ChangeType).HasMaxLength(32).IsRequired();
+            e.Property(x => x.EntityId).HasMaxLength(200);
+            e.Property(x => x.Hash).HasMaxLength(128);
+            e.Property(x => x.AssetDraftPath).HasMaxLength(1024);
+            e.Property(x => x.AssetPublishedPath).HasMaxLength(1024);
+            e.Property(x => x.PayloadJson).HasColumnType("jsonb");
+            e.HasIndex(x => new { x.StoryId, x.DraftVersion });
+        });
+
+        modelBuilder.Entity<StoryAssetLink>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.StoryId).HasMaxLength(200).IsRequired();
+            e.Property(x => x.LanguageCode).HasMaxLength(10);
+            e.Property(x => x.AssetType).HasMaxLength(32).IsRequired();
+            e.Property(x => x.EntityId).HasMaxLength(200);
+            e.Property(x => x.DraftPath).HasMaxLength(1024).IsRequired();
+            e.Property(x => x.PublishedPath).HasMaxLength(1024);
+            e.Property(x => x.ContentHash).HasMaxLength(128);
+            e.HasIndex(x => new { x.StoryId, x.DraftVersion });
+            e.HasIndex(x => x.DraftPath).IsUnique();
+        });
+
+        modelBuilder.Entity<StoryPublishJob>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.StoryId).HasMaxLength(200).IsRequired();
+            e.Property(x => x.RequestedByEmail).HasMaxLength(256);
+            e.Property(x => x.LangTag).HasMaxLength(10).IsRequired();
+            e.Property(x => x.Status).HasMaxLength(32).IsRequired();
+            e.Property(x => x.ErrorMessage).HasMaxLength(2000);
+            e.HasIndex(x => new { x.StoryId, x.Status });
+            e.HasIndex(x => x.QueuedAtUtc);
+        });
+
+        modelBuilder.Entity<StoryVersionJob>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.StoryId).HasMaxLength(200).IsRequired();
+            e.Property(x => x.RequestedByEmail).HasMaxLength(256);
+            e.Property(x => x.Status).HasMaxLength(32).IsRequired();
+            e.Property(x => x.ErrorMessage).HasMaxLength(2000);
+            e.HasIndex(x => new { x.StoryId, x.Status });
+            e.HasIndex(x => x.QueuedAtUtc);
         });
     }
 

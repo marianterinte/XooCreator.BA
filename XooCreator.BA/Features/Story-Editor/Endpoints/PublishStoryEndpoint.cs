@@ -8,12 +8,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Features.StoryEditor.Services;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
+using XooCreator.BA.Infrastructure.Services.Queue;
 using Microsoft.Extensions.Logging;
 using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Data;
@@ -24,13 +26,16 @@ namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 [Endpoint]
 public partial class PublishStoryEndpoint
 {
+    public record PublishRequest(bool ForceFull = false);
+
     private readonly IStoryCraftsRepository _crafts;
     private readonly IUserContextService _userContext;
     private readonly IAuth0UserService _auth0;
     private readonly ILogger<PublishStoryEndpoint> _logger;
-    private readonly IStoryPublishingService _publisher;
     private readonly IStoryPublishAssetService _assetService;
     private readonly IStoryDraftAssetCleanupService _cleanupService;
+    private readonly IStoryPublishQueue _queue;
+    private readonly XooDbContext _db;
     private readonly TelemetryClient? _telemetryClient;
 
     public PublishStoryEndpoint(
@@ -38,26 +43,29 @@ public partial class PublishStoryEndpoint
         IUserContextService userContext, 
         IAuth0UserService auth0, 
         ILogger<PublishStoryEndpoint> logger, 
-        IStoryPublishingService publisher,
         IStoryPublishAssetService assetService,
         IStoryDraftAssetCleanupService cleanupService,
+        IStoryPublishQueue queue,
+        XooDbContext db,
         TelemetryClient? telemetryClient = null)
     {
         _crafts = crafts;
         _userContext = userContext;
         _auth0 = auth0;
         _logger = logger;
-        _publisher = publisher;
         _assetService = assetService;
         _cleanupService = cleanupService;
+        _queue = queue;
+        _db = db;
         _telemetryClient = telemetryClient;
     }
 
     [Route("/api/stories/{storyId}/publish")]
     [Authorize]
-    public static async Task<Results<Ok<PublishResponse>, NotFound, BadRequest<string>, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
+    public static async Task<Results<Accepted<PublishResponse>, NotFound, BadRequest<string>, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
         [FromRoute] string storyId,
         [FromServices] PublishStoryEndpoint ep,
+        [FromBody] PublishRequest? request,
         CancellationToken ct)
     {
         var stopwatch = Stopwatch.StartNew();
@@ -108,41 +116,32 @@ public partial class PublishStoryEndpoint
                 return permissionResult;
             }
 
-            // Collect assets for all available languages
-            // Images are common (extract once), Audio/Video sunt pe limbă
-            var allAssets = ep._assetService.CollectAllAssets(craft);
-            assetsToCopy = allAssets.Count;
-            audioAssetCount = allAssets.Count(a => a.Type == XooCreator.BA.Features.StoryEditor.Mappers.StoryAssetPathMapper.AssetType.Audio);
-            videoAssetCount = allAssets.Count(a => a.Type == XooCreator.BA.Features.StoryEditor.Mappers.StoryAssetPathMapper.AssetType.Video);
-
-            var copyResult = await ep._assetService.CopyAssetsToPublishedAsync(allAssets, user.Email, storyId, ct);
-            if (copyResult.HasError)
-            {
-                assetCopySuccess = false;
-                copyFailureAsset = copyResult.AssetFilename;
-                copyFailureReason = copyResult.ErrorMessage;
-                if (copyResult.ErrorResult != null)
-                {
-                    outcome = MapResultOutcome(copyResult.ErrorResult);
-                    return copyResult.ErrorResult;
-                }
-
-                outcome = "AssetCopyFailed";
-                return TypedResults.BadRequest("Asset copy failed.");
-            }
-
-            assetCopySuccess = true;
-
-            // Use first available translation or ro-ro as fallback for title/summary (publish processes all translations anyway)
+            // Use first available translation or ro-ro as fallback
             langTag = craft.Translations.FirstOrDefault(t => t.LanguageCode == "ro-ro")?.LanguageCode
                 ?? craft.Translations.FirstOrDefault()?.LanguageCode
                 ?? "ro-ro";
 
-            // Finalize publishing
-            newVersion = await ep.FinalizePublishingAsync(craft, user.Email, langTag, allAssets.Count, storyId, ct);
+            var forceFull = request?.ForceFull ?? false;
 
-            outcome = "Success";
-            return TypedResults.Ok(new PublishResponse());
+            // Create publish job
+            var job = new StoryPublishJob
+            {
+                Id = Guid.NewGuid(),
+                StoryId = craft.StoryId,
+                OwnerUserId = craft.OwnerUserId,
+                RequestedByEmail = user.Email ?? string.Empty,
+                LangTag = langTag,
+                DraftVersion = craft.LastDraftVersion,
+                ForceFull = forceFull,
+                Status = StoryPublishJobStatus.Queued,
+                QueuedAtUtc = DateTime.UtcNow
+            };
+
+            await ep.CreatePublishJobAsync(job, ct);
+            await ep._queue.EnqueueAsync(job, ct);
+
+            outcome = "Queued";
+            return TypedResults.Accepted($"/api/stories/{storyId}/publish-jobs/{job.Id}", new PublishResponse { JobId = job.Id });
         }
         finally
         {
@@ -253,12 +252,12 @@ public partial class PublishStoryEndpoint
             NotFound => "NotFound",
             BadRequest<string> => "BadRequest",
             Conflict<string> => "Conflict",
-            Ok<PublishResponse> => "Success",
+            Accepted<PublishResponse> => "Success",
             _ => result.GetType().Name
         };
     }
 
-    private async Task<(AlchimaliaUser? User, Results<Ok<PublishResponse>, NotFound, BadRequest<string>, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>? Result)> ValidateAuthorizationAsync(CancellationToken ct)
+    private async Task<(AlchimaliaUser? User, Results<Accepted<PublishResponse>, NotFound, BadRequest<string>, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>? Result)> ValidateAuthorizationAsync(CancellationToken ct)
     {
         var user = await _auth0.GetCurrentUserAsync(ct);
         if (user == null)
@@ -274,7 +273,7 @@ public partial class PublishStoryEndpoint
         return (user, null);
     }
 
-    private Results<Ok<PublishResponse>, NotFound, BadRequest<string>, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>? ValidatePublishPermissions(AlchimaliaUser user, StoryCraft craft)
+    private Results<Accepted<PublishResponse>, NotFound, BadRequest<string>, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>? ValidatePublishPermissions(AlchimaliaUser user, StoryCraft craft)
     {
         var isAdmin = _auth0.HasRole(user, Data.Enums.UserRole.Admin);
 
@@ -293,26 +292,76 @@ public partial class PublishStoryEndpoint
         return null;
     }
 
-    private async Task<int> FinalizePublishingAsync(
-        StoryCraft craft,
-        string userEmail,
-        string langTag,
-        int assetsCount,
-        string storyId,
+    [Route("/api/stories/{storyId}/publish-jobs/{jobId}")]
+    [Authorize]
+    public static async Task<Results<Ok<PublishJobStatusResponse>, NotFound, UnauthorizedHttpResult, ForbidHttpResult>> HandleGet(
+        [FromRoute] string storyId,
+        [FromRoute] Guid jobId,
+        [FromServices] PublishStoryEndpoint ep,
         CancellationToken ct)
     {
-        var newVersion = await _publisher.UpsertFromCraftAsync(craft, userEmail, langTag, ct);
+        // Authorization check
+        var user = await ep._auth0.GetCurrentUserAsync(ct);
+        if (user == null)
+        {
+            return TypedResults.Unauthorized();
+        }
 
-        await _cleanupService.DeleteDraftAssetsAsync(userEmail, storyId, ct);
-        await _crafts.DeleteAsync(storyId, ct);
+        if (!ep._auth0.HasRole(user, Data.Enums.UserRole.Creator))
+        {
+            return TypedResults.Forbid();
+        }
 
-        _logger.LogInformation(
-            "Published story: storyId={StoryId} version={Version} assets={Count} draftDeleted=true",
-            storyId,
-            newVersion,
-            assetsCount);
+        var job = await ep._db.StoryPublishJobs
+            .FirstOrDefaultAsync(j => j.Id == jobId && j.StoryId == storyId, ct);
 
-        return newVersion;
+        if (job == null)
+        {
+            return TypedResults.NotFound();
+        }
+
+        var response = new PublishJobStatusResponse
+        {
+            JobId = job.Id,
+            StoryId = job.StoryId,
+            Status = job.Status.ToString(),
+            QueuedAtUtc = job.QueuedAtUtc,
+            StartedAtUtc = job.StartedAtUtc,
+            CompletedAtUtc = job.CompletedAtUtc,
+            ErrorMessage = job.ErrorMessage,
+            DequeueCount = job.DequeueCount
+        };
+
+        return TypedResults.Ok(response);
     }
+
+    private async Task CreatePublishJobAsync(StoryPublishJob job, CancellationToken ct)
+    {
+        // Mark any queued/running jobs for same story as superseded
+        var existingJobs = await _db.StoryPublishJobs
+            .Where(j => j.StoryId == job.StoryId && (j.Status == StoryPublishJobStatus.Queued || j.Status == StoryPublishJobStatus.Running))
+            .ToListAsync(ct);
+
+        foreach (var existing in existingJobs)
+        {
+            existing.Status = StoryPublishJobStatus.Superseded;
+            existing.CompletedAtUtc = DateTime.UtcNow;
+        }
+
+        _db.StoryPublishJobs.Add(job);
+        await _db.SaveChangesAsync(ct);
+    }
+}
+
+public record PublishJobStatusResponse
+{
+    public Guid JobId { get; init; }
+    public string StoryId { get; init; } = string.Empty;
+    public string Status { get; init; } = string.Empty;
+    public DateTime QueuedAtUtc { get; init; }
+    public DateTime? StartedAtUtc { get; init; }
+    public DateTime? CompletedAtUtc { get; init; }
+    public string? ErrorMessage { get; init; }
+    public int DequeueCount { get; init; }
 }
 

@@ -11,6 +11,7 @@ public class StoryAnswer
     public Guid StoryTileId { get; set; }
     public string AnswerId { get; set; } = string.Empty; // e.g., "a", "b", "c"
     public string Text { get; set; } = string.Empty;
+    public bool IsCorrect { get; set; } = false; // True if this is the correct answer for the quiz
     public string? TokensJson { get; set; } // Deprecated: will be replaced by relation
     public int SortOrder { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

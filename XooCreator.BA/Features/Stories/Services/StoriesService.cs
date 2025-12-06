@@ -1,6 +1,7 @@
 using XooCreator.BA.Features.Stories.DTOs;
 using XooCreator.BA.Features.Stories.Repositories;
 using XooCreator.BA.Features.StoryEditor.Repositories;
+using XooCreator.BA.Features.StoryEditor.Services.Content;
 using System.Text.Json;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Enums;
@@ -134,6 +135,7 @@ public class StoriesService : IStoriesService
                 AgeGroupIds = craft.AgeGroups.Select(ag => ag.StoryAgeGroup.AgeGroupId).ToList(),
                 PriceInCredits = craft.PriceInCredits,
                 StoryType = (int)craft.StoryType,
+                IsEvaluative = craft.IsEvaluative,
                 Status = MapStatusForFrontend(StoryStatusExtensions.FromDb(craft.Status)),
                 AvailableLanguages = availableLangs,
                 AssignedReviewerUserId = craft.AssignedReviewerUserId,
@@ -162,16 +164,19 @@ public class StoriesService : IStoriesService
                         {
                             var answerTranslation = a.Translations.FirstOrDefault(at => at.LanguageCode == lang);
                             
+                            var tokens = a.Tokens.Select(tok => new EditableTokenDto
+                            {
+                                Type = tok.Type,
+                                Value = tok.Value,
+                                Quantity = tok.Quantity
+                            }).ToList();
+                            
                             return new EditableAnswerDto
                             {
                                 Id = a.AnswerId,
                                 Text = answerTranslation?.Text ?? string.Empty,
-                                Tokens = a.Tokens.Select(tok => new EditableTokenDto
-                                {
-                                    Type = tok.Type,
-                                    Value = tok.Value,
-                                    Quantity = tok.Quantity
-                                }).ToList()
+                                IsCorrect = a.IsCorrect,
+                                Tokens = tokens
                             };
                         }).ToList()
                     };
@@ -201,6 +206,7 @@ public class StoriesService : IStoriesService
             AgeGroupIds = story.AgeGroups?.Select(ag => ag.StoryAgeGroup.AgeGroupId).ToList() ?? new List<string>(),
             PriceInCredits = story.PriceInCredits,
             StoryType = (int)story.StoryType,
+            IsEvaluative = story.IsEvaluative,
             Status = MapStatusForFrontend(story.Status), // story.Status is already StoryStatus enum
             AvailableLanguages = availableLangs,
             Tiles = story.Tiles.OrderBy(t => t.SortOrder).Select(t =>
@@ -230,6 +236,7 @@ public class StoriesService : IStoriesService
                         {
                             Id = a.AnswerId,
                             Text = answerTranslation?.Text ?? a.Text ?? string.Empty,
+                            IsCorrect = a.IsCorrect,
                             Tokens = (a.Tokens ?? new()).Select(tok => new EditableTokenDto
                             {
                                 Type = tok.Type ?? string.Empty, 
@@ -258,63 +265,6 @@ public class StoriesService : IStoriesService
         };
     }
 
-}
-
-public class EditableStoryDto
-{
-    public string Id { get; set; } = string.Empty;
-    public string Title { get; set; } = string.Empty;
-    public string CoverImageUrl { get; set; } = string.Empty;
-    public string? Summary { get; set; }
-    public string? StoryTopic { get; set; } // DEPRECATED: Use TopicIds instead. Kept for backward compatibility.
-    public List<string>? TopicIds { get; set; } // List of topic IDs (e.g., ["edu_math", "fun_adventure"])
-    public List<string>? AgeGroupIds { get; set; } // List of age group IDs (e.g., ["preschool_3_5", "early_school_6_8"])
-    public string? AuthorName { get; set; } // Name of the author/writer if the story has an author (for "Other" option)
-    public Guid? ClassicAuthorId { get; set; } // Reference to ClassicAuthor if a classic author is selected
-    public double PriceInCredits { get; set; } = 0; // Price in credits for purchasing the story
-    public int StoryType { get; set; } = 0; // 0 = AlchimaliaEpic (Tree Of Light), 1 = Indie (Independent)
-    public string? Status { get; set; } // 'draft' | 'in-review' | 'approved' | 'published' (FE semantic)
-    public string? Language { get; set; } // Language code for the story (standardized: use "language" instead of "languageCode")
-    public List<string>? AvailableLanguages { get; set; } // Available language codes for this story
-    public List<EditableTileDto> Tiles { get; set; } = new();
-
-    // Reviewer/Audit fields (optional)
-    public Guid? AssignedReviewerUserId { get; set; }
-    public Guid? ReviewedByUserId { get; set; }
-    public Guid? ApprovedByUserId { get; set; }
-    public string? ReviewNotes { get; set; }
-    public DateTime? ReviewStartedAt { get; set; }
-    public DateTime? ReviewEndedAt { get; set; }
-
-    // Version reference
-    public int? BaseVersion { get; set; }
-}
-
-public class EditableTileDto
-{
-    public string Type { get; set; } = "page";
-    public string Id { get; set; } = string.Empty;
-    public string? Caption { get; set; }
-    public string? Text { get; set; }
-    public string? ImageUrl { get; set; }
-    public string? AudioUrl { get; set; }
-    public string? VideoUrl { get; set; }
-    public string? Question { get; set; }
-    public List<EditableAnswerDto> Answers { get; set; } = new();
-}
-
-public class EditableAnswerDto
-{
-    public string Id { get; set; } = string.Empty;
-    public string Text { get; set; } = string.Empty;
-    public List<EditableTokenDto> Tokens { get; set; } = new();
-}
-
-public class EditableTokenDto
-{
-    public string Type { get; set; } = string.Empty; // TokenFamily as string (e.g., "Personality", "Discovery")
-    public string Value { get; set; } = string.Empty;
-    public int Quantity { get; set; }
 }
 
 

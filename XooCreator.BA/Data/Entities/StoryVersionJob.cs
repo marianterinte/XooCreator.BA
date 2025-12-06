@@ -1,0 +1,26 @@
+namespace XooCreator.BA.Data.Entities;
+
+public class StoryVersionJob
+{
+    public Guid Id { get; set; }
+    public string StoryId { get; set; } = string.Empty;
+    public Guid OwnerUserId { get; set; }
+    public string RequestedByEmail { get; set; } = string.Empty;
+    public int BaseVersion { get; set; }  // Versiunea publicată de la care se creează draft-ul
+    public string Status { get; set; } = StoryVersionJobStatus.Queued;
+    public int DequeueCount { get; set; }
+    public DateTime QueuedAtUtc { get; set; } = DateTime.UtcNow;
+    public DateTime? StartedAtUtc { get; set; }
+    public DateTime? CompletedAtUtc { get; set; }
+    public string? ErrorMessage { get; set; }
+}
+
+public static class StoryVersionJobStatus
+{
+    public const string Queued = "Queued";
+    public const string Running = "Running";
+    public const string Completed = "Completed";
+    public const string Failed = "Failed";
+    public const string Superseded = "Superseded";
+}
+

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -15,11 +16,12 @@ using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Features.StoryEditor.Services;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
+using XooCreator.BA.Infrastructure.Services.Queue;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 
 [Endpoint]
-public class ForkStoryEndpoint
+public partial class ForkStoryEndpoint
 {
     private readonly IStoryCraftsRepository _crafts;
     private readonly IAuth0UserService _auth0;
@@ -29,6 +31,9 @@ public class ForkStoryEndpoint
     private readonly IStoryAssetCopyService _storyAssetCopyService;
     private readonly ILogger<ForkStoryEndpoint> _logger;
     private readonly TelemetryClient? _telemetryClient;
+    private readonly IStoryForkQueue _forkQueue;
+    private readonly string _forkQueueName;
+    private readonly IStoryForkAssetsQueue _forkAssetsQueue;
 
     public ForkStoryEndpoint(
         IStoryCraftsRepository crafts,
@@ -38,6 +43,9 @@ public class ForkStoryEndpoint
         IStoryCopyService storyCopyService,
         IStoryAssetCopyService storyAssetCopyService,
         ILogger<ForkStoryEndpoint> logger,
+        IConfiguration configuration,
+        IStoryForkQueue forkQueue,
+        IStoryForkAssetsQueue forkAssetsQueue,
         TelemetryClient? telemetryClient = null)
     {
         _crafts = crafts;
@@ -47,6 +55,9 @@ public class ForkStoryEndpoint
         _storyCopyService = storyCopyService;
         _storyAssetCopyService = storyAssetCopyService;
         _logger = logger;
+        _forkQueue = forkQueue;
+        _forkQueueName = configuration.GetSection("AzureStorage:Queues")?["Fork"] ?? "story-fork-queue";
+        _forkAssetsQueue = forkAssetsQueue;
         _telemetryClient = telemetryClient;
     }
 
@@ -57,15 +68,53 @@ public class ForkStoryEndpoint
 
     public record ForkStoryResponse
     {
+        public Guid JobId { get; init; }
         public required string StoryId { get; init; }
         public required string OriginalStoryId { get; init; }
+        public bool CopyAssets { get; init; }
+        public string Status { get; init; } = StoryForkJobStatus.Queued;
+        public string QueueName { get; init; } = string.Empty;
+        public Guid? AssetJobId { get; init; }
+        public string? AssetJobStatus { get; init; }
+    }
+
+    public record ForkStoryJobStatusResponse
+    {
+        public Guid JobId { get; init; }
+        public string StoryId { get; init; } = string.Empty;
+        public string SourceStoryId { get; init; } = string.Empty;
+        public string Status { get; init; } = StoryForkJobStatus.Queued;
+        public bool CopyAssets { get; init; }
+        public string QueueName { get; init; } = string.Empty;
+        public DateTime QueuedAtUtc { get; init; }
+        public DateTime? StartedAtUtc { get; init; }
+        public DateTime? CompletedAtUtc { get; init; }
+        public string? ErrorMessage { get; init; }
+        public string? WarningSummary { get; init; }
+        public int SourceTranslations { get; init; }
+        public int SourceTiles { get; init; }
+        public ForkStoryAssetJobStatus? AssetJob { get; init; }
+    }
+
+    public record ForkStoryAssetJobStatus
+    {
+        public Guid JobId { get; init; }
+        public string Status { get; init; } = StoryForkAssetJobStatus.Queued;
+        public int AttemptedAssets { get; init; }
+        public int CopiedAssets { get; init; }
+        public int DequeueCount { get; init; }
+        public DateTime QueuedAtUtc { get; init; }
+        public DateTime? StartedAtUtc { get; init; }
+        public DateTime? CompletedAtUtc { get; init; }
+        public string? ErrorMessage { get; init; }
+        public string? WarningSummary { get; init; }
     }
 
     [Route("/api/stories/{storyId}/fork")]
     [Authorize]
     public static async Task<
         Results<
-            Ok<ForkStoryResponse>,
+            Accepted<ForkStoryResponse>,
             BadRequest<string>,
             NotFound,
             UnauthorizedHttpResult,
@@ -84,7 +133,9 @@ public class ForkStoryEndpoint
         int sourceTranslations = 0;
         int sourceTiles = 0;
         string? newStoryId = null;
-        var copyStats = ForkAssetCopyStats.CreateSkipped(sourceType);
+        Guid? jobId = null;
+        string? jobStatus = null;
+        var jobQueued = false;
 
         try
         {
@@ -118,54 +169,86 @@ public class ForkStoryEndpoint
                 return TypedResults.NotFound();
             }
 
+            // Fork is only allowed for published stories (definitions), not drafts (crafts)
+            // For drafts, users should use Copy instead
             if (craft != null)
             {
-                sourceType = "draft";
-                sourceTranslations = craft.Translations.Count;
-                sourceTiles = craft.Tiles.Count;
+                outcome = "BadRequest";
+                return TypedResults.BadRequest("Fork is only available for published stories. Use Copy for draft stories.");
             }
-            else if (definition != null)
+
+            if (definition != null)
             {
-                sourceType = "published";
+                sourceType = StoryForkAssetJobSourceTypes.Published;
                 sourceTranslations = definition.Translations.Count;
                 sourceTiles = definition.Tiles.Count;
             }
-
-            newStoryId = await ep._storyIdGenerator.GenerateNextAsync(currentUser.Id, currentUser.FirstName, currentUser.LastName, ct);
-            StoryCraft newCraft;
-
-            if (craft != null)
-            {
-                newCraft = await ep._storyCopyService.CreateCopyFromCraftAsync(craft, currentUser.Id, newStoryId, ct);
-            }
             else
             {
-                newCraft = await ep._storyCopyService.CreateCopyFromDefinitionAsync(definition!, currentUser.Id, newStoryId, ct);
+                outcome = "BadRequest";
+                return TypedResults.BadRequest("Fork is only available for published stories.");
             }
 
+            newStoryId = await ep._storyIdGenerator.GenerateNextAsync(
+                currentUser.Id,
+                currentUser.FirstName,
+                currentUser.LastName,
+                ct);
+
+            var requesterEmail = string.IsNullOrWhiteSpace(currentUser.Email)
+                ? $"{currentUser.Id}@unknown"
+                : currentUser.Email;
+
+            var job = new StoryForkJob
+            {
+                Id = Guid.NewGuid(),
+                SourceStoryId = storyId,
+                SourceType = sourceType,
+                CopyAssets = request.CopyAssets,
+                RequestedByUserId = currentUser.Id,
+                RequestedByEmail = requesterEmail,
+                TargetOwnerUserId = currentUser.Id,
+                TargetOwnerEmail = requesterEmail,
+                TargetStoryId = newStoryId,
+                Status = StoryForkJobStatus.Queued,
+                QueuedAtUtc = DateTime.UtcNow,
+                SourceTranslations = sourceTranslations,
+                SourceTiles = sourceTiles
+            };
+
+            ep._db.StoryForkJobs.Add(job);
+            await ep._db.SaveChangesAsync(ct);
+
+            await ep._forkQueue.EnqueueAsync(job, ct);
+
+            outcome = "Queued";
+            jobQueued = true;
+            jobId = job.Id;
+            jobStatus = job.Status;
+
             ep._logger.LogInformation(
-                "Fork story completed: userId={UserId} source={SourceStoryId} newStoryId={NewStoryId} copyAssets={CopyAssets}",
+                "Fork story job queued: userId={UserId} sourceStoryId={SourceStoryId} targetStoryId={TargetStoryId} copyAssets={CopyAssets} jobId={JobId}",
                 currentUser.Id,
                 storyId,
                 newStoryId,
-                request.CopyAssets);
+                request.CopyAssets,
+                job.Id);
 
-            if (request.CopyAssets)
+            var response = new ForkStoryResponse
             {
-                copyStats = await ep.TryCopyAssetsAsync(currentUser, craft, definition, newStoryId, sourceType, ct);
-            }
-            else
-            {
-                copyStats = ForkAssetCopyStats.CreateSkipped(sourceType);
-            }
-
-            outcome = !request.CopyAssets || copyStats.Success ? "Success" : "PartialSuccess";
-
-            return TypedResults.Ok(new ForkStoryResponse
-            {
+                JobId = job.Id,
                 StoryId = newStoryId,
-                OriginalStoryId = storyId
-            });
+                OriginalStoryId = storyId,
+                CopyAssets = request.CopyAssets,
+                Status = job.Status,
+                QueueName = ep._forkQueueName,
+                AssetJobId = job.AssetJobId,
+                AssetJobStatus = job.AssetJobStatus
+            };
+
+            return TypedResults.Accepted(
+                $"/api/stories/{storyId}/fork/jobs/{job.Id}",
+                response);
         }
         finally
         {
@@ -181,8 +264,96 @@ public class ForkStoryEndpoint
                 sourceType,
                 sourceTranslations,
                 sourceTiles,
-                copyStats);
+                jobQueued,
+                jobStatus);
         }
+    }
+
+    [HttpGet]
+    [Route("/api/stories/fork/jobs/{jobId:guid}")]
+    [Authorize]
+    public static async Task<
+        Results<
+            Ok<ForkStoryJobStatusResponse>,
+            NotFound,
+            UnauthorizedHttpResult,
+            ForbidHttpResult>> HandleGet(
+        [FromRoute] Guid jobId,
+        [FromServices] ForkStoryEndpoint ep,
+        CancellationToken ct)
+    {
+        var (user, authOutcome) = await ep.AuthorizeCreatorAsync(ct);
+        if (authOutcome == AuthorizationOutcome.Unauthorized)
+        {
+            return TypedResults.Unauthorized();
+        }
+
+        if (authOutcome == AuthorizationOutcome.Forbidden)
+        {
+            return TypedResults.Forbid();
+        }
+
+        var currentUser = user!;
+
+        var job = await ep._db.StoryForkJobs
+            .AsNoTracking()
+            .FirstOrDefaultAsync(j => j.Id == jobId, ct);
+
+        if (job == null)
+        {
+            return TypedResults.NotFound();
+        }
+
+        if (!ep.CanAccessForkJob(currentUser, job))
+        {
+            return TypedResults.Forbid();
+        }
+
+        StoryForkAssetJob? assetJob = null;
+        if (job.AssetJobId.HasValue)
+        {
+            assetJob = await ep._db.StoryForkAssetJobs
+                .AsNoTracking()
+                .FirstOrDefaultAsync(a => a.Id == job.AssetJobId.Value, ct);
+        }
+
+        ForkStoryAssetJobStatus? assetJobStatus = null;
+        if (assetJob != null)
+        {
+            assetJobStatus = new ForkStoryAssetJobStatus
+            {
+                JobId = assetJob.Id,
+                Status = assetJob.Status,
+                AttemptedAssets = assetJob.AttemptedAssets,
+                CopiedAssets = assetJob.CopiedAssets,
+                DequeueCount = assetJob.DequeueCount,
+                QueuedAtUtc = assetJob.QueuedAtUtc,
+                StartedAtUtc = assetJob.StartedAtUtc,
+                CompletedAtUtc = assetJob.CompletedAtUtc,
+                ErrorMessage = assetJob.ErrorMessage,
+                WarningSummary = assetJob.WarningSummary
+            };
+        }
+
+        var response = new ForkStoryJobStatusResponse
+        {
+            JobId = job.Id,
+            StoryId = job.TargetStoryId,
+            SourceStoryId = job.SourceStoryId,
+            Status = job.Status,
+            CopyAssets = job.CopyAssets,
+            QueueName = ep._forkQueueName,
+            QueuedAtUtc = job.QueuedAtUtc,
+            StartedAtUtc = job.StartedAtUtc,
+            CompletedAtUtc = job.CompletedAtUtc,
+            ErrorMessage = job.ErrorMessage,
+            WarningSummary = job.WarningSummary,
+            SourceTranslations = job.SourceTranslations,
+            SourceTiles = job.SourceTiles,
+            AssetJob = assetJobStatus
+        };
+
+        return TypedResults.Ok(response);
     }
 
     private enum AuthorizationOutcome
@@ -214,6 +385,16 @@ public class ForkStoryEndpoint
         return !(string.IsNullOrWhiteSpace(storyId) || storyId.Equals("new", StringComparison.OrdinalIgnoreCase));
     }
 
+    private bool CanAccessForkJob(AlchimaliaUser user, StoryForkJob job)
+    {
+        if (_auth0.HasRole(user, UserRole.Admin))
+        {
+            return true;
+        }
+
+        return job.TargetOwnerUserId == user.Id || job.RequestedByUserId == user.Id;
+    }
+
     private async Task<(StoryCraft? Craft, StoryDefinition? Definition)> LoadSourceStoryAsync(string storyId, CancellationToken ct)
     {
         var craft = await _crafts.GetAsync(storyId, ct);
@@ -233,99 +414,8 @@ public class ForkStoryEndpoint
         return (null, definition);
     }
 
-    private async Task<ForkAssetCopyStats> TryCopyAssetsAsync(
-        AlchimaliaUser currentUser,
-        StoryCraft? craft,
-        StoryDefinition? definition,
-        string newStoryId,
-        string sourceType,
-        CancellationToken ct)
-    {
-        var attemptedAssets = 0;
-        try
-        {
-            if (craft != null)
-            {
-                var sourceEmail = await ResolveOwnerEmailAsync(craft.OwnerUserId, currentUser, ct);
-                if (sourceEmail == null)
-                {
-                    _logger.LogWarning("Skipping fork asset copy for storyId={StoryId}: cannot resolve source email", craft.StoryId);
-                    return ForkAssetCopyStats.CreateFailure(sourceType, attemptedAssets, null, "SourceEmailMissing");
-                }
 
-                var assets = _storyAssetCopyService.CollectFromCraft(craft);
-                attemptedAssets = assets.Count;
-                if (attemptedAssets == 0)
-                {
-                    return ForkAssetCopyStats.CreateSkipped(sourceType);
-                }
-
-                var copyResult = await _storyAssetCopyService.CopyDraftToDraftAsync(
-                    assets,
-                    sourceEmail,
-                    craft.StoryId,
-                    currentUser.Email,
-                    newStoryId,
-                    ct);
-
-                if (copyResult.HasError)
-                {
-                    _logger.LogWarning("Fork asset copy failed: storyId={StoryId} asset={Asset} reason={Reason}", newStoryId, copyResult.AssetFilename, copyResult.ErrorMessage);
-                    return ForkAssetCopyStats.CreateFailure(sourceType, attemptedAssets, copyResult.AssetFilename, copyResult.ErrorMessage);
-                }
-
-                return ForkAssetCopyStats.CreateSuccess(sourceType, attemptedAssets, attemptedAssets);
-            }
-
-            if (definition != null)
-            {
-                if (!definition.CreatedBy.HasValue)
-                {
-                    _logger.LogWarning("Skipping fork asset copy for published storyId={StoryId}: CreatedBy missing", definition.StoryId);
-                    return ForkAssetCopyStats.CreateFailure(sourceType, attemptedAssets, null, "CreatedByMissing");
-                }
-
-                var sourceEmail = await ResolveOwnerEmailAsync(definition.CreatedBy.Value, currentUser, ct);
-                if (string.IsNullOrWhiteSpace(sourceEmail))
-                {
-                    _logger.LogWarning("Skipping fork asset copy for published storyId={StoryId}: cannot resolve owner email", definition.StoryId);
-                    return ForkAssetCopyStats.CreateFailure(sourceType, attemptedAssets, null, "SourceEmailMissing");
-                }
-
-                var assets = _storyAssetCopyService.CollectFromDefinition(definition);
-                attemptedAssets = assets.Count;
-                if (attemptedAssets == 0)
-                {
-                    return ForkAssetCopyStats.CreateSkipped(sourceType);
-                }
-
-                var copyResult = await _storyAssetCopyService.CopyPublishedToDraftAsync(
-                    assets,
-                    sourceEmail,
-                    definition.StoryId,
-                    currentUser.Email,
-                    newStoryId,
-                    ct);
-
-                if (copyResult.HasError)
-                {
-                    _logger.LogWarning("Fork asset copy failed (published): storyId={StoryId} asset={Asset} reason={Reason}", newStoryId, copyResult.AssetFilename, copyResult.ErrorMessage);
-                    return ForkAssetCopyStats.CreateFailure(sourceType, attemptedAssets, copyResult.AssetFilename, copyResult.ErrorMessage);
-                }
-
-                return ForkAssetCopyStats.CreateSuccess(sourceType, attemptedAssets, attemptedAssets);
-            }
-
-            return ForkAssetCopyStats.CreateSkipped(sourceType);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Asset copy failed during fork for storyId={StoryId}", newStoryId);
-            return ForkAssetCopyStats.CreateFailure(sourceType, attemptedAssets, null, ex.Message);
-        }
-    }
-
-    private async Task<string?> ResolveOwnerEmailAsync(Guid ownerId, AlchimaliaUser currentUser, CancellationToken ct)
+    internal async Task<string?> ResolveOwnerEmailAsync(Guid ownerId, AlchimaliaUser currentUser, CancellationToken ct)
     {
         if (ownerId == currentUser.Id)
         {
@@ -350,20 +440,19 @@ public class ForkStoryEndpoint
         string sourceType,
         int sourceTranslations,
         int sourceTiles,
-        ForkAssetCopyStats copyStats)
+        bool jobQueued,
+        string? jobStatus)
     {
         _logger.LogInformation(
-            "Fork story telemetry | originalStoryId={OriginalStoryId} newStoryId={NewStoryId} outcome={Outcome} durationMs={DurationMs} copyRequested={CopyRequested} copySuccess={CopySuccess} attemptedAssets={Attempted} copiedAssets={Copied} sourceType={SourceType} failureReason={FailureReason}",
+            "Fork story telemetry | originalStoryId={OriginalStoryId} newStoryId={NewStoryId} outcome={Outcome} durationMs={DurationMs} copyRequested={CopyRequested} jobQueued={JobQueued} jobStatus={JobStatus} sourceType={SourceType}",
             originalStoryId,
             newStoryId ?? "(not generated)",
             outcome,
             durationMs,
             copyRequested,
-            copyStats.Success,
-            copyStats.AttemptedAssets,
-            copyStats.CopiedAssets,
-            copyStats.SourceType,
-            copyStats.FailureReason ?? "(none)");
+            jobQueued,
+            jobStatus ?? "(none)",
+            sourceType);
 
         var properties = new Dictionary<string, string?>
         {
@@ -374,19 +463,14 @@ public class ForkStoryEndpoint
             ["UserEmail"] = userEmail,
             ["CopyRequested"] = copyRequested.ToString(CultureInfo.InvariantCulture),
             ["CopySourceType"] = sourceType,
-            ["CopySuccess"] = copyStats.Success.ToString(CultureInfo.InvariantCulture),
-            ["CopyAttemptedAssets"] = copyStats.AttemptedAssets.ToString(CultureInfo.InvariantCulture),
-            ["CopyCopiedAssets"] = copyStats.CopiedAssets.ToString(CultureInfo.InvariantCulture),
-            ["CopyFailureAsset"] = copyStats.FailureAsset,
-            ["CopyFailureReason"] = copyStats.FailureReason,
+            ["JobQueued"] = jobQueued.ToString(CultureInfo.InvariantCulture),
+            ["JobStatus"] = jobStatus,
             ["SourceTranslations"] = sourceTranslations.ToString(CultureInfo.InvariantCulture),
             ["SourceTiles"] = sourceTiles.ToString(CultureInfo.InvariantCulture)
         };
 
         TrackMetric("ForkStory_Duration", durationMs, properties);
-        TrackMetric("ForkStory_AssetsRequested", copyStats.AttemptedAssets, properties);
-        TrackMetric("ForkStory_AssetsCopied", copyStats.CopiedAssets, properties);
-        TrackMetric("ForkStory_CopySuccess", copyStats.Success ? 1 : 0, properties);
+        TrackMetric("ForkStory_CopyJobQueued", jobQueued ? 1 : 0, properties);
     }
 
     private void TrackMetric(string metricName, double value, IReadOnlyDictionary<string, string?> properties)
@@ -408,17 +492,5 @@ public class ForkStoryEndpoint
         _telemetryClient.TrackMetric(metric);
     }
 
-    private readonly record struct ForkAssetCopyStats(
-        int AttemptedAssets,
-        int CopiedAssets,
-        bool Success,
-        string SourceType,
-        string? FailureAsset,
-        string? FailureReason)
-    {
-        public static ForkAssetCopyStats CreateSkipped(string sourceType) => new(0, 0, true, sourceType, null, null);
-        public static ForkAssetCopyStats CreateSuccess(string sourceType, int attempted, int copied) => new(attempted, copied, true, sourceType, null, null);
-        public static ForkAssetCopyStats CreateFailure(string sourceType, int attempted, string? failureAsset, string? failureReason) => new(attempted, 0, false, sourceType, failureAsset, failureReason);
-    }
 }
 

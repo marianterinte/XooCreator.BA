@@ -1,6 +1,6 @@
 namespace XooCreator.DbScriptRunner;
 
-internal static class ScriptLoader
+public static class ScriptLoader
 {
     public static IReadOnlyList<SqlScript> LoadForwardScripts(string directory)
     {

@@ -20,6 +20,7 @@ public class StoryTile
     
     // Quiz-specific fields
     public string? Question { get; set; }
+    public string? ContentHash { get; set; }
     
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
@@ -42,6 +43,7 @@ public class StoryTileTranslation
     // Language-specific media (full published path)
     public string? AudioUrl { get; set; }
     public string? VideoUrl { get; set; }
+    public string? ContentHash { get; set; }
 
     public StoryTile StoryTile { get; set; } = null!;
 }

@@ -10,27 +10,33 @@ namespace XooCreator.BA.Features.StoryEditor.Services;
 public interface IStoryPublishingService
 {
     // Returns the new global version after publish
-    Task<int> UpsertFromCraftAsync(StoryCraft craft, string ownerEmail, string langTag, CancellationToken ct);
+    Task<int> UpsertFromCraftAsync(StoryCraft craft, string ownerEmail, string langTag, bool forceFullPublish, CancellationToken ct);
 }
 
 public class StoryPublishingService : IStoryPublishingService
 {
     private readonly XooDbContext _db;
     private readonly ILogger<StoryPublishingService> _logger;
+    private readonly IStoryAssetLinkService _assetLinks;
 
-    public StoryPublishingService(XooDbContext db, ILogger<StoryPublishingService> logger)
+    public StoryPublishingService(
+        XooDbContext db,
+        ILogger<StoryPublishingService> logger,
+        IStoryAssetLinkService assetLinks)
     {
         _db = db;
         _logger = logger;
+        _assetLinks = assetLinks;
     }
 
-    public async Task<int> UpsertFromCraftAsync(StoryCraft craft, string ownerEmail, string langTag, CancellationToken ct)
+    public async Task<int> UpsertFromCraftAsync(StoryCraft craft, string ownerEmail, string langTag, bool forceFullPublish, CancellationToken ct)
     {
         if (craft == null) throw new ArgumentNullException(nameof(craft));
         var storyId = craft.StoryId;
 
         var def = await _db.StoryDefinitions
             .Include(d => d.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Tokens)
+            .Include(d => d.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Translations)
             .Include(d => d.Tiles).ThenInclude(t => t.Translations)
             .Include(d => d.Translations)
             .Include(d => d.Topics)
@@ -39,10 +45,55 @@ public class StoryPublishingService : IStoryPublishingService
         
         // Load craft with topics and age groups
         craft = await _db.StoryCrafts
+            .Include(c => c.Translations)
+            .Include(c => c.Tiles).ThenInclude(t => t.Translations)
+            .Include(c => c.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Translations)
+            .Include(c => c.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Tokens)
             .Include(c => c.Topics).ThenInclude(t => t.StoryTopic)
             .Include(c => c.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
             .FirstOrDefaultAsync(c => c.Id == craft.Id, ct) ?? craft;
 
+        var requiresFullPublish = forceFullPublish || def == null;
+        List<StoryPublishChangeLog>? pendingLogs = null;
+
+        if (!requiresFullPublish && def != null)
+        {
+            pendingLogs = await _db.StoryPublishChangeLogs
+                .Where(x => x.StoryId == storyId && x.DraftVersion > def.LastPublishedVersion)
+                .OrderBy(x => x.DraftVersion)
+                .ThenBy(x => x.CreatedAt)
+                .ToListAsync(ct);
+
+            if (pendingLogs.Count == 0)
+            {
+                requiresFullPublish = true;
+            }
+        }
+
+        if (!requiresFullPublish && def != null && pendingLogs != null)
+        {
+            var deltaApplied = await TryApplyDeltaPublishAsync(def, craft, pendingLogs, ownerEmail, langTag, ct);
+            if (deltaApplied)
+            {
+                await UpsertUserCreatedStoryAsync(def, craft.OwnerUserId, ct);
+                LogPublication(def, craft.OwnerUserId, ownerEmail, StoryPublicationAction.Publish, null);
+                await _db.SaveChangesAsync(ct);
+                await CleanupChangeLogsAsync(storyId, craft.LastDraftVersion, ct);
+                return def.Version;
+            }
+
+            requiresFullPublish = true;
+        }
+
+        var newVersion = await ApplyFullPublishAsync(def, craft, ownerEmail, langTag, ct);
+        await CleanupChangeLogsAsync(storyId, craft.LastDraftVersion, ct);
+        return newVersion;
+    }
+
+    private async Task<int> ApplyFullPublishAsync(StoryDefinition? existingDefinition, StoryCraft craft, string ownerEmail, string langTag, CancellationToken ct)
+    {
+        var storyId = craft.StoryId;
+        var def = existingDefinition;
         var isNew = def == null;
         if (isNew)
         {
@@ -56,6 +107,7 @@ public class StoryPublishingService : IStoryPublishingService
                 StoryType = craft.StoryType,
                 Status = StoryStatus.Published,
                 IsActive = true,
+                IsEvaluative = craft.IsEvaluative,
                 SortOrder = 0,
                 Version = 1,
                 PriceInCredits = craft.PriceInCredits,
@@ -65,14 +117,13 @@ public class StoryPublishingService : IStoryPublishingService
             _db.StoryDefinitions.Add(def);
         }
 
-        // Update header
-        def.Title = craft.Translations.FirstOrDefault(t => t.LanguageCode == langTag)?.Title
-            ?? def.Title;
+        def!.Title = craft.Translations.FirstOrDefault(t => t.LanguageCode == langTag)?.Title ?? def.Title;
         def.Summary = craft.Translations.FirstOrDefault(t => t.LanguageCode == langTag)?.Summary ?? def.Summary;
         def.StoryTopic = craft.StoryTopic ?? def.StoryTopic;
         def.AuthorName = craft.AuthorName ?? def.AuthorName;
         def.ClassicAuthorId = craft.ClassicAuthorId ?? def.ClassicAuthorId;
         def.StoryType = craft.StoryType;
+        def.IsEvaluative = craft.IsEvaluative;
         def.PriceInCredits = craft.PriceInCredits;
         def.Status = StoryStatus.Published;
         def.IsActive = true;
@@ -82,7 +133,6 @@ public class StoryPublishingService : IStoryPublishingService
         {
             def.CreatedBy = craft.OwnerUserId;
         }
-        // Version bump for existing definitions
         if (!isNew)
         {
             def.Version = def.Version <= 0 ? 1 : def.Version + 1;
@@ -93,35 +143,14 @@ public class StoryPublishingService : IStoryPublishingService
             var asset = new StoryAssetPathMapper.AssetInfo(craft.CoverImageUrl, StoryAssetPathMapper.AssetType.Image, null);
             def.CoverImageUrl = StoryAssetPathMapper.BuildPublishedPath(asset, ownerEmail, storyId);
         }
-        if (def.Id != Guid.Empty)
+        else
         {
-            var existingTiles = await _db.StoryTiles.Where(t => t.StoryDefinitionId == def.Id).ToListAsync(ct);
-            if (existingTiles.Count > 0)
-            {
-                _db.StoryTiles.RemoveRange(existingTiles);
-            }
-
-            var existingDefTr = await _db.StoryDefinitionTranslations.Where(t => t.StoryDefinitionId == def.Id).ToListAsync(ct);
-            if (existingDefTr.Count > 0)
-            {
-                _db.StoryDefinitionTranslations.RemoveRange(existingDefTr);
-            }
-
-            // Remove existing topics and age groups
-            var existingTopics = await _db.StoryDefinitionTopics.Where(t => t.StoryDefinitionId == def.Id).ToListAsync(ct);
-            if (existingTopics.Count > 0)
-            {
-                _db.StoryDefinitionTopics.RemoveRange(existingTopics);
-            }
-
-            var existingAgeGroups = await _db.StoryDefinitionAgeGroups.Where(ag => ag.StoryDefinitionId == def.Id).ToListAsync(ct);
-            if (existingAgeGroups.Count > 0)
-            {
-                _db.StoryDefinitionAgeGroups.RemoveRange(existingAgeGroups);
-            }
+            def.CoverImageUrl = null;
         }
 
-        // Add definition translations from craft
+        await RemoveExistingDefinitionContentAsync(def, ct);
+        await _assetLinks.SyncCoverAsync(craft, ownerEmail, ct);
+
         foreach (var tr in craft.Translations)
         {
             _db.StoryDefinitionTranslations.Add(new StoryDefinitionTranslation
@@ -132,109 +161,186 @@ public class StoryPublishingService : IStoryPublishingService
             });
         }
 
-        // Tiles
         var tilesBySort = craft.Tiles.OrderBy(t => t.SortOrder).ToList();
         _logger.LogInformation("Publishing story: storyId={StoryId} tilesCount={Count}", storyId, tilesBySort.Count);
-        
-        foreach (var ctile in tilesBySort)
+
+        foreach (var craftTile in tilesBySort)
         {
-            _logger.LogInformation("Processing tile: tileId={TileId} imageUrl={ImageUrl}", 
-                ctile.TileId, ctile.ImageUrl ?? "(null)");
-            
-            var tile = new StoryTile
+            await UpsertTileFromCraftAsync(def, craft, craftTile, ownerEmail, langTag, ct, removeExisting: false);
+        }
+
+        await ReplaceDefinitionTopicsAsync(def, craft, ct);
+        await ReplaceDefinitionAgeGroupsAsync(def, craft, ct);
+
+        def.LastPublishedVersion = craft.LastDraftVersion;
+
+        await UpsertUserCreatedStoryAsync(def, craft.OwnerUserId, ct);
+        LogPublication(def, craft.OwnerUserId, ownerEmail, StoryPublicationAction.Publish, null);
+        await _db.SaveChangesAsync(ct);
+        return def.Version;
+    }
+
+    private async Task<bool> TryApplyDeltaPublishAsync(
+        StoryDefinition def,
+        StoryCraft craft,
+        IReadOnlyCollection<StoryPublishChangeLog> changeLogs,
+        string ownerEmail,
+        string langTag,
+        CancellationToken ct)
+    {
+        if (changeLogs.Count == 0)
+        {
+            return false;
+        }
+
+        var headerChanged = changeLogs.Any(l =>
+            string.Equals(l.EntityType, StoryPublishEntityTypes.Header, StringComparison.OrdinalIgnoreCase));
+
+        var tileChanges = changeLogs
+            .Where(l => string.Equals(l.EntityType, StoryPublishEntityTypes.Tile, StringComparison.OrdinalIgnoreCase)
+                        && !string.IsNullOrWhiteSpace(l.EntityId))
+            .GroupBy(l => l.EntityId!)
+            .Select(g => g.OrderBy(l => l.DraftVersion).ThenBy(l => l.CreatedAt).Last())
+            .ToList();
+
+        if (!headerChanged && tileChanges.Count == 0)
+        {
+            return false;
+        }
+
+        if (headerChanged)
+        {
+            await ApplyDefinitionMetadataDeltaAsync(def, craft, ownerEmail, langTag, ct);
+        }
+
+        foreach (var change in tileChanges)
+        {
+            var applied = await ApplyTileChangeAsync(def, craft, change, ownerEmail, langTag, ct);
+            if (!applied)
             {
-                StoryDefinition = def,
-                TileId = ctile.TileId,
-                Type = ctile.Type,
-                SortOrder = ctile.SortOrder,
-                Caption = null,
-                Text = null,
-                Question = null,
-                // Image is common for all languages
-                ImageUrl = ctile.ImageUrl
-                // Audio and Video are now language-specific (stored in translation)
-            };
-
-            // Build published path for image (common for all languages)
-            if (!string.IsNullOrWhiteSpace(ctile.ImageUrl))
-            {
-                var asset = new StoryAssetPathMapper.AssetInfo(ctile.ImageUrl, StoryAssetPathMapper.AssetType.Image, null);
-                tile.ImageUrl = StoryAssetPathMapper.BuildPublishedPath(asset, ownerEmail, storyId);
-            }
-
-            _db.StoryTiles.Add(tile);
-
-            // Translations (including audio/video per language)
-            foreach (var tr in ctile.Translations)
-            {
-                var translationLang = tr.LanguageCode.ToLowerInvariant();
-                string? publishedAudioUrl = null;
-                string? publishedVideoUrl = null;
-
-                // Build published paths for audio (language-specific)
-                if (!string.IsNullOrWhiteSpace(tr.AudioUrl))
-                {
-                    var audioAsset = new StoryAssetPathMapper.AssetInfo(tr.AudioUrl, StoryAssetPathMapper.AssetType.Audio, translationLang);
-                    publishedAudioUrl = StoryAssetPathMapper.BuildPublishedPath(audioAsset, ownerEmail, storyId);
-                }
-
-                // Build published paths for video (language-specific)
-                if (!string.IsNullOrWhiteSpace(tr.VideoUrl))
-                {
-                    var videoAsset = new StoryAssetPathMapper.AssetInfo(tr.VideoUrl, StoryAssetPathMapper.AssetType.Video, translationLang);
-                    publishedVideoUrl = StoryAssetPathMapper.BuildPublishedPath(videoAsset, ownerEmail, storyId);
-                }
-
-                _db.StoryTileTranslations.Add(new StoryTileTranslation
-                {
-                    StoryTile = tile,
-                    LanguageCode = translationLang,
-                    Caption = tr.Caption,
-                    Text = tr.Text,
-                    Question = tr.Question,
-                    // Audio and Video are language-specific (full published path)
-                    AudioUrl = publishedAudioUrl,
-                    VideoUrl = publishedVideoUrl
-                });
-            }
-
-            // Answers
-            var answers = ctile.Answers.OrderBy(a => a.SortOrder).ToList();
-            foreach (var ca in answers)
-            {
-                var ans = new StoryAnswer
-                {
-                    StoryTile = tile,
-                    AnswerId = ca.AnswerId,
-                    Text = ca.Translations.FirstOrDefault(t => t.LanguageCode == langTag)?.Text ?? string.Empty,
-                    SortOrder = ca.SortOrder
-                };
-                _db.StoryAnswers.Add(ans);
-
-                foreach (var tok in ca.Tokens)
-                {
-                    _db.StoryAnswerTokens.Add(new StoryAnswerToken
-                    {
-                        StoryAnswer = ans,
-                        Type = tok.Type,
-                        Value = tok.Value,
-                        Quantity = tok.Quantity
-                    });
-                }
-
-                foreach (var atr in ca.Translations)
-                {
-                    _db.StoryAnswerTranslations.Add(new StoryAnswerTranslation
-                    {
-                        StoryAnswer = ans,
-                        LanguageCode = atr.LanguageCode.ToLowerInvariant(),
-                        Text = atr.Text ?? string.Empty
-                    });
-                }
+                return false;
             }
         }
 
-        // Copy topics from craft to definition
+        def.LastPublishedVersion = craft.LastDraftVersion;
+        def.Version = def.Version <= 0 ? 1 : def.Version + 1;
+        def.Status = StoryStatus.Published;
+        def.IsActive = true;
+        def.UpdatedAt = DateTime.UtcNow;
+        def.UpdatedBy = craft.OwnerUserId;
+
+        return true;
+    }
+
+    private async Task ApplyDefinitionMetadataDeltaAsync(StoryDefinition def, StoryCraft craft, string ownerEmail, string langTag, CancellationToken ct)
+    {
+        def.Title = craft.Translations.FirstOrDefault(t => t.LanguageCode == langTag)?.Title ?? def.Title;
+        def.Summary = craft.Translations.FirstOrDefault(t => t.LanguageCode == langTag)?.Summary ?? def.Summary;
+        def.StoryTopic = craft.StoryTopic ?? def.StoryTopic;
+        def.AuthorName = craft.AuthorName ?? def.AuthorName;
+        def.ClassicAuthorId = craft.ClassicAuthorId ?? def.ClassicAuthorId;
+        def.StoryType = craft.StoryType;
+        def.IsEvaluative = craft.IsEvaluative;
+        def.PriceInCredits = craft.PriceInCredits;
+        def.Status = StoryStatus.Published;
+        def.IsActive = true;
+        def.UpdatedAt = DateTime.UtcNow;
+        def.UpdatedBy = craft.OwnerUserId;
+        if (!def.CreatedBy.HasValue)
+        {
+            def.CreatedBy = craft.OwnerUserId;
+        }
+
+        if (!string.IsNullOrWhiteSpace(craft.CoverImageUrl))
+        {
+            var asset = new StoryAssetPathMapper.AssetInfo(craft.CoverImageUrl, StoryAssetPathMapper.AssetType.Image, null);
+            def.CoverImageUrl = StoryAssetPathMapper.BuildPublishedPath(asset, ownerEmail, craft.StoryId);
+        }
+        else
+        {
+            def.CoverImageUrl = null;
+        }
+
+        await ReplaceDefinitionTranslationsAsync(def, craft, ct);
+        await ReplaceDefinitionTopicsAsync(def, craft, ct);
+        await ReplaceDefinitionAgeGroupsAsync(def, craft, ct);
+        await _assetLinks.SyncCoverAsync(craft, ownerEmail, ct);
+    }
+
+    private async Task RemoveExistingDefinitionContentAsync(StoryDefinition def, CancellationToken ct)
+    {
+        if (def.Id == Guid.Empty)
+        {
+            return;
+        }
+
+        var existingTileIds = await _db.StoryTiles
+            .Where(t => t.StoryDefinitionId == def.Id)
+            .Select(t => t.TileId)
+            .ToListAsync(ct);
+        foreach (var tileId in existingTileIds)
+        {
+            await RemoveTileAsync(def, tileId, ct);
+        }
+
+        var existingTranslations = await _db.StoryDefinitionTranslations
+            .Where(t => t.StoryDefinitionId == def.Id)
+            .ToListAsync(ct);
+        if (existingTranslations.Count > 0)
+        {
+            _db.StoryDefinitionTranslations.RemoveRange(existingTranslations);
+        }
+
+        var existingTopics = await _db.StoryDefinitionTopics
+            .Where(t => t.StoryDefinitionId == def.Id)
+            .ToListAsync(ct);
+        if (existingTopics.Count > 0)
+        {
+            _db.StoryDefinitionTopics.RemoveRange(existingTopics);
+        }
+
+        var existingAgeGroups = await _db.StoryDefinitionAgeGroups
+            .Where(ag => ag.StoryDefinitionId == def.Id)
+            .ToListAsync(ct);
+        if (existingAgeGroups.Count > 0)
+        {
+            _db.StoryDefinitionAgeGroups.RemoveRange(existingAgeGroups);
+        }
+
+        await _assetLinks.RemoveCoverAsync(def.StoryId, ct);
+    }
+
+    private async Task ReplaceDefinitionTranslationsAsync(StoryDefinition def, StoryCraft craft, CancellationToken ct)
+    {
+        var existingTranslations = await _db.StoryDefinitionTranslations
+            .Where(t => t.StoryDefinitionId == def.Id)
+            .ToListAsync(ct);
+        if (existingTranslations.Count > 0)
+        {
+            _db.StoryDefinitionTranslations.RemoveRange(existingTranslations);
+        }
+
+        foreach (var tr in craft.Translations)
+        {
+            _db.StoryDefinitionTranslations.Add(new StoryDefinitionTranslation
+            {
+                StoryDefinitionId = def.Id,
+                LanguageCode = tr.LanguageCode.ToLowerInvariant(),
+                Title = tr.Title ?? string.Empty
+            });
+        }
+    }
+
+    private async Task ReplaceDefinitionTopicsAsync(StoryDefinition def, StoryCraft craft, CancellationToken ct)
+    {
+        var existingTopics = await _db.StoryDefinitionTopics
+            .Where(t => t.StoryDefinitionId == def.Id)
+            .ToListAsync(ct);
+        if (existingTopics.Count > 0)
+        {
+            _db.StoryDefinitionTopics.RemoveRange(existingTopics);
+        }
+
         foreach (var craftTopic in craft.Topics)
         {
             _db.StoryDefinitionTopics.Add(new StoryDefinitionTopic
@@ -244,8 +350,18 @@ public class StoryPublishingService : IStoryPublishingService
                 CreatedAt = DateTime.UtcNow
             });
         }
+    }
 
-        // Copy age groups from craft to definition
+    private async Task ReplaceDefinitionAgeGroupsAsync(StoryDefinition def, StoryCraft craft, CancellationToken ct)
+    {
+        var existingAgeGroups = await _db.StoryDefinitionAgeGroups
+            .Where(ag => ag.StoryDefinitionId == def.Id)
+            .ToListAsync(ct);
+        if (existingAgeGroups.Count > 0)
+        {
+            _db.StoryDefinitionAgeGroups.RemoveRange(existingAgeGroups);
+        }
+
         foreach (var craftAgeGroup in craft.AgeGroups)
         {
             _db.StoryDefinitionAgeGroups.Add(new StoryDefinitionAgeGroup
@@ -255,11 +371,172 @@ public class StoryPublishingService : IStoryPublishingService
                 CreatedAt = DateTime.UtcNow
             });
         }
+    }
 
-        await UpsertUserCreatedStoryAsync(def, craft.OwnerUserId, ct);
-        LogPublication(def, craft.OwnerUserId, ownerEmail, StoryPublicationAction.Publish, null);
-        await _db.SaveChangesAsync(ct);
-        return def.Version;
+    private async Task<bool> ApplyTileChangeAsync(
+        StoryDefinition def,
+        StoryCraft craft,
+        StoryPublishChangeLog change,
+        string ownerEmail,
+        string langTag,
+        CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(change.EntityId))
+        {
+            return true;
+        }
+
+        var tileId = change.EntityId;
+        if (string.Equals(change.ChangeType, StoryPublishChangeTypes.Removed, StringComparison.OrdinalIgnoreCase))
+        {
+            await RemoveTileAsync(def, tileId, ct);
+            return true;
+        }
+
+        var craftTile = craft.Tiles.FirstOrDefault(t => string.Equals(t.TileId, tileId, StringComparison.OrdinalIgnoreCase));
+        if (craftTile == null)
+        {
+            _logger.LogWarning("Delta publish failed: storyId={StoryId} tileId={TileId} missing in craft.", def.StoryId, tileId);
+            return false;
+        }
+
+        await UpsertTileFromCraftAsync(def, craft, craftTile, ownerEmail, langTag, ct);
+        return true;
+    }
+
+    private async Task UpsertTileFromCraftAsync(
+        StoryDefinition def,
+        StoryCraft craft,
+        StoryCraftTile craftTile,
+        string ownerEmail,
+        string langTag,
+        CancellationToken ct,
+        bool removeExisting = true)
+    {
+        if (removeExisting)
+        {
+            await RemoveTileAsync(def, craftTile.TileId, ct);
+        }
+
+        var tile = new StoryTile
+        {
+            StoryDefinitionId = def.Id,
+            TileId = craftTile.TileId,
+            Type = craftTile.Type,
+            SortOrder = craftTile.SortOrder
+        };
+
+        if (!string.IsNullOrWhiteSpace(craftTile.ImageUrl))
+        {
+            var asset = new StoryAssetPathMapper.AssetInfo(craftTile.ImageUrl, StoryAssetPathMapper.AssetType.Image, null);
+            tile.ImageUrl = StoryAssetPathMapper.BuildPublishedPath(asset, ownerEmail, def.StoryId);
+        }
+
+        _db.StoryTiles.Add(tile);
+
+        foreach (var tr in craftTile.Translations)
+        {
+            var translationLang = tr.LanguageCode.ToLowerInvariant();
+            string? publishedAudioUrl = null;
+            string? publishedVideoUrl = null;
+
+            if (!string.IsNullOrWhiteSpace(tr.AudioUrl))
+            {
+                var audioAsset = new StoryAssetPathMapper.AssetInfo(tr.AudioUrl, StoryAssetPathMapper.AssetType.Audio, translationLang);
+                publishedAudioUrl = StoryAssetPathMapper.BuildPublishedPath(audioAsset, ownerEmail, def.StoryId);
+            }
+
+            if (!string.IsNullOrWhiteSpace(tr.VideoUrl))
+            {
+                var videoAsset = new StoryAssetPathMapper.AssetInfo(tr.VideoUrl, StoryAssetPathMapper.AssetType.Video, translationLang);
+                publishedVideoUrl = StoryAssetPathMapper.BuildPublishedPath(videoAsset, ownerEmail, def.StoryId);
+            }
+
+            _db.StoryTileTranslations.Add(new StoryTileTranslation
+            {
+                StoryTile = tile,
+                LanguageCode = translationLang,
+                Caption = tr.Caption,
+                Text = tr.Text,
+                Question = tr.Question,
+                AudioUrl = publishedAudioUrl,
+                VideoUrl = publishedVideoUrl
+            });
+        }
+
+        await _assetLinks.SyncTileAssetsAsync(craft, craftTile, ownerEmail, ct);
+
+        var answers = craftTile.Answers.OrderBy(a => a.SortOrder).ToList();
+        foreach (var craftAnswer in answers)
+        {
+            var answer = new StoryAnswer
+            {
+                StoryTile = tile,
+                AnswerId = craftAnswer.AnswerId,
+                Text = craftAnswer.Translations.FirstOrDefault(t => t.LanguageCode == langTag)?.Text ?? string.Empty,
+                IsCorrect = craftAnswer.IsCorrect,
+                SortOrder = craftAnswer.SortOrder
+            };
+            _db.StoryAnswers.Add(answer);
+
+            foreach (var token in craftAnswer.Tokens)
+            {
+                _db.StoryAnswerTokens.Add(new StoryAnswerToken
+                {
+                    StoryAnswer = answer,
+                    Type = token.Type,
+                    Value = token.Value,
+                    Quantity = token.Quantity
+                });
+            }
+
+            foreach (var translation in craftAnswer.Translations)
+            {
+                _db.StoryAnswerTranslations.Add(new StoryAnswerTranslation
+                {
+                    StoryAnswer = answer,
+                    LanguageCode = translation.LanguageCode.ToLowerInvariant(),
+                    Text = translation.Text ?? string.Empty
+                });
+            }
+        }
+    }
+
+    private async Task RemoveTileAsync(StoryDefinition def, string tileId, CancellationToken ct)
+    {
+        var tile = await _db.StoryTiles
+            .Include(t => t.Translations)
+            .Include(t => t.Answers).ThenInclude(a => a.Translations)
+            .Include(t => t.Answers).ThenInclude(a => a.Tokens)
+            .FirstOrDefaultAsync(t => t.StoryDefinitionId == def.Id && t.TileId == tileId, ct);
+
+        if (tile == null)
+        {
+            return;
+        }
+
+        await _assetLinks.RemoveTileAssetsAsync(def.StoryId, tile.TileId, ct);
+
+        _db.StoryTileTranslations.RemoveRange(tile.Translations);
+        foreach (var answer in tile.Answers)
+        {
+            _db.StoryAnswerTranslations.RemoveRange(answer.Translations);
+            _db.StoryAnswerTokens.RemoveRange(answer.Tokens);
+        }
+        _db.StoryAnswers.RemoveRange(tile.Answers);
+        _db.StoryTiles.Remove(tile);
+    }
+
+    private async Task CleanupChangeLogsAsync(string storyId, int lastDraftVersion, CancellationToken ct)
+    {
+        if (lastDraftVersion <= 0)
+        {
+            return;
+        }
+
+        await _db.StoryPublishChangeLogs
+            .Where(x => x.StoryId == storyId && x.DraftVersion <= lastDraftVersion)
+            .ExecuteDeleteAsync(ct);
     }
 
     private async Task UpsertUserCreatedStoryAsync(StoryDefinition def, Guid ownerUserId, CancellationToken ct)
@@ -301,6 +578,19 @@ public class StoryPublishingService : IStoryPublishingService
             Notes = notes,
             CreatedAt = DateTime.UtcNow
         });
+    }
+
+    private static class StoryPublishEntityTypes
+    {
+        public const string Header = "Header";
+        public const string Tile = "Tile";
+    }
+
+    private static class StoryPublishChangeTypes
+    {
+        public const string Added = "Added";
+        public const string Updated = "Updated";
+        public const string Removed = "Removed";
     }
 }
 

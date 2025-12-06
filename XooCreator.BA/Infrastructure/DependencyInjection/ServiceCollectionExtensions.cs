@@ -1,5 +1,6 @@
 using XooCreator.BA.Data.Repositories;
 using XooCreator.BA.Infrastructure.Services;
+using XooCreator.BA.Infrastructure.Services.Queue;
 using XooCreator.BA.Infrastructure.Services.Blob;
 using XooCreator.BA.Services;
 using XooCreator.BA.Features.User.Services;
@@ -36,6 +37,13 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserContextService, UserContextService>();
         services.AddSingleton<IBlobSasService, BlobSasService>();
         services.AddScoped<IDbHealthService, DbHealthService>();
+        services.AddSingleton<IAzureQueueClientFactory, AzureQueueClientFactory>();
+        services.AddSingleton<IStoryPublishQueue, StoryPublishQueue>();
+        services.AddSingleton<IStoryVersionQueue, StoryVersionQueue>();
+        services.AddSingleton<IStoryImportQueue, StoryImportQueue>();
+        services.AddSingleton<IStoryForkQueue, StoryForkQueue>();
+        services.AddSingleton<IStoryForkAssetsQueue, StoryForkAssetsQueue>();
+        services.AddSingleton<IStoryExportQueue, StoryExportQueue>();
         
         return services;
     }
@@ -99,6 +107,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IStoryOwnershipService, StoryOwnershipService>();
         services.AddScoped<IStoryAnswerUpdater, StoryAnswerUpdater>();
         services.AddScoped<IStoryTileUpdater, StoryTileUpdater>();
+        services.AddScoped<IStoryAssetLinkService, StoryAssetLinkService>();
+        services.AddScoped<IStoryPublishChangeLogService, StoryPublishChangeLogService>();
         
         // Cloning Services (unified logic for Copy/Fork/New Version)
         services.AddScoped<IStorySourceMapper, StorySourceMapper>();
@@ -116,6 +126,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IStoryDraftAssetCleanupService, StoryDraftAssetCleanupService>();
         services.AddScoped<IStoryPublishedAssetCleanupService, StoryPublishedAssetCleanupService>();
         services.AddScoped<IStoryAssetReplacementService, StoryAssetReplacementService>();
+        services.AddScoped<IStoryExportService, StoryExportService>();
         
         return services;
     }
