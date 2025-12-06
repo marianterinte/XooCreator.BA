@@ -73,8 +73,21 @@
   <ItemGroup>
     <ProjectReference Include="..\XooCreator.DbScriptRunner\XooCreator.DbScriptRunner.csproj">
       <Properties>IsReferencedProject=true</Properties>
-      <ExcludeAssets>contentfiles</ExcludeAssets>
     </ProjectReference>
   </ItemGroup>
+  
+  <!-- Exclude appsettings.json from DbScriptRunner when publishing -->
+  <Target Name="ExcludeDbScriptRunnerAppSettings" BeforeTargets="PrepareForPublish">
+    <ItemGroup>
+      <_NoneToRemove Include="@(None)" Condition="'%(None.Identity)' != '' AND $([System.String]::Copy('%(None.Identity)').Contains('XooCreator.DbScriptRunner')) AND $([System.String]::Copy('%(None.Identity)').EndsWith('appsettings.json'))" />
+      <None Remove="@(_NoneToRemove)" />
+    </ItemGroup>
+  </Target>
+  
+  <Target Name="ExcludeDbScriptRunnerAppSettingsFromPublish" BeforeTargets="ComputeFilesToPublish">
+    <ItemGroup>
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(ResolvedFileToPublish.RelativePath)' == 'appsettings.json' AND $([System.String]::Copy('%(ResolvedFileToPublish.OriginalItemSpec)').Contains('XooCreator.DbScriptRunner'))" />
+    </ItemGroup>
+  </Target>
 
 </Project>

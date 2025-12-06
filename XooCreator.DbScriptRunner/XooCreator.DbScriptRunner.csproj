@@ -19,16 +19,9 @@
 
   <ItemGroup>
     <None Update="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory Condition="'$(IsReferencedProject)' != 'true'">PreserveNewest</CopyToOutputDirectory>
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </None>
   </ItemGroup>
-  
-  <!-- Exclude appsettings.json when referenced as a project dependency -->
-  <Target Name="ExcludeAppSettingsWhenReferenced" BeforeTargets="GetCopyToPublishDirectoryItems">
-    <ItemGroup>
-      <ContentWithTargetPath Remove="@(ContentWithTargetPath)" Condition="'%(ContentWithTargetPath.TargetPath)' == 'appsettings.json' AND '$(IsReferencedProject)' == 'true'" />
-    </ItemGroup>
-  </Target>
 
 </Project>
