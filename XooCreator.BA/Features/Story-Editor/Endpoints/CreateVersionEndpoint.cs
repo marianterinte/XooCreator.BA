@@ -9,6 +9,7 @@ using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Features.StoryEditor.Services;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
+using XooCreator.BA.Infrastructure.Services.Queue;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 
@@ -18,38 +19,33 @@ public class CreateVersionEndpoint
     private readonly IStoryCraftsRepository _crafts;
     private readonly IAuth0UserService _auth0;
     private readonly XooDbContext _db;
-    private readonly IStoryCopyService _storyCopyService;
-    private readonly IStoryAssetCopyService _storyAssetCopyService;
+    private readonly IStoryVersionQueue _queue;
     private readonly ILogger<CreateVersionEndpoint> _logger;
 
     public CreateVersionEndpoint(
         IStoryCraftsRepository crafts,
         IAuth0UserService auth0,
         XooDbContext db,
-        IStoryCopyService storyCopyService,
-        IStoryAssetCopyService storyAssetCopyService,
+        IStoryVersionQueue queue,
         ILogger<CreateVersionEndpoint> logger)
     {
         _crafts = crafts;
         _auth0 = auth0;
         _db = db;
-        _storyCopyService = storyCopyService;
-        _storyAssetCopyService = storyAssetCopyService;
+        _queue = queue;
         _logger = logger;
     }
 
     public record CreateVersionResponse
     {
-        public bool Ok { get; init; } = true;
-        public required string StoryId { get; init; }
-        public int BaseVersion { get; init; }
+        public Guid JobId { get; init; }
     }
 
     [Route("/api/stories/{storyId}/create-version")]
     [Authorize]
     public static async Task<
         Results<
-            Ok<CreateVersionResponse>,
+            Accepted<CreateVersionResponse>,
             BadRequest<string>,
             NotFound,
             UnauthorizedHttpResult,
@@ -80,21 +76,73 @@ public class CreateVersionEndpoint
         var existingDraftResult = await ep.CheckExistingDraftAsync(storyId, ct);
         if (existingDraftResult != null) return existingDraftResult;
 
-        var newCraft = await ep._storyCopyService.CreateCopyFromDefinitionAsync(definition!, currentUser.Id, storyId, ct);
+        // Create version job
+        var job = new StoryVersionJob
+        {
+            Id = Guid.NewGuid(),
+            StoryId = storyId,
+            OwnerUserId = currentUser.Id,
+            RequestedByEmail = currentUser.Email ?? string.Empty,
+            BaseVersion = definition!.Version,
+            Status = StoryVersionJobStatus.Queued,
+            QueuedAtUtc = DateTime.UtcNow
+        };
 
-        await ep.TryCopyAssetsFromPublishedAsync(currentUser.Email, definition!, storyId, ct);
+        await ep.CreateVersionJobAsync(job, ct);
+        await ep._queue.EnqueueAsync(job, ct);
 
         ep._logger.LogInformation(
-            "Create version completed: userId={UserId} storyId={StoryId} baseVersion={BaseVersion}",
+            "Create version job queued: userId={UserId} storyId={StoryId} jobId={JobId} baseVersion={BaseVersion}",
             currentUser.Id,
             storyId,
-            definition!.Version);
+            job.Id,
+            definition.Version);
 
-        return TypedResults.Ok(new CreateVersionResponse
+        return TypedResults.Accepted($"/api/stories/{storyId}/version-jobs/{job.Id}", new CreateVersionResponse { JobId = job.Id });
+    }
+
+    [Route("/api/stories/{storyId}/version-jobs/{jobId}")]
+    [Authorize]
+    public static async Task<Results<Ok<VersionJobStatusResponse>, NotFound, UnauthorizedHttpResult, ForbidHttpResult>> HandleGet(
+        [FromRoute] string storyId,
+        [FromRoute] Guid jobId,
+        [FromServices] CreateVersionEndpoint ep,
+        CancellationToken ct)
+    {
+        // Authorization check
+        var user = await ep._auth0.GetCurrentUserAsync(ct);
+        if (user == null)
         {
-            StoryId = storyId,
-            BaseVersion = definition!.Version
-        });
+            return TypedResults.Unauthorized();
+        }
+
+        if (!ep._auth0.HasRole(user, UserRole.Creator) && !ep._auth0.HasRole(user, UserRole.Admin))
+        {
+            return TypedResults.Forbid();
+        }
+
+        var job = await ep._db.StoryVersionJobs
+            .FirstOrDefaultAsync(j => j.Id == jobId && j.StoryId == storyId, ct);
+
+        if (job == null)
+        {
+            return TypedResults.NotFound();
+        }
+
+        var response = new VersionJobStatusResponse
+        {
+            JobId = job.Id,
+            StoryId = job.StoryId,
+            Status = job.Status,
+            QueuedAtUtc = job.QueuedAtUtc,
+            StartedAtUtc = job.StartedAtUtc,
+            CompletedAtUtc = job.CompletedAtUtc,
+            ErrorMessage = job.ErrorMessage,
+            DequeueCount = job.DequeueCount,
+            BaseVersion = job.BaseVersion
+        };
+
+        return TypedResults.Ok(response);
     }
 
     private enum AuthorizationOutcome
@@ -126,7 +174,7 @@ public class CreateVersionEndpoint
         return !(string.IsNullOrWhiteSpace(storyId) || storyId.Equals("new", StringComparison.OrdinalIgnoreCase));
     }
 
-    private async Task<(StoryDefinition? Definition, Results<Ok<CreateVersionResponse>, BadRequest<string>, NotFound, UnauthorizedHttpResult, ForbidHttpResult, Conflict<string>>? Error)> LoadPublishedStoryAsync(string storyId, CancellationToken ct)
+    private async Task<(StoryDefinition? Definition, Results<Accepted<CreateVersionResponse>, BadRequest<string>, NotFound, UnauthorizedHttpResult, ForbidHttpResult, Conflict<string>>? Error)> LoadPublishedStoryAsync(string storyId, CancellationToken ct)
     {
         var def = await _db.StoryDefinitions
             .Include(d => d.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Tokens)
@@ -160,7 +208,7 @@ public class CreateVersionEndpoint
         return definition.CreatedBy == user.Id;
     }
 
-    private async Task<Results<Ok<CreateVersionResponse>, BadRequest<string>, NotFound, UnauthorizedHttpResult, ForbidHttpResult, Conflict<string>>?> CheckExistingDraftAsync(string storyId, CancellationToken ct)
+    private async Task<Results<Accepted<CreateVersionResponse>, BadRequest<string>, NotFound, UnauthorizedHttpResult, ForbidHttpResult, Conflict<string>>?> CheckExistingDraftAsync(string storyId, CancellationToken ct)
     {
         var existingCraft = await _crafts.GetAsync(storyId, ct);
         if (existingCraft != null && existingCraft.Status != StoryStatus.Published.ToDb())
@@ -171,23 +219,34 @@ public class CreateVersionEndpoint
         return null;
     }
 
-    private async Task TryCopyAssetsFromPublishedAsync(string ownerEmail, StoryDefinition definition, string storyId, CancellationToken ct)
+    private async Task CreateVersionJobAsync(StoryVersionJob job, CancellationToken ct)
     {
-        try
+        // Mark any queued/running jobs for same story as superseded
+        var existingJobs = await _db.StoryVersionJobs
+            .Where(j => j.StoryId == job.StoryId && (j.Status == StoryVersionJobStatus.Queued || j.Status == StoryVersionJobStatus.Running))
+            .ToListAsync(ct);
+
+        foreach (var existing in existingJobs)
         {
-            var assets = _storyAssetCopyService.CollectFromDefinition(definition);
-            await _storyAssetCopyService.CopyPublishedToDraftAsync(
-                assets,
-                ownerEmail,
-                definition.StoryId,
-                ownerEmail,
-                storyId,
-                ct);
+            existing.Status = StoryVersionJobStatus.Superseded;
+            existing.CompletedAtUtc = DateTime.UtcNow;
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to copy assets during create version for storyId={StoryId}", storyId);
-        }
+
+        _db.StoryVersionJobs.Add(job);
+        await _db.SaveChangesAsync(ct);
     }
+}
+
+public record VersionJobStatusResponse
+{
+    public Guid JobId { get; init; }
+    public string StoryId { get; init; } = string.Empty;
+    public string Status { get; init; } = string.Empty;
+    public DateTime QueuedAtUtc { get; init; }
+    public DateTime? StartedAtUtc { get; init; }
+    public DateTime? CompletedAtUtc { get; init; }
+    public string? ErrorMessage { get; init; }
+    public int DequeueCount { get; init; }
+    public int BaseVersion { get; init; }
 }
 

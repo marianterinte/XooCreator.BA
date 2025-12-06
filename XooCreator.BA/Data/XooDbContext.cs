@@ -75,6 +75,7 @@ public class XooDbContext : DbContext
     public DbSet<StoryPublishChangeLog> StoryPublishChangeLogs => Set<StoryPublishChangeLog>();
     public DbSet<StoryAssetLink> StoryAssetLinks => Set<StoryAssetLink>();
     public DbSet<StoryPublishJob> StoryPublishJobs => Set<StoryPublishJob>();
+    public DbSet<StoryVersionJob> StoryVersionJobs => Set<StoryVersionJob>();
     public DbSet<StoryImportJob> StoryImportJobs => Set<StoryImportJob>();
     public DbSet<StoryForkJob> StoryForkJobs => Set<StoryForkJob>();
     public DbSet<StoryForkAssetJob> StoryForkAssetJobs => Set<StoryForkAssetJob>();
@@ -941,6 +942,18 @@ public class XooDbContext : DbContext
             e.Property(x => x.StoryId).HasMaxLength(200).IsRequired();
             e.Property(x => x.RequestedByEmail).HasMaxLength(256);
             e.Property(x => x.LangTag).HasMaxLength(10).IsRequired();
+            e.Property(x => x.Status).HasMaxLength(32).IsRequired();
+            e.Property(x => x.ErrorMessage).HasMaxLength(2000);
+            e.HasIndex(x => new { x.StoryId, x.Status });
+            e.HasIndex(x => x.QueuedAtUtc);
+        });
+
+        modelBuilder.Entity<StoryVersionJob>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.StoryId).HasMaxLength(200).IsRequired();
+            e.Property(x => x.RequestedByEmail).HasMaxLength(256);
             e.Property(x => x.Status).HasMaxLength(32).IsRequired();
             e.Property(x => x.ErrorMessage).HasMaxLength(2000);
             e.HasIndex(x => new { x.StoryId, x.Status });
