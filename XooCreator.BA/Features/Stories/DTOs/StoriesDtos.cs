@@ -15,6 +15,7 @@ public record StoryContentDto
     public List<string> UnlockedStoryHeroes { get; init; } = new();
     public List<StoryTileDto> Tiles { get; init; } = new();
     public string? OwnerEmail { get; init; }
+    public List<string>? AvailableLanguages { get; init; } // Available language codes for this story (e.g., ["ro-ro", "en-us", "de-de"])
 }
 
 public record StoryTileDto
