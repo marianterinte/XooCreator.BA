@@ -79,3 +79,15 @@ public record QuizAnswerDetailDto
     public bool IsCorrect { get; init; }
     public string? CorrectAnswerText { get; init; }
 }
+
+/// <summary>
+/// Response for resetting all story progress (read progress and evaluation results)
+/// </summary>
+public record ResetAllProgressResponse
+{
+    public bool Success { get; init; }
+    public string? ErrorMessage { get; init; }
+    public int ReadProgressDeleted { get; init; }
+    public int EvaluationResultsDeleted { get; init; }
+    public int QuizAnswersDeleted { get; init; }
+}
