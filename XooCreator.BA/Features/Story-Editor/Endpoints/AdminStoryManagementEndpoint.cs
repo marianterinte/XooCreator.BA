@@ -41,11 +41,28 @@ public class AdminStoryManagementEndpoint
         if (!ep._auth0.HasRole(user, UserRole.Admin))
             return TypedResults.Forbid();
 
+        // Normalize story ID
+        var normalizedStoryId = NormalizeStoryId(storyId);
+
         // Get story without IsActive filter (admin can see all stories)
+        // Try exact match first, then case-insensitive search
         var story = await ep._context.StoryDefinitions
             .Include(s => s.Translations)
             .Include(s => s.Tiles)
-            .FirstOrDefaultAsync(s => s.StoryId == storyId, ct);
+            .FirstOrDefaultAsync(s => s.StoryId == normalizedStoryId, ct);
+
+        // If not found with normalized ID, try case-insensitive search
+        if (story == null)
+        {
+            var allStories = await ep._context.StoryDefinitions
+                .Include(s => s.Translations)
+                .Include(s => s.Tiles)
+                .ToListAsync(ct);
+            
+            story = allStories
+                .FirstOrDefault(s => string.Equals(s.StoryId, storyId, StringComparison.OrdinalIgnoreCase) ||
+                                     string.Equals(s.StoryId, normalizedStoryId, StringComparison.OrdinalIgnoreCase));
+        }
 
         if (story == null)
             return TypedResults.NotFound();
@@ -216,6 +233,16 @@ public class AdminStoryManagementEndpoint
             ep._logger.LogError(ex, "Error deleting story: storyId={StoryId}", storyId);
             return TypedResults.BadRequest($"Failed to delete story: {ex.Message}");
         }
+    }
+
+    private static string NormalizeStoryId(string storyId)
+    {
+        if (string.IsNullOrWhiteSpace(storyId))
+            return storyId;
+            
+        if (string.Equals(storyId, "intro-puf-puf", StringComparison.OrdinalIgnoreCase))
+            return "intro-pufpuf";
+        return storyId;
     }
 }
 
