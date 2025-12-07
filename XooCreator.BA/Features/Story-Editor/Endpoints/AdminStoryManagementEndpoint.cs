@@ -89,7 +89,7 @@ public class AdminStoryManagementEndpoint
 
     [Route("/api/admin/stories/{storyId}/deactivate")]
     [Authorize]
-    public static async Task<Results<Ok<AdminStoryActionResponse>, NotFound, UnauthorizedHttpResult, ForbidHttpResult>> HandlePostDeactivate(
+    public static async Task<Results<Ok<AdminStoryActionResponse>, NotFound, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
         [FromRoute] string storyId,
         [FromServices] AdminStoryManagementEndpoint ep,
         CancellationToken ct)
