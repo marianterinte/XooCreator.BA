@@ -51,6 +51,28 @@ public class StoriesService : IStoriesService
             userProgress = new List<UserStoryProgressDto>();
         }
 
+        // Get available languages for this story and add to StoryContentDto
+        if (story != null)
+        {
+            var availableLangs = await _crafts.GetAvailableLanguagesAsync(storyId);
+            if (availableLangs.Count == 0)
+            {
+                // If no languages found in StoryCraft, try to get from StoryDefinition translations
+                var storyDef = await _repository.GetStoryDefinitionByIdAsync(storyId);
+                if (storyDef?.Translations != null && storyDef.Translations.Count > 0)
+                {
+                    availableLangs = storyDef.Translations.Select(t => t.LanguageCode).Distinct().ToList();
+                }
+                else
+                {
+                    availableLangs = new List<string> { "ro-ro" }; // Default to ro-ro if no languages found
+                }
+            }
+
+            // Create new StoryContentDto with AvailableLanguages
+            story = story with { AvailableLanguages = availableLangs };
+        }
+
         return new GetStoryByIdResponse
         {
             Story = story,
