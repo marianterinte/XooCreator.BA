@@ -38,37 +38,24 @@ public class GetReadStoriesEndpoint
         if (userId == null)
             return TypedResults.Unauthorized();
 
-        // Get all history entries for this user (permanent history)
-        var allHistory = await ep._context.UserStoryReadHistory
-            .Where(h => h.UserId == userId.Value)
-            .ToListAsync(ct);
-
-        // Get all active progress entries for this user (current reading progress)
+        // Get all progress entries for this user
         var allProgress = await ep._context.UserStoryReadProgress
             .Where(p => p.UserId == userId.Value)
             .OrderBy(p => p.ReadAt)
             .ToListAsync(ct);
 
-        // Group progress by StoryId (case-insensitive)
+        // Group by StoryId (case-insensitive)
         var progressByStory = allProgress
             .GroupBy(p => p.StoryId, StringComparer.OrdinalIgnoreCase)
-            .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
-
-        // Combine history and progress: use progress if exists, otherwise use history
-        var allStoryIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var history in allHistory)
-        {
-            allStoryIds.Add(history.StoryId);
-        }
-        foreach (var progressKey in progressByStory.Keys)
-        {
-            allStoryIds.Add(progressKey);
-        }
+            .ToList();
 
         var readStories = new List<ReadStoryDto>();
 
-        foreach (var storyId in allStoryIds)
+        foreach (var storyGroup in progressByStory)
         {
+            var storyId = storyGroup.Key;
+            var progressEntries = storyGroup.ToList();
+
             // Normalize storyId for lookup
             var normalizedStoryId = NormalizeStoryId(storyId);
 
@@ -84,37 +71,9 @@ public class GetReadStoriesEndpoint
 
             var title = translation?.Title ?? story.Title;
             var totalTiles = story.Tiles?.Count ?? 0;
-
-            // Check if we have active progress (preferred) or history
-            int totalTilesRead;
-            DateTime? lastReadAt;
-            bool isCompleted;
-
-            if (progressByStory.TryGetValue(storyId, out var progressEntries) && progressEntries.Count > 0)
-            {
-                // Use active progress
-                totalTilesRead = progressEntries.Count;
-                lastReadAt = progressEntries.Max(p => p.ReadAt);
-                isCompleted = totalTiles > 0 && totalTilesRead >= totalTiles;
-            }
-            else
-            {
-                // Use history
-                var history = allHistory
-                    .FirstOrDefault(h => string.Equals(h.StoryId, storyId, StringComparison.OrdinalIgnoreCase));
-                
-                if (history != null)
-                {
-                    totalTilesRead = history.TotalTilesRead;
-                    lastReadAt = history.LastReadAt;
-                    isCompleted = history.CompletedAt.HasValue || (totalTiles > 0 && totalTilesRead >= totalTiles);
-                }
-                else
-                {
-                    continue; // Skip if no history or progress
-                }
-            }
-
+            var totalTilesRead = progressEntries.Count;
+            var lastReadAt = progressEntries.Max(p => p.ReadAt);
+            var isCompleted = totalTiles > 0 && totalTilesRead >= totalTiles;
             var progressPercentage = totalTiles > 0
                 ? (int)Math.Round((double)totalTilesRead / totalTiles * 100)
                 : 0;
