@@ -171,10 +171,13 @@ public class StoriesRepository : IStoriesRepository
         var isCompleted = totalTiles > 0 && totalTilesRead >= totalTiles;
         var lastReadAt = entries.Max(e => e.ReadAt);
 
-        // Save to history before deleting progress
-        var existingHistory = await _context.UserStoryReadHistory
-            .FirstOrDefaultAsync(h => h.UserId == userId && 
-                string.Equals(h.StoryId, storyId, StringComparison.OrdinalIgnoreCase));
+        // Save to history before deleting progress (load all and filter in memory for case-insensitive match)
+        var allHistory = await _context.UserStoryReadHistory
+            .Where(h => h.UserId == userId)
+            .ToListAsync();
+        
+        var existingHistory = allHistory
+            .FirstOrDefault(h => string.Equals(h.StoryId, storyId, StringComparison.OrdinalIgnoreCase));
 
         if (existingHistory != null)
         {
