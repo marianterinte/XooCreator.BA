@@ -46,6 +46,7 @@ public class XooDbContext : DbContext
     public DbSet<StoryAnswer> StoryAnswers => Set<StoryAnswer>();
     public DbSet<StoryAnswerTranslation> StoryAnswerTranslations => Set<StoryAnswerTranslation>();
     public DbSet<UserStoryReadProgress> UserStoryReadProgress => Set<UserStoryReadProgress>();
+    public DbSet<UserStoryReadHistory> UserStoryReadHistory => Set<UserStoryReadHistory>();
     public DbSet<StoryAnswerToken> StoryAnswerTokens => Set<StoryAnswerToken>();
     public DbSet<StoryQuizAnswer> StoryQuizAnswers => Set<StoryQuizAnswer>();
     public DbSet<StoryEvaluationResult> StoryEvaluationResults => Set<StoryEvaluationResult>();
@@ -511,6 +512,17 @@ public class XooDbContext : DbContext
             e.Property(x => x.Id).ValueGeneratedOnAdd();
             e.HasIndex(x => new { x.UserId, x.StoryId, x.TileId }).IsUnique();
             e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
+        });
+
+        modelBuilder.Entity<UserStoryReadHistory>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.StoryId).HasMaxLength(200).IsRequired();
+            // Unique constraint: one history record per user per story
+            e.HasIndex(x => new { x.UserId, x.StoryId }).IsUnique();
+            e.HasIndex(x => x.CompletedAt);
+            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<StoryQuizAnswer>(e =>
