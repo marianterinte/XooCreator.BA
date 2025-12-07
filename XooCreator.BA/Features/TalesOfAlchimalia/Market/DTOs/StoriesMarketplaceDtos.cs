@@ -36,6 +36,7 @@ public record StoryDetailsDto
     public int TotalReviews { get; init; }
     public StoryReviewDto? UserReview { get; init; } // Current user's review if exists
     public int ReadersCount { get; init; }
+    public bool IsEvaluative { get; init; } = false; // If true, this story contains quizzes that should be evaluated
 }
 
 public record StoryMarketplaceItemDto

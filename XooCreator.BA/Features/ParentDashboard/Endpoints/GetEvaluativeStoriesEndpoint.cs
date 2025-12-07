@@ -38,18 +38,55 @@ public class GetEvaluativeStoriesEndpoint
         if (userId == null)
             return TypedResults.Unauthorized();
 
-        // Get all evaluative stories (IsEvaluative == true and IsActive == true)
-        var evaluativeStories = await ep._context.StoryDefinitions
-            .Include(s => s.Translations)
-            .Include(s => s.Tiles)
-            .Where(s => s.IsEvaluative && s.IsActive)
-            .OrderBy(s => s.SortOrder)
-            .ToListAsync(ct);
-
         // Get all evaluation results for this user (load once, filter in memory)
         var allUserResults = await ep._context.StoryEvaluationResults
             .Where(r => r.UserId == userId.Value)
             .ToListAsync(ct);
+
+        // Get all progress entries for this user (active progress)
+        var allProgress = await ep._context.UserStoryReadProgress
+            .Where(p => p.UserId == userId.Value)
+            .ToListAsync(ct);
+
+        // Get all history entries for this user (permanent history)
+        var allHistory = await ep._context.UserStoryReadHistory
+            .Where(h => h.UserId == userId.Value)
+            .ToListAsync(ct);
+
+        // Get unique story IDs that user has started (from progress or history) or has evaluation results
+        var startedStoryIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        
+        // Add story IDs from progress
+        foreach (var progress in allProgress)
+        {
+            startedStoryIds.Add(progress.StoryId);
+        }
+        
+        // Add story IDs from history
+        foreach (var history in allHistory)
+        {
+            startedStoryIds.Add(history.StoryId);
+        }
+        
+        // Add story IDs from evaluation results
+        foreach (var aUserresult in allUserResults)
+        {
+            startedStoryIds.Add(aUserresult.StoryId);
+        }
+
+        // Get evaluative stories that user has started (IsEvaluative == true and IsActive == true)
+        // Only include stories that user has started or has evaluation results for
+        var allEvaluativeStories = await ep._context.StoryDefinitions
+            .Include(s => s.Translations)
+            .Include(s => s.Tiles)
+            .Where(s => s.IsEvaluative && s.IsActive)
+            .ToListAsync(ct);
+
+        // Filter to only include stories that user has started
+        var evaluativeStories = allEvaluativeStories
+            .Where(s => startedStoryIds.Contains(s.StoryId))
+            .OrderBy(s => s.SortOrder)
+            .ToList();
 
         var result = new List<EvaluativeStoryDto>();
 

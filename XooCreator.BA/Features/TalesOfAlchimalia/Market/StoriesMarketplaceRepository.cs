@@ -470,15 +470,8 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             : 0;
         var lastRead = progressEntries.LastOrDefault();
         var isCompleted = totalTiles > 0 && completedTiles >= totalTiles;
-        if (isCompleted && progressEntries.Count > 0)
-        {
-            _context.UserStoryReadProgress.RemoveRange(progressEntries);
-            await _context.SaveChangesAsync();
-
-            completedTiles = 0;
-            lastRead = null;
-            progressPercentage = 0;
-        }
+        // Progress entries are kept for historical tracking and parent dashboard
+        // Parent dashboard lists all stories with progress (started or completed) based on UserStoryReadProgress entries
 
         // Normalize locale to lowercase for mapping
         var normalizedLocale = (locale ?? "ro-ro").ToLowerInvariant();
