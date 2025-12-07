@@ -91,6 +91,8 @@ public record SearchStoriesRequest
     public List<string> Characters { get; init; } = new();
     public List<string> Categories { get; init; } = new();
     public List<string> Difficulties { get; init; } = new();
+    public List<string> Topics { get; init; } = new(); // Filter by topic IDs (e.g., ["alchimalia_universe", "classic_author"])
+    public bool? IsEvaluative { get; init; } // Filter by evaluative flag
     public string CompletionStatus { get; init; } = "all";
     public string SortBy { get; init; } = "sortOrder";
     public string SortOrder { get; init; } = "asc";

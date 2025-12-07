@@ -77,6 +77,20 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
                 query = query.Where(s => s.StoryType == StoryType.Indie);
             }
 
+            // Filter by topics (topic IDs)
+            if (request.Topics?.Any() == true)
+            {
+                query = query.Where(s => s.Topics.Any(t => 
+                    t.StoryTopic != null && 
+                    request.Topics.Contains(t.StoryTopic.TopicId)));
+            }
+
+            // Filter by IsEvaluative flag
+            if (request.IsEvaluative.HasValue)
+            {
+                query = query.Where(s => s.IsEvaluative == request.IsEvaluative.Value);
+            }
+
             query = ApplySorting(query, request);
 
             // Calculate total count BEFORE pagination
@@ -164,7 +178,19 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             query = query.Where(s => s.StoryType == StoryType.Indie);
         }
 
+        // Filter by topics (topic IDs)
+        if (request.Topics?.Any() == true)
+        {
+            query = query.Where(s => s.Topics.Any(t => 
+                t.StoryTopic != null && 
+                request.Topics.Contains(t.StoryTopic.TopicId)));
+        }
 
+        // Filter by IsEvaluative flag
+        if (request.IsEvaluative.HasValue)
+        {
+            query = query.Where(s => s.IsEvaluative == request.IsEvaluative.Value);
+        }
 
         // Apply filters
         //if (!string.IsNullOrEmpty(request.SearchTerm))
