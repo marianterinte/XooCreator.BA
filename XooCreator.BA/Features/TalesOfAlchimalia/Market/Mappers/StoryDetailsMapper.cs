@@ -99,7 +99,8 @@ public class StoryDetailsMapper
             AverageRating = averageRating,
             TotalReviews = totalReviews,
             UserReview = userReview,
-            ReadersCount = readersCount
+            ReadersCount = readersCount,
+            IsEvaluative = def.IsEvaluative
         };
     }
 

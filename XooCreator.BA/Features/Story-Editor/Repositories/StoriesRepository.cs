@@ -164,6 +164,46 @@ public class StoriesRepository : IStoriesRepository
             return;
         }
 
+        // Get story definition to calculate total tiles
+        var story = await GetStoryDefinitionByIdAsync(storyId);
+        var totalTiles = story?.Tiles?.Count ?? 0;
+        var totalTilesRead = entries.Count;
+        var isCompleted = totalTiles > 0 && totalTilesRead >= totalTiles;
+        var lastReadAt = entries.Max(e => e.ReadAt);
+
+        // Save to history before deleting progress
+        var existingHistory = await _context.UserStoryReadHistory
+            .FirstOrDefaultAsync(h => h.UserId == userId && 
+                string.Equals(h.StoryId, storyId, StringComparison.OrdinalIgnoreCase));
+
+        if (existingHistory != null)
+        {
+            // Update existing history record
+            existingHistory.TotalTilesRead = totalTilesRead;
+            existingHistory.TotalTiles = totalTiles;
+            existingHistory.LastReadAt = lastReadAt;
+            if (isCompleted && !existingHistory.CompletedAt.HasValue)
+            {
+                existingHistory.CompletedAt = DateTime.UtcNow;
+            }
+        }
+        else
+        {
+            // Create new history record
+            var history = new UserStoryReadHistory
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                StoryId = storyId,
+                TotalTilesRead = totalTilesRead,
+                TotalTiles = totalTiles,
+                LastReadAt = lastReadAt,
+                CompletedAt = isCompleted ? DateTime.UtcNow : null
+            };
+            _context.UserStoryReadHistory.Add(history);
+        }
+
+        // Delete progress entries
         _context.UserStoryReadProgress.RemoveRange(entries);
         await _context.SaveChangesAsync();
     }
