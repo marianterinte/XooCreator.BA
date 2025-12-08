@@ -91,6 +91,16 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
                 query = query.Where(s => s.IsEvaluative == request.IsEvaluative.Value);
             }
 
+            // Apply search filter - search in Title and Translations.Title (case-insensitive)
+            if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+            {
+                var searchTerm = request.SearchTerm.Trim();
+                query = query.Where(s => 
+                    (s.Title != null && EF.Functions.ILike(s.Title, $"%{searchTerm}%")) ||
+                    (s.Translations != null && s.Translations.Any(t => 
+                        t.Title != null && EF.Functions.ILike(t.Title, $"%{searchTerm}%"))));
+            }
+
             query = ApplySorting(query, request);
 
             // Calculate total count BEFORE pagination
@@ -192,68 +202,15 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             query = query.Where(s => s.IsEvaluative == request.IsEvaluative.Value);
         }
 
-        // Apply filters
-        //if (!string.IsNullOrEmpty(request.SearchTerm))
-        //{
-        //    query = query.Where(smi => 
-        //        smi.Story.Title.Contains(request.SearchTerm) ||
-        //        smi.Story.Translations.Any(t => t.LanguageCode == normalizedLocale && t.Title.Contains(request.SearchTerm)));
-        //}
-
-        //if (request.Regions.Any())
-        //{
-        //    query = query.Where(smi => request.Regions.Contains(smi.Region));
-        //}
-
-        //if (request.AgeRatings.Any())
-        //{
-        //    query = query.Where(smi => request.AgeRatings.Contains(smi.AgeRating));
-        //}
-
-        //if (request.Characters.Any())
-        //{
-        //    query = query.Where(smi => smi.Characters.Any(c => request.Characters.Contains(c)));
-        //}
-
-        //if (request.Categories.Any())
-        //{
-        //    query = query.Where(smi => smi.Story.StoryTopic != null && request.Categories.Contains(smi.Story.StoryTopic));
-        //}
-
-        //if (request.Difficulties.Any())
-        //{
-        //    query = query.Where(smi => request.Difficulties.Contains(smi.Difficulty));
-        //}
-
-        //// Apply completion status filter
-        //switch (request.CompletionStatus)
-        //{
-        //    case "completed":
-        //        var completedStoryIds = await _context.UserStoryReadProgress
-        //            .Where(usp => usp.UserId == userId)
-        //            .GroupBy(usp => usp.StoryId)
-        //            .Where(g => g.Count() > 0) // Has progress
-        //            .Select(g => g.Key)
-        //            .ToListAsync();
-        //        query = query.Where(smi => completedStoryIds.Contains(smi.StoryId));
-        //        break;
-        //    case "in-progress":
-        //        var inProgressStoryIds = await _context.UserStoryReadProgress
-        //            .Where(usp => usp.UserId == userId)
-        //            .Select(usp => usp.StoryId)
-        //            .Distinct()
-        //            .ToListAsync();
-        //        query = query.Where(smi => inProgressStoryIds.Contains(smi.StoryId));
-        //        break;
-        //    case "not-started":
-        //        var startedStoryIds = await _context.UserStoryReadProgress
-        //            .Where(usp => usp.UserId == userId)
-        //            .Select(usp => usp.StoryId)
-        //            .Distinct()
-        //            .ToListAsync();
-        //        query = query.Where(smi => !startedStoryIds.Contains(smi.StoryId));
-        //        break;
-        //}
+        // Apply search filter - search in Title and Translations.Title (case-insensitive)
+        if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+        {
+            var searchTerm = request.SearchTerm.Trim();
+            query = query.Where(s => 
+                (s.Title != null && EF.Functions.ILike(s.Title, $"%{searchTerm}%")) ||
+                (s.Translations != null && s.Translations.Any(t => 
+                    t.Title != null && EF.Functions.ILike(t.Title, $"%{searchTerm}%"))));
+        }
 
         query = ApplySorting(query, request);
 
