@@ -1,3 +1,5 @@
+using XooCreator.BA.Data.Entities;
+
 namespace XooCreator.BA.Data;
 
 public class StoryEpicStoryNode

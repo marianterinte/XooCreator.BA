@@ -128,6 +128,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IStoryAssetReplacementService, StoryAssetReplacementService>();
         services.AddScoped<IStoryExportService, StoryExportService>();
         
+        // Story Epic Services
+        services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Repositories.IStoryEpicRepository, XooCreator.BA.Features.StoryEditor.StoryEpic.Repositories.StoryEpicRepository>();
+        services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.IStoryEpicService, XooCreator.BA.Features.StoryEditor.StoryEpic.Services.StoryEpicService>();
+        
         return services;
     }
 

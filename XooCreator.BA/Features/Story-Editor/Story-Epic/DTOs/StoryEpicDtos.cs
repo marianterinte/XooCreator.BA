@@ -1,0 +1,86 @@
+namespace XooCreator.BA.Features.StoryEditor.StoryEpic.DTOs;
+
+public record StoryEpicDto
+{
+    public required string Id { get; init; }
+    public required string Name { get; init; }
+    public string? Description { get; init; }
+    public string Status { get; init; } = "draft";
+    public List<StoryEpicRegionDto> Regions { get; init; } = new();
+    public List<StoryEpicStoryNodeDto> Stories { get; init; } = new();
+    public List<StoryEpicUnlockRuleDto> Rules { get; init; } = new();
+}
+
+public record StoryEpicRegionDto
+{
+    public required string Id { get; init; }
+    public required string Label { get; init; }
+    public string? ImageUrl { get; init; }
+    public int SortOrder { get; init; }
+    public bool IsLocked { get; init; }
+    public double? X { get; init; }
+    public double? Y { get; init; }
+}
+
+public record StoryEpicStoryNodeDto
+{
+    public required string StoryId { get; init; }
+    public required string RegionId { get; init; }
+    public string? RewardImageUrl { get; init; }
+    public int SortOrder { get; init; }
+    public double? X { get; init; }
+    public double? Y { get; init; }
+}
+
+public record StoryEpicUnlockRuleDto
+{
+    public required string Type { get; init; }
+    public required string FromId { get; init; }
+    public required string ToRegionId { get; init; }
+    public List<string> RequiredStories { get; init; } = new();
+    public int? MinCount { get; init; }
+    public string? StoryId { get; init; }
+    public int SortOrder { get; init; }
+}
+
+public record StoryEpicStateDto
+{
+    public StoryEpicDto Epic { get; init; } = null!;
+    public StoryEpicPreviewDto Preview { get; init; } = null!;
+}
+
+public record StoryEpicPreviewDto
+{
+    public List<StoryEpicPreviewNodeDto> Nodes { get; init; } = new();
+    public List<StoryEpicPreviewEdgeDto> Edges { get; init; } = new();
+}
+
+public record StoryEpicPreviewNodeDto
+{
+    public required string Id { get; init; }
+    public required string Type { get; init; } // "region" or "story"
+    public required string Label { get; init; }
+    public string? ImageUrl { get; init; }
+    public double? X { get; init; }
+    public double? Y { get; init; }
+}
+
+public record StoryEpicPreviewEdgeDto
+{
+    public required string FromId { get; init; }
+    public required string ToId { get; init; }
+    public string? Type { get; init; } // "unlock" or "contains"
+}
+
+public record StoryEpicListItemDto
+{
+    public required string Id { get; init; }
+    public required string Name { get; init; }
+    public string? Description { get; init; }
+    public string Status { get; init; } = "draft";
+    public DateTime CreatedAt { get; init; }
+    public DateTime UpdatedAt { get; init; }
+    public int StoryCount { get; init; }
+    public int RegionCount { get; init; }
+}
+
