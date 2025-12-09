@@ -40,6 +40,12 @@ public class XooDbContext : DbContext
     public DbSet<TreeUnlockRule> TreeUnlockRules => Set<TreeUnlockRule>();
     public DbSet<TreeConfiguration> TreeConfigurations => Set<TreeConfiguration>();
     
+    // Story Epic
+    public DbSet<StoryEpic> StoryEpics => Set<StoryEpic>();
+    public DbSet<StoryEpicRegion> StoryEpicRegions => Set<StoryEpicRegion>();
+    public DbSet<StoryEpicStoryNode> StoryEpicStoryNodes => Set<StoryEpicStoryNode>();
+    public DbSet<StoryEpicUnlockRule> StoryEpicUnlockRules => Set<StoryEpicUnlockRule>();
+    
     public DbSet<StoryDefinition> StoryDefinitions => Set<StoryDefinition>();
     public DbSet<StoryDefinitionTranslation> StoryDefinitionTranslations => Set<StoryDefinitionTranslation>();
     public DbSet<StoryTile> StoryTiles => Set<StoryTile>();
@@ -422,6 +428,61 @@ public class XooDbContext : DbContext
             e.Property(x => x.FromId).HasMaxLength(100).IsRequired();
             e.Property(x => x.ToRegionId).HasMaxLength(50).IsRequired();
             e.HasOne(x => x.TreeConfiguration).WithMany().HasForeignKey(x => x.TreeConfigurationId);
+        });
+
+        modelBuilder.Entity<TreeConfiguration>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Name).IsRequired();
+        });
+
+        // Story Epic Configuration
+        modelBuilder.Entity<StoryEpic>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasMaxLength(100).IsRequired();
+            e.Property(x => x.Name).HasMaxLength(200).IsRequired();
+            e.Property(x => x.Description).HasMaxLength(1000);
+            e.Property(x => x.Status).HasMaxLength(20).IsRequired();
+            e.HasIndex(x => new { x.OwnerUserId, x.Id }).IsUnique();
+            e.HasOne(x => x.Owner).WithMany().HasForeignKey(x => x.OwnerUserId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<StoryEpicRegion>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.EpicId).HasMaxLength(100).IsRequired();
+            e.Property(x => x.RegionId).HasMaxLength(50).IsRequired();
+            e.Property(x => x.Label).HasMaxLength(100).IsRequired();
+            e.HasIndex(x => new { x.EpicId, x.RegionId }).IsUnique();
+            e.HasOne(x => x.Epic).WithMany(x => x.Regions).HasForeignKey(x => x.EpicId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<StoryEpicStoryNode>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.StoryId).HasMaxLength(100).IsRequired();
+            e.Property(x => x.RegionId).HasMaxLength(50).IsRequired();
+            e.HasIndex(x => new { x.EpicId, x.StoryId, x.RegionId }).IsUnique();
+            e.HasOne(x => x.Epic).WithMany(x => x.StoryNodes).HasForeignKey(x => x.EpicId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.Region).WithMany(x => x.Stories).HasForeignKey(x => new { x.EpicId, x.RegionId }).HasPrincipalKey(r => new { r.EpicId, r.RegionId }).OnDelete(DeleteBehavior.Cascade);
+            // StoryCraft and StoryDefinition are navigation properties only (no FK constraints in DB)
+            // Application code will determine which one exists based on StoryId
+            // We use HasPrincipalKey to map to StoryId but don't create FK constraints
+            e.HasOne(x => x.StoryCraft).WithMany().HasPrincipalKey(s => s.StoryId).HasForeignKey(x => x.StoryId).OnDelete(DeleteBehavior.SetNull).IsRequired(false);
+            e.HasOne(x => x.StoryDefinition).WithMany().HasPrincipalKey(s => s.StoryId).HasForeignKey(x => x.StoryId).OnDelete(DeleteBehavior.SetNull).IsRequired(false);
+        });
+
+        modelBuilder.Entity<StoryEpicUnlockRule>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.Type).HasMaxLength(20).IsRequired();
+            e.Property(x => x.FromId).HasMaxLength(100).IsRequired();
+            e.Property(x => x.ToRegionId).HasMaxLength(50).IsRequired();
+            e.HasOne(x => x.Epic).WithMany(x => x.UnlockRules).HasForeignKey(x => x.EpicId).OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<TreeConfiguration>(e =>
