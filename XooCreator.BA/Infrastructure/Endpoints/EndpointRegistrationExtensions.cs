@@ -43,33 +43,39 @@ public static class EndpointRegistrationExtensions
                 if (string.IsNullOrWhiteSpace(verbPart)) continue;
                 var httpVerb = verbPart.ToLowerInvariant();
 
-                var routeAttr = method.GetCustomAttribute<RouteAttribute>();
-                var route = routeAttr?.Template ?? $"/api/{type.Name.Replace("Endpoint", string.Empty).ToKebabCase()}/{verbPart.ToLowerInvariant()}";
+                var routes = method.GetCustomAttributes<RouteAttribute>(inherit: false).Select(r => r.Template).ToList();
+                if (routes.Count == 0)
+                {
+                    routes.Add($"/api/{type.Name.Replace("Endpoint", string.Empty).ToKebabCase()}/{verbPart.ToLowerInvariant()}");
+                }
 
                 var del = method.CreateDelegate(GetDelegateType(method));
 
-                switch (httpVerb)
+                foreach (var route in routes)
                 {
-                    case "get": 
-                        app.MapGet(route, del);
-                        Console.WriteLine($"\u001b[32m✓\u001b[0m \u001b[36mGET\u001b[0m \u001b[33m{route}\u001b[0m \u001b[90m->\u001b[0m \u001b[35m{type.Name}.{method.Name}\u001b[0m");
-                        break;
-                    case "post": 
-                        app.MapPost(route, del);
-                        Console.WriteLine($"\u001b[32m✓\u001b[0m \u001b[34mPOST\u001b[0m \u001b[33m{route}\u001b[0m \u001b[90m->\u001b[0m \u001b[35m{type.Name}.{method.Name}\u001b[0m");
-                        break;
-                    case "put": 
-                        app.MapPut(route, del);
-                        Console.WriteLine($"\u001b[32m✓\u001b[0m \u001b[33mPUT\u001b[0m \u001b[33m{route}\u001b[0m \u001b[90m->\u001b[0m \u001b[35m{type.Name}.{method.Name}\u001b[0m");
-                        break;
-                    case "delete": 
-                        app.MapDelete(route, del);
-                        Console.WriteLine($"\u001b[32m✓\u001b[0m \u001b[31mDELETE\u001b[0m \u001b[33m{route}\u001b[0m \u001b[90m->\u001b[0m \u001b[35m{type.Name}.{method.Name}\u001b[0m");
-                        break;
-                    case "patch": 
-                        app.MapMethods(route, new[] { "PATCH" }, del);
-                        Console.WriteLine($"\u001b[32m✓\u001b[0m \u001b[37mPATCH\u001b[0m \u001b[33m{route}\u001b[0m \u001b[90m->\u001b[0m \u001b[35m{type.Name}.{method.Name}\u001b[0m");
-                        break;
+                    switch (httpVerb)
+                    {
+                        case "get": 
+                            app.MapGet(route, del);
+                            Console.WriteLine($"\u001b[32m✓\u001b[0m \u001b[36mGET\u001b[0m \u001b[33m{route}\u001b[0m \u001b[90m->\u001b[0m \u001b[35m{type.Name}.{method.Name}\u001b[0m");
+                            break;
+                        case "post": 
+                            app.MapPost(route, del);
+                            Console.WriteLine($"\u001b[32m✓\u001b[0m \u001b[34mPOST\u001b[0m \u001b[33m{route}\u001b[0m \u001b[90m->\u001b[0m \u001b[35m{type.Name}.{method.Name}\u001b[0m");
+                            break;
+                        case "put": 
+                            app.MapPut(route, del);
+                            Console.WriteLine($"\u001b[32m✓\u001b[0m \u001b[33mPUT\u001b[0m \u001b[33m{route}\u001b[0m \u001b[90m->\u001b[0m \u001b[35m{type.Name}.{method.Name}\u001b[0m");
+                            break;
+                        case "delete": 
+                            app.MapDelete(route, del);
+                            Console.WriteLine($"\u001b[32m✓\u001b[0m \u001b[31mDELETE\u001b[0m \u001b[33m{route}\u001b[0m \u001b[90m->\u001b[0m \u001b[35m{type.Name}.{method.Name}\u001b[0m");
+                            break;
+                        case "patch": 
+                            app.MapMethods(route, new[] { "PATCH" }, del);
+                            Console.WriteLine($"\u001b[32m✓\u001b[0m \u001b[37mPATCH\u001b[0m \u001b[33m{route}\u001b[0m \u001b[90m->\u001b[0m \u001b[35m{type.Name}.{method.Name}\u001b[0m");
+                            break;
+                    }
                 }
             }
         }

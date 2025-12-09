@@ -33,6 +33,7 @@ public class XooDbContext : DbContext
     public DbSet<HeroTreeProgress> HeroTreeProgress => Set<HeroTreeProgress>();
     public DbSet<HeroDefinition> HeroDefinitions => Set<HeroDefinition>();
     public DbSet<HeroDefinitionTranslation> HeroDefinitionTranslations => Set<HeroDefinitionTranslation>();
+    public DbSet<PlatformSetting> PlatformSettings => Set<PlatformSetting>();
     
     public DbSet<TreeRegion> TreeRegions => Set<TreeRegion>();
     public DbSet<TreeStoryNode> TreeStoryNodes => Set<TreeStoryNode>();
@@ -110,6 +111,17 @@ public class XooDbContext : DbContext
     {
         modelBuilder.HasDefaultSchema(_defaultSchema);
         modelBuilder.HasPostgresExtension("uuid-ossp");
+
+        modelBuilder.Entity<PlatformSetting>(e =>
+        {
+            e.ToTable("PlatformSettings", _defaultSchema);
+            e.HasKey(x => x.Key);
+            e.Property(x => x.Key).HasMaxLength(128).IsRequired();
+            e.Property(x => x.BoolValue).IsRequired();
+            e.Property(x => x.StringValue);
+            e.Property(x => x.UpdatedAt).IsRequired();
+            e.Property(x => x.UpdatedBy).HasMaxLength(256);
+        });
 
         modelBuilder.Entity<AlchimaliaUser>(e =>
         {
