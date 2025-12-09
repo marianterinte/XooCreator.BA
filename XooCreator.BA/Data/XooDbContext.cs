@@ -126,6 +126,12 @@ public class XooDbContext : DbContext
                     v => v.Select(r => (int)r).ToArray(),
                     v => v.Select(r => (UserRole)r).ToList())
                 .HasColumnType("integer[]");
+            // Configure SelectedAgeGroupIds as PostgreSQL text array
+            e.Property(x => x.SelectedAgeGroupIds)
+                .HasConversion(
+                    v => v == null || v.Count == 0 ? null : v.ToArray(),
+                    v => v == null ? null : v.ToList())
+                .HasColumnType("text[]");
             e.Property(x => x.Email).HasMaxLength(256).IsRequired();
             e.Property(x => x.Auth0Id).HasMaxLength(256).IsRequired();
             e.Property(x => x.Picture).HasMaxLength(512);
