@@ -27,10 +27,10 @@ public class SaveStoryEpicEndpoint
         _logger = logger;
     }
 
-    [Route("/api/{locale}/story-editor/epics/{epicId}")]
+    // Route without locale - middleware UseLocaleInApiPath() strips locale from path before routing
+    [Route("/api/story-editor/epics/{epicId}")]
     [Authorize]
     public static async Task<Results<Ok, BadRequest<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePut(
-        [FromRoute] string locale,
         [FromRoute] string epicId,
         [FromServices] SaveStoryEpicEndpoint ep,
         [FromBody] StoryEpicDto dto,

@@ -26,10 +26,10 @@ public class DeleteStoryEpicEndpoint
         _logger = logger;
     }
 
-    [Route("/api/{locale}/story-editor/epics/{epicId}")]
+    // Route without locale - middleware UseLocaleInApiPath() strips locale from path before routing
+    [Route("/api/story-editor/epics/{epicId}")]
     [Authorize]
     public static async Task<Results<Ok, NotFound, BadRequest<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandleDelete(
-        [FromRoute] string locale,
         [FromRoute] string epicId,
         [FromServices] DeleteStoryEpicEndpoint ep,
         CancellationToken ct)
