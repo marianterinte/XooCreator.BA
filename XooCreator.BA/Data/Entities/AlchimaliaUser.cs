@@ -17,4 +17,14 @@ public class AlchimaliaUser
     public DateTime LastLoginAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     public bool HasVisitedImaginationLaboratory { get; set; }
+    
+    /// <summary>
+    /// Array of age group IDs selected by parent for filtering stories (e.g., ["preschool_3_5", "early_school_6_8"])
+    /// </summary>
+    public List<string>? SelectedAgeGroupIds { get; set; }
+    
+    /// <summary>
+    /// If true, marketplace will automatically filter stories to show only those matching selected age groups
+    /// </summary>
+    public bool AutoFilterStoriesByAge { get; set; } = false;
 }

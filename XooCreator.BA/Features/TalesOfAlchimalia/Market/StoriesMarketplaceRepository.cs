@@ -64,10 +64,18 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         
         try
         {
+            // Get user preferences for age filtering
+            var user = await _context.AlchimaliaUsers
+                .Where(u => u.Id == userId)
+                .Select(u => new { u.AutoFilterStoriesByAge, u.SelectedAgeGroupIds })
+                .FirstOrDefaultAsync();
+
             var query = _context.StoryDefinitions
                 .Include(s => s.Translations)
                 .Include(s => s.Topics)
                     .ThenInclude(t => t.StoryTopic)
+                .Include(s => s.AgeGroups)
+                    .ThenInclude(ag => ag.StoryAgeGroup)
                 .Where(s => s.IsActive);
 
             // Filtre implicite: doar Published + StoryType = Indie (dacă nu s-au cerut categorii specifice)
@@ -89,6 +97,14 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             if (request.IsEvaluative.HasValue)
             {
                 query = query.Where(s => s.IsEvaluative == request.IsEvaluative.Value);
+            }
+
+            // Auto-filter by age groups if enabled in parent dashboard
+            if (user != null && user.AutoFilterStoriesByAge && user.SelectedAgeGroupIds != null && user.SelectedAgeGroupIds.Count > 0)
+            {
+                query = query.Where(s => s.AgeGroups.Any(ag => 
+                    ag.StoryAgeGroup != null && 
+                    user.SelectedAgeGroupIds.Contains(ag.StoryAgeGroup.AgeGroupId)));
             }
 
             // Apply search filter - search in Title and Translations.Title (case-insensitive)
@@ -175,10 +191,18 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
     {
         var normalizedLocale = (locale ?? "ro-ro").ToLowerInvariant();
         
+        // Get user preferences for age filtering
+        var user = await _context.AlchimaliaUsers
+            .Where(u => u.Id == userId)
+            .Select(u => new { u.AutoFilterStoriesByAge, u.SelectedAgeGroupIds })
+            .FirstOrDefaultAsync();
+        
         var query = _context.StoryDefinitions
             .Include(s => s.Translations)
             .Include(s => s.Topics)
                 .ThenInclude(t => t.StoryTopic)
+            .Include(s => s.AgeGroups)
+                .ThenInclude(ag => ag.StoryAgeGroup)
             .Where(s => s.IsActive);
 
         // Filtre implicite: doar Published + StoryType = Indie (dacă nu s-au cerut categorii specifice)
@@ -200,6 +224,14 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         if (request.IsEvaluative.HasValue)
         {
             query = query.Where(s => s.IsEvaluative == request.IsEvaluative.Value);
+        }
+
+        // Auto-filter by age groups if enabled in parent dashboard
+        if (user != null && user.AutoFilterStoriesByAge && user.SelectedAgeGroupIds != null && user.SelectedAgeGroupIds.Count > 0)
+        {
+            query = query.Where(s => s.AgeGroups.Any(ag => 
+                ag.StoryAgeGroup != null && 
+                user.SelectedAgeGroupIds.Contains(ag.StoryAgeGroup.AgeGroupId)));
         }
 
         // Apply search filter - search in Title and Translations.Title (case-insensitive)
@@ -252,11 +284,29 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         // Normalize locale to lowercase (e.g., "ro-RO" -> "ro-ro") to match database LanguageCode format
         var normalizedLocale = (locale ?? "ro-ro").ToLowerInvariant();
         
-        var featuredStories = await _context.StoryDefinitions
+        // Get user preferences for age filtering
+        var user = await _context.AlchimaliaUsers
+            .Where(u => u.Id == userId)
+            .Select(u => new { u.AutoFilterStoriesByAge, u.SelectedAgeGroupIds })
+            .FirstOrDefaultAsync();
+        
+        var query = _context.StoryDefinitions
             .Include(s => s.Translations)
             .Include(s => s.Topics)
                 .ThenInclude(t => t.StoryTopic)
-            .Where(s => s.IsActive && s.Status == StoryStatus.Published)
+            .Include(s => s.AgeGroups)
+                .ThenInclude(ag => ag.StoryAgeGroup)
+            .Where(s => s.IsActive && s.Status == StoryStatus.Published);
+
+        // Auto-filter by age groups if enabled in parent dashboard
+        if (user != null && user.AutoFilterStoriesByAge && user.SelectedAgeGroupIds != null && user.SelectedAgeGroupIds.Count > 0)
+        {
+            query = query.Where(s => s.AgeGroups.Any(ag => 
+                ag.StoryAgeGroup != null && 
+                user.SelectedAgeGroupIds.Contains(ag.StoryAgeGroup.AgeGroupId)));
+        }
+        
+        var featuredStories = await query
             .OrderBy(s => s.SortOrder)
             .Take(5)
             .ToListAsync();

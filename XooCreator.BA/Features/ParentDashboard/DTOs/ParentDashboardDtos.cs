@@ -91,3 +91,32 @@ public record ResetAllProgressResponse
     public int EvaluationResultsDeleted { get; init; }
     public int QuizAnswersDeleted { get; init; }
 }
+
+/// <summary>
+/// Response for getting child age preferences
+/// </summary>
+public record GetChildAgePreferencesResponse
+{
+    public List<string>? SelectedAgeGroupIds { get; init; }
+    public bool AutoFilterStoriesByAge { get; init; }
+}
+
+/// <summary>
+/// Request for updating child age preferences
+/// </summary>
+public record UpdateChildAgePreferencesRequest
+{
+    public List<string>? SelectedAgeGroupIds { get; init; }
+    public bool? AutoFilterStoriesByAge { get; init; }
+}
+
+/// <summary>
+/// Response for updating child age preferences
+/// </summary>
+public record UpdateChildAgePreferencesResponse
+{
+    public bool Success { get; init; }
+    public string? ErrorMessage { get; init; }
+    public List<string>? SelectedAgeGroupIds { get; init; }
+    public bool AutoFilterStoriesByAge { get; init; }
+}
