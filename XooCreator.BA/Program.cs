@@ -7,6 +7,7 @@ using XooCreator.BA.Infrastructure.DependencyInjection;
 using XooCreator.BA.Infrastructure.Configuration;
 using XooCreator.BA.Features.StoryEditor.Services;
 using XooCreator.BA.Infrastructure.Middleware;
+using XooCreator.BA.Infrastructure;
 using XooCreator.DbScriptRunner;
 
 // Store startup exception for display
@@ -78,6 +79,8 @@ app.UseGlobalExceptionHandling();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Locale routing middleware (must be before MapDiscoveredEndpoints)
+app.UseLocaleInApiPath();
 
 // Connectivity check only - schema/scripts handled via XooCreator.DbScriptRunner
 using (var scope = app.Services.CreateScope())
