@@ -96,5 +96,6 @@ Toate endpoint-urile vor fi sub `/api/{locale}/story-editor/epics`:
 ## Note
 
 - Implementarea va urma pattern-urile existente din Story-Editor și TreeOfLight
+- Epicul este „lightweight” la publish (doar referințe), pentru că **stories, heroes și (viitoarele) global regions** vor avea propriul lor flux de draft → review → publish, cu același mecanism de approval ca stories.
 - Vezi `03_STORY_EPIC_IMPLEMENTATION_PLAN.md` pentru detalii complete
 
