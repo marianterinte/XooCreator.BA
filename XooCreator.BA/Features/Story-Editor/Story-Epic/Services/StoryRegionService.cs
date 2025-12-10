@@ -43,6 +43,12 @@ public class StoryRegionService : IStoryRegionService
             CreatedAt = region.CreatedAt,
             UpdatedAt = region.UpdatedAt,
             PublishedAtUtc = region.PublishedAtUtc,
+            AssignedReviewerUserId = region.AssignedReviewerUserId,
+            ReviewedByUserId = region.ReviewedByUserId,
+            ApprovedByUserId = region.ApprovedByUserId,
+            ReviewNotes = region.ReviewNotes,
+            ReviewStartedAt = region.ReviewStartedAt,
+            ReviewEndedAt = region.ReviewEndedAt,
             Translations = region.Translations.Select(t => new StoryRegionTranslationDto
             {
                 LanguageCode = t.LanguageCode,
@@ -75,6 +81,12 @@ public class StoryRegionService : IStoryRegionService
             CreatedAt = region.CreatedAt,
             UpdatedAt = region.UpdatedAt,
             PublishedAtUtc = region.PublishedAtUtc,
+            AssignedReviewerUserId = region.AssignedReviewerUserId,
+            ReviewedByUserId = region.ReviewedByUserId,
+            ApprovedByUserId = region.ApprovedByUserId,
+            ReviewNotes = region.ReviewNotes,
+            ReviewStartedAt = region.ReviewStartedAt,
+            ReviewEndedAt = region.ReviewEndedAt,
             Translations = region.Translations.Select(t => new StoryRegionTranslationDto
             {
                 LanguageCode = t.LanguageCode,
@@ -132,7 +144,7 @@ public class StoryRegionService : IStoryRegionService
         await _repository.SaveAsync(region, ct);
     }
 
-    public async Task<List<StoryRegionListItemDto>> ListRegionsByOwnerAsync(Guid ownerUserId, string? status = null, CancellationToken ct = default)
+    public async Task<List<StoryRegionListItemDto>> ListRegionsByOwnerAsync(Guid ownerUserId, string? status = null, Guid? currentUserId = null, CancellationToken ct = default)
     {
         var regions = await _repository.ListByOwnerAsync(ownerUserId, status, ct);
         return regions.Select(r =>
@@ -140,6 +152,12 @@ public class StoryRegionService : IStoryRegionService
             // Get name from first available translation, fallback to empty
             var firstTranslation = r.Translations.FirstOrDefault();
             var name = firstTranslation?.Name ?? string.Empty;
+            
+            // Compute flags for current user
+            var isOwnedByCurrentUser = currentUserId.HasValue && r.OwnerUserId == currentUserId.Value;
+            var isAssignedToCurrentUser = currentUserId.HasValue && 
+                                          r.AssignedReviewerUserId.HasValue && 
+                                          r.AssignedReviewerUserId.Value == currentUserId.Value;
             
             return new StoryRegionListItemDto
             {
@@ -149,7 +167,10 @@ public class StoryRegionService : IStoryRegionService
                 Status = r.Status,
                 CreatedAt = r.CreatedAt,
                 UpdatedAt = r.UpdatedAt,
-                PublishedAtUtc = r.PublishedAtUtc
+                PublishedAtUtc = r.PublishedAtUtc,
+                AssignedReviewerUserId = r.AssignedReviewerUserId,
+                IsAssignedToCurrentUser = isAssignedToCurrentUser,
+                IsOwnedByCurrentUser = isOwnedByCurrentUser
             };
         }).ToList();
     }
@@ -287,9 +308,17 @@ public class StoryRegionService : IStoryRegionService
             throw new InvalidOperationException($"Cannot retract region. Expected SentForApproval or Approved, got {currentStatus}");
         }
 
+        // Clear all review-related fields and revert to Draft (similar to RetractStoryEndpoint)
         region.Status = StoryStatus.Draft.ToDb();
         region.AssignedReviewerUserId = null;
         region.ReviewNotes = null;
+        region.ReviewStartedAt = null;
+        region.ReviewEndedAt = null;
+        if (currentStatus == StoryStatus.Approved)
+        {
+            region.ApprovedByUserId = null;
+        }
+        region.ReviewedByUserId = null; // Reset reviewed by as well
         region.UpdatedAt = DateTime.UtcNow;
 
         await _repository.SaveAsync(region, ct);

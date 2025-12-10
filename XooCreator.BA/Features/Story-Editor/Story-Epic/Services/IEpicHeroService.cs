@@ -15,7 +15,7 @@ public interface IEpicHeroService
     Task SaveHeroAsync(Guid ownerUserId, string heroId, EpicHeroDto dto, CancellationToken ct = default);
     
     // List heroes by owner
-    Task<List<EpicHeroListItemDto>> ListHeroesByOwnerAsync(Guid ownerUserId, string? status = null, CancellationToken ct = default);
+    Task<List<EpicHeroListItemDto>> ListHeroesByOwnerAsync(Guid ownerUserId, string? status = null, Guid? currentUserId = null, CancellationToken ct = default);
     
     // Delete hero
     Task DeleteHeroAsync(Guid ownerUserId, string heroId, CancellationToken ct = default);

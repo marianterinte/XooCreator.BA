@@ -15,7 +15,7 @@ public interface IStoryRegionService
     Task SaveRegionAsync(Guid ownerUserId, string regionId, StoryRegionDto dto, CancellationToken ct = default);
     
     // List regions by owner
-    Task<List<StoryRegionListItemDto>> ListRegionsByOwnerAsync(Guid ownerUserId, string? status = null, CancellationToken ct = default);
+    Task<List<StoryRegionListItemDto>> ListRegionsByOwnerAsync(Guid ownerUserId, string? status = null, Guid? currentUserId = null, CancellationToken ct = default);
     
     // Delete region
     Task DeleteRegionAsync(Guid ownerUserId, string regionId, CancellationToken ct = default);

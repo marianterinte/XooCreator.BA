@@ -44,6 +44,12 @@ public class EpicHeroService : IEpicHeroService
             CreatedAt = hero.CreatedAt,
             UpdatedAt = hero.UpdatedAt,
             PublishedAtUtc = hero.PublishedAtUtc,
+            AssignedReviewerUserId = hero.AssignedReviewerUserId,
+            ReviewedByUserId = hero.ReviewedByUserId,
+            ApprovedByUserId = hero.ApprovedByUserId,
+            ReviewNotes = hero.ReviewNotes,
+            ReviewStartedAt = hero.ReviewStartedAt,
+            ReviewEndedAt = hero.ReviewEndedAt,
             Translations = hero.Translations.Select(t => new EpicHeroTranslationDto
             {
                 LanguageCode = t.LanguageCode,
@@ -77,6 +83,12 @@ public class EpicHeroService : IEpicHeroService
             CreatedAt = hero.CreatedAt,
             UpdatedAt = hero.UpdatedAt,
             PublishedAtUtc = hero.PublishedAtUtc,
+            AssignedReviewerUserId = hero.AssignedReviewerUserId,
+            ReviewedByUserId = hero.ReviewedByUserId,
+            ApprovedByUserId = hero.ApprovedByUserId,
+            ReviewNotes = hero.ReviewNotes,
+            ReviewStartedAt = hero.ReviewStartedAt,
+            ReviewEndedAt = hero.ReviewEndedAt,
             Translations = hero.Translations.Select(t => new EpicHeroTranslationDto
             {
                 LanguageCode = t.LanguageCode,
@@ -135,7 +147,7 @@ public class EpicHeroService : IEpicHeroService
         await _repository.SaveAsync(hero, ct);
     }
 
-    public async Task<List<EpicHeroListItemDto>> ListHeroesByOwnerAsync(Guid ownerUserId, string? status = null, CancellationToken ct = default)
+    public async Task<List<EpicHeroListItemDto>> ListHeroesByOwnerAsync(Guid ownerUserId, string? status = null, Guid? currentUserId = null, CancellationToken ct = default)
     {
         var heroes = await _repository.ListByOwnerAsync(ownerUserId, status, ct);
         return heroes.Select(h =>
@@ -144,6 +156,12 @@ public class EpicHeroService : IEpicHeroService
             var firstTranslation = h.Translations.FirstOrDefault();
             var name = firstTranslation?.Name ?? string.Empty;
             var greetingText = firstTranslation?.GreetingText;
+            
+            // Compute flags for current user
+            var isOwnedByCurrentUser = currentUserId.HasValue && h.OwnerUserId == currentUserId.Value;
+            var isAssignedToCurrentUser = currentUserId.HasValue && 
+                                          h.AssignedReviewerUserId.HasValue && 
+                                          h.AssignedReviewerUserId.Value == currentUserId.Value;
             
             return new EpicHeroListItemDto
             {
@@ -155,7 +173,10 @@ public class EpicHeroService : IEpicHeroService
                 Status = h.Status,
                 CreatedAt = h.CreatedAt,
                 UpdatedAt = h.UpdatedAt,
-                PublishedAtUtc = h.PublishedAtUtc
+                PublishedAtUtc = h.PublishedAtUtc,
+                AssignedReviewerUserId = h.AssignedReviewerUserId,
+                IsAssignedToCurrentUser = isAssignedToCurrentUser,
+                IsOwnedByCurrentUser = isOwnedByCurrentUser
             };
         }).ToList();
     }
@@ -300,9 +321,17 @@ public class EpicHeroService : IEpicHeroService
             throw new InvalidOperationException($"Cannot retract hero. Expected SentForApproval or Approved, got {currentStatus}");
         }
 
+        // Clear all review-related fields and revert to Draft (similar to RetractStoryEndpoint)
         hero.Status = StoryStatus.Draft.ToDb();
         hero.AssignedReviewerUserId = null;
         hero.ReviewNotes = null;
+        hero.ReviewStartedAt = null;
+        hero.ReviewEndedAt = null;
+        if (currentStatus == StoryStatus.Approved)
+        {
+            hero.ApprovedByUserId = null;
+        }
+        hero.ReviewedByUserId = null; // Reset reviewed by as well
         hero.UpdatedAt = DateTime.UtcNow;
 
         await _repository.SaveAsync(hero, ct);

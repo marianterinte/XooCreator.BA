@@ -23,6 +23,14 @@ public record EpicHeroDto
     public DateTime UpdatedAt { get; init; }
     public DateTime? PublishedAtUtc { get; init; }
     
+    // Review workflow fields (similar to StoryCraft/EditableStoryDto)
+    public Guid? AssignedReviewerUserId { get; init; }
+    public Guid? ReviewedByUserId { get; init; }
+    public Guid? ApprovedByUserId { get; init; }
+    public string? ReviewNotes { get; init; }
+    public DateTime? ReviewStartedAt { get; init; }
+    public DateTime? ReviewEndedAt { get; init; }
+    
     // Translations per language
     public List<EpicHeroTranslationDto> Translations { get; init; } = new();
     
@@ -55,5 +63,10 @@ public record EpicHeroListItemDto
     public DateTime CreatedAt { get; init; }
     public DateTime UpdatedAt { get; init; }
     public DateTime? PublishedAtUtc { get; init; }
+    
+    // Review workflow fields for list display
+    public Guid? AssignedReviewerUserId { get; init; }
+    public bool IsAssignedToCurrentUser { get; init; } // Computed in service based on current user
+    public bool IsOwnedByCurrentUser { get; init; } // Computed in service based on current user
 }
 
