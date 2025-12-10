@@ -46,6 +46,14 @@ public class XooDbContext : DbContext
     public DbSet<StoryEpicStoryNode> StoryEpicStoryNodes => Set<StoryEpicStoryNode>();
     public DbSet<StoryEpicUnlockRule> StoryEpicUnlockRules => Set<StoryEpicUnlockRule>();
     
+    // Story Epic - Independent Regions and Heroes
+    public DbSet<StoryRegion> StoryRegions => Set<StoryRegion>();
+    public DbSet<StoryRegionTranslation> StoryRegionTranslations => Set<StoryRegionTranslation>();
+    public DbSet<EpicHero> EpicHeroes => Set<EpicHero>();
+    public DbSet<EpicHeroTranslation> EpicHeroTranslations => Set<EpicHeroTranslation>();
+    public DbSet<StoryEpicRegionReference> StoryEpicRegionReferences => Set<StoryEpicRegionReference>();
+    public DbSet<StoryEpicHeroReference> StoryEpicHeroReferences => Set<StoryEpicHeroReference>();
+    
     public DbSet<StoryDefinition> StoryDefinitions => Set<StoryDefinition>();
     public DbSet<StoryDefinitionTranslation> StoryDefinitionTranslations => Set<StoryDefinitionTranslation>();
     public DbSet<StoryTile> StoryTiles => Set<StoryTile>();
@@ -483,6 +491,78 @@ public class XooDbContext : DbContext
             e.Property(x => x.FromId).HasMaxLength(100).IsRequired();
             e.Property(x => x.ToRegionId).HasMaxLength(50).IsRequired();
             e.HasOne(x => x.Epic).WithMany(x => x.UnlockRules).HasForeignKey(x => x.EpicId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // StoryRegion - Independent region entity
+        modelBuilder.Entity<StoryRegion>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasMaxLength(100).IsRequired();
+            e.Property(x => x.Name).HasMaxLength(200).IsRequired();
+            e.Property(x => x.Status).HasMaxLength(20).IsRequired();
+            e.HasIndex(x => new { x.OwnerUserId, x.Id }).IsUnique();
+            e.HasOne(x => x.Owner).WithMany().HasForeignKey(x => x.OwnerUserId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // StoryRegionTranslation - Translations for StoryRegion
+        modelBuilder.Entity<StoryRegionTranslation>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.StoryRegionId).HasMaxLength(100).IsRequired();
+            e.Property(x => x.LanguageCode).HasMaxLength(10).IsRequired();
+            e.Property(x => x.Name).HasMaxLength(200).IsRequired();
+            e.HasIndex(x => new { x.StoryRegionId, x.LanguageCode }).IsUnique();
+            e.HasOne(x => x.StoryRegion).WithMany(x => x.Translations).HasForeignKey(x => x.StoryRegionId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // EpicHero - Independent hero entity for epics
+        modelBuilder.Entity<EpicHero>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasMaxLength(100).IsRequired();
+            e.Property(x => x.Name).HasMaxLength(200).IsRequired();
+            e.Property(x => x.Status).HasMaxLength(20).IsRequired();
+            e.HasIndex(x => new { x.OwnerUserId, x.Id }).IsUnique();
+            e.HasOne(x => x.Owner).WithMany().HasForeignKey(x => x.OwnerUserId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // EpicHeroTranslation - Translations for EpicHero
+        modelBuilder.Entity<EpicHeroTranslation>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.EpicHeroId).HasMaxLength(100).IsRequired();
+            e.Property(x => x.LanguageCode).HasMaxLength(10).IsRequired();
+            e.Property(x => x.Name).HasMaxLength(200).IsRequired();
+            e.Property(x => x.GreetingText).HasMaxLength(1000);
+            e.HasIndex(x => new { x.EpicHeroId, x.LanguageCode }).IsUnique();
+            e.HasOne(x => x.EpicHero).WithMany(x => x.Translations).HasForeignKey(x => x.EpicHeroId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // StoryEpicRegionReference - Junction table linking StoryRegion to StoryEpic
+        modelBuilder.Entity<StoryEpicRegionReference>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.EpicId).HasMaxLength(100).IsRequired();
+            e.Property(x => x.RegionId).HasMaxLength(100).IsRequired();
+            e.HasIndex(x => new { x.EpicId, x.RegionId }).IsUnique();
+            e.HasOne(x => x.Epic).WithMany().HasForeignKey(x => x.EpicId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.Region).WithMany(x => x.EpicReferences).HasForeignKey(x => x.RegionId).OnDelete(DeleteBehavior.Restrict); // Prevent deletion if used in epics
+        });
+
+        // StoryEpicHeroReference - Junction table linking EpicHero to StoryEpic
+        modelBuilder.Entity<StoryEpicHeroReference>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.EpicId).HasMaxLength(100).IsRequired();
+            e.Property(x => x.HeroId).HasMaxLength(100).IsRequired();
+            e.Property(x => x.StoryId).HasMaxLength(200);
+            e.HasIndex(x => new { x.EpicId, x.HeroId }).IsUnique();
+            e.HasOne(x => x.Epic).WithMany().HasForeignKey(x => x.EpicId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.Hero).WithMany(x => x.EpicReferences).HasForeignKey(x => x.HeroId).OnDelete(DeleteBehavior.Restrict); // Prevent deletion if used in epics
         });
 
         modelBuilder.Entity<TreeConfiguration>(e =>

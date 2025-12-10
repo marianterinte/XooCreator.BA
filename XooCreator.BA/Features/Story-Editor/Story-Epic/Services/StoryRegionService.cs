@@ -1,0 +1,352 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
+using XooCreator.BA.Data;
+using XooCreator.BA.Data.Enums;
+using XooCreator.BA.Features.StoryEditor.StoryEpic.DTOs;
+using XooCreator.BA.Features.StoryEditor.StoryEpic.Repositories;
+using XooCreator.BA.Infrastructure.Services.Blob;
+using Azure.Storage.Blobs;
+using Azure.Storage.Sas;
+using System.IO;
+
+namespace XooCreator.BA.Features.StoryEditor.StoryEpic.Services;
+
+public class StoryRegionService : IStoryRegionService
+{
+    private readonly IStoryRegionRepository _repository;
+    private readonly XooDbContext _context;
+    private readonly IBlobSasService _blobSas;
+    private readonly ILogger<StoryRegionService> _logger;
+
+    public StoryRegionService(
+        IStoryRegionRepository repository,
+        XooDbContext context,
+        IBlobSasService blobSas,
+        ILogger<StoryRegionService> logger)
+    {
+        _repository = repository;
+        _context = context;
+        _blobSas = blobSas;
+        _logger = logger;
+    }
+
+    public async Task<StoryRegionDto?> GetRegionAsync(string regionId, CancellationToken ct = default)
+    {
+        var region = await _repository.GetAsync(regionId, ct);
+        if (region == null) return null;
+
+        return new StoryRegionDto
+        {
+            Id = region.Id,
+            ImageUrl = region.ImageUrl,
+            Status = region.Status,
+            CreatedAt = region.CreatedAt,
+            UpdatedAt = region.UpdatedAt,
+            PublishedAtUtc = region.PublishedAtUtc,
+            Translations = region.Translations.Select(t => new StoryRegionTranslationDto
+            {
+                LanguageCode = t.LanguageCode,
+                Name = t.Name,
+                Description = t.Description
+            }).ToList()
+        };
+    }
+
+    public async Task<StoryRegionDto> CreateRegionAsync(Guid ownerUserId, string regionId, string name, CancellationToken ct = default)
+    {
+        var region = await _repository.CreateAsync(ownerUserId, regionId, name, ct);
+        
+        // Create default translation (ro-ro) with the provided name
+        var defaultTranslation = new StoryRegionTranslation
+        {
+            Id = Guid.NewGuid(),
+            StoryRegionId = region.Id,
+            LanguageCode = "ro-ro",
+            Name = name
+        };
+        region.Translations.Add(defaultTranslation);
+        await _repository.SaveAsync(region, ct);
+        
+        return new StoryRegionDto
+        {
+            Id = region.Id,
+            ImageUrl = region.ImageUrl,
+            Status = region.Status,
+            CreatedAt = region.CreatedAt,
+            UpdatedAt = region.UpdatedAt,
+            PublishedAtUtc = region.PublishedAtUtc,
+            Translations = region.Translations.Select(t => new StoryRegionTranslationDto
+            {
+                LanguageCode = t.LanguageCode,
+                Name = t.Name,
+                Description = t.Description
+            }).ToList()
+        };
+    }
+
+    public async Task SaveRegionAsync(Guid ownerUserId, string regionId, StoryRegionDto dto, CancellationToken ct = default)
+    {
+        var region = await _repository.GetAsync(regionId, ct);
+        if (region == null)
+        {
+            throw new InvalidOperationException($"Region '{regionId}' not found");
+        }
+
+        if (region.OwnerUserId != ownerUserId)
+        {
+            throw new UnauthorizedAccessException($"User does not own region '{regionId}'");
+        }
+
+        // Update properties (non-translatable)
+        region.ImageUrl = dto.ImageUrl;
+        region.UpdatedAt = DateTime.UtcNow;
+
+        // Update translations
+        if (dto.Translations != null && dto.Translations.Count > 0)
+        {
+            foreach (var translationDto in dto.Translations)
+            {
+                var lang = translationDto.LanguageCode.ToLowerInvariant();
+                var translation = region.Translations.FirstOrDefault(t => t.LanguageCode == lang);
+                
+                if (translation == null)
+                {
+                    translation = new StoryRegionTranslation
+                    {
+                        Id = Guid.NewGuid(),
+                        StoryRegionId = region.Id,
+                        LanguageCode = lang,
+                        Name = translationDto.Name,
+                        Description = translationDto.Description
+                    };
+                    _context.StoryRegionTranslations.Add(translation);
+                }
+                else
+                {
+                    translation.Name = translationDto.Name;
+                    translation.Description = translationDto.Description;
+                }
+            }
+        }
+
+        await _repository.SaveAsync(region, ct);
+    }
+
+    public async Task<List<StoryRegionListItemDto>> ListRegionsByOwnerAsync(Guid ownerUserId, string? status = null, CancellationToken ct = default)
+    {
+        var regions = await _repository.ListByOwnerAsync(ownerUserId, status, ct);
+        return regions.Select(r =>
+        {
+            // Get name from first available translation, fallback to empty
+            var firstTranslation = r.Translations.FirstOrDefault();
+            var name = firstTranslation?.Name ?? string.Empty;
+            
+            return new StoryRegionListItemDto
+            {
+                Id = r.Id,
+                Name = name,
+                ImageUrl = r.ImageUrl,
+                Status = r.Status,
+                CreatedAt = r.CreatedAt,
+                UpdatedAt = r.UpdatedAt,
+                PublishedAtUtc = r.PublishedAtUtc
+            };
+        }).ToList();
+    }
+
+    public async Task DeleteRegionAsync(Guid ownerUserId, string regionId, CancellationToken ct = default)
+    {
+        var region = await _repository.GetAsync(regionId, ct);
+        if (region == null)
+        {
+            throw new InvalidOperationException($"Region '{regionId}' not found");
+        }
+
+        if (region.OwnerUserId != ownerUserId)
+        {
+            throw new UnauthorizedAccessException($"User does not own region '{regionId}'");
+        }
+
+        // Check if region is used in any epic
+        var isUsed = await _repository.IsUsedInEpicsAsync(regionId, ct);
+        if (isUsed && region.Status == "published")
+        {
+            throw new InvalidOperationException($"Cannot delete published region '{regionId}' that is used in epics");
+        }
+
+        await _repository.DeleteAsync(regionId, ct);
+    }
+
+    public async Task SubmitForReviewAsync(Guid ownerUserId, string regionId, CancellationToken ct = default)
+    {
+        var region = await _repository.GetAsync(regionId, ct);
+        if (region == null)
+        {
+            throw new InvalidOperationException($"Region '{regionId}' not found");
+        }
+
+        if (region.OwnerUserId != ownerUserId)
+        {
+            throw new UnauthorizedAccessException($"User does not own region '{regionId}'");
+        }
+
+        var currentStatus = StoryStatusExtensions.FromDb(region.Status);
+        if (currentStatus != StoryStatus.Draft && currentStatus != StoryStatus.ChangesRequested)
+        {
+            throw new InvalidOperationException($"Invalid state transition. Expected Draft or ChangesRequested, got {currentStatus}");
+        }
+
+        region.Status = StoryStatus.SentForApproval.ToDb();
+        region.AssignedReviewerUserId = null;
+        region.ReviewNotes = null;
+        region.UpdatedAt = DateTime.UtcNow;
+
+        await _repository.SaveAsync(region, ct);
+        _logger.LogInformation("Region submitted for review: regionId={RegionId}", regionId);
+    }
+
+    public async Task ReviewAsync(Guid reviewerUserId, string regionId, bool approve, string? notes, CancellationToken ct = default)
+    {
+        var region = await _repository.GetAsync(regionId, ct);
+        if (region == null)
+        {
+            throw new InvalidOperationException($"Region '{regionId}' not found");
+        }
+
+        var currentStatus = StoryStatusExtensions.FromDb(region.Status);
+        if (currentStatus != StoryStatus.InReview && currentStatus != StoryStatus.SentForApproval)
+        {
+            throw new InvalidOperationException($"Invalid state transition. Expected InReview or SentForApproval, got {currentStatus}");
+        }
+
+        var newStatus = approve ? StoryStatus.Approved : StoryStatus.ChangesRequested;
+        region.Status = newStatus.ToDb();
+        region.ReviewNotes = string.IsNullOrWhiteSpace(notes) ? region.ReviewNotes : notes;
+        region.ReviewEndedAt = DateTime.UtcNow;
+        region.ReviewedByUserId = reviewerUserId;
+        if (approve)
+        {
+            region.ApprovedByUserId = reviewerUserId;
+        }
+        region.UpdatedAt = DateTime.UtcNow;
+
+        await _repository.SaveAsync(region, ct);
+        _logger.LogInformation("Region reviewed: regionId={RegionId} approved={Approve}", regionId, approve);
+    }
+
+    public async Task PublishAsync(Guid ownerUserId, string regionId, string ownerEmail, CancellationToken ct = default)
+    {
+        var region = await _repository.GetAsync(regionId, ct);
+        if (region == null)
+        {
+            throw new InvalidOperationException($"Region '{regionId}' not found");
+        }
+
+        if (region.OwnerUserId != ownerUserId)
+        {
+            throw new UnauthorizedAccessException($"User does not own region '{regionId}'");
+        }
+
+        var currentStatus = StoryStatusExtensions.FromDb(region.Status);
+        if (currentStatus != StoryStatus.Approved)
+        {
+            throw new InvalidOperationException($"Cannot publish region. Expected Approved, got {currentStatus}");
+        }
+
+        // Copy image asset synchronously if exists
+        if (!string.IsNullOrWhiteSpace(region.ImageUrl))
+        {
+            var publishedImageUrl = await PublishImageAsync(regionId, region.ImageUrl, ownerEmail, ct);
+            region.ImageUrl = publishedImageUrl;
+        }
+
+        region.Status = StoryStatus.Published.ToDb();
+        region.PublishedAtUtc = DateTime.UtcNow;
+        region.UpdatedAt = DateTime.UtcNow;
+
+        await _repository.SaveAsync(region, ct);
+        _logger.LogInformation("Region published: regionId={RegionId}", regionId);
+    }
+
+    public async Task RetractAsync(Guid ownerUserId, string regionId, CancellationToken ct = default)
+    {
+        var region = await _repository.GetAsync(regionId, ct);
+        if (region == null)
+        {
+            throw new InvalidOperationException($"Region '{regionId}' not found");
+        }
+
+        if (region.OwnerUserId != ownerUserId)
+        {
+            throw new UnauthorizedAccessException($"User does not own region '{regionId}'");
+        }
+
+        var currentStatus = StoryStatusExtensions.FromDb(region.Status);
+        if (currentStatus != StoryStatus.SentForApproval && currentStatus != StoryStatus.Approved)
+        {
+            throw new InvalidOperationException($"Cannot retract region. Expected SentForApproval or Approved, got {currentStatus}");
+        }
+
+        region.Status = StoryStatus.Draft.ToDb();
+        region.AssignedReviewerUserId = null;
+        region.ReviewNotes = null;
+        region.UpdatedAt = DateTime.UtcNow;
+
+        await _repository.SaveAsync(region, ct);
+        _logger.LogInformation("Region retracted: regionId={RegionId}", regionId);
+    }
+
+    private async Task<string> PublishImageAsync(string regionId, string draftPath, string ownerEmail, CancellationToken ct)
+    {
+        var normalizedPath = NormalizeBlobPath(draftPath);
+        if (IsAlreadyPublished(normalizedPath))
+        {
+            return normalizedPath; // Already published
+        }
+
+        var sourceClient = _blobSas.GetBlobClient(_blobSas.DraftContainer, normalizedPath);
+        if (!await sourceClient.ExistsAsync(ct))
+        {
+            throw new InvalidOperationException($"Draft image '{normalizedPath}' does not exist.");
+        }
+
+        var fileName = Path.GetFileName(normalizedPath);
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            fileName = $"{regionId}-image.png";
+        }
+
+        // Path format: images/regions/{regionId}/{fileName}
+        var destinationPath = $"images/regions/{regionId}/{fileName}";
+        var destinationClient = _blobSas.GetBlobClient(_blobSas.PublishedContainer, destinationPath);
+
+        _logger.LogInformation("Copying region image from {Source} to {Destination}", normalizedPath, destinationPath);
+
+        var sasUri = sourceClient.GenerateSasUri(BlobSasPermissions.Read, DateTimeOffset.UtcNow.AddMinutes(10));
+        var operation = await destinationClient.StartCopyFromUriAsync(sasUri, cancellationToken: ct);
+        await operation.WaitForCompletionAsync(cancellationToken: ct);
+
+        return destinationPath;
+    }
+
+    private static string NormalizeBlobPath(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path)) return string.Empty;
+
+        var trimmed = path.Trim();
+        if (trimmed.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+        {
+            var uri = new Uri(trimmed);
+            trimmed = uri.AbsolutePath.TrimStart('/');
+        }
+
+        return trimmed.TrimStart('/');
+    }
+
+    private static bool IsAlreadyPublished(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path)) return false;
+        return path.StartsWith("images/", StringComparison.OrdinalIgnoreCase);
+    }
+}
+
