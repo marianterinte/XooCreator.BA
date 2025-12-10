@@ -131,6 +131,7 @@ public static class ServiceCollectionExtensions
         // Story Epic Services
         services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Repositories.IStoryEpicRepository, XooCreator.BA.Features.StoryEditor.StoryEpic.Repositories.StoryEpicRepository>();
         services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.IStoryEpicService, XooCreator.BA.Features.StoryEditor.StoryEpic.Services.StoryEpicService>();
+        services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.IStoryEpicPublishingService, XooCreator.BA.Features.StoryEditor.StoryEpic.Services.StoryEpicPublishingService>();
         
         return services;
     }

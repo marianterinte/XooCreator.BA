@@ -6,6 +6,7 @@ public record StoryEpicDto
     public required string Name { get; init; }
     public string? Description { get; init; }
     public string Status { get; init; } = "draft";
+    public DateTime? PublishedAtUtc { get; init; }
     public List<StoryEpicRegionDto> Regions { get; init; } = new();
     public List<StoryEpicStoryNodeDto> Stories { get; init; } = new();
     public List<StoryEpicUnlockRuleDto> Rules { get; init; } = new();
@@ -80,7 +81,29 @@ public record StoryEpicListItemDto
     public string Status { get; init; } = "draft";
     public DateTime CreatedAt { get; init; }
     public DateTime UpdatedAt { get; init; }
+    public DateTime? PublishedAtUtc { get; init; }
     public int StoryCount { get; init; }
     public int RegionCount { get; init; }
 }
+
+public record StoryEpicStoryOptionDto
+{
+    public required string StoryId { get; init; }
+    public required string Title { get; init; }
+    public string? CoverImageUrl { get; init; }
+}
+
+public record GetStoryEpicStoryOptionsResponse
+{
+    public List<StoryEpicStoryOptionDto> Stories { get; init; } = new();
+}
+
+public record StoryEpicPublishResponse
+{
+    public required string EpicId { get; init; }
+    public required string Status { get; init; }
+    public DateTime? PublishedAtUtc { get; init; }
+}
+
+
 

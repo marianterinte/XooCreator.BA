@@ -10,6 +10,7 @@ public class StoryEpic
     public bool IsDefault { get; set; } = false;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? PublishedAtUtc { get; set; }
     
     // Navigation properties
     public AlchimaliaUser Owner { get; set; } = null!;

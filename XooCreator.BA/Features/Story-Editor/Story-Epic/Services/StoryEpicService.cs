@@ -92,6 +92,7 @@ public class StoryEpicService : IStoryEpicService
             Status = e.Status,
             CreatedAt = e.CreatedAt,
             UpdatedAt = e.UpdatedAt,
+            PublishedAtUtc = e.PublishedAtUtc,
             StoryCount = e.StoryNodes.Count,
             RegionCount = e.Regions.Count
         }).ToList();
@@ -122,6 +123,7 @@ public class StoryEpicService : IStoryEpicService
             Name = epic.Name,
             Description = epic.Description,
             Status = epic.Status,
+            PublishedAtUtc = epic.PublishedAtUtc,
             Regions = epic.Regions.Select(r => new StoryEpicRegionDto
             {
                 Id = r.RegionId,
