@@ -108,6 +108,24 @@ public class StoryRegionRepository : IStoryRegionRepository
             .ToListAsync(ct);
     }
 
+    public async Task<List<StoryRegion>> ListPublishedAsync(Guid? excludeOwnerId = null, CancellationToken ct = default)
+    {
+        var query = _context.StoryRegions
+            .Where(x => x.Status == "published")
+            .AsQueryable();
+
+        if (excludeOwnerId.HasValue)
+        {
+            var ownerId = excludeOwnerId.Value;
+            query = query.Where(x => x.OwnerUserId != ownerId);
+        }
+
+        return await query
+            .Include(x => x.Translations)
+            .OrderByDescending(x => x.UpdatedAt)
+            .ToListAsync(ct);
+    }
+
     public async Task DeleteAsync(string regionId, CancellationToken ct = default)
     {
         var id = (regionId ?? string.Empty).Trim();

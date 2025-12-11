@@ -8,6 +8,7 @@ using XooCreator.BA.Infrastructure.Services.Blob;
 using Azure.Storage.Blobs;
 using Azure.Storage.Sas;
 using System.IO;
+using System.Linq;
 
 namespace XooCreator.BA.Features.StoryEditor.StoryEpic.Services;
 
@@ -155,32 +156,31 @@ public class StoryRegionService : IStoryRegionService
     public async Task<List<StoryRegionListItemDto>> ListRegionsByOwnerAsync(Guid ownerUserId, string? status = null, Guid? currentUserId = null, CancellationToken ct = default)
     {
         var regions = await _repository.ListByOwnerAsync(ownerUserId, status, ct);
-        return regions.Select(r =>
+        return regions.Select(r => MapToListItem(r, currentUserId)).ToList();
+    }
+
+    public async Task<List<StoryRegionListItemDto>> ListRegionsForEditorAsync(Guid currentUserId, string? status = null, CancellationToken ct = default)
+    {
+        var ownedRegions = await _repository.ListByOwnerAsync(currentUserId, status, ct);
+        var publishedRegions = await _repository.ListPublishedAsync(currentUserId, ct);
+
+        var combined = new Dictionary<string, StoryRegion>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var region in ownedRegions)
         {
-            // Get name from first available translation, fallback to empty
-            var firstTranslation = r.Translations.FirstOrDefault();
-            var name = firstTranslation?.Name ?? string.Empty;
-            
-            // Compute flags for current user
-            var isOwnedByCurrentUser = currentUserId.HasValue && r.OwnerUserId == currentUserId.Value;
-            var isAssignedToCurrentUser = currentUserId.HasValue && 
-                                          r.AssignedReviewerUserId.HasValue && 
-                                          r.AssignedReviewerUserId.Value == currentUserId.Value;
-            
-            return new StoryRegionListItemDto
-            {
-                Id = r.Id,
-                Name = name,
-                ImageUrl = r.ImageUrl,
-                Status = r.Status,
-                CreatedAt = r.CreatedAt,
-                UpdatedAt = r.UpdatedAt,
-                PublishedAtUtc = r.PublishedAtUtc,
-                AssignedReviewerUserId = r.AssignedReviewerUserId,
-                IsAssignedToCurrentUser = isAssignedToCurrentUser,
-                IsOwnedByCurrentUser = isOwnedByCurrentUser
-            };
-        }).ToList();
+            combined[region.Id] = region;
+        }
+
+        foreach (var region in publishedRegions)
+        {
+            combined[region.Id] = region;
+        }
+
+        return combined.Values
+            .Select(r => MapToListItem(r, currentUserId))
+            .OrderByDescending(r => r.IsOwnedByCurrentUser)
+            .ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
+            .ToList();
     }
 
     public async Task DeleteRegionAsync(Guid ownerUserId, string regionId, CancellationToken ct = default)
@@ -196,9 +196,22 @@ public class StoryRegionService : IStoryRegionService
             throw new UnauthorizedAccessException($"User does not own region '{regionId}'");
         }
 
-        // Check if region is used in any epic
+        var currentStatus = StoryStatusExtensions.FromDb(region.Status);
+
+        // Only allow deletion of draft or changes_requested regions
+        if (currentStatus != StoryStatus.Draft && currentStatus != StoryStatus.ChangesRequested)
+        {
+            var statusName = currentStatus.ToString();
+            if (currentStatus == StoryStatus.SentForApproval || currentStatus == StoryStatus.InReview || currentStatus == StoryStatus.Approved)
+            {
+                throw new InvalidOperationException($"Cannot delete region '{regionId}' while it is in '{statusName}' status. Please retract it first to move it back to Draft.");
+            }
+            throw new InvalidOperationException($"Cannot delete region '{regionId}' in '{statusName}' status.");
+        }
+
+        // Check if region is used in any epic (for extra safety)
         var isUsed = await _repository.IsUsedInEpicsAsync(regionId, ct);
-        if (isUsed && region.Status == "published")
+        if (isUsed && currentStatus == StoryStatus.Published)
         {
             throw new InvalidOperationException($"Cannot delete published region '{regionId}' that is used in epics");
         }
@@ -331,6 +344,31 @@ public class StoryRegionService : IStoryRegionService
 
         await _repository.SaveAsync(region, ct);
         _logger.LogInformation("Region retracted: regionId={RegionId}", regionId);
+    }
+
+    private StoryRegionListItemDto MapToListItem(StoryRegion region, Guid? currentUserId)
+    {
+        var firstTranslation = region.Translations.FirstOrDefault();
+        var name = firstTranslation?.Name ?? region.Name ?? string.Empty;
+
+        var isOwnedByCurrentUser = currentUserId.HasValue && region.OwnerUserId == currentUserId.Value;
+        var isAssignedToCurrentUser = currentUserId.HasValue &&
+                                      region.AssignedReviewerUserId.HasValue &&
+                                      region.AssignedReviewerUserId.Value == currentUserId.Value;
+
+        return new StoryRegionListItemDto
+        {
+            Id = region.Id,
+            Name = name,
+            ImageUrl = region.ImageUrl,
+            Status = region.Status,
+            CreatedAt = region.CreatedAt,
+            UpdatedAt = region.UpdatedAt,
+            PublishedAtUtc = region.PublishedAtUtc,
+            AssignedReviewerUserId = region.AssignedReviewerUserId,
+            IsAssignedToCurrentUser = isAssignedToCurrentUser,
+            IsOwnedByCurrentUser = isOwnedByCurrentUser
+        };
     }
 
     private async Task<string> PublishImageAsync(string regionId, string draftPath, string ownerEmail, CancellationToken ct)

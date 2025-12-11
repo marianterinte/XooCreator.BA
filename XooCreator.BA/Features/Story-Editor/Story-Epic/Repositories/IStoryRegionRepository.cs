@@ -15,6 +15,9 @@ public interface IStoryRegionRepository
     
     // List regions by owner (with optional status filter)
     Task<List<StoryRegion>> ListByOwnerAsync(Guid ownerUserId, string? status = null, CancellationToken ct = default);
+
+    // List published regions (optionally excluding an owner)
+    Task<List<StoryRegion>> ListPublishedAsync(Guid? excludeOwnerId = null, CancellationToken ct = default);
     
     // Delete region
     Task DeleteAsync(string regionId, CancellationToken ct = default);

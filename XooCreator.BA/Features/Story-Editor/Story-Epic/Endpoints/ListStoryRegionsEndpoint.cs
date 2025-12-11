@@ -36,7 +36,7 @@ public class ListStoryRegionsEndpoint
         var user = await ep._auth0.GetCurrentUserAsync(ct);
         if (user == null) return TypedResults.Unauthorized();
 
-        var regions = await ep._regionService.ListRegionsByOwnerAsync(user.Id, status, user.Id, ct);
+        var regions = await ep._regionService.ListRegionsForEditorAsync(user.Id, status, ct);
         return TypedResults.Ok(regions);
     }
 }
