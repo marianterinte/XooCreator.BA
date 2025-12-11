@@ -126,6 +126,15 @@ public class StoryRegionRepository : IStoryRegionRepository
             .ToListAsync(ct);
     }
 
+    public async Task<List<StoryRegion>> ListForReviewAsync(CancellationToken ct = default)
+    {
+        return await _context.StoryRegions
+            .Where(x => x.Status == "sent_for_approval" || x.Status == "in_review")
+            .Include(x => x.Translations)
+            .OrderByDescending(x => x.UpdatedAt)
+            .ToListAsync(ct);
+    }
+
     public async Task DeleteAsync(string regionId, CancellationToken ct = default)
     {
         var id = (regionId ?? string.Empty).Trim();

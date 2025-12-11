@@ -19,6 +19,9 @@ public interface IStoryRegionRepository
     // List published regions (optionally excluding an owner)
     Task<List<StoryRegion>> ListPublishedAsync(Guid? excludeOwnerId = null, CancellationToken ct = default);
     
+    // List regions for review (sent_for_approval or in_review status)
+    Task<List<StoryRegion>> ListForReviewAsync(CancellationToken ct = default);
+    
     // Delete region
     Task DeleteAsync(string regionId, CancellationToken ct = default);
     

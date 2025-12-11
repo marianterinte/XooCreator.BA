@@ -163,6 +163,7 @@ public class StoryRegionService : IStoryRegionService
     {
         var ownedRegions = await _repository.ListByOwnerAsync(currentUserId, status, ct);
         var publishedRegions = await _repository.ListPublishedAsync(currentUserId, ct);
+        var regionsForReview = await _repository.ListForReviewAsync(ct);
 
         var combined = new Dictionary<string, StoryRegion>(StringComparer.OrdinalIgnoreCase);
 
@@ -174,6 +175,15 @@ public class StoryRegionService : IStoryRegionService
         foreach (var region in publishedRegions)
         {
             combined[region.Id] = region;
+        }
+
+        // Include regions sent_for_approval and in_review (for reviewers)
+        foreach (var region in regionsForReview)
+        {
+            if (!combined.ContainsKey(region.Id))
+            {
+                combined[region.Id] = region;
+            }
         }
 
         return combined.Values

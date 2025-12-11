@@ -83,28 +83,10 @@ public class StoryEpicRepository : IStoryEpicRepository
 
         epic.UpdatedAt = DateTime.UtcNow;
 
-        // Check if epic exists
-        var existing = await _context.StoryEpics
-            .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Id == epic.Id, ct);
-
-        if (existing == null)
-        {
-            // New epic - add to context
-            if (epic.CreatedAt == default)
-            {
-                epic.CreatedAt = DateTime.UtcNow;
-            }
-            _context.StoryEpics.Add(epic);
-        }
-        else
-        {
-            // Existing epic - update
-            _context.StoryEpics.Update(epic);
-        }
-
-        // Handle related entities
-        // Regions
+        // EF Core will track the epic and its related entities automatically
+        // since they were loaded via GetFullAsync with Include()
+        // Just ensure timestamps are set properly
+        
         foreach (var region in epic.Regions)
         {
             region.UpdatedAt = DateTime.UtcNow;
@@ -112,10 +94,10 @@ public class StoryEpicRepository : IStoryEpicRepository
             {
                 region.CreatedAt = DateTime.UtcNow;
             }
-            _context.StoryEpicRegions.Update(region);
+            // Let EF Core determine if it's new (Added) or existing (Modified)
+            // based on its tracking state
         }
 
-        // Story nodes
         foreach (var storyNode in epic.StoryNodes)
         {
             storyNode.UpdatedAt = DateTime.UtcNow;
@@ -123,10 +105,8 @@ public class StoryEpicRepository : IStoryEpicRepository
             {
                 storyNode.CreatedAt = DateTime.UtcNow;
             }
-            _context.StoryEpicStoryNodes.Update(storyNode);
         }
 
-        // Unlock rules
         foreach (var rule in epic.UnlockRules)
         {
             rule.UpdatedAt = DateTime.UtcNow;
@@ -134,7 +114,6 @@ public class StoryEpicRepository : IStoryEpicRepository
             {
                 rule.CreatedAt = DateTime.UtcNow;
             }
-            _context.StoryEpicUnlockRules.Update(rule);
         }
 
         await _context.SaveChangesAsync(ct);

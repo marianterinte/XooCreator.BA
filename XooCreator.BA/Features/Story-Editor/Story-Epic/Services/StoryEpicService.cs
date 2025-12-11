@@ -26,8 +26,9 @@ public class StoryEpicService : IStoryEpicService
 
     public async Task SaveEpicAsync(Guid ownerUserId, string epicId, StoryEpicDto dto, CancellationToken ct = default)
     {
-        // Verify ownership
-        var existing = await _repository.GetAsync(epicId, ct);
+        // Use GetFullAsync to load related entities (regions, stories, rules)
+        var existing = await _repository.GetFullAsync(epicId, ct);
+        
         if (existing != null && existing.OwnerUserId != ownerUserId)
         {
             throw new UnauthorizedAccessException($"User does not own epic '{epicId}'");
@@ -37,6 +38,12 @@ public class StoryEpicService : IStoryEpicService
         if (existing == null)
         {
             existing = await _repository.CreateAsync(ownerUserId, epicId, dto.Name, ct);
+            // After creation, we need to reload with collections initialized
+            existing = await _repository.GetFullAsync(epicId, ct);
+            if (existing == null)
+            {
+                throw new InvalidOperationException($"Failed to create epic '{epicId}'");
+            }
         }
 
         // Update basic properties
@@ -45,7 +52,7 @@ public class StoryEpicService : IStoryEpicService
         existing.Status = dto.Status;
         existing.UpdatedAt = DateTime.UtcNow;
 
-        // Update regions
+        // Update regions (now with proper tracking since we used GetFullAsync)
         await UpdateRegionsAsync(existing, dto.Regions, ct);
 
         // Update story nodes
