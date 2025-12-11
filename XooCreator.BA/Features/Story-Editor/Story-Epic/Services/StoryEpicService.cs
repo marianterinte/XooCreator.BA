@@ -50,6 +50,7 @@ public class StoryEpicService : IStoryEpicService
         // Update basic properties
         existing.Name = dto.Name;
         existing.Description = dto.Description;
+        existing.CoverImageUrl = dto.CoverImageUrl;
         existing.Status = dto.Status;
         existing.UpdatedAt = DateTime.UtcNow;
 
@@ -97,6 +98,7 @@ public class StoryEpicService : IStoryEpicService
             Id = e.Id,
             Name = e.Name,
             Description = e.Description,
+            CoverImageUrl = e.CoverImageUrl,
             Status = e.Status,
             CreatedAt = e.CreatedAt,
             UpdatedAt = e.UpdatedAt,
@@ -130,6 +132,7 @@ public class StoryEpicService : IStoryEpicService
             Id = epic.Id,
             Name = epic.Name,
             Description = epic.Description,
+            CoverImageUrl = epic.CoverImageUrl,
             Status = epic.Status,
             PublishedAtUtc = epic.PublishedAtUtc,
             Regions = epic.Regions.Select(r => new StoryEpicRegionDto

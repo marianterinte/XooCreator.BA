@@ -7,6 +7,7 @@ public class StoryEpic
     public string? Description { get; set; }
     public Guid OwnerUserId { get; set; }
     public string Status { get; set; } = "draft"; // draft, published
+    public string? CoverImageUrl { get; set; } // Background image for tree logic view
     public bool IsDefault { get; set; } = false;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
