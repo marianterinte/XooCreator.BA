@@ -63,6 +63,7 @@ public class StoryRegionService : IStoryRegionService
         var region = await _repository.CreateAsync(ownerUserId, regionId, name, ct);
         
         // Create default translation (ro-ro) with the provided name
+        // Add translation directly to context instead of using SaveAsync to avoid concurrency issues
         var defaultTranslation = new StoryRegionTranslation
         {
             Id = Guid.NewGuid(),
@@ -70,8 +71,15 @@ public class StoryRegionService : IStoryRegionService
             LanguageCode = "ro-ro",
             Name = name
         };
-        region.Translations.Add(defaultTranslation);
-        await _repository.SaveAsync(region, ct);
+        _context.StoryRegionTranslations.Add(defaultTranslation);
+        await _context.SaveChangesAsync(ct);
+        
+        // Reload region with translations to return complete DTO
+        region = await _repository.GetAsync(regionId, ct);
+        if (region == null)
+        {
+            throw new InvalidOperationException($"Region '{regionId}' not found after creation");
+        }
         
         return new StoryRegionDto
         {
