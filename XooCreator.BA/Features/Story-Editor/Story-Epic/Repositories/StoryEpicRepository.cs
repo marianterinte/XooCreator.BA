@@ -83,39 +83,9 @@ public class StoryEpicRepository : IStoryEpicRepository
 
         epic.UpdatedAt = DateTime.UtcNow;
 
-        // EF Core will track the epic and its related entities automatically
-        // since they were loaded via GetFullAsync with Include()
-        // Just ensure timestamps are set properly
-        
-        foreach (var region in epic.Regions)
-        {
-            region.UpdatedAt = DateTime.UtcNow;
-            if (region.CreatedAt == default)
-            {
-                region.CreatedAt = DateTime.UtcNow;
-            }
-            // Let EF Core determine if it's new (Added) or existing (Modified)
-            // based on its tracking state
-        }
-
-        foreach (var storyNode in epic.StoryNodes)
-        {
-            storyNode.UpdatedAt = DateTime.UtcNow;
-            if (storyNode.CreatedAt == default)
-            {
-                storyNode.CreatedAt = DateTime.UtcNow;
-            }
-        }
-
-        foreach (var rule in epic.UnlockRules)
-        {
-            rule.UpdatedAt = DateTime.UtcNow;
-            if (rule.CreatedAt == default)
-            {
-                rule.CreatedAt = DateTime.UtcNow;
-            }
-        }
-
+        // The service layer handles related entities (regions, stories, rules)
+        // by directly querying and modifying DbContext.
+        // Here we just save all pending changes.
         await _context.SaveChangesAsync(ct);
     }
 

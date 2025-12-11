@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.DTOs;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.Repositories;
@@ -165,110 +166,166 @@ public class StoryEpicService : IStoryEpicService
 
     private async Task UpdateRegionsAsync(Data.StoryEpic epic, List<StoryEpicRegionDto> regionDtos, CancellationToken ct)
     {
-        // Remove regions that are not in DTO
-        var existingRegionIds = regionDtos.Select(r => r.Id).ToHashSet();
-        var regionsToRemove = epic.Regions.Where(r => !existingRegionIds.Contains(r.RegionId)).ToList();
-        foreach (var region in regionsToRemove)
+        var dtoRegionIds = regionDtos.Select(r => r.Id).ToHashSet();
+        
+        // Get existing regions from DB for this epic
+        var existingDbRegions = await _context.StoryEpicRegions
+            .Where(r => r.EpicId == epic.Id)
+            .ToListAsync(ct);
+        var existingDbRegionIds = existingDbRegions.ToDictionary(r => r.RegionId);
+        
+        // Remove regions not in DTO
+        foreach (var dbRegion in existingDbRegions)
         {
-            epic.Regions.Remove(region);
-            _context.StoryEpicRegions.Remove(region);
+            if (!dtoRegionIds.Contains(dbRegion.RegionId))
+            {
+                _context.StoryEpicRegions.Remove(dbRegion);
+            }
         }
 
         // Update or add regions
         foreach (var regionDto in regionDtos)
         {
-            var region = epic.Regions.FirstOrDefault(r => r.RegionId == regionDto.Id);
-            if (region == null)
+            if (existingDbRegionIds.TryGetValue(regionDto.Id, out var existingRegion))
             {
-                region = new Data.StoryEpicRegion
+                // Update existing
+                existingRegion.Label = regionDto.Label;
+                existingRegion.ImageUrl = regionDto.ImageUrl;
+                existingRegion.SortOrder = regionDto.SortOrder;
+                existingRegion.IsLocked = regionDto.IsLocked;
+                existingRegion.X = regionDto.X;
+                existingRegion.Y = regionDto.Y;
+                existingRegion.UpdatedAt = DateTime.UtcNow;
+            }
+            else
+            {
+                // Add new
+                var newRegion = new Data.StoryEpicRegion
                 {
                     EpicId = epic.Id,
                     RegionId = regionDto.Id,
+                    Label = regionDto.Label,
+                    ImageUrl = regionDto.ImageUrl,
+                    SortOrder = regionDto.SortOrder,
+                    IsLocked = regionDto.IsLocked,
+                    X = regionDto.X,
+                    Y = regionDto.Y,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
-                epic.Regions.Add(region);
+                _context.StoryEpicRegions.Add(newRegion);
             }
-
-            region.Label = regionDto.Label;
-            region.ImageUrl = regionDto.ImageUrl;
-            region.SortOrder = regionDto.SortOrder;
-            region.IsLocked = regionDto.IsLocked;
-            region.X = regionDto.X;
-            region.Y = regionDto.Y;
-            region.UpdatedAt = DateTime.UtcNow;
         }
     }
 
     private async Task UpdateStoryNodesAsync(Data.StoryEpic epic, List<StoryEpicStoryNodeDto> storyNodeDtos, CancellationToken ct)
     {
-        // Remove story nodes that are not in DTO
-        var existingStoryKeys = storyNodeDtos.Select(s => (s.StoryId, s.RegionId)).ToHashSet();
-        var nodesToRemove = epic.StoryNodes
-            .Where(sn => !existingStoryKeys.Contains((sn.StoryId, sn.RegionId)))
-            .ToList();
-        foreach (var node in nodesToRemove)
+        var dtoStoryKeys = storyNodeDtos.Select(s => (s.StoryId, s.RegionId)).ToHashSet();
+        
+        // Get existing story nodes from DB for this epic
+        var existingDbNodes = await _context.StoryEpicStoryNodes
+            .Where(sn => sn.EpicId == epic.Id)
+            .ToListAsync(ct);
+        var existingDbNodesByKey = existingDbNodes.ToDictionary(sn => (sn.StoryId, sn.RegionId));
+        
+        // Remove nodes not in DTO
+        foreach (var dbNode in existingDbNodes)
         {
-            epic.StoryNodes.Remove(node);
-            _context.StoryEpicStoryNodes.Remove(node);
+            if (!dtoStoryKeys.Contains((dbNode.StoryId, dbNode.RegionId)))
+            {
+                _context.StoryEpicStoryNodes.Remove(dbNode);
+            }
         }
 
         // Update or add story nodes
         foreach (var storyNodeDto in storyNodeDtos)
         {
-            var storyNode = epic.StoryNodes
-                .FirstOrDefault(sn => sn.StoryId == storyNodeDto.StoryId && sn.RegionId == storyNodeDto.RegionId);
-            
-            if (storyNode == null)
+            var key = (storyNodeDto.StoryId, storyNodeDto.RegionId);
+            if (existingDbNodesByKey.TryGetValue(key, out var existingNode))
             {
-                storyNode = new Data.StoryEpicStoryNode
+                // Update existing
+                existingNode.RewardImageUrl = storyNodeDto.RewardImageUrl;
+                existingNode.SortOrder = storyNodeDto.SortOrder;
+                existingNode.X = storyNodeDto.X;
+                existingNode.Y = storyNodeDto.Y;
+                existingNode.UpdatedAt = DateTime.UtcNow;
+            }
+            else
+            {
+                // Add new
+                var newNode = new Data.StoryEpicStoryNode
                 {
                     EpicId = epic.Id,
                     StoryId = storyNodeDto.StoryId,
                     RegionId = storyNodeDto.RegionId,
+                    RewardImageUrl = storyNodeDto.RewardImageUrl,
+                    SortOrder = storyNodeDto.SortOrder,
+                    X = storyNodeDto.X,
+                    Y = storyNodeDto.Y,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
-                epic.StoryNodes.Add(storyNode);
+                _context.StoryEpicStoryNodes.Add(newNode);
             }
-
-            storyNode.RewardImageUrl = storyNodeDto.RewardImageUrl;
-            storyNode.SortOrder = storyNodeDto.SortOrder;
-            storyNode.X = storyNodeDto.X;
-            storyNode.Y = storyNodeDto.Y;
-            storyNode.UpdatedAt = DateTime.UtcNow;
         }
     }
 
     private async Task UpdateUnlockRulesAsync(Data.StoryEpic epic, List<StoryEpicUnlockRuleDto> ruleDtos, CancellationToken ct)
     {
-        // Remove rules that are not in DTO (simplified - in production might want to keep IDs)
-        var rulesToRemove = epic.UnlockRules.ToList();
-        foreach (var rule in rulesToRemove)
+        // Get existing rules from DB for this epic
+        var existingDbRules = await _context.StoryEpicUnlockRules
+            .Where(r => r.EpicId == epic.Id)
+            .ToListAsync(ct);
+        
+        // Create key for matching rules
+        var dtoRuleKeys = ruleDtos.Select(r => (r.FromId, r.ToRegionId, r.StoryId ?? "")).ToHashSet();
+        var existingDbRulesByKey = existingDbRules.ToDictionary(r => (r.FromId, r.ToRegionId, r.StoryId ?? ""));
+        
+        // Remove rules not in DTO
+        foreach (var dbRule in existingDbRules)
         {
-            epic.UnlockRules.Remove(rule);
-            _context.StoryEpicUnlockRules.Remove(rule);
+            var key = (dbRule.FromId, dbRule.ToRegionId, dbRule.StoryId ?? "");
+            if (!dtoRuleKeys.Contains(key))
+            {
+                _context.StoryEpicUnlockRules.Remove(dbRule);
+            }
         }
 
-        // Add all rules from DTO
+        // Update or add rules
         foreach (var ruleDto in ruleDtos)
         {
-            var rule = new Data.StoryEpicUnlockRule
+            var key = (ruleDto.FromId, ruleDto.ToRegionId, ruleDto.StoryId ?? "");
+            if (existingDbRulesByKey.TryGetValue(key, out var existingRule))
             {
-                EpicId = epic.Id,
-                Type = ruleDto.Type,
-                FromId = ruleDto.FromId,
-                ToRegionId = ruleDto.ToRegionId,
-                RequiredStoriesCsv = ruleDto.RequiredStories.Any() 
+                // Update existing
+                existingRule.Type = ruleDto.Type;
+                existingRule.RequiredStoriesCsv = ruleDto.RequiredStories.Any() 
                     ? string.Join(",", ruleDto.RequiredStories) 
-                    : null,
-                MinCount = ruleDto.MinCount,
-                StoryId = ruleDto.StoryId,
-                SortOrder = ruleDto.SortOrder,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
-            epic.UnlockRules.Add(rule);
+                    : null;
+                existingRule.MinCount = ruleDto.MinCount;
+                existingRule.SortOrder = ruleDto.SortOrder;
+                existingRule.UpdatedAt = DateTime.UtcNow;
+            }
+            else
+            {
+                // Add new
+                var newRule = new Data.StoryEpicUnlockRule
+                {
+                    EpicId = epic.Id,
+                    Type = ruleDto.Type,
+                    FromId = ruleDto.FromId,
+                    ToRegionId = ruleDto.ToRegionId,
+                    RequiredStoriesCsv = ruleDto.RequiredStories.Any() 
+                        ? string.Join(",", ruleDto.RequiredStories) 
+                        : null,
+                    MinCount = ruleDto.MinCount,
+                    StoryId = ruleDto.StoryId,
+                    SortOrder = ruleDto.SortOrder,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+                _context.StoryEpicUnlockRules.Add(newRule);
+            }
         }
     }
 
