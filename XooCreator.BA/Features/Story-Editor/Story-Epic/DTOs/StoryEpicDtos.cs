@@ -86,6 +86,11 @@ public record StoryEpicListItemDto
     public DateTime? PublishedAtUtc { get; init; }
     public int StoryCount { get; init; }
     public int RegionCount { get; init; }
+    
+    // Review workflow fields for list display
+    public Guid? AssignedReviewerUserId { get; init; }
+    public bool IsAssignedToCurrentUser { get; init; } // Computed in service based on current user
+    public bool IsOwnedByCurrentUser { get; init; } // Computed in service based on current user
 }
 
 public record StoryEpicStoryOptionDto

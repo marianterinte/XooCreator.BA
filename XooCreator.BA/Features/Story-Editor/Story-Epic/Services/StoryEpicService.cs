@@ -89,22 +89,34 @@ public class StoryEpicService : IStoryEpicService
         };
     }
 
-    public async Task<List<StoryEpicListItemDto>> ListEpicsByOwnerAsync(Guid ownerUserId, CancellationToken ct = default)
+    public async Task<List<StoryEpicListItemDto>> ListEpicsByOwnerAsync(Guid ownerUserId, Guid? currentUserId = null, CancellationToken ct = default)
     {
         var epics = await _repository.ListByOwnerAsync(ownerUserId, ct);
         
-        return epics.Select(e => new StoryEpicListItemDto
+        return epics.Select(e =>
         {
-            Id = e.Id,
-            Name = e.Name,
-            Description = e.Description,
-            CoverImageUrl = e.CoverImageUrl,
-            Status = e.Status,
-            CreatedAt = e.CreatedAt,
-            UpdatedAt = e.UpdatedAt,
-            PublishedAtUtc = e.PublishedAtUtc,
-            StoryCount = e.StoryNodes.Count,
-            RegionCount = e.Regions.Count
+            // Compute flags for current user
+            var isOwnedByCurrentUser = currentUserId.HasValue && e.OwnerUserId == currentUserId.Value;
+            var isAssignedToCurrentUser = currentUserId.HasValue && 
+                                          e.AssignedReviewerUserId.HasValue && 
+                                          e.AssignedReviewerUserId.Value == currentUserId.Value;
+            
+            return new StoryEpicListItemDto
+            {
+                Id = e.Id,
+                Name = e.Name,
+                Description = e.Description,
+                CoverImageUrl = e.CoverImageUrl,
+                Status = e.Status,
+                CreatedAt = e.CreatedAt,
+                UpdatedAt = e.UpdatedAt,
+                PublishedAtUtc = e.PublishedAtUtc,
+                StoryCount = e.StoryNodes.Count,
+                RegionCount = e.Regions.Count,
+                AssignedReviewerUserId = e.AssignedReviewerUserId,
+                IsAssignedToCurrentUser = isAssignedToCurrentUser,
+                IsOwnedByCurrentUser = isOwnedByCurrentUser
+            };
         }).ToList();
     }
 

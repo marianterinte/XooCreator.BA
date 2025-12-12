@@ -17,7 +17,7 @@ public interface IStoryEpicService
     Task<StoryEpicStateDto?> GetEpicStateAsync(string epicId, CancellationToken ct = default);
     
     // List epics by owner
-    Task<List<StoryEpicListItemDto>> ListEpicsByOwnerAsync(Guid ownerUserId, CancellationToken ct = default);
+    Task<List<StoryEpicListItemDto>> ListEpicsByOwnerAsync(Guid ownerUserId, Guid? currentUserId = null, CancellationToken ct = default);
     
     // Delete epic
     Task DeleteEpicAsync(Guid ownerUserId, string epicId, CancellationToken ct = default);
