@@ -14,7 +14,7 @@ public class StoryEpicRegion
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     
-    public StoryEpic Epic { get; set; } = null!;
+    public DbStoryEpic Epic { get; set; } = null!;
     public ICollection<StoryEpicStoryNode> Stories { get; set; } = new List<StoryEpicStoryNode>();
 }
 

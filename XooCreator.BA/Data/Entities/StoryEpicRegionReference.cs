@@ -22,7 +22,7 @@ public class StoryEpicRegionReference
     public bool IsLocked { get; set; } = false;
     
     // Navigation properties
-    public StoryEpic Epic { get; set; } = null!;
+    public DbStoryEpic Epic { get; set; } = null!;
     public StoryRegion Region { get; set; } = null!;
 }
 

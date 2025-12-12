@@ -20,7 +20,7 @@ public class StoryEpicHeroReference
     public string? StoryId { get; set; } // Story care deblochează acest hero (opțional)
     
     // Navigation properties
-    public StoryEpic Epic { get; set; } = null!;
+    public DbStoryEpic Epic { get; set; } = null!;
     public EpicHero Hero { get; set; } = null!;
 }
 

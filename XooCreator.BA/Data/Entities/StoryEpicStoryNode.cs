@@ -15,7 +15,7 @@ public class StoryEpicStoryNode
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     
-    public StoryEpic Epic { get; set; } = null!;
+    public DbStoryEpic Epic { get; set; } = null!;
     public StoryEpicRegion Region { get; set; } = null!;
     public StoryCraft? StoryCraft { get; set; } // Pentru draft stories
     public StoryDefinition? StoryDefinition { get; set; } // Pentru published stories

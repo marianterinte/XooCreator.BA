@@ -29,7 +29,7 @@ public class PublishStoryEpicEndpoint
 
     [Route("/api/story-editor/epics/{epicId}/publish")]
     [Authorize]
-    public static async Task<Results<Ok<StoryEpicPublishResponse>, UnauthorizedHttpResult, ForbidHttpResult, BadRequest<string>>> HandlePost(
+    public static async Task<Results<Ok<StoryEpicPublishResponse>, UnauthorizedHttpResult, ForbidHttpResult, BadRequest<string>, Conflict<string>>> HandlePost(
         [FromRoute] string epicId,
         [FromServices] PublishStoryEpicEndpoint ep,
         CancellationToken ct)
@@ -44,9 +44,11 @@ public class PublishStoryEpicEndpoint
             return TypedResults.Forbid();
         }
 
+        var isAdmin = ep._auth0.HasRole(user, UserRole.Admin);
+
         try
         {
-            var publishedAt = await ep._publishingService.PublishAsync(user.Id, epicId, ct);
+            var publishedAt = await ep._publishingService.PublishAsync(user.Id, epicId, isAdmin, ct);
             ep._logger.LogInformation("PublishStoryEpic succeeded: userId={UserId} epicId={EpicId}", user.Id, epicId);
             return TypedResults.Ok(new StoryEpicPublishResponse
             {
@@ -59,6 +61,12 @@ public class PublishStoryEpicEndpoint
         {
             ep._logger.LogWarning("PublishStoryEpic unauthorized: {Error}", ex.Message);
             return TypedResults.Forbid();
+        }
+        catch (InvalidOperationException ex)
+        {
+            // Validation errors (unpublished dependencies, etc.)
+            ep._logger.LogWarning("PublishStoryEpic validation failed: {Error}", ex.Message);
+            return TypedResults.Conflict(ex.Message);
         }
         catch (Exception ex)
         {

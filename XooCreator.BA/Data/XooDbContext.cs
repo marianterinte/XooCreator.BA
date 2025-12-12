@@ -41,7 +41,7 @@ public class XooDbContext : DbContext
     public DbSet<TreeConfiguration> TreeConfigurations => Set<TreeConfiguration>();
     
     // Story Epic
-    public DbSet<StoryEpic> StoryEpics => Set<StoryEpic>();
+    public DbSet<DbStoryEpic> StoryEpics => Set<DbStoryEpic>();
     public DbSet<StoryEpicRegion> StoryEpicRegions => Set<StoryEpicRegion>();
     public DbSet<StoryEpicStoryNode> StoryEpicStoryNodes => Set<StoryEpicStoryNode>();
     public DbSet<StoryEpicUnlockRule> StoryEpicUnlockRules => Set<StoryEpicUnlockRule>();
@@ -445,7 +445,7 @@ public class XooDbContext : DbContext
         });
 
         // Story Epic Configuration
-        modelBuilder.Entity<StoryEpic>(e =>
+        modelBuilder.Entity<DbStoryEpic>(e =>
         {
             e.HasKey(x => x.Id);
             e.Property(x => x.Id).HasMaxLength(100).IsRequired();
@@ -453,7 +453,13 @@ public class XooDbContext : DbContext
             e.Property(x => x.Description).HasMaxLength(1000);
             e.Property(x => x.Status).HasMaxLength(20).IsRequired();
             e.HasIndex(x => new { x.OwnerUserId, x.Id }).IsUnique();
+            e.HasIndex(x => x.Status);
+            e.HasIndex(x => x.AssignedReviewerUserId).HasFilter($"[{nameof(DbStoryEpic.AssignedReviewerUserId)}] IS NOT NULL");
             e.HasOne(x => x.Owner).WithMany().HasForeignKey(x => x.OwnerUserId).OnDelete(DeleteBehavior.Cascade);
+            // Review workflow foreign keys (optional, nullable)
+            e.HasOne<AlchimaliaUser>().WithMany().HasForeignKey(x => x.AssignedReviewerUserId).OnDelete(DeleteBehavior.SetNull);
+            e.HasOne<AlchimaliaUser>().WithMany().HasForeignKey(x => x.ReviewedByUserId).OnDelete(DeleteBehavior.SetNull);
+            e.HasOne<AlchimaliaUser>().WithMany().HasForeignKey(x => x.ApprovedByUserId).OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<StoryEpicRegion>(e =>

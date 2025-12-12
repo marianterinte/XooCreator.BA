@@ -125,7 +125,7 @@ public class StoryEpicService : IStoryEpicService
         await _repository.DeleteAsync(epicId, ct);
     }
 
-    private StoryEpicDto MapToDto(Data.StoryEpic epic)
+    private StoryEpicDto MapToDto(Data.DbStoryEpic epic)
     {
         return new StoryEpicDto
         {
@@ -167,7 +167,7 @@ public class StoryEpicService : IStoryEpicService
         };
     }
 
-    private async Task UpdateRegionsAsync(Data.StoryEpic epic, List<StoryEpicRegionDto> regionDtos, CancellationToken ct)
+    private async Task UpdateRegionsAsync(Data.DbStoryEpic epic, List<StoryEpicRegionDto> regionDtos, CancellationToken ct)
     {
         var dtoRegionIds = regionDtos.Select(r => r.Id).ToHashSet();
         
@@ -221,7 +221,7 @@ public class StoryEpicService : IStoryEpicService
         }
     }
 
-    private async Task UpdateStoryNodesAsync(Data.StoryEpic epic, List<StoryEpicStoryNodeDto> storyNodeDtos, CancellationToken ct)
+    private async Task UpdateStoryNodesAsync(Data.DbStoryEpic epic, List<StoryEpicStoryNodeDto> storyNodeDtos, CancellationToken ct)
     {
         var dtoStoryKeys = storyNodeDtos.Select(s => (s.StoryId, s.RegionId)).ToHashSet();
         
@@ -273,7 +273,7 @@ public class StoryEpicService : IStoryEpicService
         }
     }
 
-    private async Task UpdateUnlockRulesAsync(Data.StoryEpic epic, List<StoryEpicUnlockRuleDto> ruleDtos, CancellationToken ct)
+    private async Task UpdateUnlockRulesAsync(Data.DbStoryEpic epic, List<StoryEpicUnlockRuleDto> ruleDtos, CancellationToken ct)
     {
         // Get existing rules from DB for this epic
         var existingDbRules = await _context.StoryEpicUnlockRules

@@ -12,7 +12,7 @@ public class StoryEpicRepository : IStoryEpicRepository
         _context = context;
     }
 
-    public async Task<Data.StoryEpic?> GetAsync(string epicId, CancellationToken ct = default)
+    public async Task<Data.DbStoryEpic?> GetAsync(string epicId, CancellationToken ct = default)
     {
         var id = (epicId ?? string.Empty).Trim();
         if (string.IsNullOrEmpty(id)) return null;
@@ -21,7 +21,7 @@ public class StoryEpicRepository : IStoryEpicRepository
             .FirstOrDefaultAsync(x => x.Id == id, ct);
     }
 
-    public async Task<Data.StoryEpic?> GetFullAsync(string epicId, CancellationToken ct = default)
+    public async Task<Data.DbStoryEpic?> GetFullAsync(string epicId, CancellationToken ct = default)
     {
         var id = (epicId ?? string.Empty).Trim();
         if (string.IsNullOrEmpty(id)) return null;
@@ -38,7 +38,7 @@ public class StoryEpicRepository : IStoryEpicRepository
             .FirstOrDefaultAsync(x => x.Id == id, ct);
     }
 
-    public async Task<Data.StoryEpic> CreateAsync(Guid ownerUserId, string epicId, string name, CancellationToken ct = default)
+    public async Task<Data.DbStoryEpic> CreateAsync(Guid ownerUserId, string epicId, string name, CancellationToken ct = default)
     {
         var id = (epicId ?? string.Empty).Trim();
         if (string.IsNullOrEmpty(id))
@@ -58,7 +58,7 @@ public class StoryEpicRepository : IStoryEpicRepository
             throw new InvalidOperationException($"Epic with ID '{id}' already exists");
         }
 
-        var epic = new Data.StoryEpic
+        var epic = new Data.DbStoryEpic
         {
             Id = id,
             Name = name.Trim(),
@@ -74,7 +74,7 @@ public class StoryEpicRepository : IStoryEpicRepository
         return epic;
     }
 
-    public async Task SaveAsync(Data.StoryEpic epic, CancellationToken ct = default)
+    public async Task SaveAsync(Data.DbStoryEpic epic, CancellationToken ct = default)
     {
         if (epic == null)
         {
@@ -89,7 +89,7 @@ public class StoryEpicRepository : IStoryEpicRepository
         await _context.SaveChangesAsync(ct);
     }
 
-    public Task<List<Data.StoryEpic>> ListByOwnerAsync(Guid ownerUserId, CancellationToken ct = default)
+    public Task<List<Data.DbStoryEpic>> ListByOwnerAsync(Guid ownerUserId, CancellationToken ct = default)
     {
         return _context.StoryEpics
             .Include(x => x.Regions)

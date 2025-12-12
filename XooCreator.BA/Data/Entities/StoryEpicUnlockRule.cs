@@ -14,7 +14,7 @@ public class StoryEpicUnlockRule
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     
-    public StoryEpic Epic { get; set; } = null!;
+    public DbStoryEpic Epic { get; set; } = null!;
 
     // Note: No FK relationships to avoid mixed ID type issues
     // Validation will be done in application code
