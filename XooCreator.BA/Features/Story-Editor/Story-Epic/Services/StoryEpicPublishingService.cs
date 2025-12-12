@@ -46,11 +46,14 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
             return ValidationResult.InvalidStatus("Epic must be approved before publishing. Please submit for review first.");
         }
 
-        // 3. Minimum requirements - Check if epic has regions (via references in new architecture)
-        var hasRegions = await _context.StoryEpicRegionReferences
+        // 3. Minimum requirements - Check if epic has regions
+        // Check both StoryEpicRegions (old architecture) and StoryEpicRegionReferences (new architecture)
+        var hasRegionsOld = await _context.StoryEpicRegions
+            .AnyAsync(r => r.EpicId == epic.Id, ct);
+        var hasRegionsNew = await _context.StoryEpicRegionReferences
             .AnyAsync(r => r.EpicId == epic.Id, ct);
 
-        if (!hasRegions)
+        if (!hasRegionsOld && !hasRegionsNew)
         {
             return ValidationResult.NoRegions();
         }
@@ -61,15 +64,25 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
         }
 
         // 4. Check all referenced regions are published
+        // Check both StoryEpicRegions (old architecture) and StoryEpicRegionReferences (new architecture)
+        var unpublishedRegions = new List<StoryRegion>();
+        
+        // Check old architecture (StoryEpicRegions - regions stored directly in epic)
+        // Note: In old architecture, regions are just IDs, so we can't check their status here
+        // This check is mainly for the new architecture
+        
+        // Check new architecture (StoryEpicRegionReferences - references to independent StoryRegion entities)
         var regionReferences = await _context.StoryEpicRegionReferences
             .Where(r => r.EpicId == epic.Id)
             .Include(r => r.Region)
             .ToListAsync(ct);
 
-        var unpublishedRegions = regionReferences
+        var unpublishedRegionsNew = regionReferences
             .Where(r => r.Region.Status != "published")
             .Select(r => r.Region)
             .ToList();
+        
+        unpublishedRegions.AddRange(unpublishedRegionsNew);
 
         if (unpublishedRegions.Any())
         {
