@@ -21,5 +21,8 @@ public interface IStoryEpicService
     
     // Delete epic
     Task DeleteEpicAsync(Guid ownerUserId, string epicId, CancellationToken ct = default);
+    
+    // Create new version from published epic
+    Task<int> CreateVersionFromPublishedAsync(Guid ownerUserId, string epicId, CancellationToken ct = default);
 }
 

@@ -92,6 +92,7 @@ public class XooDbContext : DbContext
     public DbSet<StoryAssetLink> StoryAssetLinks => Set<StoryAssetLink>();
     public DbSet<StoryPublishJob> StoryPublishJobs => Set<StoryPublishJob>();
     public DbSet<StoryVersionJob> StoryVersionJobs => Set<StoryVersionJob>();
+    public DbSet<EpicVersionJob> EpicVersionJobs => Set<EpicVersionJob>();
     public DbSet<StoryImportJob> StoryImportJobs => Set<StoryImportJob>();
     public DbSet<StoryForkJob> StoryForkJobs => Set<StoryForkJob>();
     public DbSet<StoryForkAssetJob> StoryForkAssetJobs => Set<StoryForkAssetJob>();

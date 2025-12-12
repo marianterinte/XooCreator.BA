@@ -137,6 +137,64 @@ public class StoryEpicService : IStoryEpicService
         await _repository.DeleteAsync(epicId, ct);
     }
 
+    public async Task<int> CreateVersionFromPublishedAsync(Guid ownerUserId, string epicId, CancellationToken ct = default)
+    {
+        // Load published epic with all related data
+        var publishedEpic = await _repository.GetFullAsync(epicId, ct);
+        if (publishedEpic == null)
+        {
+            throw new InvalidOperationException($"Epic '{epicId}' not found");
+        }
+
+        // Verify ownership
+        if (publishedEpic.OwnerUserId != ownerUserId)
+        {
+            throw new UnauthorizedAccessException($"User does not own epic '{epicId}'");
+        }
+
+        // Check if epic is published
+        if (publishedEpic.Status != "published")
+        {
+            throw new InvalidOperationException($"Epic '{epicId}' is not published (status: {publishedEpic.Status})");
+        }
+
+        // Check if draft already exists (status != "published")
+        var existingEpic = await _repository.GetAsync(epicId, ct);
+        if (existingEpic != null && existingEpic.Status != "published")
+        {
+            throw new InvalidOperationException("A draft already exists for this epic. Please edit or publish it first.");
+        }
+
+        // IMPORTANT: Epic-ul publicat rămâne neschimbat în market!
+        // Nu actualizăm epic-ul publicat - doar actualizăm dacă există deja un draft (ceea ce nu e cazul aici)
+        // Epic-ul publicat va rămâne cu status="published" și va fi vizibil în market.
+
+        // Actualizăm epic-ul existent (care este publicat) la draft, dar păstrăm datele publicate
+        // În realitate, epic-ul publicat rămâne în market pentru că query-ul din market verifică status="published"
+        // Dar aici trebuie să actualizăm epic-ul pentru a crea draft-ul
+        
+        // Salvăm versiunea publicată înainte de a actualiza
+        var publishedVersion = publishedEpic.Version;
+        var publishedCoverImageUrl = publishedEpic.CoverImageUrl;
+        var publishedPublishedAtUtc = publishedEpic.PublishedAtUtc;
+
+        // IMPORTANT: Nu actualizăm status-ul epic-ului publicat!
+        // Epic-ul publicat rămâne cu status="published" astfel încât să rămână vizibil în market.
+        // Doar setăm BaseVersion pentru a ști de la ce versiune publicată am început editarea.
+        publishedEpic.BaseVersion = publishedVersion; // Set base version to published version
+        publishedEpic.LastDraftVersion = 0; // Reset draft version counter
+        publishedEpic.UpdatedAt = DateTime.UtcNow;
+        // NU schimbăm Status - rămâne "published"!
+        // NU schimbăm Version - rămâne versiunea publicată!
+        // NU schimbăm PublishedAtUtc - rămâne data publicării!
+        // Nu ștergem sau copiem entitățile - ele rămân neschimbate pentru market
+
+        await _context.SaveChangesAsync(ct);
+        
+        // Return the base version that was set
+        return newDraft.BaseVersion;
+    }
+
     private StoryEpicDto MapToDto(Data.DbStoryEpic epic)
     {
         return new StoryEpicDto
