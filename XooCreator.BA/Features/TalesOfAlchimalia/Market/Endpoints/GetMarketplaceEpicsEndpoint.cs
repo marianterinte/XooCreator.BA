@@ -33,7 +33,7 @@ public class GetMarketplaceEpicsEndpoint
 
     [Route("/api/{locale}/tales-of-alchimalia/market/epics")]
     [Authorize]
-    public static async Task<Ok<GetMarketplaceEpicsResponse>> HandleGetMarketplaceEpics(
+    public static async Task<Ok<GetMarketplaceEpicsResponse>> HandleGet(
         [FromRoute] string locale,
         [FromServices] GetMarketplaceEpicsEndpoint ep,
         [FromQuery] string? searchTerm = null,

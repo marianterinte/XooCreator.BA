@@ -27,7 +27,7 @@ public class GetEpicDetailsEndpoint
 
     [Route("/api/{locale}/tales-of-alchimalia/market/epics/{epicId}")]
     [Authorize]
-    public static async Task<Results<Ok<EpicDetailsDto>, NotFound>> HandleGetEpicDetails(
+    public static async Task<Results<Ok<EpicDetailsDto>, NotFound>> HandleGet(
         [FromRoute] string locale,
         [FromRoute] string epicId,
         [FromServices] GetEpicDetailsEndpoint ep)
