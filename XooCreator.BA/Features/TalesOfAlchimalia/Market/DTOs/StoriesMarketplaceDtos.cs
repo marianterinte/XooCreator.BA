@@ -201,4 +201,54 @@ public record ReadersTrendPointDto(string Date, int ReadersCount);
 
 public record ReadersCorrelationItemDto(string StoryId, string Title, int ReadersCount, int ReviewsCount, double AverageRating);
 
+// Epic Marketplace DTOs
+public record EpicMarketplaceItemDto
+{
+    public required string Id { get; init; }
+    public required string Name { get; init; }
+    public string? Description { get; init; }
+    public string? CoverImageUrl { get; init; }
+    public Guid? CreatedBy { get; init; }
+    public string? CreatedByName { get; init; }
+    public DateTime CreatedAt { get; init; }
+    public DateTime? PublishedAtUtc { get; init; }
+    public int StoryCount { get; init; } // Number of stories in this epic
+    public int RegionCount { get; init; } // Number of regions in this epic
+    public int ReadersCount { get; init; } // Total readers across all stories in epic
+    public double AverageRating { get; init; } // Average rating across all stories in epic
+}
+
+public record EpicDetailsDto
+{
+    public required string Id { get; init; }
+    public required string Name { get; init; }
+    public string? Description { get; init; }
+    public string? CoverImageUrl { get; init; }
+    public Guid? CreatedBy { get; init; }
+    public string? CreatedByName { get; init; }
+    public DateTime CreatedAt { get; init; }
+    public DateTime? PublishedAtUtc { get; init; }
+    public int StoryCount { get; init; }
+    public int RegionCount { get; init; }
+    public int ReadersCount { get; init; }
+    public double AverageRating { get; init; }
+    public int TotalReviews { get; init; }
+}
+
+public record GetMarketplaceEpicsResponse
+{
+    public List<EpicMarketplaceItemDto> Epics { get; init; } = new();
+    public int TotalCount { get; init; }
+    public bool HasMore { get; init; }
+}
+
+public record SearchEpicsRequest
+{
+    public string? SearchTerm { get; init; }
+    public string SortBy { get; init; } = "publishedAt"; // publishedAt, name, readers, rating
+    public string SortOrder { get; init; } = "desc"; // asc, desc
+    public int Page { get; init; } = 1;
+    public int PageSize { get; init; } = 20;
+}
+
 

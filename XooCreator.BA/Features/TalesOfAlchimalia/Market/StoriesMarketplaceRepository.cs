@@ -42,17 +42,20 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
 {
     private readonly XooDbContext _context;
     private readonly StoryDetailsMapper _storyDetailsMapper;
+    private readonly EpicsMarketplaceRepository? _epicsRepository;
     private readonly ILogger<StoriesMarketplaceRepository>? _logger;
     private readonly TelemetryClient? _telemetryClient;
 
     public StoriesMarketplaceRepository(
         XooDbContext context, 
         StoryDetailsMapper storyDetailsMapper,
+        EpicsMarketplaceRepository? epicsRepository = null,
         ILogger<StoriesMarketplaceRepository>? logger = null,
         TelemetryClient? telemetryClient = null)
     {
         _context = context;
         _storyDetailsMapper = storyDetailsMapper;
+        _epicsRepository = epicsRepository;
         _logger = logger;
         _telemetryClient = telemetryClient;
     }
@@ -83,6 +86,16 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             if (!(request.Categories?.Any() ?? false))
             {
                 query = query.Where(s => s.StoryType == StoryType.Indie);
+            }
+
+            // Exclude stories that are assigned to published epics
+            if (_epicsRepository != null)
+            {
+                var storyIdsInEpics = await _epicsRepository.GetStoryIdsInPublishedEpicsAsync();
+                if (storyIdsInEpics.Any())
+                {
+                    query = query.Where(s => !storyIdsInEpics.Contains(s.StoryId));
+                }
             }
 
             // Filter by topics (topic IDs)
@@ -210,6 +223,16 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         if (!(request.Categories?.Any() ?? false))
         {
             query = query.Where(s => s.StoryType == StoryType.Indie);
+        }
+
+        // Exclude stories that are assigned to published epics
+        if (_epicsRepository != null)
+        {
+            var storyIdsInEpics = await _epicsRepository.GetStoryIdsInPublishedEpicsAsync();
+            if (storyIdsInEpics.Any())
+            {
+                query = query.Where(s => !storyIdsInEpics.Contains(s.StoryId));
+            }
         }
 
         // Filter by topics (topic IDs)

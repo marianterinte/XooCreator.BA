@@ -178,6 +178,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<StoryDetailsMapper>();
         services.AddScoped<IStoriesMarketplaceRepository, StoriesMarketplaceRepository>();
         services.AddScoped<IStoriesMarketplaceService, StoriesMarketplaceService>();
+        services.AddScoped<EpicsMarketplaceRepository>();
+        services.AddScoped<IEpicsMarketplaceService, EpicsMarketplaceService>();
         
         return services;
     }
