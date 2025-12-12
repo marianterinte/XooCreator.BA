@@ -28,6 +28,8 @@ public class XooDbContext : DbContext
 
     public DbSet<TreeProgress> TreeProgress => Set<TreeProgress>();
     public DbSet<StoryProgress> StoryProgress => Set<StoryProgress>();
+    public DbSet<EpicProgress> EpicProgress => Set<EpicProgress>();
+    public DbSet<EpicStoryProgress> EpicStoryProgress => Set<EpicStoryProgress>();
     public DbSet<UserTokenBalance> UserTokenBalances => Set<UserTokenBalance>();
     public DbSet<HeroProgress> HeroProgress => Set<HeroProgress>();
     public DbSet<HeroTreeProgress> HeroTreeProgress => Set<HeroTreeProgress>();
@@ -355,6 +357,24 @@ public class XooDbContext : DbContext
             e.HasIndex(x => new { x.UserId, x.StoryId, x.TreeConfigurationId }).IsUnique();
             e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
             e.HasOne(x => x.TreeConfiguration).WithMany().HasForeignKey(x => x.TreeConfigurationId);
+        });
+
+        modelBuilder.Entity<EpicProgress>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.HasIndex(x => new { x.UserId, x.RegionId, x.EpicId }).IsUnique();
+            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.Epic).WithMany().HasForeignKey(x => x.EpicId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<EpicStoryProgress>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.HasIndex(x => new { x.UserId, x.StoryId, x.EpicId }).IsUnique();
+            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.Epic).WithMany().HasForeignKey(x => x.EpicId).OnDelete(DeleteBehavior.Cascade);
         });
 
 

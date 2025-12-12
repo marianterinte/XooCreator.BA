@@ -113,5 +113,41 @@ public record StoryEpicPublishResponse
     public DateTime? PublishedAtUtc { get; init; }
 }
 
+// Epic Progress DTOs
+public record EpicProgressDto
+{
+    public required string RegionId { get; init; }
+    public bool IsUnlocked { get; init; }
+    public DateTime? UnlockedAt { get; init; }
+}
+
+public record EpicStoryProgressDto
+{
+    public required string StoryId { get; init; }
+    public string? SelectedAnswer { get; init; }
+    public DateTime CompletedAt { get; init; }
+}
+
+public record EpicProgressStateDto
+{
+    public List<EpicCompletedStoryDto> CompletedStories { get; init; } = new();
+    public List<string> UnlockedRegions { get; init; } = new();
+}
+
+public record EpicCompletedStoryDto
+{
+    public required string StoryId { get; init; }
+    public string? SelectedAnswer { get; init; }
+    public DateTime CompletedAt { get; init; }
+}
+
+// Epic State with Progress (for player)
+public record StoryEpicStateWithProgressDto
+{
+    public StoryEpicDto Epic { get; init; } = null!;
+    public StoryEpicPreviewDto Preview { get; init; } = null!;
+    public EpicProgressStateDto Progress { get; init; } = null!;
+}
+
 
 
