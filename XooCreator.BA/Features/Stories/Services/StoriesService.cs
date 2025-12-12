@@ -158,6 +158,7 @@ public class StoriesService : IStoriesService
                 PriceInCredits = craft.PriceInCredits,
                 StoryType = (int)craft.StoryType,
                 IsEvaluative = craft.IsEvaluative,
+                IsPartOfEpic = craft.IsPartOfEpic,
                 Status = MapStatusForFrontend(StoryStatusExtensions.FromDb(craft.Status)),
                 AvailableLanguages = availableLangs,
                 AssignedReviewerUserId = craft.AssignedReviewerUserId,
@@ -229,6 +230,7 @@ public class StoriesService : IStoriesService
             PriceInCredits = story.PriceInCredits,
             StoryType = (int)story.StoryType,
             IsEvaluative = story.IsEvaluative,
+            IsPartOfEpic = story.IsPartOfEpic,
             Status = MapStatusForFrontend(story.Status), // story.Status is already StoryStatus enum
             AvailableLanguages = availableLangs,
             Tiles = story.Tiles.OrderBy(t => t.SortOrder).Select(t =>

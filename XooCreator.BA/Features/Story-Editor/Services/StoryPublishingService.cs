@@ -108,6 +108,7 @@ public class StoryPublishingService : IStoryPublishingService
                 Status = StoryStatus.Published,
                 IsActive = true,
                 IsEvaluative = craft.IsEvaluative,
+                IsPartOfEpic = craft.IsPartOfEpic,
                 SortOrder = 0,
                 Version = 1,
                 PriceInCredits = craft.PriceInCredits,
@@ -124,6 +125,7 @@ public class StoryPublishingService : IStoryPublishingService
         def.ClassicAuthorId = craft.ClassicAuthorId ?? def.ClassicAuthorId;
         def.StoryType = craft.StoryType;
         def.IsEvaluative = craft.IsEvaluative;
+        def.IsPartOfEpic = craft.IsPartOfEpic;
         def.PriceInCredits = craft.PriceInCredits;
         def.Status = StoryStatus.Published;
         def.IsActive = true;
@@ -241,6 +243,7 @@ public class StoryPublishingService : IStoryPublishingService
         def.ClassicAuthorId = craft.ClassicAuthorId ?? def.ClassicAuthorId;
         def.StoryType = craft.StoryType;
         def.IsEvaluative = craft.IsEvaluative;
+        def.IsPartOfEpic = craft.IsPartOfEpic;
         def.PriceInCredits = craft.PriceInCredits;
         def.Status = StoryStatus.Published;
         def.IsActive = true;

@@ -90,6 +90,7 @@ public class StoryEditorService : IStoryEditorService
         craft.ClassicAuthorId = dto.ClassicAuthorId; // Save classic author ID if selected
         craft.StoryType = (StoryType)(dto.StoryType);
         craft.IsEvaluative = dto.IsEvaluative;
+        craft.IsPartOfEpic = dto.IsPartOfEpic;
         craft.PriceInCredits = dto.PriceInCredits;
         craft.UpdatedAt = DateTime.UtcNow;
         

@@ -304,11 +304,16 @@ public class StoryEpicService : IStoryEpicService
             .ToListAsync(ct);
         var existingDbNodesByKey = existingDbNodes.ToDictionary(sn => (sn.StoryId, sn.RegionId));
         
+        // Collect story IDs that will be removed and added
+        var removedStoryIds = new HashSet<string>();
+        var addedStoryIds = new HashSet<string>();
+
         // Remove nodes not in DTO
         foreach (var dbNode in existingDbNodes)
         {
             if (!dtoStoryKeys.Contains((dbNode.StoryId, dbNode.RegionId)))
             {
+                removedStoryIds.Add(dbNode.StoryId);
                 _context.StoryEpicStoryNodes.Remove(dbNode);
             }
         }
@@ -329,6 +334,7 @@ public class StoryEpicService : IStoryEpicService
             else
             {
                 // Add new
+                addedStoryIds.Add(storyNodeDto.StoryId);
                 var newNode = new Data.StoryEpicStoryNode
                 {
                     EpicId = epic.Id,
@@ -342,6 +348,62 @@ public class StoryEpicService : IStoryEpicService
                     UpdatedAt = DateTime.UtcNow
                 };
                 _context.StoryEpicStoryNodes.Add(newNode);
+            }
+        }
+
+        // Update IsPartOfEpic flag for stories that were added to epic
+        if (addedStoryIds.Any())
+        {
+            // Update StoryCrafts
+            var craftsToUpdate = await _context.StoryCrafts
+                .Where(c => addedStoryIds.Contains(c.StoryId))
+                .ToListAsync(ct);
+            foreach (var craft in craftsToUpdate)
+            {
+                craft.IsPartOfEpic = true;
+            }
+
+            // Update StoryDefinitions
+            var definitionsToUpdate = await _context.StoryDefinitions
+                .Where(d => addedStoryIds.Contains(d.StoryId))
+                .ToListAsync(ct);
+            foreach (var def in definitionsToUpdate)
+            {
+                def.IsPartOfEpic = true;
+            }
+        }
+
+        // Update IsPartOfEpic flag for stories that were removed from epic
+        if (removedStoryIds.Any())
+        {
+            // Check if story is still in any other epic
+            var storiesStillInEpics = await _context.StoryEpicStoryNodes
+                .Where(sn => removedStoryIds.Contains(sn.StoryId))
+                .Select(sn => sn.StoryId)
+                .Distinct()
+                .ToListAsync(ct);
+            
+            var storiesToRemoveFlag = removedStoryIds.Except(storiesStillInEpics).ToList();
+
+            if (storiesToRemoveFlag.Any())
+            {
+                // Update StoryCrafts
+                var craftsToUpdate = await _context.StoryCrafts
+                    .Where(c => storiesToRemoveFlag.Contains(c.StoryId))
+                    .ToListAsync(ct);
+                foreach (var craft in craftsToUpdate)
+                {
+                    craft.IsPartOfEpic = false;
+                }
+
+                // Update StoryDefinitions
+                var definitionsToUpdate = await _context.StoryDefinitions
+                    .Where(d => storiesToRemoveFlag.Contains(d.StoryId))
+                    .ToListAsync(ct);
+                foreach (var def in definitionsToUpdate)
+                {
+                    def.IsPartOfEpic = false;
+                }
             }
         }
     }

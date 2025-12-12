@@ -27,12 +27,18 @@ public class SetStartupRegionEndpoint
         _logger = logger;
     }
 
+    public record SetStartupRegionRequest
+    {
+        public required bool IsStartup { get; init; }
+    }
+
     // Route without locale - middleware UseLocaleInApiPath() strips locale from path before routing
     [Route("/api/story-editor/epics/{epicId}/regions/{regionId}/set-startup")]
     [Authorize]
     public static async Task<Results<Ok, NotFound, BadRequest<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
         [FromRoute] string epicId,
         [FromRoute] string regionId,
+        [FromBody] SetStartupRegionRequest req,
         [FromServices] SetStartupRegionEndpoint ep,
         CancellationToken ct)
     {
@@ -74,25 +80,56 @@ public class SetStartupRegionEndpoint
             return TypedResults.BadRequest("Region not found in this epic");
         }
 
-        // Set all regions in this epic to IsStartupRegion = false
-        var allRegions = await ep._context.StoryEpicRegions
-            .Where(r => r.EpicId == epicId)
-            .ToListAsync(ct);
-        
-        foreach (var reg in allRegions)
+        if (req.IsStartup)
         {
-            reg.IsStartupRegion = false;
-            reg.UpdatedAt = DateTime.UtcNow;
+            // Step 1: Set ALL existing startup regions to false first (to avoid constraint violation)
+            // We need to do this in a separate save to ensure no two regions have IsStartupRegion = true at the same time
+            var existingStartupRegions = await ep._context.StoryEpicRegions
+                .Where(r => r.EpicId == epicId && r.IsStartupRegion)
+                .ToListAsync(ct);
+            
+            foreach (var reg in existingStartupRegions)
+            {
+                reg.IsStartupRegion = false;
+                reg.UpdatedAt = DateTime.UtcNow;
+            }
+            
+            // Save changes to unset all existing startup regions
+            if (existingStartupRegions.Count > 0)
+            {
+                await ep._context.SaveChangesAsync(ct);
+            }
+
+            // Step 2: Now set the selected region to true (safe now, no other region is startup)
+            // Detach the region from context and reload it to ensure we have fresh data
+            ep._context.Entry(region).State = Microsoft.EntityFrameworkCore.EntityState.Detached;
+            var freshRegion = await ep._context.StoryEpicRegions
+                .FirstOrDefaultAsync(r => r.EpicId == epicId && r.RegionId == regionId, ct);
+            
+            if (freshRegion == null)
+            {
+                return TypedResults.BadRequest("Region not found after reload");
+            }
+
+            freshRegion.IsStartupRegion = true;
+            freshRegion.UpdatedAt = DateTime.UtcNow;
+
+            await ep._context.SaveChangesAsync(ct);
+
+            ep._logger.LogInformation("SetStartupRegion: Region marked as startup epicId={EpicId} regionId={RegionId} userId={UserId}", 
+                epicId, regionId, user.Id);
         }
+        else
+        {
+            // Just unset this region
+            region.IsStartupRegion = false;
+            region.UpdatedAt = DateTime.UtcNow;
 
-        // Set the selected region to IsStartupRegion = true
-        region.IsStartupRegion = true;
-        region.UpdatedAt = DateTime.UtcNow;
+            await ep._context.SaveChangesAsync(ct);
 
-        await ep._context.SaveChangesAsync(ct);
-
-        ep._logger.LogInformation("SetStartupRegion: Region marked as startup epicId={EpicId} regionId={RegionId} userId={UserId}", 
-            epicId, regionId, user.Id);
+            ep._logger.LogInformation("SetStartupRegion: Region unmarked as startup epicId={EpicId} regionId={RegionId} userId={UserId}", 
+                epicId, regionId, user.Id);
+        }
 
         return TypedResults.Ok();
     }

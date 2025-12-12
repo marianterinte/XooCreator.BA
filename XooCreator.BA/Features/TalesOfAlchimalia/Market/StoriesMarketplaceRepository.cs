@@ -88,17 +88,8 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
                 query = query.Where(s => s.StoryType == StoryType.Indie);
             }
 
-            // Exclude stories that are assigned to ANY epic (draft or published)
-            // If a story is part of an epic, it should not appear as an independent story
-            var storyIdsInEpics = await _context.StoryEpicStoryNodes
-                .Select(sn => sn.StoryId)
-                .Distinct()
-                .ToListAsync();
-            
-            if (storyIdsInEpics.Any())
-            {
-                query = query.Where(s => !storyIdsInEpics.Contains(s.StoryId));
-            }
+            // Exclude stories that are part of an epic (using IsPartOfEpic flag)
+            query = query.Where(s => !s.IsPartOfEpic);
 
             // Filter by topics (topic IDs)
             if (request.Topics?.Any() == true)
@@ -227,17 +218,8 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             query = query.Where(s => s.StoryType == StoryType.Indie);
         }
 
-        // Exclude stories that are assigned to ANY epic (draft or published)
-        // If a story is part of an epic, it should not appear as an independent story
-        var storyIdsInEpics = await _context.StoryEpicStoryNodes
-            .Select(sn => sn.StoryId)
-            .Distinct()
-            .ToListAsync();
-        
-        if (storyIdsInEpics.Any())
-        {
-            query = query.Where(s => !storyIdsInEpics.Contains(s.StoryId));
-        }
+        // Exclude stories that are part of an epic (using IsPartOfEpic flag)
+        query = query.Where(s => !s.IsPartOfEpic);
 
         // Filter by topics (topic IDs)
         if (request.Topics?.Any() == true)
@@ -325,17 +307,8 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
                 .ThenInclude(ag => ag.StoryAgeGroup)
             .Where(s => s.IsActive && s.Status == StoryStatus.Published);
 
-        // Exclude stories that are assigned to ANY epic (draft or published)
-        // If a story is part of an epic, it should not appear as an independent story
-        var storyIdsInEpics = await _context.StoryEpicStoryNodes
-            .Select(sn => sn.StoryId)
-            .Distinct()
-            .ToListAsync();
-        
-        if (storyIdsInEpics.Any())
-        {
-            query = query.Where(s => !storyIdsInEpics.Contains(s.StoryId));
-        }
+        // Exclude stories that are part of an epic (using IsPartOfEpic flag)
+        query = query.Where(s => !s.IsPartOfEpic);
 
         // Auto-filter by age groups if enabled in parent dashboard
         if (user != null && user.AutoFilterStoriesByAge && user.SelectedAgeGroupIds != null && user.SelectedAgeGroupIds.Count > 0)
