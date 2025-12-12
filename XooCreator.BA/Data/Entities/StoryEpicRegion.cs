@@ -9,6 +9,7 @@ public class StoryEpicRegion
     public string? ImageUrl { get; set; }
     public int SortOrder { get; set; }
     public bool IsLocked { get; set; } = false;
+    public bool IsStartupRegion { get; set; } = false; // Marchează regiunea ca regiune de început pentru epic
     public double? X { get; set; } // Coordonată X pentru vizualizare
     public double? Y { get; set; } // Coordonată Y pentru vizualizare
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

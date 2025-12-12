@@ -192,7 +192,7 @@ public class StoryEpicService : IStoryEpicService
         await _context.SaveChangesAsync(ct);
         
         // Return the base version that was set
-        return newDraft.BaseVersion;
+        return publishedEpic.BaseVersion;
     }
 
     private StoryEpicDto MapToDto(Data.DbStoryEpic epic)
@@ -212,6 +212,7 @@ public class StoryEpicService : IStoryEpicService
                 ImageUrl = r.ImageUrl,
                 SortOrder = r.SortOrder,
                 IsLocked = r.IsLocked,
+                IsStartupRegion = r.IsStartupRegion,
                 X = r.X,
                 Y = r.Y
             }).ToList(),
@@ -266,6 +267,7 @@ public class StoryEpicService : IStoryEpicService
                 existingRegion.ImageUrl = regionDto.ImageUrl;
                 existingRegion.SortOrder = regionDto.SortOrder;
                 existingRegion.IsLocked = regionDto.IsLocked;
+                existingRegion.IsStartupRegion = regionDto.IsStartupRegion;
                 existingRegion.X = regionDto.X;
                 existingRegion.Y = regionDto.Y;
                 existingRegion.UpdatedAt = DateTime.UtcNow;
@@ -281,6 +283,7 @@ public class StoryEpicService : IStoryEpicService
                     ImageUrl = regionDto.ImageUrl,
                     SortOrder = regionDto.SortOrder,
                     IsLocked = regionDto.IsLocked,
+                    IsStartupRegion = regionDto.IsStartupRegion,
                     X = regionDto.X,
                     Y = regionDto.Y,
                     CreatedAt = DateTime.UtcNow,

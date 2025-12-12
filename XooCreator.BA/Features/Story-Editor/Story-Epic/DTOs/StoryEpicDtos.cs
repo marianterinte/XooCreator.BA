@@ -20,6 +20,7 @@ public record StoryEpicRegionDto
     public string? ImageUrl { get; init; }
     public int SortOrder { get; init; }
     public bool IsLocked { get; init; }
+    public bool IsStartupRegion { get; init; }
     public double? X { get; init; }
     public double? Y { get; init; }
 }
