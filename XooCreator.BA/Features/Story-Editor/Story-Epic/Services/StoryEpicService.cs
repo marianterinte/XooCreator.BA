@@ -80,7 +80,7 @@ public class StoryEpicService : IStoryEpicService
         var epic = await GetEpicAsync(epicId, ct);
         if (epic == null) return null;
 
-        var preview = GeneratePreview(epic);
+        var preview = await GeneratePreviewAsync(epic, ct);
 
         return new StoryEpicStateDto
         {
@@ -467,10 +467,36 @@ public class StoryEpicService : IStoryEpicService
         }
     }
 
-    private StoryEpicPreviewDto GeneratePreview(StoryEpicDto epic)
+    private async Task<StoryEpicPreviewDto> GeneratePreviewAsync(StoryEpicDto epic, CancellationToken ct = default)
     {
         var nodes = new List<StoryEpicPreviewNodeDto>();
         var edges = new List<StoryEpicPreviewEdgeDto>();
+
+        // Get story titles from database (both published and draft)
+        var storyIds = epic.Stories.Select(s => s.StoryId).ToList();
+        
+        // Get published story titles from StoryDefinitions
+        var storyTitles = await _context.StoryDefinitions
+            .Where(s => storyIds.Contains(s.StoryId) && s.IsActive)
+            .Select(s => new { s.StoryId, s.Title })
+            .ToDictionaryAsync(s => s.StoryId, s => s.Title, ct);
+        
+        // Get draft story titles from StoryCrafts (use first translation's title, or fallback to StoryId)
+        var craftTitles = new Dictionary<string, string>();
+        var crafts = await _context.StoryCrafts
+            .Include(c => c.Translations)
+            .Where(c => storyIds.Contains(c.StoryId))
+            .ToListAsync(ct);
+        
+        foreach (var craft in crafts)
+        {
+            // Use first available translation title, or StoryId as fallback
+            var title = craft.Translations.FirstOrDefault()?.Title;
+            if (!string.IsNullOrWhiteSpace(title))
+            {
+                craftTitles[craft.StoryId] = title;
+            }
+        }
 
         // Add region nodes
         foreach (var region in epic.Regions)
@@ -489,11 +515,16 @@ public class StoryEpicService : IStoryEpicService
         // Add story nodes
         foreach (var story in epic.Stories)
         {
+            // Get story title from StoryDefinition (published) or StoryCraft (draft), fallback to StoryId
+            var storyTitle = storyTitles.TryGetValue(story.StoryId, out var title) 
+                ? title 
+                : (craftTitles.TryGetValue(story.StoryId, out var craftTitle) ? craftTitle : story.StoryId);
+            
             nodes.Add(new StoryEpicPreviewNodeDto
             {
                 Id = story.StoryId,
                 Type = "story",
-                Label = story.StoryId, // Could be enhanced with story title
+                Label = storyTitle, // Use story title instead of ID
                 ImageUrl = story.RewardImageUrl,
                 X = story.X,
                 Y = story.Y

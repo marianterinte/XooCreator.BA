@@ -6,6 +6,13 @@ public interface IStoryEpicProgressService
 {
     Task<StoryEpicStateWithProgressDto?> GetEpicStateWithProgressAsync(string epicId, Guid userId, CancellationToken ct = default);
     Task<CompleteEpicStoryResult> CompleteStoryAsync(string epicId, Guid userId, string storyId, string? selectedAnswer = null, CancellationToken ct = default);
+    Task<ResetEpicProgressResult> ResetProgressAsync(string epicId, Guid userId, CancellationToken ct = default);
+}
+
+public record ResetEpicProgressResult
+{
+    public required bool Success { get; init; }
+    public string? ErrorMessage { get; init; }
 }
 
 public record CompleteEpicStoryResult

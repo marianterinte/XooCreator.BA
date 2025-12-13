@@ -171,5 +171,34 @@ public class StoryEpicProgressService : IStoryEpicProgressService
 
         return unlockedRegions.ToList();
     }
+
+    public async Task<ResetEpicProgressResult> ResetProgressAsync(string epicId, Guid userId, CancellationToken ct = default)
+    {
+        try
+        {
+            var success = await _progressRepository.ResetProgressAsync(userId, epicId);
+            if (!success)
+            {
+                return new ResetEpicProgressResult
+                {
+                    Success = false,
+                    ErrorMessage = "Failed to reset progress"
+                };
+            }
+
+            return new ResetEpicProgressResult
+            {
+                Success = true
+            };
+        }
+        catch (Exception ex)
+        {
+            return new ResetEpicProgressResult
+            {
+                Success = false,
+                ErrorMessage = ex.Message
+            };
+        }
+    }
 }
 

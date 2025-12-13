@@ -110,5 +110,31 @@ public class EpicProgressRepository : IEpicProgressRepository
             return false;
         }
     }
+
+    public async Task<bool> ResetProgressAsync(Guid userId, string epicId)
+    {
+        try
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            
+            // Delete all epic progress for this user and epic
+            await _context.EpicProgress
+                .Where(ep => ep.UserId == userId && ep.EpicId == epicId)
+                .ExecuteDeleteAsync();
+            
+            // Delete all epic story progress for this user and epic
+            await _context.EpicStoryProgress
+                .Where(esp => esp.UserId == userId && esp.EpicId == epicId)
+                .ExecuteDeleteAsync();
+            
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
 }
 
