@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.DTOs;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.Repositories;
+using XooCreator.BA.Infrastructure;
 
 namespace XooCreator.BA.Features.StoryEditor.StoryEpic.Services;
 
@@ -9,11 +10,13 @@ public class StoryEpicService : IStoryEpicService
 {
     private readonly IStoryEpicRepository _repository;
     private readonly XooDbContext _context;
+    private readonly IUserContextService _userContext;
 
-    public StoryEpicService(IStoryEpicRepository repository, XooDbContext context)
+    public StoryEpicService(IStoryEpicRepository repository, XooDbContext context, IUserContextService userContext)
     {
         _repository = repository;
         _context = context;
+        _userContext = userContext;
     }
 
     public async Task EnsureEpicAsync(Guid ownerUserId, string epicId, string name, CancellationToken ct = default)
@@ -21,7 +24,18 @@ public class StoryEpicService : IStoryEpicService
         var exists = await _repository.ExistsAsync(epicId, ct);
         if (!exists)
         {
-            await _repository.CreateAsync(ownerUserId, epicId, name, ct);
+            var epic = await _repository.CreateAsync(ownerUserId, epicId, name, ct);
+            // Create default translation (ro-ro) with the provided name
+            var locale = _userContext.GetRequestLocaleOrDefault("ro-ro");
+            var defaultTranslation = new Data.StoryEpicTranslation
+            {
+                Id = Guid.NewGuid(),
+                StoryEpicId = epic.Id,
+                LanguageCode = locale,
+                Name = name
+            };
+            _context.StoryEpicTranslations.Add(defaultTranslation);
+            await _context.SaveChangesAsync(ct);
         }
     }
 
@@ -38,7 +52,42 @@ public class StoryEpicService : IStoryEpicService
         // Ensure epic exists
         if (existing == null)
         {
-            existing = await _repository.CreateAsync(ownerUserId, epicId, dto.Name, ct);
+            // Use first translation name or dto.Name as fallback
+            var defaultName = dto.Translations.FirstOrDefault()?.Name ?? dto.Name;
+            existing = await _repository.CreateAsync(ownerUserId, epicId, defaultName, ct);
+            
+            // Create translations if provided
+            if (dto.Translations.Any())
+            {
+                foreach (var translationDto in dto.Translations)
+                {
+                    var translation = new Data.StoryEpicTranslation
+                    {
+                        Id = Guid.NewGuid(),
+                        StoryEpicId = existing.Id,
+                        LanguageCode = translationDto.LanguageCode.ToLowerInvariant(),
+                        Name = translationDto.Name,
+                        Description = translationDto.Description
+                    };
+                    _context.StoryEpicTranslations.Add(translation);
+                }
+            }
+            else
+            {
+                // Create default translation (ro-ro) with the provided name
+                var locale = _userContext.GetRequestLocaleOrDefault("ro-ro");
+                var defaultTranslation = new Data.StoryEpicTranslation
+                {
+                    Id = Guid.NewGuid(),
+                    StoryEpicId = existing.Id,
+                    LanguageCode = locale,
+                    Name = defaultName,
+                    Description = dto.Description
+                };
+                _context.StoryEpicTranslations.Add(defaultTranslation);
+            }
+            await _context.SaveChangesAsync(ct);
+            
             // After creation, we need to reload with collections initialized
             existing = await _repository.GetFullAsync(epicId, ct);
             if (existing == null)
@@ -47,12 +96,13 @@ public class StoryEpicService : IStoryEpicService
             }
         }
 
-        // Update basic properties
-        existing.Name = dto.Name;
-        existing.Description = dto.Description;
+        // Update basic properties (keep Name and Description for backward compatibility, but use translations)
         existing.CoverImageUrl = dto.CoverImageUrl;
         existing.Status = dto.Status;
         existing.UpdatedAt = DateTime.UtcNow;
+
+        // Update translations
+        await UpdateTranslationsAsync(existing, dto.Translations, ct);
 
         // Update regions (now with proper tracking since we used GetFullAsync)
         await UpdateRegionsAsync(existing, dto.Regions, ct);
@@ -72,7 +122,8 @@ public class StoryEpicService : IStoryEpicService
         var epic = await _repository.GetFullAsync(epicId, ct);
         if (epic == null) return null;
 
-        return MapToDto(epic);
+        var locale = _userContext.GetRequestLocaleOrDefault("ro-ro");
+        return MapToDto(epic, locale);
     }
 
     public async Task<StoryEpicStateDto?> GetEpicStateAsync(string epicId, CancellationToken ct = default)
@@ -92,6 +143,15 @@ public class StoryEpicService : IStoryEpicService
     public async Task<List<StoryEpicListItemDto>> ListEpicsByOwnerAsync(Guid ownerUserId, Guid? currentUserId = null, CancellationToken ct = default)
     {
         var epics = await _repository.ListByOwnerAsync(ownerUserId, ct);
+        var locale = _userContext.GetRequestLocaleOrDefault("ro-ro");
+        
+        // Load translations for all epics
+        var epicIds = epics.Select(e => e.Id).ToList();
+        var translations = await _context.StoryEpicTranslations
+            .Where(t => epicIds.Contains(t.StoryEpicId))
+            .ToListAsync(ct);
+        var translationsByEpic = translations.GroupBy(t => t.StoryEpicId)
+            .ToDictionary(g => g.Key, g => g.ToList());
         
         return epics.Select(e =>
         {
@@ -101,11 +161,17 @@ public class StoryEpicService : IStoryEpicService
                                           e.AssignedReviewerUserId.HasValue && 
                                           e.AssignedReviewerUserId.Value == currentUserId.Value;
             
+            // Get name and description in requested locale
+            var epicTranslations = translationsByEpic.GetValueOrDefault(e.Id, new List<Data.StoryEpicTranslation>());
+            var translation = epicTranslations.FirstOrDefault(t => t.LanguageCode.Equals(locale, StringComparison.OrdinalIgnoreCase));
+            var name = translation?.Name ?? epicTranslations.FirstOrDefault()?.Name ?? e.Name;
+            var description = translation?.Description ?? epicTranslations.FirstOrDefault()?.Description ?? e.Description;
+            
             return new StoryEpicListItemDto
             {
                 Id = e.Id,
-                Name = e.Name,
-                Description = e.Description,
+                Name = name,
+                Description = description,
                 CoverImageUrl = e.CoverImageUrl,
                 Status = e.Status,
                 CreatedAt = e.CreatedAt,
@@ -195,16 +261,30 @@ public class StoryEpicService : IStoryEpicService
         return publishedEpic.BaseVersion;
     }
 
-    private StoryEpicDto MapToDto(Data.DbStoryEpic epic)
+    private StoryEpicDto MapToDto(Data.DbStoryEpic epic, string locale)
     {
+        // Get translations
+        var translations = epic.Translations.Select(t => new StoryEpicTranslationDto
+        {
+            LanguageCode = t.LanguageCode,
+            Name = t.Name,
+            Description = t.Description
+        }).ToList();
+
+        // Get name and description in requested locale (fallback to first available or epic.Name/Description)
+        var translation = translations.FirstOrDefault(t => t.LanguageCode.Equals(locale, StringComparison.OrdinalIgnoreCase));
+        var name = translation?.Name ?? translations.FirstOrDefault()?.Name ?? epic.Name;
+        var description = translation?.Description ?? translations.FirstOrDefault()?.Description ?? epic.Description;
+
         return new StoryEpicDto
         {
             Id = epic.Id,
-            Name = epic.Name,
-            Description = epic.Description,
+            Name = name,
+            Description = description,
             CoverImageUrl = epic.CoverImageUrl,
             Status = epic.Status,
             PublishedAtUtc = epic.PublishedAtUtc,
+            Translations = translations,
             Regions = epic.Regions.Select(r => new StoryEpicRegionDto
             {
                 Id = r.RegionId,
@@ -236,6 +316,43 @@ public class StoryEpicService : IStoryEpicService
                 SortOrder = r.SortOrder
             }).ToList()
         };
+    }
+
+    private async Task UpdateTranslationsAsync(Data.DbStoryEpic epic, List<StoryEpicTranslationDto> translationDtos, CancellationToken ct)
+    {
+        // Get existing translations from DB
+        var existingTranslations = await _context.StoryEpicTranslations
+            .Where(t => t.StoryEpicId == epic.Id)
+            .ToListAsync(ct);
+        var existingByLang = existingTranslations.ToDictionary(t => t.LanguageCode, StringComparer.OrdinalIgnoreCase);
+
+        // Update or add translations
+        foreach (var translationDto in translationDtos)
+        {
+            var langCode = translationDto.LanguageCode.ToLowerInvariant();
+            if (existingByLang.TryGetValue(langCode, out var existingTranslation))
+            {
+                // Update existing
+                existingTranslation.Name = translationDto.Name;
+                existingTranslation.Description = translationDto.Description;
+            }
+            else
+            {
+                // Add new
+                var newTranslation = new Data.StoryEpicTranslation
+                {
+                    Id = Guid.NewGuid(),
+                    StoryEpicId = epic.Id,
+                    LanguageCode = langCode,
+                    Name = translationDto.Name,
+                    Description = translationDto.Description
+                };
+                _context.StoryEpicTranslations.Add(newTranslation);
+            }
+        }
+
+        // Remove translations not in DTO (optional - we might want to keep all translations)
+        // For now, we'll keep all existing translations and only update/add what's in the DTO
     }
 
     private async Task UpdateRegionsAsync(Data.DbStoryEpic epic, List<StoryEpicRegionDto> regionDtos, CancellationToken ct)

@@ -44,6 +44,7 @@ public class XooDbContext : DbContext
     
     // Story Epic
     public DbSet<DbStoryEpic> StoryEpics => Set<DbStoryEpic>();
+    public DbSet<StoryEpicTranslation> StoryEpicTranslations => Set<StoryEpicTranslation>();
     public DbSet<StoryEpicRegion> StoryEpicRegions => Set<StoryEpicRegion>();
     public DbSet<StoryEpicStoryNode> StoryEpicStoryNodes => Set<StoryEpicStoryNode>();
     public DbSet<StoryEpicUnlockRule> StoryEpicUnlockRules => Set<StoryEpicUnlockRule>();
@@ -541,6 +542,19 @@ public class XooDbContext : DbContext
             e.Property(x => x.Name).HasMaxLength(200).IsRequired();
             e.HasIndex(x => new { x.StoryRegionId, x.LanguageCode }).IsUnique();
             e.HasOne(x => x.StoryRegion).WithMany(x => x.Translations).HasForeignKey(x => x.StoryRegionId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // StoryEpicTranslation - Translations for StoryEpic
+        modelBuilder.Entity<StoryEpicTranslation>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.StoryEpicId).HasMaxLength(100).IsRequired();
+            e.Property(x => x.LanguageCode).HasMaxLength(10).IsRequired();
+            e.Property(x => x.Name).HasMaxLength(200).IsRequired();
+            e.Property(x => x.Description).HasMaxLength(1000);
+            e.HasIndex(x => new { x.StoryEpicId, x.LanguageCode }).IsUnique();
+            e.HasOne(x => x.StoryEpic).WithMany(x => x.Translations).HasForeignKey(x => x.StoryEpicId).OnDelete(DeleteBehavior.Cascade);
         });
 
         // EpicHero - Independent hero entity for epics

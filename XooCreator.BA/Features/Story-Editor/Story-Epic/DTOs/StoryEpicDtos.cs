@@ -1,16 +1,41 @@
 namespace XooCreator.BA.Features.StoryEditor.StoryEpic.DTOs;
 
+/// <summary>
+/// Translation data for a StoryEpic in a specific language
+/// </summary>
+public record StoryEpicTranslationDto
+{
+    public required string LanguageCode { get; init; }
+    public required string Name { get; init; }
+    public string? Description { get; init; }
+}
+
 public record StoryEpicDto
 {
     public required string Id { get; init; }
-    public required string Name { get; init; }
-    public string? Description { get; init; }
+    public required string Name { get; init; } // Name in requested/default language
+    public string? Description { get; init; } // Description in requested/default language
     public string? CoverImageUrl { get; init; }
     public string Status { get; init; } = "draft";
     public DateTime? PublishedAtUtc { get; init; }
     public List<StoryEpicRegionDto> Regions { get; init; } = new();
     public List<StoryEpicStoryNodeDto> Stories { get; init; } = new();
     public List<StoryEpicUnlockRuleDto> Rules { get; init; } = new();
+    public List<StoryEpicTranslationDto> Translations { get; init; } = new(); // All translations
+    
+    // Helper: Get name in a specific language (falls back to first available)
+    public string GetName(string languageCode)
+    {
+        var translation = Translations.FirstOrDefault(t => t.LanguageCode.Equals(languageCode, StringComparison.OrdinalIgnoreCase));
+        return translation?.Name ?? Translations.FirstOrDefault()?.Name ?? Name;
+    }
+    
+    // Helper: Get description in a specific language
+    public string? GetDescription(string languageCode)
+    {
+        var translation = Translations.FirstOrDefault(t => t.LanguageCode.Equals(languageCode, StringComparison.OrdinalIgnoreCase));
+        return translation?.Description ?? Translations.FirstOrDefault()?.Description ?? Description;
+    }
 }
 
 public record StoryEpicRegionDto

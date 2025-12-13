@@ -35,6 +35,7 @@ public class StoryEpicRepository : IStoryEpicRepository
             .Include(x => x.StoryNodes)
                 .ThenInclude(sn => sn.StoryDefinition)
             .Include(x => x.UnlockRules)
+            .Include(x => x.Translations)
             .FirstOrDefaultAsync(x => x.Id == id, ct);
     }
 
@@ -94,6 +95,7 @@ public class StoryEpicRepository : IStoryEpicRepository
         return _context.StoryEpics
             .Include(x => x.Regions)
             .Include(x => x.StoryNodes)
+            .Include(x => x.Translations)
             .Where(x => x.OwnerUserId == ownerUserId)
             .OrderByDescending(x => x.UpdatedAt)
             .ToListAsync(ct);

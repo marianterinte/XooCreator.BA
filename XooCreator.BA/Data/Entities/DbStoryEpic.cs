@@ -31,5 +31,6 @@ public class DbStoryEpic
     public ICollection<StoryEpicRegion> Regions { get; set; } = new List<StoryEpicRegion>();
     public ICollection<StoryEpicStoryNode> StoryNodes { get; set; } = new List<StoryEpicStoryNode>();
     public ICollection<StoryEpicUnlockRule> UnlockRules { get; set; } = new List<StoryEpicUnlockRule>();
+    public ICollection<StoryEpicTranslation> Translations { get; set; } = new List<StoryEpicTranslation>();
 }
 
