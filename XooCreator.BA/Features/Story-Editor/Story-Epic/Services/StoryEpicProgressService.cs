@@ -54,16 +54,28 @@ public class StoryEpicProgressService : IStoryEpicProgressService
         };
     }
 
-    public async Task<bool> CompleteStoryAsync(string epicId, Guid userId, string storyId, string? selectedAnswer = null, CancellationToken ct = default)
+    public async Task<CompleteEpicStoryResult> CompleteStoryAsync(string epicId, Guid userId, string storyId, string? selectedAnswer = null, CancellationToken ct = default)
     {
+        // Get current unlocked regions BEFORE completing the story
+        var currentProgress = await _progressRepository.GetEpicProgressAsync(userId, epicId);
+        var currentUnlockedRegions = new HashSet<string>(
+            currentProgress.Where(p => p.IsUnlocked).Select(p => p.RegionId)
+        );
+
         // Complete the story
         var completed = await _progressRepository.CompleteStoryAsync(userId, epicId, storyId, selectedAnswer);
         
-        if (!completed) return false;
+        if (!completed)
+        {
+            return new CompleteEpicStoryResult { Success = false, NewlyUnlockedRegions = new List<string>() };
+        }
 
         // Get epic state to evaluate new unlocked regions
         var epicState = await _epicService.GetEpicStateAsync(epicId, ct);
-        if (epicState == null) return false;
+        if (epicState == null)
+        {
+            return new CompleteEpicStoryResult { Success = false, NewlyUnlockedRegions = new List<string>() };
+        }
 
         // Get updated story progress
         var storyProgress = await _progressRepository.GetEpicStoryProgressAsync(userId, epicId);
@@ -75,13 +87,23 @@ public class StoryEpicProgressService : IStoryEpicProgressService
             epicState.Epic.Regions
         );
 
-        // Unlock any new regions
+        // Find newly unlocked regions (regions that are now unlocked but weren't before)
+        var newlyUnlockedRegions = new List<string>();
         foreach (var regionId in unlockedRegions)
         {
-            await _progressRepository.UnlockRegionAsync(userId, epicId, regionId);
+            if (!currentUnlockedRegions.Contains(regionId))
+            {
+                newlyUnlockedRegions.Add(regionId);
+                // Unlock the region in the database
+                await _progressRepository.UnlockRegionAsync(userId, epicId, regionId);
+            }
         }
 
-        return true;
+        return new CompleteEpicStoryResult
+        {
+            Success = true,
+            NewlyUnlockedRegions = newlyUnlockedRegions
+        };
     }
 
     private List<string> EvaluateUnlockedRegions(

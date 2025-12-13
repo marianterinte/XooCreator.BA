@@ -39,9 +39,9 @@ public class CompleteEpicStoryEndpoint
 
         var selectedAnswer = request?.SelectedAnswer;
 
-        var completed = await ep._progressService.CompleteStoryAsync(epicId, user.Id, storyId, selectedAnswer, ct);
+        var result = await ep._progressService.CompleteStoryAsync(epicId, user.Id, storyId, selectedAnswer, ct);
         
-        if (!completed)
+        if (!result.Success)
         {
             ep._logger.LogWarning("CompleteEpicStory: Failed to complete story epicId={EpicId} storyId={StoryId} userId={UserId}", epicId, storyId, user.Id);
             return TypedResults.BadRequest("Failed to complete story. It may already be completed.");
@@ -51,7 +51,8 @@ public class CompleteEpicStoryEndpoint
         {
             Success = true,
             EpicId = epicId,
-            StoryId = storyId
+            StoryId = storyId,
+            NewlyUnlockedRegions = result.NewlyUnlockedRegions
         };
 
         return TypedResults.Ok(response);
@@ -68,5 +69,6 @@ public record CompleteEpicStoryResponse
     public required bool Success { get; init; }
     public required string EpicId { get; init; }
     public required string StoryId { get; init; }
+    public List<string> NewlyUnlockedRegions { get; init; } = new();
 }
 
