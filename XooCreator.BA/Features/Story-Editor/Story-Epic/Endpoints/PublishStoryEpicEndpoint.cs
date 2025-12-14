@@ -154,7 +154,10 @@ public class PublishStoryEpicEndpoint
             return TypedResults.Unauthorized();
         }
 
-        if (!ep._auth0.HasRole(user, UserRole.Creator) && !ep._auth0.HasRole(user, UserRole.Admin))
+        var isAdmin = ep._auth0.HasRole(user, UserRole.Admin);
+        var isCreator = ep._auth0.HasRole(user, UserRole.Creator);
+
+        if (!isAdmin && !isCreator)
         {
             return TypedResults.Forbid();
         }
@@ -165,6 +168,17 @@ public class PublishStoryEpicEndpoint
         if (job == null)
         {
             return TypedResults.NotFound();
+        }
+
+        // Verify ownership (unless admin)
+        if (!isAdmin)
+        {
+            if (job.OwnerUserId != user.Id)
+            {
+                ep._logger.LogWarning("Epic publish job access forbidden: userId={UserId} jobId={JobId} ownerId={OwnerId}",
+                    user.Id, jobId, job.OwnerUserId);
+                return TypedResults.Forbid();
+            }
         }
 
         var response = new EpicPublishJobStatusResponse
