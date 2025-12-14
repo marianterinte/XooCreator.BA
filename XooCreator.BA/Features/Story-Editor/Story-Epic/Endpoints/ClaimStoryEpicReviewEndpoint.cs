@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using XooCreator.BA.Data;
 using XooCreator.BA.Data.Enums;
-using XooCreator.BA.Features.StoryEditor.StoryEpic.Repositories;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
 using Microsoft.Extensions.Logging;
@@ -12,16 +13,16 @@ namespace XooCreator.BA.Features.StoryEditor.StoryEpic.Endpoints;
 [Endpoint]
 public class ClaimStoryEpicReviewEndpoint
 {
-    private readonly IStoryEpicRepository _epicRepository;
+    private readonly XooDbContext _context;
     private readonly IAuth0UserService _auth0;
     private readonly ILogger<ClaimStoryEpicReviewEndpoint> _logger;
 
     public ClaimStoryEpicReviewEndpoint(
-        IStoryEpicRepository epicRepository,
+        XooDbContext context,
         IAuth0UserService auth0,
         ILogger<ClaimStoryEpicReviewEndpoint> logger)
     {
-        _epicRepository = epicRepository;
+        _context = context;
         _auth0 = auth0;
         _logger = logger;
     }
@@ -49,7 +50,10 @@ public class ClaimStoryEpicReviewEndpoint
             return TypedResults.Forbid();
         }
 
-        var epic = await ep._epicRepository.GetAsync(epicId, ct);
+        // Get epic craft (draft)
+        var epic = await ep._context.StoryEpicCrafts
+            .FirstOrDefaultAsync(e => e.Id == epicId, ct);
+        
         if (epic == null) return TypedResults.NotFound();
 
         var currentStatus = StoryStatusExtensions.FromDb(epic.Status);
@@ -64,7 +68,7 @@ public class ClaimStoryEpicReviewEndpoint
         epic.AssignedReviewerUserId = user.Id;
         epic.ReviewStartedAt = DateTime.UtcNow;
         epic.UpdatedAt = DateTime.UtcNow;
-        await ep._epicRepository.SaveAsync(epic, ct);
+        await ep._context.SaveChangesAsync(ct);
         
         ep._logger.LogInformation("Epic claim: epicId={EpicId} reviewer={Reviewer}", epicId, user.Id);
         return TypedResults.Ok(new ClaimEpicResponse());

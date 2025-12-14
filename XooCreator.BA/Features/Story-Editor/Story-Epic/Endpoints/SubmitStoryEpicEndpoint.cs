@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
-using XooCreator.BA.Features.StoryEditor.StoryEpic.Repositories;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
@@ -14,19 +14,16 @@ namespace XooCreator.BA.Features.StoryEditor.StoryEpic.Endpoints;
 [Endpoint]
 public class SubmitStoryEpicEndpoint
 {
-    private readonly IStoryEpicRepository _epics;
-    private readonly IUserContextService _userContext;
+    private readonly XooDbContext _context;
     private readonly IAuth0UserService _auth0;
     private readonly ILogger<SubmitStoryEpicEndpoint> _logger;
 
     public SubmitStoryEpicEndpoint(
-        IStoryEpicRepository epics,
-        IUserContextService userContext,
+        XooDbContext context,
         IAuth0UserService auth0,
         ILogger<SubmitStoryEpicEndpoint> logger)
     {
-        _epics = epics;
-        _userContext = userContext;
+        _context = context;
         _auth0 = auth0;
         _logger = logger;
     }
@@ -54,7 +51,10 @@ public class SubmitStoryEpicEndpoint
             return TypedResults.Forbid();
         }
 
-        var epic = await ep._epics.GetAsync(epicId, ct);
+        // Get epic craft (draft)
+        var epic = await ep._context.StoryEpicCrafts
+            .FirstOrDefaultAsync(e => e.Id == epicId, ct);
+        
         if (epic == null) return TypedResults.NotFound();
 
         if (epic.OwnerUserId != user.Id)
@@ -77,7 +77,7 @@ public class SubmitStoryEpicEndpoint
         epic.ReviewEndedAt = null;
         epic.UpdatedAt = DateTime.UtcNow;
         
-        await ep._epics.SaveAsync(epic, ct);
+        await ep._context.SaveChangesAsync(ct);
         ep._logger.LogInformation("Submit epic: epicId={EpicId} from={From} to={To}", epicId, current, StoryStatus.SentForApproval);
         return TypedResults.Ok(new SubmitStoryEpicResponse());
     }

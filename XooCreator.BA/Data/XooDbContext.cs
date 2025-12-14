@@ -42,12 +42,25 @@ public class XooDbContext : DbContext
     public DbSet<TreeUnlockRule> TreeUnlockRules => Set<TreeUnlockRule>();
     public DbSet<TreeConfiguration> TreeConfigurations => Set<TreeConfiguration>();
     
-    // Story Epic
+    // Story Epic - Legacy (DbStoryEpic) - to be migrated
     public DbSet<DbStoryEpic> StoryEpics => Set<DbStoryEpic>();
     public DbSet<StoryEpicTranslation> StoryEpicTranslations => Set<StoryEpicTranslation>();
     public DbSet<StoryEpicRegion> StoryEpicRegions => Set<StoryEpicRegion>();
     public DbSet<StoryEpicStoryNode> StoryEpicStoryNodes => Set<StoryEpicStoryNode>();
     public DbSet<StoryEpicUnlockRule> StoryEpicUnlockRules => Set<StoryEpicUnlockRule>();
+    
+    // Story Epic - New Architecture (Craft for drafts, Definition for published)
+    public DbSet<StoryEpicCraft> StoryEpicCrafts => Set<StoryEpicCraft>();
+    public DbSet<StoryEpicCraftTranslation> StoryEpicCraftTranslations => Set<StoryEpicCraftTranslation>();
+    public DbSet<StoryEpicCraftRegion> StoryEpicCraftRegions => Set<StoryEpicCraftRegion>();
+    public DbSet<StoryEpicCraftStoryNode> StoryEpicCraftStoryNodes => Set<StoryEpicCraftStoryNode>();
+    public DbSet<StoryEpicCraftUnlockRule> StoryEpicCraftUnlockRules => Set<StoryEpicCraftUnlockRule>();
+    
+    public DbSet<StoryEpicDefinition> StoryEpicDefinitions => Set<StoryEpicDefinition>();
+    public DbSet<StoryEpicDefinitionTranslation> StoryEpicDefinitionTranslations => Set<StoryEpicDefinitionTranslation>();
+    public DbSet<StoryEpicDefinitionRegion> StoryEpicDefinitionRegions => Set<StoryEpicDefinitionRegion>();
+    public DbSet<StoryEpicDefinitionStoryNode> StoryEpicDefinitionStoryNodes => Set<StoryEpicDefinitionStoryNode>();
+    public DbSet<StoryEpicDefinitionUnlockRule> StoryEpicDefinitionUnlockRules => Set<StoryEpicDefinitionUnlockRule>();
     
     // Story Epic - Independent Regions and Heroes
     public DbSet<StoryRegion> StoryRegions => Set<StoryRegion>();
@@ -99,6 +112,7 @@ public class XooDbContext : DbContext
     public DbSet<StoryPublishJob> StoryPublishJobs => Set<StoryPublishJob>();
     public DbSet<StoryVersionJob> StoryVersionJobs => Set<StoryVersionJob>();
     public DbSet<EpicVersionJob> EpicVersionJobs => Set<EpicVersionJob>();
+    public DbSet<EpicPublishJob> EpicPublishJobs => Set<EpicPublishJob>();
     public DbSet<StoryImportJob> StoryImportJobs => Set<StoryImportJob>();
     public DbSet<StoryForkJob> StoryForkJobs => Set<StoryForkJob>();
     public DbSet<StoryForkAssetJob> StoryForkAssetJobs => Set<StoryForkAssetJob>();
@@ -547,7 +561,131 @@ public class XooDbContext : DbContext
             e.HasOne(x => x.StoryRegion).WithMany(x => x.Translations).HasForeignKey(x => x.StoryRegionId).OnDelete(DeleteBehavior.Cascade);
         });
 
-        // StoryEpicTranslation - Translations for StoryEpic
+        // StoryEpicCraft - Draft epics (similar to StoryCraft)
+        modelBuilder.Entity<StoryEpicCraft>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasMaxLength(100).IsRequired();
+            e.Property(x => x.Name).HasMaxLength(200).IsRequired();
+            e.Property(x => x.Description).HasMaxLength(1000);
+            e.Property(x => x.Status).HasMaxLength(20).IsRequired();
+            e.HasIndex(x => new { x.OwnerUserId, x.Id }).IsUnique();
+            e.HasIndex(x => x.Status);
+            e.HasIndex(x => x.AssignedReviewerUserId).HasFilter($"[{nameof(StoryEpicCraft.AssignedReviewerUserId)}] IS NOT NULL");
+            e.HasOne(x => x.Owner).WithMany().HasForeignKey(x => x.OwnerUserId).OnDelete(DeleteBehavior.Cascade);
+            // Review workflow foreign keys (optional, nullable)
+            e.HasOne<AlchimaliaUser>().WithMany().HasForeignKey(x => x.AssignedReviewerUserId).OnDelete(DeleteBehavior.SetNull);
+            e.HasOne<AlchimaliaUser>().WithMany().HasForeignKey(x => x.ReviewedByUserId).OnDelete(DeleteBehavior.SetNull);
+            e.HasOne<AlchimaliaUser>().WithMany().HasForeignKey(x => x.ApprovedByUserId).OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<StoryEpicCraftRegion>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.EpicId).HasMaxLength(100).IsRequired();
+            e.Property(x => x.RegionId).HasMaxLength(50).IsRequired();
+            e.Property(x => x.Label).HasMaxLength(100).IsRequired();
+            e.HasIndex(x => new { x.EpicId, x.RegionId }).IsUnique();
+            e.HasOne(x => x.Epic).WithMany(x => x.Regions).HasForeignKey(x => x.EpicId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<StoryEpicCraftStoryNode>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.StoryId).HasMaxLength(100).IsRequired();
+            e.Property(x => x.RegionId).HasMaxLength(50).IsRequired();
+            e.HasIndex(x => new { x.EpicId, x.StoryId, x.RegionId }).IsUnique();
+            e.HasOne(x => x.Epic).WithMany(x => x.StoryNodes).HasForeignKey(x => x.EpicId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.Region).WithMany(x => x.Stories).HasForeignKey(x => new { x.EpicId, x.RegionId }).HasPrincipalKey(r => new { r.EpicId, r.RegionId }).OnDelete(DeleteBehavior.Cascade);
+            // StoryCraft and StoryDefinition are navigation properties only (no FK constraints in DB)
+            e.HasOne(x => x.StoryCraft).WithMany().HasPrincipalKey(s => s.StoryId).HasForeignKey(x => x.StoryId).OnDelete(DeleteBehavior.SetNull).IsRequired(false);
+            e.HasOne(x => x.StoryDefinition).WithMany().HasPrincipalKey(s => s.StoryId).HasForeignKey(x => x.StoryId).OnDelete(DeleteBehavior.SetNull).IsRequired(false);
+        });
+
+        modelBuilder.Entity<StoryEpicCraftUnlockRule>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.Type).HasMaxLength(20).IsRequired();
+            e.Property(x => x.FromId).HasMaxLength(100).IsRequired();
+            e.Property(x => x.ToRegionId).HasMaxLength(50).IsRequired();
+            e.HasOne(x => x.Epic).WithMany(x => x.UnlockRules).HasForeignKey(x => x.EpicId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<StoryEpicCraftTranslation>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.StoryEpicCraftId).HasMaxLength(100).IsRequired();
+            e.Property(x => x.LanguageCode).HasMaxLength(10).IsRequired();
+            e.Property(x => x.Name).HasMaxLength(200).IsRequired();
+            e.Property(x => x.Description).HasMaxLength(1000);
+            e.HasIndex(x => new { x.StoryEpicCraftId, x.LanguageCode }).IsUnique();
+            e.HasOne(x => x.StoryEpicCraft).WithMany(x => x.Translations).HasForeignKey(x => x.StoryEpicCraftId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // StoryEpicDefinition - Published epics (similar to StoryDefinition)
+        modelBuilder.Entity<StoryEpicDefinition>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasMaxLength(100).IsRequired();
+            e.Property(x => x.Name).HasMaxLength(200).IsRequired();
+            e.Property(x => x.Description).HasMaxLength(1000);
+            e.Property(x => x.Status).HasMaxLength(20).IsRequired();
+            e.HasIndex(x => new { x.OwnerUserId, x.Id }).IsUnique();
+            e.HasIndex(x => x.Status);
+            e.HasOne(x => x.Owner).WithMany().HasForeignKey(x => x.OwnerUserId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<StoryEpicDefinitionRegion>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.EpicId).HasMaxLength(100).IsRequired();
+            e.Property(x => x.RegionId).HasMaxLength(50).IsRequired();
+            e.Property(x => x.Label).HasMaxLength(100).IsRequired();
+            e.HasIndex(x => new { x.EpicId, x.RegionId }).IsUnique();
+            e.HasOne(x => x.Epic).WithMany(x => x.Regions).HasForeignKey(x => x.EpicId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<StoryEpicDefinitionStoryNode>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.StoryId).HasMaxLength(100).IsRequired();
+            e.Property(x => x.RegionId).HasMaxLength(50).IsRequired();
+            e.HasIndex(x => new { x.EpicId, x.StoryId, x.RegionId }).IsUnique();
+            e.HasOne(x => x.Epic).WithMany(x => x.StoryNodes).HasForeignKey(x => x.EpicId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.Region).WithMany(x => x.Stories).HasForeignKey(x => new { x.EpicId, x.RegionId }).HasPrincipalKey(r => new { r.EpicId, r.RegionId }).OnDelete(DeleteBehavior.Cascade);
+            // Only StoryDefinition for published epics
+            e.HasOne(x => x.StoryDefinition).WithMany().HasPrincipalKey(s => s.StoryId).HasForeignKey(x => x.StoryId).OnDelete(DeleteBehavior.Restrict).IsRequired();
+        });
+
+        modelBuilder.Entity<StoryEpicDefinitionUnlockRule>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.Type).HasMaxLength(20).IsRequired();
+            e.Property(x => x.FromId).HasMaxLength(100).IsRequired();
+            e.Property(x => x.ToRegionId).HasMaxLength(50).IsRequired();
+            e.HasOne(x => x.Epic).WithMany(x => x.UnlockRules).HasForeignKey(x => x.EpicId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<StoryEpicDefinitionTranslation>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.StoryEpicDefinitionId).HasMaxLength(100).IsRequired();
+            e.Property(x => x.LanguageCode).HasMaxLength(10).IsRequired();
+            e.Property(x => x.Name).HasMaxLength(200).IsRequired();
+            e.Property(x => x.Description).HasMaxLength(1000);
+            e.HasIndex(x => new { x.StoryEpicDefinitionId, x.LanguageCode }).IsUnique();
+            e.HasOne(x => x.StoryEpicDefinition).WithMany(x => x.Translations).HasForeignKey(x => x.StoryEpicDefinitionId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // StoryEpicTranslation - Translations for StoryEpic (legacy)
         modelBuilder.Entity<StoryEpicTranslation>(e =>
         {
             e.HasKey(x => x.Id);
@@ -1228,6 +1366,31 @@ public class XooDbContext : DbContext
             e.Property(x => x.Status).HasMaxLength(32).IsRequired();
             e.Property(x => x.ErrorMessage).HasMaxLength(2000);
             e.HasIndex(x => new { x.StoryId, x.Status });
+            e.HasIndex(x => x.QueuedAtUtc);
+        });
+
+        modelBuilder.Entity<EpicVersionJob>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.EpicId).HasMaxLength(200).IsRequired();
+            e.Property(x => x.RequestedByEmail).HasMaxLength(256);
+            e.Property(x => x.Status).HasMaxLength(32).IsRequired();
+            e.Property(x => x.ErrorMessage).HasMaxLength(2000);
+            e.HasIndex(x => new { x.EpicId, x.Status });
+            e.HasIndex(x => x.QueuedAtUtc);
+        });
+
+        modelBuilder.Entity<EpicPublishJob>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.EpicId).HasMaxLength(200).IsRequired();
+            e.Property(x => x.RequestedByEmail).HasMaxLength(256);
+            e.Property(x => x.LangTag).HasMaxLength(10).IsRequired();
+            e.Property(x => x.Status).HasMaxLength(32).IsRequired();
+            e.Property(x => x.ErrorMessage).HasMaxLength(2000);
+            e.HasIndex(x => new { x.EpicId, x.Status });
             e.HasIndex(x => x.QueuedAtUtc);
         });
     }

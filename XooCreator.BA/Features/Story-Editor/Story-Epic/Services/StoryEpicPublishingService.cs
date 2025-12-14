@@ -164,6 +164,53 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
         return assets;
     }
 
+    /// <summary>
+    /// Collects assets from StoryEpicCraft (for publishing from craft to definition)
+    /// </summary>
+    private List<EpicAssetInfo> CollectEpicAssetsFromCraft(StoryEpicCraft craft)
+    {
+        var assets = new List<EpicAssetInfo>();
+
+        // Cover image
+        if (!string.IsNullOrWhiteSpace(craft.CoverImageUrl))
+        {
+            var extension = Path.GetExtension(craft.CoverImageUrl);
+            if (string.IsNullOrWhiteSpace(extension))
+            {
+                extension = ".png"; // Default extension
+            }
+
+            assets.Add(new EpicAssetInfo
+            {
+                Type = EpicAssetType.Cover,
+                DraftPath = NormalizeBlobPath(craft.CoverImageUrl),
+                PublishedPath = $"images/epics/{craft.Id}/cover{extension}"
+            });
+        }
+
+        // Reward images
+        foreach (var storyNode in craft.StoryNodes)
+        {
+            if (string.IsNullOrWhiteSpace(storyNode.RewardImageUrl)) continue;
+
+            var extension = Path.GetExtension(storyNode.RewardImageUrl);
+            if (string.IsNullOrWhiteSpace(extension))
+            {
+                extension = ".png"; // Default extension
+            }
+
+            assets.Add(new EpicAssetInfo
+            {
+                Type = EpicAssetType.Reward,
+                StoryId = storyNode.StoryId,
+                DraftPath = NormalizeBlobPath(storyNode.RewardImageUrl),
+                PublishedPath = $"images/epics/{craft.Id}/stories/{storyNode.StoryId}/reward{extension}"
+            });
+        }
+
+        return assets;
+    }
+
     public async Task<AssetCopyResult> CopyEpicAssetsAsync(List<EpicAssetInfo> assets, string ownerEmail, string epicId, CancellationToken ct)
     {
         foreach (var asset in assets)
@@ -338,5 +385,171 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
     {
         if (string.IsNullOrWhiteSpace(path)) return false;
         return path.StartsWith("images/", StringComparison.OrdinalIgnoreCase);
+    }
+
+    public async Task PublishFromCraftAsync(StoryEpicCraft craft, string requestedByEmail, string langTag, bool forceFull, CancellationToken ct = default)
+    {
+        // Load craft with all related data
+        craft = await _context.StoryEpicCrafts
+            .Include(c => c.Regions)
+            .Include(c => c.StoryNodes)
+            .Include(c => c.UnlockRules)
+            .Include(c => c.Translations)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(c => c.Id == craft.Id, ct) ?? craft;
+
+        // Validate craft status
+        if (craft.Status != "approved")
+        {
+            throw new InvalidOperationException($"Epic craft must be approved before publishing (current status: {craft.Status})");
+        }
+
+        // Load or create StoryEpicDefinition
+        var definition = await _context.StoryEpicDefinitions
+            .Include(d => d.Regions)
+            .Include(d => d.StoryNodes)
+            .Include(d => d.UnlockRules)
+            .Include(d => d.Translations)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(d => d.Id == craft.Id, ct);
+
+        var isNew = definition == null;
+        if (isNew)
+        {
+            definition = new StoryEpicDefinition
+            {
+                Id = craft.Id,
+                Name = craft.Name,
+                Description = craft.Description,
+                OwnerUserId = craft.OwnerUserId,
+                Status = "published",
+                CoverImageUrl = craft.CoverImageUrl,
+                IsDefault = craft.IsDefault,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                PublishedAtUtc = DateTime.UtcNow,
+                Version = 1,
+                BaseVersion = 0,
+                LastPublishedVersion = craft.LastDraftVersion
+            };
+            _context.StoryEpicDefinitions.Add(definition);
+        }
+        else
+        {
+            // Update existing definition
+            // Save current version as BaseVersion BEFORE incrementing
+            definition.BaseVersion = definition.Version;
+            definition.Version = definition.Version <= 0 ? 1 : definition.Version + 1;
+            
+            definition.Name = craft.Name;
+            definition.Description = craft.Description;
+            definition.Status = "published";
+            definition.CoverImageUrl = craft.CoverImageUrl;
+            definition.IsDefault = craft.IsDefault;
+            definition.UpdatedAt = DateTime.UtcNow;
+            definition.PublishedAtUtc = DateTime.UtcNow;
+            definition.LastPublishedVersion = craft.LastDraftVersion;
+        }
+
+        // Collect and copy assets from craft
+        var assets = CollectEpicAssetsFromCraft(craft);
+        var copyResult = await CopyEpicAssetsAsync(assets, requestedByEmail, craft.Id, ct);
+        if (copyResult.HasError)
+        {
+            throw new InvalidOperationException(copyResult.ErrorMessage);
+        }
+
+        // Remove existing content before adding new content
+        // Always remove to avoid duplication when re-publishing
+        // This ensures clean state before copying new content from craft
+        // Remove existing regions
+        _context.StoryEpicDefinitionRegions.RemoveRange(definition.Regions);
+        definition.Regions.Clear();
+
+        // Remove existing story nodes
+        _context.StoryEpicDefinitionStoryNodes.RemoveRange(definition.StoryNodes);
+        definition.StoryNodes.Clear();
+
+        // Remove existing unlock rules
+        _context.StoryEpicDefinitionUnlockRules.RemoveRange(definition.UnlockRules);
+        definition.UnlockRules.Clear();
+
+        // Remove existing translations
+        _context.StoryEpicDefinitionTranslations.RemoveRange(definition.Translations);
+        definition.Translations.Clear();
+
+        // Update definition with published asset paths
+        var coverAsset = assets.FirstOrDefault(a => a.Type == EpicAssetType.Cover);
+        if (coverAsset != null)
+        {
+            definition.CoverImageUrl = coverAsset.PublishedPath;
+        }
+
+        // Copy Regions
+        foreach (var craftRegion in craft.Regions)
+        {
+            definition.Regions.Add(new StoryEpicDefinitionRegion
+            {
+                RegionId = craftRegion.RegionId,
+                Label = craftRegion.Label,
+                ImageUrl = craftRegion.ImageUrl,
+                SortOrder = craftRegion.SortOrder,
+                IsLocked = craftRegion.IsLocked,
+                IsStartupRegion = craftRegion.IsStartupRegion,
+                X = craftRegion.X,
+                Y = craftRegion.Y
+            });
+        }
+
+        // Copy StoryNodes
+        foreach (var craftNode in craft.StoryNodes)
+        {
+            // Find the corresponding reward asset to get published path
+            var rewardAsset = assets.FirstOrDefault(a => a.Type == EpicAssetType.Reward && a.StoryId == craftNode.StoryId);
+            var rewardImageUrl = rewardAsset?.PublishedPath ?? craftNode.RewardImageUrl;
+
+            definition.StoryNodes.Add(new StoryEpicDefinitionStoryNode
+            {
+                StoryId = craftNode.StoryId,
+                RegionId = craftNode.RegionId,
+                RewardImageUrl = rewardImageUrl, // Use published path if asset was copied
+                SortOrder = craftNode.SortOrder,
+                X = craftNode.X,
+                Y = craftNode.Y
+            });
+        }
+
+        // Copy UnlockRules
+        foreach (var craftRule in craft.UnlockRules)
+        {
+            definition.UnlockRules.Add(new StoryEpicDefinitionUnlockRule
+            {
+                Type = craftRule.Type,
+                FromId = craftRule.FromId,
+                ToRegionId = craftRule.ToRegionId,
+                RequiredStoriesCsv = craftRule.RequiredStoriesCsv,
+                MinCount = craftRule.MinCount,
+                StoryId = craftRule.StoryId,
+                SortOrder = craftRule.SortOrder
+            });
+        }
+
+        // Copy Translations
+        foreach (var craftTranslation in craft.Translations)
+        {
+            definition.Translations.Add(new StoryEpicDefinitionTranslation
+            {
+                StoryEpicDefinitionId = definition.Id,
+                LanguageCode = craftTranslation.LanguageCode,
+                Name = craftTranslation.Name,
+                Description = craftTranslation.Description
+            });
+        }
+
+        await _context.SaveChangesAsync(ct);
+
+        _logger.LogInformation(
+            "Published StoryEpicCraft to StoryEpicDefinition: epicId={EpicId} version={Version} draftVersion={DraftVersion} isNew={IsNew}",
+            craft.Id, definition.Version, craft.LastDraftVersion, isNew);
     }
 }

@@ -42,6 +42,8 @@ builder.Services.AddHostedService<StoryImportQueueWorker>();
 builder.Services.AddHostedService<StoryForkQueueWorker>();
 builder.Services.AddHostedService<StoryForkAssetsQueueWorker>();
 builder.Services.AddHostedService<StoryExportQueueWorker>();
+builder.Services.AddHostedService<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.EpicPublishQueueJob>();
+builder.Services.AddHostedService<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.EpicVersionQueueJob>();
 
 builder.Services.AddAuthConfiguration(builder.Configuration);
 

@@ -14,6 +14,9 @@ public interface IStoryEpicPublishingService
     Task<AssetCopyResult> CopyEpicAssetsAsync(List<EpicAssetInfo> assets, string ownerEmail, string epicId, CancellationToken ct);
     void UpdateEpicAfterPublish(DbStoryEpic epic, List<EpicAssetInfo> assets);
     Task<DateTime?> PublishAsync(Guid ownerUserId, string epicId, bool isAdmin, CancellationToken ct = default);
+    
+    // New method for publishing from StoryEpicCraft to StoryEpicDefinition
+    Task PublishFromCraftAsync(StoryEpicCraft craft, string requestedByEmail, string langTag, bool forceFull, CancellationToken ct = default);
 }
 
 public class ValidationResult

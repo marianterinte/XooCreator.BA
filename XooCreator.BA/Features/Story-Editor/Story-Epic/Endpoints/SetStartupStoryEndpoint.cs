@@ -53,24 +53,24 @@ public class SetStartupRegionEndpoint
             return TypedResults.Forbid();
         }
 
-        // Verify epic exists and user owns it
-        var epic = await ep._context.StoryEpics
+        // Verify epic exists and user owns it (check both craft and definition)
+        var craft = await ep._context.StoryEpicCrafts
             .FirstOrDefaultAsync(e => e.Id == epicId, ct);
         
-        if (epic == null)
+        if (craft == null)
         {
             ep._logger.LogWarning("SetStartupRegion: Epic not found epicId={EpicId} userId={UserId}", epicId, user.Id);
             return TypedResults.NotFound();
         }
 
-        if (epic.OwnerUserId != user.Id)
+        if (craft.OwnerUserId != user.Id)
         {
             ep._logger.LogWarning("SetStartupRegion: User does not own epic epicId={EpicId} userId={UserId}", epicId, user.Id);
             return TypedResults.Forbid();
         }
 
-        // Verify region exists in this epic
-        var region = await ep._context.StoryEpicRegions
+        // Verify region exists in this epic (use StoryEpicCraftRegions)
+        var region = await ep._context.StoryEpicCraftRegions
             .FirstOrDefaultAsync(r => r.EpicId == epicId && r.RegionId == regionId, ct);
         
         if (region == null)
@@ -84,7 +84,7 @@ public class SetStartupRegionEndpoint
         {
             // Step 1: Set ALL existing startup regions to false first (to avoid constraint violation)
             // We need to do this in a separate save to ensure no two regions have IsStartupRegion = true at the same time
-            var existingStartupRegions = await ep._context.StoryEpicRegions
+            var existingStartupRegions = await ep._context.StoryEpicCraftRegions
                 .Where(r => r.EpicId == epicId && r.IsStartupRegion)
                 .ToListAsync(ct);
             
@@ -103,7 +103,7 @@ public class SetStartupRegionEndpoint
             // Step 2: Now set the selected region to true (safe now, no other region is startup)
             // Detach the region from context and reload it to ensure we have fresh data
             ep._context.Entry(region).State = Microsoft.EntityFrameworkCore.EntityState.Detached;
-            var freshRegion = await ep._context.StoryEpicRegions
+            var freshRegion = await ep._context.StoryEpicCraftRegions
                 .FirstOrDefaultAsync(r => r.EpicId == epicId && r.RegionId == regionId, ct);
             
             if (freshRegion == null)

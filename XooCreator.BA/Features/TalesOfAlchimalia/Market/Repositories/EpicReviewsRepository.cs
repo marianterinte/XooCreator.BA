@@ -36,8 +36,8 @@ public class EpicReviewsRepository : IEpicReviewsRepository
         if (existingReview != null)
             return null; // User already has a review
 
-        // Verify epic exists and is published
-        var epicExists = await _context.StoryEpics
+        // Verify epic exists and is published (use StoryEpicDefinitions)
+        var epicExists = await _context.StoryEpicDefinitions
             .AnyAsync(e => e.Id == epicId && e.Status == "published");
         
         if (!epicExists)

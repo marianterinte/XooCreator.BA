@@ -11,119 +11,176 @@ public class StoryEpicService : IStoryEpicService
     private readonly IStoryEpicRepository _repository;
     private readonly XooDbContext _context;
     private readonly IUserContextService _userContext;
+    private readonly ILogger<StoryEpicService> _logger;
 
-    public StoryEpicService(IStoryEpicRepository repository, XooDbContext context, IUserContextService userContext)
+    public StoryEpicService(IStoryEpicRepository repository, XooDbContext context, IUserContextService userContext, ILogger<StoryEpicService> logger)
     {
         _repository = repository;
         _context = context;
         _userContext = userContext;
+        _logger = logger;
     }
 
     public async Task EnsureEpicAsync(Guid ownerUserId, string epicId, string name, CancellationToken ct = default)
     {
-        var exists = await _repository.ExistsAsync(epicId, ct);
-        if (!exists)
+        // Check if craft exists
+        var craftExists = await _context.StoryEpicCrafts.AnyAsync(c => c.Id == epicId, ct);
+        if (!craftExists)
         {
-            var epic = await _repository.CreateAsync(ownerUserId, epicId, name, ct);
+            // Create new StoryEpicCraft
+            var craft = new StoryEpicCraft
+            {
+                Id = epicId,
+                Name = name,
+                OwnerUserId = ownerUserId,
+                Status = "draft",
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+            _context.StoryEpicCrafts.Add(craft);
+            
             // Create default translation (ro-ro) with the provided name
             var locale = _userContext.GetRequestLocaleOrDefault("ro-ro");
-            var defaultTranslation = new Data.StoryEpicTranslation
+            craft.Translations.Add(new StoryEpicCraftTranslation
             {
-                Id = Guid.NewGuid(),
-                StoryEpicId = epic.Id,
+                StoryEpicCraftId = craft.Id,
                 LanguageCode = locale,
                 Name = name
-            };
-            _context.StoryEpicTranslations.Add(defaultTranslation);
+            });
+            
             await _context.SaveChangesAsync(ct);
         }
     }
 
     public async Task SaveEpicAsync(Guid ownerUserId, string epicId, StoryEpicDto dto, CancellationToken ct = default)
     {
-        // Use GetFullAsync to load related entities (regions, stories, rules)
-        var existing = await _repository.GetFullAsync(epicId, ct);
+        // Load or create StoryEpicCraft (always work with draft)
+        var craft = await _context.StoryEpicCrafts
+            .Include(c => c.Regions)
+            .Include(c => c.StoryNodes)
+            .Include(c => c.UnlockRules)
+            .Include(c => c.Translations)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(c => c.Id == epicId, ct);
         
-        if (existing != null && existing.OwnerUserId != ownerUserId)
+        if (craft != null && craft.OwnerUserId != ownerUserId)
         {
             throw new UnauthorizedAccessException($"User does not own epic '{epicId}'");
         }
 
-        // Ensure epic exists
-        if (existing == null)
+        // Create new craft if it doesn't exist
+        if (craft == null)
         {
             // Use first translation name or dto.Name as fallback
             var defaultName = dto.Translations.FirstOrDefault()?.Name ?? dto.Name;
-            existing = await _repository.CreateAsync(ownerUserId, epicId, defaultName, ct);
+            craft = new StoryEpicCraft
+            {
+                Id = epicId,
+                Name = defaultName,
+                Description = dto.Description,
+                OwnerUserId = ownerUserId,
+                Status = dto.Status ?? "draft",
+                CoverImageUrl = dto.CoverImageUrl,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+            _context.StoryEpicCrafts.Add(craft);
             
             // Create translations if provided
             if (dto.Translations.Any())
             {
                 foreach (var translationDto in dto.Translations)
                 {
-                    var translation = new Data.StoryEpicTranslation
+                    craft.Translations.Add(new StoryEpicCraftTranslation
                     {
-                        Id = Guid.NewGuid(),
-                        StoryEpicId = existing.Id,
+                        StoryEpicCraftId = craft.Id,
                         LanguageCode = translationDto.LanguageCode.ToLowerInvariant(),
                         Name = translationDto.Name,
                         Description = translationDto.Description
-                    };
-                    _context.StoryEpicTranslations.Add(translation);
+                    });
                 }
             }
             else
             {
                 // Create default translation (ro-ro) with the provided name
                 var locale = _userContext.GetRequestLocaleOrDefault("ro-ro");
-                var defaultTranslation = new Data.StoryEpicTranslation
+                craft.Translations.Add(new StoryEpicCraftTranslation
                 {
-                    Id = Guid.NewGuid(),
-                    StoryEpicId = existing.Id,
+                    StoryEpicCraftId = craft.Id,
                     LanguageCode = locale,
                     Name = defaultName,
                     Description = dto.Description
-                };
-                _context.StoryEpicTranslations.Add(defaultTranslation);
+                });
             }
             await _context.SaveChangesAsync(ct);
             
-            // After creation, we need to reload with collections initialized
-            existing = await _repository.GetFullAsync(epicId, ct);
-            if (existing == null)
+            // Reload with collections initialized
+            craft = await _context.StoryEpicCrafts
+                .Include(c => c.Regions)
+                .Include(c => c.StoryNodes)
+                .Include(c => c.UnlockRules)
+                .Include(c => c.Translations)
+                .AsSplitQuery()
+                .FirstOrDefaultAsync(c => c.Id == epicId, ct);
+            
+            if (craft == null)
             {
                 throw new InvalidOperationException($"Failed to create epic '{epicId}'");
             }
         }
 
-        // Update basic properties (keep Name and Description for backward compatibility, but use translations)
-        existing.CoverImageUrl = dto.CoverImageUrl;
-        existing.Status = dto.Status;
-        existing.UpdatedAt = DateTime.UtcNow;
+        // Update basic properties
+        craft.CoverImageUrl = dto.CoverImageUrl;
+        craft.Status = dto.Status ?? craft.Status;
+        craft.UpdatedAt = DateTime.UtcNow;
+        craft.LastDraftVersion += 1; // Increment draft version on each save
 
         // Update translations
-        await UpdateTranslationsAsync(existing, dto.Translations, ct);
+        await UpdateCraftTranslationsAsync(craft, dto.Translations, ct);
 
-        // Update regions (now with proper tracking since we used GetFullAsync)
-        await UpdateRegionsAsync(existing, dto.Regions, ct);
+        // Update regions
+        await UpdateCraftRegionsAsync(craft, dto.Regions, ct);
 
         // Update story nodes
-        await UpdateStoryNodesAsync(existing, dto.Stories, ct);
+        await UpdateCraftStoryNodesAsync(craft, dto.Stories, ct);
 
         // Update unlock rules
-        await UpdateUnlockRulesAsync(existing, dto.Rules, ct);
+        await UpdateCraftUnlockRulesAsync(craft, dto.Rules, ct);
 
         // Save changes
-        await _repository.SaveAsync(existing, ct);
+        await _context.SaveChangesAsync(ct);
     }
 
     public async Task<StoryEpicDto?> GetEpicAsync(string epicId, CancellationToken ct = default)
     {
-        var epic = await _repository.GetFullAsync(epicId, ct);
-        if (epic == null) return null;
+        // Try to get draft (StoryEpicCraft) first
+        var craft = await _context.StoryEpicCrafts
+            .Include(c => c.Regions)
+            .Include(c => c.StoryNodes)
+            .Include(c => c.UnlockRules)
+            .Include(c => c.Translations)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(c => c.Id == epicId, ct);
 
-        var locale = _userContext.GetRequestLocaleOrDefault("ro-ro");
-        return MapToDto(epic, locale);
+        if (craft != null)
+        {
+            var locale = _userContext.GetRequestLocaleOrDefault("ro-ro");
+            return MapCraftToDto(craft, locale);
+        }
+
+        // If no draft, try to get published (StoryEpicDefinition)
+        var definition = await _context.StoryEpicDefinitions
+            .Include(d => d.Regions)
+            .Include(d => d.StoryNodes)
+            .Include(d => d.UnlockRules)
+            .Include(d => d.Translations)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(d => d.Id == epicId, ct);
+
+        if (definition == null) return null;
+
+        var locale2 = _userContext.GetRequestLocaleOrDefault("ro-ro");
+        return MapDefinitionToDto(definition, locale2);
     }
 
     public async Task<StoryEpicStateDto?> GetEpicStateAsync(string epicId, CancellationToken ct = default)
@@ -142,123 +199,349 @@ public class StoryEpicService : IStoryEpicService
 
     public async Task<List<StoryEpicListItemDto>> ListEpicsByOwnerAsync(Guid ownerUserId, Guid? currentUserId = null, CancellationToken ct = default)
     {
-        var epics = await _repository.ListByOwnerAsync(ownerUserId, ct);
         var locale = _userContext.GetRequestLocaleOrDefault("ro-ro");
         
-        // Load translations for all epics
-        var epicIds = epics.Select(e => e.Id).ToList();
-        var translations = await _context.StoryEpicTranslations
-            .Where(t => epicIds.Contains(t.StoryEpicId))
+        // Get both crafts (drafts) and definitions (published) for this owner
+        var crafts = await _context.StoryEpicCrafts
+            .Include(c => c.Regions)
+            .Include(c => c.StoryNodes)
+            .Include(c => c.Translations)
+            .Where(c => c.OwnerUserId == ownerUserId)
             .ToListAsync(ct);
-        var translationsByEpic = translations.GroupBy(t => t.StoryEpicId)
-            .ToDictionary(g => g.Key, g => g.ToList());
         
-        return epics.Select(e =>
+        var definitions = await _context.StoryEpicDefinitions
+            .Include(d => d.Regions)
+            .Include(d => d.StoryNodes)
+            .Include(d => d.Translations)
+            .Where(d => d.OwnerUserId == ownerUserId)
+            .ToListAsync(ct);
+        
+        var result = new List<StoryEpicListItemDto>();
+        
+        // Add crafts (drafts)
+        foreach (var craft in crafts)
         {
-            // Compute flags for current user
-            var isOwnedByCurrentUser = currentUserId.HasValue && e.OwnerUserId == currentUserId.Value;
+            var isOwnedByCurrentUser = currentUserId.HasValue && craft.OwnerUserId == currentUserId.Value;
             var isAssignedToCurrentUser = currentUserId.HasValue && 
-                                          e.AssignedReviewerUserId.HasValue && 
-                                          e.AssignedReviewerUserId.Value == currentUserId.Value;
+                                          craft.AssignedReviewerUserId.HasValue && 
+                                          craft.AssignedReviewerUserId.Value == currentUserId.Value;
             
-            // Get name and description in requested locale
-            var epicTranslations = translationsByEpic.GetValueOrDefault(e.Id, new List<Data.StoryEpicTranslation>());
-            var translation = epicTranslations.FirstOrDefault(t => t.LanguageCode.Equals(locale, StringComparison.OrdinalIgnoreCase));
-            var name = translation?.Name ?? epicTranslations.FirstOrDefault()?.Name ?? e.Name;
-            var description = translation?.Description ?? epicTranslations.FirstOrDefault()?.Description ?? e.Description;
+            var translation = craft.Translations.FirstOrDefault(t => t.LanguageCode.Equals(locale, StringComparison.OrdinalIgnoreCase));
+            var name = translation?.Name ?? craft.Translations.FirstOrDefault()?.Name ?? craft.Name;
+            var description = translation?.Description ?? craft.Translations.FirstOrDefault()?.Description ?? craft.Description;
             
-            return new StoryEpicListItemDto
+            result.Add(new StoryEpicListItemDto
             {
-                Id = e.Id,
+                Id = craft.Id,
                 Name = name,
                 Description = description,
-                CoverImageUrl = e.CoverImageUrl,
-                Status = e.Status,
-                CreatedAt = e.CreatedAt,
-                UpdatedAt = e.UpdatedAt,
-                PublishedAtUtc = e.PublishedAtUtc,
-                StoryCount = e.StoryNodes.Count,
-                RegionCount = e.Regions.Count,
-                AssignedReviewerUserId = e.AssignedReviewerUserId,
+                CoverImageUrl = craft.CoverImageUrl,
+                Status = craft.Status,
+                CreatedAt = craft.CreatedAt,
+                UpdatedAt = craft.UpdatedAt,
+                PublishedAtUtc = null, // Crafts are not published
+                StoryCount = craft.StoryNodes.Count,
+                RegionCount = craft.Regions.Count,
+                AssignedReviewerUserId = craft.AssignedReviewerUserId,
                 IsAssignedToCurrentUser = isAssignedToCurrentUser,
                 IsOwnedByCurrentUser = isOwnedByCurrentUser
-            };
-        }).ToList();
+            });
+        }
+        
+        // Add definitions (published) - always include published epics, even if draft exists
+        // This allows published epics to remain visible when "new version" creates a draft
+        foreach (var definition in definitions)
+        {
+            var isOwnedByCurrentUser = currentUserId.HasValue && definition.OwnerUserId == currentUserId.Value;
+            
+            var translation = definition.Translations.FirstOrDefault(t => t.LanguageCode.Equals(locale, StringComparison.OrdinalIgnoreCase));
+            var name = translation?.Name ?? definition.Translations.FirstOrDefault()?.Name ?? definition.Name;
+            var description = translation?.Description ?? definition.Translations.FirstOrDefault()?.Description ?? definition.Description;
+            
+            result.Add(new StoryEpicListItemDto
+            {
+                Id = definition.Id,
+                Name = name,
+                Description = description,
+                CoverImageUrl = definition.CoverImageUrl,
+                Status = definition.Status,
+                CreatedAt = definition.CreatedAt,
+                UpdatedAt = definition.UpdatedAt,
+                PublishedAtUtc = definition.PublishedAtUtc,
+                StoryCount = definition.StoryNodes.Count,
+                RegionCount = definition.Regions.Count,
+                AssignedReviewerUserId = null, // Definitions don't have reviewers
+                IsAssignedToCurrentUser = false,
+                IsOwnedByCurrentUser = isOwnedByCurrentUser
+            });
+        }
+        
+        return result.OrderByDescending(e => e.UpdatedAt).ToList();
     }
 
     public async Task DeleteEpicAsync(Guid ownerUserId, string epicId, CancellationToken ct = default)
     {
-        // Verify ownership
-        var epic = await _repository.GetAsync(epicId, ct);
-        if (epic == null)
+        // Delete craft if exists
+        var craft = await _context.StoryEpicCrafts.FirstOrDefaultAsync(c => c.Id == epicId, ct);
+        if (craft != null)
+        {
+            if (craft.OwnerUserId != ownerUserId)
+            {
+                throw new UnauthorizedAccessException($"User does not own epic '{epicId}'");
+            }
+            _context.StoryEpicCrafts.Remove(craft);
+        }
+        
+        // Delete definition if exists
+        var definition = await _context.StoryEpicDefinitions.FirstOrDefaultAsync(d => d.Id == epicId, ct);
+        if (definition != null)
+        {
+            if (definition.OwnerUserId != ownerUserId)
+            {
+                throw new UnauthorizedAccessException($"User does not own epic '{epicId}'");
+            }
+            _context.StoryEpicDefinitions.Remove(definition);
+        }
+        
+        if (craft == null && definition == null)
         {
             throw new InvalidOperationException($"Epic '{epicId}' not found");
         }
-
-        if (epic.OwnerUserId != ownerUserId)
-        {
-            throw new UnauthorizedAccessException($"User does not own epic '{epicId}'");
-        }
-
-        await _repository.DeleteAsync(epicId, ct);
+        
+        await _context.SaveChangesAsync(ct);
     }
 
     public async Task<int> CreateVersionFromPublishedAsync(Guid ownerUserId, string epicId, CancellationToken ct = default)
     {
-        // Load published epic with all related data
-        var publishedEpic = await _repository.GetFullAsync(epicId, ct);
-        if (publishedEpic == null)
+        // Load published StoryEpicDefinition with all related data
+        var definition = await _context.StoryEpicDefinitions
+            .Include(d => d.Regions)
+            .Include(d => d.StoryNodes)
+            .Include(d => d.UnlockRules)
+            .Include(d => d.Translations)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(d => d.Id == epicId, ct);
+
+        if (definition == null)
         {
-            throw new InvalidOperationException($"Epic '{epicId}' not found");
+            throw new InvalidOperationException($"Published epic '{epicId}' not found");
         }
 
         // Verify ownership
-        if (publishedEpic.OwnerUserId != ownerUserId)
+        if (definition.OwnerUserId != ownerUserId)
         {
             throw new UnauthorizedAccessException($"User does not own epic '{epicId}'");
         }
 
         // Check if epic is published
-        if (publishedEpic.Status != "published")
+        if (definition.Status != "published")
         {
-            throw new InvalidOperationException($"Epic '{epicId}' is not published (status: {publishedEpic.Status})");
+            throw new InvalidOperationException($"Epic '{epicId}' is not published (status: {definition.Status})");
         }
 
-        // Check if draft already exists (status != "published")
-        var existingEpic = await _repository.GetAsync(epicId, ct);
-        if (existingEpic != null && existingEpic.Status != "published")
+        // Check if draft already exists
+        var existingCraft = await _context.StoryEpicCrafts.FirstOrDefaultAsync(c => c.Id == epicId, ct);
+        if (existingCraft != null && existingCraft.Status != "published")
         {
             throw new InvalidOperationException("A draft already exists for this epic. Please edit or publish it first.");
         }
 
-        // IMPORTANT: Epic-ul publicat rămâne neschimbat în market!
-        // Nu actualizăm epic-ul publicat - doar actualizăm dacă există deja un draft (ceea ce nu e cazul aici)
-        // Epic-ul publicat va rămâne cu status="published" și va fi vizibil în market.
+        // Create new StoryEpicCraft from StoryEpicDefinition
+        var craft = new StoryEpicCraft
+        {
+            Id = definition.Id,
+            Name = definition.Name,
+            Description = definition.Description,
+            OwnerUserId = definition.OwnerUserId,
+            Status = "draft",
+            CoverImageUrl = definition.CoverImageUrl,
+            IsDefault = definition.IsDefault,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+            BaseVersion = definition.Version,
+            LastDraftVersion = 0
+        };
 
-        // Actualizăm epic-ul existent (care este publicat) la draft, dar păstrăm datele publicate
-        // În realitate, epic-ul publicat rămâne în market pentru că query-ul din market verifică status="published"
-        // Dar aici trebuie să actualizăm epic-ul pentru a crea draft-ul
-        
-        // Salvăm versiunea publicată înainte de a actualiza
-        var publishedVersion = publishedEpic.Version;
-        var publishedCoverImageUrl = publishedEpic.CoverImageUrl;
-        var publishedPublishedAtUtc = publishedEpic.PublishedAtUtc;
+        // Copy Regions
+        foreach (var defRegion in definition.Regions)
+        {
+            craft.Regions.Add(new StoryEpicCraftRegion
+            {
+                RegionId = defRegion.RegionId,
+                Label = defRegion.Label,
+                ImageUrl = defRegion.ImageUrl,
+                SortOrder = defRegion.SortOrder,
+                IsLocked = defRegion.IsLocked,
+                IsStartupRegion = defRegion.IsStartupRegion,
+                X = defRegion.X,
+                Y = defRegion.Y
+            });
+        }
 
-        // IMPORTANT: Nu actualizăm status-ul epic-ului publicat!
-        // Epic-ul publicat rămâne cu status="published" astfel încât să rămână vizibil în market.
-        // Doar setăm BaseVersion pentru a ști de la ce versiune publicată am început editarea.
-        publishedEpic.BaseVersion = publishedVersion; // Set base version to published version
-        publishedEpic.LastDraftVersion = 0; // Reset draft version counter
-        publishedEpic.UpdatedAt = DateTime.UtcNow;
-        // NU schimbăm Status - rămâne "published"!
-        // NU schimbăm Version - rămâne versiunea publicată!
-        // NU schimbăm PublishedAtUtc - rămâne data publicării!
-        // Nu ștergem sau copiem entitățile - ele rămân neschimbate pentru market
+        // Copy StoryNodes
+        foreach (var defNode in definition.StoryNodes)
+        {
+            craft.StoryNodes.Add(new StoryEpicCraftStoryNode
+            {
+                StoryId = defNode.StoryId,
+                RegionId = defNode.RegionId,
+                RewardImageUrl = defNode.RewardImageUrl,
+                SortOrder = defNode.SortOrder,
+                X = defNode.X,
+                Y = defNode.Y
+            });
+        }
 
+        // Copy UnlockRules
+        foreach (var defRule in definition.UnlockRules)
+        {
+            craft.UnlockRules.Add(new StoryEpicCraftUnlockRule
+            {
+                Type = defRule.Type,
+                FromId = defRule.FromId,
+                ToRegionId = defRule.ToRegionId,
+                RequiredStoriesCsv = defRule.RequiredStoriesCsv,
+                MinCount = defRule.MinCount,
+                StoryId = defRule.StoryId,
+                SortOrder = defRule.SortOrder
+            });
+        }
+
+        // Copy Translations
+        foreach (var defTranslation in definition.Translations)
+        {
+            craft.Translations.Add(new StoryEpicCraftTranslation
+            {
+                StoryEpicCraftId = craft.Id,
+                LanguageCode = defTranslation.LanguageCode,
+                Name = defTranslation.Name,
+                Description = defTranslation.Description
+            });
+        }
+
+        _context.StoryEpicCrafts.Add(craft);
         await _context.SaveChangesAsync(ct);
-        
-        // Return the base version that was set
-        return publishedEpic.BaseVersion;
+
+        _logger.LogInformation(
+            "Created StoryEpicCraft from StoryEpicDefinition: epicId={EpicId} baseVersion={BaseVersion} ownerId={OwnerId}",
+            epicId, definition.Version, ownerUserId);
+
+        // Return the base version
+        return definition.Version;
+    }
+
+    private StoryEpicDto MapCraftToDto(StoryEpicCraft craft, string locale)
+    {
+        // Get translations
+        var translations = craft.Translations.Select(t => new StoryEpicTranslationDto
+        {
+            LanguageCode = t.LanguageCode,
+            Name = t.Name,
+            Description = t.Description
+        }).ToList();
+
+        // Get name and description in requested locale
+        var translation = translations.FirstOrDefault(t => t.LanguageCode.Equals(locale, StringComparison.OrdinalIgnoreCase));
+        var name = translation?.Name ?? translations.FirstOrDefault()?.Name ?? craft.Name;
+        var description = translation?.Description ?? translations.FirstOrDefault()?.Description ?? craft.Description;
+
+        return new StoryEpicDto
+        {
+            Id = craft.Id,
+            Name = name,
+            Description = description,
+            CoverImageUrl = craft.CoverImageUrl,
+            Status = craft.Status,
+            PublishedAtUtc = null, // Crafts are not published
+            Translations = translations,
+            Regions = craft.Regions.Select(r => new StoryEpicRegionDto
+            {
+                Id = r.RegionId,
+                Label = r.Label,
+                ImageUrl = r.ImageUrl,
+                SortOrder = r.SortOrder,
+                IsLocked = r.IsLocked,
+                IsStartupRegion = r.IsStartupRegion,
+                X = r.X,
+                Y = r.Y
+            }).ToList(),
+            Stories = craft.StoryNodes.Select(sn => new StoryEpicStoryNodeDto
+            {
+                StoryId = sn.StoryId,
+                RegionId = sn.RegionId,
+                RewardImageUrl = sn.RewardImageUrl,
+                SortOrder = sn.SortOrder,
+                X = sn.X,
+                Y = sn.Y
+            }).ToList(),
+            Rules = craft.UnlockRules.Select(r => new StoryEpicUnlockRuleDto
+            {
+                Type = r.Type,
+                FromId = r.FromId,
+                ToRegionId = r.ToRegionId,
+                RequiredStories = r.RequiredStoriesCsv?.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList() ?? new List<string>(),
+                MinCount = r.MinCount,
+                StoryId = r.StoryId,
+                SortOrder = r.SortOrder
+            }).ToList()
+        };
+    }
+
+    private StoryEpicDto MapDefinitionToDto(StoryEpicDefinition definition, string locale)
+    {
+        // Get translations
+        var translations = definition.Translations.Select(t => new StoryEpicTranslationDto
+        {
+            LanguageCode = t.LanguageCode,
+            Name = t.Name,
+            Description = t.Description
+        }).ToList();
+
+        // Get name and description in requested locale
+        var translation = translations.FirstOrDefault(t => t.LanguageCode.Equals(locale, StringComparison.OrdinalIgnoreCase));
+        var name = translation?.Name ?? translations.FirstOrDefault()?.Name ?? definition.Name;
+        var description = translation?.Description ?? translations.FirstOrDefault()?.Description ?? definition.Description;
+
+        return new StoryEpicDto
+        {
+            Id = definition.Id,
+            Name = name,
+            Description = description,
+            CoverImageUrl = definition.CoverImageUrl,
+            Status = definition.Status,
+            PublishedAtUtc = definition.PublishedAtUtc,
+            Translations = translations,
+            Regions = definition.Regions.Select(r => new StoryEpicRegionDto
+            {
+                Id = r.RegionId,
+                Label = r.Label,
+                ImageUrl = r.ImageUrl,
+                SortOrder = r.SortOrder,
+                IsLocked = r.IsLocked,
+                IsStartupRegion = r.IsStartupRegion,
+                X = r.X,
+                Y = r.Y
+            }).ToList(),
+            Stories = definition.StoryNodes.Select(sn => new StoryEpicStoryNodeDto
+            {
+                StoryId = sn.StoryId,
+                RegionId = sn.RegionId,
+                RewardImageUrl = sn.RewardImageUrl,
+                SortOrder = sn.SortOrder,
+                X = sn.X,
+                Y = sn.Y
+            }).ToList(),
+            Rules = definition.UnlockRules.Select(r => new StoryEpicUnlockRuleDto
+            {
+                Type = r.Type,
+                FromId = r.FromId,
+                ToRegionId = r.ToRegionId,
+                RequiredStories = r.RequiredStoriesCsv?.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList() ?? new List<string>(),
+                MinCount = r.MinCount,
+                StoryId = r.StoryId,
+                SortOrder = r.SortOrder
+            }).ToList()
+        };
     }
 
     private StoryEpicDto MapToDto(Data.DbStoryEpic epic, string locale)
@@ -521,6 +804,185 @@ public class StoryEpicService : IStoryEpicService
                 {
                     def.IsPartOfEpic = false;
                 }
+            }
+        }
+    }
+
+    private async Task UpdateCraftTranslationsAsync(StoryEpicCraft craft, List<StoryEpicTranslationDto> translationDtos, CancellationToken ct)
+    {
+        var existingByLang = craft.Translations.ToDictionary(t => t.LanguageCode, StringComparer.OrdinalIgnoreCase);
+
+        // Update or add translations
+        foreach (var translationDto in translationDtos)
+        {
+            var langCode = translationDto.LanguageCode.ToLowerInvariant();
+            if (existingByLang.TryGetValue(langCode, out var existingTranslation))
+            {
+                existingTranslation.Name = translationDto.Name;
+                existingTranslation.Description = translationDto.Description;
+            }
+            else
+            {
+                craft.Translations.Add(new StoryEpicCraftTranslation
+                {
+                    StoryEpicCraftId = craft.Id,
+                    LanguageCode = langCode,
+                    Name = translationDto.Name,
+                    Description = translationDto.Description
+                });
+            }
+        }
+    }
+
+    private async Task UpdateCraftRegionsAsync(StoryEpicCraft craft, List<StoryEpicRegionDto> regionDtos, CancellationToken ct)
+    {
+        var dtoRegionIds = regionDtos.Select(r => r.Id).ToHashSet();
+        var existingByRegionId = craft.Regions.ToDictionary(r => r.RegionId);
+
+        // Remove regions not in DTO
+        var toRemove = craft.Regions.Where(r => !dtoRegionIds.Contains(r.RegionId)).ToList();
+        foreach (var region in toRemove)
+        {
+            craft.Regions.Remove(region);
+        }
+
+        // Update or add regions
+        foreach (var regionDto in regionDtos)
+        {
+            if (existingByRegionId.TryGetValue(regionDto.Id, out var existingRegion))
+            {
+                existingRegion.Label = regionDto.Label;
+                existingRegion.ImageUrl = regionDto.ImageUrl;
+                existingRegion.SortOrder = regionDto.SortOrder;
+                existingRegion.IsLocked = regionDto.IsLocked;
+                existingRegion.IsStartupRegion = regionDto.IsStartupRegion;
+                existingRegion.X = regionDto.X;
+                existingRegion.Y = regionDto.Y;
+                existingRegion.UpdatedAt = DateTime.UtcNow;
+            }
+            else
+            {
+                craft.Regions.Add(new StoryEpicCraftRegion
+                {
+                    RegionId = regionDto.Id,
+                    Label = regionDto.Label,
+                    ImageUrl = regionDto.ImageUrl,
+                    SortOrder = regionDto.SortOrder,
+                    IsLocked = regionDto.IsLocked,
+                    IsStartupRegion = regionDto.IsStartupRegion,
+                    X = regionDto.X,
+                    Y = regionDto.Y,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                });
+            }
+        }
+    }
+
+    private async Task UpdateCraftStoryNodesAsync(StoryEpicCraft craft, List<StoryEpicStoryNodeDto> storyNodeDtos, CancellationToken ct)
+    {
+        var dtoStoryKeys = storyNodeDtos.Select(s => (s.StoryId, s.RegionId)).ToHashSet();
+        var existingByKey = craft.StoryNodes.ToDictionary(sn => (sn.StoryId, sn.RegionId));
+
+        // Remove nodes not in DTO
+        var toRemove = craft.StoryNodes.Where(sn => !dtoStoryKeys.Contains((sn.StoryId, sn.RegionId))).ToList();
+        foreach (var node in toRemove)
+        {
+            craft.StoryNodes.Remove(node);
+        }
+
+        // Update or add story nodes
+        foreach (var storyNodeDto in storyNodeDtos)
+        {
+            var key = (storyNodeDto.StoryId, storyNodeDto.RegionId);
+            if (existingByKey.TryGetValue(key, out var existingNode))
+            {
+                existingNode.RewardImageUrl = storyNodeDto.RewardImageUrl;
+                existingNode.SortOrder = storyNodeDto.SortOrder;
+                existingNode.X = storyNodeDto.X;
+                existingNode.Y = storyNodeDto.Y;
+                existingNode.UpdatedAt = DateTime.UtcNow;
+            }
+            else
+            {
+                craft.StoryNodes.Add(new StoryEpicCraftStoryNode
+                {
+                    StoryId = storyNodeDto.StoryId,
+                    RegionId = storyNodeDto.RegionId,
+                    RewardImageUrl = storyNodeDto.RewardImageUrl,
+                    SortOrder = storyNodeDto.SortOrder,
+                    X = storyNodeDto.X,
+                    Y = storyNodeDto.Y,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                });
+            }
+        }
+
+        // Update IsPartOfEpic flag for stories
+        var allStoryIds = storyNodeDtos.Select(s => s.StoryId).Distinct().ToList();
+        if (allStoryIds.Any())
+        {
+            var craftsToUpdate = await _context.StoryCrafts
+                .Where(c => allStoryIds.Contains(c.StoryId))
+                .ToListAsync(ct);
+            foreach (var storyCraft in craftsToUpdate)
+            {
+                storyCraft.IsPartOfEpic = true;
+            }
+
+            var definitionsToUpdate = await _context.StoryDefinitions
+                .Where(d => allStoryIds.Contains(d.StoryId))
+                .ToListAsync(ct);
+            foreach (var storyDef in definitionsToUpdate)
+            {
+                storyDef.IsPartOfEpic = true;
+            }
+        }
+    }
+
+    private async Task UpdateCraftUnlockRulesAsync(StoryEpicCraft craft, List<StoryEpicUnlockRuleDto> ruleDtos, CancellationToken ct)
+    {
+        var dtoRuleKeys = ruleDtos.Select(r => (r.FromId, r.ToRegionId, r.StoryId ?? "")).ToHashSet();
+        var existingByKey = craft.UnlockRules.ToDictionary(r => (r.FromId, r.ToRegionId, r.StoryId ?? ""));
+
+        // Remove rules not in DTO
+        var toRemove = craft.UnlockRules.Where(r => !dtoRuleKeys.Contains((r.FromId, r.ToRegionId, r.StoryId ?? ""))).ToList();
+        foreach (var rule in toRemove)
+        {
+            craft.UnlockRules.Remove(rule);
+        }
+
+        // Update or add rules
+        foreach (var ruleDto in ruleDtos)
+        {
+            var key = (ruleDto.FromId, ruleDto.ToRegionId, ruleDto.StoryId ?? "");
+            if (existingByKey.TryGetValue(key, out var existingRule))
+            {
+                existingRule.Type = ruleDto.Type;
+                existingRule.RequiredStoriesCsv = ruleDto.RequiredStories.Any() 
+                    ? string.Join(",", ruleDto.RequiredStories) 
+                    : null;
+                existingRule.MinCount = ruleDto.MinCount;
+                existingRule.SortOrder = ruleDto.SortOrder;
+                existingRule.UpdatedAt = DateTime.UtcNow;
+            }
+            else
+            {
+                craft.UnlockRules.Add(new StoryEpicCraftUnlockRule
+                {
+                    Type = ruleDto.Type,
+                    FromId = ruleDto.FromId,
+                    ToRegionId = ruleDto.ToRegionId,
+                    RequiredStoriesCsv = ruleDto.RequiredStories.Any() 
+                        ? string.Join(",", ruleDto.RequiredStories) 
+                        : null,
+                    MinCount = ruleDto.MinCount,
+                    StoryId = ruleDto.StoryId,
+                    SortOrder = ruleDto.SortOrder,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                });
             }
         }
     }

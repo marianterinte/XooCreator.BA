@@ -40,6 +40,8 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IAzureQueueClientFactory, AzureQueueClientFactory>();
         services.AddSingleton<IStoryPublishQueue, StoryPublishQueue>();
         services.AddSingleton<IStoryVersionQueue, StoryVersionQueue>();
+        services.AddSingleton<IEpicPublishQueue, EpicPublishQueue>();
+        services.AddSingleton<IEpicVersionQueue, EpicVersionQueue>();
         services.AddSingleton<IStoryImportQueue, StoryImportQueue>();
         services.AddSingleton<IStoryForkQueue, StoryForkQueue>();
         services.AddSingleton<IStoryForkAssetsQueue, StoryForkAssetsQueue>();

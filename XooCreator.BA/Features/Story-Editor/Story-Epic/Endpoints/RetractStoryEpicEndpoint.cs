@@ -1,32 +1,28 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
-using XooCreator.BA.Features.StoryEditor.StoryEpic.Repositories;
-using XooCreator.BA.Infrastructure;
+using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
 using Microsoft.Extensions.Logging;
-using XooCreator.BA.Data.Enums;
 
 namespace XooCreator.BA.Features.StoryEditor.StoryEpic.Endpoints;
 
 [Endpoint]
 public class RetractStoryEpicEndpoint
 {
-    private readonly IStoryEpicRepository _epics;
-    private readonly IUserContextService _userContext;
+    private readonly XooDbContext _context;
     private readonly IAuth0UserService _auth0;
     private readonly ILogger<RetractStoryEpicEndpoint> _logger;
 
     public RetractStoryEpicEndpoint(
-        IStoryEpicRepository epics,
-        IUserContextService userContext,
+        XooDbContext context,
         IAuth0UserService auth0,
         ILogger<RetractStoryEpicEndpoint> logger)
     {
-        _epics = epics;
-        _userContext = userContext;
+        _context = context;
         _auth0 = auth0;
         _logger = logger;
     }
@@ -54,7 +50,10 @@ public class RetractStoryEpicEndpoint
             return TypedResults.Forbid();
         }
 
-        var epic = await ep._epics.GetAsync(epicId, ct);
+        // Get epic craft (draft)
+        var epic = await ep._context.StoryEpicCrafts
+            .FirstOrDefaultAsync(e => e.Id == epicId, ct);
+        
         if (epic == null) return TypedResults.NotFound();
 
         if (epic.OwnerUserId != user.Id)
@@ -83,7 +82,7 @@ public class RetractStoryEpicEndpoint
         epic.ReviewedByUserId = null;
         epic.UpdatedAt = DateTime.UtcNow;
         
-        await ep._epics.SaveAsync(epic, ct);
+        await ep._context.SaveChangesAsync(ct);
         ep._logger.LogInformation("Retract epic: epicId={EpicId}", epicId);
         return TypedResults.Ok(new RetractStoryEpicResponse());
     }

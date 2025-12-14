@@ -26,8 +26,8 @@ public class EpicsMarketplaceRepository
     {
         try
         {
-            // Query only published epics
-            var query = _context.StoryEpics
+            // Query only published epics (use StoryEpicDefinitions)
+            var query = _context.StoryEpicDefinitions
                 .Include(e => e.Owner)
                 .Include(e => e.StoryNodes)
                 .Where(e => e.Status == "published" && e.PublishedAtUtc != null);
@@ -136,7 +136,7 @@ public class EpicsMarketplaceRepository
     {
         try
         {
-            var epic = await _context.StoryEpics
+            var epic = await _context.StoryEpicDefinitions
                 .Include(e => e.Owner)
                 .Include(e => e.StoryNodes)
                 .Include(e => e.Regions)
@@ -216,7 +216,7 @@ public class EpicsMarketplaceRepository
     {
         try
         {
-            return await _context.StoryEpicStoryNodes
+            return await _context.StoryEpicDefinitionStoryNodes
                 .Where(sn => sn.Epic.Status == "published" && sn.Epic.PublishedAtUtc != null)
                 .Select(sn => sn.StoryId)
                 .Distinct()

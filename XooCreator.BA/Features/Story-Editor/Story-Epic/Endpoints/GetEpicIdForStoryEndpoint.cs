@@ -37,27 +37,43 @@ public class GetEpicIdForStoryEndpoint
         if (user == null) return TypedResults.Unauthorized();
 
         // Find epic that contains this story
-        // Check both published (StoryDefinition) and draft (StoryCraft) stories
-        var epicNode = await ep._context.StoryEpicStoryNodes
+        // Check both published (StoryEpicDefinition) and draft (StoryEpicCraft) epics
+        // First check published epics
+        var definitionNode = await ep._context.StoryEpicDefinitionStoryNodes
             .Where(sn => sn.StoryId == storyId)
             .Select(sn => new { sn.EpicId, sn.Epic.Status })
             .FirstOrDefaultAsync(ct);
 
-        if (epicNode == null)
+        if (definitionNode != null)
         {
-            ep._logger.LogDebug("GetEpicIdForStory: Story not found in any epic storyId={StoryId} userId={UserId}", storyId, user.Id);
-            return TypedResults.NotFound();
+            var response = new GetEpicIdForStoryResponse
+            {
+                EpicId = definitionNode.EpicId,
+                Status = definitionNode.Status
+            };
+            return TypedResults.Ok(response);
         }
 
-        // Only return published epics (or allow draft if user is owner)
-        // For now, return any epic (we can add ownership check later if needed)
-        var response = new GetEpicIdForStoryResponse
-        {
-            EpicId = epicNode.EpicId,
-            Status = epicNode.Status
-        };
+        // Check draft epics
+        var craftNode = await ep._context.StoryEpicCraftStoryNodes
+            .Where(sn => sn.StoryId == storyId)
+            .Select(sn => new { sn.EpicId, sn.Epic.Status })
+            .FirstOrDefaultAsync(ct);
 
-        return TypedResults.Ok(response);
+        if (craftNode != null)
+        {
+            var response = new GetEpicIdForStoryResponse
+            {
+                EpicId = craftNode.EpicId,
+                Status = craftNode.Status
+            };
+            return TypedResults.Ok(response);
+        }
+
+        ep._logger.LogDebug("GetEpicIdForStory: Story not found in any epic storyId={StoryId} userId={UserId}", storyId, user.Id);
+        return TypedResults.NotFound();
+
+        //return TypedResults.Ok(response);
     }
 }
 

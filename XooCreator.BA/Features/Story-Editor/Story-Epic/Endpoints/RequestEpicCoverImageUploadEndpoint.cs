@@ -2,9 +2,10 @@ using System.IO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using XooCreator.BA.Data;
 using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Features.Assets.DTOs;
-using XooCreator.BA.Features.StoryEditor.StoryEpic.Repositories;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
 using XooCreator.BA.Infrastructure.Services.Blob;
@@ -15,18 +16,18 @@ namespace XooCreator.BA.Features.StoryEditor.StoryEpic.Endpoints;
 public class RequestEpicCoverImageUploadEndpoint
 {
     private readonly IBlobSasService _sas;
-    private readonly IStoryEpicRepository _repository;
+    private readonly XooDbContext _context;
     private readonly IAuth0UserService _auth0;
     private readonly IConfiguration _config;
 
     public RequestEpicCoverImageUploadEndpoint(
         IBlobSasService sas,
-        IStoryEpicRepository repository,
+        XooDbContext context,
         IAuth0UserService auth0,
         IConfiguration config)
     {
         _sas = sas;
-        _repository = repository;
+        _context = context;
         _auth0 = auth0;
         _config = config;
     }
@@ -62,13 +63,31 @@ public class RequestEpicCoverImageUploadEndpoint
             return TypedResults.BadRequest("Epic ID is required.");
         }
 
-        var epic = await ep._repository.GetAsync(epicId, ct);
-        if (epic == null)
+        // Try to get epic from craft (draft) first, then from definition (published)
+        var craft = await ep._context.StoryEpicCrafts
+            .FirstOrDefaultAsync(c => c.Id == epicId, ct);
+        
+        Guid? ownerUserId = null;
+        if (craft != null)
+        {
+            ownerUserId = craft.OwnerUserId;
+        }
+        else
+        {
+            var definition = await ep._context.StoryEpicDefinitions
+                .FirstOrDefaultAsync(d => d.Id == epicId, ct);
+            if (definition != null)
+            {
+                ownerUserId = definition.OwnerUserId;
+            }
+        }
+
+        if (ownerUserId == null)
         {
             return TypedResults.NotFound();
         }
 
-        var isOwner = epic.OwnerUserId == user.Id;
+        var isOwner = ownerUserId.Value == user.Id;
         var isAdmin = ep._auth0.HasRole(user, UserRole.Admin);
         if (!isOwner && !isAdmin)
         {
@@ -109,7 +128,7 @@ public class RequestEpicCoverImageUploadEndpoint
         }
 
         var emailEsc = Uri.EscapeDataString(email.Trim());
-        var blobPath = $"epics/{emailEsc}/{epic.Id}/cover/{fileName}";
+        var blobPath = $"epics/{emailEsc}/{epicId}/cover/{fileName}";
 
         var putUri = await ep._sas.GetPutSasAsync(ep._sas.DraftContainer, blobPath, contentType, TimeSpan.FromMinutes(10), ct);
         var blobClient = ep._sas.GetBlobClient(ep._sas.DraftContainer, blobPath);

@@ -25,7 +25,7 @@ public class EpicFavoritesRepository : IEpicFavoritesRepository
 
     public async Task<bool> AddFavoriteAsync(Guid userId, string epicId)
     {
-        var epic = await _context.StoryEpics
+        var epic = await _context.StoryEpicDefinitions
             .FirstOrDefaultAsync(e => e.Id == epicId && e.Status == "published");
 
         if (epic == null)
@@ -72,13 +72,22 @@ public class EpicFavoritesRepository : IEpicFavoritesRepository
 
     public async Task<List<EpicMarketplaceItemDto>> GetFavoriteEpicsAsync(Guid userId, string locale)
     {
+        // Get favorite epic IDs for this user
         var favoriteEpicIds = await _context.UserFavoriteEpics
-            .Include(f => f.Epic)
-            .Where(f => f.UserId == userId && f.Epic.Status == "published")
+            .Where(f => f.UserId == userId)
             .Select(f => f.EpicId)
             .ToListAsync();
 
         if (!favoriteEpicIds.Any())
+            return new List<EpicMarketplaceItemDto>();
+
+        // Verify that these epics are published (use StoryEpicDefinitions)
+        var publishedEpicIds = await _context.StoryEpicDefinitions
+            .Where(e => favoriteEpicIds.Contains(e.Id) && e.Status == "published")
+            .Select(e => e.Id)
+            .ToListAsync();
+
+        if (!publishedEpicIds.Any())
             return new List<EpicMarketplaceItemDto>();
 
         // Get all marketplace epics and filter to favorites
@@ -93,7 +102,7 @@ public class EpicFavoritesRepository : IEpicFavoritesRepository
 
         // Filter to only favorites
         var favoriteEpics = allEpics
-            .Where(e => favoriteEpicIds.Contains(e.Id))
+            .Where(e => publishedEpicIds.Contains(e.Id))
             .ToList();
 
         return favoriteEpics;
