@@ -36,7 +36,8 @@ public class ListEpicHeroesEndpoint
         var user = await ep._auth0.GetCurrentUserAsync(ct);
         if (user == null) return TypedResults.Unauthorized();
 
-        var heroes = await ep._heroService.ListHeroesByOwnerAsync(user.Id, status, user.Id, ct);
+        // List heroes available to the current editor (own + published)
+        var heroes = await ep._heroService.ListHeroesForEditorAsync(user.Id, status, ct);
         return TypedResults.Ok(heroes);
     }
 }

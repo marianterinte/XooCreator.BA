@@ -108,6 +108,33 @@ public class EpicHeroRepository : IEpicHeroRepository
             .ToListAsync(ct);
     }
 
+    public async Task<List<EpicHero>> ListPublishedAsync(Guid? excludeOwnerId = null, CancellationToken ct = default)
+    {
+        var query = _context.EpicHeroes
+            .Where(x => x.Status == "published")
+            .AsQueryable();
+
+        if (excludeOwnerId.HasValue)
+        {
+            var ownerId = excludeOwnerId.Value;
+            query = query.Where(x => x.OwnerUserId != ownerId);
+        }
+
+        return await query
+            .Include(x => x.Translations)
+            .OrderByDescending(x => x.UpdatedAt)
+            .ToListAsync(ct);
+    }
+
+    public async Task<List<EpicHero>> ListForReviewAsync(CancellationToken ct = default)
+    {
+        return await _context.EpicHeroes
+            .Where(x => x.Status == "sent_for_approval" || x.Status == "in_review")
+            .Include(x => x.Translations)
+            .OrderByDescending(x => x.UpdatedAt)
+            .ToListAsync(ct);
+    }
+
     public async Task DeleteAsync(string heroId, CancellationToken ct = default)
     {
         var id = (heroId ?? string.Empty).Trim();

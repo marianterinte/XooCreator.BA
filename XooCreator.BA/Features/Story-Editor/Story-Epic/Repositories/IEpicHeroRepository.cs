@@ -15,6 +15,12 @@ public interface IEpicHeroRepository
     
     // List heroes by owner (with optional status filter)
     Task<List<EpicHero>> ListByOwnerAsync(Guid ownerUserId, string? status = null, CancellationToken ct = default);
+
+    // List published heroes (optionally excluding an owner)
+    Task<List<EpicHero>> ListPublishedAsync(Guid? excludeOwnerId = null, CancellationToken ct = default);
+    
+    // List heroes for review (sent_for_approval or in_review status)
+    Task<List<EpicHero>> ListForReviewAsync(CancellationToken ct = default);
     
     // Delete hero
     Task DeleteAsync(string heroId, CancellationToken ct = default);

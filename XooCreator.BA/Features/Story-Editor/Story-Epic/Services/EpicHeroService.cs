@@ -181,6 +181,70 @@ public class EpicHeroService : IEpicHeroService
         }).ToList();
     }
 
+    public async Task<List<EpicHeroListItemDto>> ListHeroesForEditorAsync(Guid currentUserId, string? status = null, CancellationToken ct = default)
+    {
+        var ownedHeroes = await _repository.ListByOwnerAsync(currentUserId, status, ct);
+        var publishedHeroes = await _repository.ListPublishedAsync(currentUserId, ct);
+        var heroesForReview = await _repository.ListForReviewAsync(ct);
+
+        var combined = new Dictionary<string, EpicHero>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var hero in ownedHeroes)
+        {
+            combined[hero.Id] = hero;
+        }
+
+        foreach (var hero in publishedHeroes)
+        {
+            combined[hero.Id] = hero;
+        }
+
+        // Include heroes sent_for_approval and in_review (for reviewers)
+        foreach (var hero in heroesForReview)
+        {
+            if (!combined.ContainsKey(hero.Id))
+            {
+                combined[hero.Id] = hero;
+            }
+        }
+
+        return combined.Values
+            .Select(h => MapToListItem(h, currentUserId))
+            .OrderByDescending(h => h.IsOwnedByCurrentUser)
+            .ThenBy(h => h.Name, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    private EpicHeroListItemDto MapToListItem(EpicHero hero, Guid? currentUserId)
+    {
+        // Get name and greeting from first available translation
+        var firstTranslation = hero.Translations.FirstOrDefault();
+        var name = firstTranslation?.Name ?? string.Empty;
+        var greetingText = firstTranslation?.GreetingText;
+        
+        // Compute flags for current user
+        var isOwnedByCurrentUser = currentUserId.HasValue && hero.OwnerUserId == currentUserId.Value;
+        var isAssignedToCurrentUser = currentUserId.HasValue && 
+                                      hero.AssignedReviewerUserId.HasValue && 
+                                      hero.AssignedReviewerUserId.Value == currentUserId.Value;
+        
+        return new EpicHeroListItemDto
+        {
+            Id = hero.Id,
+            Name = name,
+            ImageUrl = hero.ImageUrl,
+            GreetingText = greetingText,
+            GreetingAudioUrl = hero.GreetingAudioUrl,
+            Status = hero.Status,
+            CreatedAt = hero.CreatedAt,
+            UpdatedAt = hero.UpdatedAt,
+            PublishedAtUtc = hero.PublishedAtUtc,
+            AssignedReviewerUserId = hero.AssignedReviewerUserId,
+            IsAssignedToCurrentUser = isAssignedToCurrentUser,
+            IsOwnedByCurrentUser = isOwnedByCurrentUser
+        };
+    }
+
     public async Task DeleteHeroAsync(Guid ownerUserId, string heroId, CancellationToken ct = default)
     {
         var hero = await _repository.GetAsync(heroId, ct);
