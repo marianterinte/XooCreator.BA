@@ -231,8 +231,9 @@ public record EpicDetailsDto
     public int StoryCount { get; init; }
     public int RegionCount { get; init; }
     public int ReadersCount { get; init; }
-    public double AverageRating { get; init; }
-    public int TotalReviews { get; init; }
+    public double AverageRating { get; init; } // From epic reviews, not story reviews
+    public int TotalReviews { get; init; } // From epic reviews, not story reviews
+    public EpicReviewDto? UserReview { get; init; } // Current user's review if exists
 }
 
 public record GetMarketplaceEpicsResponse
@@ -249,6 +250,75 @@ public record SearchEpicsRequest
     public string SortOrder { get; init; } = "desc"; // asc, desc
     public int Page { get; init; } = 1;
     public int PageSize { get; init; } = 20;
+}
+
+// Epic Review DTOs
+public record EpicReviewDto
+{
+    public Guid Id { get; init; }
+    public Guid UserId { get; init; }
+    public string UserName { get; init; } = string.Empty;
+    public string? UserPicture { get; init; }
+    public string EpicId { get; init; } = string.Empty;
+    public int Rating { get; init; }
+    public string? Comment { get; init; }
+    public DateTime CreatedAt { get; init; }
+    public DateTime UpdatedAt { get; init; }
+    public bool IsOwnReview { get; init; } // True if this is the current user's review
+}
+
+public record CreateEpicReviewRequest
+{
+    public required string EpicId { get; init; }
+    public required int Rating { get; init; } // 1-5
+    public string? Comment { get; init; }
+}
+
+public record CreateEpicReviewResponse
+{
+    public bool Success { get; init; }
+    public string? ErrorMessage { get; init; }
+    public EpicReviewDto? Review { get; init; }
+}
+
+public record UpdateEpicReviewRequest
+{
+    public required Guid ReviewId { get; init; }
+    public required int Rating { get; init; } // 1-5
+    public string? Comment { get; init; }
+}
+
+public record UpdateEpicReviewResponse
+{
+    public bool Success { get; init; }
+    public string? ErrorMessage { get; init; }
+    public EpicReviewDto? Review { get; init; }
+}
+
+public record DeleteEpicReviewResponse
+{
+    public bool Success { get; init; }
+    public string? ErrorMessage { get; init; }
+}
+
+public record GetEpicReviewsRequest
+{
+    public required string EpicId { get; init; }
+    public int Page { get; init; } = 1;
+    public int PageSize { get; init; } = 20;
+    public string? SortBy { get; init; } = "createdAt"; // createdAt, rating
+    public string SortOrder { get; init; } = "desc"; // asc, desc
+}
+
+public record GetEpicReviewsResponse
+{
+    public List<EpicReviewDto> Reviews { get; init; } = new();
+    public int TotalCount { get; init; }
+    public int Page { get; init; }
+    public int PageSize { get; init; }
+    public bool HasMore { get; init; }
+    public double AverageRating { get; init; }
+    public Dictionary<int, int> RatingDistribution { get; init; } = new(); // Rating -> Count
 }
 
 

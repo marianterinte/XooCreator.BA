@@ -84,8 +84,11 @@ public class XooDbContext : DbContext
     // Story Marketplace
     public DbSet<StoryPurchase> StoryPurchases => Set<StoryPurchase>();
     public DbSet<StoryReview> StoryReviews => Set<StoryReview>();
+    public DbSet<EpicReview> EpicReviews => Set<EpicReview>();
     public DbSet<UserFavoriteStories> UserFavoriteStories => Set<UserFavoriteStories>();
+    public DbSet<UserFavoriteEpics> UserFavoriteEpics => Set<UserFavoriteEpics>();
     public DbSet<StoryReader> StoryReaders => Set<StoryReader>();
+    public DbSet<EpicReader> EpicReaders => Set<EpicReader>();
     
     // User Story Relations
     public DbSet<UserOwnedStories> UserOwnedStories => Set<UserOwnedStories>();
@@ -627,6 +630,26 @@ public class XooDbContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
+        modelBuilder.Entity<EpicReader>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.EpicId).HasMaxLength(100).IsRequired();
+            e.Property(x => x.AcquiredAt).IsRequired();
+            e.Property(x => x.AcquisitionSource).HasConversion<int>();
+            e.HasIndex(x => x.EpicId);
+            e.HasIndex(x => new { x.UserId, x.EpicId }).IsUnique();
+            e.HasOne(x => x.User)
+                .WithMany()
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.Epic)
+                .WithMany()
+                .HasForeignKey(x => x.EpicId)
+                .HasPrincipalKey(e => e.Id)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
         modelBuilder.Entity<StoryDefinition>(e =>
         {
             e.HasKey(x => x.Id);
@@ -851,6 +874,23 @@ public class XooDbContext : DbContext
             e.HasOne(x => x.Story).WithMany().HasForeignKey(x => x.StoryId).HasPrincipalKey(s => s.StoryId).OnDelete(DeleteBehavior.Cascade);
         });
 
+        // Epic Reviews Entity Configuration
+        modelBuilder.Entity<EpicReview>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.HasIndex(x => new { x.UserId, x.EpicId }).IsUnique();
+            e.Property(x => x.Rating).IsRequired();
+            e.Property(x => x.Comment).HasMaxLength(2000);
+            e.Property(x => x.EpicId).HasMaxLength(100).IsRequired();
+            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.Epic)
+                .WithMany()
+                .HasForeignKey(x => x.EpicId)
+                .HasPrincipalKey(e => e.Id)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
         modelBuilder.Entity<UserFavoriteStories>(e =>
         {
             e.HasKey(x => x.Id);
@@ -864,6 +904,25 @@ public class XooDbContext : DbContext
             e.HasOne(x => x.StoryDefinition)
                 .WithMany()
                 .HasForeignKey(x => x.StoryDefinitionId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<UserFavoriteEpics>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.Property(x => x.EpicId).HasMaxLength(100).IsRequired();
+            e.Property(x => x.AddedAt).IsRequired();
+            e.HasIndex(x => new { x.UserId, x.EpicId }).IsUnique();
+            e.HasIndex(x => x.EpicId);
+            e.HasOne(x => x.User)
+                .WithMany()
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.Epic)
+                .WithMany()
+                .HasForeignKey(x => x.EpicId)
+                .HasPrincipalKey(e => e.Id)
                 .OnDelete(DeleteBehavior.Cascade);
         });
 

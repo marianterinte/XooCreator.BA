@@ -175,8 +175,12 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<IStoryReviewsRepository, StoryReviewsRepository>();
         services.AddScoped<IStoryReviewsService, StoryReviewsService>();
+        services.AddScoped<IEpicReviewsRepository, EpicReviewsRepository>();
+        services.AddScoped<IEpicReviewsService, EpicReviewsService>();
         services.AddScoped<IFavoritesRepository, FavoritesRepository>();
         services.AddScoped<IFavoritesService, FavoritesService>();
+        services.AddScoped<IEpicFavoritesRepository, EpicFavoritesRepository>();
+        services.AddScoped<IEpicFavoritesService, EpicFavoritesService>();
         services.AddScoped<StoryDetailsMapper>();
         services.AddScoped<IStoriesMarketplaceRepository, StoriesMarketplaceRepository>();
         services.AddScoped<IStoriesMarketplaceService, StoriesMarketplaceService>();

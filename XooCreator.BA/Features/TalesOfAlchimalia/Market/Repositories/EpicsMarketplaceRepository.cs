@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using XooCreator.BA.Data;
+using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.DTOs;
 
 namespace XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories;
@@ -66,53 +67,41 @@ public class EpicsMarketplaceRepository
                 .Take(request.PageSize)
                 .ToListAsync();
 
-            // Get story IDs for all epics to calculate readers and ratings
-            var epicStoryIds = epics
-                .SelectMany(e => e.StoryNodes.Select(sn => sn.StoryId))
-                .Distinct()
-                .ToList();
+            // Get epic IDs to calculate readers count and review statistics
+            var epicIds = epics.Select(e => e.Id).ToList();
 
-            // Get readers count for stories in these epics
-            var readersCounts = await _context.StoryReaders
-                .Where(sr => epicStoryIds.Contains(sr.StoryId))
-                .GroupBy(sr => sr.StoryId)
+            // Get readers count for epics (direct count from EpicReaders table)
+            var epicReadersCounts = await _context.EpicReaders
+                .Where(er => epicIds.Contains(er.EpicId))
+                .GroupBy(er => er.EpicId)
                 .ToDictionaryAsync(g => g.Key, g => g.Count());
 
-            // Get review statistics for stories in these epics
-            var reviewStatsRaw = await _context.StoryReviews
-                .Where(r => epicStoryIds.Contains(r.StoryId))
-                .GroupBy(r => r.StoryId)
+            // Get review statistics from EpicReviews (not StoryReviews)
+            var epicReviewStats = await _context.EpicReviews
+                .Where(r => epicIds.Contains(r.EpicId) && r.IsActive)
+                .GroupBy(r => r.EpicId)
                 .Select(g => new
                 {
-                    StoryId = g.Key,
+                    EpicId = g.Key,
                     AverageRating = g.Average(r => (double)r.Rating),
                     TotalReviews = g.Count()
                 })
                 .ToListAsync();
 
-            var reviewStats = reviewStatsRaw.ToDictionary(
-                x => x.StoryId,
+            var reviewStats = epicReviewStats.ToDictionary(
+                x => x.EpicId,
                 x => new { x.AverageRating, x.TotalReviews });
 
             // Map to DTOs
             var dtoList = epics.Select(epic =>
             {
-                var epicStoryIds = epic.StoryNodes.Select(sn => sn.StoryId).ToList();
+                // Get epic readers count (direct from EpicReaders)
+                var totalReaders = epicReadersCounts.TryGetValue(epic.Id, out var count) ? count : 0;
                 
-                // Calculate totals from dictionaries
-                var totalReaders = epicStoryIds
-                    .Where(id => readersCounts.ContainsKey(id))
-                    .Sum(id => readersCounts[id]);
-                
-                var reviewData = epicStoryIds
-                    .Where(id => reviewStats.ContainsKey(id))
-                    .Select(id => reviewStats[id])
-                    .ToList();
-                
-                var totalReviews = reviewData.Sum(r => r.TotalReviews);
-                var avgRating = reviewData.Any() && totalReviews > 0
-                    ? reviewData.Sum(r => r.AverageRating * r.TotalReviews) / totalReviews
-                    : 0.0;
+                // Get review statistics from EpicReviews
+                var reviewData = reviewStats.TryGetValue(epic.Id, out var stats) ? stats : null;
+                var totalReviews = reviewData?.TotalReviews ?? 0;
+                var avgRating = reviewData?.AverageRating ?? 0.0;
 
                 return new EpicMarketplaceItemDto
                 {
@@ -159,42 +148,41 @@ public class EpicsMarketplaceRepository
             // Get story IDs for this epic
             var storyIds = epic.StoryNodes.Select(sn => sn.StoryId).ToList();
 
-            // Get readers count for stories in this epic
-            var readersCounts = await _context.StoryReaders
-                .Where(sr => storyIds.Contains(sr.StoryId))
-                .GroupBy(sr => sr.StoryId)
-                .ToDictionaryAsync(g => g.Key, g => g.Count());
+            // Get epic readers count (direct count from EpicReaders table)
+            var totalReaders = await GetEpicReadersCountAsync(epicId);
 
-            // Get review statistics for stories in this epic
-            var reviewStatsRaw = await _context.StoryReviews
-                .Where(r => storyIds.Contains(r.StoryId))
-                .GroupBy(r => r.StoryId)
-                .Select(g => new
-                {
-                    StoryId = g.Key,
-                    AverageRating = g.Average(r => (double)r.Rating),
-                    TotalReviews = g.Count()
-                })
+            // Get review statistics from EpicReviews (not StoryReviews)
+            var epicReviews = await _context.EpicReviews
+                .Where(r => r.EpicId == epicId && r.IsActive)
                 .ToListAsync();
 
-            var reviewStats = reviewStatsRaw.ToDictionary(
-                x => x.StoryId,
-                x => new { x.AverageRating, x.TotalReviews });
-
-            // Calculate totals
-            var totalReaders = storyIds
-                .Where(id => readersCounts.ContainsKey(id))
-                .Sum(id => readersCounts[id]);
-
-            var reviewData = storyIds
-                .Where(id => reviewStats.ContainsKey(id))
-                .Select(id => reviewStats[id])
-                .ToList();
-
-            var totalReviews = reviewData.Sum(r => r.TotalReviews);
-            var avgRating = reviewData.Any() && totalReviews > 0
-                ? reviewData.Sum(r => r.AverageRating * r.TotalReviews) / totalReviews
+            var totalReviews = epicReviews.Count;
+            var avgRating = totalReviews > 0
+                ? epicReviews.Average(r => r.Rating)
                 : 0.0;
+
+            // Get user's review if exists
+            EpicReviewDto? userReview = null;
+            var userEpicReview = await _context.EpicReviews
+                .Include(r => r.User)
+                .FirstOrDefaultAsync(r => r.EpicId == epicId && r.UserId == userId && r.IsActive);
+
+            if (userEpicReview != null && userEpicReview.User != null)
+            {
+                userReview = new EpicReviewDto
+                {
+                    Id = userEpicReview.Id,
+                    UserId = userEpicReview.UserId,
+                    UserName = userEpicReview.User.Name,
+                    UserPicture = userEpicReview.User.Picture,
+                    EpicId = userEpicReview.EpicId,
+                    Rating = userEpicReview.Rating,
+                    Comment = userEpicReview.Comment,
+                    CreatedAt = userEpicReview.CreatedAt,
+                    UpdatedAt = userEpicReview.UpdatedAt,
+                    IsOwnReview = true
+                };
+            }
 
             return new EpicDetailsDto
             {
@@ -210,7 +198,8 @@ public class EpicsMarketplaceRepository
                 RegionCount = epic.Regions.Count,
                 ReadersCount = totalReaders,
                 AverageRating = avgRating,
-                TotalReviews = totalReviews
+                TotalReviews = totalReviews,
+                UserReview = userReview
             };
         }
         catch (Exception ex)
@@ -238,6 +227,43 @@ public class EpicsMarketplaceRepository
             _logger?.LogError(ex, "Error getting story IDs in published epics");
             throw;
         }
+    }
+
+    /// <summary>
+    /// Ensures an epic reader record exists (adds if not exists)
+    /// </summary>
+    public async Task EnsureEpicReaderAsync(Guid userId, string epicId, EpicAcquisitionSource source)
+    {
+        var exists = await _context.EpicReaders
+            .AsNoTracking()
+            .AnyAsync(er => er.UserId == userId && er.EpicId == epicId);
+
+        if (exists)
+        {
+            return;
+        }
+
+        var reader = new EpicReader
+        {
+            Id = Guid.NewGuid(),
+            UserId = userId,
+            EpicId = epicId,
+            AcquiredAt = DateTime.UtcNow,
+            AcquisitionSource = source
+        };
+
+        _context.EpicReaders.Add(reader);
+        await _context.SaveChangesAsync();
+    }
+
+    /// <summary>
+    /// Gets the count of unique readers for an epic
+    /// </summary>
+    public Task<int> GetEpicReadersCountAsync(string epicId)
+    {
+        return _context.EpicReaders
+            .Where(er => er.EpicId == epicId)
+            .CountAsync();
     }
 }
 
