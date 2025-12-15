@@ -64,6 +64,7 @@ public class EpicHeroService : IEpicHeroService
         var hero = await _repository.CreateAsync(ownerUserId, heroId, name, ct);
         
         // Create default translation (ro-ro) with the provided name
+        // Add translation directly to context instead of using SaveAsync to avoid concurrency issues
         var defaultTranslation = new EpicHeroTranslation
         {
             Id = Guid.NewGuid(),
@@ -71,8 +72,15 @@ public class EpicHeroService : IEpicHeroService
             LanguageCode = "ro-ro",
             Name = name
         };
-        hero.Translations.Add(defaultTranslation);
-        await _repository.SaveAsync(hero, ct);
+        _context.EpicHeroTranslations.Add(defaultTranslation);
+        await _context.SaveChangesAsync(ct);
+        
+        // Reload hero with translations to return complete DTO
+        hero = await _repository.GetAsync(heroId, ct);
+        if (hero == null)
+        {
+            throw new InvalidOperationException($"Hero '{heroId}' not found after creation");
+        }
         
         return new EpicHeroDto
         {
