@@ -327,6 +327,11 @@ public class StoryEpicService : IStoryEpicService
             .Include(d => d.Translations)
             .AsSplitQuery()
             .FirstOrDefaultAsync(d => d.Id == epicId, ct);
+        
+        // Load hero references for the definition
+        var heroReferences = await _context.StoryEpicHeroReferences
+            .Where(h => h.EpicId == epicId)
+            .ToListAsync(ct);
 
         if (definition == null)
         {
@@ -426,6 +431,21 @@ public class StoryEpicService : IStoryEpicService
         }
 
         _context.StoryEpicCrafts.Add(craft);
+        await _context.SaveChangesAsync(ct);
+
+        // Copy Hero References from StoryEpicHeroReference (definition) to StoryEpicCraftHeroReference (craft)
+        foreach (var heroRef in heroReferences)
+        {
+            craft.HeroReferences.Add(new StoryEpicCraftHeroReference
+            {
+                EpicId = craft.Id,
+                HeroId = heroRef.HeroId,
+                StoryId = heroRef.StoryId,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            });
+        }
+        
         await _context.SaveChangesAsync(ct);
 
         _logger.LogInformation(

@@ -43,14 +43,15 @@ public class StoryEpicProgressService : IStoryEpicProgressService
 
         // Evaluate unlocked heroes based on completed stories
         // This includes heroes from StoryEpicHeroReferences AND heroes unlocked by completed stories (from StoryDefinitionUnlockedHeroes)
+        var completedStoryIds = storyProgress.Select(sp => sp.StoryId).ToList();
         var unlockedHeroes = await EvaluateUnlockedHeroesAsync(
             epicState.Epic.Heroes,
-            storyProgress.Select(sp => sp.StoryId).ToList()
+            completedStoryIds,
+            ct
         );
 
         // Also get heroes unlocked by completed stories themselves
-        var completedStoryIds = storyProgress.Select(sp => sp.StoryId).ToList();
-        var storyUnlockedHeroes = await GetUnlockedHeroesFromStoriesAsync(completedStoryIds);
+        var storyUnlockedHeroes = await GetUnlockedHeroesFromStoriesAsync(completedStoryIds, ct);
         
         // Merge heroes from epic references and story definitions, avoiding duplicates
         var allUnlockedHeroIds = new HashSet<string>(unlockedHeroes.Select(h => h.HeroId));
@@ -131,7 +132,7 @@ public class StoryEpicProgressService : IStoryEpicProgressService
 
         // Evaluate and unlock heroes based on completed story
         // This includes heroes from StoryEpicHeroReferences AND heroes unlocked by the story itself (from StoryDefinitionUnlockedHeroes)
-        var newlyUnlockedHeroes = await EvaluateAndUnlockHeroesAsync(userId, epicId, storyId, epicState.Epic.Heroes, storyProgress.Select(sp => sp.StoryId).ToList());
+        var newlyUnlockedHeroes = await EvaluateAndUnlockHeroesAsync(userId, epicId, storyId, epicState.Epic.Heroes, storyProgress.Select(sp => sp.StoryId).ToList(), ct);
 
         return new CompleteEpicStoryResult
         {
@@ -236,9 +237,19 @@ public class StoryEpicProgressService : IStoryEpicProgressService
         }
     }
 
+    /// <summary>
+    /// Gets hero image URL from EpicHeroes (epic heroes created in Story Editor)
+    /// </summary>
+    private async Task<string> GetHeroImageUrlAsync(string heroId, CancellationToken ct = default)
+    {
+        var epicHero = await _heroRepository.GetAsync(heroId, ct);
+        return epicHero?.ImageUrl ?? string.Empty;
+    }
+
     private async Task<List<UnlockedHeroDto>> EvaluateUnlockedHeroesAsync(
         List<StoryEpicHeroReferenceDto> heroReferences,
-        List<string> completedStoryIds)
+        List<string> completedStoryIds,
+        CancellationToken ct = default)
     {
         var completedStoryIdsSet = new HashSet<string>(completedStoryIds);
         var unlockedHeroes = new List<UnlockedHeroDto>();
@@ -252,9 +263,8 @@ public class StoryEpicProgressService : IStoryEpicProgressService
 
             if (isUnlocked)
             {
-                // Get hero image URL
-                var hero = await _heroRepository.GetAsync(heroRef.HeroId);
-                var imageUrl = hero?.ImageUrl ?? heroRef.HeroImageUrl ?? string.Empty;
+                // Get hero image URL from EpicHero
+                var imageUrl = heroRef.HeroImageUrl ?? await GetHeroImageUrlAsync(heroRef.HeroId, ct);
 
                 unlockedHeroes.Add(new UnlockedHeroDto
                 {
@@ -272,14 +282,15 @@ public class StoryEpicProgressService : IStoryEpicProgressService
         string epicId,
         string completedStoryId,
         List<StoryEpicHeroReferenceDto> heroReferences,
-        List<string> allCompletedStoryIds)
+        List<string> allCompletedStoryIds,
+        CancellationToken ct = default)
     {
         var completedStoryIdsSet = new HashSet<string>(allCompletedStoryIds);
         var newlyUnlockedHeroes = new List<UnlockedHeroDto>();
 
         // Get previously unlocked heroes (before this story completion)
         var previousCompletedStories = allCompletedStoryIds.Where(id => id != completedStoryId).ToList();
-        var previousUnlockedHeroes = await EvaluateUnlockedHeroesAsync(heroReferences, previousCompletedStories);
+        var previousUnlockedHeroes = await EvaluateUnlockedHeroesAsync(heroReferences, previousCompletedStories, ct);
         var previousUnlockedHeroIds = new HashSet<string>(previousUnlockedHeroes.Select(h => h.HeroId));
 
         // Check which heroes are unlocked by the completed story from StoryEpicHeroReferences
@@ -291,9 +302,8 @@ public class StoryEpicProgressService : IStoryEpicProgressService
                 // Check if hero was already unlocked
                 if (!previousUnlockedHeroIds.Contains(heroRef.HeroId))
                 {
-                    // Get hero image URL
-                    var hero = await _heroRepository.GetAsync(heroRef.HeroId);
-                    var imageUrl = hero?.ImageUrl ?? heroRef.HeroImageUrl ?? string.Empty;
+                    // Get hero image URL from EpicHero
+                    var imageUrl = heroRef.HeroImageUrl ?? await GetHeroImageUrlAsync(heroRef.HeroId, ct);
 
                     newlyUnlockedHeroes.Add(new UnlockedHeroDto
                     {
@@ -307,7 +317,7 @@ public class StoryEpicProgressService : IStoryEpicProgressService
         // Also check heroes unlocked by the story itself (from StoryDefinitionUnlockedHeroes)
         var storyDefinition = await _context.StoryDefinitions
             .Include(sd => sd.UnlockedHeroes)
-            .FirstOrDefaultAsync(sd => sd.StoryId == completedStoryId && sd.IsActive);
+            .FirstOrDefaultAsync(sd => sd.StoryId == completedStoryId && sd.IsActive, ct);
 
         if (storyDefinition != null && storyDefinition.UnlockedHeroes != null && storyDefinition.UnlockedHeroes.Count > 0)
         {
@@ -316,9 +326,8 @@ public class StoryEpicProgressService : IStoryEpicProgressService
                 // Check if hero was already unlocked
                 if (!previousUnlockedHeroIds.Contains(unlockedHero.HeroId))
                 {
-                    // Get hero image URL
-                    var hero = await _heroRepository.GetAsync(unlockedHero.HeroId);
-                    var imageUrl = hero?.ImageUrl ?? string.Empty;
+                    // Get hero image URL from EpicHero
+                    var imageUrl = await GetHeroImageUrlAsync(unlockedHero.HeroId, ct);
 
                     newlyUnlockedHeroes.Add(new UnlockedHeroDto
                     {
@@ -335,7 +344,7 @@ public class StoryEpicProgressService : IStoryEpicProgressService
     /// <summary>
     /// Gets heroes unlocked by completed stories (from StoryDefinitionUnlockedHeroes)
     /// </summary>
-    private async Task<List<UnlockedHeroDto>> GetUnlockedHeroesFromStoriesAsync(List<string> completedStoryIds)
+    private async Task<List<UnlockedHeroDto>> GetUnlockedHeroesFromStoriesAsync(List<string> completedStoryIds, CancellationToken ct = default)
     {
         var unlockedHeroes = new List<UnlockedHeroDto>();
 
@@ -348,7 +357,7 @@ public class StoryEpicProgressService : IStoryEpicProgressService
         var storyDefinitions = await _context.StoryDefinitions
             .Include(sd => sd.UnlockedHeroes)
             .Where(sd => completedStoryIds.Contains(sd.StoryId) && sd.IsActive)
-            .ToListAsync();
+            .ToListAsync(ct);
 
         foreach (var storyDefinition in storyDefinitions)
         {
@@ -356,9 +365,8 @@ public class StoryEpicProgressService : IStoryEpicProgressService
             {
                 foreach (var unlockedHero in storyDefinition.UnlockedHeroes)
                 {
-                    // Get hero image URL
-                    var hero = await _heroRepository.GetAsync(unlockedHero.HeroId);
-                    var imageUrl = hero?.ImageUrl ?? string.Empty;
+                    // Get hero image URL from EpicHero
+                    var imageUrl = await GetHeroImageUrlAsync(unlockedHero.HeroId, ct);
 
                     unlockedHeroes.Add(new UnlockedHeroDto
                     {

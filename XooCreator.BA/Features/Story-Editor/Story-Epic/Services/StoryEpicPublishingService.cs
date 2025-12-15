@@ -172,6 +172,7 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
             .Include(c => c.StoryNodes)
             .Include(c => c.UnlockRules)
             .Include(c => c.Translations)
+            .Include(c => c.HeroReferences)
             .AsSplitQuery()
             .FirstOrDefaultAsync(c => c.Id == craft.Id, ct) ?? craft;
 
@@ -255,6 +256,15 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
         _context.StoryEpicDefinitionTranslations.RemoveRange(definition.Translations);
         definition.Translations.Clear();
 
+        // Remove existing hero references
+        var existingHeroReferences = await _context.StoryEpicHeroReferences
+            .Where(h => h.EpicId == definition.Id)
+            .ToListAsync(ct);
+        if (existingHeroReferences.Count > 0)
+        {
+            _context.StoryEpicHeroReferences.RemoveRange(existingHeroReferences);
+        }
+
         // Update definition with published asset paths
         var coverAsset = assets.FirstOrDefault(a => a.Type == EpicAssetType.Cover);
         if (coverAsset != null)
@@ -320,6 +330,17 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
                 LanguageCode = craftTranslation.LanguageCode,
                 Name = craftTranslation.Name,
                 Description = craftTranslation.Description
+            });
+        }
+
+        // Copy Hero References from StoryEpicCraftHeroReference (craft) to StoryEpicHeroReference (definition)
+        foreach (var craftHeroRef in craft.HeroReferences)
+        {
+            _context.StoryEpicHeroReferences.Add(new StoryEpicHeroReference
+            {
+                EpicId = definition.Id,
+                HeroId = craftHeroRef.HeroId,
+                StoryId = craftHeroRef.StoryId
             });
         }
 
