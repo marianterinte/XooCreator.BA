@@ -20,5 +20,6 @@ public record CompleteEpicStoryResult
     public required bool Success { get; init; }
     public List<string> NewlyUnlockedRegions { get; init; } = new();
     public List<UnlockedHeroDto> NewlyUnlockedHeroes { get; init; } = new();
+    public string? StoryCoverImageUrl { get; init; }
 }
 

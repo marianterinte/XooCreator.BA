@@ -864,17 +864,21 @@ public class StoryEpicService : IStoryEpicService
         var nodes = new List<StoryEpicPreviewNodeDto>();
         var edges = new List<StoryEpicPreviewEdgeDto>();
 
-        // Get story titles from database (both published and draft)
+        // Get story titles and cover images from database (both published and draft)
         var storyIds = epic.Stories.Select(s => s.StoryId).ToList();
         
-        // Get published story titles from StoryDefinitions
-        var storyTitles = await _context.StoryDefinitions
+        // Get published story titles and cover images from StoryDefinitions
+        var storyData = await _context.StoryDefinitions
             .Where(s => storyIds.Contains(s.StoryId) && s.IsActive)
-            .Select(s => new { s.StoryId, s.Title })
-            .ToDictionaryAsync(s => s.StoryId, s => s.Title, ct);
+            .Select(s => new { s.StoryId, s.Title, s.CoverImageUrl })
+            .ToDictionaryAsync(s => s.StoryId, s => new { s.Title, s.CoverImageUrl }, ct);
         
-        // Get draft story titles from StoryCrafts (use first translation's title, or fallback to StoryId)
+        var storyTitles = storyData.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Title);
+        var storyCoverImages = storyData.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.CoverImageUrl);
+        
+        // Get draft story titles and cover images from StoryCrafts (use first translation's title, or fallback to StoryId)
         var craftTitles = new Dictionary<string, string>();
+        var craftCoverImages = new Dictionary<string, string?>();
         var crafts = await _context.StoryCrafts
             .Include(c => c.Translations)
             .Where(c => storyIds.Contains(c.StoryId))
@@ -887,6 +891,11 @@ public class StoryEpicService : IStoryEpicService
             if (!string.IsNullOrWhiteSpace(title))
             {
                 craftTitles[craft.StoryId] = title;
+            }
+            // Get cover image from craft
+            if (!string.IsNullOrWhiteSpace(craft.CoverImageUrl))
+            {
+                craftCoverImages[craft.StoryId] = craft.CoverImageUrl;
             }
         }
 
@@ -912,12 +921,18 @@ public class StoryEpicService : IStoryEpicService
                 ? title 
                 : (craftTitles.TryGetValue(story.StoryId, out var craftTitle) ? craftTitle : story.StoryId);
             
+            // Get story cover image from StoryDefinition (published) or StoryCraft (draft)
+            var storyCoverImage = storyCoverImages.TryGetValue(story.StoryId, out var coverImage) 
+                ? coverImage 
+                : (craftCoverImages.TryGetValue(story.StoryId, out var craftCoverImage) ? craftCoverImage : null);
+            
             nodes.Add(new StoryEpicPreviewNodeDto
             {
                 Id = story.StoryId,
                 Type = "story",
                 Label = storyTitle, // Use story title instead of ID
-                ImageUrl = story.RewardImageUrl,
+                ImageUrl = story.RewardImageUrl, // Reward image (shown when story is not completed)
+                CoverImageUrl = storyCoverImage, // Cover image (shown when story is completed)
                 X = story.X,
                 Y = story.Y
             });

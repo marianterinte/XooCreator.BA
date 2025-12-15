@@ -98,14 +98,19 @@ public class StoryEpicProgressService : IStoryEpicProgressService
         
         if (!completed)
         {
-            return new CompleteEpicStoryResult { Success = false, NewlyUnlockedRegions = new List<string>(), NewlyUnlockedHeroes = new List<UnlockedHeroDto>() };
+            return new CompleteEpicStoryResult { Success = false, NewlyUnlockedRegions = new List<string>(), NewlyUnlockedHeroes = new List<UnlockedHeroDto>(), StoryCoverImageUrl = null };
         }
+
+        // Get story cover image URL
+        var storyDefinition = await _context.StoryDefinitions
+            .FirstOrDefaultAsync(sd => sd.StoryId == storyId && sd.IsActive, ct);
+        var storyCoverImageUrl = storyDefinition?.CoverImageUrl;
 
         // Get epic state to evaluate new unlocked regions and heroes
         var epicState = await _epicService.GetEpicStateAsync(epicId, ct);
         if (epicState == null)
         {
-            return new CompleteEpicStoryResult { Success = false, NewlyUnlockedRegions = new List<string>(), NewlyUnlockedHeroes = new List<UnlockedHeroDto>() };
+            return new CompleteEpicStoryResult { Success = false, NewlyUnlockedRegions = new List<string>(), NewlyUnlockedHeroes = new List<UnlockedHeroDto>(), StoryCoverImageUrl = storyCoverImageUrl };
         }
 
         // Get updated story progress
@@ -138,7 +143,8 @@ public class StoryEpicProgressService : IStoryEpicProgressService
         {
             Success = true,
             NewlyUnlockedRegions = newlyUnlockedRegions,
-            NewlyUnlockedHeroes = newlyUnlockedHeroes
+            NewlyUnlockedHeroes = newlyUnlockedHeroes,
+            StoryCoverImageUrl = storyCoverImageUrl
         };
     }
 

@@ -98,7 +98,8 @@ public record StoryEpicPreviewNodeDto
     public required string Id { get; init; }
     public required string Type { get; init; } // "region" or "story"
     public required string Label { get; init; }
-    public string? ImageUrl { get; init; }
+    public string? ImageUrl { get; init; } // For regions: region image; For stories: reward image (when not completed) or cover image (when completed)
+    public string? CoverImageUrl { get; init; } // Story cover image (only for stories, used when story is completed)
     public double? X { get; init; }
     public double? Y { get; init; }
 }

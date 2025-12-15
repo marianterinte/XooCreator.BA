@@ -54,7 +54,8 @@ public class CompleteEpicStoryEndpoint
             EpicId = epicId,
             StoryId = storyId,
             NewlyUnlockedRegions = result.NewlyUnlockedRegions,
-            NewlyUnlockedHeroes = result.NewlyUnlockedHeroes
+            NewlyUnlockedHeroes = result.NewlyUnlockedHeroes,
+            StoryCoverImageUrl = result.StoryCoverImageUrl
         };
 
         return TypedResults.Ok(response);
@@ -73,5 +74,6 @@ public record CompleteEpicStoryResponse
     public required string StoryId { get; init; }
     public List<string> NewlyUnlockedRegions { get; init; } = new();
     public List<UnlockedHeroDto> NewlyUnlockedHeroes { get; init; } = new();
+    public string? StoryCoverImageUrl { get; init; }
 }
 
