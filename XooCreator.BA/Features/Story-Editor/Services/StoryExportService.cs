@@ -244,6 +244,9 @@ public class StoryExportService : IStoryExportService
             .Select(ag => ag.StoryAgeGroup!.AgeGroupId)
             .ToList() ?? new List<string>();
 
+        // Load UnlockedStoryHeroes from many-to-many table
+        var unlockedHeroes = craft.UnlockedHeroes.Select(h => h.HeroId).ToList();
+
         return new
         {
             id = craft.StoryId,
@@ -259,6 +262,7 @@ public class StoryExportService : IStoryExportService
             classicAuthorId = craft.ClassicAuthorId,
             priceInCredits = craft.PriceInCredits,
             isEvaluative = craft.IsEvaluative,
+            unlockedStoryHeroes = unlockedHeroes,
             translations = craft.Translations.Select(t => new
             {
                 lang = t.LanguageCode,

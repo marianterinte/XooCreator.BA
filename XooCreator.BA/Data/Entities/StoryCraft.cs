@@ -57,7 +57,23 @@ public class StoryCraft
     public List<StoryCraftTile> Tiles { get; set; } = new();
     public List<StoryCraftTopic> Topics { get; set; } = new();
     public List<StoryCraftAgeGroup> AgeGroups { get; set; } = new();
+    public List<StoryCraftUnlockedHero> UnlockedHeroes { get; set; } = new();
     public ClassicAuthor? ClassicAuthor { get; set; }
+}
+
+/// <summary>
+/// Many-to-many relationship between StoryCraft and Unlocked Heroes (stored as string IDs)
+/// </summary>
+public class StoryCraftUnlockedHero
+{
+    public Guid StoryCraftId { get; set; }
+    
+    [MaxLength(100)]
+    public required string HeroId { get; set; } // e.g., "puf-puf", "linkaro", "grubot"
+    
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    
+    public StoryCraft StoryCraft { get; set; } = null!;
 }
 
 /// <summary>

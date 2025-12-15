@@ -132,6 +132,7 @@ public class XooDbContext : DbContext
     public DbSet<StoryTopicTranslation> StoryTopicTranslations => Set<StoryTopicTranslation>();
     public DbSet<StoryCraftTopic> StoryCraftTopics => Set<StoryCraftTopic>();
     public DbSet<StoryDefinitionTopic> StoryDefinitionTopics => Set<StoryDefinitionTopic>();
+    public DbSet<StoryCraftUnlockedHero> StoryCraftUnlockedHeroes => Set<StoryCraftUnlockedHero>();
     public DbSet<StoryAgeGroup> StoryAgeGroups => Set<StoryAgeGroup>();
     public DbSet<StoryAgeGroupTranslation> StoryAgeGroupTranslations => Set<StoryAgeGroupTranslation>();
     public DbSet<StoryCraftAgeGroup> StoryCraftAgeGroups => Set<StoryCraftAgeGroup>();
