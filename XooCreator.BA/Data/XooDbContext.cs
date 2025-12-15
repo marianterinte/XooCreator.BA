@@ -56,6 +56,7 @@ public class XooDbContext : DbContext
     public DbSet<StoryEpicCraftRegion> StoryEpicCraftRegions => Set<StoryEpicCraftRegion>();
     public DbSet<StoryEpicCraftStoryNode> StoryEpicCraftStoryNodes => Set<StoryEpicCraftStoryNode>();
     public DbSet<StoryEpicCraftUnlockRule> StoryEpicCraftUnlockRules => Set<StoryEpicCraftUnlockRule>();
+    public DbSet<StoryEpicCraftHeroReference> StoryEpicCraftHeroReferences => Set<StoryEpicCraftHeroReference>();
     
     public DbSet<StoryEpicDefinition> StoryEpicDefinitions => Set<StoryEpicDefinition>();
     public DbSet<StoryEpicDefinitionTranslation> StoryEpicDefinitionTranslations => Set<StoryEpicDefinitionTranslation>();

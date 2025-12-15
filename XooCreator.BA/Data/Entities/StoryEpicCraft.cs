@@ -36,5 +36,6 @@ public class StoryEpicCraft
     public ICollection<StoryEpicCraftStoryNode> StoryNodes { get; set; } = new List<StoryEpicCraftStoryNode>();
     public ICollection<StoryEpicCraftUnlockRule> UnlockRules { get; set; } = new List<StoryEpicCraftUnlockRule>();
     public ICollection<StoryEpicCraftTranslation> Translations { get; set; } = new List<StoryEpicCraftTranslation>();
+    public ICollection<StoryEpicCraftHeroReference> HeroReferences { get; set; } = new List<StoryEpicCraftHeroReference>();
 }
 

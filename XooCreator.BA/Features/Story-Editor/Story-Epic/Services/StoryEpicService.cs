@@ -60,6 +60,7 @@ public class StoryEpicService : IStoryEpicService
             .Include(c => c.StoryNodes)
             .Include(c => c.UnlockRules)
             .Include(c => c.Translations)
+            .Include(c => c.HeroReferences)
             .AsSplitQuery()
             .FirstOrDefaultAsync(c => c.Id == epicId, ct);
         
@@ -162,16 +163,14 @@ public class StoryEpicService : IStoryEpicService
             .Include(c => c.StoryNodes)
             .Include(c => c.UnlockRules)
             .Include(c => c.Translations)
+            .Include(c => c.HeroReferences)
             .AsSplitQuery()
             .FirstOrDefaultAsync(c => c.Id == epicId, ct);
 
         if (craft != null)
         {
             var locale = _userContext.GetRequestLocaleOrDefault("ro-ro");
-            var heroes = await _context.StoryEpicHeroReferences
-                .Where(h => h.EpicId == epicId)
-                .ToListAsync(ct);
-            return MapCraftToDto(craft, locale, heroes);
+            return MapCraftToDto(craft, locale);
         }
 
         // If no draft, try to get published (StoryEpicDefinition)
@@ -439,7 +438,7 @@ public class StoryEpicService : IStoryEpicService
         return definition.Version;
     }
 
-    private StoryEpicDto MapCraftToDto(StoryEpicCraft craft, string locale, List<StoryEpicHeroReference> heroes)
+    private StoryEpicDto MapCraftToDto(StoryEpicCraft craft, string locale)
     {
         // Get translations
         var translations = craft.Translations.Select(t => new StoryEpicTranslationDto
@@ -493,7 +492,7 @@ public class StoryEpicService : IStoryEpicService
                 StoryId = r.StoryId,
                 SortOrder = r.SortOrder
             }).ToList(),
-            Heroes = heroes.Select(h => new StoryEpicHeroReferenceDto
+            Heroes = craft.HeroReferences.Select(h => new StoryEpicHeroReferenceDto
             {
                 HeroId = h.HeroId,
                 StoryId = h.StoryId
@@ -1008,19 +1007,15 @@ public class StoryEpicService : IStoryEpicService
 
     private async Task UpdateCraftHeroReferencesAsync(StoryEpicCraft craft, List<StoryEpicHeroReferenceDto> heroDtos, CancellationToken ct)
     {
-        // Get existing hero references from DB for this epic
-        var existingHeroRefs = await _context.StoryEpicHeroReferences
-            .Where(h => h.EpicId == craft.Id)
-            .ToListAsync(ct);
-        
+        // Use StoryEpicCraftHeroReference (for drafts) instead of StoryEpicHeroReference (for published)
         var dtoHeroIds = heroDtos.Select(h => h.HeroId).ToHashSet();
-        var existingByHeroId = existingHeroRefs.ToDictionary(h => h.HeroId);
+        var existingByHeroId = craft.HeroReferences.ToDictionary(h => h.HeroId);
         
         // Remove hero references not in DTO
-        var toRemove = existingHeroRefs.Where(h => !dtoHeroIds.Contains(h.HeroId)).ToList();
+        var toRemove = craft.HeroReferences.Where(h => !dtoHeroIds.Contains(h.HeroId)).ToList();
         foreach (var heroRef in toRemove)
         {
-            _context.StoryEpicHeroReferences.Remove(heroRef);
+            craft.HeroReferences.Remove(heroRef);
         }
         
         // Update or add hero references
@@ -1029,14 +1024,17 @@ public class StoryEpicService : IStoryEpicService
             if (existingByHeroId.TryGetValue(heroDto.HeroId, out var existingHeroRef))
             {
                 existingHeroRef.StoryId = heroDto.StoryId;
+                existingHeroRef.UpdatedAt = DateTime.UtcNow;
             }
             else
             {
-                _context.StoryEpicHeroReferences.Add(new StoryEpicHeroReference
+                craft.HeroReferences.Add(new StoryEpicCraftHeroReference
                 {
                     EpicId = craft.Id,
                     HeroId = heroDto.HeroId,
-                    StoryId = heroDto.StoryId
+                    StoryId = heroDto.StoryId,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
                 });
             }
         }
