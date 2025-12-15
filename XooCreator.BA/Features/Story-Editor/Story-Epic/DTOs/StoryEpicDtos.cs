@@ -21,6 +21,7 @@ public record StoryEpicDto
     public List<StoryEpicRegionDto> Regions { get; init; } = new();
     public List<StoryEpicStoryNodeDto> Stories { get; init; } = new();
     public List<StoryEpicUnlockRuleDto> Rules { get; init; } = new();
+    public List<StoryEpicHeroReferenceDto> Heroes { get; init; } = new(); // Hero references with unlock stories
     public List<StoryEpicTranslationDto> Translations { get; init; } = new(); // All translations
     
     // Helper: Get name in a specific language (falls back to first available)
@@ -69,6 +70,15 @@ public record StoryEpicUnlockRuleDto
     public int? MinCount { get; init; }
     public string? StoryId { get; init; }
     public int SortOrder { get; init; }
+}
+
+public record StoryEpicHeroReferenceDto
+{
+    public required string HeroId { get; init; }
+    public string? StoryId { get; init; } // Story care deblochează hero-ul (opțional - null = available from start)
+    // Optional: informații pentru UI (nu sunt salvate în DB, doar pentru display)
+    public string? HeroName { get; init; }
+    public string? HeroImageUrl { get; init; }
 }
 
 public record StoryEpicStateDto
