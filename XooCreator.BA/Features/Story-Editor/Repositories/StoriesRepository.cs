@@ -83,6 +83,7 @@ public class StoriesRepository : IStoriesRepository
                         .ThenInclude(a => a.Translations)
                 .Include(s => s.Topics).ThenInclude(t => t.StoryTopic)
                 .Include(s => s.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
+                .Include(s => s.UnlockedHeroes)
                 .FirstOrDefaultAsync(s => s.StoryId == storyId && s.IsActive);
 
         return story;

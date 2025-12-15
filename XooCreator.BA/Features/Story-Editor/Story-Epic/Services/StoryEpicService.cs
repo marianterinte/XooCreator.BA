@@ -1,21 +1,19 @@
 using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
+using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.DTOs;
-using XooCreator.BA.Features.StoryEditor.StoryEpic.Repositories;
 using XooCreator.BA.Infrastructure;
 
 namespace XooCreator.BA.Features.StoryEditor.StoryEpic.Services;
 
 public class StoryEpicService : IStoryEpicService
 {
-    private readonly IStoryEpicRepository _repository;
     private readonly XooDbContext _context;
     private readonly IUserContextService _userContext;
     private readonly ILogger<StoryEpicService> _logger;
 
-    public StoryEpicService(IStoryEpicRepository repository, XooDbContext context, IUserContextService userContext, ILogger<StoryEpicService> logger)
+    public StoryEpicService(XooDbContext context, IUserContextService userContext, ILogger<StoryEpicService> logger)
     {
-        _repository = repository;
         _context = context;
         _userContext = userContext;
         _logger = logger;
@@ -562,268 +560,67 @@ public class StoryEpicService : IStoryEpicService
         };
     }
 
-    private StoryEpicDto MapToDto(Data.DbStoryEpic epic, string locale)
+    // REMOVED: All methods using DbStoryEpic (old architecture) - use StoryEpicCraft/StoryEpicDefinition instead
+
+    public async Task<StoryEpicDto?> GetPublishedEpicAsync(string epicId, CancellationToken ct = default)
     {
-        // Get translations
-        var translations = epic.Translations.Select(t => new StoryEpicTranslationDto
-        {
-            LanguageCode = t.LanguageCode,
-            Name = t.Name,
-            Description = t.Description
-        }).ToList();
+        var definition = await GetStoryEpicDefinitionByIdAsync(epicId, ct);
+        if (definition == null) return null;
 
-        // Get name and description in requested locale (fallback to first available or epic.Name/Description)
-        var translation = translations.FirstOrDefault(t => t.LanguageCode.Equals(locale, StringComparison.OrdinalIgnoreCase));
-        var name = translation?.Name ?? translations.FirstOrDefault()?.Name ?? epic.Name;
-        var description = translation?.Description ?? translations.FirstOrDefault()?.Description ?? epic.Description;
-
-        return new StoryEpicDto
-        {
-            Id = epic.Id,
-            Name = name,
-            Description = description,
-            CoverImageUrl = epic.CoverImageUrl,
-            Status = epic.Status,
-            PublishedAtUtc = epic.PublishedAtUtc,
-            Translations = translations,
-            Regions = epic.Regions.Select(r => new StoryEpicRegionDto
-            {
-                Id = r.RegionId,
-                Label = r.Label,
-                ImageUrl = r.ImageUrl,
-                SortOrder = r.SortOrder,
-                IsLocked = r.IsLocked,
-                IsStartupRegion = r.IsStartupRegion,
-                X = r.X,
-                Y = r.Y
-            }).ToList(),
-            Stories = epic.StoryNodes.Select(sn => new StoryEpicStoryNodeDto
-            {
-                StoryId = sn.StoryId,
-                RegionId = sn.RegionId,
-                RewardImageUrl = sn.RewardImageUrl,
-                SortOrder = sn.SortOrder,
-                X = sn.X,
-                Y = sn.Y
-            }).ToList(),
-            Rules = epic.UnlockRules.Select(r => new StoryEpicUnlockRuleDto
-            {
-                Type = r.Type,
-                FromId = r.FromId,
-                ToRegionId = r.ToRegionId,
-                RequiredStories = r.RequiredStoriesCsv?.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList() ?? new List<string>(),
-                MinCount = r.MinCount,
-                StoryId = r.StoryId,
-                SortOrder = r.SortOrder
-            }).ToList()
-        };
+        var locale = _userContext.GetRequestLocaleOrDefault("ro-ro");
+        var heroes = await _context.StoryEpicHeroReferences
+            .Where(h => h.EpicId == epicId)
+            .ToListAsync(ct);
+        
+        return MapDefinitionToDto(definition, locale, heroes);
     }
 
-    private async Task UpdateTranslationsAsync(Data.DbStoryEpic epic, List<StoryEpicTranslationDto> translationDtos, CancellationToken ct)
+    public async Task<StoryEpicDefinition?> GetStoryEpicDefinitionByIdAsync(string epicId, CancellationToken ct = default)
     {
-        // Get existing translations from DB
-        var existingTranslations = await _context.StoryEpicTranslations
-            .Where(t => t.StoryEpicId == epic.Id)
-            .ToListAsync(ct);
-        var existingByLang = existingTranslations.ToDictionary(t => t.LanguageCode, StringComparer.OrdinalIgnoreCase);
-
-        // Update or add translations
-        foreach (var translationDto in translationDtos)
-        {
-            var langCode = translationDto.LanguageCode.ToLowerInvariant();
-            if (existingByLang.TryGetValue(langCode, out var existingTranslation))
-            {
-                // Update existing
-                existingTranslation.Name = translationDto.Name;
-                existingTranslation.Description = translationDto.Description;
-            }
-            else
-            {
-                // Add new
-                var newTranslation = new Data.StoryEpicTranslation
-                {
-                    Id = Guid.NewGuid(),
-                    StoryEpicId = epic.Id,
-                    LanguageCode = langCode,
-                    Name = translationDto.Name,
-                    Description = translationDto.Description
-                };
-                _context.StoryEpicTranslations.Add(newTranslation);
-            }
-        }
-
-        // Remove translations not in DTO (optional - we might want to keep all translations)
-        // For now, we'll keep all existing translations and only update/add what's in the DTO
+        return await _context.StoryEpicDefinitions
+            .Include(d => d.Regions)
+            .Include(d => d.StoryNodes)
+            .Include(d => d.UnlockRules)
+            .Include(d => d.Translations)
+            .Include(d => d.Owner)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(d => d.Id == epicId, ct);
     }
 
-    private async Task UpdateRegionsAsync(Data.DbStoryEpic epic, List<StoryEpicRegionDto> regionDtos, CancellationToken ct)
+    public async Task<List<StoryEpicDto>> GetAllPublishedEpicsAsync(string locale, CancellationToken ct = default)
     {
-        var dtoRegionIds = regionDtos.Select(r => r.Id).ToHashSet();
-        
-        // Get existing regions from DB for this epic
-        var existingDbRegions = await _context.StoryEpicRegions
-            .Where(r => r.EpicId == epic.Id)
+        var definitions = await _context.StoryEpicDefinitions
+            .Include(d => d.Regions)
+            .Include(d => d.StoryNodes)
+            .Include(d => d.UnlockRules)
+            .Include(d => d.Translations)
+            .AsSplitQuery()
+            .Where(d => d.Status == "published" && d.PublishedAtUtc != null)
             .ToListAsync(ct);
-        var existingDbRegionIds = existingDbRegions.ToDictionary(r => r.RegionId);
-        
-        // Remove regions not in DTO
-        foreach (var dbRegion in existingDbRegions)
+
+        if (definitions.Count == 0)
         {
-            if (!dtoRegionIds.Contains(dbRegion.RegionId))
-            {
-                _context.StoryEpicRegions.Remove(dbRegion);
-            }
+            return new List<StoryEpicDto>();
         }
 
-        // Update or add regions
-        foreach (var regionDto in regionDtos)
-        {
-            if (existingDbRegionIds.TryGetValue(regionDto.Id, out var existingRegion))
-            {
-                // Update existing
-                existingRegion.Label = regionDto.Label;
-                existingRegion.ImageUrl = regionDto.ImageUrl;
-                existingRegion.SortOrder = regionDto.SortOrder;
-                existingRegion.IsLocked = regionDto.IsLocked;
-                existingRegion.IsStartupRegion = regionDto.IsStartupRegion;
-                existingRegion.X = regionDto.X;
-                existingRegion.Y = regionDto.Y;
-                existingRegion.UpdatedAt = DateTime.UtcNow;
-            }
-            else
-            {
-                // Add new
-                var newRegion = new Data.StoryEpicRegion
-                {
-                    EpicId = epic.Id,
-                    RegionId = regionDto.Id,
-                    Label = regionDto.Label,
-                    ImageUrl = regionDto.ImageUrl,
-                    SortOrder = regionDto.SortOrder,
-                    IsLocked = regionDto.IsLocked,
-                    IsStartupRegion = regionDto.IsStartupRegion,
-                    X = regionDto.X,
-                    Y = regionDto.Y,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                };
-                _context.StoryEpicRegions.Add(newRegion);
-            }
-        }
-    }
-
-    private async Task UpdateStoryNodesAsync(Data.DbStoryEpic epic, List<StoryEpicStoryNodeDto> storyNodeDtos, CancellationToken ct)
-    {
-        var dtoStoryKeys = storyNodeDtos.Select(s => (s.StoryId, s.RegionId)).ToHashSet();
-        
-        // Get existing story nodes from DB for this epic
-        var existingDbNodes = await _context.StoryEpicStoryNodes
-            .Where(sn => sn.EpicId == epic.Id)
+        // Load all heroes for all epics in one query to avoid N+1
+        var epicIds = definitions.Select(d => d.Id).ToList();
+        var allHeroes = await _context.StoryEpicHeroReferences
+            .Where(h => epicIds.Contains(h.EpicId))
             .ToListAsync(ct);
-        var existingDbNodesByKey = existingDbNodes.ToDictionary(sn => (sn.StoryId, sn.RegionId));
         
-        // Collect story IDs that will be removed and added
-        var removedStoryIds = new HashSet<string>();
-        var addedStoryIds = new HashSet<string>();
+        var heroesByEpicId = allHeroes
+            .GroupBy(h => h.EpicId)
+            .ToDictionary(g => g.Key, g => g.ToList());
 
-        // Remove nodes not in DTO
-        foreach (var dbNode in existingDbNodes)
+        var result = new List<StoryEpicDto>();
+        foreach (var definition in definitions)
         {
-            if (!dtoStoryKeys.Contains((dbNode.StoryId, dbNode.RegionId)))
-            {
-                removedStoryIds.Add(dbNode.StoryId);
-                _context.StoryEpicStoryNodes.Remove(dbNode);
-            }
+            var heroes = heroesByEpicId.GetValueOrDefault(definition.Id, new List<StoryEpicHeroReference>());
+            result.Add(MapDefinitionToDto(definition, locale, heroes));
         }
 
-        // Update or add story nodes
-        foreach (var storyNodeDto in storyNodeDtos)
-        {
-            var key = (storyNodeDto.StoryId, storyNodeDto.RegionId);
-            if (existingDbNodesByKey.TryGetValue(key, out var existingNode))
-            {
-                // Update existing
-                existingNode.RewardImageUrl = storyNodeDto.RewardImageUrl;
-                existingNode.SortOrder = storyNodeDto.SortOrder;
-                existingNode.X = storyNodeDto.X;
-                existingNode.Y = storyNodeDto.Y;
-                existingNode.UpdatedAt = DateTime.UtcNow;
-            }
-            else
-            {
-                // Add new
-                addedStoryIds.Add(storyNodeDto.StoryId);
-                var newNode = new Data.StoryEpicStoryNode
-                {
-                    EpicId = epic.Id,
-                    StoryId = storyNodeDto.StoryId,
-                    RegionId = storyNodeDto.RegionId,
-                    RewardImageUrl = storyNodeDto.RewardImageUrl,
-                    SortOrder = storyNodeDto.SortOrder,
-                    X = storyNodeDto.X,
-                    Y = storyNodeDto.Y,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                };
-                _context.StoryEpicStoryNodes.Add(newNode);
-            }
-        }
-
-        // Update IsPartOfEpic flag for stories that were added to epic
-        if (addedStoryIds.Any())
-        {
-            // Update StoryCrafts
-            var craftsToUpdate = await _context.StoryCrafts
-                .Where(c => addedStoryIds.Contains(c.StoryId))
-                .ToListAsync(ct);
-            foreach (var craft in craftsToUpdate)
-            {
-                craft.IsPartOfEpic = true;
-            }
-
-            // Update StoryDefinitions
-            var definitionsToUpdate = await _context.StoryDefinitions
-                .Where(d => addedStoryIds.Contains(d.StoryId))
-                .ToListAsync(ct);
-            foreach (var def in definitionsToUpdate)
-            {
-                def.IsPartOfEpic = true;
-            }
-        }
-
-        // Update IsPartOfEpic flag for stories that were removed from epic
-        if (removedStoryIds.Any())
-        {
-            // Check if story is still in any other epic
-            var storiesStillInEpics = await _context.StoryEpicStoryNodes
-                .Where(sn => removedStoryIds.Contains(sn.StoryId))
-                .Select(sn => sn.StoryId)
-                .Distinct()
-                .ToListAsync(ct);
-            
-            var storiesToRemoveFlag = removedStoryIds.Except(storiesStillInEpics).ToList();
-
-            if (storiesToRemoveFlag.Any())
-            {
-                // Update StoryCrafts
-                var craftsToUpdate = await _context.StoryCrafts
-                    .Where(c => storiesToRemoveFlag.Contains(c.StoryId))
-                    .ToListAsync(ct);
-                foreach (var craft in craftsToUpdate)
-                {
-                    craft.IsPartOfEpic = false;
-                }
-
-                // Update StoryDefinitions
-                var definitionsToUpdate = await _context.StoryDefinitions
-                    .Where(d => storiesToRemoveFlag.Contains(d.StoryId))
-                    .ToListAsync(ct);
-                foreach (var def in definitionsToUpdate)
-                {
-                    def.IsPartOfEpic = false;
-                }
-            }
-        }
+        return result;
     }
 
     private async Task UpdateCraftTranslationsAsync(StoryEpicCraft craft, List<StoryEpicTranslationDto> translationDtos, CancellationToken ct)
@@ -1040,64 +837,7 @@ public class StoryEpicService : IStoryEpicService
         }
     }
 
-    private async Task UpdateUnlockRulesAsync(Data.DbStoryEpic epic, List<StoryEpicUnlockRuleDto> ruleDtos, CancellationToken ct)
-    {
-        // Get existing rules from DB for this epic
-        var existingDbRules = await _context.StoryEpicUnlockRules
-            .Where(r => r.EpicId == epic.Id)
-            .ToListAsync(ct);
-        
-        // Create key for matching rules
-        var dtoRuleKeys = ruleDtos.Select(r => (r.FromId, r.ToRegionId, r.StoryId ?? "")).ToHashSet();
-        var existingDbRulesByKey = existingDbRules.ToDictionary(r => (r.FromId, r.ToRegionId, r.StoryId ?? ""));
-        
-        // Remove rules not in DTO
-        foreach (var dbRule in existingDbRules)
-        {
-            var key = (dbRule.FromId, dbRule.ToRegionId, dbRule.StoryId ?? "");
-            if (!dtoRuleKeys.Contains(key))
-            {
-                _context.StoryEpicUnlockRules.Remove(dbRule);
-            }
-        }
-
-        // Update or add rules
-        foreach (var ruleDto in ruleDtos)
-        {
-            var key = (ruleDto.FromId, ruleDto.ToRegionId, ruleDto.StoryId ?? "");
-            if (existingDbRulesByKey.TryGetValue(key, out var existingRule))
-            {
-                // Update existing
-                existingRule.Type = ruleDto.Type;
-                existingRule.RequiredStoriesCsv = ruleDto.RequiredStories.Any() 
-                    ? string.Join(",", ruleDto.RequiredStories) 
-                    : null;
-                existingRule.MinCount = ruleDto.MinCount;
-                existingRule.SortOrder = ruleDto.SortOrder;
-                existingRule.UpdatedAt = DateTime.UtcNow;
-            }
-            else
-            {
-                // Add new
-                var newRule = new Data.StoryEpicUnlockRule
-                {
-                    EpicId = epic.Id,
-                    Type = ruleDto.Type,
-                    FromId = ruleDto.FromId,
-                    ToRegionId = ruleDto.ToRegionId,
-                    RequiredStoriesCsv = ruleDto.RequiredStories.Any() 
-                        ? string.Join(",", ruleDto.RequiredStories) 
-                        : null,
-                    MinCount = ruleDto.MinCount,
-                    StoryId = ruleDto.StoryId,
-                    SortOrder = ruleDto.SortOrder,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                };
-                _context.StoryEpicUnlockRules.Add(newRule);
-            }
-        }
-    }
+    // REMOVED: UpdateUnlockRulesAsync(Data.DbStoryEpic) - Old architecture removed, use UpdateCraftUnlockRulesAsync instead
 
     private async Task<StoryEpicPreviewDto> GeneratePreviewAsync(StoryEpicDto epic, CancellationToken ct = default)
     {

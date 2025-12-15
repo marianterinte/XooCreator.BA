@@ -98,8 +98,8 @@ CREATE TABLE IF NOT EXISTS "alchimalia_schema"."StoryEpicRegionReferences" (
     "SortOrder" integer NOT NULL DEFAULT 0,
     "IsLocked" boolean NOT NULL DEFAULT false,
     CONSTRAINT "PK_StoryEpicRegionReferences" PRIMARY KEY ("Id"),
-    CONSTRAINT "FK_StoryEpicRegionReferences_StoryEpics_EpicId" 
-        FOREIGN KEY ("EpicId") REFERENCES "alchimalia_schema"."StoryEpics" ("Id") ON DELETE CASCADE,
+    CONSTRAINT "FK_StoryEpicRegionReferences_StoryEpicDefinitions_EpicId" 
+        FOREIGN KEY ("EpicId") REFERENCES "alchimalia_schema"."StoryEpicDefinitions" ("Id") ON DELETE CASCADE,
     CONSTRAINT "FK_StoryEpicRegionReferences_StoryRegions_RegionId" 
         FOREIGN KEY ("RegionId") REFERENCES "alchimalia_schema"."StoryRegions" ("Id") ON DELETE RESTRICT,
     CONSTRAINT "UQ_StoryEpicRegionReferences_EpicId_RegionId" 
@@ -122,8 +122,8 @@ CREATE TABLE IF NOT EXISTS "alchimalia_schema"."StoryEpicHeroReferences" (
     "HeroId" character varying(100) NOT NULL,
     "StoryId" character varying(200),
     CONSTRAINT "PK_StoryEpicHeroReferences" PRIMARY KEY ("Id"),
-    CONSTRAINT "FK_StoryEpicHeroReferences_StoryEpics_EpicId" 
-        FOREIGN KEY ("EpicId") REFERENCES "alchimalia_schema"."StoryEpics" ("Id") ON DELETE CASCADE,
+    CONSTRAINT "FK_StoryEpicHeroReferences_StoryEpicDefinitions_EpicId" 
+        FOREIGN KEY ("EpicId") REFERENCES "alchimalia_schema"."StoryEpicDefinitions" ("Id") ON DELETE CASCADE,
     CONSTRAINT "FK_StoryEpicHeroReferences_EpicHeroes_HeroId" 
         FOREIGN KEY ("HeroId") REFERENCES "alchimalia_schema"."EpicHeroes" ("Id") ON DELETE RESTRICT,
     CONSTRAINT "UQ_StoryEpicHeroReferences_EpicId_HeroId" 

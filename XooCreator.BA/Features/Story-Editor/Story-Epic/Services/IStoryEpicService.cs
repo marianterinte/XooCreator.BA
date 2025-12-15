@@ -1,3 +1,4 @@
+using XooCreator.BA.Data;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.DTOs;
 
 namespace XooCreator.BA.Features.StoryEditor.StoryEpic.Services;
@@ -24,5 +25,14 @@ public interface IStoryEpicService
     
     // Create new version from published epic
     Task<int> CreateVersionFromPublishedAsync(Guid ownerUserId, string epicId, CancellationToken ct = default);
+    
+    // Get published epic (StoryEpicDefinition only, no draft fallback)
+    Task<StoryEpicDto?> GetPublishedEpicAsync(string epicId, CancellationToken ct = default);
+    
+    // Get StoryEpicDefinition entity by ID (helper method)
+    Task<StoryEpicDefinition?> GetStoryEpicDefinitionByIdAsync(string epicId, CancellationToken ct = default);
+    
+    // Get all published epics
+    Task<List<StoryEpicDto>> GetAllPublishedEpicsAsync(string locale, CancellationToken ct = default);
 }
 

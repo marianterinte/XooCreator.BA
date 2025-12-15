@@ -11,7 +11,7 @@ public class StoryEpicHeroReference
     public int Id { get; set; }
     
     [MaxLength(100)]
-    public required string EpicId { get; set; } = string.Empty; // FK to StoryEpic
+    public required string EpicId { get; set; } = string.Empty; // FK to StoryEpicDefinition
     
     [MaxLength(100)]
     public required string HeroId { get; set; } = string.Empty; // FK to EpicHero (must be published)
@@ -20,7 +20,7 @@ public class StoryEpicHeroReference
     public string? StoryId { get; set; } // Story care deblochează acest hero (opțional)
     
     // Navigation properties
-    public DbStoryEpic Epic { get; set; } = null!;
+    public StoryEpicDefinition Epic { get; set; } = null!;
     public EpicHero Hero { get; set; } = null!;
 }
 

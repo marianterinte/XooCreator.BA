@@ -12,8 +12,9 @@ CREATE TABLE IF NOT EXISTS alchimalia_schema."EpicProgress" (
     "CreatedAt" timestamp with time zone NOT NULL DEFAULT (now() at time zone 'utc'),
     "UpdatedAt" timestamp with time zone NOT NULL DEFAULT (now() at time zone 'utc'),
     CONSTRAINT "PK_EpicProgress" PRIMARY KEY ("Id"),
-    CONSTRAINT "FK_EpicProgress_AlchimaliaUsers_UserId" FOREIGN KEY ("UserId") REFERENCES alchimalia_schema."AlchimaliaUsers" ("Id") ON DELETE CASCADE,
-    CONSTRAINT "FK_EpicProgress_StoryEpics_EpicId" FOREIGN KEY ("EpicId") REFERENCES alchimalia_schema."StoryEpics" ("Id") ON DELETE CASCADE
+    CONSTRAINT "FK_EpicProgress_AlchimaliaUsers_UserId" FOREIGN KEY ("UserId") REFERENCES alchimalia_schema."AlchimaliaUsers" ("Id") ON DELETE CASCADE
+    -- Note: EpicId foreign key constraint removed - EpicId can reference either StoryEpics (old) or StoryEpicDefinition (new)
+    -- See V0042__remove_epic_progress_foreign_keys.sql
 );
 
 -- Create unique index for EpicProgress
@@ -30,8 +31,9 @@ CREATE TABLE IF NOT EXISTS alchimalia_schema."EpicStoryProgress" (
     "CompletedAt" timestamp with time zone NOT NULL DEFAULT (now() at time zone 'utc'),
     "EpicId" character varying(100) NOT NULL,
     CONSTRAINT "PK_EpicStoryProgress" PRIMARY KEY ("Id"),
-    CONSTRAINT "FK_EpicStoryProgress_AlchimaliaUsers_UserId" FOREIGN KEY ("UserId") REFERENCES alchimalia_schema."AlchimaliaUsers" ("Id") ON DELETE CASCADE,
-    CONSTRAINT "FK_EpicStoryProgress_StoryEpics_EpicId" FOREIGN KEY ("EpicId") REFERENCES alchimalia_schema."StoryEpics" ("Id") ON DELETE CASCADE
+    CONSTRAINT "FK_EpicStoryProgress_AlchimaliaUsers_UserId" FOREIGN KEY ("UserId") REFERENCES alchimalia_schema."AlchimaliaUsers" ("Id") ON DELETE CASCADE
+    -- Note: EpicId foreign key constraint removed - EpicId can reference either StoryEpics (old) or StoryEpicDefinition (new)
+    -- See V0042__remove_epic_progress_foreign_keys.sql
 );
 
 -- Create unique index for EpicStoryProgress

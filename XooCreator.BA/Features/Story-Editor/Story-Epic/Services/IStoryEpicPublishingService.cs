@@ -9,13 +9,9 @@ namespace XooCreator.BA.Features.StoryEditor.StoryEpic.Services;
 
 public interface IStoryEpicPublishingService
 {
-    Task<ValidationResult> ValidatePublishAsync(DbStoryEpic epic, Guid ownerUserId, bool isAdmin, CancellationToken ct = default);
-    List<EpicAssetInfo> CollectEpicAssets(DbStoryEpic epic);
     Task<AssetCopyResult> CopyEpicAssetsAsync(List<EpicAssetInfo> assets, string ownerEmail, string epicId, CancellationToken ct);
-    void UpdateEpicAfterPublish(DbStoryEpic epic, List<EpicAssetInfo> assets);
-    Task<DateTime?> PublishAsync(Guid ownerUserId, string epicId, bool isAdmin, CancellationToken ct = default);
     
-    // New method for publishing from StoryEpicCraft to StoryEpicDefinition
+    // Method for publishing from StoryEpicCraft to StoryEpicDefinition
     Task PublishFromCraftAsync(StoryEpicCraft craft, string requestedByEmail, string langTag, bool forceFull, CancellationToken ct = default);
 }
 

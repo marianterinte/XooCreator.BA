@@ -35,23 +35,5 @@ BEGIN
     END IF;
 END $$;
 
--- Update existing StoryDefinitions that are in epics
-UPDATE alchimalia_schema."StoryDefinitions" sd
-SET "IsPartOfEpic" = true
-WHERE EXISTS (
-    SELECT 1 
-    FROM alchimalia_schema."StoryEpicStoryNodes" sn
-    WHERE sn."StoryId" = sd."StoryId"
-);
-
--- Update existing StoryCrafts that are in epics
-UPDATE alchimalia_schema."StoryCrafts" sc
-SET "IsPartOfEpic" = true
-WHERE EXISTS (
-    SELECT 1 
-    FROM alchimalia_schema."StoryEpicStoryNodes" sn
-    WHERE sn."StoryId" = sc."StoryId"
-);
-
 COMMIT;
 

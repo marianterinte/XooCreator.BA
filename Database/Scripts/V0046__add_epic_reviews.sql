@@ -18,8 +18,8 @@ CREATE TABLE IF NOT EXISTS "alchimalia_schema"."EpicReviews" (
     CONSTRAINT "PK_EpicReviews" PRIMARY KEY ("Id"),
     CONSTRAINT "FK_EpicReviews_AlchimaliaUsers_UserId" 
         FOREIGN KEY ("UserId") REFERENCES "alchimalia_schema"."AlchimaliaUsers" ("Id") ON DELETE CASCADE,
-    CONSTRAINT "FK_EpicReviews_StoryEpics_EpicId" 
-        FOREIGN KEY ("EpicId") REFERENCES "alchimalia_schema"."StoryEpics" ("Id") ON DELETE CASCADE
+    CONSTRAINT "FK_EpicReviews_StoryEpicDefinitions_EpicId" 
+        FOREIGN KEY ("EpicId") REFERENCES "alchimalia_schema"."StoryEpicDefinitions" ("Id") ON DELETE CASCADE
 );
 
 -- Create unique index to ensure one review per user per epic

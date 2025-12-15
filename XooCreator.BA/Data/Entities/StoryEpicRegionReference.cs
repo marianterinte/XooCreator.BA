@@ -11,7 +11,7 @@ public class StoryEpicRegionReference
     public int Id { get; set; }
     
     [MaxLength(100)]
-    public required string EpicId { get; set; } = string.Empty; // FK to StoryEpic
+    public required string EpicId { get; set; } = string.Empty; // FK to StoryEpicDefinition
     
     [MaxLength(100)]
     public required string RegionId { get; set; } = string.Empty; // FK to StoryRegion (must be published)
@@ -22,7 +22,7 @@ public class StoryEpicRegionReference
     public bool IsLocked { get; set; } = false;
     
     // Navigation properties
-    public DbStoryEpic Epic { get; set; } = null!;
+    public StoryEpicDefinition Epic { get; set; } = null!;
     public StoryRegion Region { get; set; } = null!;
 }
 

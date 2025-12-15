@@ -11,10 +11,10 @@ public class EpicStoryProgress
     public string? SelectedAnswer { get; set; } // The choice made by user
     public string? TokensJson { get; set; } // JSON serialized list of TokenReward objects
     public DateTime CompletedAt { get; set; } = DateTime.UtcNow;
-    public string EpicId { get; set; } = string.Empty; // FK to StoryEpic
+    public string EpicId { get; set; } = string.Empty; // Can reference either StoryEpics (old) or StoryEpicDefinition (new architecture)
     
-    // Navigation
-    public DbStoryEpic Epic { get; set; } = null!;
+    // Navigation (ignored in EF Core - EpicId can reference either StoryEpics or StoryEpicDefinition)
+    // public DbStoryEpic Epic { get; set; } = null!;
     public AlchimaliaUser User { get; set; } = null!;
 }
 

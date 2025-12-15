@@ -9,13 +9,13 @@ public class EpicProgress
     public Guid UserId { get; set; }
     public string RegionId { get; set; } = string.Empty; // Region ID from StoryEpicRegion
     public bool IsUnlocked { get; set; }
-    public string EpicId { get; set; } = string.Empty; // FK to StoryEpic
+    public string EpicId { get; set; } = string.Empty; // Can reference either StoryEpics (old) or StoryEpicDefinition (new architecture)
     public DateTime UnlockedAt { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     
-    // Navigation
-    public DbStoryEpic Epic { get; set; } = null!;
+    // Navigation (ignored in EF Core - EpicId can reference either StoryEpics or StoryEpicDefinition)
+    // public DbStoryEpic Epic { get; set; } = null!;
     public AlchimaliaUser User { get; set; } = null!;
 }
 

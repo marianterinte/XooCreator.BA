@@ -14,8 +14,8 @@ CREATE TABLE IF NOT EXISTS "alchimalia_schema"."UserFavoriteEpics" (
     CONSTRAINT "PK_UserFavoriteEpics" PRIMARY KEY ("Id"),
     CONSTRAINT "FK_UserFavoriteEpics_AlchimaliaUsers_UserId" 
         FOREIGN KEY ("UserId") REFERENCES "alchimalia_schema"."AlchimaliaUsers" ("Id") ON DELETE CASCADE,
-    CONSTRAINT "FK_UserFavoriteEpics_StoryEpics_EpicId" 
-        FOREIGN KEY ("EpicId") REFERENCES "alchimalia_schema"."StoryEpics" ("Id") ON DELETE CASCADE
+    CONSTRAINT "FK_UserFavoriteEpics_StoryEpicDefinitions_EpicId" 
+        FOREIGN KEY ("EpicId") REFERENCES "alchimalia_schema"."StoryEpicDefinitions" ("Id") ON DELETE CASCADE
 );
 
 -- Create unique index to ensure one favorite per user per epic

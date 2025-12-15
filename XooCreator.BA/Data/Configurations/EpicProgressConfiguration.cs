@@ -12,6 +12,8 @@ public class EpicProgressConfiguration : IEntityTypeConfiguration<EpicProgress>
         builder.Property(x => x.Id).ValueGeneratedOnAdd();
         builder.HasIndex(x => new { x.UserId, x.RegionId, x.EpicId }).IsUnique();
         builder.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
-        builder.HasOne(x => x.Epic).WithMany().HasForeignKey(x => x.EpicId).OnDelete(DeleteBehavior.Cascade);
+        // EpicId can reference either StoryEpics (old architecture) or StoryEpicDefinition (new architecture)
+        // No foreign key constraint - validated at application level
+        // Note: Epic navigation property was removed - EpicId is just a string reference
     }
 }

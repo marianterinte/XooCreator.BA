@@ -7,11 +7,11 @@ public class UserFavoriteEpics
 {
     public Guid Id { get; set; }
     public Guid UserId { get; set; }
-    public string EpicId { get; set; } = string.Empty; // FK către DbStoryEpic.Id
+    public string EpicId { get; set; } = string.Empty; // FK to StoryEpicDefinition.Id
     public DateTime AddedAt { get; set; } = DateTime.UtcNow;
     
     // Navigation properties
     public AlchimaliaUser User { get; set; } = null!;
-    public DbStoryEpic Epic { get; set; } = null!;
+    public StoryEpicDefinition Epic { get; set; } = null!;
 }
 

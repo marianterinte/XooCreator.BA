@@ -15,8 +15,8 @@ CREATE TABLE IF NOT EXISTS "alchimalia_schema"."EpicReaders" (
     CONSTRAINT "PK_EpicReaders" PRIMARY KEY ("Id"),
     CONSTRAINT "FK_EpicReaders_AlchimaliaUsers_UserId" 
         FOREIGN KEY ("UserId") REFERENCES "alchimalia_schema"."AlchimaliaUsers" ("Id") ON DELETE CASCADE,
-    CONSTRAINT "FK_EpicReaders_StoryEpics_EpicId" 
-        FOREIGN KEY ("EpicId") REFERENCES "alchimalia_schema"."StoryEpics" ("Id") ON DELETE CASCADE
+    CONSTRAINT "FK_EpicReaders_StoryEpicDefinitions_EpicId" 
+        FOREIGN KEY ("EpicId") REFERENCES "alchimalia_schema"."StoryEpicDefinitions" ("Id") ON DELETE CASCADE
 );
 
 -- Create unique index to ensure one reader per user per epic

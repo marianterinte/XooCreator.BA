@@ -43,13 +43,6 @@ public class XooDbContext : DbContext
     public DbSet<TreeUnlockRule> TreeUnlockRules => Set<TreeUnlockRule>();
     public DbSet<TreeConfiguration> TreeConfigurations => Set<TreeConfiguration>();
     
-    // Story Epic - Legacy (DbStoryEpic) - to be migrated
-    public DbSet<DbStoryEpic> StoryEpics => Set<DbStoryEpic>();
-    public DbSet<StoryEpicTranslation> StoryEpicTranslations => Set<StoryEpicTranslation>();
-    public DbSet<StoryEpicRegion> StoryEpicRegions => Set<StoryEpicRegion>();
-    public DbSet<StoryEpicStoryNode> StoryEpicStoryNodes => Set<StoryEpicStoryNode>();
-    public DbSet<StoryEpicUnlockRule> StoryEpicUnlockRules => Set<StoryEpicUnlockRule>();
-    
     // Story Epic - New Architecture (Craft for drafts, Definition for published)
     public DbSet<StoryEpicCraft> StoryEpicCrafts => Set<StoryEpicCraft>();
     public DbSet<StoryEpicCraftTranslation> StoryEpicCraftTranslations => Set<StoryEpicCraftTranslation>();
@@ -133,6 +126,7 @@ public class XooDbContext : DbContext
     public DbSet<StoryCraftTopic> StoryCraftTopics => Set<StoryCraftTopic>();
     public DbSet<StoryDefinitionTopic> StoryDefinitionTopics => Set<StoryDefinitionTopic>();
     public DbSet<StoryCraftUnlockedHero> StoryCraftUnlockedHeroes => Set<StoryCraftUnlockedHero>();
+    public DbSet<StoryDefinitionUnlockedHero> StoryDefinitionUnlockedHeroes => Set<StoryDefinitionUnlockedHero>();
     public DbSet<StoryAgeGroup> StoryAgeGroups => Set<StoryAgeGroup>();
     public DbSet<StoryAgeGroupTranslation> StoryAgeGroupTranslations => Set<StoryAgeGroupTranslation>();
     public DbSet<StoryCraftAgeGroup> StoryCraftAgeGroups => Set<StoryCraftAgeGroup>();

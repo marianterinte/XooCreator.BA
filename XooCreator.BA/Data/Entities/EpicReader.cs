@@ -9,11 +9,11 @@ public class EpicReader
 {
     public Guid Id { get; set; }
     public Guid UserId { get; set; }
-    public string EpicId { get; set; } = string.Empty;
+    public string EpicId { get; set; } = string.Empty; // FK to StoryEpicDefinition
     public DateTime AcquiredAt { get; set; } = DateTime.UtcNow;
     public EpicAcquisitionSource AcquisitionSource { get; set; } = EpicAcquisitionSource.Free;
 
     public AlchimaliaUser User { get; set; } = null!;
-    public DbStoryEpic Epic { get; set; } = null!;
+    public StoryEpicDefinition Epic { get; set; } = null!;
 }
 
