@@ -8,13 +8,16 @@ public class StoryEpicProgressService : IStoryEpicProgressService
 {
     private readonly IStoryEpicService _epicService;
     private readonly IEpicProgressRepository _progressRepository;
+    private readonly IEpicHeroRepository _heroRepository;
 
     public StoryEpicProgressService(
         IStoryEpicService epicService,
-        IEpicProgressRepository progressRepository)
+        IEpicProgressRepository progressRepository,
+        IEpicHeroRepository heroRepository)
     {
         _epicService = epicService;
         _progressRepository = progressRepository;
+        _heroRepository = heroRepository;
     }
 
     public async Task<StoryEpicStateWithProgressDto?> GetEpicStateWithProgressAsync(string epicId, Guid userId, CancellationToken ct = default)
@@ -34,6 +37,12 @@ public class StoryEpicProgressService : IStoryEpicProgressService
             epicState.Epic.Regions
         );
 
+        // Evaluate unlocked heroes based on completed stories
+        var unlockedHeroes = await EvaluateUnlockedHeroesAsync(
+            epicState.Epic.Heroes,
+            storyProgress.Select(sp => sp.StoryId).ToList()
+        );
+
         // Build progress state
         var progressState = new EpicProgressStateDto
         {
@@ -43,7 +52,8 @@ public class StoryEpicProgressService : IStoryEpicProgressService
                 SelectedAnswer = sp.SelectedAnswer,
                 CompletedAt = sp.CompletedAt
             }).ToList(),
-            UnlockedRegions = unlockedRegions
+            UnlockedRegions = unlockedRegions,
+            UnlockedHeroes = unlockedHeroes
         };
 
         return new StoryEpicStateWithProgressDto
@@ -67,14 +77,14 @@ public class StoryEpicProgressService : IStoryEpicProgressService
         
         if (!completed)
         {
-            return new CompleteEpicStoryResult { Success = false, NewlyUnlockedRegions = new List<string>() };
+            return new CompleteEpicStoryResult { Success = false, NewlyUnlockedRegions = new List<string>(), NewlyUnlockedHeroes = new List<UnlockedHeroDto>() };
         }
 
-        // Get epic state to evaluate new unlocked regions
+        // Get epic state to evaluate new unlocked regions and heroes
         var epicState = await _epicService.GetEpicStateAsync(epicId, ct);
         if (epicState == null)
         {
-            return new CompleteEpicStoryResult { Success = false, NewlyUnlockedRegions = new List<string>() };
+            return new CompleteEpicStoryResult { Success = false, NewlyUnlockedRegions = new List<string>(), NewlyUnlockedHeroes = new List<UnlockedHeroDto>() };
         }
 
         // Get updated story progress
@@ -99,10 +109,14 @@ public class StoryEpicProgressService : IStoryEpicProgressService
             }
         }
 
+        // Evaluate and unlock heroes based on completed story
+        var newlyUnlockedHeroes = await EvaluateAndUnlockHeroesAsync(userId, epicId, storyId, epicState.Epic.Heroes, storyProgress.Select(sp => sp.StoryId).ToList());
+
         return new CompleteEpicStoryResult
         {
             Success = true,
-            NewlyUnlockedRegions = newlyUnlockedRegions
+            NewlyUnlockedRegions = newlyUnlockedRegions,
+            NewlyUnlockedHeroes = newlyUnlockedHeroes
         };
     }
 
@@ -199,6 +213,77 @@ public class StoryEpicProgressService : IStoryEpicProgressService
                 ErrorMessage = ex.Message
             };
         }
+    }
+
+    private async Task<List<UnlockedHeroDto>> EvaluateUnlockedHeroesAsync(
+        List<StoryEpicHeroReferenceDto> heroReferences,
+        List<string> completedStoryIds)
+    {
+        var completedStoryIdsSet = new HashSet<string>(completedStoryIds);
+        var unlockedHeroes = new List<UnlockedHeroDto>();
+
+        foreach (var heroRef in heroReferences)
+        {
+            // Hero is unlocked if:
+            // 1. It has no StoryId (available from start), OR
+            // 2. The story that unlocks it is completed
+            bool isUnlocked = heroRef.StoryId == null || completedStoryIdsSet.Contains(heroRef.StoryId);
+
+            if (isUnlocked)
+            {
+                // Get hero image URL
+                var hero = await _heroRepository.GetAsync(heroRef.HeroId);
+                var imageUrl = hero?.ImageUrl ?? heroRef.HeroImageUrl ?? string.Empty;
+
+                unlockedHeroes.Add(new UnlockedHeroDto
+                {
+                    HeroId = heroRef.HeroId,
+                    ImageUrl = imageUrl
+                });
+            }
+        }
+
+        return unlockedHeroes;
+    }
+
+    private async Task<List<UnlockedHeroDto>> EvaluateAndUnlockHeroesAsync(
+        Guid userId,
+        string epicId,
+        string completedStoryId,
+        List<StoryEpicHeroReferenceDto> heroReferences,
+        List<string> allCompletedStoryIds)
+    {
+        var completedStoryIdsSet = new HashSet<string>(allCompletedStoryIds);
+        var newlyUnlockedHeroes = new List<UnlockedHeroDto>();
+
+        // Get previously unlocked heroes (before this story completion)
+        var previousCompletedStories = allCompletedStoryIds.Where(id => id != completedStoryId).ToList();
+        var previousUnlockedHeroes = await EvaluateUnlockedHeroesAsync(heroReferences, previousCompletedStories);
+        var previousUnlockedHeroIds = new HashSet<string>(previousUnlockedHeroes.Select(h => h.HeroId));
+
+        // Check which heroes are unlocked by the completed story
+        foreach (var heroRef in heroReferences)
+        {
+            // Hero is unlocked by this story if StoryId matches
+            if (heroRef.StoryId == completedStoryId)
+            {
+                // Check if hero was already unlocked
+                if (!previousUnlockedHeroIds.Contains(heroRef.HeroId))
+                {
+                    // Get hero image URL
+                    var hero = await _heroRepository.GetAsync(heroRef.HeroId);
+                    var imageUrl = hero?.ImageUrl ?? heroRef.HeroImageUrl ?? string.Empty;
+
+                    newlyUnlockedHeroes.Add(new UnlockedHeroDto
+                    {
+                        HeroId = heroRef.HeroId,
+                        ImageUrl = imageUrl
+                    });
+                }
+            }
+        }
+
+        return newlyUnlockedHeroes;
     }
 }
 

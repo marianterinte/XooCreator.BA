@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.Services;
+using XooCreator.BA.Features.StoryEditor.StoryEpic.DTOs;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
 using Microsoft.Extensions.Logging;
@@ -52,7 +53,8 @@ public class CompleteEpicStoryEndpoint
             Success = true,
             EpicId = epicId,
             StoryId = storyId,
-            NewlyUnlockedRegions = result.NewlyUnlockedRegions
+            NewlyUnlockedRegions = result.NewlyUnlockedRegions,
+            NewlyUnlockedHeroes = result.NewlyUnlockedHeroes
         };
 
         return TypedResults.Ok(response);
@@ -70,5 +72,6 @@ public record CompleteEpicStoryResponse
     public required string EpicId { get; init; }
     public required string StoryId { get; init; }
     public List<string> NewlyUnlockedRegions { get; init; } = new();
+    public List<UnlockedHeroDto> NewlyUnlockedHeroes { get; init; } = new();
 }
 

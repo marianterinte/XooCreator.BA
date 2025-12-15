@@ -163,10 +163,17 @@ public record EpicStoryProgressDto
     public DateTime CompletedAt { get; init; }
 }
 
+public record UnlockedHeroDto
+{
+    public required string HeroId { get; init; }
+    public required string ImageUrl { get; init; }
+}
+
 public record EpicProgressStateDto
 {
     public List<EpicCompletedStoryDto> CompletedStories { get; init; } = new();
     public List<string> UnlockedRegions { get; init; } = new();
+    public List<UnlockedHeroDto> UnlockedHeroes { get; init; } = new();
 }
 
 public record EpicCompletedStoryDto
