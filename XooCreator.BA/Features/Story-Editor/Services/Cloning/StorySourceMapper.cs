@@ -10,13 +10,13 @@ namespace XooCreator.BA.Features.StoryEditor.Services.Cloning;
 /// </summary>
 public interface IStorySourceMapper
 {
-    StoryCloneData MapFromCraft(StoryCraft source, bool isCopy);
-    StoryCloneData MapFromDefinition(StoryDefinition definition, bool isCopy);
+    StoryCloneData MapFromCraft(StoryCraft source, bool isCopy, bool isFork = false);
+    StoryCloneData MapFromDefinition(StoryDefinition definition, bool isCopy, bool isFork = false);
 }
 
 public class StorySourceMapper : IStorySourceMapper
 {
-    public StoryCloneData MapFromCraft(StoryCraft source, bool isCopy)
+    public StoryCloneData MapFromCraft(StoryCraft source, bool isCopy, bool isFork = false)
     {
         return new StoryCloneData
         {
@@ -24,7 +24,7 @@ public class StorySourceMapper : IStorySourceMapper
             StoryTopic = source.StoryTopic,
             CoverImageUrl = source.CoverImageUrl,
             PriceInCredits = source.PriceInCredits,
-            AuthorName = source.AuthorName,
+            AuthorName = isFork ? null : source.AuthorName,
             ClassicAuthorId = source.ClassicAuthorId,
             BaseVersion = source.BaseVersion,
             IsEvaluative = source.IsEvaluative,
@@ -73,7 +73,7 @@ public class StorySourceMapper : IStorySourceMapper
         };
     }
 
-    public StoryCloneData MapFromDefinition(StoryDefinition definition, bool isCopy)
+    public StoryCloneData MapFromDefinition(StoryDefinition definition, bool isCopy, bool isFork = false)
     {
         return new StoryCloneData
         {
@@ -81,7 +81,7 @@ public class StorySourceMapper : IStorySourceMapper
             StoryTopic = definition.StoryTopic,
             CoverImageUrl = ExtractFileName(definition.CoverImageUrl),
             PriceInCredits = definition.PriceInCredits,
-            AuthorName = definition.AuthorName,
+            AuthorName = isFork ? null : definition.AuthorName,
             ClassicAuthorId = definition.ClassicAuthorId,
             BaseVersion = definition.Version,
             IsEvaluative = definition.IsEvaluative,

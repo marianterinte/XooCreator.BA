@@ -2,6 +2,7 @@ using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Features.StoryEditor.Services.Cloning;
+using XooCreator.BA.Features.UserAdministration.Repositories;
 
 namespace XooCreator.BA.Features.StoryEditor.Services;
 
@@ -32,17 +33,20 @@ public class StoryCopyService : IStoryCopyService
     private readonly ILogger<StoryCopyService> _logger;
     private readonly IStorySourceMapper _sourceMapper;
     private readonly IStoryCloner _cloner;
+    private readonly IUserAdministrationRepository _userRepository;
 
     public StoryCopyService(
         IStoryCraftsRepository craftsRepository,
         ILogger<StoryCopyService> logger,
         IStorySourceMapper sourceMapper,
-        IStoryCloner cloner)
+        IStoryCloner cloner,
+        IUserAdministrationRepository userRepository)
     {
         _craftsRepository = craftsRepository;
         _logger = logger;
         _sourceMapper = sourceMapper;
         _cloner = cloner;
+        _userRepository = userRepository;
     }
 
     public async Task<StoryCraft> CreateCopyFromCraftAsync(
@@ -55,8 +59,22 @@ public class StoryCopyService : IStoryCopyService
         ArgumentNullException.ThrowIfNull(sourceCraft);
         ValidateInputs(ownerUserId, newStoryId);
 
+        // Detect if this is a fork (owner is different from source owner)
+        bool isFork = sourceCraft.OwnerUserId != ownerUserId;
+
         // Map source to unified clone data
-        var cloneData = _sourceMapper.MapFromCraft(sourceCraft, isCopy);
+        var cloneData = _sourceMapper.MapFromCraft(sourceCraft, isCopy, isFork);
+        
+        // If this is a fork, set AuthorName to the owner's name
+        if (isFork && string.IsNullOrWhiteSpace(cloneData.AuthorName))
+        {
+            var owner = await _userRepository.GetUserByIdAsync(ownerUserId, ct);
+            
+            if (owner != null && !string.IsNullOrWhiteSpace(owner.Name))
+            {
+                cloneData.AuthorName = owner.Name;
+            }
+        }
         
         // Create new craft from clone data
         var craft = _cloner.CreateCraft(cloneData, ownerUserId, newStoryId);
@@ -83,8 +101,22 @@ public class StoryCopyService : IStoryCopyService
         ArgumentNullException.ThrowIfNull(definition);
         ValidateInputs(ownerUserId, newStoryId);
 
+        // Detect if this is a fork (owner is different from CreatedBy)
+        bool isFork = definition.CreatedBy.HasValue && definition.CreatedBy.Value != ownerUserId;
+
         // Map source to unified clone data
-        var cloneData = _sourceMapper.MapFromDefinition(definition, isCopy);
+        var cloneData = _sourceMapper.MapFromDefinition(definition, isCopy, isFork);
+        
+        // If this is a fork, set AuthorName to the owner's name
+        if (isFork && string.IsNullOrWhiteSpace(cloneData.AuthorName))
+        {
+            var owner = await _userRepository.GetUserByIdAsync(ownerUserId, ct);
+            
+            if (owner != null && !string.IsNullOrWhiteSpace(owner.Name))
+            {
+                cloneData.AuthorName = owner.Name;
+            }
+        }
         
         // Create new craft from clone data
         var craft = _cloner.CreateCraft(cloneData, ownerUserId, newStoryId);
