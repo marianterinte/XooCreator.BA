@@ -397,21 +397,24 @@ public partial class ForkStoryEndpoint
 
     private async Task<(StoryCraft? Craft, StoryDefinition? Definition)> LoadSourceStoryAsync(string storyId, CancellationToken ct)
     {
-        var craft = await _crafts.GetAsync(storyId, ct);
-        if (craft != null)
-        {
-            return (craft, null);
-        }
-
+        // For fork, prioritize published (StoryDefinition) over draft (StoryCraft)
+        // If both exist, use published (stable version) for fork
         var definition = await _db.StoryDefinitions
             .Include(d => d.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Tokens)
             .Include(d => d.Tiles).ThenInclude(t => t.Translations)
             .Include(d => d.Translations)
             .Include(d => d.Topics).ThenInclude(t => t.StoryTopic)
             .Include(d => d.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
-            .FirstOrDefaultAsync(d => d.StoryId == storyId, ct);
+            .FirstOrDefaultAsync(d => d.StoryId == storyId && d.IsActive, ct);
 
-        return (null, definition);
+        if (definition != null)
+        {
+            return (null, definition);  // Prioritize published
+        }
+
+        // If no published version exists, fall back to draft
+        var craft = await _crafts.GetAsync(storyId, ct);
+        return (craft, null);
     }
 
 

@@ -1,3 +1,4 @@
+using System.Text.Json;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.Enums;
@@ -9,13 +10,13 @@ namespace XooCreator.BA.Features.StoryEditor.Services.Cloning;
 /// </summary>
 public interface IStorySourceMapper
 {
-    StoryCloneData MapFromCraft(StoryCraft source, bool isCopy);
-    StoryCloneData MapFromDefinition(StoryDefinition definition, bool isCopy);
+    StoryCloneData MapFromCraft(StoryCraft source, bool isCopy, bool isFork = false);
+    StoryCloneData MapFromDefinition(StoryDefinition definition, bool isCopy, bool isFork = false);
 }
 
 public class StorySourceMapper : IStorySourceMapper
 {
-    public StoryCloneData MapFromCraft(StoryCraft source, bool isCopy)
+    public StoryCloneData MapFromCraft(StoryCraft source, bool isCopy, bool isFork = false)
     {
         return new StoryCloneData
         {
@@ -23,7 +24,7 @@ public class StorySourceMapper : IStorySourceMapper
             StoryTopic = source.StoryTopic,
             CoverImageUrl = source.CoverImageUrl,
             PriceInCredits = source.PriceInCredits,
-            AuthorName = source.AuthorName,
+            AuthorName = isFork ? null : source.AuthorName,
             ClassicAuthorId = source.ClassicAuthorId,
             BaseVersion = source.BaseVersion,
             IsEvaluative = source.IsEvaluative,
@@ -67,11 +68,12 @@ public class StorySourceMapper : IStorySourceMapper
                 }).ToList()
             }).ToList(),
             Topics = source.Topics.Select(t => t.StoryTopicId).ToList(),
-            AgeGroups = source.AgeGroups.Select(ag => ag.StoryAgeGroupId).ToList()
+            AgeGroups = source.AgeGroups.Select(ag => ag.StoryAgeGroupId).ToList(),
+            UnlockedStoryHeroes = GetUnlockedHeroesFromCraft(source)
         };
     }
 
-    public StoryCloneData MapFromDefinition(StoryDefinition definition, bool isCopy)
+    public StoryCloneData MapFromDefinition(StoryDefinition definition, bool isCopy, bool isFork = false)
     {
         return new StoryCloneData
         {
@@ -79,7 +81,7 @@ public class StorySourceMapper : IStorySourceMapper
             StoryTopic = definition.StoryTopic,
             CoverImageUrl = ExtractFileName(definition.CoverImageUrl),
             PriceInCredits = definition.PriceInCredits,
-            AuthorName = definition.AuthorName,
+            AuthorName = isFork ? null : definition.AuthorName,
             ClassicAuthorId = definition.ClassicAuthorId,
             BaseVersion = definition.Version,
             IsEvaluative = definition.IsEvaluative,
@@ -123,13 +125,65 @@ public class StorySourceMapper : IStorySourceMapper
                 }).ToList()
             }).ToList(),
             Topics = definition.Topics.Select(t => t.StoryTopicId).ToList(),
-            AgeGroups = definition.AgeGroups.Select(ag => ag.StoryAgeGroupId).ToList()
+            AgeGroups = definition.AgeGroups.Select(ag => ag.StoryAgeGroupId).ToList(),
+            UnlockedStoryHeroes = GetUnlockedHeroesFromStoryJson(definition.StoryId)
         };
     }
 
     private static string? ExtractFileName(string? path)
     {
         return string.IsNullOrWhiteSpace(path) ? null : Path.GetFileName(path);
+    }
+
+    private static List<string> GetUnlockedHeroesFromCraft(StoryCraft craft)
+    {
+        return craft.UnlockedHeroes.Select(h => h.HeroId).ToList();
+    }
+
+    private static List<string> GetUnlockedHeroesFromStoryJson(string storyId)
+    {
+        try
+        {
+            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            var candidates = new[]
+            {
+                Path.Combine(baseDir, "Data", "SeedData", "en-us", "Stories", $"{storyId}.json"),
+                Path.Combine(baseDir, "Data", "SeedData", "ro-ro", "Stories", $"{storyId}.json"),
+                Path.Combine(baseDir, "Data", "SeedData", "hu-hu", "Stories", $"{storyId}.json"),
+                Path.Combine(baseDir, "Data", "SeedData", "Stories", "seed@alchimalia.com", "i18n", "en-us", $"{storyId}.json"),
+                Path.Combine(baseDir, "Data", "SeedData", "Stories", "seed@alchimalia.com", "i18n", "ro-ro", $"{storyId}.json"),
+                Path.Combine(baseDir, "Data", "SeedData", "Stories", "seed@alchimalia.com", "i18n", "hu-hu", $"{storyId}.json"),
+                Path.Combine(baseDir, "Data", "SeedData", "Stories", "seed@alchimalia.com", "independent", "i18n", "en-us", $"{storyId}.json"),
+                Path.Combine(baseDir, "Data", "SeedData", "Stories", "seed@alchimalia.com", "independent", "i18n", "ro-ro", $"{storyId}.json"),
+                Path.Combine(baseDir, "Data", "SeedData", "Stories", "seed@alchimalia.com", "independent", "i18n", "hu-hu", $"{storyId}.json")
+            };
+
+            foreach (var filePath in candidates)
+            {
+                if (File.Exists(filePath))
+                {
+                    var json = File.ReadAllText(filePath);
+                    var storyData = JsonSerializer.Deserialize<StoryJsonProbe>(json, new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        PropertyNameCaseInsensitive = true
+                    });
+
+                    return storyData?.UnlockedStoryHeroes ?? new List<string>();
+                }
+            }
+        }
+        catch
+        {
+            // Ignore errors, return empty list
+        }
+
+        return new List<string>();
+    }
+
+    private sealed class StoryJsonProbe
+    {
+        public List<string> UnlockedStoryHeroes { get; set; } = new();
     }
 }
 
@@ -148,6 +202,7 @@ public class StoryCloneData
     public List<TileCloneData> Tiles { get; set; } = new();
     public List<Guid> Topics { get; set; } = new();
     public List<Guid> AgeGroups { get; set; } = new();
+    public List<string> UnlockedStoryHeroes { get; set; } = new();
 }
 
 public class TranslationCloneData

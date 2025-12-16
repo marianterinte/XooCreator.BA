@@ -48,8 +48,16 @@ public class UserContextService : IUserContextService
     public string GetRequestLocaleOrDefault(string fallback = "ro-ro")
     {
         var ctx = _httpContextAccessor.HttpContext;
-        var val = ctx?.GetRouteValue("locale") as string;
-        if (!string.IsNullOrWhiteSpace(val)) return val.ToLowerInvariant();
+        if (ctx == null) return fallback;
+        
+        // First check route value (for endpoints with locale in path like /api/{locale}/...)
+        var routeVal = ctx.GetRouteValue("locale") as string;
+        if (!string.IsNullOrWhiteSpace(routeVal)) return routeVal.ToLowerInvariant();
+        
+        // Then check query string (for language-agnostic endpoints like /api/story-editor/epics?locale=ro-ro)
+        var queryVal = ctx.Request.Query["locale"].FirstOrDefault();
+        if (!string.IsNullOrWhiteSpace(queryVal)) return queryVal.ToLowerInvariant();
+        
         return fallback;
     }
 }

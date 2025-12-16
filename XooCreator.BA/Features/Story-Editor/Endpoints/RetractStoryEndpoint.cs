@@ -27,7 +27,7 @@ public class RetractStoryEndpoint
         _logger = logger;
     }
 
-    public record RetractResponse
+    public record RetractStoryResponse
     {
         public bool Ok { get; init; } = true;
         public string Status { get; init; } = "Draft";
@@ -35,7 +35,7 @@ public class RetractStoryEndpoint
 
     [Route("/api/stories/{storyId}/retract")]
     [Authorize]
-    public static async Task<Results<Ok<RetractResponse>, NotFound, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
+    public static async Task<Results<Ok<RetractStoryResponse>, NotFound, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
         [FromRoute] string storyId,
         [FromServices] RetractStoryEndpoint ep,
         CancellationToken ct)
@@ -74,7 +74,7 @@ public class RetractStoryEndpoint
         }
         await ep._crafts.SaveAsync(craft, ct);
         ep._logger.LogInformation("Retract: storyId={StoryId}", storyId);
-        return TypedResults.Ok(new RetractResponse());
+        return TypedResults.Ok(new RetractStoryResponse());
     }
 }
 

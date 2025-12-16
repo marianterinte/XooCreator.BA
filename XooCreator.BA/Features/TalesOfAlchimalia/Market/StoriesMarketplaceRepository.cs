@@ -42,17 +42,20 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
 {
     private readonly XooDbContext _context;
     private readonly StoryDetailsMapper _storyDetailsMapper;
+    private readonly EpicsMarketplaceRepository? _epicsRepository;
     private readonly ILogger<StoriesMarketplaceRepository>? _logger;
     private readonly TelemetryClient? _telemetryClient;
 
     public StoriesMarketplaceRepository(
         XooDbContext context, 
         StoryDetailsMapper storyDetailsMapper,
+        EpicsMarketplaceRepository? epicsRepository = null,
         ILogger<StoriesMarketplaceRepository>? logger = null,
         TelemetryClient? telemetryClient = null)
     {
         _context = context;
         _storyDetailsMapper = storyDetailsMapper;
+        _epicsRepository = epicsRepository;
         _logger = logger;
         _telemetryClient = telemetryClient;
     }
@@ -84,6 +87,9 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             {
                 query = query.Where(s => s.StoryType == StoryType.Indie);
             }
+
+            // Exclude stories that are part of an epic (using IsPartOfEpic flag)
+            query = query.Where(s => !s.IsPartOfEpic);
 
             // Filter by topics (topic IDs)
             if (request.Topics?.Any() == true)
@@ -212,6 +218,9 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             query = query.Where(s => s.StoryType == StoryType.Indie);
         }
 
+        // Exclude stories that are part of an epic (using IsPartOfEpic flag)
+        query = query.Where(s => !s.IsPartOfEpic);
+
         // Filter by topics (topic IDs)
         if (request.Topics?.Any() == true)
         {
@@ -297,6 +306,9 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             .Include(s => s.AgeGroups)
                 .ThenInclude(ag => ag.StoryAgeGroup)
             .Where(s => s.IsActive && s.Status == StoryStatus.Published);
+
+        // Exclude stories that are part of an epic (using IsPartOfEpic flag)
+        query = query.Where(s => !s.IsPartOfEpic);
 
         // Auto-filter by age groups if enabled in parent dashboard
         if (user != null && user.AutoFilterStoriesByAge && user.SelectedAgeGroupIds != null && user.SelectedAgeGroupIds.Count > 0)

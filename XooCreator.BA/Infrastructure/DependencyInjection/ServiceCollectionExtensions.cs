@@ -40,6 +40,8 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IAzureQueueClientFactory, AzureQueueClientFactory>();
         services.AddSingleton<IStoryPublishQueue, StoryPublishQueue>();
         services.AddSingleton<IStoryVersionQueue, StoryVersionQueue>();
+        services.AddSingleton<IEpicPublishQueue, EpicPublishQueue>();
+        services.AddSingleton<IEpicVersionQueue, EpicVersionQueue>();
         services.AddSingleton<IStoryImportQueue, StoryImportQueue>();
         services.AddSingleton<IStoryForkQueue, StoryForkQueue>();
         services.AddSingleton<IStoryForkAssetsQueue, StoryForkAssetsQueue>();
@@ -128,6 +130,20 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IStoryAssetReplacementService, StoryAssetReplacementService>();
         services.AddScoped<IStoryExportService, StoryExportService>();
         
+        // Story Epic Services
+        services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.IStoryEpicService, XooCreator.BA.Features.StoryEditor.StoryEpic.Services.StoryEpicService>();
+        services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.IStoryEpicPublishingService, XooCreator.BA.Features.StoryEditor.StoryEpic.Services.StoryEpicPublishingService>();
+        services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Repositories.IEpicProgressRepository, XooCreator.BA.Features.StoryEditor.StoryEpic.Repositories.EpicProgressRepository>();
+        services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.IStoryEpicProgressService, XooCreator.BA.Features.StoryEditor.StoryEpic.Services.StoryEpicProgressService>();
+        
+        // Story Region Services (Independent Regions)
+        services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Repositories.IStoryRegionRepository, XooCreator.BA.Features.StoryEditor.StoryEpic.Repositories.StoryRegionRepository>();
+        services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.IStoryRegionService, XooCreator.BA.Features.StoryEditor.StoryEpic.Services.StoryRegionService>();
+        
+        // Epic Hero Services (Independent Heroes)
+        services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Repositories.IEpicHeroRepository, XooCreator.BA.Features.StoryEditor.StoryEpic.Repositories.EpicHeroRepository>();
+        services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.IEpicHeroService, XooCreator.BA.Features.StoryEditor.StoryEpic.Services.EpicHeroService>();
+        
         return services;
     }
 
@@ -160,11 +176,17 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<IStoryReviewsRepository, StoryReviewsRepository>();
         services.AddScoped<IStoryReviewsService, StoryReviewsService>();
+        services.AddScoped<IEpicReviewsRepository, EpicReviewsRepository>();
+        services.AddScoped<IEpicReviewsService, EpicReviewsService>();
         services.AddScoped<IFavoritesRepository, FavoritesRepository>();
         services.AddScoped<IFavoritesService, FavoritesService>();
+        services.AddScoped<IEpicFavoritesRepository, EpicFavoritesRepository>();
+        services.AddScoped<IEpicFavoritesService, EpicFavoritesService>();
         services.AddScoped<StoryDetailsMapper>();
         services.AddScoped<IStoriesMarketplaceRepository, StoriesMarketplaceRepository>();
         services.AddScoped<IStoriesMarketplaceService, StoriesMarketplaceService>();
+        services.AddScoped<EpicsMarketplaceRepository>();
+        services.AddScoped<IEpicsMarketplaceService, EpicsMarketplaceService>();
         
         return services;
     }

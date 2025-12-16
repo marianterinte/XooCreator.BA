@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.Enums;
@@ -90,6 +91,7 @@ public class StoryEditorService : IStoryEditorService
         craft.ClassicAuthorId = dto.ClassicAuthorId; // Save classic author ID if selected
         craft.StoryType = (StoryType)(dto.StoryType);
         craft.IsEvaluative = dto.IsEvaluative;
+        craft.IsPartOfEpic = dto.IsPartOfEpic;
         craft.PriceInCredits = dto.PriceInCredits;
         craft.UpdatedAt = DateTime.UtcNow;
         
@@ -98,6 +100,9 @@ public class StoryEditorService : IStoryEditorService
         
         // Update age groups (many-to-many)
         await UpdateAgeGroupsAsync(craft, dto.AgeGroupIds ?? new(), ct);
+        
+        // Update unlocked heroes (many-to-many)
+        await UpdateUnlockedHeroesAsync(craft, dto.UnlockedStoryHeroes ?? new(), ct);
         
         // Update tiles (delegated to TileUpdater)
         await _tileUpdater.UpdateTilesAsync(craft, dto.Tiles ?? new(), lang, ct);
@@ -161,6 +166,34 @@ public class StoryEditorService : IStoryEditorService
             {
                 StoryCraftId = craft.Id,
                 StoryAgeGroupId = ageGroup.Id,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+    }
+
+    private async Task UpdateUnlockedHeroesAsync(StoryCraft craft, List<string> heroIds, CancellationToken ct)
+    {
+        // Remove existing unlocked heroes
+        var existingHeroes = _context.StoryCraftUnlockedHeroes
+            .Where(h => h.StoryCraftId == craft.Id)
+            .ToList();
+        _context.StoryCraftUnlockedHeroes.RemoveRange(existingHeroes);
+
+        if (heroIds == null || heroIds.Count == 0)
+        {
+            return;
+        }
+
+        // Add new unlocked heroes (stored as string IDs, no separate entity needed)
+        foreach (var heroId in heroIds)
+        {
+            if (string.IsNullOrWhiteSpace(heroId))
+                continue;
+
+            _context.StoryCraftUnlockedHeroes.Add(new StoryCraftUnlockedHero
+            {
+                StoryCraftId = craft.Id,
+                HeroId = heroId.Trim(),
                 CreatedAt = DateTime.UtcNow
             });
         }

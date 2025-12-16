@@ -14,9 +14,11 @@ public class EditableStoryDto
     public double PriceInCredits { get; set; } = 0; // Price in credits for purchasing the story
     public int StoryType { get; set; } = 0; // 0 = AlchimaliaEpic (Tree Of Light), 1 = Indie (Independent)
     public bool IsEvaluative { get; set; } = false; // If true, this story contains quizzes that should be evaluated
+    public bool IsPartOfEpic { get; set; } = false; // If true, this story is part of an epic (draft or published) and should not appear as independent story
     public string? Status { get; set; } // 'draft' | 'in-review' | 'approved' | 'published' (FE semantic)
     public string? Language { get; set; } // Language code for the story (standardized: use "language" instead of "languageCode")
     public List<string>? AvailableLanguages { get; set; } // Available language codes for this story
+    public List<string>? UnlockedStoryHeroes { get; set; } // List of hero IDs that are unlocked when this story is completed
     public List<EditableTileDto> Tiles { get; set; } = new();
 
     // Reviewer/Audit fields (optional)

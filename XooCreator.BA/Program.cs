@@ -7,6 +7,7 @@ using XooCreator.BA.Infrastructure.DependencyInjection;
 using XooCreator.BA.Infrastructure.Configuration;
 using XooCreator.BA.Features.StoryEditor.Services;
 using XooCreator.BA.Infrastructure.Middleware;
+using XooCreator.BA.Infrastructure;
 using XooCreator.DbScriptRunner;
 
 // Store startup exception for display
@@ -41,6 +42,8 @@ builder.Services.AddHostedService<StoryImportQueueWorker>();
 builder.Services.AddHostedService<StoryForkQueueWorker>();
 builder.Services.AddHostedService<StoryForkAssetsQueueWorker>();
 builder.Services.AddHostedService<StoryExportQueueWorker>();
+builder.Services.AddHostedService<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.EpicPublishQueueJob>();
+builder.Services.AddHostedService<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.EpicVersionQueueJob>();
 
 builder.Services.AddAuthConfiguration(builder.Configuration);
 
@@ -78,6 +81,8 @@ app.UseGlobalExceptionHandling();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Locale routing middleware (must be before MapDiscoveredEndpoints)
+app.UseLocaleInApiPath();
 
 // Connectivity check only - schema/scripts handled via XooCreator.DbScriptRunner
 using (var scope = app.Services.CreateScope())

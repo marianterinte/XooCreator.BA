@@ -15,6 +15,10 @@ public static class SwaggerConfiguration
                 Version = "v1.0.0",
                 Description = "XooCreator Backend API"
             });
+            
+            // Use full type name as schemaId to avoid conflicts between types with same name in different namespaces
+            c.CustomSchemaIds(type => type.FullName?.Replace("+", ".") ?? type.Name);
+            
             c.OperationFilter<LocaleParameterOperationFilter>();
             c.OperationFilter<BusinessFolderTagOperationFilter>();
 

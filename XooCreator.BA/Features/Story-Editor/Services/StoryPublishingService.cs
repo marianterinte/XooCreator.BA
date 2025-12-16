@@ -108,6 +108,7 @@ public class StoryPublishingService : IStoryPublishingService
                 Status = StoryStatus.Published,
                 IsActive = true,
                 IsEvaluative = craft.IsEvaluative,
+                IsPartOfEpic = craft.IsPartOfEpic,
                 SortOrder = 0,
                 Version = 1,
                 PriceInCredits = craft.PriceInCredits,
@@ -124,6 +125,7 @@ public class StoryPublishingService : IStoryPublishingService
         def.ClassicAuthorId = craft.ClassicAuthorId ?? def.ClassicAuthorId;
         def.StoryType = craft.StoryType;
         def.IsEvaluative = craft.IsEvaluative;
+        def.IsPartOfEpic = craft.IsPartOfEpic;
         def.PriceInCredits = craft.PriceInCredits;
         def.Status = StoryStatus.Published;
         def.IsActive = true;
@@ -171,6 +173,7 @@ public class StoryPublishingService : IStoryPublishingService
 
         await ReplaceDefinitionTopicsAsync(def, craft, ct);
         await ReplaceDefinitionAgeGroupsAsync(def, craft, ct);
+        await ReplaceDefinitionUnlockedHeroesAsync(def, craft, ct);
 
         def.LastPublishedVersion = craft.LastDraftVersion;
 
@@ -241,6 +244,7 @@ public class StoryPublishingService : IStoryPublishingService
         def.ClassicAuthorId = craft.ClassicAuthorId ?? def.ClassicAuthorId;
         def.StoryType = craft.StoryType;
         def.IsEvaluative = craft.IsEvaluative;
+        def.IsPartOfEpic = craft.IsPartOfEpic;
         def.PriceInCredits = craft.PriceInCredits;
         def.Status = StoryStatus.Published;
         def.IsActive = true;
@@ -264,6 +268,7 @@ public class StoryPublishingService : IStoryPublishingService
         await ReplaceDefinitionTranslationsAsync(def, craft, ct);
         await ReplaceDefinitionTopicsAsync(def, craft, ct);
         await ReplaceDefinitionAgeGroupsAsync(def, craft, ct);
+        await ReplaceDefinitionUnlockedHeroesAsync(def, craft, ct);
         await _assetLinks.SyncCoverAsync(craft, ownerEmail, ct);
     }
 
@@ -368,6 +373,35 @@ public class StoryPublishingService : IStoryPublishingService
             {
                 StoryDefinitionId = def.Id,
                 StoryAgeGroupId = craftAgeGroup.StoryAgeGroupId,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+    }
+
+    private async Task ReplaceDefinitionUnlockedHeroesAsync(StoryDefinition def, StoryCraft craft, CancellationToken ct)
+    {
+        var existingUnlockedHeroes = await _db.StoryDefinitionUnlockedHeroes
+            .Where(h => h.StoryDefinitionId == def.Id)
+            .ToListAsync(ct);
+        if (existingUnlockedHeroes.Count > 0)
+        {
+            _db.StoryDefinitionUnlockedHeroes.RemoveRange(existingUnlockedHeroes);
+        }
+
+        // Load craft with UnlockedHeroes if not already loaded
+        if (craft.UnlockedHeroes == null || craft.UnlockedHeroes.Count == 0)
+        {
+            craft.UnlockedHeroes = await _db.StoryCraftUnlockedHeroes
+                .Where(h => h.StoryCraftId == craft.Id)
+                .ToListAsync(ct);
+        }
+
+        foreach (var craftUnlockedHero in craft.UnlockedHeroes)
+        {
+            _db.StoryDefinitionUnlockedHeroes.Add(new StoryDefinitionUnlockedHero
+            {
+                StoryDefinitionId = def.Id,
+                HeroId = craftUnlockedHero.HeroId,
                 CreatedAt = DateTime.UtcNow
             });
         }

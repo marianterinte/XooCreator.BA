@@ -127,6 +127,19 @@ public class StoryCloner : IStoryCloner
             });
         }
 
+        // Clone unlocked heroes
+        foreach (var heroId in cloneData.UnlockedStoryHeroes)
+        {
+            if (string.IsNullOrWhiteSpace(heroId))
+                continue;
+
+            craft.UnlockedHeroes.Add(new StoryCraftUnlockedHero
+            {
+                HeroId = heroId.Trim(),
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+
         return craft;
     }
 }

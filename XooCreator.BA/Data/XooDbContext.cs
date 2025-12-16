@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System.Linq;
+using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.Enums;
@@ -28,6 +29,8 @@ public class XooDbContext : DbContext
 
     public DbSet<TreeProgress> TreeProgress => Set<TreeProgress>();
     public DbSet<StoryProgress> StoryProgress => Set<StoryProgress>();
+    public DbSet<EpicProgress> EpicProgress => Set<EpicProgress>();
+    public DbSet<EpicStoryProgress> EpicStoryProgress => Set<EpicStoryProgress>();
     public DbSet<UserTokenBalance> UserTokenBalances => Set<UserTokenBalance>();
     public DbSet<HeroProgress> HeroProgress => Set<HeroProgress>();
     public DbSet<HeroTreeProgress> HeroTreeProgress => Set<HeroTreeProgress>();
@@ -39,6 +42,28 @@ public class XooDbContext : DbContext
     public DbSet<TreeStoryNode> TreeStoryNodes => Set<TreeStoryNode>();
     public DbSet<TreeUnlockRule> TreeUnlockRules => Set<TreeUnlockRule>();
     public DbSet<TreeConfiguration> TreeConfigurations => Set<TreeConfiguration>();
+    
+    // Story Epic - New Architecture (Craft for drafts, Definition for published)
+    public DbSet<StoryEpicCraft> StoryEpicCrafts => Set<StoryEpicCraft>();
+    public DbSet<StoryEpicCraftTranslation> StoryEpicCraftTranslations => Set<StoryEpicCraftTranslation>();
+    public DbSet<StoryEpicCraftRegion> StoryEpicCraftRegions => Set<StoryEpicCraftRegion>();
+    public DbSet<StoryEpicCraftStoryNode> StoryEpicCraftStoryNodes => Set<StoryEpicCraftStoryNode>();
+    public DbSet<StoryEpicCraftUnlockRule> StoryEpicCraftUnlockRules => Set<StoryEpicCraftUnlockRule>();
+    public DbSet<StoryEpicCraftHeroReference> StoryEpicCraftHeroReferences => Set<StoryEpicCraftHeroReference>();
+    
+    public DbSet<StoryEpicDefinition> StoryEpicDefinitions => Set<StoryEpicDefinition>();
+    public DbSet<StoryEpicDefinitionTranslation> StoryEpicDefinitionTranslations => Set<StoryEpicDefinitionTranslation>();
+    public DbSet<StoryEpicDefinitionRegion> StoryEpicDefinitionRegions => Set<StoryEpicDefinitionRegion>();
+    public DbSet<StoryEpicDefinitionStoryNode> StoryEpicDefinitionStoryNodes => Set<StoryEpicDefinitionStoryNode>();
+    public DbSet<StoryEpicDefinitionUnlockRule> StoryEpicDefinitionUnlockRules => Set<StoryEpicDefinitionUnlockRule>();
+    
+    // Story Epic - Independent Regions and Heroes
+    public DbSet<StoryRegion> StoryRegions => Set<StoryRegion>();
+    public DbSet<StoryRegionTranslation> StoryRegionTranslations => Set<StoryRegionTranslation>();
+    public DbSet<EpicHero> EpicHeroes => Set<EpicHero>();
+    public DbSet<EpicHeroTranslation> EpicHeroTranslations => Set<EpicHeroTranslation>();
+    public DbSet<StoryEpicRegionReference> StoryEpicRegionReferences => Set<StoryEpicRegionReference>();
+    public DbSet<StoryEpicHeroReference> StoryEpicHeroReferences => Set<StoryEpicHeroReference>();
     
     public DbSet<StoryDefinition> StoryDefinitions => Set<StoryDefinition>();
     public DbSet<StoryDefinitionTranslation> StoryDefinitionTranslations => Set<StoryDefinitionTranslation>();
@@ -67,8 +92,11 @@ public class XooDbContext : DbContext
     // Story Marketplace
     public DbSet<StoryPurchase> StoryPurchases => Set<StoryPurchase>();
     public DbSet<StoryReview> StoryReviews => Set<StoryReview>();
+    public DbSet<EpicReview> EpicReviews => Set<EpicReview>();
     public DbSet<UserFavoriteStories> UserFavoriteStories => Set<UserFavoriteStories>();
+    public DbSet<UserFavoriteEpics> UserFavoriteEpics => Set<UserFavoriteEpics>();
     public DbSet<StoryReader> StoryReaders => Set<StoryReader>();
+    public DbSet<EpicReader> EpicReaders => Set<EpicReader>();
     
     // User Story Relations
     public DbSet<UserOwnedStories> UserOwnedStories => Set<UserOwnedStories>();
@@ -78,6 +106,8 @@ public class XooDbContext : DbContext
     public DbSet<StoryAssetLink> StoryAssetLinks => Set<StoryAssetLink>();
     public DbSet<StoryPublishJob> StoryPublishJobs => Set<StoryPublishJob>();
     public DbSet<StoryVersionJob> StoryVersionJobs => Set<StoryVersionJob>();
+    public DbSet<EpicVersionJob> EpicVersionJobs => Set<EpicVersionJob>();
+    public DbSet<EpicPublishJob> EpicPublishJobs => Set<EpicPublishJob>();
     public DbSet<StoryImportJob> StoryImportJobs => Set<StoryImportJob>();
     public DbSet<StoryForkJob> StoryForkJobs => Set<StoryForkJob>();
     public DbSet<StoryForkAssetJob> StoryForkAssetJobs => Set<StoryForkAssetJob>();
@@ -95,6 +125,8 @@ public class XooDbContext : DbContext
     public DbSet<StoryTopicTranslation> StoryTopicTranslations => Set<StoryTopicTranslation>();
     public DbSet<StoryCraftTopic> StoryCraftTopics => Set<StoryCraftTopic>();
     public DbSet<StoryDefinitionTopic> StoryDefinitionTopics => Set<StoryDefinitionTopic>();
+    public DbSet<StoryCraftUnlockedHero> StoryCraftUnlockedHeroes => Set<StoryCraftUnlockedHero>();
+    public DbSet<StoryDefinitionUnlockedHero> StoryDefinitionUnlockedHeroes => Set<StoryDefinitionUnlockedHero>();
     public DbSet<StoryAgeGroup> StoryAgeGroups => Set<StoryAgeGroup>();
     public DbSet<StoryAgeGroupTranslation> StoryAgeGroupTranslations => Set<StoryAgeGroupTranslation>();
     public DbSet<StoryCraftAgeGroup> StoryCraftAgeGroups => Set<StoryCraftAgeGroup>();
@@ -112,505 +144,19 @@ public class XooDbContext : DbContext
         modelBuilder.HasDefaultSchema(_defaultSchema);
         modelBuilder.HasPostgresExtension("uuid-ossp");
 
-        modelBuilder.Entity<PlatformSetting>(e =>
-        {
-            e.ToTable("PlatformSettings", _defaultSchema);
-            e.HasKey(x => x.Key);
-            e.Property(x => x.Key).HasMaxLength(128).IsRequired();
-            e.Property(x => x.BoolValue).IsRequired();
-            e.Property(x => x.StringValue);
-            e.Property(x => x.UpdatedAt).IsRequired();
-            e.Property(x => x.UpdatedBy).HasMaxLength(256);
-        });
+        // Apply all entity configurations from the Configurations folder
+        modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
-        modelBuilder.Entity<AlchimaliaUser>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.HasIndex(x => x.Auth0Id).IsUnique();
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.Name).HasMaxLength(100).IsRequired();
-            e.Property(x => x.FirstName).HasMaxLength(100).IsRequired();
-            e.Property(x => x.LastName).HasMaxLength(100).IsRequired();
-            e.Property(x => x.Role).IsRequired();
-            // Configure Roles as PostgreSQL array
-            e.Property(x => x.Roles)
-                .HasConversion(
-                    v => v.Select(r => (int)r).ToArray(),
-                    v => v.Select(r => (UserRole)r).ToList())
-                .HasColumnType("integer[]");
-            // Configure SelectedAgeGroupIds as PostgreSQL text array
-            e.Property(x => x.SelectedAgeGroupIds)
-                .HasConversion(
-                    v => v == null || v.Count == 0 ? null : v.ToArray(),
-                    v => v == null ? null : v.ToList())
-                .HasColumnType("text[]");
-            e.Property(x => x.Email).HasMaxLength(256).IsRequired();
-            e.Property(x => x.Auth0Id).HasMaxLength(256).IsRequired();
-            e.Property(x => x.Picture).HasMaxLength(512);
-        });
+        // Explicitly set schema for PlatformSettings table
+        modelBuilder.Entity<PlatformSetting>().ToTable("PlatformSettings", _defaultSchema);
 
-        modelBuilder.Entity<StoryForkJob>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedNever();
-            e.Property(x => x.SourceStoryId).HasMaxLength(256).IsRequired();
-            e.Property(x => x.SourceType).HasMaxLength(32).IsRequired();
-            e.Property(x => x.TargetStoryId).HasMaxLength(256).IsRequired();
-            e.Property(x => x.TargetOwnerEmail).HasMaxLength(256).IsRequired();
-            e.Property(x => x.RequestedByEmail).HasMaxLength(256).IsRequired();
-            e.Property(x => x.Status).HasMaxLength(32).IsRequired();
-            e.HasIndex(x => new { x.TargetStoryId, x.Status });
-        });
-
-        modelBuilder.Entity<StoryForkAssetJob>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedNever();
-            e.Property(x => x.SourceStoryId).HasMaxLength(256).IsRequired();
-            e.Property(x => x.SourceType).HasMaxLength(32).IsRequired();
-            e.Property(x => x.TargetStoryId).HasMaxLength(256).IsRequired();
-            e.Property(x => x.TargetOwnerEmail).HasMaxLength(256).IsRequired();
-            e.Property(x => x.RequestedByEmail).HasMaxLength(256).IsRequired();
-            e.Property(x => x.Status).HasMaxLength(32).IsRequired();
-            e.HasIndex(x => new { x.TargetStoryId, x.Status });
-        });
-
-        modelBuilder.Entity<StoryImportJob>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedNever();
-            e.Property(x => x.StoryId).HasMaxLength(256).IsRequired();
-            e.Property(x => x.OriginalStoryId).HasMaxLength(256);
-            e.Property(x => x.Locale).HasMaxLength(16);
-            e.Property(x => x.ZipBlobPath).HasMaxLength(512).IsRequired();
-            e.Property(x => x.ZipFileName).HasMaxLength(256);
-            e.Property(x => x.Status).HasMaxLength(32).IsRequired();
-            e.HasIndex(x => new { x.StoryId, x.Status });
-            e.HasIndex(x => x.OwnerUserId);
-        });
-
-        modelBuilder.Entity<CreditWallet>(e =>
-        {
-            e.HasKey(x => x.UserId);
-            e.HasOne(x => x.User).WithOne().HasForeignKey<CreditWallet>(x => x.UserId);
-        });
-
-        modelBuilder.Entity<BestiaryItem>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.ArmsKey).HasMaxLength(32);
-            e.Property(x => x.BodyKey).HasMaxLength(32);
-            e.Property(x => x.HeadKey).HasMaxLength(32);
-            e.Property(x => x.Name).HasMaxLength(128);
-            e.Property(x => x.Story).HasMaxLength(10000);
-        });
-
-        modelBuilder.Entity<UserBestiary>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.BestiaryType).HasMaxLength(32).IsRequired();
-            e.HasIndex(x => new { x.UserId, x.BestiaryItemId, x.BestiaryType }).IsUnique();
-            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
-            e.HasOne(x => x.BestiaryItem).WithMany().HasForeignKey(x => x.BestiaryItemId);
-            e.ToTable("UserBestiary");
-        });
-
-        modelBuilder.Entity<CreditTransaction>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Amount).IsRequired();
-            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
-        });
-
-        modelBuilder.Entity<Tree>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
-        });
-
-        modelBuilder.Entity<TreeChoice>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.HasOne(x => x.Tree).WithMany(x => x.Choices).HasForeignKey(x => x.TreeId);
-            e.HasIndex(x => new { x.TreeId, x.Tier }).IsUnique();
-        });
-
-        modelBuilder.Entity<Creature>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
-            e.HasOne(x => x.Tree).WithMany().HasForeignKey(x => x.TreeId);
-        });
-
-        modelBuilder.Entity<Job>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Type).HasMaxLength(24);
-            e.Property(x => x.Status).HasMaxLength(24);
-            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
-        });
-
-        modelBuilder.Entity<BodyPart>(e =>
-        {
-            e.HasKey(x => x.Key);
-            e.Property(x => x.Key).HasMaxLength(32);
-            e.Property(x => x.Name).HasMaxLength(64).IsRequired();
-            e.Property(x => x.Image).HasMaxLength(256).IsRequired();
-        });
-
-        modelBuilder.Entity<BodyPartTranslation>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.LanguageCode).HasMaxLength(10);
-            e.HasIndex(x => new { x.BodyPartKey, x.LanguageCode }).IsUnique();
-            e.HasOne(x => x.BodyPart)
-                .WithMany(b => b.Translations)
-                .HasForeignKey(x => x.BodyPartKey)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<Region>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Name).HasMaxLength(64).IsRequired();
-            e.HasIndex(x => x.Name).IsUnique();
-        });
-
-        modelBuilder.Entity<Animal>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Label).HasMaxLength(64).IsRequired();
-            e.Property(x => x.Src).HasMaxLength(256).IsRequired();
-            e.Property(x => x.IsHybrid).HasDefaultValue(false);
-            e.HasOne(x => x.Region).WithMany(x => x.Animals).HasForeignKey(x => x.RegionId);
-        });
-
-        modelBuilder.Entity<AnimalTranslation>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.LanguageCode).HasMaxLength(10);
-            e.HasIndex(x => new { x.AnimalId, x.LanguageCode }).IsUnique();
-            e.HasOne(x => x.Animal)
-                .WithMany(a => a.Translations)
-                .HasForeignKey(x => x.AnimalId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<AnimalPartSupport>(e =>
-        {
-            e.HasKey(x => new { x.AnimalId, x.PartKey });
-            e.HasOne(x => x.Animal).WithMany(x => x.SupportedParts).HasForeignKey(x => x.AnimalId);
-            e.HasOne(x => x.Part).WithMany().HasForeignKey(x => x.PartKey);
-        });
-
-        modelBuilder.Entity<BuilderConfig>(e =>
-        {
-            e.HasKey(x => x.Id);
-        });
-
+        // Seed data methods
         SeedBuilderDataFromJson(modelBuilder);
-
         SeedStoryHeroesDataFromJson(modelBuilder);
-        
         SeedHeroMessagesDataFromJson(modelBuilder);
-        
         SeedStoryHeroDefinitions(modelBuilder);
-        
-        // Independent stories are seeded via StoriesRepository.SeedIndependentStoriesAsync()
-        // which uses SaveChanges() instead of HasData() to allow navigation properties
-        // SeedIndependentStoriesDataFromJson(modelBuilder);
 
-        modelBuilder.Entity<TreeProgress>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.HasIndex(x => new { x.UserId, x.RegionId, x.TreeConfigurationId }).IsUnique();
-            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
-            e.HasOne(x => x.TreeConfiguration).WithMany().HasForeignKey(x => x.TreeConfigurationId);
-        });
-
-        modelBuilder.Entity<StoryProgress>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.HasIndex(x => new { x.UserId, x.StoryId, x.TreeConfigurationId }).IsUnique();
-            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
-            e.HasOne(x => x.TreeConfiguration).WithMany().HasForeignKey(x => x.TreeConfigurationId);
-        });
-
-
-        modelBuilder.Entity<UserTokenBalance>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.Type).HasMaxLength(64).IsRequired();
-            e.Property(x => x.Value).HasMaxLength(128).IsRequired();
-            e.HasIndex(x => new { x.UserId, x.Type, x.Value }).IsUnique();
-            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
-        });
-
-        modelBuilder.Entity<HeroProgress>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.HasIndex(x => new { x.UserId, x.HeroId, x.HeroType }).IsUnique();
-            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
-        });
-
-        modelBuilder.Entity<HeroTreeProgress>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.HasIndex(x => new { x.UserId, x.NodeId }).IsUnique();
-            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
-        });
-
-        modelBuilder.Entity<HeroDefinition>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).HasMaxLength(100);
-            e.Property(x => x.Type).HasMaxLength(50).IsRequired();
-            e.Property(x => x.PrerequisitesJson).HasMaxLength(2000);
-            e.Property(x => x.RewardsJson).HasMaxLength(2000);
-            e.Property(x => x.PositionX).HasColumnType("decimal(10,6)");
-            e.Property(x => x.PositionY).HasColumnType("decimal(10,6)");
-            e.HasIndex(x => x.Id).IsUnique();
-        });
-
-        modelBuilder.Entity<HeroDefinitionTranslation>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.LanguageCode).HasMaxLength(10);
-            e.HasIndex(x => new { x.HeroDefinitionId, x.LanguageCode }).IsUnique();
-            e.HasOne(x => x.HeroDefinition)
-                .WithMany(s => s.Translations)
-                .HasForeignKey(x => x.HeroDefinitionId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<TreeRegion>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).HasMaxLength(50);
-            e.Property(x => x.Label).HasMaxLength(100).IsRequired();
-            e.HasIndex(x => new { x.Id, x.TreeConfigurationId }).IsUnique();
-            e.HasOne(x => x.TreeConfiguration).WithMany().HasForeignKey(x => x.TreeConfigurationId);
-        });
-
-        modelBuilder.Entity<TreeStoryNode>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.StoryId).HasMaxLength(100).IsRequired();
-            e.Property(x => x.RegionId).HasMaxLength(50).IsRequired();
-            e.HasIndex(x => new { x.StoryId, x.RegionId, x.TreeConfigurationId }).IsUnique();
-            e.HasOne(x => x.Region).WithMany(x => x.Stories).HasForeignKey(x => x.RegionId);
-            e.HasOne(x => x.StoryDefinition).WithMany().HasForeignKey(x => x.StoryId).HasPrincipalKey(s => s.StoryId);
-            e.HasOne(x => x.TreeConfiguration).WithMany().HasForeignKey(x => x.TreeConfigurationId);
-        });
-
-        modelBuilder.Entity<TreeUnlockRule>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.Type).HasMaxLength(20).IsRequired();
-            e.Property(x => x.FromId).HasMaxLength(100).IsRequired();
-            e.Property(x => x.ToRegionId).HasMaxLength(50).IsRequired();
-            e.HasOne(x => x.TreeConfiguration).WithMany().HasForeignKey(x => x.TreeConfigurationId);
-        });
-
-        modelBuilder.Entity<TreeConfiguration>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Name).IsRequired();
-        });
-
-        modelBuilder.Entity<StoryReader>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.StoryId).HasMaxLength(100).IsRequired();
-            e.Property(x => x.AcquiredAt).IsRequired();
-            e.Property(x => x.AcquisitionSource).HasConversion<int>();
-            e.HasIndex(x => x.StoryId);
-            e.HasIndex(x => new { x.UserId, x.StoryId }).IsUnique();
-            e.HasOne(x => x.User)
-                .WithMany()
-                .HasForeignKey(x => x.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<StoryDefinition>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.HasIndex(x => x.StoryId).IsUnique();
-            e.Property(x => x.LastPublishedVersion).HasDefaultValue(0);
-            e.HasMany(x => x.Tiles).WithOne(x => x.StoryDefinition).HasForeignKey(x => x.StoryDefinitionId).OnDelete(DeleteBehavior.Cascade);
-            e.HasMany(x => x.Topics).WithOne(x => x.StoryDefinition).HasForeignKey(x => x.StoryDefinitionId).OnDelete(DeleteBehavior.Cascade);
-            e.HasMany(x => x.AgeGroups).WithOne(x => x.StoryDefinition).HasForeignKey(x => x.StoryDefinitionId).OnDelete(DeleteBehavior.Cascade);
-            e.HasOne(x => x.ClassicAuthor)
-                .WithMany(x => x.StoryDefinitions)
-                .HasForeignKey(x => x.ClassicAuthorId)
-                .OnDelete(DeleteBehavior.SetNull);
-        });
-
-        modelBuilder.Entity<StoryDefinitionTranslation>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.LanguageCode).HasMaxLength(10);
-            e.HasIndex(x => new { x.StoryDefinitionId, x.LanguageCode }).IsUnique();
-            e.HasOne(x => x.StoryDefinition)
-                .WithMany(s => s.Translations)
-                .HasForeignKey(x => x.StoryDefinitionId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<StoryTile>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.ContentHash).HasMaxLength(128);
-            e.HasIndex(x => new { x.StoryDefinitionId, x.TileId }).IsUnique();
-            e.HasOne(x => x.StoryDefinition).WithMany(x => x.Tiles).HasForeignKey(x => x.StoryDefinitionId);
-            e.HasMany(x => x.Answers).WithOne(x => x.StoryTile).HasForeignKey(x => x.StoryTileId).OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<StoryTileTranslation>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.LanguageCode).HasMaxLength(10);
-            e.Property(x => x.ContentHash).HasMaxLength(128);
-            e.HasIndex(x => new { x.StoryTileId, x.LanguageCode }).IsUnique();
-            e.HasOne(x => x.StoryTile)
-                .WithMany(t => t.Translations)
-                .HasForeignKey(x => x.StoryTileId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<StoryAnswer>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.HasIndex(x => new { x.StoryTileId, x.AnswerId }).IsUnique();
-            e.HasOne(x => x.StoryTile).WithMany(x => x.Answers).HasForeignKey(x => x.StoryTileId);
-            e.HasMany(x => x.Tokens).WithOne(x => x.StoryAnswer).HasForeignKey(x => x.StoryAnswerId).OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<StoryAnswerTranslation>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.LanguageCode).HasMaxLength(10);
-            e.HasIndex(x => new { x.StoryAnswerId, x.LanguageCode }).IsUnique();
-            e.HasOne(x => x.StoryAnswer)
-                .WithMany(a => a.Translations)
-                .HasForeignKey(x => x.StoryAnswerId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<StoryAnswerToken>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.Type).HasMaxLength(64).IsRequired();
-            e.Property(x => x.Value).HasMaxLength(128).IsRequired();
-        });
-
-        modelBuilder.Entity<UserStoryReadProgress>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.HasIndex(x => new { x.UserId, x.StoryId, x.TileId }).IsUnique();
-            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
-        });
-
-        modelBuilder.Entity<UserStoryReadHistory>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.StoryId).HasMaxLength(200).IsRequired();
-            // Unique constraint: one history record per user per story
-            e.HasIndex(x => new { x.UserId, x.StoryId }).IsUnique();
-            e.HasIndex(x => x.CompletedAt);
-            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<StoryQuizAnswer>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.StoryId).HasMaxLength(200).IsRequired();
-            e.Property(x => x.TileId).HasMaxLength(100).IsRequired();
-            e.Property(x => x.SelectedAnswerId).HasMaxLength(50).IsRequired();
-            e.HasIndex(x => new { x.UserId, x.StoryId, x.TileId, x.SessionId });
-            e.HasIndex(x => new { x.UserId, x.StoryId });
-            e.HasIndex(x => x.SessionId);
-            e.HasOne(x => x.User)
-                .WithMany()
-                .HasForeignKey(x => x.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<StoryEvaluationResult>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.StoryId).HasMaxLength(200).IsRequired();
-            e.HasIndex(x => new { x.UserId, x.StoryId, x.CompletedAt });
-            e.HasIndex(x => new { x.UserId, x.StoryId, x.SessionId }).IsUnique();
-            e.HasOne(x => x.User)
-                .WithMany()
-                .HasForeignKey(x => x.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<StoryHero>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.HeroId).HasMaxLength(100).IsRequired();
-            e.Property(x => x.ImageUrl).HasMaxLength(500);
-            e.Property(x => x.UnlockConditionJson).HasMaxLength(2000);
-            e.HasIndex(x => x.HeroId).IsUnique();
-            e.HasMany(x => x.StoryUnlocks).WithOne(x => x.StoryHero).HasForeignKey(x => x.StoryHeroId).OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<StoryHeroUnlock>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.StoryId).HasMaxLength(100).IsRequired();
-            e.HasIndex(x => new { x.StoryHeroId, x.StoryId }).IsUnique();
-            e.HasOne(x => x.StoryHero).WithMany(x => x.StoryUnlocks).HasForeignKey(x => x.StoryHeroId);
-        });
-
-        modelBuilder.Entity<HeroMessage>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.HeroId).HasMaxLength(100).IsRequired();
-            e.Property(x => x.RegionId).HasMaxLength(50).IsRequired();
-            e.Property(x => x.MessageKey).HasMaxLength(200).IsRequired();
-            e.HasIndex(x => new { x.HeroId, x.RegionId }).IsUnique();
-        });
-
-        modelBuilder.Entity<HeroClickMessage>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.HeroId).HasMaxLength(100).IsRequired();
-            e.Property(x => x.MessageKey).HasMaxLength(200).IsRequired();
-            e.HasIndex(x => x.HeroId).IsUnique();
-        });
-
+        // Seed data for AlchimaliaUser and related entities
         var systemAdminUserId = Guid.Parse("33333333-3333-3333-3333-333333333333");
         
         modelBuilder.Entity<AlchimaliaUser>().HasData(
@@ -646,350 +192,11 @@ public class XooDbContext : DbContext
             }
         );
 
-        // Story Marketplace Entity Configurations
-        modelBuilder.Entity<StoryPurchase>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.HasIndex(x => new { x.UserId, x.StoryId }).IsUnique();
-            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
-            e.HasOne(x => x.Story).WithMany().HasForeignKey(x => x.StoryId).HasPrincipalKey(s => s.StoryId).OnDelete(DeleteBehavior.Cascade);
-        });
-
-        // Story Reviews Entity Configuration
-        modelBuilder.Entity<StoryReview>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.HasIndex(x => new { x.UserId, x.StoryId }).IsUnique();
-            e.Property(x => x.Rating).IsRequired();
-            e.Property(x => x.Comment).HasMaxLength(2000);
-            e.Property(x => x.StoryId).HasMaxLength(200).IsRequired();
-            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
-            e.HasOne(x => x.Story).WithMany().HasForeignKey(x => x.StoryId).HasPrincipalKey(s => s.StoryId).OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<UserFavoriteStories>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.AddedAt).IsRequired();
-            e.HasIndex(x => new { x.UserId, x.StoryDefinitionId }).IsUnique();
-            e.HasOne(x => x.User)
-                .WithMany()
-                .HasForeignKey(x => x.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
-            e.HasOne(x => x.StoryDefinition)
-                .WithMany()
-                .HasForeignKey(x => x.StoryDefinitionId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        // Removed StoryMarketplaceInfo entity mapping
-
-        // User Owned Stories Configuration
-        modelBuilder.Entity<UserOwnedStories>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.HasIndex(x => new { x.UserId, x.StoryDefinitionId }).IsUnique();
-            e.Property(x => x.PurchasePrice).HasColumnType("decimal(10,2)");
-            e.Property(x => x.PurchaseReference).HasMaxLength(100);
-            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
-            e.HasOne(x => x.StoryDefinition).WithMany().HasForeignKey(x => x.StoryDefinitionId).OnDelete(DeleteBehavior.Cascade);
-        });
-
-        // User Created Stories Configuration
-        modelBuilder.Entity<UserCreatedStories>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.HasIndex(x => new { x.UserId, x.StoryDefinitionId }).IsUnique();
-            e.Property(x => x.CreationNotes).HasMaxLength(1000);
-            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
-            e.HasOne(x => x.StoryDefinition).WithMany().HasForeignKey(x => x.StoryDefinitionId).OnDelete(DeleteBehavior.Cascade);
-        });
-
-        // Story Feedback Configuration
-        modelBuilder.Entity<StoryFeedback>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.StoryId).HasMaxLength(200).IsRequired();
-            e.Property(x => x.Email).HasMaxLength(256).IsRequired();
-            e.Property(x => x.FeedbackText).HasMaxLength(5000).IsRequired();
-            // Configure lists as PostgreSQL JSON arrays
-            e.Property(x => x.WhatLiked)
-                .HasConversion(
-                    v => System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions?)null),
-                    v => System.Text.Json.JsonSerializer.Deserialize<List<string>>(v, (System.Text.Json.JsonSerializerOptions?)null) ?? new List<string>())
-                .HasColumnType("jsonb");
-            e.Property(x => x.WhatDisliked)
-                .HasConversion(
-                    v => System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions?)null),
-                    v => System.Text.Json.JsonSerializer.Deserialize<List<string>>(v, (System.Text.Json.JsonSerializerOptions?)null) ?? new List<string>())
-                .HasColumnType("jsonb");
-            e.Property(x => x.WhatCouldBeBetter)
-                .HasConversion(
-                    v => System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions?)null),
-                    v => System.Text.Json.JsonSerializer.Deserialize<List<string>>(v, (System.Text.Json.JsonSerializerOptions?)null) ?? new List<string>())
-                .HasColumnType("jsonb");
-            e.HasIndex(x => new { x.UserId, x.StoryId }).IsUnique(); // One feedback per user per story
-            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
-        });
-
-        // Story Feedback Preference Configuration
-        modelBuilder.Entity<StoryFeedbackPreference>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.StoryId).HasMaxLength(200).IsRequired();
-            e.HasIndex(x => new { x.UserId, x.StoryId }).IsUnique(); // One preference per user per story
-            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
-        });
-
         base.OnModelCreating(modelBuilder);
-
-        modelBuilder.Entity<StoryCraft>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.StoryId).HasMaxLength(200).IsRequired();
-            e.Property(x => x.Status).HasMaxLength(20).IsRequired();
-            e.Property(x => x.UpdatedAt).IsRequired();
-            e.Property(x => x.LastDraftVersion).HasDefaultValue(0);
-            e.HasIndex(x => x.StoryId).IsUnique();
-            e.HasMany(x => x.Translations).WithOne(x => x.StoryCraft).HasForeignKey(x => x.StoryCraftId).OnDelete(DeleteBehavior.Cascade);
-            e.HasMany(x => x.Tiles).WithOne(x => x.StoryCraft).HasForeignKey(x => x.StoryCraftId).OnDelete(DeleteBehavior.Cascade);
-            e.HasMany(x => x.Topics).WithOne(x => x.StoryCraft).HasForeignKey(x => x.StoryCraftId).OnDelete(DeleteBehavior.Cascade);
-            e.HasMany(x => x.AgeGroups).WithOne(x => x.StoryCraft).HasForeignKey(x => x.StoryCraftId).OnDelete(DeleteBehavior.Cascade);
-            e.HasOne(x => x.ClassicAuthor)
-                .WithMany()
-                .HasForeignKey(x => x.ClassicAuthorId)
-                .OnDelete(DeleteBehavior.SetNull);
-        });
-
-        modelBuilder.Entity<StoryCraftTranslation>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.LanguageCode).HasMaxLength(10);
-            e.HasIndex(x => new { x.StoryCraftId, x.LanguageCode }).IsUnique();
-            e.HasOne(x => x.StoryCraft)
-                .WithMany(s => s.Translations)
-                .HasForeignKey(x => x.StoryCraftId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<StoryCraftTile>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.HasIndex(x => new { x.StoryCraftId, x.TileId }).IsUnique();
-            e.HasOne(x => x.StoryCraft).WithMany(x => x.Tiles).HasForeignKey(x => x.StoryCraftId);
-            e.HasMany(x => x.Answers).WithOne(x => x.StoryCraftTile).HasForeignKey(x => x.StoryCraftTileId).OnDelete(DeleteBehavior.Cascade);
-            e.HasMany(x => x.Translations).WithOne(x => x.StoryCraftTile).HasForeignKey(x => x.StoryCraftTileId).OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<StoryCraftTileTranslation>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.LanguageCode).HasMaxLength(10);
-            e.HasIndex(x => new { x.StoryCraftTileId, x.LanguageCode }).IsUnique();
-            e.HasOne(x => x.StoryCraftTile)
-                .WithMany(t => t.Translations)
-                .HasForeignKey(x => x.StoryCraftTileId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<StoryCraftAnswer>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.HasIndex(x => new { x.StoryCraftTileId, x.AnswerId }).IsUnique();
-            e.HasOne(x => x.StoryCraftTile).WithMany(x => x.Answers).HasForeignKey(x => x.StoryCraftTileId);
-            e.HasMany(x => x.Tokens).WithOne(x => x.StoryCraftAnswer).HasForeignKey(x => x.StoryCraftAnswerId).OnDelete(DeleteBehavior.Cascade);
-            e.HasMany(x => x.Translations).WithOne(x => x.StoryCraftAnswer).HasForeignKey(x => x.StoryCraftAnswerId).OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<StoryCraftAnswerTranslation>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.LanguageCode).HasMaxLength(10);
-            e.HasIndex(x => new { x.StoryCraftAnswerId, x.LanguageCode }).IsUnique();
-            e.HasOne(x => x.StoryCraftAnswer)
-                .WithMany(a => a.Translations)
-                .HasForeignKey(x => x.StoryCraftAnswerId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<StoryCraftAnswerToken>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.Type).HasMaxLength(64).IsRequired();
-            e.Property(x => x.Value).HasMaxLength(128).IsRequired();
-            e.HasOne(x => x.StoryCraftAnswer).WithMany(x => x.Tokens).HasForeignKey(x => x.StoryCraftAnswerId).OnDelete(DeleteBehavior.Cascade);
-        });
-
-        // Story Topics Configuration
-        modelBuilder.Entity<StoryTopic>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.TopicId).HasMaxLength(100).IsRequired();
-            e.Property(x => x.DimensionId).HasMaxLength(50).IsRequired();
-            e.HasIndex(x => x.TopicId).IsUnique();
-            e.HasMany(x => x.Translations).WithOne(x => x.StoryTopic).HasForeignKey(x => x.StoryTopicId).OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<StoryTopicTranslation>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.LanguageCode).HasMaxLength(10);
-            e.HasIndex(x => new { x.StoryTopicId, x.LanguageCode }).IsUnique();
-            e.HasOne(x => x.StoryTopic)
-                .WithMany(t => t.Translations)
-                .HasForeignKey(x => x.StoryTopicId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<StoryCraftTopic>(e =>
-        {
-            e.HasKey(x => new { x.StoryCraftId, x.StoryTopicId });
-            e.HasOne(x => x.StoryCraft).WithMany(x => x.Topics).HasForeignKey(x => x.StoryCraftId);
-            e.HasOne(x => x.StoryTopic).WithMany(x => x.StoryCrafts).HasForeignKey(x => x.StoryTopicId);
-        });
-
-        modelBuilder.Entity<StoryDefinitionTopic>(e =>
-        {
-            e.HasKey(x => new { x.StoryDefinitionId, x.StoryTopicId });
-            e.HasOne(x => x.StoryDefinition).WithMany(x => x.Topics).HasForeignKey(x => x.StoryDefinitionId);
-            e.HasOne(x => x.StoryTopic).WithMany(x => x.StoryDefinitions).HasForeignKey(x => x.StoryTopicId);
-        });
-
-        // Story Age Groups Configuration
-        modelBuilder.Entity<StoryAgeGroup>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.AgeGroupId).HasMaxLength(100).IsRequired();
-            e.HasIndex(x => x.AgeGroupId).IsUnique();
-            e.HasMany(x => x.Translations).WithOne(x => x.StoryAgeGroup).HasForeignKey(x => x.StoryAgeGroupId).OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<StoryAgeGroupTranslation>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.LanguageCode).HasMaxLength(10);
-            e.HasIndex(x => new { x.StoryAgeGroupId, x.LanguageCode }).IsUnique();
-            e.HasOne(x => x.StoryAgeGroup)
-                .WithMany(t => t.Translations)
-                .HasForeignKey(x => x.StoryAgeGroupId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<ClassicAuthor>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.AuthorId).HasMaxLength(100).IsRequired();
-            e.Property(x => x.Name).HasMaxLength(200).IsRequired();
-            e.Property(x => x.LanguageCode).HasMaxLength(10).IsRequired();
-            e.HasIndex(x => x.AuthorId).IsUnique();
-            e.HasIndex(x => new { x.LanguageCode, x.SortOrder });
-        });
-
-        modelBuilder.Entity<StoryCraftAgeGroup>(e =>
-        {
-            e.HasKey(x => new { x.StoryCraftId, x.StoryAgeGroupId });
-            e.HasOne(x => x.StoryCraft).WithMany(x => x.AgeGroups).HasForeignKey(x => x.StoryCraftId);
-            e.HasOne(x => x.StoryAgeGroup).WithMany(x => x.StoryCrafts).HasForeignKey(x => x.StoryAgeGroupId);
-        });
-
-        modelBuilder.Entity<StoryDefinitionAgeGroup>(e =>
-        {
-            e.HasKey(x => new { x.StoryDefinitionId, x.StoryAgeGroupId });
-            e.HasOne(x => x.StoryDefinition).WithMany(x => x.AgeGroups).HasForeignKey(x => x.StoryDefinitionId);
-            e.HasOne(x => x.StoryAgeGroup).WithMany(x => x.StoryDefinitions).HasForeignKey(x => x.StoryAgeGroupId);
-        });
-
-        modelBuilder.Entity<StoryPublicationAudit>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.StoryId).HasMaxLength(200).IsRequired();
-            e.Property(x => x.PerformedByEmail).HasMaxLength(256).IsRequired();
-            e.Property(x => x.Action).IsRequired();
-            e.Property(x => x.Notes).HasMaxLength(2000);
-            e.HasIndex(x => x.StoryId);
-            e.HasIndex(x => x.StoryDefinitionId);
-            e.HasOne(x => x.StoryDefinition)
-                .WithMany()
-                .HasForeignKey(x => x.StoryDefinitionId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<StoryPublishChangeLog>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.StoryId).HasMaxLength(200).IsRequired();
-            e.Property(x => x.LanguageCode).HasMaxLength(10).IsRequired();
-            e.Property(x => x.EntityType).HasMaxLength(32).IsRequired();
-            e.Property(x => x.ChangeType).HasMaxLength(32).IsRequired();
-            e.Property(x => x.EntityId).HasMaxLength(200);
-            e.Property(x => x.Hash).HasMaxLength(128);
-            e.Property(x => x.AssetDraftPath).HasMaxLength(1024);
-            e.Property(x => x.AssetPublishedPath).HasMaxLength(1024);
-            e.Property(x => x.PayloadJson).HasColumnType("jsonb");
-            e.HasIndex(x => new { x.StoryId, x.DraftVersion });
-        });
-
-        modelBuilder.Entity<StoryAssetLink>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.StoryId).HasMaxLength(200).IsRequired();
-            e.Property(x => x.LanguageCode).HasMaxLength(10);
-            e.Property(x => x.AssetType).HasMaxLength(32).IsRequired();
-            e.Property(x => x.EntityId).HasMaxLength(200);
-            e.Property(x => x.DraftPath).HasMaxLength(1024).IsRequired();
-            e.Property(x => x.PublishedPath).HasMaxLength(1024);
-            e.Property(x => x.ContentHash).HasMaxLength(128);
-            e.HasIndex(x => new { x.StoryId, x.DraftVersion });
-            e.HasIndex(x => x.DraftPath).IsUnique();
-        });
-
-        modelBuilder.Entity<StoryPublishJob>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.StoryId).HasMaxLength(200).IsRequired();
-            e.Property(x => x.RequestedByEmail).HasMaxLength(256);
-            e.Property(x => x.LangTag).HasMaxLength(10).IsRequired();
-            e.Property(x => x.Status).HasMaxLength(32).IsRequired();
-            e.Property(x => x.ErrorMessage).HasMaxLength(2000);
-            e.HasIndex(x => new { x.StoryId, x.Status });
-            e.HasIndex(x => x.QueuedAtUtc);
-        });
-
-        modelBuilder.Entity<StoryVersionJob>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedOnAdd();
-            e.Property(x => x.StoryId).HasMaxLength(200).IsRequired();
-            e.Property(x => x.RequestedByEmail).HasMaxLength(256);
-            e.Property(x => x.Status).HasMaxLength(32).IsRequired();
-            e.Property(x => x.ErrorMessage).HasMaxLength(2000);
-            e.HasIndex(x => new { x.StoryId, x.Status });
-            e.HasIndex(x => x.QueuedAtUtc);
-        });
     }
+
+    // Removed all individual entity configurations - they are now in separate configuration files
+    // in the Configurations folder and are applied via ApplyConfigurationsFromAssembly
 
     private void SeedBuilderDataFromJson(ModelBuilder modelBuilder)
     {
