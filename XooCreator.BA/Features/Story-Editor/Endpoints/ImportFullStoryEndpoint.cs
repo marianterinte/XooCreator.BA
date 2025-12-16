@@ -109,7 +109,7 @@ public partial class ImportFullStoryEndpoint
     [Route("/api/{locale}/stories/import-full")]
     [Authorize]
     [DisableRequestSizeLimit] // Disable request size limit for this endpoint (allows up to 500MB as per MaxZipSizeBytes)
-    public static async Task<Results<Accepted<ImportFullStoryEnqueueResponse>, BadRequest<ImportFullStoryResponse>, UnauthorizedHttpResult, ForbidHttpResult, Conflict<string>>> HandlePost(
+    public static async Task<Results<Accepted<ImportFullStoryEnqueueResponse>, BadRequest<ImportFullStoryResponse>, Conflict<ImportFullStoryResponse>>> HandlePost(
         [FromRoute] string locale,
         [FromServices] ImportFullStoryEndpoint ep,
         HttpRequest request,
@@ -120,14 +120,16 @@ public partial class ImportFullStoryEndpoint
         var user = await ep._auth0.GetCurrentUserAsync(ct);
         if (user == null)
         {
-            return TypedResults.Unauthorized();
+            errors.Add("Authentication required. Please log in to import a story.");
+            return TypedResults.BadRequest(new ImportFullStoryResponse { Success = false, Errors = errors });
         }
 
         var isAdmin = ep._auth0.HasRole(user, UserRole.Admin);
         var isCreator = ep._auth0.HasRole(user, UserRole.Creator);
         if (!isAdmin && !isCreator)
         {
-            return TypedResults.Forbid();
+            errors.Add("You do not have permission to import stories. Only users with Creator or Admin role can import stories.");
+            return TypedResults.BadRequest(new ImportFullStoryResponse { Success = false, Errors = errors });
         }
 
         if (!request.HasFormContentType)
@@ -185,13 +187,47 @@ public partial class ImportFullStoryEndpoint
 
         var finalStoryId = await ep.ResolveStoryIdConflictAsync(manifestResult.StoryId, user, isAdmin, ct);
 
-        var hasActiveJob = await ep._db.StoryImportJobs
-            .AnyAsync(j => j.StoryId == finalStoryId &&
-                           (j.Status == StoryImportJobStatus.Queued || j.Status == StoryImportJobStatus.Running), ct);
+        // Check for stuck jobs (Running for more than 10 minutes) and mark them as Failed
+        var tenMinutesAgo = DateTime.UtcNow.AddMinutes(-10);
+        var stuckJobs = await ep._db.StoryImportJobs
+            .Where(j => j.StoryId == finalStoryId &&
+                       j.Status == StoryImportJobStatus.Running &&
+                       j.StartedAtUtc.HasValue &&
+                       j.StartedAtUtc.Value <= tenMinutesAgo)
+            .ToListAsync(ct);
 
-        if (hasActiveJob)
+        if (stuckJobs.Any())
         {
-            return TypedResults.Conflict($"Import already queued or running for storyId '{finalStoryId}'.");
+            foreach (var stuckJob in stuckJobs)
+            {
+                stuckJob.Status = StoryImportJobStatus.Failed;
+                stuckJob.ErrorMessage = "Job timed out (stuck in Running status for more than 10 minutes).";
+                stuckJob.CompletedAtUtc = DateTime.UtcNow;
+                ep._logger.LogWarning("Marked stuck import job as Failed: jobId={JobId} storyId={StoryId} startedAt={StartedAt}",
+                    stuckJob.Id, stuckJob.StoryId, stuckJob.StartedAtUtc);
+            }
+            await ep._db.SaveChangesAsync(ct);
+        }
+
+        // Check for active jobs (Queued or Running)
+        var activeJob = await ep._db.StoryImportJobs
+            .FirstOrDefaultAsync(j => j.StoryId == finalStoryId &&
+                                      (j.Status == StoryImportJobStatus.Queued || j.Status == StoryImportJobStatus.Running), ct);
+
+        if (activeJob != null)
+        {
+            var jobStatus = activeJob.Status == StoryImportJobStatus.Queued 
+                ? "queued" 
+                : "currently running";
+            var queuedTime = activeJob.QueuedAtUtc.ToString("yyyy-MM-dd HH:mm:ss UTC");
+            var message = $"Cannot import story '{finalStoryId}'. An import job is already {jobStatus} for this story (queued at {queuedTime}). " +
+                         $"Please wait up to 10 minutes for the current import to complete, or check the import status before trying again. " +
+                         $"If the import appears to be stuck, you can retry after 10 minutes.";
+            return TypedResults.Conflict(new ImportFullStoryResponse 
+            { 
+                Success = false, 
+                Errors = new List<string> { message } 
+            });
         }
 
         var jobId = Guid.NewGuid();
@@ -1080,20 +1116,23 @@ public partial class ImportFullStoryEndpoint
 
     [Route("/api/stories/import-jobs/{jobId:guid}")]
     [Authorize]
-    public static async Task<Results<Ok<ImportJobStatusResponse>, NotFound, UnauthorizedHttpResult, ForbidHttpResult>> HandleGet(
+    public static async Task<Results<Ok<ImportJobStatusResponse>, NotFound, BadRequest<ImportFullStoryResponse>>> HandleGet(
         [FromRoute] Guid jobId,
         [FromServices] ImportFullStoryEndpoint ep,
         CancellationToken ct)
     {
+        var errors = new List<string>();
         var user = await ep._auth0.GetCurrentUserAsync(ct);
         if (user == null)
         {
-            return TypedResults.Unauthorized();
+            errors.Add("Authentication required. Please log in to check import job status.");
+            return TypedResults.BadRequest(new ImportFullStoryResponse { Success = false, Errors = errors });
         }
 
-        if (!ep._auth0.HasRole(user, Data.Enums.UserRole.Creator))
+        if (!ep._auth0.HasRole(user, Data.Enums.UserRole.Creator) && !ep._auth0.HasRole(user, Data.Enums.UserRole.Admin))
         {
-            return TypedResults.Forbid();
+            errors.Add("You do not have permission to check import job status. Only users with Creator or Admin role can access this information.");
+            return TypedResults.BadRequest(new ImportFullStoryResponse { Success = false, Errors = errors });
         }
 
         var job = await ep._db.StoryImportJobs
@@ -1105,10 +1144,12 @@ public partial class ImportFullStoryEndpoint
             return TypedResults.NotFound();
         }
 
-        // Check if user owns the job
-        if (job.OwnerUserId != user.Id)
+        // Check if user owns the job or is admin
+        if (job.OwnerUserId != user.Id && !ep._auth0.HasRole(user, Data.Enums.UserRole.Admin))
         {
-            return TypedResults.Forbid();
+            errors.Clear();
+            errors.Add($"You do not have permission to access this import job. This job belongs to another user.");
+            return TypedResults.BadRequest(new ImportFullStoryResponse { Success = false, Errors = errors });
         }
 
         var response = new ImportJobStatusResponse

@@ -24,7 +24,19 @@ if (!string.IsNullOrWhiteSpace(portEnv))
     builder.WebHost.UseUrls($"http://0.0.0.0:{portEnv}");
 }
 
-builder.Services.AddLogging();
+builder.Services.AddLogging(builder =>
+{
+    builder.AddConsole(options =>
+    {
+        options.FormatterName = "RedError";
+    });
+    builder.AddConsoleFormatter<XooCreator.BA.Infrastructure.Logging.RedErrorConsoleFormatter, Microsoft.Extensions.Logging.Console.SimpleConsoleFormatterOptions>(options =>
+    {
+        options.TimestampFormat = "HH:mm:ss ";
+        options.SingleLine = false;
+        options.IncludeScopes = false;
+    });
+});
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddEndpointDefinitions();
