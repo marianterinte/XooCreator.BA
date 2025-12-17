@@ -148,6 +148,7 @@ public static class ServiceCollectionExtensions
         // Region and Hero Asset Cleanup Services
         services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.IRegionPublishedAssetCleanupService, XooCreator.BA.Features.StoryEditor.StoryEpic.Services.RegionPublishedAssetCleanupService>();
         services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.IHeroPublishedAssetCleanupService, XooCreator.BA.Features.StoryEditor.StoryEpic.Services.HeroPublishedAssetCleanupService>();
+        services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.IEpicPublishedAssetCleanupService, XooCreator.BA.Features.StoryEditor.StoryEpic.Services.EpicPublishedAssetCleanupService>();
         
         return services;
     }

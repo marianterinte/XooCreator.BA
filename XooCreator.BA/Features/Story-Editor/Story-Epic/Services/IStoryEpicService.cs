@@ -34,5 +34,8 @@ public interface IStoryEpicService
     
     // Get all published epics
     Task<List<StoryEpicDto>> GetAllPublishedEpicsAsync(string locale, CancellationToken ct = default);
+    
+    // Unpublish epic (soft delete with asset cleanup)
+    Task UnpublishAsync(Guid ownerUserId, string epicId, string reason, CancellationToken ct = default);
 }
 

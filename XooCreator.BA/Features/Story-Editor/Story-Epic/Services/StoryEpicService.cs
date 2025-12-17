@@ -10,12 +10,18 @@ public class StoryEpicService : IStoryEpicService
 {
     private readonly XooDbContext _context;
     private readonly IUserContextService _userContext;
+    private readonly IEpicPublishedAssetCleanupService _assetCleanup;
     private readonly ILogger<StoryEpicService> _logger;
 
-    public StoryEpicService(XooDbContext context, IUserContextService userContext, ILogger<StoryEpicService> logger)
+    public StoryEpicService(
+        XooDbContext context, 
+        IUserContextService userContext, 
+        IEpicPublishedAssetCleanupService assetCleanup,
+        ILogger<StoryEpicService> logger)
     {
         _context = context;
         _userContext = userContext;
+        _assetCleanup = assetCleanup;
         _logger = logger;
     }
 
@@ -602,6 +608,12 @@ public class StoryEpicService : IStoryEpicService
     {
         var definition = await GetStoryEpicDefinitionByIdAsync(epicId, ct);
         if (definition == null) return null;
+        
+        // Only return if epic is published and active (not unpublished)
+        if (definition.Status != "published" || !definition.IsActive)
+        {
+            return null;
+        }
 
         var locale = _userContext.GetRequestLocaleOrDefault("ro-ro");
         var heroes = await _context.StoryEpicHeroReferences
@@ -631,7 +643,7 @@ public class StoryEpicService : IStoryEpicService
             .Include(d => d.UnlockRules)
             .Include(d => d.Translations)
             .AsSplitQuery()
-            .Where(d => d.Status == "published" && d.PublishedAtUtc != null)
+            .Where(d => d.Status == "published" && d.IsActive && d.PublishedAtUtc != null)
             .ToListAsync(ct);
 
         if (definitions.Count == 0)
@@ -978,6 +990,66 @@ public class StoryEpicService : IStoryEpicService
             Nodes = nodes,
             Edges = edges
         };
+    }
+
+    public async Task UnpublishAsync(Guid ownerUserId, string epicId, string reason, CancellationToken ct = default)
+    {
+        var definition = await GetStoryEpicDefinitionByIdAsync(epicId, ct);
+        if (definition == null)
+        {
+            throw new InvalidOperationException($"Published epic '{epicId}' not found");
+        }
+
+        if (definition.OwnerUserId != ownerUserId)
+        {
+            throw new UnauthorizedAccessException($"User does not own epic '{epicId}'");
+        }
+
+        if (definition.Status != "published" || !definition.IsActive)
+        {
+            throw new InvalidOperationException($"Cannot unpublish epic. Expected Published and Active, got status '{definition.Status}' and IsActive '{definition.IsActive}'");
+        }
+
+        // Mark as unpublished (soft delete - preserves player progress in EpicProgress table)
+        definition.Status = "unpublished";
+        definition.IsActive = false;
+        definition.UpdatedAt = DateTime.UtcNow;
+
+        // NOTE: We intentionally DO NOT delete EpicProgress or EpicStoryProgress records
+        // This preserves player history and allows them to see the epic was decomissioned
+        // Players will see a message that the epic is no longer available for security reasons
+
+        await _context.SaveChangesAsync(ct);
+        
+        // Extract owner email from CoverImageUrl and delete published assets from blob storage
+        var ownerEmail = TryExtractOwnerEmail(definition);
+        if (!string.IsNullOrWhiteSpace(ownerEmail))
+        {
+            await _assetCleanup.DeletePublishedAssetsAsync(ownerEmail, epicId, ct);
+        }
+        else
+        {
+            _logger.LogWarning("Could not determine owner email for published assets cleanup. epicId={EpicId}", epicId);
+        }
+        
+        _logger.LogInformation("Epic unpublished and assets deleted: epicId={EpicId} reason={Reason}", epicId, reason);
+    }
+
+    private string? TryExtractOwnerEmail(StoryEpicDefinition definition)
+    {
+        if (string.IsNullOrWhiteSpace(definition.CoverImageUrl))
+        {
+            return null;
+        }
+
+        // CoverImageUrl format: images/tales-of-alchimalia/epics/{ownerEmail}/{epicId}/...
+        var parts = definition.CoverImageUrl.Split('/', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length >= 5 && parts[0] == "images" && parts[1] == "tales-of-alchimalia" && parts[2] == "epics")
+        {
+            return parts[3]; // ownerEmail
+        }
+
+        return null;
     }
 }
 

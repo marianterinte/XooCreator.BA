@@ -10,9 +10,10 @@ public class StoryEpicDefinition
     public string Name { get; set; } = string.Empty; // e.g., "My Epic"
     public string? Description { get; set; }
     public Guid OwnerUserId { get; set; }
-    public string Status { get; set; } = "published"; // published
+    public string Status { get; set; } = "published"; // published, unpublished
     public string? CoverImageUrl { get; set; } // Background image for tree logic view
     public bool IsDefault { get; set; } = false;
+    public bool IsActive { get; set; } = true; // For soft delete / unpublish
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? PublishedAtUtc { get; set; }
