@@ -13,6 +13,7 @@ public class EpicHeroTranslationConfiguration : IEntityTypeConfiguration<EpicHer
         builder.Property(x => x.EpicHeroId).HasMaxLength(100).IsRequired();
         builder.Property(x => x.LanguageCode).HasMaxLength(10).IsRequired();
         builder.Property(x => x.Name).HasMaxLength(200).IsRequired();
+        builder.Property(x => x.Description);
         builder.Property(x => x.GreetingText).HasMaxLength(1000);
         builder.HasIndex(x => new { x.EpicHeroId, x.LanguageCode }).IsUnique();
         builder.HasOne(x => x.EpicHero).WithMany(x => x.Translations).HasForeignKey(x => x.EpicHeroId).OnDelete(DeleteBehavior.Cascade);

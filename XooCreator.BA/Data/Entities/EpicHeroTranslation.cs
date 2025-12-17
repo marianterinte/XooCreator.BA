@@ -3,8 +3,8 @@ using System.ComponentModel.DataAnnotations;
 namespace XooCreator.BA.Data;
 
 /// <summary>
-/// Translation for EpicHero (Name, GreetingText per language)
-/// Similar to StoryCraftTranslation pattern
+/// Translation for EpicHero (Name, Description, GreetingText per language)
+/// Similar to StoryRegionTranslation pattern
 /// </summary>
 public class EpicHeroTranslation
 {
@@ -18,6 +18,8 @@ public class EpicHeroTranslation
     
     [MaxLength(200)]
     public required string Name { get; set; } = string.Empty; // Translated hero name
+    
+    public string? Description { get; set; } // Optional description in this language
     
     [MaxLength(1000)]
     public string? GreetingText { get; set; } // Translated greeting message

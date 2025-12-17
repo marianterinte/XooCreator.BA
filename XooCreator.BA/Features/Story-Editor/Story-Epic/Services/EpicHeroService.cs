@@ -54,6 +54,7 @@ public class EpicHeroService : IEpicHeroService
             {
                 LanguageCode = t.LanguageCode,
                 Name = t.Name,
+                Description = t.Description,
                 GreetingText = t.GreetingText
             }).ToList()
         };
@@ -101,6 +102,7 @@ public class EpicHeroService : IEpicHeroService
             {
                 LanguageCode = t.LanguageCode,
                 Name = t.Name,
+                Description = t.Description,
                 GreetingText = t.GreetingText
             }).ToList()
         };
@@ -140,6 +142,7 @@ public class EpicHeroService : IEpicHeroService
                         EpicHeroId = hero.Id,
                         LanguageCode = lang,
                         Name = translationDto.Name,
+                        Description = translationDto.Description,
                         GreetingText = translationDto.GreetingText
                     };
                     _context.EpicHeroTranslations.Add(translation);
@@ -147,6 +150,7 @@ public class EpicHeroService : IEpicHeroService
                 else
                 {
                     translation.Name = translationDto.Name;
+                    translation.Description = translationDto.Description;
                     translation.GreetingText = translationDto.GreetingText;
                 }
             }

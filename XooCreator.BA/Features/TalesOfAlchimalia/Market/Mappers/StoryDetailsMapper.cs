@@ -1,8 +1,6 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
-using XooCreator.BA.Data.Entities;
-using XooCreator.BA.Data.SeedData.DTOs;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.DTOs;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories;
 
@@ -65,6 +63,31 @@ public class StoryDetailsMapper
             }
         }
 
+        // Map age groups
+        var ageGroups = new List<DTOs.AgeGroupInfoDto>();
+        if (def.AgeGroups != null && def.AgeGroups.Any())
+        {
+            foreach (var ageGroupRel in def.AgeGroups)
+            {
+                var ageGroup = ageGroupRel.StoryAgeGroup;
+                if (ageGroup == null) continue;
+
+                var translation2 = ageGroup.Translations?.FirstOrDefault(t => t.LanguageCode == locale)
+                    ?? ageGroup.Translations?.FirstOrDefault();
+
+                if (translation2 != null)
+                {
+                    ageGroups.Add(new DTOs.AgeGroupInfoDto
+                    {
+                        Id = ageGroup.AgeGroupId,
+                        Label = translation2.Label,
+                        MinAge = ageGroup.MinAge,
+                        MaxAge = ageGroup.MaxAge
+                    });
+                }
+            }
+        }
+
         return new StoryDetailsDto
         {
             Id = def.StoryId,
@@ -96,6 +119,7 @@ public class StoryDetailsMapper
             UpdatedAt = def.UpdatedAt,
             UpdatedBy = def.UpdatedBy,
             AvailableLanguages = def.Translations?.Select(t => t.LanguageCode).OrderBy(l => l).ToList() ?? new List<string>(),
+            AgeGroups = ageGroups,
             AverageRating = averageRating,
             TotalReviews = totalReviews,
             UserReview = userReview,

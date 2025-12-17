@@ -457,6 +457,9 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         var def = await _context.StoryDefinitions
             .Include(s => s.Translations)
             .Include(s => s.Tiles)
+            .Include(s => s.AgeGroups)
+                .ThenInclude(ag => ag.StoryAgeGroup)
+                    .ThenInclude(ag => ag.Translations)
             .FirstOrDefaultAsync(s => s.StoryId == storyId && s.IsActive && s.Status == StoryStatus.Published);
 
         if (def == null)

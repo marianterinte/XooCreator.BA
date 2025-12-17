@@ -31,12 +31,21 @@ public record StoryDetailsDto
     public DateTime UpdatedAt { get; init; }
     public Guid? UpdatedBy { get; init; }
     public List<string> AvailableLanguages { get; init; } = new();
+    public List<AgeGroupInfoDto> AgeGroups { get; init; } = new(); // Age groups for this story
     // Review statistics
     public double AverageRating { get; init; }
     public int TotalReviews { get; init; }
     public StoryReviewDto? UserReview { get; init; } // Current user's review if exists
     public int ReadersCount { get; init; }
     public bool IsEvaluative { get; init; } = false; // If true, this story contains quizzes that should be evaluated
+}
+
+public record AgeGroupInfoDto
+{
+    public required string Id { get; init; }
+    public required string Label { get; init; }
+    public int MinAge { get; init; }
+    public int MaxAge { get; init; }
 }
 
 public record StoryMarketplaceItemDto
