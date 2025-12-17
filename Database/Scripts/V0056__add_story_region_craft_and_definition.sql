@@ -50,7 +50,6 @@ CREATE INDEX IF NOT EXISTS "IX_StoryRegionCrafts_AssignedReviewerUserId"
 CREATE TABLE IF NOT EXISTS "alchimalia_schema"."StoryRegionCraftTranslations" (
     "Id" uuid NOT NULL,
     "StoryRegionCraftId" character varying(100) NOT NULL,
-    "OwnerUserId" uuid NOT NULL,
     "LanguageCode" character varying(10) NOT NULL,
     "Name" character varying(200) NOT NULL,
     "Description" text,
@@ -96,7 +95,6 @@ CREATE INDEX IF NOT EXISTS "IX_StoryRegionDefinitions_Status"
 CREATE TABLE IF NOT EXISTS "alchimalia_schema"."StoryRegionDefinitionTranslations" (
     "Id" uuid NOT NULL,
     "StoryRegionDefinitionId" character varying(100) NOT NULL,
-    "OwnerUserId" uuid NOT NULL,
     "LanguageCode" character varying(10) NOT NULL,
     "Name" character varying(200) NOT NULL,
     "Description" text,

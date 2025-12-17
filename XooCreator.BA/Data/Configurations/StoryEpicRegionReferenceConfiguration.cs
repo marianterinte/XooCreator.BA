@@ -14,6 +14,6 @@ public class StoryEpicRegionReferenceConfiguration : IEntityTypeConfiguration<St
         builder.Property(x => x.RegionId).HasMaxLength(100).IsRequired();
         builder.HasIndex(x => new { x.EpicId, x.RegionId }).IsUnique();
         builder.HasOne(x => x.Epic).WithMany().HasForeignKey(x => x.EpicId).OnDelete(DeleteBehavior.Cascade);
-        builder.HasOne(x => x.Region).WithMany(x => x.EpicReferences).HasForeignKey(x => x.RegionId).OnDelete(DeleteBehavior.Restrict); // Prevent deletion if used in epics
+        builder.HasOne(x => x.Region).WithMany().HasForeignKey(x => x.RegionId).OnDelete(DeleteBehavior.Restrict); // Prevent deletion if used in epics
     }
 }

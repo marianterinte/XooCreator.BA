@@ -32,23 +32,37 @@ public class GetHeroGreetingEndpoint
         var userId = await ep._userContext.GetUserIdAsync();
         if (userId == null) return TypedResults.Unauthorized();
 
-        var hero = await ep._heroRepository.GetAsync(heroId, ct);
-        if (hero == null)
+        // Try to get craft first (draft), fallback to definition (published)
+        var heroCraft = await ep._heroRepository.GetCraftAsync(heroId, ct);
+        var heroDefinition = heroCraft == null ? await ep._heroRepository.GetDefinitionAsync(heroId, ct) : null;
+        
+        if (heroCraft == null && heroDefinition == null)
         {
             return TypedResults.NotFound();
         }
 
-        // Get greeting text and audio in requested language
-        var translation = hero.Translations.FirstOrDefault(t => 
-            t.LanguageCode.Equals(locale, StringComparison.OrdinalIgnoreCase));
-        
-        // Fallback to first available translation if requested language not found
-        translation ??= hero.Translations.FirstOrDefault();
+        string? greetingText = null;
+        string? audioUrl = null;
 
-        var greetingText = translation?.GreetingText ?? $"Hello! I'm {translation?.Name ?? heroId}.";
-        
-        // Get audio URL from translation (per language), fallback to old hero-level audio for backward compatibility
-        var audioUrl = translation?.GreetingAudioUrl ?? hero.GreetingAudioUrl;
+        // Get greeting text and audio in requested language from craft or definition
+        if (heroCraft != null)
+        {
+            var translation = heroCraft.Translations.FirstOrDefault(t => 
+                t.LanguageCode.Equals(locale, StringComparison.OrdinalIgnoreCase)) 
+                ?? heroCraft.Translations.FirstOrDefault();
+            
+            greetingText = translation?.GreetingText ?? $"Hello! I'm {translation?.Name ?? heroId}.";
+            audioUrl = translation?.GreetingAudioUrl;
+        }
+        else if (heroDefinition != null)
+        {
+            var translation = heroDefinition.Translations.FirstOrDefault(t => 
+                t.LanguageCode.Equals(locale, StringComparison.OrdinalIgnoreCase)) 
+                ?? heroDefinition.Translations.FirstOrDefault();
+            
+            greetingText = translation?.GreetingText ?? $"Hello! I'm {translation?.Name ?? heroId}.";
+            audioUrl = translation?.GreetingAudioUrl;
+        }
 
         var response = new HeroGreetingDto
         {

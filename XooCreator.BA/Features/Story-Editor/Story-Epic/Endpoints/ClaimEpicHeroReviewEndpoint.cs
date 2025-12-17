@@ -49,20 +49,20 @@ public class ClaimEpicHeroReviewEndpoint
             return TypedResults.Forbid();
         }
 
-        var hero = await ep._repository.GetAsync(heroId, ct);
-        if (hero == null) return TypedResults.NotFound();
+        var heroCraft = await ep._repository.GetCraftAsync(heroId, ct);
+        if (heroCraft == null) return TypedResults.NotFound();
 
-        if (hero.Status != "sent_for_approval")
+        if (heroCraft.Status != "sent_for_approval")
         {
-            ep._logger.LogWarning("Hero claim invalid state: heroId={HeroId} state={State}", heroId, hero.Status);
+            ep._logger.LogWarning("Hero claim invalid state: heroId={HeroId} state={State}", heroId, heroCraft.Status);
             return TypedResults.Conflict("Invalid state transition. Expected sent_for_approval.");
         }
 
         // Assign reviewer and move to in_review
-        hero.Status = "in_review";
-        hero.AssignedReviewerUserId = user.Id;
-        hero.ReviewStartedAt = DateTime.UtcNow;
-        await ep._repository.SaveAsync(hero, ct);
+        heroCraft.Status = "in_review";
+        heroCraft.AssignedReviewerUserId = user.Id;
+        heroCraft.ReviewStartedAt = DateTime.UtcNow;
+        await ep._repository.SaveCraftAsync(heroCraft, ct);
         
         ep._logger.LogInformation("Hero claim: heroId={HeroId} reviewer={Reviewer}", heroId, user.Id);
         return TypedResults.Ok(new ClaimHeroResponse());

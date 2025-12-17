@@ -14,7 +14,7 @@ public class StoryEpicRegionReference
     public required string EpicId { get; set; } = string.Empty; // FK to StoryEpicDefinition
     
     [MaxLength(100)]
-    public required string RegionId { get; set; } = string.Empty; // FK to StoryRegion (must be published)
+    public required string RegionId { get; set; } = string.Empty; // FK to StoryRegionDefinition (must be published)
     
     public double? X { get; set; } // Coordonată X în tree
     public double? Y { get; set; } // Coordonată Y în tree
@@ -23,6 +23,6 @@ public class StoryEpicRegionReference
     
     // Navigation properties
     public StoryEpicDefinition Epic { get; set; } = null!;
-    public StoryRegion Region { get; set; } = null!;
+    public StoryRegionDefinition Region { get; set; } = null!;
 }
 

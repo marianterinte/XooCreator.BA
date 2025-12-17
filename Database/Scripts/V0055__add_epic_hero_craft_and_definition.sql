@@ -50,7 +50,6 @@ CREATE INDEX IF NOT EXISTS "IX_EpicHeroCrafts_AssignedReviewerUserId"
 CREATE TABLE IF NOT EXISTS "alchimalia_schema"."EpicHeroCraftTranslations" (
     "Id" uuid NOT NULL,
     "EpicHeroCraftId" character varying(100) NOT NULL,
-    "OwnerUserId" uuid NOT NULL,
     "LanguageCode" character varying(10) NOT NULL,
     "Name" character varying(200) NOT NULL,
     "Description" text,
@@ -98,7 +97,6 @@ CREATE INDEX IF NOT EXISTS "IX_EpicHeroDefinitions_Status"
 CREATE TABLE IF NOT EXISTS "alchimalia_schema"."EpicHeroDefinitionTranslations" (
     "Id" uuid NOT NULL,
     "EpicHeroDefinitionId" character varying(100) NOT NULL,
-    "OwnerUserId" uuid NOT NULL,
     "LanguageCode" character varying(10) NOT NULL,
     "Name" character varying(200) NOT NULL,
     "Description" text,
