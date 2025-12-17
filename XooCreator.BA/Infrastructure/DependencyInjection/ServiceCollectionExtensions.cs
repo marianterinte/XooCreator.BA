@@ -145,6 +145,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Repositories.IEpicHeroRepository, XooCreator.BA.Features.StoryEditor.StoryEpic.Repositories.EpicHeroRepository>();
         services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.IEpicHeroService, XooCreator.BA.Features.StoryEditor.StoryEpic.Services.EpicHeroService>();
         
+        // Region and Hero Asset Cleanup Services
+        services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.IRegionPublishedAssetCleanupService, XooCreator.BA.Features.StoryEditor.StoryEpic.Services.RegionPublishedAssetCleanupService>();
+        services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.IHeroPublishedAssetCleanupService, XooCreator.BA.Features.StoryEditor.StoryEpic.Services.HeroPublishedAssetCleanupService>();
+        
         return services;
     }
 

@@ -37,5 +37,8 @@ public interface IStoryRegionService
     
     // Create new version from published region
     Task CreateVersionFromPublishedAsync(Guid ownerUserId, string regionId, CancellationToken ct = default);
+    
+    // Unpublish a published region
+    Task UnpublishAsync(Guid ownerUserId, string regionId, string reason, CancellationToken ct = default);
 }
 

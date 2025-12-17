@@ -19,7 +19,9 @@ public class StoryRegionDefinition
     public Guid OwnerUserId { get; set; }
     
     [MaxLength(20)]
-    public required string Status { get; set; } = "published"; // published
+    public required string Status { get; set; } = "published"; // published, unpublished
+    
+    public bool IsActive { get; set; } = true; // For soft delete / unpublish
     
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;

@@ -37,5 +37,8 @@ public interface IEpicHeroService
     
     // Create new version from published hero
     Task CreateVersionFromPublishedAsync(Guid ownerUserId, string heroId, CancellationToken ct = default);
+    
+    // Unpublish a published hero
+    Task UnpublishAsync(Guid ownerUserId, string heroId, string reason, CancellationToken ct = default);
 }
 

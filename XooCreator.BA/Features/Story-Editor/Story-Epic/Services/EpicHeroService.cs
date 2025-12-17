@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
+using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.DTOs;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.Repositories;
@@ -16,17 +17,20 @@ public class EpicHeroService : IEpicHeroService
     private readonly IEpicHeroRepository _repository;
     private readonly XooDbContext _context;
     private readonly IBlobSasService _blobSas;
+    private readonly IHeroPublishedAssetCleanupService _assetCleanup;
     private readonly ILogger<EpicHeroService> _logger;
 
     public EpicHeroService(
         IEpicHeroRepository repository,
         XooDbContext context,
         IBlobSasService blobSas,
+        IHeroPublishedAssetCleanupService assetCleanup,
         ILogger<EpicHeroService> logger)
     {
         _repository = repository;
         _context = context;
         _blobSas = blobSas;
+        _assetCleanup = assetCleanup;
         _logger = logger;
     }
 
@@ -244,17 +248,15 @@ public class EpicHeroService : IEpicHeroService
             combined.Add(MapCraftToListItem(craft, currentUserId));
         }
 
-        // Add published definitions (avoid duplicates)
-        var ownedIds = new HashSet<string>(ownedCrafts.Select(c => c.Id), StringComparer.OrdinalIgnoreCase);
+        // Add published definitions - always include, even if draft exists
+        // This allows published heroes to remain visible when "new version" creates a draft
         foreach (var definition in publishedDefinitions)
         {
-            if (!ownedIds.Contains(definition.Id))
-            {
-                combined.Add(MapDefinitionToListItem(definition, currentUserId));
-            }
+            combined.Add(MapDefinitionToListItem(definition, currentUserId));
         }
 
         // Add crafts for review (avoid duplicates)
+        var ownedIds = new HashSet<string>(ownedCrafts.Select(c => c.Id), StringComparer.OrdinalIgnoreCase);
         foreach (var craft in craftsForReview)
         {
             if (!ownedIds.Contains(craft.Id))
@@ -710,6 +712,65 @@ public class EpicHeroService : IEpicHeroService
         await _context.SaveChangesAsync(ct);
 
         _logger.LogInformation("Created new version from published hero: heroId={HeroId} baseVersion={BaseVersion}", heroId, definition.Version);
+    }
+
+    public async Task UnpublishAsync(Guid ownerUserId, string heroId, string reason, CancellationToken ct = default)
+    {
+        var definition = await _repository.GetDefinitionAsync(heroId, ct);
+        if (definition == null)
+        {
+            throw new InvalidOperationException($"Published hero '{heroId}' not found");
+        }
+
+        if (definition.OwnerUserId != ownerUserId)
+        {
+            throw new UnauthorizedAccessException($"User does not own hero '{heroId}'");
+        }
+
+        if (definition.Status != "published" || !definition.IsActive)
+        {
+            throw new InvalidOperationException($"Cannot unpublish hero. Expected Published and Active, got status '{definition.Status}' and IsActive '{definition.IsActive}'");
+        }
+
+        // Mark as unpublished (destructive - will delete assets)
+        definition.Status = "unpublished";
+        definition.IsActive = false;
+        definition.UpdatedAt = DateTime.UtcNow;
+
+        // TODO: Create separate HeroPublicationAudits table for audit logging
+        // For now, we skip audit logging since StoryPublicationAudits has FK to StoryDefinitions
+
+        await _context.SaveChangesAsync(ct);
+        
+        // Extract owner email from ImageUrl and delete published assets from blob storage
+        var ownerEmail = TryExtractOwnerEmail(definition);
+        if (!string.IsNullOrWhiteSpace(ownerEmail))
+        {
+            await _assetCleanup.DeletePublishedAssetsAsync(ownerEmail, heroId, ct);
+        }
+        else
+        {
+            _logger.LogWarning("Could not determine owner email for published assets cleanup. heroId={HeroId}", heroId);
+        }
+        
+        _logger.LogInformation("Hero unpublished and assets deleted: heroId={HeroId} reason={Reason}", heroId, reason);
+    }
+
+    private string? TryExtractOwnerEmail(EpicHeroDefinition definition)
+    {
+        if (string.IsNullOrWhiteSpace(definition.ImageUrl))
+        {
+            return null;
+        }
+
+        // ImageUrl format: images/tales-of-alchimalia/heroes/{ownerEmail}/{heroId}/...
+        var parts = definition.ImageUrl.Split('/', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length >= 5 && parts[0] == "images" && parts[1] == "tales-of-alchimalia" && parts[2] == "heroes")
+        {
+            return parts[3]; // ownerEmail
+        }
+
+        return null;
     }
 }
 

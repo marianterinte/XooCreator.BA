@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
+using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.DTOs;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.Repositories;
@@ -17,17 +18,20 @@ public class StoryRegionService : IStoryRegionService
     private readonly IStoryRegionRepository _repository;
     private readonly XooDbContext _context;
     private readonly IBlobSasService _blobSas;
+    private readonly IRegionPublishedAssetCleanupService _assetCleanup;
     private readonly ILogger<StoryRegionService> _logger;
 
     public StoryRegionService(
         IStoryRegionRepository repository,
         XooDbContext context,
         IBlobSasService blobSas,
+        IRegionPublishedAssetCleanupService assetCleanup,
         ILogger<StoryRegionService> logger)
     {
         _repository = repository;
         _context = context;
         _blobSas = blobSas;
+        _assetCleanup = assetCleanup;
         _logger = logger;
     }
 
@@ -202,17 +206,15 @@ public class StoryRegionService : IStoryRegionService
             combined.Add(MapCraftToListItem(craft, currentUserId));
         }
 
-        // Add published definitions (avoid duplicates)
-        var ownedIds = new HashSet<string>(ownedCrafts.Select(c => c.Id), StringComparer.OrdinalIgnoreCase);
+        // Add published definitions - always include, even if draft exists
+        // This allows published regions to remain visible when "new version" creates a draft
         foreach (var definition in publishedDefinitions)
         {
-            if (!ownedIds.Contains(definition.Id))
-            {
-                combined.Add(MapDefinitionToListItem(definition, currentUserId));
-            }
+            combined.Add(MapDefinitionToListItem(definition, currentUserId));
         }
 
         // Add crafts for review (avoid duplicates)
+        var ownedIds = new HashSet<string>(ownedCrafts.Select(c => c.Id), StringComparer.OrdinalIgnoreCase);
         foreach (var craft in craftsForReview)
         {
             if (!ownedIds.Contains(craft.Id))
@@ -631,6 +633,65 @@ public class StoryRegionService : IStoryRegionService
         await _context.SaveChangesAsync(ct);
 
         _logger.LogInformation("Created new version from published region: regionId={RegionId} baseVersion={BaseVersion}", regionId, definition.Version);
+    }
+
+    public async Task UnpublishAsync(Guid ownerUserId, string regionId, string reason, CancellationToken ct = default)
+    {
+        var definition = await _repository.GetDefinitionAsync(regionId, ct);
+        if (definition == null)
+        {
+            throw new InvalidOperationException($"Published region '{regionId}' not found");
+        }
+
+        if (definition.OwnerUserId != ownerUserId)
+        {
+            throw new UnauthorizedAccessException($"User does not own region '{regionId}'");
+        }
+
+        if (definition.Status != "published" || !definition.IsActive)
+        {
+            throw new InvalidOperationException($"Cannot unpublish region. Expected Published and Active, got status '{definition.Status}' and IsActive '{definition.IsActive}'");
+        }
+
+        // Mark as unpublished (destructive - will delete assets)
+        definition.Status = "unpublished";
+        definition.IsActive = false;
+        definition.UpdatedAt = DateTime.UtcNow;
+
+        // TODO: Create separate RegionPublicationAudits table for audit logging
+        // For now, we skip audit logging since StoryPublicationAudits has FK to StoryDefinitions
+
+        await _context.SaveChangesAsync(ct);
+        
+        // Extract owner email from ImageUrl and delete published assets from blob storage
+        var ownerEmail = TryExtractOwnerEmail(definition);
+        if (!string.IsNullOrWhiteSpace(ownerEmail))
+        {
+            await _assetCleanup.DeletePublishedAssetsAsync(ownerEmail, regionId, ct);
+        }
+        else
+        {
+            _logger.LogWarning("Could not determine owner email for published assets cleanup. regionId={RegionId}", regionId);
+        }
+        
+        _logger.LogInformation("Region unpublished and assets deleted: regionId={RegionId} reason={Reason}", regionId, reason);
+    }
+
+    private string? TryExtractOwnerEmail(StoryRegionDefinition definition)
+    {
+        if (string.IsNullOrWhiteSpace(definition.ImageUrl))
+        {
+            return null;
+        }
+
+        // ImageUrl format: images/tales-of-alchimalia/regions/{ownerEmail}/{regionId}/...
+        var parts = definition.ImageUrl.Split('/', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length >= 5 && parts[0] == "images" && parts[1] == "tales-of-alchimalia" && parts[2] == "regions")
+        {
+            return parts[3]; // ownerEmail
+        }
+
+        return null;
     }
 }
 
