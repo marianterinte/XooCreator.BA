@@ -24,6 +24,9 @@ public class EpicHeroTranslation
     [MaxLength(1000)]
     public string? GreetingText { get; set; } // Translated greeting message
     
+    [MaxLength(1000)]
+    public string? GreetingAudioUrl { get; set; } // Audio URL for greeting in this language
+    
     // Navigation property
     public EpicHero EpicHero { get; set; } = null!;
 }

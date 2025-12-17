@@ -9,7 +9,7 @@ public interface IStoryRegionService
     Task<StoryRegionDto?> GetRegionAsync(string regionId, CancellationToken ct = default);
     
     // Create region
-    Task<StoryRegionDto> CreateRegionAsync(Guid ownerUserId, string regionId, string name, CancellationToken ct = default);
+    Task<StoryRegionDto> CreateRegionAsync(Guid ownerUserId, string regionId, string name, string? description, string languageCode, CancellationToken ct = default);
     
     // Save region
     Task SaveRegionAsync(Guid ownerUserId, string regionId, StoryRegionDto dto, CancellationToken ct = default);

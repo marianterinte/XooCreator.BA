@@ -13,6 +13,7 @@ public class StoryRegionTranslationConfiguration : IEntityTypeConfiguration<Stor
         builder.Property(x => x.StoryRegionId).HasMaxLength(100).IsRequired();
         builder.Property(x => x.LanguageCode).HasMaxLength(10).IsRequired();
         builder.Property(x => x.Name).HasMaxLength(200).IsRequired();
+        builder.Property(x => x.Description);
         builder.HasIndex(x => new { x.StoryRegionId, x.LanguageCode }).IsUnique();
         builder.HasOne(x => x.StoryRegion).WithMany(x => x.Translations).HasForeignKey(x => x.StoryRegionId).OnDelete(DeleteBehavior.Cascade);
     }

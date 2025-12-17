@@ -14,6 +14,8 @@ public record CreateStoryRegionRequest
 {
     public string? RegionId { get; init; }
     public required string Name { get; init; }
+    public string? Description { get; init; }
+    public required string LanguageCode { get; init; }
 }
 
 public record CreateStoryRegionResponse
@@ -70,9 +72,15 @@ public class CreateStoryRegionEndpoint
 
         try
         {
-            var region = await ep._regionService.CreateRegionAsync(user.Id, regionId, req.Name, ct);
-            ep._logger.LogInformation("CreateStoryRegion: userId={UserId} regionId={RegionId} name={Name}", 
-                user.Id, regionId, req.Name);
+            var region = await ep._regionService.CreateRegionAsync(
+                user.Id, 
+                regionId, 
+                req.Name, 
+                req.Description, 
+                req.LanguageCode, 
+                ct);
+            ep._logger.LogInformation("CreateStoryRegion: userId={UserId} regionId={RegionId} name={Name} languageCode={LanguageCode}", 
+                user.Id, regionId, req.Name, req.LanguageCode);
             
             return TypedResults.Ok(new CreateStoryRegionResponse { RegionId = region.Id });
         }

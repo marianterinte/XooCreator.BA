@@ -37,6 +37,7 @@ public class RequestEpicHeroAudioUploadEndpoint
         public required string FileName { get; init; }
         public long ExpectedSize { get; init; }
         public string? ContentType { get; init; }
+        public required string LanguageCode { get; init; } // Language code for per-language audio
     }
 
     [Route("/api/story-editor/heroes/{heroId}/assets/request-audio-upload")]
@@ -112,8 +113,15 @@ public class RequestEpicHeroAudioUploadEndpoint
 
         var emailEsc = Uri.EscapeDataString(email.Trim());
         
-        // Path format: heroes/{ownerEmail}/{heroId}/audio/{filename}
-        var blobPath = $"heroes/{emailEsc}/{heroId}/audio/{fileName}";
+        // Validate and normalize language code
+        var languageCode = (request.LanguageCode ?? string.Empty).Trim().ToLowerInvariant();
+        if (string.IsNullOrWhiteSpace(languageCode))
+        {
+            return TypedResults.BadRequest("Language code is required for audio upload.");
+        }
+        
+        // Path format: heroes/{ownerEmail}/{heroId}/greeting/{languageCode}/{filename}
+        var blobPath = $"heroes/{emailEsc}/{heroId}/greeting/{languageCode}/{fileName}";
         var putUri = await ep._sas.GetPutSasAsync(ep._sas.DraftContainer, blobPath, contentType, TimeSpan.FromMinutes(15), ct);
         var blobClient = ep._sas.GetBlobClient(ep._sas.DraftContainer, blobPath);
 

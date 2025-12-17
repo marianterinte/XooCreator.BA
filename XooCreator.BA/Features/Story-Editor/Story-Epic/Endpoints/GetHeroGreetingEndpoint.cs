@@ -38,7 +38,7 @@ public class GetHeroGreetingEndpoint
             return TypedResults.NotFound();
         }
 
-        // Get greeting text in requested language
+        // Get greeting text and audio in requested language
         var translation = hero.Translations.FirstOrDefault(t => 
             t.LanguageCode.Equals(locale, StringComparison.OrdinalIgnoreCase));
         
@@ -46,12 +46,15 @@ public class GetHeroGreetingEndpoint
         translation ??= hero.Translations.FirstOrDefault();
 
         var greetingText = translation?.GreetingText ?? $"Hello! I'm {translation?.Name ?? heroId}.";
+        
+        // Get audio URL from translation (per language), fallback to old hero-level audio for backward compatibility
+        var audioUrl = translation?.GreetingAudioUrl ?? hero.GreetingAudioUrl;
 
         var response = new HeroGreetingDto
         {
             HeroId = heroId,
             Message = greetingText,
-            AudioUrl = hero.GreetingAudioUrl
+            AudioUrl = audioUrl
         };
 
         return TypedResults.Ok(response);

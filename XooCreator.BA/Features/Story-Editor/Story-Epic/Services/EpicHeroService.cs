@@ -55,23 +55,25 @@ public class EpicHeroService : IEpicHeroService
                 LanguageCode = t.LanguageCode,
                 Name = t.Name,
                 Description = t.Description,
-                GreetingText = t.GreetingText
+                GreetingText = t.GreetingText,
+                GreetingAudioUrl = t.GreetingAudioUrl
             }).ToList()
         };
     }
 
-    public async Task<EpicHeroDto> CreateHeroAsync(Guid ownerUserId, string heroId, string name, CancellationToken ct = default)
+    public async Task<EpicHeroDto> CreateHeroAsync(Guid ownerUserId, string heroId, string name, string languageCode, string? description, CancellationToken ct = default)
     {
         var hero = await _repository.CreateAsync(ownerUserId, heroId, name, ct);
         
-        // Create default translation (ro-ro) with the provided name
+        // Create initial translation with the provided language code, name, and description
         // Add translation directly to context instead of using SaveAsync to avoid concurrency issues
         var defaultTranslation = new EpicHeroTranslation
         {
             Id = Guid.NewGuid(),
             EpicHeroId = hero.Id,
-            LanguageCode = "ro-ro",
-            Name = name
+            LanguageCode = languageCode,
+            Name = name,
+            Description = description
         };
         _context.EpicHeroTranslations.Add(defaultTranslation);
         await _context.SaveChangesAsync(ct);
@@ -103,7 +105,8 @@ public class EpicHeroService : IEpicHeroService
                 LanguageCode = t.LanguageCode,
                 Name = t.Name,
                 Description = t.Description,
-                GreetingText = t.GreetingText
+                GreetingText = t.GreetingText,
+                GreetingAudioUrl = t.GreetingAudioUrl
             }).ToList()
         };
     }
@@ -123,7 +126,8 @@ public class EpicHeroService : IEpicHeroService
 
         // Update properties (non-translatable)
         hero.ImageUrl = dto.ImageUrl;
-        hero.GreetingAudioUrl = dto.GreetingAudioUrl;
+        // Note: GreetingAudioUrl is now per-language, so we don't update it here
+        // Keep the old GreetingAudioUrl in EpicHero for backward compatibility (can be removed later)
         hero.UpdatedAt = DateTime.UtcNow;
 
         // Update translations
@@ -143,7 +147,8 @@ public class EpicHeroService : IEpicHeroService
                         LanguageCode = lang,
                         Name = translationDto.Name,
                         Description = translationDto.Description,
-                        GreetingText = translationDto.GreetingText
+                        GreetingText = translationDto.GreetingText,
+                        GreetingAudioUrl = translationDto.GreetingAudioUrl
                     };
                     _context.EpicHeroTranslations.Add(translation);
                 }
@@ -152,6 +157,7 @@ public class EpicHeroService : IEpicHeroService
                     translation.Name = translationDto.Name;
                     translation.Description = translationDto.Description;
                     translation.GreetingText = translationDto.GreetingText;
+                    translation.GreetingAudioUrl = translationDto.GreetingAudioUrl;
                 }
             }
         }
