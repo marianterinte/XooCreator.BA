@@ -72,8 +72,9 @@ public static class StoryAssetPathMapper
     /// <summary>
     /// Builds the published blob storage path for an asset.
     /// Structure: {category}/tales-of-alchimalia/stories/{userEmail}/{storyId}/{filename} (for images)
-    /// Structure: {category}/tales-of-alchimalia/stories/{userEmail}/{storyId}/{lang}/{filename} (for audio/video)
+    /// Structure: {category}/tales-of-alchimalia/stories/{userEmail}/{storyId}/{lang}/{filename} (for audio/video - normal stories)
     /// Special case: Seeded stories use 'tol' instead of 'tales-of-alchimalia' for historical reasons
+    /// Special case: Seeded stories audio/video use: {category}/{lang}/tol/stories/{userEmail}/{storyId}/{filename}
     /// </summary>
     /// <param name="asset">Asset information</param>
     /// <param name="userEmail">User email (owner of the story)</param>
@@ -89,11 +90,19 @@ public static class StoryAssetPathMapper
             _ => "images"
         };
 
+        var isSeeded = IsSeededStory(userEmail);
+        
+        // Special path structure for seeded stories audio/video: {category}/{lang}/tol/stories/{userEmail}/{storyId}/{filename}
+        if (isSeeded && (asset.Type == AssetType.Audio || asset.Type == AssetType.Video) && !string.IsNullOrWhiteSpace(asset.Lang))
+        {
+            return $"{category}/{asset.Lang}/tol/stories/{userEmail}/{storyId}/{asset.Filename}";
+        }
+
         // Seeded stories use 'tol' path instead of 'tales-of-alchimalia' for historical reasons
-        var folderName = IsSeededStory(userEmail) ? "tol" : "tales-of-alchimalia";
+        var folderName = isSeeded ? "tol" : "tales-of-alchimalia";
         var basePath = $"{category}/{folderName}/stories/{userEmail}/{storyId}";
 
-        // Audio and Video assets are language-specific in published structure
+        // Audio and Video assets are language-specific in published structure (for normal stories)
         if ((asset.Type == AssetType.Audio || asset.Type == AssetType.Video) && !string.IsNullOrWhiteSpace(asset.Lang))
         {
             basePath = $"{basePath}/{asset.Lang}";

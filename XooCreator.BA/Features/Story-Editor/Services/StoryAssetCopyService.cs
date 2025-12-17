@@ -1,5 +1,6 @@
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
+using XooCreator.BA.Data.SeedData;
 using XooCreator.BA.Features.StoryEditor.Mappers;
 using XooCreator.BA.Features.StoryEditor.Models;
 using XooCreator.BA.Infrastructure.Services.Blob;
@@ -85,30 +86,73 @@ public class StoryAssetCopyService : IStoryAssetCopyService
         ArgumentNullException.ThrowIfNull(definition);
         var results = new List<StoryAssetPathMapper.AssetInfo>();
 
+        var isSeeded = LooksLikeSeededStory(definition);
+
+        _logger.LogInformation(
+            "CollectFromDefinition started: storyId={StoryId} tiles={TileCount} looksSeeded={IsSeeded}",
+            definition.StoryId, definition.Tiles.Count, isSeeded);
+
         if (!string.IsNullOrWhiteSpace(definition.CoverImageUrl))
         {
             results.Add(new StoryAssetPathMapper.AssetInfo(Path.GetFileName(definition.CoverImageUrl), StoryAssetPathMapper.AssetType.Image, null));
+            _logger.LogInformation("Collected cover image: {Filename}", Path.GetFileName(definition.CoverImageUrl));
         }
 
         foreach (var tile in definition.Tiles)
         {
-            if (!string.IsNullOrWhiteSpace(tile.ImageUrl))
+            var tileImageFilename = Path.GetFileName(tile.ImageUrl);
+
+            if (!string.IsNullOrWhiteSpace(tileImageFilename))
             {
-                results.Add(new StoryAssetPathMapper.AssetInfo(Path.GetFileName(tile.ImageUrl), StoryAssetPathMapper.AssetType.Image, null));
+                results.Add(new StoryAssetPathMapper.AssetInfo(tileImageFilename, StoryAssetPathMapper.AssetType.Image, null));
+                _logger.LogInformation("Collected tile image: {Filename}", tileImageFilename);
             }
+
+            _logger.LogInformation(
+                "Processing tile: tileId={TileId} translations={TranslationCount}",
+                tile.TileId, tile.Translations.Count);
 
             foreach (var translation in tile.Translations)
             {
-                if (!string.IsNullOrWhiteSpace(translation.AudioUrl))
+                _logger.LogInformation(
+                    "Processing translation: lang={Lang} audioUrl={AudioUrl} videoUrl={VideoUrl}",
+                    translation.LanguageCode,
+                    translation.AudioUrl ?? "null",
+                    translation.VideoUrl ?? "null");
+
+                var audioFilename = Path.GetFileName(translation.AudioUrl);
+                if (string.IsNullOrWhiteSpace(audioFilename) && isSeeded)
                 {
-                    results.Add(new StoryAssetPathMapper.AssetInfo(Path.GetFileName(translation.AudioUrl), StoryAssetPathMapper.AssetType.Audio, translation.LanguageCode));
+                    audioFilename = DeriveSeededAudioFilename(tileImageFilename);
+                    if (!string.IsNullOrWhiteSpace(audioFilename))
+                    {
+                        _logger.LogInformation(
+                            "Seeded fallback audio detected: tileId={TileId} lang={Lang} derivedFilename={Filename}",
+                            tile.TileId,
+                            translation.LanguageCode,
+                            audioFilename);
+                    }
                 }
+
+                if (!string.IsNullOrWhiteSpace(audioFilename))
+                {
+                    results.Add(new StoryAssetPathMapper.AssetInfo(audioFilename, StoryAssetPathMapper.AssetType.Audio, translation.LanguageCode));
+                }
+
                 if (!string.IsNullOrWhiteSpace(translation.VideoUrl))
                 {
-                    results.Add(new StoryAssetPathMapper.AssetInfo(Path.GetFileName(translation.VideoUrl), StoryAssetPathMapper.AssetType.Video, translation.LanguageCode));
+                    var filename = Path.GetFileName(translation.VideoUrl);
+                    results.Add(new StoryAssetPathMapper.AssetInfo(filename, StoryAssetPathMapper.AssetType.Video, translation.LanguageCode));
+                    _logger.LogInformation(
+                        "Collected video: filename={Filename} lang={Lang} fullUrl={FullUrl}",
+                        filename, translation.LanguageCode, translation.VideoUrl);
                 }
             }
         }
+
+        _logger.LogInformation(
+            "CollectFromDefinition completed: storyId={StoryId} totalAssets={AssetCount}",
+            definition.StoryId, results.Count);
 
         return results;
     }
@@ -166,6 +210,28 @@ public class StoryAssetCopyService : IStoryAssetCopyService
         return AssetCopyResult.Success();
     }
 
+    private static bool LooksLikeSeededStory(StoryDefinition definition)
+    {
+        if (definition == null) return false;
+        return LooksLikeSeededPath(definition.CoverImageUrl)
+               || definition.Tiles.Any(t => LooksLikeSeededPath(t.ImageUrl));
+    }
+
+    private static bool LooksLikeSeededPath(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path)) return false;
+        return path.Contains(SeedUserHelper.SeedUserEmail, StringComparison.OrdinalIgnoreCase)
+               || path.Contains("/tol/stories/", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string? DeriveSeededAudioFilename(string? imageFilename)
+    {
+        if (string.IsNullOrWhiteSpace(imageFilename)) return null;
+        var name = Path.GetFileNameWithoutExtension(imageFilename);
+        if (string.IsNullOrWhiteSpace(name)) return null;
+        return $"{name}.wav";
+    }
+
     public async Task<AssetCopyResult> CopyPublishedToDraftAsync(
         IEnumerable<StoryAssetPathMapper.AssetInfo> assets,
         string publishedOwnerEmail,
@@ -185,6 +251,11 @@ public class StoryAssetCopyService : IStoryAssetCopyService
         foreach (var asset in assets)
         {
             var sourcePath = StoryAssetPathMapper.BuildPublishedPath(asset, publishedOwnerEmail, sourceStoryId);
+            
+            _logger.LogInformation(
+                "Processing asset: filename={Filename} type={Type} lang={Lang} sourcePath={SourcePath}",
+                asset.Filename, asset.Type, asset.Lang ?? "null", sourcePath);
+            
             var sourceClient = _sasService.GetBlobClient(_sasService.PublishedContainer, sourcePath);
 
             if (!await sourceClient.ExistsAsync(ct))
@@ -195,7 +266,11 @@ public class StoryAssetCopyService : IStoryAssetCopyService
                 continue;
             }
 
+            _logger.LogInformation("Source asset exists, copying: {SourcePath}", sourcePath);
+
             var targetPath = StoryAssetPathMapper.BuildDraftPath(asset, targetEmail, targetStoryId);
+            _logger.LogInformation("Target path: {TargetPath}", targetPath);
+            
             var copyResult = await CopyAssetWithPollingAsync(
                 sourcePath,
                 targetPath,
