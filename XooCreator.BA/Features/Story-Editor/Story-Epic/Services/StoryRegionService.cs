@@ -191,7 +191,7 @@ public class StoryRegionService : IStoryRegionService
     public async Task<List<StoryRegionListItemDto>> ListRegionsForEditorAsync(Guid currentUserId, string? status = null, CancellationToken ct = default)
     {
         var ownedCrafts = await _repository.ListCraftsByOwnerAsync(currentUserId, status, ct);
-        var publishedDefinitions = await _repository.ListPublishedDefinitionsAsync(currentUserId, ct);
+        var publishedDefinitions = await _repository.ListPublishedDefinitionsAsync(excludeOwnerId: null, ct); // Include owner's published regions
         var craftsForReview = await _repository.ListCraftsForReviewAsync(ct);
 
         var combined = new List<StoryRegionListItemDto>();
@@ -390,13 +390,31 @@ public class StoryRegionService : IStoryRegionService
             _context.StoryRegionDefinitionTranslations.Add(definitionTranslation);
         }
 
-        // Update craft status to published
-        regionCraft.Status = "published";
-        regionCraft.UpdatedAt = DateTime.UtcNow;
-        regionCraft.BaseVersion = definition.Version;
-
         await _context.SaveChangesAsync(ct);
-        _logger.LogInformation("Region published: regionId={RegionId} version={Version}", regionId, definition.Version);
+        
+        // Cleanup: Delete StoryRegionCraft after successful publish (similar to Epics)
+        try
+        {
+            // Reload craft in current context to ensure it's tracked properly
+            var craftToDelete = await _context.StoryRegionCrafts
+                .FirstOrDefaultAsync(c => c.Id == regionId, ct);
+            
+            if (craftToDelete != null)
+            {
+                _context.StoryRegionCrafts.Remove(craftToDelete);
+                await _context.SaveChangesAsync(ct);
+                _logger.LogInformation("Region published and craft cleaned up: regionId={RegionId} version={Version}", regionId, definition.Version);
+            }
+            else
+            {
+                _logger.LogWarning("StoryRegionCraft not found for cleanup: regionId={RegionId}", regionId);
+            }
+        }
+        catch (Exception cleanupEx)
+        {
+            _logger.LogWarning(cleanupEx, "Failed to cleanup region craft after publish: regionId={RegionId}, but publish succeeded", regionId);
+            // Don't fail if cleanup fails - publish was successful
+        }
     }
 
     public async Task RetractAsync(Guid ownerUserId, string regionId, CancellationToken ct = default)
@@ -560,11 +578,27 @@ public class StoryRegionService : IStoryRegionService
             throw new InvalidOperationException($"Region '{regionId}' is not published (status: {definition.Status})");
         }
 
-        // Check if draft already exists
-        var existingCraft = await _context.StoryRegionCrafts.FirstOrDefaultAsync(c => c.Id == regionId, ct);
-        if (existingCraft != null && existingCraft.Status != "published")
+        // Check if draft already exists (use AsNoTracking to avoid tracking conflicts)
+        var existingCraft = await _context.StoryRegionCrafts
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.Id == regionId, ct);
+        
+        if (existingCraft != null)
         {
-            throw new InvalidOperationException("A draft already exists for this region. Please edit or publish it first.");
+            if (existingCraft.Status != "published")
+            {
+                throw new InvalidOperationException("A draft already exists for this region. Please edit or publish it first.");
+            }
+            
+            // If status is "published", this is a leftover craft that should have been deleted
+            // Delete it now before creating the new version
+            _logger.LogWarning("Found leftover published craft for regionId={RegionId}, deleting it before creating new version", regionId);
+            var craftToDelete = await _context.StoryRegionCrafts.FirstOrDefaultAsync(c => c.Id == regionId, ct);
+            if (craftToDelete != null)
+            {
+                _context.StoryRegionCrafts.Remove(craftToDelete);
+                await _context.SaveChangesAsync(ct);
+            }
         }
 
         // Create new StoryRegionCraft from StoryRegionDefinition

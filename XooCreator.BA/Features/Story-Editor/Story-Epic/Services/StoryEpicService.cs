@@ -350,11 +350,27 @@ public class StoryEpicService : IStoryEpicService
             throw new InvalidOperationException($"Epic '{epicId}' is not published (status: {definition.Status})");
         }
 
-        // Check if draft already exists
-        var existingCraft = await _context.StoryEpicCrafts.FirstOrDefaultAsync(c => c.Id == epicId, ct);
-        if (existingCraft != null && existingCraft.Status != "published")
+        // Check if draft already exists (use AsNoTracking to avoid tracking conflicts)
+        var existingCraft = await _context.StoryEpicCrafts
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.Id == epicId, ct);
+        
+        if (existingCraft != null)
         {
-            throw new InvalidOperationException("A draft already exists for this epic. Please edit or publish it first.");
+            if (existingCraft.Status != "published")
+            {
+                throw new InvalidOperationException("A draft already exists for this epic. Please edit or publish it first.");
+            }
+            
+            // If status is "published", this is a leftover craft that should have been deleted
+            // Delete it now before creating the new version
+            _logger.LogWarning("Found leftover published craft for epicId={EpicId}, deleting it before creating new version", epicId);
+            var craftToDelete = await _context.StoryEpicCrafts.FirstOrDefaultAsync(c => c.Id == epicId, ct);
+            if (craftToDelete != null)
+            {
+                _context.StoryEpicCrafts.Remove(craftToDelete);
+                await _context.SaveChangesAsync(ct);
+            }
         }
 
         // Create new StoryEpicCraft from StoryEpicDefinition

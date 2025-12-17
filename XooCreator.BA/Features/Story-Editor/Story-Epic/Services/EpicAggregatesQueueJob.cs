@@ -182,8 +182,10 @@ public class EpicAggregatesQueueJob : BackgroundService
                     return;
                 }
 
-                // Check if draft already exists
-                var existingCraft = await db.EpicHeroCrafts.FirstOrDefaultAsync(c => c.Id == job.HeroId, stoppingToken);
+                // Check if draft already exists (use AsNoTracking to avoid tracking conflicts)
+                var existingCraft = await db.EpicHeroCrafts
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(c => c.Id == job.HeroId, stoppingToken);
                 if (existingCraft != null && existingCraft.Status != "published")
                 {
                     job.Status = HeroVersionJobStatus.Failed;
@@ -299,8 +301,10 @@ public class EpicAggregatesQueueJob : BackgroundService
                     return;
                 }
 
-                // Check if draft already exists
-                var existingCraft = await db.StoryRegionCrafts.FirstOrDefaultAsync(c => c.Id == job.RegionId, stoppingToken);
+                // Check if draft already exists (use AsNoTracking to avoid tracking conflicts)
+                var existingCraft = await db.StoryRegionCrafts
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(c => c.Id == job.RegionId, stoppingToken);
                 if (existingCraft != null && existingCraft.Status != "published")
                 {
                     job.Status = RegionVersionJobStatus.Failed;

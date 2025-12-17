@@ -233,7 +233,7 @@ public class EpicHeroService : IEpicHeroService
     public async Task<List<EpicHeroListItemDto>> ListHeroesForEditorAsync(Guid currentUserId, string? status = null, CancellationToken ct = default)
     {
         var ownedCrafts = await _repository.ListCraftsByOwnerAsync(currentUserId, status, ct);
-        var publishedDefinitions = await _repository.ListPublishedDefinitionsAsync(currentUserId, ct);
+        var publishedDefinitions = await _repository.ListPublishedDefinitionsAsync(excludeOwnerId: null, ct); // Include owner's published heroes
         var craftsForReview = await _repository.ListCraftsForReviewAsync(ct);
 
         var combined = new List<EpicHeroListItemDto>();
@@ -480,13 +480,31 @@ public class EpicHeroService : IEpicHeroService
             _context.EpicHeroDefinitionTranslations.Add(definitionTranslation);
         }
 
-        // Update craft status to published
-        heroCraft.Status = "published";
-        heroCraft.UpdatedAt = DateTime.UtcNow;
-        heroCraft.BaseVersion = definition.Version;
-
         await _context.SaveChangesAsync(ct);
-        _logger.LogInformation("Hero published: heroId={HeroId} version={Version}", heroId, definition.Version);
+        
+        // Cleanup: Delete EpicHeroCraft after successful publish (similar to Epics)
+        try
+        {
+            // Reload craft in current context to ensure it's tracked properly
+            var craftToDelete = await _context.EpicHeroCrafts
+                .FirstOrDefaultAsync(c => c.Id == heroId, ct);
+            
+            if (craftToDelete != null)
+            {
+                _context.EpicHeroCrafts.Remove(craftToDelete);
+                await _context.SaveChangesAsync(ct);
+                _logger.LogInformation("Hero published and craft cleaned up: heroId={HeroId} version={Version}", heroId, definition.Version);
+            }
+            else
+            {
+                _logger.LogWarning("EpicHeroCraft not found for cleanup: heroId={HeroId}", heroId);
+            }
+        }
+        catch (Exception cleanupEx)
+        {
+            _logger.LogWarning(cleanupEx, "Failed to cleanup hero craft after publish: heroId={HeroId}, but publish succeeded", heroId);
+            // Don't fail if cleanup fails - publish was successful
+        }
     }
 
     public async Task RetractAsync(Guid ownerUserId, string heroId, CancellationToken ct = default)
@@ -637,11 +655,27 @@ public class EpicHeroService : IEpicHeroService
             throw new InvalidOperationException($"Hero '{heroId}' is not published (status: {definition.Status})");
         }
 
-        // Check if draft already exists
-        var existingCraft = await _context.EpicHeroCrafts.FirstOrDefaultAsync(c => c.Id == heroId, ct);
-        if (existingCraft != null && existingCraft.Status != "published")
+        // Check if draft already exists (use AsNoTracking to avoid tracking conflicts)
+        var existingCraft = await _context.EpicHeroCrafts
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.Id == heroId, ct);
+        
+        if (existingCraft != null)
         {
-            throw new InvalidOperationException("A draft already exists for this hero. Please edit or publish it first.");
+            if (existingCraft.Status != "published")
+            {
+                throw new InvalidOperationException("A draft already exists for this hero. Please edit or publish it first.");
+            }
+            
+            // If status is "published", this is a leftover craft that should have been deleted
+            // Delete it now before creating the new version
+            _logger.LogWarning("Found leftover published craft for heroId={HeroId}, deleting it before creating new version", heroId);
+            var craftToDelete = await _context.EpicHeroCrafts.FirstOrDefaultAsync(c => c.Id == heroId, ct);
+            if (craftToDelete != null)
+            {
+                _context.EpicHeroCrafts.Remove(craftToDelete);
+                await _context.SaveChangesAsync(ct);
+            }
         }
 
         // Create new EpicHeroCraft from EpicHeroDefinition
