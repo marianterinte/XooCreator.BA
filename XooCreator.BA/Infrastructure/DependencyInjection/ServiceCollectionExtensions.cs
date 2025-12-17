@@ -46,6 +46,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IStoryForkQueue, StoryForkQueue>();
         services.AddSingleton<IStoryForkAssetsQueue, StoryForkAssetsQueue>();
         services.AddSingleton<IStoryExportQueue, StoryExportQueue>();
+        services.AddSingleton<IEpicAggregatesQueue, EpicAggregatesQueue>();
         
         return services;
     }

@@ -14,6 +14,6 @@ public class StoryEpicCraftHeroReference
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     
     public StoryEpicCraft Epic { get; set; } = null!;
-    public EpicHero Hero { get; set; } = null!;
+    public EpicHeroCraft Hero { get; set; } = null!;
 }
 

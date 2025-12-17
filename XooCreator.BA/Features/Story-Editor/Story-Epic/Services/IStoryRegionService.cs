@@ -34,5 +34,8 @@ public interface IStoryRegionService
     
     // Retract from review
     Task RetractAsync(Guid ownerUserId, string regionId, CancellationToken ct = default);
+    
+    // Create new version from published region
+    Task CreateVersionFromPublishedAsync(Guid ownerUserId, string regionId, CancellationToken ct = default);
 }
 

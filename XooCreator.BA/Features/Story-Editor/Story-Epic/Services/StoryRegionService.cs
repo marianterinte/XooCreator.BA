@@ -434,5 +434,69 @@ public class StoryRegionService : IStoryRegionService
         if (string.IsNullOrWhiteSpace(path)) return false;
         return path.StartsWith("images/", StringComparison.OrdinalIgnoreCase);
     }
+
+    public async Task CreateVersionFromPublishedAsync(Guid ownerUserId, string regionId, CancellationToken ct = default)
+    {
+        // Load published StoryRegionDefinition with all related data
+        var definition = await _context.StoryRegionDefinitions
+            .Include(d => d.Translations)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(d => d.Id == regionId, ct);
+
+        if (definition == null)
+        {
+            throw new InvalidOperationException($"Published region '{regionId}' not found");
+        }
+
+        // Verify ownership
+        if (definition.OwnerUserId != ownerUserId)
+        {
+            throw new UnauthorizedAccessException($"User does not own region '{regionId}'");
+        }
+
+        // Check if region is published
+        if (definition.Status != "published")
+        {
+            throw new InvalidOperationException($"Region '{regionId}' is not published (status: {definition.Status})");
+        }
+
+        // Check if draft already exists
+        var existingCraft = await _context.StoryRegionCrafts.FirstOrDefaultAsync(c => c.Id == regionId, ct);
+        if (existingCraft != null && existingCraft.Status != "published")
+        {
+            throw new InvalidOperationException("A draft already exists for this region. Please edit or publish it first.");
+        }
+
+        // Create new StoryRegionCraft from StoryRegionDefinition
+        var craft = new StoryRegionCraft
+        {
+            Id = definition.Id,
+            Name = definition.Name,
+            ImageUrl = definition.ImageUrl,
+            OwnerUserId = definition.OwnerUserId,
+            Status = "draft",
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+            BaseVersion = definition.Version,
+            LastDraftVersion = 0
+        };
+
+        // Copy Translations
+        foreach (var defTranslation in definition.Translations)
+        {
+            craft.Translations.Add(new StoryRegionCraftTranslation
+            {
+                StoryRegionCraftId = craft.Id,
+                LanguageCode = defTranslation.LanguageCode,
+                Name = defTranslation.Name,
+                Description = defTranslation.Description
+            });
+        }
+
+        _context.StoryRegionCrafts.Add(craft);
+        await _context.SaveChangesAsync(ct);
+
+        _logger.LogInformation("Created new version from published region: regionId={RegionId} baseVersion={BaseVersion}", regionId, definition.Version);
+    }
 }
 

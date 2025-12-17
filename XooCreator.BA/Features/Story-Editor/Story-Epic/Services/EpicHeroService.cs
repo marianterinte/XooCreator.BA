@@ -506,5 +506,71 @@ public class EpicHeroService : IEpicHeroService
         return path.StartsWith("images/", StringComparison.OrdinalIgnoreCase) ||
                path.StartsWith("audio/", StringComparison.OrdinalIgnoreCase);
     }
+
+    public async Task CreateVersionFromPublishedAsync(Guid ownerUserId, string heroId, CancellationToken ct = default)
+    {
+        // Load published EpicHeroDefinition with all related data
+        var definition = await _context.EpicHeroDefinitions
+            .Include(d => d.Translations)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(d => d.Id == heroId, ct);
+
+        if (definition == null)
+        {
+            throw new InvalidOperationException($"Published hero '{heroId}' not found");
+        }
+
+        // Verify ownership
+        if (definition.OwnerUserId != ownerUserId)
+        {
+            throw new UnauthorizedAccessException($"User does not own hero '{heroId}'");
+        }
+
+        // Check if hero is published
+        if (definition.Status != "published")
+        {
+            throw new InvalidOperationException($"Hero '{heroId}' is not published (status: {definition.Status})");
+        }
+
+        // Check if draft already exists
+        var existingCraft = await _context.EpicHeroCrafts.FirstOrDefaultAsync(c => c.Id == heroId, ct);
+        if (existingCraft != null && existingCraft.Status != "published")
+        {
+            throw new InvalidOperationException("A draft already exists for this hero. Please edit or publish it first.");
+        }
+
+        // Create new EpicHeroCraft from EpicHeroDefinition
+        var craft = new EpicHeroCraft
+        {
+            Id = definition.Id,
+            Name = definition.Name,
+            ImageUrl = definition.ImageUrl,
+            OwnerUserId = definition.OwnerUserId,
+            Status = "draft",
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+            BaseVersion = definition.Version,
+            LastDraftVersion = 0
+        };
+
+        // Copy Translations
+        foreach (var defTranslation in definition.Translations)
+        {
+            craft.Translations.Add(new EpicHeroCraftTranslation
+            {
+                EpicHeroCraftId = craft.Id,
+                LanguageCode = defTranslation.LanguageCode,
+                Name = defTranslation.Name,
+                Description = defTranslation.Description,
+                GreetingText = defTranslation.GreetingText,
+                GreetingAudioUrl = defTranslation.GreetingAudioUrl
+            });
+        }
+
+        _context.EpicHeroCrafts.Add(craft);
+        await _context.SaveChangesAsync(ct);
+
+        _logger.LogInformation("Created new version from published hero: heroId={HeroId} baseVersion={BaseVersion}", heroId, definition.Version);
+    }
 }
 

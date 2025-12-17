@@ -34,5 +34,8 @@ public interface IEpicHeroService
     
     // Retract from review
     Task RetractAsync(Guid ownerUserId, string heroId, CancellationToken ct = default);
+    
+    // Create new version from published hero
+    Task CreateVersionFromPublishedAsync(Guid ownerUserId, string heroId, CancellationToken ct = default);
 }
 
