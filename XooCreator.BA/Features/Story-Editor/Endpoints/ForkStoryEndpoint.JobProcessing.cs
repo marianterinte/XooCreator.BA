@@ -49,6 +49,24 @@ public partial class ForkStoryEndpoint
                 sourceOwnerId = sourceDefinition.CreatedBy.Value;
                 sourceOwnerEmail = await ResolveUserEmailAsync(sourceDefinition.CreatedBy.Value, ct);
             }
+            
+            // Fallback: If sourceOwnerEmail is still null, try to detect if this is a seeded story
+            // Seeded stories have assets in "images/tol/stories/seed@alchimalia.com/..." path
+            if (string.IsNullOrWhiteSpace(sourceOwnerEmail))
+            {
+                _logger.LogWarning("Source owner email not found for story {StoryId}. Checking if this is a seeded story...", sourceStoryId);
+                
+                // Check if cover image path contains "seed@alchimalia.com" or "tol/stories"
+                if (!string.IsNullOrWhiteSpace(sourceDefinition.CoverImageUrl))
+                {
+                    var coverPath = sourceDefinition.CoverImageUrl.ToLowerInvariant();
+                    if (coverPath.Contains("seed@alchimalia.com") || coverPath.Contains("/tol/stories/"))
+                    {
+                        sourceOwnerEmail = "seed@alchimalia.com";
+                        _logger.LogInformation("Detected seeded story {StoryId}. Using seed@alchimalia.com as source owner email.", sourceStoryId);
+                    }
+                }
+            }
         }
         else
         {
@@ -319,6 +337,23 @@ public partial class ForkStoryEndpoint
                 if (string.IsNullOrWhiteSpace(sourceEmail) && definition.CreatedBy.HasValue)
                 {
                     sourceEmail = await ResolveUserEmailAsync(definition.CreatedBy.Value, ct);
+                }
+
+                // Fallback: If sourceEmail is still null, try to detect if this is a seeded story
+                if (string.IsNullOrWhiteSpace(sourceEmail))
+                {
+                    _logger.LogWarning("Source owner email not found for published story {StoryId}. Checking if this is a seeded story...", definition.StoryId);
+                    
+                    // Check if cover image path contains "seed@alchimalia.com" or "tol/stories"
+                    if (!string.IsNullOrWhiteSpace(definition.CoverImageUrl))
+                    {
+                        var coverPath = definition.CoverImageUrl.ToLowerInvariant();
+                        if (coverPath.Contains("seed@alchimalia.com") || coverPath.Contains("/tol/stories/"))
+                        {
+                            sourceEmail = "seed@alchimalia.com";
+                            _logger.LogInformation("Detected seeded story {StoryId}. Using seed@alchimalia.com as source owner email for asset copy.", definition.StoryId);
+                        }
+                    }
                 }
 
                 if (string.IsNullOrWhiteSpace(sourceEmail))

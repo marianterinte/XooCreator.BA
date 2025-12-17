@@ -11,13 +11,23 @@
 - Fork-ul pentru seeded stories este **blocat la nivel de UI** (frontend)
 - **Nu există restricții la nivel de backend** pentru fork-ul seeded stories
 
-### 1.2 Oportunitate
+### 1.2 Ce Se Copiază la Fork (Verificat ✅)
+La fork, se copiază **100% complet**:
+- ✅ **Toate translațiile** (ro-ro, en-us, hu-hu) - titles, summaries, captions, text, questions
+- ✅ **Toate tile-urile** (pages, quiz, video) - cu toate proprietățile
+- ✅ **Toate quiz-urile** - answers, translations, IsCorrect flags, tokens (rewards)
+- ✅ **Toate imaginile** - cover image + tile images (copiate fizic din published la draft storage)
+- ✅ **Toate audio-urile** - pentru fiecare limbă (copiate fizic)
+- ✅ **Toate video-urile** - pentru fiecare limbă (copiate fizic)
+- ✅ **Metadata** - topics, age groups, unlocked heroes, IsEvaluative, etc.
+
+### 1.3 Oportunitate
 Există o oportunitate de a permite fork-ul seeded stories pentru a facilita:
 1. **Editarea** story-urilor din Tree of Light
 2. **Migrarea** acestora de la seed data la Story Epic (editat și managed prin UI)
 3. **Publicarea** unei versiuni proprii a Tree of Light Epic
 
-### 1.3 Recomandare
+### 1.4 Recomandare
 **DA**, este posibil și recomandat să permitem fork-ul seeded stories cu următoarea abordare:
 1. **Eliminarea restricției de UI** care blochează fork-ul pentru seeded stories
 2. **Crearea de story crafts** prin fork pentru fiecare story din Tree of Light
@@ -28,7 +38,364 @@ Există o oportunitate de a permite fork-ul seeded stories pentru a facilita:
 
 ---
 
-## 2. Analiza Story Fork - Cum Funcționează Momentan
+## 2. Ce Se Copiază la Fork - Analiză Detaliată
+
+### 2.1 Conținut de Story (Metadata și Text)
+
+#### ✅ Story-Level Data
+Fork-ul copiază **toate** datele de story prin `StorySourceMapper.MapFromDefinition()`:
+
+| Element | Se Copiază? | Detalii |
+|---------|------------|---------|
+| **StoryType** | ✅ DA | Tipul story-ului (e.g., "interactive", "narrative") |
+| **StoryTopic** | ✅ DA | Topicul story-ului (e.g., "adventure", "science") |
+| **CoverImageUrl** | ✅ DA | Doar numele fișierului (path-ul se reconstruiește) |
+| **PriceInCredits** | ✅ DA | Prețul în credite |
+| **AuthorName** | ⚠️ NULL | Se setează NULL la fork, apoi se setează la numele user-ului curent |
+| **ClassicAuthorId** | ✅ DA | ID-ul autorului clasic (dacă există) |
+| **BaseVersion** | ✅ DA | Versiunea de bază (din definition.Version) |
+| **IsEvaluative** | ✅ DA | Flag pentru quiz evaluative |
+| **Topics** | ✅ DA | Lista de topic IDs (story topics) |
+| **AgeGroups** | ✅ DA | Lista de age group IDs |
+| **UnlockedStoryHeroes** | ✅ DA | Lista de hero IDs deblocați |
+
+**Cod Sursă**: `StorySourceMapper.cs`, linii 76-130
+
+### 2.2 Translații (Toate Limbile)
+
+#### ✅ Story Translations
+Fork-ul copiază **toate translațiile** story-ului:
+
+```csharp
+Translations = definition.Translations.Select(t => new TranslationCloneData
+{
+    LanguageCode = t.LanguageCode,          // ✅ Limba (ro-ro, en-us, hu-hu)
+    Title = t.Title,                         // ✅ Titlul în limba respectivă
+    Summary = definition.Summary             // ✅ Summary-ul (același pentru toate limbile)
+}).ToList()
+```
+
+**Exemplu pentru Tree of Light**:
+- `intro-pufpuf` are 3 translații: **ro-ro**, **en-us**, **hu-hu**
+- **TOATE** cele 3 translații se copiază în fork
+
+**Cod Sursă**: `StorySourceMapper.cs`, linii 88-95
+
+### 2.3 Tile-uri (Pagini și Quiz-uri)
+
+#### ✅ Tiles și Tile Translations
+Fork-ul copiază **toate tile-urile** cu **toate translațiile** lor:
+
+```csharp
+Tiles = definition.Tiles.OrderBy(t => t.SortOrder).Select(tile => new TileCloneData
+{
+    TileId = tile.TileId,                    // ✅ ID-ul tile-ului
+    Type = tile.Type,                        // ✅ Tipul (page, quiz, video)
+    ImageUrl = ExtractFileName(tile.ImageUrl), // ✅ Numele imaginii (fără path)
+    Translations = tile.Translations.Select(tt => new TileTranslationCloneData
+    {
+        LanguageCode = tt.LanguageCode,      // ✅ Limba
+        Caption = tt.Caption ?? string.Empty, // ✅ Caption-ul
+        Text = tt.Text ?? string.Empty,      // ✅ Textul paginii
+        Question = tt.Question ?? string.Empty, // ✅ Întrebarea quiz-ului
+        AudioUrl = ExtractFileName(tt.AudioUrl), // ✅ Numele fișierului audio
+        VideoUrl = ExtractFileName(tt.VideoUrl)  // ✅ Numele fișierului video
+    }).ToList(),
+    ...
+}).ToList()
+```
+
+**Important**:
+- ✅ **Toate tile-urile** se copiază (pages, quiz, video)
+- ✅ **Toate translațiile** fiecărui tile se copiază
+- ✅ **Caption, Text, Question** se copiază pentru fiecare limbă
+- ✅ **AudioUrl și VideoUrl** se copiază pentru fiecare limbă (sunt language-specific)
+
+**Cod Sursă**: `StorySourceMapper.cs`, linii 96-109
+
+### 2.4 Quiz-uri (Answers și Tokens)
+
+#### ✅ Answers și Answer Translations
+Fork-ul copiază **toate răspunsurile** quiz-urilor cu **toate translațiile**:
+
+```csharp
+Answers = tile.Answers.OrderBy(a => a.SortOrder).Select(answer => new AnswerCloneData
+{
+    AnswerId = answer.AnswerId,              // ✅ ID-ul răspunsului
+    IsCorrect = answer.IsCorrect,            // ✅ Flag pentru răspunsul corect
+    Translations = answer.Translations.Select(at => new AnswerTranslationCloneData
+    {
+        LanguageCode = at.LanguageCode,      // ✅ Limba
+        Text = at.Text ?? string.Empty       // ✅ Textul răspunsului
+    }).ToList(),
+    Tokens = answer.Tokens.Select(token => new TokenCloneData
+    {
+        Type = token.Type ?? string.Empty,   // ✅ Tipul token-ului (e.g., "courage")
+        Value = token.Value ?? string.Empty, // ✅ Valoarea token-ului
+        Quantity = token.Quantity            // ✅ Cantitatea
+    }).ToList()
+}).ToList()
+```
+
+**Important**:
+- ✅ **Toate răspunsurile** quiz-urilor se copiază
+- ✅ **IsCorrect flag** se păstrează
+- ✅ **Toate translațiile** fiecărui răspuns se copiază
+- ✅ **Tokens-urile** (rewards) se copiază (pentru răspunsuri corecte)
+
+**Cod Sursă**: `StorySourceMapper.cs`, linii 110-125
+
+### 2.5 Asset-uri (Images, Audio, Video)
+
+#### ✅ Asset Collection și Copy Process
+
+Fork-ul folosește `StoryAssetCopyService` pentru a **copia fizic** toate asset-urile.
+
+##### Pasul 1: Colectarea Asset-urilor (`CollectFromDefinition`)
+
+```csharp
+public List<AssetInfo> CollectFromDefinition(StoryDefinition definition)
+{
+    var results = new List<AssetInfo>();
+    
+    // ✅ Cover Image
+    if (!string.IsNullOrWhiteSpace(definition.CoverImageUrl))
+        results.Add(new AssetInfo(Path.GetFileName(definition.CoverImageUrl), AssetType.Image, null));
+    
+    foreach (var tile in definition.Tiles)
+    {
+        // ✅ Tile Images (language-agnostic)
+        if (!string.IsNullOrWhiteSpace(tile.ImageUrl))
+            results.Add(new AssetInfo(Path.GetFileName(tile.ImageUrl), AssetType.Image, null));
+        
+        foreach (var translation in tile.Translations)
+        {
+            // ✅ Audio (language-specific)
+            if (!string.IsNullOrWhiteSpace(translation.AudioUrl))
+                results.Add(new AssetInfo(Path.GetFileName(translation.AudioUrl), AssetType.Audio, translation.LanguageCode));
+            
+            // ✅ Video (language-specific)
+            if (!string.IsNullOrWhiteSpace(translation.VideoUrl))
+                results.Add(new AssetInfo(Path.GetFileName(translation.VideoUrl), AssetType.Video, translation.LanguageCode));
+        }
+    }
+    
+    return results;
+}
+```
+
+**Cod Sursă**: `StoryAssetCopyService.cs`, linii 83-114
+
+##### Pasul 2: Copierea Asset-urilor (`CopyPublishedToDraftAsync`)
+
+```csharp
+public async Task<AssetCopyResult> CopyPublishedToDraftAsync(
+    IEnumerable<AssetInfo> assets,
+    string publishedOwnerEmail,     // e.g., "seed@alchimalia.com"
+    string sourceStoryId,           // e.g., "intro-pufpuf"
+    string targetEmail,             // e.g., "john.doe@example.com"
+    string targetStoryId,           // e.g., "john-doe-s1"
+    CancellationToken ct)
+{
+    foreach (var asset in assets)
+    {
+        // Sursa: Published container
+        var sourcePath = BuildPublishedPath(asset, publishedOwnerEmail, sourceStoryId);
+        // e.g., "images/tol/stories/seed@alchimalia.com/intro-pufpuf/1.puf-puf-flying.png"
+        
+        var sourceClient = _sasService.GetBlobClient(_sasService.PublishedContainer, sourcePath);
+        
+        if (!await sourceClient.ExistsAsync(ct))
+        {
+            _logger.LogWarning("Source asset not found: {Path}", sourcePath);
+            continue; // ⚠️ Skip dacă asset-ul nu există
+        }
+        
+        // Destinația: Draft container
+        var targetPath = BuildDraftPath(asset, targetEmail, targetStoryId);
+        // e.g., "drafts/john.doe@example.com/john-doe-s1/1.puf-puf-flying.png"
+        
+        var copyResult = await CopyAssetWithPollingAsync(...);
+        
+        if (copyResult.HasError)
+        {
+            return copyResult; // ❌ Oprește dacă un asset eșuează
+        }
+    }
+    
+    return AssetCopyResult.Success();
+}
+```
+
+**Cod Sursă**: `StoryAssetCopyService.cs`, linii 169-220
+
+##### Tipuri de Asset-uri Copiate
+
+| Asset Type | Language-Specific? | Locație Sursă (Published) | Locație Destinație (Draft) |
+|------------|-------------------|---------------------------|---------------------------|
+| **Cover Image** | ❌ NU | `images/tol/stories/{owner}/{storyId}/0.Cover.png` | `drafts/{user-email}/{newStoryId}/0.Cover.png` |
+| **Tile Images** | ❌ NU | `images/tol/stories/{owner}/{storyId}/1.image.png` | `drafts/{user-email}/{newStoryId}/1.image.png` |
+| **Audio** | ✅ DA | `audio/{owner}/{storyId}/{lang}/audio.wav` | `drafts/{user-email}/{newStoryId}/{lang}/audio.wav` |
+| **Video** | ✅ DA | `video/{owner}/{storyId}/{lang}/video.mp4` | `drafts/{user-email}/{newStoryId}/{lang}/video.mp4` |
+
+**Important**:
+- ✅ **Images** sunt language-agnostic (aceeași imagine pentru toate limbile)
+- ✅ **Audio** și **Video** sunt language-specific (fiecare limbă are propriul fișier)
+
+##### Mecanismul de Copiere
+
+```csharp
+private async Task<AssetCopyResult> CopyAssetWithPollingAsync(...)
+{
+    // 1. Generează SAS token pentru sursa (read-only, 10 minute)
+    var sourceSas = await _sasService.GetReadSasAsync(sourceContainer, sourceBlobPath, TimeSpan.FromMinutes(10), ct);
+    
+    // 2. Inițiază copierea asincronă (Azure Blob Copy)
+    var copyOperation = await targetClient.StartCopyFromUriAsync(sourceSas, cancellationToken: ct);
+    
+    // 3. Polling pentru status (max 30 secunde)
+    var pollUntil = DateTime.UtcNow.AddSeconds(30);
+    while (true)
+    {
+        var props = await targetClient.GetPropertiesAsync(cancellationToken: ct);
+        var copyStatus = props.Value.CopyStatus;
+        
+        if (copyStatus == CopyStatus.Success)
+            break; // ✅ Succes
+        
+        if (copyStatus == CopyStatus.Failed || copyStatus == CopyStatus.Aborted)
+            return AssetCopyResult.CopyFailed(...); // ❌ Eșuat
+        
+        if (DateTime.UtcNow > pollUntil)
+            return AssetCopyResult.CopyTimeout(...); // ⏱️ Timeout
+        
+        await Task.Delay(250, ct); // ⏳ Așteaptă 250ms
+    }
+    
+    return AssetCopyResult.Success();
+}
+```
+
+**Cod Sursă**: `StoryAssetCopyService.cs`, linii 222-286
+
+**Caracteristici**:
+- ✅ **Copy asincron** (server-side copy în Azure Blob Storage)
+- ✅ **Polling cu timeout** (30 secunde)
+- ✅ **Retry logic** la nivel de service
+- ⚠️ **Skip pe asset lipsă** (nu oprește job-ul întreg)
+- ❌ **Fail pe primul error** (după skip-urile de asset lipsă)
+
+### 2.6 Fluxul Complet de Fork pentru Seeded Story
+
+#### Exemplu: Fork `intro-pufpuf` (Seeded Story din Tree of Light)
+
+##### Date Inițiale:
+- **StoryId**: `intro-pufpuf`
+- **Owner**: `seed@alchimalia.com` (CreatedBy userId)
+- **Translații**: ro-ro, en-us, hu-hu
+- **Tiles**: 5 tiles (4 pages + 1 quiz)
+- **Assets**: 
+  - 1 cover image: `0.Cover.png`
+  - 4 tile images: `1.puf-puf-flying.png`, `2.puf-puf-hurt.png`, `3.puf-puf-crystal.png`, `puf-puf-home-planet.png`
+  - Audio/Video (dacă există) pentru fiecare limbă
+
+##### Procesul de Fork:
+
+**1. Backend: Crearea Job-ului**
+```json
+POST /api/stories/intro-pufpuf/fork
+{
+  "copyAssets": true
+}
+
+Response:
+{
+  "jobId": "guid-1234-5678",
+  "storyId": "john-doe-s1",
+  "originalStoryId": "intro-pufpuf",
+  "copyAssets": true,
+  "status": "Queued"
+}
+```
+
+**2. Job Processing: Crearea StoryCraft**
+- ✅ Încarcă `StoryDefinition` pentru `intro-pufpuf` (cu toate includes)
+- ✅ Mapează la `StoryCloneData`:
+  - 3 translații (ro-ro, en-us, hu-hu) cu title și summary
+  - 5 tiles cu toate translațiile (caption, text, question)
+  - Quiz answers cu toate translațiile și tokens
+  - Topics, age groups, unlocked heroes
+- ✅ Creează `StoryCraft` nou:
+  - `StoryId` = `john-doe-s1`
+  - `OwnerUserId` = current user
+  - `Status` = Draft
+  - `AuthorName` = current user name (NU "Alchimalia Seed")
+- ✅ Salvează în DB
+
+**3. Asset Copy Job: Copierea Fișierelor**
+- ✅ Colectează toate asset-urile:
+  - 1 cover image
+  - 4 tile images
+  - Audio/Video pentru ro-ro, en-us, hu-hu (dacă există)
+- ✅ Pentru fiecare asset:
+  - Sursa: `images/tol/stories/seed@alchimalia.com/intro-pufpuf/...`
+  - Destinație: `drafts/john.doe@example.com/john-doe-s1/...`
+  - Copiază prin Azure Blob Copy (server-side)
+  - Polling pentru status (30 secunde timeout)
+
+**4. Rezultat Final:**
+- ✅ `StoryCraft` în DB cu `StoryId` = `john-doe-s1`, owner = current user
+- ✅ **3 translații** complete (ro-ro, en-us, hu-hu)
+- ✅ **5 tiles** complete cu toate translațiile
+- ✅ **Quiz-uri** complete cu answers, translations, tokens
+- ✅ **Toate asset-urile** copiate în draft storage
+- ✅ User-ul poate edita story-ul în Story Editor
+- ✅ User-ul poate publica story-ul → `StoryDefinition` nou
+
+### 2.7 Rezumat: Ce SE Copiază vs Ce NU Se Copiază
+
+#### ✅ CE SE COPIAZĂ (100% Complete)
+
+| Categorie | Detalii |
+|-----------|---------|
+| **Story Metadata** | StoryType, StoryTopic, CoverImageUrl, PriceInCredits, ClassicAuthorId, BaseVersion, IsEvaluative |
+| **Translații Story** | **TOATE** translațiile (ro-ro, en-us, hu-hu, etc.) cu Title și Summary |
+| **Tiles** | **TOATE** tile-urile (pages, quiz, video) cu TileId, Type, ImageUrl, SortOrder |
+| **Tile Translations** | **TOATE** translațiile tile-urilor cu Caption, Text, Question, AudioUrl, VideoUrl |
+| **Quiz Answers** | **TOATE** răspunsurile cu AnswerId, IsCorrect, SortOrder |
+| **Answer Translations** | **TOATE** translațiile răspunsurilor cu Text |
+| **Tokens** | **TOATE** tokens-urile (rewards) cu Type, Value, Quantity |
+| **Topics** | **TOATE** topic IDs |
+| **Age Groups** | **TOATE** age group IDs |
+| **Unlocked Heroes** | **TOATE** hero IDs deblocați |
+| **Images** | **TOATE** imaginile (cover + tile images) - copiate fizic din published la draft storage |
+| **Audio** | **TOATE** fișierele audio pentru **TOATE** limbile - copiate fizic |
+| **Video** | **TOATE** fișierele video pentru **TOATE** limbile - copiate fizic |
+
+#### ❌ CE NU SE COPIAZĂ / SE RESETEAZĂ
+
+| Element | Comportament |
+|---------|-------------|
+| **AuthorName** | Se setează NULL, apoi se setează la numele user-ului curent (NU se copiază "Alchimalia Seed") |
+| **OwnerUserId** | Se setează la current user (NU se copiază seed userId) |
+| **CreatedBy** | Va fi setat la current user când se publică (NU se copiază seed userId) |
+| **Status** | Se setează la `Draft` (NU se copiază `Published`) |
+| **Version** | Se resetează la 0 în craft (dar se păstrează în `BaseVersion`) |
+| **CreatedAt** | Se setează la `DateTime.UtcNow` |
+| **UpdatedAt** | Se setează la `DateTime.UtcNow` |
+
+#### ⚠️ COMPORTAMENT SPECIAL
+
+| Situație | Comportament |
+|----------|-------------|
+| **Asset lipsă** | Se skip-ează (se loghează warning), job-ul continuă |
+| **Asset copy eșuat** | Job-ul se oprește cu error (după primul eșec) |
+| **Craft există deja** | Se refolosește craft-ul existent (nu se creează unul nou) |
+| **Title în translații** | Pentru Copy se adaugă prefix "Copy of" (pentru Fork NU se adaugă) |
+
+---
+
+## 3. Analiza Story Fork - Cum Funcționează Momentan
 
 ### 2.1 Backend - Fork Story Endpoint
 
@@ -141,7 +508,7 @@ private async checkOwnershipAndStatus(): Promise<void> {
 
 ---
 
-## 3. Tree of Light - Structura și Story-urile Seeded
+## 4. Tree of Light - Structura și Story-urile Seeded
 
 ### 3.1 Arhitectura Tree of Light
 
@@ -227,7 +594,7 @@ private async checkOwnershipAndStatus(): Promise<void> {
 
 ---
 
-## 4. Posibilitatea de Fork pentru Seeded Stories
+## 5. Posibilitatea de Fork pentru Seeded Stories
 
 ### 4.1 Analiza Restricțiilor
 
@@ -290,7 +657,7 @@ Pentru a verifica că fork-ul funcționează:
 
 ---
 
-## 5. Migrarea Tree of Light la Story Epic
+## 6. Migrarea Tree of Light la Story Epic
 
 ### 5.1 Motivația Migrării
 
@@ -410,7 +777,7 @@ Pentru a verifica că fork-ul funcționează:
 
 ---
 
-## 6. Provocări și Soluții
+## 7. Provocări și Soluții
 
 ### 6.1 Provocare 1: Assets-urile Seeded
 
@@ -462,15 +829,25 @@ Pentru a verifica că fork-ul funcționează:
 
 ---
 
-## 7. Concluzie și Recomandări
+## 8. Concluzie și Recomandări
 
-### 7.1 Răspuns la Întrebări
+### 8.1 Răspuns la Întrebări
 
 #### 1. **Cum se face momentan Story Fork?**
 - Fork este disponibil pentru orice StoryDefinition publicat
 - Creează un StoryCraft nou (draft) cu owner-ul = current user
-- Assets-urile sunt copiate automat
+- ✅ **Copiază 100% complet**: toate translațiile, quiz-urile, și assets-urile (images, audio, video)
+- Assets-urile sunt copiate automat prin Azure Blob Copy (server-side)
 - ❌ **Blocat la nivel de UI pentru seeded stories** (dar funcționează la nivel de backend)
+
+#### 1a. **Se copiază toate translațiile, quiz-urile, audio, video, images?**
+- ✅ **DA, 100% complet!** Vezi secțiunea 2 pentru detalii complete
+- **Translații**: TOATE limbile (ro-ro, en-us, hu-hu) cu titles, summaries, captions, text, questions
+- **Quiz-uri**: TOATE răspunsurile cu translations, IsCorrect flags, tokens (rewards)
+- **Images**: TOATE (cover + tile images) - copiate fizic din published la draft storage
+- **Audio**: TOATE fișierele pentru TOATE limbile - copiate fizic
+- **Video**: TOATE fișierele pentru TOATE limbile - copiate fizic
+- **Metadata**: Topics, age groups, unlocked heroes, IsEvaluative, etc.
 
 #### 2. **Putem face Story Fork pentru Tree of Light stories?**
 - ✅ **DA**, backend-ul permite fork pentru seeded stories
@@ -490,7 +867,7 @@ Pentru a verifica că fork-ul funcționează:
   4. Adaugă regiuni, story nodes, și unlock rules
   5. Publică Story Epic
 
-### 7.2 Recomandări Prioritizate
+### 8.2 Recomandări Prioritizate
 
 #### Prioritate 1: Permite Fork pentru Seeded Stories
 - **Task**: Elimină restricția `!isSeedStory` din `story-controls.component.html`
@@ -522,7 +899,7 @@ Pentru a verifica că fork-ul funcționează:
 - **Effort**: 2-4 ore
 - **Beneficiu**: Elimină dependența de seed data
 
-### 7.3 Avantaje Finale
+### 8.3 Avantaje Finale
 
 1. **Flexibilitate**: Poți edita story-urile și epic-ul prin UI
 2. **Multiple Versions**: Poți crea versiuni noi ale Tree of Light
@@ -530,7 +907,7 @@ Pentru a verifica că fork-ul funcționează:
 4. **Maintenance**: Mai ușor de întreținut (fără seed data hard-coded)
 5. **Evolution**: Poți evolua Tree of Light fără rebuild și redeploy
 
-### 7.4 Risc Minim
+### 8.4 Risc Minim
 
 - **Backend-ul deja suportă fork** pentru published stories
 - **Nu sunt necesare modificări de backend** (doar eliminarea restricției UI)
@@ -539,9 +916,9 @@ Pentru a verifica că fork-ul funcționează:
 
 ---
 
-## 8. Anexe
+## 9. Anexe
 
-### 8.1 Cod de Modificat (Frontend)
+### 9.1 Cod de Modificat (Frontend)
 
 **Fișier**: `XooCreator/xoo-creator/src/app/story/story-reading/components/story-controls/story-controls.component.html`
 
@@ -571,7 +948,7 @@ Pentru a verifica că fork-ul funcționează:
 
 **Motivație**: Permite fork-ul pentru toate story-urile published, inclusiv cele seeded.
 
-### 8.2 Story-uri de Forked
+### 9.2 Story-uri de Forked
 
 | Original StoryId | Forked StoryId (Example) | Region | Description |
 |------------------|--------------------------|--------|-------------|
@@ -584,13 +961,15 @@ Pentru a verifica că fork-ul funcționează:
 | `sylvaria-s1` | `john-doe-sylvaria-s1-s1` | sylvaria | First story in Sylvaria |
 | `crystalia-s1` | `john-doe-crystalia-s1-s1` | crystalia | First story in Crystalia |
 
-### 8.3 Referințe Codul Sursă
+### 9.3 Referințe Codul Sursă
 
 #### Backend:
 - **Fork Endpoint**: `XooCreator.BA/XooCreator.BA/Features/Story-Editor/Endpoints/ForkStoryEndpoint.cs`
 - **Fork Job Processing**: `XooCreator.BA/XooCreator.BA/Features/Story-Editor/Endpoints/ForkStoryEndpoint.JobProcessing.cs`
 - **Story Copy Service**: `XooCreator.BA/XooCreator.BA/Features/Story-Editor/Services/StoryCopyService.cs`
-- **Story Cloner**: `XooCreator.BA/XooCreator.BA/Features/Story-Editor/Services/Cloning/StoryCloner.cs`
+- **Story Asset Copy Service**: `XooCreator.BA/XooCreator.BA/Features/Story-Editor/Services/StoryAssetCopyService.cs` (copiere images, audio, video)
+- **Story Source Mapper**: `XooCreator.BA/XooCreator.BA/Features/Story-Editor/Services/Cloning/StorySourceMapper.cs` (mapare translations, tiles, quiz)
+- **Story Cloner**: `XooCreator.BA/XooCreator.BA/Features/Story-Editor/Services/Cloning/StoryCloner.cs` (creare StoryCraft din clone data)
 - **Seed Stories**: `XooCreator.BA/XooCreator.BA/Features/Story-Editor/Repositories/StoriesRepository.cs` (linia 215-658)
 
 #### Frontend:
@@ -609,7 +988,7 @@ Pentru a verifica că fork-ul funcționează:
 - **Seeded Stories**: `XooCreator.BA/XooCreator.BA/Data/SeedData/Stories/seed@alchimalia.com/i18n/{locale}/*.json`
 - **Analysis Doc**: `XooCreator/xoo-creator/002.Documentation/Story-Epic/02_TREE_OF_LIGHT_ANALYSIS.md`
 
-### 8.4 Documentație Relevantă
+### 9.4 Documentație Relevantă
 
 - **Fork Story Bug Analysis**: `XooCreator.BA/XooCreator.BA/Documentation/FORK_STORY_BUG_ANALYSIS.md`
 - **Fork Author Issue**: `XooCreator/xoo-creator/002.Documentation/StoryEditorLatestVersion/10_FORK_AUTHOR_ISSUE.md`
