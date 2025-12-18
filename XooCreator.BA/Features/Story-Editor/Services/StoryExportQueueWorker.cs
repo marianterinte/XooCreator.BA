@@ -36,10 +36,19 @@ public class StoryExportQueueWorker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await _queueClient.CreateIfNotExistsAsync(cancellationToken: stoppingToken);
+        _logger.LogInformation("StoryExportQueueWorker initializing... QueueName={QueueName}", _queueClient.Name);
 
-        _logger.LogInformation("StoryExportQueueWorker started. QueueName={QueueName} QueueUri={QueueUri}",
-            _queueClient.Name, _queueClient.Uri);
+        try
+        {
+            await _queueClient.CreateIfNotExistsAsync(cancellationToken: stoppingToken);
+            _logger.LogInformation("StoryExportQueueWorker started. QueueName={QueueName} QueueUri={QueueUri}",
+                _queueClient.Name, _queueClient.Uri);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "StoryExportQueueWorker failed to create/connect to queue. QueueName={QueueName}. Retrying in 30 seconds.", _queueClient.Name);
+            await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+        }
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -161,16 +170,31 @@ public class StoryExportQueueWorker : BackgroundService
                     }
                 } // Scope disposed here
             }
-            catch (TaskCanceledException)
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {
-                // shutting down
+                _logger.LogInformation("StoryExportQueueWorker stopping due to cancellation request.");
+                break;
+            }
+            catch (TaskCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                _logger.LogInformation("StoryExportQueueWorker stopping due to task cancellation.");
+                break;
+            }
+            catch (Azure.RequestFailedException azureEx)
+            {
+                _logger.LogError(azureEx, "Azure Storage error in StoryExportQueueWorker. Status={Status} ErrorCode={ErrorCode}. Retrying in 10 seconds.",
+                    azureEx.Status, azureEx.ErrorCode);
+                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected error in StoryExportQueueWorker loop.");
-                await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+                _logger.LogError(ex, "Unexpected error in StoryExportQueueWorker loop. ExceptionType={ExceptionType}. Retrying in 10 seconds.",
+                    ex.GetType().FullName);
+                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
             }
         }
+
+        _logger.LogInformation("StoryExportQueueWorker has stopped. QueueName={QueueName}", _queueClient.Name);
     }
 
     private async Task<ExportResult> ProcessDraftExportAsync(

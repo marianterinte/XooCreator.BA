@@ -33,16 +33,25 @@ public class StoryPublishQueueWorker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await _queueClient.CreateIfNotExistsAsync(cancellationToken: stoppingToken);
+        _logger.LogInformation("StoryPublishQueueWorker initializing... QueueName={QueueName}", _queueClient.Name);
 
-        _logger.LogInformation("StoryPublishQueueWorker started. QueueName={QueueName} QueueUri={QueueUri}", 
-            _queueClient.Name, _queueClient.Uri);
+        try
+        {
+            await _queueClient.CreateIfNotExistsAsync(cancellationToken: stoppingToken);
+            _logger.LogInformation("StoryPublishQueueWorker started. QueueName={QueueName} QueueUri={QueueUri}", 
+                _queueClient.Name, _queueClient.Uri);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "StoryPublishQueueWorker failed to create/connect to queue. QueueName={QueueName}. Retrying in 30 seconds.", _queueClient.Name);
+            await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+        }
 
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
-                var messages = await _queueClient.ReceiveMessagesAsync(maxMessages: 1, visibilityTimeout: TimeSpan.FromSeconds(30), cancellationToken: stoppingToken);
+                var messages = await _queueClient.ReceiveMessagesAsync(maxMessages: 1, visibilityTimeout: TimeSpan.FromSeconds(60), cancellationToken: stoppingToken);
                 if (messages?.Value == null || messages.Value.Length == 0)
                 {
                     // Log only every 10th check to avoid spam (every ~30 seconds)
@@ -137,8 +146,18 @@ public class StoryPublishQueueWorker : BackgroundService
                             _logger.LogInformation("Processing StoryPublishJob: jobId={JobId} storyId={StoryId} draftVersion={DraftVersion} forceFull={ForceFull}",
                                 job.Id, job.StoryId, job.DraftVersion, job.ForceFull);
 
-                            var langTag = job.LangTag.ToLowerInvariant();
-                            await publisher.UpsertFromCraftAsync(craft, job.RequestedByEmail, langTag, job.ForceFull, stoppingToken);
+                            var langTag = job.LangTag?.ToLowerInvariant() ?? "ro-ro";
+
+                            try
+                            {
+                                await publisher.UpsertFromCraftAsync(craft, job.RequestedByEmail, langTag, job.ForceFull, stoppingToken);
+                                _logger.LogInformation("UpsertFromCraftAsync completed successfully: jobId={JobId} storyId={StoryId}", job.Id, job.StoryId);
+                            }
+                            catch (Exception publishEx)
+                            {
+                                _logger.LogError(publishEx, "UpsertFromCraftAsync failed: jobId={JobId} storyId={StoryId}", job.Id, job.StoryId);
+                                throw;
+                            }
 
                             job.Status = StoryPublishJobStatus.Completed;
                             job.CompletedAtUtc = DateTime.UtcNow;
@@ -146,7 +165,6 @@ public class StoryPublishQueueWorker : BackgroundService
                             
                             await db.SaveChangesAsync(stoppingToken);
 
-                            // Cleanup: Delete StoryCraft and draft assets after successful publish
                             try
                             {
                                 _logger.LogInformation("Cleaning up draft after successful publish: storyId={StoryId}", job.StoryId);
@@ -156,7 +174,6 @@ public class StoryPublishQueueWorker : BackgroundService
                             }
                             catch (Exception cleanupEx)
                             {
-                                // Log cleanup errors but don't fail the job - publish was successful
                                 _logger.LogWarning(cleanupEx, "Failed to cleanup draft after publish: storyId={StoryId}", job.StoryId);
                             }
                         }
@@ -179,16 +196,31 @@ public class StoryPublishQueueWorker : BackgroundService
                     }
                 } // Scope disposed here - DbContext and all scoped services are cleaned up
             }
-            catch (TaskCanceledException)
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {
-                // shutting down
+                _logger.LogInformation("StoryPublishQueueWorker stopping due to cancellation request.");
+                break;
+            }
+            catch (TaskCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                _logger.LogInformation("StoryPublishQueueWorker stopping due to task cancellation.");
+                break;
+            }
+            catch (Azure.RequestFailedException azureEx)
+            {
+                _logger.LogError(azureEx, "Azure Storage error in StoryPublishQueueWorker. Status={Status} ErrorCode={ErrorCode}. Retrying in 10 seconds.",
+                    azureEx.Status, azureEx.ErrorCode);
+                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected error in StoryPublishQueueWorker loop.");
-                await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+                _logger.LogError(ex, "Unexpected error in StoryPublishQueueWorker loop. ExceptionType={ExceptionType}. Retrying in 10 seconds.",
+                    ex.GetType().FullName);
+                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
             }
         }
+
+        _logger.LogInformation("StoryPublishQueueWorker has stopped. QueueName={QueueName}", _queueClient.Name);
     }
 
     // Note: QueueClient from Azure.Storage.Queues v12+ is stateless and doesn't implement IDisposable.

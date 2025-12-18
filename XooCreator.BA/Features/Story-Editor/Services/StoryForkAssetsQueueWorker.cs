@@ -37,17 +37,26 @@ public class StoryForkAssetsQueueWorker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await _queueClient.CreateIfNotExistsAsync(cancellationToken: stoppingToken);
+        _logger.LogInformation("StoryForkAssetsQueueWorker initializing... QueueName={QueueName}", _queueClient.Name);
 
-        _logger.LogInformation("StoryForkAssetsQueueWorker started. QueueName={QueueName} QueueUri={QueueUri}",
-            _queueClient.Name, _queueClient.Uri);
+        try
+        {
+            await _queueClient.CreateIfNotExistsAsync(cancellationToken: stoppingToken);
+            _logger.LogInformation("StoryForkAssetsQueueWorker started. QueueName={QueueName} QueueUri={QueueUri}",
+                _queueClient.Name, _queueClient.Uri);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "StoryForkAssetsQueueWorker failed to create/connect to queue. QueueName={QueueName}. Retrying in 30 seconds.", _queueClient.Name);
+            await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+        }
 
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
                 var messages = await _queueClient.ReceiveMessagesAsync(1, TimeSpan.FromSeconds(60), stoppingToken);
-                if (messages.Value == null || messages.Value.Length == 0)
+                if (messages?.Value == null || messages.Value.Length == 0)
                 {
                     await Task.Delay(TimeSpan.FromSeconds(3), stoppingToken);
                     continue;
@@ -80,42 +89,43 @@ public class StoryForkAssetsQueueWorker : BackgroundService
                     continue;
                 }
 
-                using var scope = _services.CreateScope();
-                var db = scope.ServiceProvider.GetRequiredService<XooDbContext>();
-                var endpoint = scope.ServiceProvider.GetRequiredService<ForkStoryEndpoint>();
-
-                var job = await db.StoryForkAssetJobs.FirstOrDefaultAsync(j => j.Id == payload.JobId, stoppingToken);
-                if (job == null || job.Status is StoryForkAssetJobStatus.Completed or StoryForkAssetJobStatus.Failed)
+                using (var scope = _services.CreateScope())
                 {
-                    await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
-                    continue;
-                }
+                    var db = scope.ServiceProvider.GetRequiredService<XooDbContext>();
+                    var endpoint = scope.ServiceProvider.GetRequiredService<ForkStoryEndpoint>();
 
-                job.DequeueCount += 1;
-                job.StartedAtUtc ??= DateTime.UtcNow;
-                job.Status = StoryForkAssetJobStatus.Running;
-                await db.SaveChangesAsync(stoppingToken);
-
-                try
-                {
-                    var result = await endpoint.ProcessForkAssetJobAsync(job, stoppingToken);
-
-                    job.AttemptedAssets = result.AttemptedAssets;
-                    job.CopiedAssets = result.CopiedAssets;
-                    job.WarningSummary = string.Join(Environment.NewLine, result.Warnings);
-                    job.ErrorMessage = string.Join(Environment.NewLine, result.Errors);
-
-                    if (result.Success)
+                    var job = await db.StoryForkAssetJobs.FirstOrDefaultAsync(j => j.Id == payload.JobId, stoppingToken);
+                    if (job == null || job.Status is StoryForkAssetJobStatus.Completed or StoryForkAssetJobStatus.Failed)
                     {
-                        job.Status = StoryForkAssetJobStatus.Completed;
-                        job.CompletedAtUtc = DateTime.UtcNow;
-                        await UpdateParentForkJobStatusAsync(db, job, stoppingToken);
-                        await db.SaveChangesAsync(stoppingToken);
                         await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
+                        continue;
                     }
-                    else
+
+                    job.DequeueCount += 1;
+                    job.StartedAtUtc ??= DateTime.UtcNow;
+                    job.Status = StoryForkAssetJobStatus.Running;
+                    await db.SaveChangesAsync(stoppingToken);
+
+                    try
                     {
-                        if (job.DequeueCount >= 3)
+                        _logger.LogInformation("Processing StoryForkAssetJob: jobId={JobId}", job.Id);
+                        var result = await endpoint.ProcessForkAssetJobAsync(job, stoppingToken);
+                        _logger.LogInformation("ProcessForkAssetJobAsync completed: jobId={JobId} success={Success} copied={CopiedAssets}", job.Id, result.Success, result.CopiedAssets);
+
+                        job.AttemptedAssets = result.AttemptedAssets;
+                        job.CopiedAssets = result.CopiedAssets;
+                        job.WarningSummary = string.Join(Environment.NewLine, result.Warnings ?? Array.Empty<string>());
+                        job.ErrorMessage = string.Join(Environment.NewLine, result.Errors ?? Array.Empty<string>());
+
+                        if (result.Success)
+                        {
+                            job.Status = StoryForkAssetJobStatus.Completed;
+                            job.CompletedAtUtc = DateTime.UtcNow;
+                            await UpdateParentForkJobStatusAsync(db, job, stoppingToken);
+                            await db.SaveChangesAsync(stoppingToken);
+                            await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
+                        }
+                        else if (job.DequeueCount >= 3)
                         {
                             job.Status = StoryForkAssetJobStatus.Failed;
                             job.CompletedAtUtc = DateTime.UtcNow;
@@ -129,37 +139,52 @@ public class StoryForkAssetsQueueWorker : BackgroundService
                             await db.SaveChangesAsync(stoppingToken);
                         }
                     }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Failed to process fork asset job: jobId={JobId}", job.Id);
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to process fork asset job: jobId={JobId}", job.Id);
 
-                    if (job.DequeueCount >= 3)
-                    {
-                        job.Status = StoryForkAssetJobStatus.Failed;
-                        job.ErrorMessage = ex.Message;
-                        job.CompletedAtUtc = DateTime.UtcNow;
-                        await UpdateParentForkJobStatusAsync(db, job, stoppingToken);
-                        await db.SaveChangesAsync(stoppingToken);
-                        await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
-                    }
-                    else
-                    {
-                        await UpdateParentForkJobStatusAsync(db, job, stoppingToken);
-                        await db.SaveChangesAsync(stoppingToken);
+                        if (job.DequeueCount >= 3)
+                        {
+                            job.Status = StoryForkAssetJobStatus.Failed;
+                            job.ErrorMessage = ex.Message;
+                            job.CompletedAtUtc = DateTime.UtcNow;
+                            await UpdateParentForkJobStatusAsync(db, job, stoppingToken);
+                            await db.SaveChangesAsync(stoppingToken);
+                            await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
+                        }
+                        else
+                        {
+                            await UpdateParentForkJobStatusAsync(db, job, stoppingToken);
+                            await db.SaveChangesAsync(stoppingToken);
+                        }
                     }
                 }
             }
-            catch (TaskCanceledException)
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {
-                // shutting down
+                _logger.LogInformation("StoryForkAssetsQueueWorker stopping due to cancellation request.");
+                break;
+            }
+            catch (TaskCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                _logger.LogInformation("StoryForkAssetsQueueWorker stopping due to task cancellation.");
+                break;
+            }
+            catch (Azure.RequestFailedException azureEx)
+            {
+                _logger.LogError(azureEx, "Azure Storage error in StoryForkAssetsQueueWorker. Status={Status} ErrorCode={ErrorCode}. Retrying in 10 seconds.",
+                    azureEx.Status, azureEx.ErrorCode);
+                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected error in StoryForkAssetsQueueWorker loop.");
-                await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+                _logger.LogError(ex, "Unexpected error in StoryForkAssetsQueueWorker loop. ExceptionType={ExceptionType}. Retrying in 10 seconds.",
+                    ex.GetType().FullName);
+                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
             }
         }
+
+        _logger.LogInformation("StoryForkAssetsQueueWorker has stopped. QueueName={QueueName}", _queueClient.Name);
     }
 
     private sealed record StoryForkAssetsQueuePayload(Guid JobId, string TargetStoryId);

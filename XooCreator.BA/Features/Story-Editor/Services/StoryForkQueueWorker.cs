@@ -37,17 +37,26 @@ public class StoryForkQueueWorker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await _queueClient.CreateIfNotExistsAsync(cancellationToken: stoppingToken);
+        _logger.LogInformation("StoryForkQueueWorker initializing... QueueName={QueueName}", _queueClient.Name);
 
-        _logger.LogInformation("StoryForkQueueWorker started. QueueName={QueueName} QueueUri={QueueUri}",
-            _queueClient.Name, _queueClient.Uri);
+        try
+        {
+            await _queueClient.CreateIfNotExistsAsync(cancellationToken: stoppingToken);
+            _logger.LogInformation("StoryForkQueueWorker started. QueueName={QueueName} QueueUri={QueueUri}",
+                _queueClient.Name, _queueClient.Uri);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "StoryForkQueueWorker failed to create/connect to queue. QueueName={QueueName}. Retrying in 30 seconds.", _queueClient.Name);
+            await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+        }
 
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
                 var messages = await _queueClient.ReceiveMessagesAsync(1, TimeSpan.FromSeconds(60), stoppingToken);
-                if (messages.Value == null || messages.Value.Length == 0)
+                if (messages?.Value == null || messages.Value.Length == 0)
                 {
                     await Task.Delay(TimeSpan.FromSeconds(3), stoppingToken);
                     continue;
@@ -80,43 +89,44 @@ public class StoryForkQueueWorker : BackgroundService
                     continue;
                 }
 
-                using var scope = _services.CreateScope();
-                var db = scope.ServiceProvider.GetRequiredService<XooDbContext>();
-                var endpoint = scope.ServiceProvider.GetRequiredService<ForkStoryEndpoint>();
-
-                var job = await db.StoryForkJobs.FirstOrDefaultAsync(j => j.Id == payload.JobId, stoppingToken);
-                if (job == null || job.Status is StoryForkJobStatus.Completed or StoryForkJobStatus.Failed)
+                using (var scope = _services.CreateScope())
                 {
-                    await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
-                    continue;
-                }
+                    var db = scope.ServiceProvider.GetRequiredService<XooDbContext>();
+                    var endpoint = scope.ServiceProvider.GetRequiredService<ForkStoryEndpoint>();
 
-                job.DequeueCount += 1;
-                job.StartedAtUtc ??= DateTime.UtcNow;
-                job.Status = StoryForkJobStatus.Running;
-                await db.SaveChangesAsync(stoppingToken);
-
-                try
-                {
-                    var result = await endpoint.ProcessForkJobAsync(job, stoppingToken);
-
-                    job.WarningSummary = string.Join(Environment.NewLine, result.Warnings);
-                    job.ErrorMessage = string.Join(Environment.NewLine, result.Errors);
-                    job.AssetJobId = result.AssetJobId;
-                    job.AssetJobStatus = result.AssetJobStatus;
-                    job.SourceTiles = result.SourceTiles;
-                    job.SourceTranslations = result.SourceTranslations;
-
-                    if (result.Success)
+                    var job = await db.StoryForkJobs.FirstOrDefaultAsync(j => j.Id == payload.JobId, stoppingToken);
+                    if (job == null || job.Status is StoryForkJobStatus.Completed or StoryForkJobStatus.Failed)
                     {
-                        job.Status = StoryForkJobStatus.Completed;
-                        job.CompletedAtUtc = DateTime.UtcNow;
-                        await db.SaveChangesAsync(stoppingToken);
                         await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
+                        continue;
                     }
-                    else
+
+                    job.DequeueCount += 1;
+                    job.StartedAtUtc ??= DateTime.UtcNow;
+                    job.Status = StoryForkJobStatus.Running;
+                    await db.SaveChangesAsync(stoppingToken);
+
+                    try
                     {
-                        if (job.DequeueCount >= 3)
+                        _logger.LogInformation("Processing StoryForkJob: jobId={JobId} targetStoryId={TargetStoryId}", job.Id, job.TargetStoryId);
+                        var result = await endpoint.ProcessForkJobAsync(job, stoppingToken);
+                        _logger.LogInformation("ProcessForkJobAsync completed: jobId={JobId} success={Success}", job.Id, result.Success);
+
+                        job.WarningSummary = string.Join(Environment.NewLine, result.Warnings ?? Array.Empty<string>());
+                        job.ErrorMessage = string.Join(Environment.NewLine, result.Errors ?? Array.Empty<string>());
+                        job.AssetJobId = result.AssetJobId;
+                        job.AssetJobStatus = result.AssetJobStatus;
+                        job.SourceTiles = result.SourceTiles;
+                        job.SourceTranslations = result.SourceTranslations;
+
+                        if (result.Success)
+                        {
+                            job.Status = StoryForkJobStatus.Completed;
+                            job.CompletedAtUtc = DateTime.UtcNow;
+                            await db.SaveChangesAsync(stoppingToken);
+                            await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
+                        }
+                        else if (job.DequeueCount >= 3)
                         {
                             job.Status = StoryForkJobStatus.Failed;
                             job.CompletedAtUtc = DateTime.UtcNow;
@@ -128,35 +138,50 @@ public class StoryForkQueueWorker : BackgroundService
                             await db.SaveChangesAsync(stoppingToken);
                         }
                     }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Failed to process fork job: jobId={JobId}", job.Id);
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to process fork job: jobId={JobId}", job.Id);
 
-                    if (job.DequeueCount >= 3)
-                    {
-                        job.Status = StoryForkJobStatus.Failed;
-                        job.ErrorMessage = ex.Message;
-                        job.CompletedAtUtc = DateTime.UtcNow;
-                        await db.SaveChangesAsync(stoppingToken);
-                        await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
-                    }
-                    else
-                    {
-                        await db.SaveChangesAsync(stoppingToken);
+                        if (job.DequeueCount >= 3)
+                        {
+                            job.Status = StoryForkJobStatus.Failed;
+                            job.ErrorMessage = ex.Message;
+                            job.CompletedAtUtc = DateTime.UtcNow;
+                            await db.SaveChangesAsync(stoppingToken);
+                            await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
+                        }
+                        else
+                        {
+                            await db.SaveChangesAsync(stoppingToken);
+                        }
                     }
                 }
             }
-            catch (TaskCanceledException)
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {
-                // shutting down
+                _logger.LogInformation("StoryForkQueueWorker stopping due to cancellation request.");
+                break;
+            }
+            catch (TaskCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                _logger.LogInformation("StoryForkQueueWorker stopping due to task cancellation.");
+                break;
+            }
+            catch (Azure.RequestFailedException azureEx)
+            {
+                _logger.LogError(azureEx, "Azure Storage error in StoryForkQueueWorker. Status={Status} ErrorCode={ErrorCode}. Retrying in 10 seconds.",
+                    azureEx.Status, azureEx.ErrorCode);
+                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected error in StoryForkQueueWorker loop.");
-                await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+                _logger.LogError(ex, "Unexpected error in StoryForkQueueWorker loop. ExceptionType={ExceptionType}. Retrying in 10 seconds.",
+                    ex.GetType().FullName);
+                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
             }
         }
+
+        _logger.LogInformation("StoryForkQueueWorker has stopped. QueueName={QueueName}", _queueClient.Name);
     }
 
     private sealed record StoryForkQueuePayload(Guid JobId, string TargetStoryId);

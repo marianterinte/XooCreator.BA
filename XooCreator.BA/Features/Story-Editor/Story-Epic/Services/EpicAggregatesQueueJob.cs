@@ -33,16 +33,25 @@ public class EpicAggregatesQueueJob : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await _queueClient.CreateIfNotExistsAsync(cancellationToken: stoppingToken);
+        _logger.LogInformation("EpicAggregatesQueueJob initializing... QueueName={QueueName}", _queueClient.Name);
 
-        _logger.LogInformation("EpicAggregatesQueueJob started. QueueName={QueueName} QueueUri={QueueUri}", 
-            _queueClient.Name, _queueClient.Uri);
+        try
+        {
+            await _queueClient.CreateIfNotExistsAsync(cancellationToken: stoppingToken);
+            _logger.LogInformation("EpicAggregatesQueueJob started. QueueName={QueueName} QueueUri={QueueUri}", 
+                _queueClient.Name, _queueClient.Uri);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "EpicAggregatesQueueJob failed to create/connect to queue. QueueName={QueueName}. Retrying in 30 seconds.", _queueClient.Name);
+            await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+        }
 
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
-                var messages = await _queueClient.ReceiveMessagesAsync(maxMessages: 1, visibilityTimeout: TimeSpan.FromSeconds(30), cancellationToken: stoppingToken);
+                var messages = await _queueClient.ReceiveMessagesAsync(maxMessages: 1, visibilityTimeout: TimeSpan.FromSeconds(60), cancellationToken: stoppingToken);
                 if (messages?.Value == null || messages.Value.Length == 0)
                 {
                     // Log only every 10th check to avoid spam (every ~30 seconds)
@@ -99,16 +108,31 @@ public class EpicAggregatesQueueJob : BackgroundService
                     await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                 }
             }
-            catch (TaskCanceledException)
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {
-                // shutting down
+                _logger.LogInformation("EpicAggregatesQueueJob stopping due to cancellation request.");
+                break;
+            }
+            catch (TaskCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                _logger.LogInformation("EpicAggregatesQueueJob stopping due to task cancellation.");
+                break;
+            }
+            catch (Azure.RequestFailedException azureEx)
+            {
+                _logger.LogError(azureEx, "Azure Storage error in EpicAggregatesQueueJob. Status={Status} ErrorCode={ErrorCode}. Retrying in 10 seconds.",
+                    azureEx.Status, azureEx.ErrorCode);
+                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected error in EpicAggregatesQueueJob loop.");
-                await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+                _logger.LogError(ex, "Unexpected error in EpicAggregatesQueueJob loop. ExceptionType={ExceptionType}. Retrying in 10 seconds.",
+                    ex.GetType().FullName);
+                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
             }
         }
+
+        _logger.LogInformation("EpicAggregatesQueueJob has stopped. QueueName={QueueName}", _queueClient.Name);
     }
 
     private async Task ProcessHeroVersionJobAsync(EpicAggregatesQueuePayload payload, QueueMessage message, CancellationToken stoppingToken)
@@ -199,8 +223,16 @@ public class EpicAggregatesQueueJob : BackgroundService
                 _logger.LogInformation("Processing HeroVersionJob: jobId={JobId} heroId={HeroId} baseVersion={BaseVersion}",
                     job.Id, job.HeroId, job.BaseVersion);
 
-                // Create EpicHeroCraft from EpicHeroDefinition
-                await heroService.CreateVersionFromPublishedAsync(job.OwnerUserId, job.HeroId, stoppingToken);
+                try
+                {
+                    await heroService.CreateVersionFromPublishedAsync(job.OwnerUserId, job.HeroId, stoppingToken);
+                    _logger.LogInformation("CreateVersionFromPublishedAsync (hero) completed: jobId={JobId} heroId={HeroId}", job.Id, job.HeroId);
+                }
+                catch (Exception versionEx)
+                {
+                    _logger.LogError(versionEx, "CreateVersionFromPublishedAsync (hero) failed: jobId={JobId} heroId={HeroId}", job.Id, job.HeroId);
+                    throw;
+                }
 
                 job.Status = HeroVersionJobStatus.Completed;
                 job.CompletedAtUtc = DateTime.UtcNow;
@@ -318,8 +350,16 @@ public class EpicAggregatesQueueJob : BackgroundService
                 _logger.LogInformation("Processing RegionVersionJob: jobId={JobId} regionId={RegionId} baseVersion={BaseVersion}",
                     job.Id, job.RegionId, job.BaseVersion);
 
-                // Create StoryRegionCraft from StoryRegionDefinition
-                await regionService.CreateVersionFromPublishedAsync(job.OwnerUserId, job.RegionId, stoppingToken);
+                try
+                {
+                    await regionService.CreateVersionFromPublishedAsync(job.OwnerUserId, job.RegionId, stoppingToken);
+                    _logger.LogInformation("CreateVersionFromPublishedAsync (region) completed: jobId={JobId} regionId={RegionId}", job.Id, job.RegionId);
+                }
+                catch (Exception versionEx)
+                {
+                    _logger.LogError(versionEx, "CreateVersionFromPublishedAsync (region) failed: jobId={JobId} regionId={RegionId}", job.Id, job.RegionId);
+                    throw;
+                }
 
                 job.Status = RegionVersionJobStatus.Completed;
                 job.CompletedAtUtc = DateTime.UtcNow;
