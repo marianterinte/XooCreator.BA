@@ -64,13 +64,13 @@ public class RequestEpicHeroImageUploadEndpoint
             return TypedResults.BadRequest("Hero ID is required.");
         }
 
-        var hero = await ep._repository.GetAsync(heroId, ct);
-        if (hero == null)
+        var heroCraft = await ep._repository.GetCraftAsync(heroId, ct);
+        if (heroCraft == null)
         {
             return TypedResults.NotFound();
         }
 
-        var isOwner = hero.OwnerUserId == user.Id;
+        var isOwner = heroCraft.OwnerUserId == user.Id;
         var isAdmin = ep._auth0.HasRole(user, UserRole.Admin);
         if (!isOwner && !isAdmin)
         {

@@ -9,7 +9,7 @@ public interface IEpicHeroService
     Task<EpicHeroDto?> GetHeroAsync(string heroId, CancellationToken ct = default);
     
     // Create hero
-    Task<EpicHeroDto> CreateHeroAsync(Guid ownerUserId, string heroId, string name, CancellationToken ct = default);
+    Task<EpicHeroDto> CreateHeroAsync(Guid ownerUserId, string heroId, string name, string languageCode, string? description, CancellationToken ct = default);
     
     // Save hero
     Task SaveHeroAsync(Guid ownerUserId, string heroId, EpicHeroDto dto, CancellationToken ct = default);
@@ -34,5 +34,11 @@ public interface IEpicHeroService
     
     // Retract from review
     Task RetractAsync(Guid ownerUserId, string heroId, CancellationToken ct = default);
+    
+    // Create new version from published hero
+    Task CreateVersionFromPublishedAsync(Guid ownerUserId, string heroId, CancellationToken ct = default);
+    
+    // Unpublish a published hero
+    Task UnpublishAsync(Guid ownerUserId, string heroId, string reason, CancellationToken ct = default);
 }
 

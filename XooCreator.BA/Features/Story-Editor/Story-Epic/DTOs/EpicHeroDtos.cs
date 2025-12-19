@@ -7,7 +7,9 @@ public record EpicHeroTranslationDto
 {
     public required string LanguageCode { get; init; }
     public required string Name { get; init; }
+    public string? Description { get; init; }
     public string? GreetingText { get; init; }
+    public string? GreetingAudioUrl { get; init; } // Audio URL per language
 }
 
 /// <summary>
@@ -41,11 +43,25 @@ public record EpicHeroDto
         return translation?.Name ?? Translations.FirstOrDefault()?.Name ?? string.Empty;
     }
     
+    // Helper: Get description in a specific language
+    public string? GetDescription(string languageCode)
+    {
+        var translation = Translations.FirstOrDefault(t => t.LanguageCode.Equals(languageCode, StringComparison.OrdinalIgnoreCase));
+        return translation?.Description ?? Translations.FirstOrDefault()?.Description;
+    }
+    
     // Helper: Get greeting text in a specific language
     public string? GetGreetingText(string languageCode)
     {
         var translation = Translations.FirstOrDefault(t => t.LanguageCode.Equals(languageCode, StringComparison.OrdinalIgnoreCase));
         return translation?.GreetingText ?? Translations.FirstOrDefault()?.GreetingText;
+    }
+    
+    // Helper: Get greeting audio URL in a specific language
+    public string? GetGreetingAudioUrl(string languageCode)
+    {
+        var translation = Translations.FirstOrDefault(t => t.LanguageCode.Equals(languageCode, StringComparison.OrdinalIgnoreCase));
+        return translation?.GreetingAudioUrl ?? Translations.FirstOrDefault()?.GreetingAudioUrl;
     }
 }
 

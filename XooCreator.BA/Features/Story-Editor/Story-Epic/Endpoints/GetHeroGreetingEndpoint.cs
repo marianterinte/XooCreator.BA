@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.Repositories;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Endpoints;
+using XooCreator.BA.Infrastructure.Services.Blob;
 
 namespace XooCreator.BA.Features.StoryEditor.StoryEpic.Endpoints;
 
@@ -12,13 +13,16 @@ public class GetHeroGreetingEndpoint
 {
     private readonly IEpicHeroRepository _heroRepository;
     private readonly IUserContextService _userContext;
+    private readonly IBlobSasService _blobSas;
 
     public GetHeroGreetingEndpoint(
         IEpicHeroRepository heroRepository,
-        IUserContextService userContext)
+        IUserContextService userContext,
+        IBlobSasService blobSas)
     {
         _heroRepository = heroRepository;
         _userContext = userContext;
+        _blobSas = blobSas;
     }
 
     [Route("/api/{locale}/story-epic/heroes/{heroId}/greeting")]
@@ -32,26 +36,65 @@ public class GetHeroGreetingEndpoint
         var userId = await ep._userContext.GetUserIdAsync();
         if (userId == null) return TypedResults.Unauthorized();
 
-        var hero = await ep._heroRepository.GetAsync(heroId, ct);
-        if (hero == null)
+        // Try to get craft first (draft), fallback to definition (published)
+        var heroCraft = await ep._heroRepository.GetCraftAsync(heroId, ct);
+        var heroDefinition = heroCraft == null ? await ep._heroRepository.GetDefinitionAsync(heroId, ct) : null;
+        
+        if (heroCraft == null && heroDefinition == null)
         {
             return TypedResults.NotFound();
         }
 
-        // Get greeting text in requested language
-        var translation = hero.Translations.FirstOrDefault(t => 
-            t.LanguageCode.Equals(locale, StringComparison.OrdinalIgnoreCase));
-        
-        // Fallback to first available translation if requested language not found
-        translation ??= hero.Translations.FirstOrDefault();
+        string? greetingText = null;
+        string? audioPath = null;
+        bool isFromDraft = false;
 
-        var greetingText = translation?.GreetingText ?? $"Hello! I'm {translation?.Name ?? heroId}.";
+        // Get greeting text and audio in requested language from craft or definition
+        if (heroCraft != null)
+        {
+            var translation = heroCraft.Translations.FirstOrDefault(t => 
+                t.LanguageCode.Equals(locale, StringComparison.OrdinalIgnoreCase)) 
+                ?? heroCraft.Translations.FirstOrDefault();
+            
+            greetingText = translation?.GreetingText ?? $"Hello! I'm {translation?.Name ?? heroId}.";
+            audioPath = translation?.GreetingAudioUrl;
+            isFromDraft = true;
+        }
+        else if (heroDefinition != null)
+        {
+            var translation = heroDefinition.Translations.FirstOrDefault(t => 
+                t.LanguageCode.Equals(locale, StringComparison.OrdinalIgnoreCase)) 
+                ?? heroDefinition.Translations.FirstOrDefault();
+            
+            greetingText = translation?.GreetingText ?? $"Hello! I'm {translation?.Name ?? heroId}.";
+            audioPath = translation?.GreetingAudioUrl;
+            isFromDraft = false;
+        }
+
+        // Generate SAS URL for audio if path exists
+        string? audioUrl = null;
+        if (!string.IsNullOrWhiteSpace(audioPath))
+        {
+            // Determine which container to use based on source (draft vs published)
+            var container = isFromDraft ? ep._blobSas.DraftContainer : ep._blobSas.PublishedContainer;
+            
+            try
+            {
+                // Generate SAS URL for reading the audio file
+                audioUrl = (await ep._blobSas.GetReadSasAsync(container, audioPath, TimeSpan.FromHours(1), ct)).ToString();
+            }
+            catch
+            {
+                // If SAS generation fails, try to return path for fallback
+                audioUrl = audioPath;
+            }
+        }
 
         var response = new HeroGreetingDto
         {
             HeroId = heroId,
             Message = greetingText,
-            AudioUrl = hero.GreetingAudioUrl
+            AudioUrl = audioUrl
         };
 
         return TypedResults.Ok(response);

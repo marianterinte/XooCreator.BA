@@ -9,7 +9,7 @@ public interface IStoryRegionService
     Task<StoryRegionDto?> GetRegionAsync(string regionId, CancellationToken ct = default);
     
     // Create region
-    Task<StoryRegionDto> CreateRegionAsync(Guid ownerUserId, string regionId, string name, CancellationToken ct = default);
+    Task<StoryRegionDto> CreateRegionAsync(Guid ownerUserId, string regionId, string name, string? description, string languageCode, CancellationToken ct = default);
     
     // Save region
     Task SaveRegionAsync(Guid ownerUserId, string regionId, StoryRegionDto dto, CancellationToken ct = default);
@@ -34,5 +34,11 @@ public interface IStoryRegionService
     
     // Retract from review
     Task RetractAsync(Guid ownerUserId, string regionId, CancellationToken ct = default);
+    
+    // Create new version from published region
+    Task CreateVersionFromPublishedAsync(Guid ownerUserId, string regionId, CancellationToken ct = default);
+    
+    // Unpublish a published region
+    Task UnpublishAsync(Guid ownerUserId, string regionId, string reason, CancellationToken ct = default);
 }
 

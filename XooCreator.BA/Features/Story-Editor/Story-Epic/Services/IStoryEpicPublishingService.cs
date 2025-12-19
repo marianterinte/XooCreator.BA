@@ -25,8 +25,8 @@ public class ValidationResult
     public static ValidationResult InvalidStatus(string message) => new() { IsValid = false, ErrorMessage = message };
     public static ValidationResult NoRegions() => new() { IsValid = false, ErrorMessage = "Epic must have at least one region." };
     public static ValidationResult NoStories() => new() { IsValid = false, ErrorMessage = "Epic must have at least one story." };
-    public static ValidationResult UnpublishedRegions(List<StoryRegion> regions) => new() { IsValid = false, ErrorMessage = $"The following regions are not published: {string.Join(", ", regions.Select(r => r.Id))}" };
-    public static ValidationResult UnpublishedHeroes(List<EpicHero> heroes) => new() { IsValid = false, ErrorMessage = $"The following heroes are not published: {string.Join(", ", heroes.Select(h => h.Id))}" };
+    public static ValidationResult UnpublishedRegions(List<StoryRegionDefinition> regions) => new() { IsValid = false, ErrorMessage = $"The following regions are not published: {string.Join(", ", regions.Select(r => r.Id))}" };
+    public static ValidationResult UnpublishedHeroes(List<EpicHeroDefinition> heroes) => new() { IsValid = false, ErrorMessage = $"The following heroes are not published: {string.Join(", ", heroes.Select(h => h.Id))}" };
     public static ValidationResult UnpublishedStories(List<string> storyIds) => new() { IsValid = false, ErrorMessage = $"The following stories are not published: {string.Join(", ", storyIds)}" };
 }
 

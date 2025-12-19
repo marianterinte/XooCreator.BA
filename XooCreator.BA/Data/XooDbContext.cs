@@ -57,13 +57,21 @@ public class XooDbContext : DbContext
     public DbSet<StoryEpicDefinitionStoryNode> StoryEpicDefinitionStoryNodes => Set<StoryEpicDefinitionStoryNode>();
     public DbSet<StoryEpicDefinitionUnlockRule> StoryEpicDefinitionUnlockRules => Set<StoryEpicDefinitionUnlockRule>();
     
-    // Story Epic - Independent Regions and Heroes
-    public DbSet<StoryRegion> StoryRegions => Set<StoryRegion>();
-    public DbSet<StoryRegionTranslation> StoryRegionTranslations => Set<StoryRegionTranslation>();
-    public DbSet<EpicHero> EpicHeroes => Set<EpicHero>();
-    public DbSet<EpicHeroTranslation> EpicHeroTranslations => Set<EpicHeroTranslation>();
+    // Story Epic - Independent Regions and Heroes (Craft/Definition pattern)
+    public DbSet<StoryRegionCraft> StoryRegionCrafts => Set<StoryRegionCraft>();
+    public DbSet<StoryRegionCraftTranslation> StoryRegionCraftTranslations => Set<StoryRegionCraftTranslation>();
+    public DbSet<StoryRegionDefinition> StoryRegionDefinitions => Set<StoryRegionDefinition>();
+    public DbSet<StoryRegionDefinitionTranslation> StoryRegionDefinitionTranslations => Set<StoryRegionDefinitionTranslation>();
+    public DbSet<EpicHeroCraft> EpicHeroCrafts => Set<EpicHeroCraft>();
+    public DbSet<EpicHeroCraftTranslation> EpicHeroCraftTranslations => Set<EpicHeroCraftTranslation>();
+    public DbSet<EpicHeroDefinition> EpicHeroDefinitions => Set<EpicHeroDefinition>();
+    public DbSet<EpicHeroDefinitionTranslation> EpicHeroDefinitionTranslations => Set<EpicHeroDefinitionTranslation>();
     public DbSet<StoryEpicRegionReference> StoryEpicRegionReferences => Set<StoryEpicRegionReference>();
     public DbSet<StoryEpicHeroReference> StoryEpicHeroReferences => Set<StoryEpicHeroReference>();
+    
+    // Version Jobs
+    public DbSet<HeroVersionJob> HeroVersionJobs => Set<HeroVersionJob>();
+    public DbSet<RegionVersionJob> RegionVersionJobs => Set<RegionVersionJob>();
     
     public DbSet<StoryDefinition> StoryDefinitions => Set<StoryDefinition>();
     public DbSet<StoryDefinitionTranslation> StoryDefinitionTranslations => Set<StoryDefinitionTranslation>();

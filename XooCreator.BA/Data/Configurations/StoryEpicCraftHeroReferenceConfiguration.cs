@@ -33,7 +33,7 @@ public class StoryEpicCraftHeroReferenceConfiguration : IEntityTypeConfiguration
             .HasForeignKey(x => x.EpicId)
             .OnDelete(DeleteBehavior.Cascade);
         
-        // Foreign key to EpicHero
+        // Foreign key to EpicHeroCraft (for draft epics)
         builder.HasOne(x => x.Hero)
             .WithMany()
             .HasForeignKey(x => x.HeroId)

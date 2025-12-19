@@ -21,6 +21,12 @@ public class RequestPerformanceMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
+        // Log separator before request
+        _logger.LogInformation("---------------------- ---------------------- ---------------------- ----------------------");
+        _logger.LogInformation("Request started | Path={Path} | Method={Method}",
+            context.Request.Path,
+            context.Request.Method);
+
         var stopwatch = Stopwatch.StartNew();
         var requestStartTime = DateTimeOffset.UtcNow;
         
@@ -73,6 +79,9 @@ public class RequestPerformanceMiddleware
                 gen0Collections,
                 gen1Collections,
                 gen2Collections);
+
+            // Log separator after request
+            _logger.LogInformation("---------------------- ---------------------- ---------------------- ----------------------");
 
             // Track in Application Insights
             if (_telemetryClient != null)

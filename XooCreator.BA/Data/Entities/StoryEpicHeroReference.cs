@@ -21,6 +21,6 @@ public class StoryEpicHeroReference
     
     // Navigation properties
     public StoryEpicDefinition Epic { get; set; } = null!;
-    public EpicHero Hero { get; set; } = null!;
+    public EpicHeroDefinition Hero { get; set; } = null!;
 }
 

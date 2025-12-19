@@ -33,16 +33,26 @@ public class EpicPublishQueueJob : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await _queueClient.CreateIfNotExistsAsync(cancellationToken: stoppingToken);
-
-        _logger.LogInformation("EpicPublishQueueJob started. QueueName={QueueName} QueueUri={QueueUri}", 
-            _queueClient.Name, _queueClient.Uri);
+        // Log immediately on startup to confirm worker is starting
+        _logger.LogInformation("EpicPublishQueueJob initializing... QueueName={QueueName}", _queueClient.Name);
+        
+        try
+        {
+            await _queueClient.CreateIfNotExistsAsync(cancellationToken: stoppingToken);
+            _logger.LogInformation("EpicPublishQueueJob started successfully. QueueName={QueueName} QueueUri={QueueUri}", 
+                _queueClient.Name, _queueClient.Uri);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "EpicPublishQueueJob failed to create/connect to queue. QueueName={QueueName}. Worker will retry in 30 seconds.", _queueClient.Name);
+            await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+        }
 
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
-                var messages = await _queueClient.ReceiveMessagesAsync(maxMessages: 1, visibilityTimeout: TimeSpan.FromSeconds(30), cancellationToken: stoppingToken);
+                var messages = await _queueClient.ReceiveMessagesAsync(maxMessages: 1, visibilityTimeout: TimeSpan.FromSeconds(60), cancellationToken: stoppingToken);
                 if (messages?.Value == null || messages.Value.Length == 0)
                 {
                     // Log only every 10th check to avoid spam (every ~30 seconds)
@@ -133,27 +143,49 @@ public class EpicPublishQueueJob : BackgroundService
                             _logger.LogInformation("Processing EpicPublishJob: jobId={JobId} epicId={EpicId} draftVersion={DraftVersion} forceFull={ForceFull}",
                                 job.Id, job.EpicId, job.DraftVersion, job.ForceFull);
 
-                            var langTag = job.LangTag.ToLowerInvariant();
-                            await publisher.PublishFromCraftAsync(craft, job.RequestedByEmail, langTag, job.ForceFull, stoppingToken);
+                            var langTag = job.LangTag?.ToLowerInvariant() ?? "ro-ro";
+                            
+                            try
+                            {
+                                await publisher.PublishFromCraftAsync(craft, job.RequestedByEmail, langTag, job.ForceFull, stoppingToken);
+                                _logger.LogInformation("PublishFromCraftAsync completed successfully: jobId={JobId} epicId={EpicId}", job.Id, job.EpicId);
+                            }
+                            catch (Exception publishEx)
+                            {
+                                _logger.LogError(publishEx, "PublishFromCraftAsync failed: jobId={JobId} epicId={EpicId}", job.Id, job.EpicId);
+                                throw; // Re-throw to trigger retry logic
+                            }
 
                             job.Status = EpicPublishJobStatus.Completed;
                             job.CompletedAtUtc = DateTime.UtcNow;
                             job.ErrorMessage = null;
                             
                             await db.SaveChangesAsync(stoppingToken);
+                            _logger.LogInformation("Job status saved as Completed: jobId={JobId}", job.Id);
 
                             // Cleanup: Delete StoryEpicCraft and draft assets after successful publish
+                            // This is done in a separate try-catch to not affect the job status
                             try
                             {
-                                // TODO: Implement cleanup service for epic drafts
-                                // await cleanupService.CleanupDraftAssetsAsync(craft.OwnerUserId, craft.Id, stoppingToken);
+                                _logger.LogDebug("Starting cleanup for epicId={EpicId}", craft.Id);
                                 
                                 // Reload craft in current context to ensure it's tracked
                                 var craftToDelete = await db.StoryEpicCrafts
+                                    .Include(c => c.Regions)
+                                    .Include(c => c.StoryNodes)
+                                    .Include(c => c.UnlockRules)
+                                    .Include(c => c.Translations)
                                     .FirstOrDefaultAsync(c => c.Id == craft.Id, stoppingToken);
                                 
                                 if (craftToDelete != null)
                                 {
+                                    // Remove related entities first to avoid FK violations
+                                    db.RemoveRange(craftToDelete.Regions);
+                                    db.RemoveRange(craftToDelete.StoryNodes);
+                                    db.RemoveRange(craftToDelete.UnlockRules);
+                                    db.RemoveRange(craftToDelete.Translations);
+                                    await db.SaveChangesAsync(stoppingToken);
+                                    
                                     db.StoryEpicCrafts.Remove(craftToDelete);
                                     await db.SaveChangesAsync(stoppingToken);
                                     _logger.LogInformation("Cleaned up StoryEpicCraft after publish: epicId={EpicId}", craft.Id);
@@ -165,11 +197,11 @@ public class EpicPublishQueueJob : BackgroundService
                             }
                             catch (Exception cleanupEx)
                             {
-                                _logger.LogWarning(cleanupEx, "Failed to cleanup draft assets for epicId={EpicId}, but publish succeeded", craft.Id);
+                                _logger.LogWarning(cleanupEx, "Failed to cleanup draft for epicId={EpicId}, but publish succeeded. Manual cleanup may be needed.", craft.Id);
                                 // Don't fail the job if cleanup fails - publish was successful
                             }
 
-                            _logger.LogInformation("EpicPublishJob completed: jobId={JobId} epicId={EpicId} draftVersion={DraftVersion}",
+                            _logger.LogInformation("EpicPublishJob fully completed: jobId={JobId} epicId={EpicId} draftVersion={DraftVersion}",
                                 job.Id, job.EpicId, job.DraftVersion);
                         }
 
@@ -192,16 +224,31 @@ public class EpicPublishQueueJob : BackgroundService
                     }
                 } // Scope disposed here - DbContext and all scoped services are cleaned up
             }
-            catch (TaskCanceledException)
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {
-                // shutting down
+                _logger.LogInformation("EpicPublishQueueJob stopping due to cancellation request.");
+                break;
+            }
+            catch (TaskCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                _logger.LogInformation("EpicPublishQueueJob stopping due to task cancellation.");
+                break;
+            }
+            catch (Azure.RequestFailedException azureEx)
+            {
+                _logger.LogError(azureEx, "Azure Storage error in EpicPublishQueueJob. Status={Status} ErrorCode={ErrorCode}. Retrying in 10 seconds.",
+                    azureEx.Status, azureEx.ErrorCode);
+                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected error in EpicPublishQueueJob loop.");
-                await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+                _logger.LogError(ex, "Unexpected error in EpicPublishQueueJob loop. ExceptionType={ExceptionType}. Worker will continue after 10 seconds delay.",
+                    ex.GetType().FullName);
+                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
             }
         }
+        
+        _logger.LogInformation("EpicPublishQueueJob has stopped. QueueName={QueueName}", _queueClient.Name);
     }
 
     // Note: QueueClient from Azure.Storage.Queues v12+ is stateless and doesn't implement IDisposable.

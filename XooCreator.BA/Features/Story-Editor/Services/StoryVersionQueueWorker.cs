@@ -34,16 +34,25 @@ public class StoryVersionQueueWorker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await _queueClient.CreateIfNotExistsAsync(cancellationToken: stoppingToken);
+        _logger.LogInformation("StoryVersionQueueWorker initializing... QueueName={QueueName}", _queueClient.Name);
 
-        _logger.LogInformation("StoryVersionQueueWorker started. QueueName={QueueName} QueueUri={QueueUri}", 
-            _queueClient.Name, _queueClient.Uri);
+        try
+        {
+            await _queueClient.CreateIfNotExistsAsync(cancellationToken: stoppingToken);
+            _logger.LogInformation("StoryVersionQueueWorker started. QueueName={QueueName} QueueUri={QueueUri}", 
+                _queueClient.Name, _queueClient.Uri);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "StoryVersionQueueWorker failed to create/connect to queue. QueueName={QueueName}. Retrying in 30 seconds.", _queueClient.Name);
+            await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+        }
 
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
-                var messages = await _queueClient.ReceiveMessagesAsync(maxMessages: 1, visibilityTimeout: TimeSpan.FromSeconds(30), cancellationToken: stoppingToken);
+                var messages = await _queueClient.ReceiveMessagesAsync(maxMessages: 1, visibilityTimeout: TimeSpan.FromSeconds(60), cancellationToken: stoppingToken);
                 if (messages?.Value == null || messages.Value.Length == 0)
                 {
                     // Log only every 10th check to avoid spam (every ~30 seconds)
@@ -177,6 +186,7 @@ public class StoryVersionQueueWorker : BackgroundService
 
                         // Create StoryCraft from StoryDefinition
                         var newCraft = await storyCopyService.CreateCopyFromDefinitionAsync(definition, job.OwnerUserId, job.StoryId, stoppingToken);
+                        _logger.LogInformation("Draft created from definition for StoryVersionJob: jobId={JobId} storyId={StoryId}", job.Id, job.StoryId);
 
                         // Copy assets from published to draft storage
                         try
@@ -189,11 +199,11 @@ public class StoryVersionQueueWorker : BackgroundService
                                 job.RequestedByEmail,
                                 job.StoryId,
                                 stoppingToken);
+                            _logger.LogInformation("Asset copy completed for StoryVersionJob: jobId={JobId} storyId={StoryId}", job.Id, job.StoryId);
                         }
                         catch (Exception assetEx)
                         {
                             _logger.LogWarning(assetEx, "Failed to copy assets during create version for storyId={StoryId}, but continuing", job.StoryId);
-                            // Don't fail the job if asset copy fails - craft was created successfully
                         }
 
                         job.Status = StoryVersionJobStatus.Completed;
@@ -223,16 +233,31 @@ public class StoryVersionQueueWorker : BackgroundService
                     }
                 } // Scope disposed here - DbContext and all scoped services are cleaned up
             }
-            catch (TaskCanceledException)
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {
-                // shutting down
+                _logger.LogInformation("StoryVersionQueueWorker stopping due to cancellation request.");
+                break;
+            }
+            catch (TaskCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                _logger.LogInformation("StoryVersionQueueWorker stopping due to task cancellation.");
+                break;
+            }
+            catch (Azure.RequestFailedException azureEx)
+            {
+                _logger.LogError(azureEx, "Azure Storage error in StoryVersionQueueWorker. Status={Status} ErrorCode={ErrorCode}. Retrying in 10 seconds.",
+                    azureEx.Status, azureEx.ErrorCode);
+                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected error in StoryVersionQueueWorker loop.");
-                await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+                _logger.LogError(ex, "Unexpected error in StoryVersionQueueWorker loop. ExceptionType={ExceptionType}. Retrying in 10 seconds.",
+                    ex.GetType().FullName);
+                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
             }
         }
+
+        _logger.LogInformation("StoryVersionQueueWorker has stopped. QueueName={QueueName}", _queueClient.Name);
     }
 
     // Note: QueueClient from Azure.Storage.Queues v12+ is stateless and doesn't implement IDisposable.

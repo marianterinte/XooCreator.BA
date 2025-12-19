@@ -64,13 +64,13 @@ public class RequestStoryRegionImageUploadEndpoint
             return TypedResults.BadRequest("Region ID is required.");
         }
 
-        var region = await ep._repository.GetAsync(regionId, ct);
-        if (region == null)
+        var regionCraft = await ep._repository.GetCraftAsync(regionId, ct);
+        if (regionCraft == null)
         {
             return TypedResults.NotFound();
         }
 
-        var isOwner = region.OwnerUserId == user.Id;
+        var isOwner = regionCraft.OwnerUserId == user.Id;
         var isAdmin = ep._auth0.HasRole(user, UserRole.Admin);
         if (!isOwner && !isAdmin)
         {
