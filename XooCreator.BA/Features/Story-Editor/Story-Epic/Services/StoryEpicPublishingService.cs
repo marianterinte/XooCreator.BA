@@ -272,14 +272,32 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
             definition.CoverImageUrl = coverAsset.PublishedPath;
         }
 
-        // Copy Regions
+        // Copy Regions (and publish region images if they're draft assets)
         foreach (var craftRegion in craft.Regions)
         {
+            var publishedImageUrl = craftRegion.ImageUrl;
+            
+            // If region has an image URL and it's a draft asset (not already published), publish it
+            if (!string.IsNullOrWhiteSpace(craftRegion.ImageUrl) && !IsAlreadyPublished(craftRegion.ImageUrl))
+            {
+                try
+                {
+                    publishedImageUrl = await PublishRegionImageAsync(craft.Id, craftRegion.RegionId, craftRegion.ImageUrl, ct);
+                    _logger.LogInformation("Published region image: regionId={RegionId} from={DraftPath} to={PublishedPath}", 
+                        craftRegion.RegionId, craftRegion.ImageUrl, publishedImageUrl);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to publish region image for regionId={RegionId}, using draft path", craftRegion.RegionId);
+                    // Continue with draft path if publish fails (non-blocking)
+                }
+            }
+            
             definition.Regions.Add(new StoryEpicDefinitionRegion
             {
                 RegionId = craftRegion.RegionId,
                 Label = craftRegion.Label,
-                ImageUrl = craftRegion.ImageUrl,
+                ImageUrl = publishedImageUrl, // Use published path if copied, otherwise original draft path
                 SortOrder = craftRegion.SortOrder,
                 IsLocked = craftRegion.IsLocked,
                 IsStartupRegion = craftRegion.IsStartupRegion,

@@ -209,6 +209,21 @@ public class StoryEpicService : IStoryEpicService
         };
     }
 
+    public async Task<StoryEpicStateDto?> GetPublishedEpicStateAsync(string epicId, CancellationToken ct = default)
+    {
+        // Only get published epic (no draft fallback) - used for play mode
+        var epic = await GetPublishedEpicAsync(epicId, ct);
+        if (epic == null) return null;
+
+        var preview = await GeneratePreviewAsync(epic, ct);
+
+        return new StoryEpicStateDto
+        {
+            Epic = epic,
+            Preview = preview
+        };
+    }
+
     public async Task<List<StoryEpicListItemDto>> ListEpicsByOwnerAsync(Guid ownerUserId, Guid? currentUserId = null, CancellationToken ct = default)
     {
         var locale = _userContext.GetRequestLocaleOrDefault("ro-ro");

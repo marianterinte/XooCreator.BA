@@ -26,8 +26,9 @@ public class StoryEpicProgressService : IStoryEpicProgressService
 
     public async Task<StoryEpicStateWithProgressDto?> GetEpicStateWithProgressAsync(string epicId, Guid userId, CancellationToken ct = default)
     {
-        // Get epic state (without progress)
-        var epicState = await _epicService.GetEpicStateAsync(epicId, ct);
+        // Get PUBLISHED epic state for play mode (without progress)
+        // This ensures we use the published version, not the draft
+        var epicState = await _epicService.GetPublishedEpicStateAsync(epicId, ct);
         if (epicState == null) return null;
 
         // Get user progress
@@ -106,8 +107,9 @@ public class StoryEpicProgressService : IStoryEpicProgressService
             .FirstOrDefaultAsync(sd => sd.StoryId == storyId && sd.IsActive, ct);
         var storyCoverImageUrl = storyDefinition?.CoverImageUrl;
 
-        // Get epic state to evaluate new unlocked regions and heroes
-        var epicState = await _epicService.GetEpicStateAsync(epicId, ct);
+        // Get PUBLISHED epic state to evaluate new unlocked regions and heroes
+        // Use published version since we're in play mode completing a story
+        var epicState = await _epicService.GetPublishedEpicStateAsync(epicId, ct);
         if (epicState == null)
         {
             return new CompleteEpicStoryResult { Success = false, NewlyUnlockedRegions = new List<string>(), NewlyUnlockedHeroes = new List<UnlockedHeroDto>(), StoryCoverImageUrl = storyCoverImageUrl };
