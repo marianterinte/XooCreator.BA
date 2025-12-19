@@ -470,6 +470,21 @@ public class EpicHeroService : IEpicHeroService
         // Copy translations from craft to definition
         foreach (var craftTranslation in heroCraft.Translations)
         {
+            // Copy greeting audio from draft to published container if exists
+            string? publishedAudioUrl = craftTranslation.GreetingAudioUrl;
+            if (!string.IsNullOrWhiteSpace(craftTranslation.GreetingAudioUrl))
+            {
+                try
+                {
+                    publishedAudioUrl = await PublishGreetingAudioAsync(heroId, craftTranslation.GreetingAudioUrl, craftTranslation.LanguageCode, ownerEmail, ct);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to publish greeting audio for heroId={HeroId} lang={Lang}, using draft path", heroId, craftTranslation.LanguageCode);
+                    // Continue with draft path if publish fails (non-blocking)
+                }
+            }
+            
             var definitionTranslation = new EpicHeroDefinitionTranslation
             {
                 EpicHeroDefinitionId = definition.Id,
@@ -477,7 +492,7 @@ public class EpicHeroService : IEpicHeroService
                 Name = craftTranslation.Name,
                 Description = craftTranslation.Description,
                 GreetingText = craftTranslation.GreetingText,
-                GreetingAudioUrl = craftTranslation.GreetingAudioUrl
+                GreetingAudioUrl = publishedAudioUrl
             };
             _context.EpicHeroDefinitionTranslations.Add(definitionTranslation);
         }
@@ -578,36 +593,71 @@ public class EpicHeroService : IEpicHeroService
         return destinationPath;
     }
 
-    private async Task<string> PublishAudioAsync(string heroId, string draftPath, string ownerEmail, CancellationToken ct)
+    private async Task<string> PublishGreetingAudioAsync(string heroId, string draftPath, string languageCode, string ownerEmail, CancellationToken ct)
     {
         var normalizedPath = NormalizeBlobPath(draftPath);
+        
+        // Extract the path structure from draft to preserve encoding
+        // Draft path format: heroes/{encodedEmail}/{heroId}/greeting/{languageCode}/{fileName}
+        // We want to preserve the exact structure, just change container from draft to published
+        
+        // Check if already published
         if (IsAlreadyPublished(normalizedPath))
         {
-            return normalizedPath; // Already published
+            // Path is already in published format, but verify it exists in published container
+            var publishedClient = _blobSas.GetBlobClient(_blobSas.PublishedContainer, normalizedPath);
+            if (await publishedClient.ExistsAsync(ct))
+            {
+                return normalizedPath;
+            }
+            _logger.LogWarning("Path marked as published but file doesn't exist in published container, will copy from draft: {Path}", normalizedPath);
         }
-
+        
+        // Verify source exists in draft container
         var sourceClient = _blobSas.GetBlobClient(_blobSas.DraftContainer, normalizedPath);
         if (!await sourceClient.ExistsAsync(ct))
         {
-            throw new InvalidOperationException($"Draft audio '{normalizedPath}' does not exist.");
+            throw new InvalidOperationException($"Draft greeting audio '{normalizedPath}' does not exist in draft container.");
         }
-
-        var fileName = Path.GetFileName(normalizedPath);
-        if (string.IsNullOrWhiteSpace(fileName))
+        
+        // Determine destination path
+        string destinationPath;
+        if (normalizedPath.StartsWith("heroes/", StringComparison.OrdinalIgnoreCase))
         {
-            fileName = $"{heroId}-greeting.mp3";
+            // Path already has correct structure - reuse it as-is (preserves email encoding)
+            destinationPath = normalizedPath;
+        }
+        else
+        {
+            // Fallback: build path from scratch if structure doesn't match
+            var fileName = Path.GetFileName(normalizedPath);
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                fileName = $"{heroId}-greeting-{languageCode}.mp3";
+            }
+            var emailEscaped = Uri.EscapeDataString(ownerEmail);
+            destinationPath = $"heroes/{emailEscaped}/{heroId}/greeting/{languageCode}/{fileName}";
+        }
+        
+        // Check if file already exists in published container (skip copy if already published)
+        var destinationClient = _blobSas.GetBlobClient(_blobSas.PublishedContainer, destinationPath);
+        if (await destinationClient.ExistsAsync(ct))
+        {
+            return destinationPath; // Already published, return the path
         }
 
-        // Path format: audio/heroes/{heroId}/{fileName}
-        var destinationPath = $"audio/heroes/{heroId}/{fileName}";
-        var destinationClient = _blobSas.GetBlobClient(_blobSas.PublishedContainer, destinationPath);
-
-        _logger.LogInformation("Copying hero audio from {Source} to {Destination}", normalizedPath, destinationPath);
+        _logger.LogInformation("Copying hero greeting audio: {Source} → {Destination}", normalizedPath, destinationPath);
 
         var sasUri = sourceClient.GenerateSasUri(BlobSasPermissions.Read, DateTimeOffset.UtcNow.AddMinutes(10));
         var operation = await destinationClient.StartCopyFromUriAsync(sasUri, cancellationToken: ct);
         await operation.WaitForCompletionAsync(cancellationToken: ct);
-
+        
+        // Verify copy was successful
+        if (!await destinationClient.ExistsAsync(ct))
+        {
+            throw new InvalidOperationException($"Failed to copy greeting audio to published container. Source: {normalizedPath}, Destination: {destinationPath}");
+        }
+        
         return destinationPath;
     }
 
@@ -628,7 +678,10 @@ public class EpicHeroService : IEpicHeroService
     private static bool IsAlreadyPublished(string path)
     {
         if (string.IsNullOrWhiteSpace(path)) return false;
+        // Check if path is already in published container structure
+        // Published paths start with "images/" or "heroes/" (for greeting audio)
         return path.StartsWith("images/", StringComparison.OrdinalIgnoreCase) ||
+               path.StartsWith("heroes/", StringComparison.OrdinalIgnoreCase) ||
                path.StartsWith("audio/", StringComparison.OrdinalIgnoreCase);
     }
 

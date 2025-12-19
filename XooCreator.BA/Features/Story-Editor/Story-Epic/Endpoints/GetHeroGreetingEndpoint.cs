@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.Repositories;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Endpoints;
+using XooCreator.BA.Infrastructure.Services.Blob;
 
 namespace XooCreator.BA.Features.StoryEditor.StoryEpic.Endpoints;
 
@@ -12,13 +13,16 @@ public class GetHeroGreetingEndpoint
 {
     private readonly IEpicHeroRepository _heroRepository;
     private readonly IUserContextService _userContext;
+    private readonly IBlobSasService _blobSas;
 
     public GetHeroGreetingEndpoint(
         IEpicHeroRepository heroRepository,
-        IUserContextService userContext)
+        IUserContextService userContext,
+        IBlobSasService blobSas)
     {
         _heroRepository = heroRepository;
         _userContext = userContext;
+        _blobSas = blobSas;
     }
 
     [Route("/api/{locale}/story-epic/heroes/{heroId}/greeting")]
@@ -42,7 +46,8 @@ public class GetHeroGreetingEndpoint
         }
 
         string? greetingText = null;
-        string? audioUrl = null;
+        string? audioPath = null;
+        bool isFromDraft = false;
 
         // Get greeting text and audio in requested language from craft or definition
         if (heroCraft != null)
@@ -52,7 +57,8 @@ public class GetHeroGreetingEndpoint
                 ?? heroCraft.Translations.FirstOrDefault();
             
             greetingText = translation?.GreetingText ?? $"Hello! I'm {translation?.Name ?? heroId}.";
-            audioUrl = translation?.GreetingAudioUrl;
+            audioPath = translation?.GreetingAudioUrl;
+            isFromDraft = true;
         }
         else if (heroDefinition != null)
         {
@@ -61,7 +67,27 @@ public class GetHeroGreetingEndpoint
                 ?? heroDefinition.Translations.FirstOrDefault();
             
             greetingText = translation?.GreetingText ?? $"Hello! I'm {translation?.Name ?? heroId}.";
-            audioUrl = translation?.GreetingAudioUrl;
+            audioPath = translation?.GreetingAudioUrl;
+            isFromDraft = false;
+        }
+
+        // Generate SAS URL for audio if path exists
+        string? audioUrl = null;
+        if (!string.IsNullOrWhiteSpace(audioPath))
+        {
+            // Determine which container to use based on source (draft vs published)
+            var container = isFromDraft ? ep._blobSas.DraftContainer : ep._blobSas.PublishedContainer;
+            
+            try
+            {
+                // Generate SAS URL for reading the audio file
+                audioUrl = (await ep._blobSas.GetReadSasAsync(container, audioPath, TimeSpan.FromHours(1), ct)).ToString();
+            }
+            catch
+            {
+                // If SAS generation fails, try to return path for fallback
+                audioUrl = audioPath;
+            }
         }
 
         var response = new HeroGreetingDto
