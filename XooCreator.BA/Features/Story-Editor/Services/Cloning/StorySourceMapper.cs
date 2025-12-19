@@ -2,6 +2,7 @@ using System.Text.Json;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.Enums;
+using XooCreator.BA.Data.SeedData;
 
 namespace XooCreator.BA.Features.StoryEditor.Services.Cloning;
 
@@ -75,6 +76,8 @@ public class StorySourceMapper : IStorySourceMapper
 
     public StoryCloneData MapFromDefinition(StoryDefinition definition, bool isCopy, bool isFork = false)
     {
+        var isSeeded = LooksLikeSeededStory(definition);
+
         return new StoryCloneData
         {
             StoryType = definition.StoryType,
@@ -93,20 +96,34 @@ public class StorySourceMapper : IStorySourceMapper
                     : t.Title,
                 Summary = definition.Summary
             }).ToList(),
-            Tiles = definition.Tiles.OrderBy(t => t.SortOrder).Select(tile => new TileCloneData
+            Tiles = definition.Tiles.OrderBy(t => t.SortOrder).Select(tile =>
             {
-                TileId = tile.TileId,
-                Type = tile.Type,
-                ImageUrl = ExtractFileName(tile.ImageUrl),
-                Translations = tile.Translations.Select(tt => new TileTranslationCloneData
+                var imageFilename = ExtractFileName(tile.ImageUrl);
+                var derivedAudioFilename = isSeeded ? DeriveSeededAudioFilename(imageFilename) : null;
+
+                return new TileCloneData
                 {
-                    LanguageCode = tt.LanguageCode,
-                    Caption = tt.Caption ?? string.Empty,
-                    Text = tt.Text ?? string.Empty,
-                    Question = tt.Question ?? string.Empty,
-                    AudioUrl = ExtractFileName(tt.AudioUrl),
-                    VideoUrl = ExtractFileName(tt.VideoUrl)
-                }).ToList(),
+                    TileId = tile.TileId,
+                    Type = tile.Type,
+                    ImageUrl = imageFilename,
+                    Translations = tile.Translations.Select(tt =>
+                    {
+                        var audioFilename = ExtractFileName(tt.AudioUrl);
+                        if (string.IsNullOrWhiteSpace(audioFilename))
+                        {
+                            audioFilename = derivedAudioFilename;
+                        }
+
+                        return new TileTranslationCloneData
+                        {
+                            LanguageCode = tt.LanguageCode,
+                            Caption = tt.Caption ?? string.Empty,
+                            Text = tt.Text ?? string.Empty,
+                            Question = tt.Question ?? string.Empty,
+                            AudioUrl = audioFilename,
+                            VideoUrl = ExtractFileName(tt.VideoUrl)
+                        };
+                    }).ToList(),
                 Answers = tile.Answers.OrderBy(a => a.SortOrder).Select(answer => new AnswerCloneData
                 {
                     AnswerId = answer.AnswerId,
@@ -123,6 +140,7 @@ public class StorySourceMapper : IStorySourceMapper
                         Quantity = token.Quantity
                     }).ToList()
                 }).ToList()
+            };
             }).ToList(),
             Topics = definition.Topics.Select(t => t.StoryTopicId).ToList(),
             AgeGroups = definition.AgeGroups.Select(ag => ag.StoryAgeGroupId).ToList(),
@@ -133,6 +151,28 @@ public class StorySourceMapper : IStorySourceMapper
     private static string? ExtractFileName(string? path)
     {
         return string.IsNullOrWhiteSpace(path) ? null : Path.GetFileName(path);
+    }
+
+    private static string? DeriveSeededAudioFilename(string? imageFilename)
+    {
+        if (string.IsNullOrWhiteSpace(imageFilename)) return null;
+        var baseName = Path.GetFileNameWithoutExtension(imageFilename);
+        if (string.IsNullOrWhiteSpace(baseName)) return null;
+        return $"{baseName}.wav";
+    }
+
+    private static bool LooksLikeSeededStory(StoryDefinition definition)
+    {
+        if (definition == null) return false;
+        if (LooksLikeSeededPath(definition.CoverImageUrl)) return true;
+        return definition.Tiles.Any(t => LooksLikeSeededPath(t.ImageUrl));
+    }
+
+    private static bool LooksLikeSeededPath(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path)) return false;
+        return path.Contains(SeedUserHelper.SeedUserEmail, StringComparison.OrdinalIgnoreCase)
+               || path.Contains("/tol/stories/", StringComparison.OrdinalIgnoreCase);
     }
 
     private static List<string> GetUnlockedHeroesFromCraft(StoryCraft craft)

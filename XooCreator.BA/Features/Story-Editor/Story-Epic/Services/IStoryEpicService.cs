@@ -14,8 +14,11 @@ public interface IStoryEpicService
     // Get epic as DTO
     Task<StoryEpicDto?> GetEpicAsync(string epicId, CancellationToken ct = default);
     
-    // Get epic state for preview
+    // Get epic state for preview (returns draft if exists, otherwise published)
     Task<StoryEpicStateDto?> GetEpicStateAsync(string epicId, CancellationToken ct = default);
+    
+    // Get published epic state for play mode (only returns published, no draft fallback)
+    Task<StoryEpicStateDto?> GetPublishedEpicStateAsync(string epicId, CancellationToken ct = default);
     
     // List epics by owner
     Task<List<StoryEpicListItemDto>> ListEpicsByOwnerAsync(Guid ownerUserId, Guid? currentUserId = null, CancellationToken ct = default);
@@ -34,5 +37,8 @@ public interface IStoryEpicService
     
     // Get all published epics
     Task<List<StoryEpicDto>> GetAllPublishedEpicsAsync(string locale, CancellationToken ct = default);
+    
+    // Unpublish epic (soft delete with asset cleanup)
+    Task UnpublishAsync(Guid ownerUserId, string epicId, string reason, CancellationToken ct = default);
 }
 

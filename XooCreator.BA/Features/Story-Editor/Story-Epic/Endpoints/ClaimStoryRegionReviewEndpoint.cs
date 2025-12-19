@@ -49,20 +49,20 @@ public class ClaimStoryRegionReviewEndpoint
             return TypedResults.Forbid();
         }
 
-        var region = await ep._repository.GetAsync(regionId, ct);
-        if (region == null) return TypedResults.NotFound();
+        var regionCraft = await ep._repository.GetCraftAsync(regionId, ct);
+        if (regionCraft == null) return TypedResults.NotFound();
 
-        if (region.Status != "sent_for_approval")
+        if (regionCraft.Status != "sent_for_approval")
         {
-            ep._logger.LogWarning("Region claim invalid state: regionId={RegionId} state={State}", regionId, region.Status);
+            ep._logger.LogWarning("Region claim invalid state: regionId={RegionId} state={State}", regionId, regionCraft.Status);
             return TypedResults.Conflict("Invalid state transition. Expected sent_for_approval.");
         }
 
         // Assign reviewer and move to in_review
-        region.Status = "in_review";
-        region.AssignedReviewerUserId = user.Id;
-        region.ReviewStartedAt = DateTime.UtcNow;
-        await ep._repository.SaveAsync(region, ct);
+        regionCraft.Status = "in_review";
+        regionCraft.AssignedReviewerUserId = user.Id;
+        regionCraft.ReviewStartedAt = DateTime.UtcNow;
+        await ep._repository.SaveCraftAsync(regionCraft, ct);
         
         ep._logger.LogInformation("Region claim: regionId={RegionId} reviewer={Reviewer}", regionId, user.Id);
         return TypedResults.Ok(new ClaimRegionResponse());

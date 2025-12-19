@@ -14,6 +14,8 @@ public record CreateEpicHeroRequest
 {
     public string? HeroId { get; init; }
     public required string Name { get; init; }
+    public required string LanguageCode { get; init; } // Language code for initial translation
+    public string? Description { get; init; } // Optional description for initial translation
 }
 
 public record CreateEpicHeroResponse
@@ -70,9 +72,9 @@ public class CreateEpicHeroEndpoint
 
         try
         {
-            var hero = await ep._heroService.CreateHeroAsync(user.Id, heroId, req.Name, ct);
-            ep._logger.LogInformation("CreateEpicHero: userId={UserId} heroId={HeroId} name={Name}", 
-                user.Id, heroId, req.Name);
+            var hero = await ep._heroService.CreateHeroAsync(user.Id, heroId, req.Name, req.LanguageCode, req.Description, ct);
+            ep._logger.LogInformation("CreateEpicHero: userId={UserId} heroId={HeroId} name={Name} languageCode={LanguageCode}", 
+                user.Id, heroId, req.Name, req.LanguageCode);
             
             return TypedResults.Ok(new CreateEpicHeroResponse { HeroId = hero.Id });
         }

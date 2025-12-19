@@ -15,6 +15,10 @@ public class StoryEpicHeroReferenceConfiguration : IEntityTypeConfiguration<Stor
         builder.Property(x => x.StoryId).HasMaxLength(200);
         builder.HasIndex(x => new { x.EpicId, x.HeroId }).IsUnique();
         builder.HasOne(x => x.Epic).WithMany().HasForeignKey(x => x.EpicId).OnDelete(DeleteBehavior.Cascade);
-        builder.HasOne(x => x.Hero).WithMany(x => x.EpicReferences).HasForeignKey(x => x.HeroId).OnDelete(DeleteBehavior.Restrict); // Prevent deletion if used in epics
+        // Foreign key to EpicHeroDefinition (for published epics)
+        builder.HasOne(x => x.Hero)
+            .WithMany()
+            .HasForeignKey(x => x.HeroId)
+            .OnDelete(DeleteBehavior.Restrict); // Prevent deletion if used in epics
     }
 }

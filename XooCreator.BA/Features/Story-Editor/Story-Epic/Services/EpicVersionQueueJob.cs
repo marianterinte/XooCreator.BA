@@ -32,16 +32,25 @@ public class EpicVersionQueueJob : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await _queueClient.CreateIfNotExistsAsync(cancellationToken: stoppingToken);
+        _logger.LogInformation("EpicVersionQueueJob initializing... QueueName={QueueName}", _queueClient.Name);
 
-        _logger.LogInformation("EpicVersionQueueJob started. QueueName={QueueName} QueueUri={QueueUri}", 
-            _queueClient.Name, _queueClient.Uri);
+        try
+        {
+            await _queueClient.CreateIfNotExistsAsync(cancellationToken: stoppingToken);
+            _logger.LogInformation("EpicVersionQueueJob started. QueueName={QueueName} QueueUri={QueueUri}", 
+                _queueClient.Name, _queueClient.Uri);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "EpicVersionQueueJob failed to create/connect to queue. QueueName={QueueName}. Retrying in 30 seconds.", _queueClient.Name);
+            await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+        }
 
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
-                var messages = await _queueClient.ReceiveMessagesAsync(maxMessages: 1, visibilityTimeout: TimeSpan.FromSeconds(30), cancellationToken: stoppingToken);
+                var messages = await _queueClient.ReceiveMessagesAsync(maxMessages: 1, visibilityTimeout: TimeSpan.FromSeconds(60), cancellationToken: stoppingToken);
                 if (messages?.Value == null || messages.Value.Length == 0)
                 {
                     // Log only every 10th check to avoid spam (every ~30 seconds)
@@ -170,9 +179,16 @@ public class EpicVersionQueueJob : BackgroundService
                         _logger.LogInformation("Processing EpicVersionJob: jobId={JobId} epicId={EpicId} baseVersion={BaseVersion}",
                             job.Id, job.EpicId, job.BaseVersion);
 
-                        // Create StoryEpicCraft from StoryEpicDefinition
-                        // TODO: Implement CreateVersionFromPublishedAsync in IStoryEpicService
-                        await epicService.CreateVersionFromPublishedAsync(job.OwnerUserId, job.EpicId, stoppingToken);
+                        try
+                        {
+                            await epicService.CreateVersionFromPublishedAsync(job.OwnerUserId, job.EpicId, stoppingToken);
+                            _logger.LogInformation("CreateVersionFromPublishedAsync completed: jobId={JobId} epicId={EpicId}", job.Id, job.EpicId);
+                        }
+                        catch (Exception versionEx)
+                        {
+                            _logger.LogError(versionEx, "CreateVersionFromPublishedAsync failed: jobId={JobId} epicId={EpicId}", job.Id, job.EpicId);
+                            throw;
+                        }
 
                         job.Status = EpicVersionJobStatus.Completed;
                         job.CompletedAtUtc = DateTime.UtcNow;
@@ -201,16 +217,31 @@ public class EpicVersionQueueJob : BackgroundService
                     }
                 } // Scope disposed here - DbContext and all scoped services are cleaned up
             }
-            catch (TaskCanceledException)
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {
-                // shutting down
+                _logger.LogInformation("EpicVersionQueueJob stopping due to cancellation request.");
+                break;
+            }
+            catch (TaskCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                _logger.LogInformation("EpicVersionQueueJob stopping due to task cancellation.");
+                break;
+            }
+            catch (Azure.RequestFailedException azureEx)
+            {
+                _logger.LogError(azureEx, "Azure Storage error in EpicVersionQueueJob. Status={Status} ErrorCode={ErrorCode}. Retrying in 10 seconds.",
+                    azureEx.Status, azureEx.ErrorCode);
+                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected error in EpicVersionQueueJob loop.");
-                await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+                _logger.LogError(ex, "Unexpected error in EpicVersionQueueJob loop. ExceptionType={ExceptionType}. Retrying in 10 seconds.",
+                    ex.GetType().FullName);
+                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
             }
         }
+
+        _logger.LogInformation("EpicVersionQueueJob has stopped. QueueName={QueueName}", _queueClient.Name);
     }
 
     // Note: QueueClient from Azure.Storage.Queues v12+ is stateless and doesn't implement IDisposable.

@@ -26,8 +26,9 @@ public class StoryEpicProgressService : IStoryEpicProgressService
 
     public async Task<StoryEpicStateWithProgressDto?> GetEpicStateWithProgressAsync(string epicId, Guid userId, CancellationToken ct = default)
     {
-        // Get epic state (without progress)
-        var epicState = await _epicService.GetEpicStateAsync(epicId, ct);
+        // Get PUBLISHED epic state for play mode (without progress)
+        // This ensures we use the published version, not the draft
+        var epicState = await _epicService.GetPublishedEpicStateAsync(epicId, ct);
         if (epicState == null) return null;
 
         // Get user progress
@@ -106,8 +107,9 @@ public class StoryEpicProgressService : IStoryEpicProgressService
             .FirstOrDefaultAsync(sd => sd.StoryId == storyId && sd.IsActive, ct);
         var storyCoverImageUrl = storyDefinition?.CoverImageUrl;
 
-        // Get epic state to evaluate new unlocked regions and heroes
-        var epicState = await _epicService.GetEpicStateAsync(epicId, ct);
+        // Get PUBLISHED epic state to evaluate new unlocked regions and heroes
+        // Use published version since we're in play mode completing a story
+        var epicState = await _epicService.GetPublishedEpicStateAsync(epicId, ct);
         if (epicState == null)
         {
             return new CompleteEpicStoryResult { Success = false, NewlyUnlockedRegions = new List<string>(), NewlyUnlockedHeroes = new List<UnlockedHeroDto>(), StoryCoverImageUrl = storyCoverImageUrl };
@@ -244,12 +246,17 @@ public class StoryEpicProgressService : IStoryEpicProgressService
     }
 
     /// <summary>
-    /// Gets hero image URL from EpicHeroes (epic heroes created in Story Editor)
+    /// Gets hero image URL from EpicHeroDefinitions (published) or EpicHeroCrafts (draft)
     /// </summary>
     private async Task<string> GetHeroImageUrlAsync(string heroId, CancellationToken ct = default)
     {
-        var epicHero = await _heroRepository.GetAsync(heroId, ct);
-        return epicHero?.ImageUrl ?? string.Empty;
+        // Try published definition first
+        var epicHeroDefinition = await _heroRepository.GetDefinitionAsync(heroId, ct);
+        if (epicHeroDefinition != null) return epicHeroDefinition.ImageUrl ?? string.Empty;
+        
+        // Fallback to craft (draft)
+        var epicHeroCraft = await _heroRepository.GetCraftAsync(heroId, ct);
+        return epicHeroCraft?.ImageUrl ?? string.Empty;
     }
 
     private async Task<List<UnlockedHeroDto>> EvaluateUnlockedHeroesAsync(

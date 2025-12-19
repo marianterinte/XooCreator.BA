@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
+using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.DTOs;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.Repositories;
@@ -17,86 +18,119 @@ public class StoryRegionService : IStoryRegionService
     private readonly IStoryRegionRepository _repository;
     private readonly XooDbContext _context;
     private readonly IBlobSasService _blobSas;
+    private readonly IRegionPublishedAssetCleanupService _assetCleanup;
     private readonly ILogger<StoryRegionService> _logger;
 
     public StoryRegionService(
         IStoryRegionRepository repository,
         XooDbContext context,
         IBlobSasService blobSas,
+        IRegionPublishedAssetCleanupService assetCleanup,
         ILogger<StoryRegionService> logger)
     {
         _repository = repository;
         _context = context;
         _blobSas = blobSas;
+        _assetCleanup = assetCleanup;
         _logger = logger;
     }
 
     public async Task<StoryRegionDto?> GetRegionAsync(string regionId, CancellationToken ct = default)
     {
-        var region = await _repository.GetAsync(regionId, ct);
-        if (region == null) return null;
-
-        return new StoryRegionDto
+        // Try to get craft first (draft/in-review/approved)
+        var craft = await _repository.GetCraftAsync(regionId, ct);
+        if (craft != null)
         {
-            Id = region.Id,
-            ImageUrl = region.ImageUrl,
-            Status = region.Status,
-            CreatedAt = region.CreatedAt,
-            UpdatedAt = region.UpdatedAt,
-            PublishedAtUtc = region.PublishedAtUtc,
-            AssignedReviewerUserId = region.AssignedReviewerUserId,
-            ReviewedByUserId = region.ReviewedByUserId,
-            ApprovedByUserId = region.ApprovedByUserId,
-            ReviewNotes = region.ReviewNotes,
-            ReviewStartedAt = region.ReviewStartedAt,
-            ReviewEndedAt = region.ReviewEndedAt,
-            Translations = region.Translations.Select(t => new StoryRegionTranslationDto
+            return new StoryRegionDto
             {
-                LanguageCode = t.LanguageCode,
-                Name = t.Name,
-                Description = t.Description
-            }).ToList()
-        };
+                Id = craft.Id,
+                ImageUrl = craft.ImageUrl,
+                Status = craft.Status,
+                CreatedAt = craft.CreatedAt,
+                UpdatedAt = craft.UpdatedAt,
+                PublishedAtUtc = null,
+                AssignedReviewerUserId = craft.AssignedReviewerUserId,
+                ReviewedByUserId = craft.ReviewedByUserId,
+                ApprovedByUserId = craft.ApprovedByUserId,
+                ReviewNotes = craft.ReviewNotes,
+                ReviewStartedAt = craft.ReviewStartedAt,
+                ReviewEndedAt = craft.ReviewEndedAt,
+                Translations = craft.Translations.Select(t => new StoryRegionTranslationDto
+                {
+                    LanguageCode = t.LanguageCode,
+                    Name = t.Name,
+                    Description = t.Description
+                }).ToList()
+            };
+        }
+
+        // Try to get definition (published)
+        var definition = await _repository.GetDefinitionAsync(regionId, ct);
+        if (definition != null)
+        {
+            return new StoryRegionDto
+            {
+                Id = definition.Id,
+                ImageUrl = definition.ImageUrl,
+                Status = definition.Status,
+                CreatedAt = definition.CreatedAt,
+                UpdatedAt = definition.UpdatedAt,
+                PublishedAtUtc = definition.PublishedAtUtc,
+                AssignedReviewerUserId = null,
+                ReviewedByUserId = null,
+                ApprovedByUserId = null,
+                ReviewNotes = null,
+                ReviewStartedAt = null,
+                ReviewEndedAt = null,
+                Translations = definition.Translations.Select(t => new StoryRegionTranslationDto
+                {
+                    LanguageCode = t.LanguageCode,
+                    Name = t.Name,
+                    Description = t.Description
+                }).ToList()
+            };
+        }
+
+        return null;
     }
 
-    public async Task<StoryRegionDto> CreateRegionAsync(Guid ownerUserId, string regionId, string name, CancellationToken ct = default)
+    public async Task<StoryRegionDto> CreateRegionAsync(Guid ownerUserId, string regionId, string name, string? description, string languageCode, CancellationToken ct = default)
     {
-        var region = await _repository.CreateAsync(ownerUserId, regionId, name, ct);
+        var regionCraft = await _repository.CreateCraftAsync(ownerUserId, regionId, name, ct);
         
-        // Create default translation (ro-ro) with the provided name
-        // Add translation directly to context instead of using SaveAsync to avoid concurrency issues
-        var defaultTranslation = new StoryRegionTranslation
+        // Create default translation with the provided name, description, and language code
+        var defaultTranslation = new StoryRegionCraftTranslation
         {
-            Id = Guid.NewGuid(),
-            StoryRegionId = region.Id,
-            LanguageCode = "ro-ro",
-            Name = name
+            StoryRegionCraftId = regionCraft.Id,
+            LanguageCode = languageCode.ToLowerInvariant(),
+            Name = name,
+            Description = description
         };
-        _context.StoryRegionTranslations.Add(defaultTranslation);
+        _context.StoryRegionCraftTranslations.Add(defaultTranslation);
         await _context.SaveChangesAsync(ct);
         
-        // Reload region with translations to return complete DTO
-        region = await _repository.GetAsync(regionId, ct);
-        if (region == null)
+        // Reload region craft with translations to return complete DTO
+        regionCraft = await _repository.GetCraftAsync(regionId, ct);
+        if (regionCraft == null)
         {
-            throw new InvalidOperationException($"Region '{regionId}' not found after creation");
+            throw new InvalidOperationException($"Region craft '{regionId}' not found after creation");
         }
         
         return new StoryRegionDto
         {
-            Id = region.Id,
-            ImageUrl = region.ImageUrl,
-            Status = region.Status,
-            CreatedAt = region.CreatedAt,
-            UpdatedAt = region.UpdatedAt,
-            PublishedAtUtc = region.PublishedAtUtc,
-            AssignedReviewerUserId = region.AssignedReviewerUserId,
-            ReviewedByUserId = region.ReviewedByUserId,
-            ApprovedByUserId = region.ApprovedByUserId,
-            ReviewNotes = region.ReviewNotes,
-            ReviewStartedAt = region.ReviewStartedAt,
-            ReviewEndedAt = region.ReviewEndedAt,
-            Translations = region.Translations.Select(t => new StoryRegionTranslationDto
+            Id = regionCraft.Id,
+            ImageUrl = regionCraft.ImageUrl,
+            Status = regionCraft.Status,
+            CreatedAt = regionCraft.CreatedAt,
+            UpdatedAt = regionCraft.UpdatedAt,
+            PublishedAtUtc = null,
+            AssignedReviewerUserId = regionCraft.AssignedReviewerUserId,
+            ReviewedByUserId = regionCraft.ReviewedByUserId,
+            ApprovedByUserId = regionCraft.ApprovedByUserId,
+            ReviewNotes = regionCraft.ReviewNotes,
+            ReviewStartedAt = regionCraft.ReviewStartedAt,
+            ReviewEndedAt = regionCraft.ReviewEndedAt,
+            Translations = regionCraft.Translations.Select(t => new StoryRegionTranslationDto
             {
                 LanguageCode = t.LanguageCode,
                 Name = t.Name,
@@ -107,20 +141,20 @@ public class StoryRegionService : IStoryRegionService
 
     public async Task SaveRegionAsync(Guid ownerUserId, string regionId, StoryRegionDto dto, CancellationToken ct = default)
     {
-        var region = await _repository.GetAsync(regionId, ct);
-        if (region == null)
+        var regionCraft = await _repository.GetCraftAsync(regionId, ct);
+        if (regionCraft == null)
         {
-            throw new InvalidOperationException($"Region '{regionId}' not found");
+            throw new InvalidOperationException($"Region craft '{regionId}' not found");
         }
 
-        if (region.OwnerUserId != ownerUserId)
+        if (regionCraft.OwnerUserId != ownerUserId)
         {
             throw new UnauthorizedAccessException($"User does not own region '{regionId}'");
         }
 
         // Update properties (non-translatable)
-        region.ImageUrl = dto.ImageUrl;
-        region.UpdatedAt = DateTime.UtcNow;
+        regionCraft.ImageUrl = dto.ImageUrl;
+        regionCraft.UpdatedAt = DateTime.UtcNow;
 
         // Update translations
         if (dto.Translations != null && dto.Translations.Count > 0)
@@ -128,19 +162,18 @@ public class StoryRegionService : IStoryRegionService
             foreach (var translationDto in dto.Translations)
             {
                 var lang = translationDto.LanguageCode.ToLowerInvariant();
-                var translation = region.Translations.FirstOrDefault(t => t.LanguageCode == lang);
+                var translation = regionCraft.Translations.FirstOrDefault(t => t.LanguageCode == lang);
                 
                 if (translation == null)
                 {
-                    translation = new StoryRegionTranslation
+                    translation = new StoryRegionCraftTranslation
                     {
-                        Id = Guid.NewGuid(),
-                        StoryRegionId = region.Id,
+                        StoryRegionCraftId = regionCraft.Id,
                         LanguageCode = lang,
                         Name = translationDto.Name,
                         Description = translationDto.Description
                     };
-                    _context.StoryRegionTranslations.Add(translation);
+                    _context.StoryRegionCraftTranslations.Add(translation);
                 }
                 else
                 {
@@ -150,44 +183,47 @@ public class StoryRegionService : IStoryRegionService
             }
         }
 
-        await _repository.SaveAsync(region, ct);
+        await _repository.SaveCraftAsync(regionCraft, ct);
     }
 
     public async Task<List<StoryRegionListItemDto>> ListRegionsByOwnerAsync(Guid ownerUserId, string? status = null, Guid? currentUserId = null, CancellationToken ct = default)
     {
-        var regions = await _repository.ListByOwnerAsync(ownerUserId, status, ct);
-        return regions.Select(r => MapToListItem(r, currentUserId)).ToList();
+        var regionCrafts = await _repository.ListCraftsByOwnerAsync(ownerUserId, status, ct);
+        return regionCrafts.Select(r => MapCraftToListItem(r, currentUserId)).ToList();
     }
 
     public async Task<List<StoryRegionListItemDto>> ListRegionsForEditorAsync(Guid currentUserId, string? status = null, CancellationToken ct = default)
     {
-        var ownedRegions = await _repository.ListByOwnerAsync(currentUserId, status, ct);
-        var publishedRegions = await _repository.ListPublishedAsync(currentUserId, ct);
-        var regionsForReview = await _repository.ListForReviewAsync(ct);
+        var ownedCrafts = await _repository.ListCraftsByOwnerAsync(currentUserId, status, ct);
+        var publishedDefinitions = await _repository.ListPublishedDefinitionsAsync(excludeOwnerId: null, ct); // Include owner's published regions
+        var craftsForReview = await _repository.ListCraftsForReviewAsync(ct);
 
-        var combined = new Dictionary<string, StoryRegion>(StringComparer.OrdinalIgnoreCase);
+        var combined = new List<StoryRegionListItemDto>();
 
-        foreach (var region in ownedRegions)
+        // Add owned crafts
+        foreach (var craft in ownedCrafts)
         {
-            combined[region.Id] = region;
+            combined.Add(MapCraftToListItem(craft, currentUserId));
         }
 
-        foreach (var region in publishedRegions)
+        // Add published definitions - always include, even if draft exists
+        // This allows published regions to remain visible when "new version" creates a draft
+        foreach (var definition in publishedDefinitions)
         {
-            combined[region.Id] = region;
+            combined.Add(MapDefinitionToListItem(definition, currentUserId));
         }
 
-        // Include regions sent_for_approval and in_review (for reviewers)
-        foreach (var region in regionsForReview)
+        // Add crafts for review (avoid duplicates)
+        var ownedIds = new HashSet<string>(ownedCrafts.Select(c => c.Id), StringComparer.OrdinalIgnoreCase);
+        foreach (var craft in craftsForReview)
         {
-            if (!combined.ContainsKey(region.Id))
+            if (!ownedIds.Contains(craft.Id))
             {
-                combined[region.Id] = region;
+                combined.Add(MapCraftToListItem(craft, currentUserId));
             }
         }
 
-        return combined.Values
-            .Select(r => MapToListItem(r, currentUserId))
+        return combined
             .OrderByDescending(r => r.IsOwnedByCurrentUser)
             .ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
             .ToList();
@@ -195,18 +231,18 @@ public class StoryRegionService : IStoryRegionService
 
     public async Task DeleteRegionAsync(Guid ownerUserId, string regionId, CancellationToken ct = default)
     {
-        var region = await _repository.GetAsync(regionId, ct);
-        if (region == null)
+        var regionCraft = await _repository.GetCraftAsync(regionId, ct);
+        if (regionCraft == null)
         {
-            throw new InvalidOperationException($"Region '{regionId}' not found");
+            throw new InvalidOperationException($"Region craft '{regionId}' not found");
         }
 
-        if (region.OwnerUserId != ownerUserId)
+        if (regionCraft.OwnerUserId != ownerUserId)
         {
             throw new UnauthorizedAccessException($"User does not own region '{regionId}'");
         }
 
-        var currentStatus = StoryStatusExtensions.FromDb(region.Status);
+        var currentStatus = StoryStatusExtensions.FromDb(regionCraft.Status);
 
         // Only allow deletion of draft or changes_requested regions
         if (currentStatus != StoryStatus.Draft && currentStatus != StoryStatus.ChangesRequested)
@@ -219,164 +255,249 @@ public class StoryRegionService : IStoryRegionService
             throw new InvalidOperationException($"Cannot delete region '{regionId}' in '{statusName}' status.");
         }
 
-        // Check if region is used in any epic (for extra safety)
-        var isUsed = await _repository.IsUsedInEpicsAsync(regionId, ct);
-        if (isUsed && currentStatus == StoryStatus.Published)
-        {
-            throw new InvalidOperationException($"Cannot delete published region '{regionId}' that is used in epics");
-        }
-
-        await _repository.DeleteAsync(regionId, ct);
+        await _repository.DeleteCraftAsync(regionId, ct);
     }
 
     public async Task SubmitForReviewAsync(Guid ownerUserId, string regionId, CancellationToken ct = default)
     {
-        var region = await _repository.GetAsync(regionId, ct);
-        if (region == null)
+        var regionCraft = await _repository.GetCraftAsync(regionId, ct);
+        if (regionCraft == null)
         {
-            throw new InvalidOperationException($"Region '{regionId}' not found");
+            throw new InvalidOperationException($"Region craft '{regionId}' not found");
         }
 
-        if (region.OwnerUserId != ownerUserId)
+        if (regionCraft.OwnerUserId != ownerUserId)
         {
             throw new UnauthorizedAccessException($"User does not own region '{regionId}'");
         }
 
-        var currentStatus = StoryStatusExtensions.FromDb(region.Status);
+        var currentStatus = StoryStatusExtensions.FromDb(regionCraft.Status);
         if (currentStatus != StoryStatus.Draft && currentStatus != StoryStatus.ChangesRequested)
         {
             throw new InvalidOperationException($"Invalid state transition. Expected Draft or ChangesRequested, got {currentStatus}");
         }
 
-        region.Status = StoryStatus.SentForApproval.ToDb();
-        region.AssignedReviewerUserId = null;
-        region.ReviewNotes = null;
-        region.UpdatedAt = DateTime.UtcNow;
+        regionCraft.Status = StoryStatus.SentForApproval.ToDb();
+        regionCraft.AssignedReviewerUserId = null;
+        regionCraft.ReviewNotes = null;
+        regionCraft.UpdatedAt = DateTime.UtcNow;
 
-        await _repository.SaveAsync(region, ct);
-        _logger.LogInformation("Region submitted for review: regionId={RegionId}", regionId);
+        await _repository.SaveCraftAsync(regionCraft, ct);
+        _logger.LogInformation("Region craft submitted for review: regionId={RegionId}", regionId);
     }
 
     public async Task ReviewAsync(Guid reviewerUserId, string regionId, bool approve, string? notes, CancellationToken ct = default)
     {
-        var region = await _repository.GetAsync(regionId, ct);
-        if (region == null)
+        var regionCraft = await _repository.GetCraftAsync(regionId, ct);
+        if (regionCraft == null)
         {
-            throw new InvalidOperationException($"Region '{regionId}' not found");
+            throw new InvalidOperationException($"Region craft '{regionId}' not found");
         }
 
-        var currentStatus = StoryStatusExtensions.FromDb(region.Status);
+        var currentStatus = StoryStatusExtensions.FromDb(regionCraft.Status);
         if (currentStatus != StoryStatus.InReview && currentStatus != StoryStatus.SentForApproval)
         {
             throw new InvalidOperationException($"Invalid state transition. Expected InReview or SentForApproval, got {currentStatus}");
         }
 
         var newStatus = approve ? StoryStatus.Approved : StoryStatus.ChangesRequested;
-        region.Status = newStatus.ToDb();
-        region.ReviewNotes = string.IsNullOrWhiteSpace(notes) ? region.ReviewNotes : notes;
-        region.ReviewEndedAt = DateTime.UtcNow;
-        region.ReviewedByUserId = reviewerUserId;
+        regionCraft.Status = newStatus.ToDb();
+        regionCraft.ReviewNotes = string.IsNullOrWhiteSpace(notes) ? regionCraft.ReviewNotes : notes;
+        regionCraft.ReviewEndedAt = DateTime.UtcNow;
+        regionCraft.ReviewedByUserId = reviewerUserId;
         if (approve)
         {
-            region.ApprovedByUserId = reviewerUserId;
+            regionCraft.ApprovedByUserId = reviewerUserId;
         }
-        region.UpdatedAt = DateTime.UtcNow;
+        regionCraft.UpdatedAt = DateTime.UtcNow;
 
-        await _repository.SaveAsync(region, ct);
-        _logger.LogInformation("Region reviewed: regionId={RegionId} approved={Approve}", regionId, approve);
+        await _repository.SaveCraftAsync(regionCraft, ct);
+        _logger.LogInformation("Region craft reviewed: regionId={RegionId} approved={Approve}", regionId, approve);
     }
 
     public async Task PublishAsync(Guid ownerUserId, string regionId, string ownerEmail, CancellationToken ct = default)
     {
-        var region = await _repository.GetAsync(regionId, ct);
-        if (region == null)
+        var regionCraft = await _repository.GetCraftAsync(regionId, ct);
+        if (regionCraft == null)
         {
-            throw new InvalidOperationException($"Region '{regionId}' not found");
+            throw new InvalidOperationException($"Region craft '{regionId}' not found");
         }
 
-        if (region.OwnerUserId != ownerUserId)
+        if (regionCraft.OwnerUserId != ownerUserId)
         {
             throw new UnauthorizedAccessException($"User does not own region '{regionId}'");
         }
 
-        var currentStatus = StoryStatusExtensions.FromDb(region.Status);
+        var currentStatus = StoryStatusExtensions.FromDb(regionCraft.Status);
         if (currentStatus != StoryStatus.Approved)
         {
             throw new InvalidOperationException($"Cannot publish region. Expected Approved, got {currentStatus}");
         }
 
         // Copy image asset synchronously if exists
-        if (!string.IsNullOrWhiteSpace(region.ImageUrl))
+        string? publishedImageUrl = regionCraft.ImageUrl;
+        if (!string.IsNullOrWhiteSpace(regionCraft.ImageUrl))
         {
-            var publishedImageUrl = await PublishImageAsync(regionId, region.ImageUrl, ownerEmail, ct);
-            region.ImageUrl = publishedImageUrl;
+            publishedImageUrl = await PublishImageAsync(regionId, regionCraft.ImageUrl, ownerEmail, ct);
         }
 
-        region.Status = StoryStatus.Published.ToDb();
-        region.PublishedAtUtc = DateTime.UtcNow;
-        region.UpdatedAt = DateTime.UtcNow;
+        // Check if definition already exists
+        var existingDefinition = await _repository.GetDefinitionAsync(regionId, ct);
+        StoryRegionDefinition definition;
+        
+        if (existingDefinition == null)
+        {
+            // Create new definition
+            definition = new StoryRegionDefinition
+            {
+                Id = regionCraft.Id,
+                Name = regionCraft.Name,
+                ImageUrl = publishedImageUrl,
+                OwnerUserId = regionCraft.OwnerUserId,
+                Status = "published",
+                CreatedAt = regionCraft.CreatedAt,
+                UpdatedAt = DateTime.UtcNow,
+                PublishedAtUtc = DateTime.UtcNow,
+                Version = 1
+            };
+            _context.StoryRegionDefinitions.Add(definition);
+        }
+        else
+        {
+            // Update existing definition
+            existingDefinition.Name = regionCraft.Name;
+            existingDefinition.ImageUrl = publishedImageUrl;
+            existingDefinition.UpdatedAt = DateTime.UtcNow;
+            existingDefinition.PublishedAtUtc = DateTime.UtcNow;
+            existingDefinition.Version += 1;
+            definition = existingDefinition;
+            
+            // Remove old translations
+            var oldTranslations = await _context.StoryRegionDefinitionTranslations
+                .Where(t => t.StoryRegionDefinitionId == regionId)
+                .ToListAsync(ct);
+            _context.StoryRegionDefinitionTranslations.RemoveRange(oldTranslations);
+        }
 
-        await _repository.SaveAsync(region, ct);
-        _logger.LogInformation("Region published: regionId={RegionId}", regionId);
+        // Copy translations from craft to definition
+        foreach (var craftTranslation in regionCraft.Translations)
+        {
+            var definitionTranslation = new StoryRegionDefinitionTranslation
+            {
+                StoryRegionDefinitionId = definition.Id,
+                LanguageCode = craftTranslation.LanguageCode,
+                Name = craftTranslation.Name,
+                Description = craftTranslation.Description
+            };
+            _context.StoryRegionDefinitionTranslations.Add(definitionTranslation);
+        }
+
+        await _context.SaveChangesAsync(ct);
+        
+        // Cleanup: Delete StoryRegionCraft after successful publish (similar to Epics)
+        try
+        {
+            // Reload craft in current context to ensure it's tracked properly
+            var craftToDelete = await _context.StoryRegionCrafts
+                .FirstOrDefaultAsync(c => c.Id == regionId, ct);
+            
+            if (craftToDelete != null)
+            {
+                _context.StoryRegionCrafts.Remove(craftToDelete);
+                await _context.SaveChangesAsync(ct);
+                _logger.LogInformation("Region published and craft cleaned up: regionId={RegionId} version={Version}", regionId, definition.Version);
+            }
+            else
+            {
+                _logger.LogWarning("StoryRegionCraft not found for cleanup: regionId={RegionId}", regionId);
+            }
+        }
+        catch (Exception cleanupEx)
+        {
+            _logger.LogWarning(cleanupEx, "Failed to cleanup region craft after publish: regionId={RegionId}, but publish succeeded", regionId);
+            // Don't fail if cleanup fails - publish was successful
+        }
     }
 
     public async Task RetractAsync(Guid ownerUserId, string regionId, CancellationToken ct = default)
     {
-        var region = await _repository.GetAsync(regionId, ct);
-        if (region == null)
+        var regionCraft = await _repository.GetCraftAsync(regionId, ct);
+        if (regionCraft == null)
         {
-            throw new InvalidOperationException($"Region '{regionId}' not found");
+            throw new InvalidOperationException($"Region craft '{regionId}' not found");
         }
 
-        if (region.OwnerUserId != ownerUserId)
+        if (regionCraft.OwnerUserId != ownerUserId)
         {
             throw new UnauthorizedAccessException($"User does not own region '{regionId}'");
         }
 
-        var currentStatus = StoryStatusExtensions.FromDb(region.Status);
+        var currentStatus = StoryStatusExtensions.FromDb(regionCraft.Status);
         if (currentStatus != StoryStatus.SentForApproval && currentStatus != StoryStatus.Approved)
         {
             throw new InvalidOperationException($"Cannot retract region. Expected SentForApproval or Approved, got {currentStatus}");
         }
 
-        // Clear all review-related fields and revert to Draft (similar to RetractStoryEndpoint)
-        region.Status = StoryStatus.Draft.ToDb();
-        region.AssignedReviewerUserId = null;
-        region.ReviewNotes = null;
-        region.ReviewStartedAt = null;
-        region.ReviewEndedAt = null;
+        // Clear all review-related fields and revert to Draft
+        regionCraft.Status = StoryStatus.Draft.ToDb();
+        regionCraft.AssignedReviewerUserId = null;
+        regionCraft.ReviewNotes = null;
+        regionCraft.ReviewStartedAt = null;
+        regionCraft.ReviewEndedAt = null;
         if (currentStatus == StoryStatus.Approved)
         {
-            region.ApprovedByUserId = null;
+            regionCraft.ApprovedByUserId = null;
         }
-        region.ReviewedByUserId = null; // Reset reviewed by as well
-        region.UpdatedAt = DateTime.UtcNow;
+        regionCraft.ReviewedByUserId = null;
+        regionCraft.UpdatedAt = DateTime.UtcNow;
 
-        await _repository.SaveAsync(region, ct);
-        _logger.LogInformation("Region retracted: regionId={RegionId}", regionId);
+        await _repository.SaveCraftAsync(regionCraft, ct);
+        _logger.LogInformation("Region craft retracted: regionId={RegionId}", regionId);
     }
 
-    private StoryRegionListItemDto MapToListItem(StoryRegion region, Guid? currentUserId)
+    private StoryRegionListItemDto MapCraftToListItem(StoryRegionCraft craft, Guid? currentUserId)
     {
-        var firstTranslation = region.Translations.FirstOrDefault();
-        var name = firstTranslation?.Name ?? region.Name ?? string.Empty;
+        var firstTranslation = craft.Translations.FirstOrDefault();
+        var name = firstTranslation?.Name ?? string.Empty;
 
-        var isOwnedByCurrentUser = currentUserId.HasValue && region.OwnerUserId == currentUserId.Value;
+        var isOwnedByCurrentUser = currentUserId.HasValue && craft.OwnerUserId == currentUserId.Value;
         var isAssignedToCurrentUser = currentUserId.HasValue &&
-                                      region.AssignedReviewerUserId.HasValue &&
-                                      region.AssignedReviewerUserId.Value == currentUserId.Value;
+                                      craft.AssignedReviewerUserId.HasValue &&
+                                      craft.AssignedReviewerUserId.Value == currentUserId.Value;
 
         return new StoryRegionListItemDto
         {
-            Id = region.Id,
+            Id = craft.Id,
             Name = name,
-            ImageUrl = region.ImageUrl,
-            Status = region.Status,
-            CreatedAt = region.CreatedAt,
-            UpdatedAt = region.UpdatedAt,
-            PublishedAtUtc = region.PublishedAtUtc,
-            AssignedReviewerUserId = region.AssignedReviewerUserId,
+            ImageUrl = craft.ImageUrl,
+            Status = craft.Status,
+            CreatedAt = craft.CreatedAt,
+            UpdatedAt = craft.UpdatedAt,
+            PublishedAtUtc = null,
+            AssignedReviewerUserId = craft.AssignedReviewerUserId,
             IsAssignedToCurrentUser = isAssignedToCurrentUser,
+            IsOwnedByCurrentUser = isOwnedByCurrentUser
+        };
+    }
+
+    private StoryRegionListItemDto MapDefinitionToListItem(StoryRegionDefinition definition, Guid? currentUserId)
+    {
+        var firstTranslation = definition.Translations.FirstOrDefault();
+        var name = firstTranslation?.Name ?? string.Empty;
+
+        var isOwnedByCurrentUser = currentUserId.HasValue && definition.OwnerUserId == currentUserId.Value;
+
+        return new StoryRegionListItemDto
+        {
+            Id = definition.Id,
+            Name = name,
+            ImageUrl = definition.ImageUrl,
+            Status = definition.Status,
+            CreatedAt = definition.CreatedAt,
+            UpdatedAt = definition.UpdatedAt,
+            PublishedAtUtc = definition.PublishedAtUtc,
+            AssignedReviewerUserId = null,
+            IsAssignedToCurrentUser = false,
             IsOwnedByCurrentUser = isOwnedByCurrentUser
         };
     }
@@ -432,6 +553,145 @@ public class StoryRegionService : IStoryRegionService
     {
         if (string.IsNullOrWhiteSpace(path)) return false;
         return path.StartsWith("images/", StringComparison.OrdinalIgnoreCase);
+    }
+
+    public async Task CreateVersionFromPublishedAsync(Guid ownerUserId, string regionId, CancellationToken ct = default)
+    {
+        // Load published StoryRegionDefinition with all related data
+        var definition = await _context.StoryRegionDefinitions
+            .Include(d => d.Translations)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(d => d.Id == regionId, ct);
+
+        if (definition == null)
+        {
+            throw new InvalidOperationException($"Published region '{regionId}' not found");
+        }
+
+        // Verify ownership
+        if (definition.OwnerUserId != ownerUserId)
+        {
+            throw new UnauthorizedAccessException($"User does not own region '{regionId}'");
+        }
+
+        // Check if region is published
+        if (definition.Status != "published")
+        {
+            throw new InvalidOperationException($"Region '{regionId}' is not published (status: {definition.Status})");
+        }
+
+        // Check if draft already exists (use AsNoTracking to avoid tracking conflicts)
+        var existingCraft = await _context.StoryRegionCrafts
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.Id == regionId, ct);
+        
+        if (existingCraft != null)
+        {
+            if (existingCraft.Status != "published")
+            {
+                throw new InvalidOperationException("A draft already exists for this region. Please edit or publish it first.");
+            }
+            
+            // If status is "published", this is a leftover craft that should have been deleted
+            // Delete it now before creating the new version
+            _logger.LogWarning("Found leftover published craft for regionId={RegionId}, deleting it before creating new version", regionId);
+            var craftToDelete = await _context.StoryRegionCrafts.FirstOrDefaultAsync(c => c.Id == regionId, ct);
+            if (craftToDelete != null)
+            {
+                _context.StoryRegionCrafts.Remove(craftToDelete);
+                await _context.SaveChangesAsync(ct);
+            }
+        }
+
+        // Create new StoryRegionCraft from StoryRegionDefinition
+        var craft = new StoryRegionCraft
+        {
+            Id = definition.Id,
+            Name = definition.Name,
+            ImageUrl = definition.ImageUrl,
+            OwnerUserId = definition.OwnerUserId,
+            Status = "draft",
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+            BaseVersion = definition.Version,
+            LastDraftVersion = 0
+        };
+
+        // Copy Translations
+        foreach (var defTranslation in definition.Translations)
+        {
+            craft.Translations.Add(new StoryRegionCraftTranslation
+            {
+                StoryRegionCraftId = craft.Id,
+                LanguageCode = defTranslation.LanguageCode,
+                Name = defTranslation.Name,
+                Description = defTranslation.Description
+            });
+        }
+
+        _context.StoryRegionCrafts.Add(craft);
+        await _context.SaveChangesAsync(ct);
+
+        _logger.LogInformation("Created new version from published region: regionId={RegionId} baseVersion={BaseVersion}", regionId, definition.Version);
+    }
+
+    public async Task UnpublishAsync(Guid ownerUserId, string regionId, string reason, CancellationToken ct = default)
+    {
+        var definition = await _repository.GetDefinitionAsync(regionId, ct);
+        if (definition == null)
+        {
+            throw new InvalidOperationException($"Published region '{regionId}' not found");
+        }
+
+        if (definition.OwnerUserId != ownerUserId)
+        {
+            throw new UnauthorizedAccessException($"User does not own region '{regionId}'");
+        }
+
+        if (definition.Status != "published" || !definition.IsActive)
+        {
+            throw new InvalidOperationException($"Cannot unpublish region. Expected Published and Active, got status '{definition.Status}' and IsActive '{definition.IsActive}'");
+        }
+
+        // Mark as unpublished (destructive - will delete assets)
+        definition.Status = "unpublished";
+        definition.IsActive = false;
+        definition.UpdatedAt = DateTime.UtcNow;
+
+        // TODO: Create separate RegionPublicationAudits table for audit logging
+        // For now, we skip audit logging since StoryPublicationAudits has FK to StoryDefinitions
+
+        await _context.SaveChangesAsync(ct);
+        
+        // Extract owner email from ImageUrl and delete published assets from blob storage
+        var ownerEmail = TryExtractOwnerEmail(definition);
+        if (!string.IsNullOrWhiteSpace(ownerEmail))
+        {
+            await _assetCleanup.DeletePublishedAssetsAsync(ownerEmail, regionId, ct);
+        }
+        else
+        {
+            _logger.LogWarning("Could not determine owner email for published assets cleanup. regionId={RegionId}", regionId);
+        }
+        
+        _logger.LogInformation("Region unpublished and assets deleted: regionId={RegionId} reason={Reason}", regionId, reason);
+    }
+
+    private string? TryExtractOwnerEmail(StoryRegionDefinition definition)
+    {
+        if (string.IsNullOrWhiteSpace(definition.ImageUrl))
+        {
+            return null;
+        }
+
+        // ImageUrl format: images/tales-of-alchimalia/regions/{ownerEmail}/{regionId}/...
+        var parts = definition.ImageUrl.Split('/', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length >= 5 && parts[0] == "images" && parts[1] == "tales-of-alchimalia" && parts[2] == "regions")
+        {
+            return parts[3]; // ownerEmail
+        }
+
+        return null;
     }
 }
 
