@@ -35,7 +35,6 @@ public class StoryRegion
     
     // Navigation properties
     public AlchimaliaUser Owner { get; set; } = null!;
-    public ICollection<StoryEpicRegionReference> EpicReferences { get; set; } = new List<StoryEpicRegionReference>();
     public ICollection<StoryRegionTranslation> Translations { get; set; } = new List<StoryRegionTranslation>();
 }
 
