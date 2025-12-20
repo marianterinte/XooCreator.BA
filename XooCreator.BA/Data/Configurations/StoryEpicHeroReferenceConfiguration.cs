@@ -8,6 +8,7 @@ public class StoryEpicHeroReferenceConfiguration : IEntityTypeConfiguration<Stor
 {
     public void Configure(EntityTypeBuilder<StoryEpicHeroReference> builder)
     {
+        builder.ToTable("StoryEpicHeroReferences", "alchimalia_schema");
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Id).ValueGeneratedOnAdd();
         builder.Property(x => x.EpicId).HasMaxLength(100).IsRequired();

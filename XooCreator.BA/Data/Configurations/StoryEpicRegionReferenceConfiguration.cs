@@ -8,6 +8,7 @@ public class StoryEpicRegionReferenceConfiguration : IEntityTypeConfiguration<St
 {
     public void Configure(EntityTypeBuilder<StoryEpicRegionReference> builder)
     {
+        builder.ToTable("StoryEpicRegionReferences", "alchimalia_schema");
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Id).ValueGeneratedOnAdd();
         builder.Property(x => x.EpicId).HasMaxLength(100).IsRequired();
