@@ -5,12 +5,18 @@ namespace XooCreator.BA.Features.StoryEditor.StoryEpic.Services;
 
 public interface IHeroPublishedAssetCleanupService
 {
-    Task DeletePublishedAssetsAsync(string ownerEmail, string heroId, CancellationToken ct);
+    Task DeletePublishedAssetsAsync(string heroId, CancellationToken ct);
 }
 
 public class HeroPublishedAssetCleanupService : IHeroPublishedAssetCleanupService
 {
-    private static readonly string[] Categories = { "images", "audio", "video" };
+    private static readonly string[] Prefixes =
+    {
+        // NEW published structure for hero assets
+        "images/heroes/",
+        "audio/heroes/",
+        "video/heroes/"
+    };
 
     private readonly IBlobSasService _sas;
     private readonly ILogger<HeroPublishedAssetCleanupService> _logger;
@@ -23,11 +29,11 @@ public class HeroPublishedAssetCleanupService : IHeroPublishedAssetCleanupServic
         _logger = logger;
     }
 
-    public async Task DeletePublishedAssetsAsync(string ownerEmail, string heroId, CancellationToken ct)
+    public async Task DeletePublishedAssetsAsync(string heroId, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(ownerEmail) || string.IsNullOrWhiteSpace(heroId))
+        if (string.IsNullOrWhiteSpace(heroId))
         {
-            _logger.LogWarning("Cannot cleanup published hero assets. Missing ownerEmail or heroId. heroId={HeroId}", heroId);
+            _logger.LogWarning("Cannot cleanup published hero assets. Missing heroId.");
             return;
         }
 
@@ -36,9 +42,9 @@ public class HeroPublishedAssetCleanupService : IHeroPublishedAssetCleanupServic
             var container = _sas.GetContainerClient(_sas.PublishedContainer);
             var deleted = 0;
 
-            foreach (var category in Categories)
+            foreach (var prefixBase in Prefixes)
             {
-                var prefix = $"{category}/tales-of-alchimalia/heroes/{ownerEmail}/{heroId}/";
+                var prefix = $"{prefixBase}{heroId}/";
                 await foreach (var blob in container.GetBlobsAsync(prefix: prefix, cancellationToken: ct))
                 {
                     var blobClient = container.GetBlobClient(blob.Name);
@@ -48,9 +54,8 @@ public class HeroPublishedAssetCleanupService : IHeroPublishedAssetCleanupServic
             }
 
             _logger.LogInformation(
-                "Published hero assets cleanup complete: heroId={HeroId} ownerEmail={OwnerEmail} deletedCount={Count}",
+                "Published hero assets cleanup complete: heroId={HeroId} deletedCount={Count}",
                 heroId,
-                ownerEmail,
                 deleted);
         }
         catch (OperationCanceledException)
@@ -60,7 +65,7 @@ public class HeroPublishedAssetCleanupService : IHeroPublishedAssetCleanupServic
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to cleanup published hero assets: heroId={HeroId} ownerEmail={OwnerEmail}", heroId, ownerEmail);
+            _logger.LogError(ex, "Failed to cleanup published hero assets: heroId={HeroId}", heroId);
             throw;
         }
     }
