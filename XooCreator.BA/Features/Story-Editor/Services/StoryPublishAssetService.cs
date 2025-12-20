@@ -95,10 +95,22 @@ public class StoryPublishAssetService : IStoryPublishAssetService
         string storyId,
         CancellationToken ct)
     {
+        var successCount = 0;
+        var failedAssets = new List<string>();
+        
         foreach (var asset in assets)
         {
             var sourceResult = await FindSourceAssetAsync(asset, userEmail, storyId, ct);
-            if (sourceResult.Result.HasError) return sourceResult.Result;
+            if (sourceResult.Result.HasError)
+            {
+                // Log and continue with other assets instead of failing immediately
+                // This allows multi-language stories to publish even if some audio files are missing
+                _logger.LogWarning(
+                    "Skipping missing asset during publish: storyId={StoryId} filename={Filename} type={Type} lang={Lang}",
+                    storyId, asset.Filename, asset.Type, asset.Lang);
+                failedAssets.Add($"{asset.Filename} ({asset.Lang ?? "common"})");
+                continue;
+            }
 
             var copyResult = await CopyAssetWithPollingAsync(
                 sourceResult.SourceBlobPath!,
@@ -106,9 +118,28 @@ public class StoryPublishAssetService : IStoryPublishAssetService
                 userEmail,
                 storyId,
                 ct);
-            if (copyResult.HasError) return copyResult;
+            
+            if (copyResult.HasError)
+            {
+                _logger.LogWarning(
+                    "Failed to copy asset during publish: storyId={StoryId} filename={Filename} type={Type} lang={Lang} error={Error}",
+                    storyId, asset.Filename, asset.Type, asset.Lang, copyResult.ErrorMessage);
+                failedAssets.Add($"{asset.Filename} ({asset.Lang ?? "common"})");
+                continue;
+            }
+            
+            successCount++;
         }
 
+        if (failedAssets.Count > 0)
+        {
+            _logger.LogWarning(
+                "Some assets failed to copy during publish: storyId={StoryId} successCount={SuccessCount} failedCount={FailedCount} failedAssets={FailedAssets}",
+                storyId, successCount, failedAssets.Count, string.Join(", ", failedAssets));
+        }
+
+        // Return success - missing assets are non-blocking (allows partial publish)
+        // The audio/video for missing languages simply won't be available
         return AssetCopyResult.Success();
     }
 

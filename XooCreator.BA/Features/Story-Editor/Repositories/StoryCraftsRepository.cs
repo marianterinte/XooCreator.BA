@@ -255,11 +255,25 @@ public class StoryCraftsRepository : IStoryCraftsRepository
     public async Task<List<string>> GetAvailableLanguagesAsync(string storyId, CancellationToken ct = default)
     {
         var id = (storyId ?? string.Empty).Trim();
+        
+        // First try to get languages from craft (draft)
         var languages = await _context.StoryCraftTranslations
             .Where(x => x.StoryCraft.StoryId == id)
             .Select(x => x.LanguageCode)
             .Distinct()
             .ToListAsync(ct);
+        
+        // If no craft exists (e.g., published story with deleted draft), 
+        // get languages from definition (published)
+        if (languages.Count == 0)
+        {
+            languages = await _context.StoryDefinitionTranslations
+                .Where(x => x.StoryDefinition.StoryId == id)
+                .Select(x => x.LanguageCode)
+                .Distinct()
+                .ToListAsync(ct);
+        }
+        
         return languages;
     }
 }
