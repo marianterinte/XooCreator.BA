@@ -40,7 +40,6 @@ public class EpicHero
     
     // Navigation properties
     public AlchimaliaUser Owner { get; set; } = null!;
-    public ICollection<StoryEpicHeroReference> EpicReferences { get; set; } = new List<StoryEpicHeroReference>();
     public ICollection<EpicHeroTranslation> Translations { get; set; } = new List<EpicHeroTranslation>();
 }
 

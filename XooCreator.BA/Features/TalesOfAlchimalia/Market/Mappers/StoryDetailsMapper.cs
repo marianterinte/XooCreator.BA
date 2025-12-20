@@ -124,7 +124,8 @@ public class StoryDetailsMapper
             TotalReviews = totalReviews,
             UserReview = userReview,
             ReadersCount = readersCount,
-            IsEvaluative = def.IsEvaluative
+            IsEvaluative = def.IsEvaluative,
+            IsPartOfEpic = def.IsPartOfEpic
         };
     }
 

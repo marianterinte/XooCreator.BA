@@ -242,6 +242,14 @@ public class EpicHeroService : IEpicHeroService
 
         var combined = new List<EpicHeroListItemDto>();
 
+        _logger.LogInformation(
+            "ListHeroesForEditor: userId={UserId} status={Status} ownedCrafts={OwnedCrafts} publishedDefinitions={Published} craftsForReview={ForReview}",
+            currentUserId,
+            status ?? "(null)",
+            ownedCrafts.Count,
+            publishedDefinitions.Count,
+            craftsForReview.Count);
+
         // Add owned crafts
         foreach (var craft in ownedCrafts)
         {
@@ -468,15 +476,40 @@ public class EpicHeroService : IEpicHeroService
         }
 
         // Copy translations from craft to definition
-        foreach (var craftTranslation in heroCraft.Translations)
+        if (heroCraft.Translations == null || heroCraft.Translations.Count == 0)
         {
+            throw new InvalidOperationException("Cannot publish hero. No translations found.");
+        }
+
+        // Normalize language codes and prevent intermittent publish failures caused by duplicates (case/whitespace)
+        var normalizedTranslations = heroCraft.Translations
+            .Select(t => new
+            {
+                Translation = t,
+                Lang = (t.LanguageCode ?? string.Empty).Trim().ToLowerInvariant()
+            })
+            .Where(x => !string.IsNullOrWhiteSpace(x.Lang))
+            .GroupBy(x => x.Lang, StringComparer.OrdinalIgnoreCase)
+            .Select(g => g.First())
+            .ToList();
+
+        if (normalizedTranslations.Count == 0)
+        {
+            throw new InvalidOperationException("Cannot publish hero. All translations have empty language code.");
+        }
+
+        foreach (var item in normalizedTranslations)
+        {
+            var craftTranslation = item.Translation;
+            var lang = item.Lang;
+
             // Copy greeting audio from draft to published container if exists
             string? publishedAudioUrl = craftTranslation.GreetingAudioUrl;
             if (!string.IsNullOrWhiteSpace(craftTranslation.GreetingAudioUrl))
             {
                 try
                 {
-                    publishedAudioUrl = await PublishGreetingAudioAsync(heroId, craftTranslation.GreetingAudioUrl, craftTranslation.LanguageCode, ownerEmail, ct);
+                    publishedAudioUrl = await PublishGreetingAudioAsync(heroId, craftTranslation.GreetingAudioUrl, lang, ownerEmail, ct);
                 }
                 catch (Exception ex)
                 {
@@ -488,7 +521,7 @@ public class EpicHeroService : IEpicHeroService
             var definitionTranslation = new EpicHeroDefinitionTranslation
             {
                 EpicHeroDefinitionId = definition.Id,
-                LanguageCode = craftTranslation.LanguageCode,
+                LanguageCode = lang,
                 Name = craftTranslation.Name,
                 Description = craftTranslation.Description,
                 GreetingText = craftTranslation.GreetingText,
@@ -497,7 +530,19 @@ public class EpicHeroService : IEpicHeroService
             _context.EpicHeroDefinitionTranslations.Add(definitionTranslation);
         }
 
-        await _context.SaveChangesAsync(ct);
+        try
+        {
+            // If this hero was previously unpublished, publish should re-activate it
+            definition.IsActive = true;
+            definition.Status = "published";
+
+            await _context.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateException ex)
+        {
+            _logger.LogError(ex, "Failed to publish hero (DB update). heroId={HeroId}", heroId);
+            throw new InvalidOperationException("Failed to publish hero due to invalid/duplicate translation data. Please review the hero translations and try again.");
+        }
         
         // Cleanup: Delete EpicHeroCraft after successful publish (similar to Epics)
         try
@@ -597,20 +642,19 @@ public class EpicHeroService : IEpicHeroService
     {
         var normalizedPath = NormalizeBlobPath(draftPath);
         
-        // Extract the path structure from draft to preserve encoding
         // Draft path format: heroes/{encodedEmail}/{heroId}/greeting/{languageCode}/{fileName}
-        // We want to preserve the exact structure, just change container from draft to published
+        // Published path format (NEW): audio/heroes/{heroId}/{languageCode}/{fileName}
+        // We do NOT publish into "heroes/..." in the published container anymore.
         
-        // Check if already published
-        if (IsAlreadyPublished(normalizedPath))
+        // If already published under the new structure, keep it
+        if (normalizedPath.StartsWith("audio/", StringComparison.OrdinalIgnoreCase))
         {
-            // Path is already in published format, but verify it exists in published container
             var publishedClient = _blobSas.GetBlobClient(_blobSas.PublishedContainer, normalizedPath);
             if (await publishedClient.ExistsAsync(ct))
             {
                 return normalizedPath;
             }
-            _logger.LogWarning("Path marked as published but file doesn't exist in published container, will copy from draft: {Path}", normalizedPath);
+            _logger.LogWarning("Audio path starts with audio/ but doesn't exist in published container, will copy from draft: {Path}", normalizedPath);
         }
         
         // Verify source exists in draft container
@@ -620,24 +664,14 @@ public class EpicHeroService : IEpicHeroService
             throw new InvalidOperationException($"Draft greeting audio '{normalizedPath}' does not exist in draft container.");
         }
         
-        // Determine destination path
-        string destinationPath;
-        if (normalizedPath.StartsWith("heroes/", StringComparison.OrdinalIgnoreCase))
+        // Build destination path under NEW published structure
+        var fileName = Path.GetFileName(normalizedPath);
+        if (string.IsNullOrWhiteSpace(fileName))
         {
-            // Path already has correct structure - reuse it as-is (preserves email encoding)
-            destinationPath = normalizedPath;
+            fileName = $"{heroId}-greeting-{languageCode}.mp3";
         }
-        else
-        {
-            // Fallback: build path from scratch if structure doesn't match
-            var fileName = Path.GetFileName(normalizedPath);
-            if (string.IsNullOrWhiteSpace(fileName))
-            {
-                fileName = $"{heroId}-greeting-{languageCode}.mp3";
-            }
-            var emailEscaped = Uri.EscapeDataString(ownerEmail);
-            destinationPath = $"heroes/{emailEscaped}/{heroId}/greeting/{languageCode}/{fileName}";
-        }
+        var lang = string.IsNullOrWhiteSpace(languageCode) ? "en-us" : languageCode.Trim().ToLowerInvariant();
+        var destinationPath = $"audio/heroes/{heroId}/{lang}/{fileName}";
         
         // Check if file already exists in published container (skip copy if already published)
         var destinationClient = _blobSas.GetBlobClient(_blobSas.PublishedContainer, destinationPath);
@@ -661,7 +695,7 @@ public class EpicHeroService : IEpicHeroService
         return destinationPath;
     }
 
-    private static string NormalizeBlobPath(string path)
+    private string NormalizeBlobPath(string path)
     {
         if (string.IsNullOrWhiteSpace(path)) return string.Empty;
 
@@ -672,17 +706,34 @@ public class EpicHeroService : IEpicHeroService
             trimmed = uri.AbsolutePath.TrimStart('/');
         }
 
-        return trimmed.TrimStart('/');
+        trimmed = trimmed.TrimStart('/');
+
+        // If a full URL was provided, AbsolutePath includes the container as the first segment:
+        //   {containerName}/{blobName...}
+        // Our blob clients already know the container, so strip it if present.
+        // This makes publishing resilient when FE stores full blob URLs.
+        var draftPrefix = _blobSas.DraftContainer.Trim('/') + "/";
+        var publishedPrefix = _blobSas.PublishedContainer.Trim('/') + "/";
+        if (trimmed.StartsWith(draftPrefix, StringComparison.OrdinalIgnoreCase))
+        {
+            trimmed = trimmed.Substring(draftPrefix.Length);
+        }
+        else if (trimmed.StartsWith(publishedPrefix, StringComparison.OrdinalIgnoreCase))
+        {
+            trimmed = trimmed.Substring(publishedPrefix.Length);
+        }
+
+        return trimmed;
     }
 
     private static bool IsAlreadyPublished(string path)
     {
         if (string.IsNullOrWhiteSpace(path)) return false;
         // Check if path is already in published container structure
-        // Published paths start with "images/" or "heroes/" (for greeting audio)
+        // Published paths start with "images/" or "audio/" (or "video/").
         return path.StartsWith("images/", StringComparison.OrdinalIgnoreCase) ||
-               path.StartsWith("heroes/", StringComparison.OrdinalIgnoreCase) ||
-               path.StartsWith("audio/", StringComparison.OrdinalIgnoreCase);
+               path.StartsWith("audio/", StringComparison.OrdinalIgnoreCase) ||
+               path.StartsWith("video/", StringComparison.OrdinalIgnoreCase);
     }
 
     public async Task CreateVersionFromPublishedAsync(Guid ownerUserId, string heroId, CancellationToken ct = default)
@@ -795,35 +846,13 @@ public class EpicHeroService : IEpicHeroService
 
         await _context.SaveChangesAsync(ct);
         
-        // Extract owner email from ImageUrl and delete published assets from blob storage
-        var ownerEmail = TryExtractOwnerEmail(definition);
-        if (!string.IsNullOrWhiteSpace(ownerEmail))
-        {
-            await _assetCleanup.DeletePublishedAssetsAsync(ownerEmail, heroId, ct);
-        }
-        else
-        {
-            _logger.LogWarning("Could not determine owner email for published assets cleanup. heroId={HeroId}", heroId);
-        }
+        // Delete published assets from blob storage (new structure doesn't require owner email)
+        await _assetCleanup.DeletePublishedAssetsAsync(heroId, ct);
         
         _logger.LogInformation("Hero unpublished and assets deleted: heroId={HeroId} reason={Reason}", heroId, reason);
     }
 
-    private string? TryExtractOwnerEmail(EpicHeroDefinition definition)
-    {
-        if (string.IsNullOrWhiteSpace(definition.ImageUrl))
-        {
-            return null;
-        }
-
-        // ImageUrl format: images/tales-of-alchimalia/heroes/{ownerEmail}/{heroId}/...
-        var parts = definition.ImageUrl.Split('/', StringSplitOptions.RemoveEmptyEntries);
-        if (parts.Length >= 5 && parts[0] == "images" && parts[1] == "tales-of-alchimalia" && parts[2] == "heroes")
-        {
-            return parts[3]; // ownerEmail
-        }
-
-        return null;
-    }
+    // NOTE: We no longer encode ownerEmail in published hero asset paths.
 }
+
 

@@ -38,6 +38,7 @@ public record StoryDetailsDto
     public StoryReviewDto? UserReview { get; init; } // Current user's review if exists
     public int ReadersCount { get; init; }
     public bool IsEvaluative { get; init; } = false; // If true, this story contains quizzes that should be evaluated
+    public bool IsPartOfEpic { get; init; } = false; // If true, this story is part of an epic (draft or published) and should not appear as independent story
 }
 
 public record AgeGroupInfoDto

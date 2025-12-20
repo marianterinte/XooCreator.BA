@@ -234,7 +234,7 @@ public class StoryAssetLinkService : IStoryAssetLinkService
         return Convert.ToHexString(sha.ComputeHash(Encoding.UTF8.GetBytes(raw)));
     }
 
-    private static List<StoryAssetPathMapper.AssetInfo> CollectTileAssets(StoryCraftTile tile)
+    private List<StoryAssetPathMapper.AssetInfo> CollectTileAssets(StoryCraftTile tile)
     {
         var assets = new List<StoryAssetPathMapper.AssetInfo>();
         if (!string.IsNullOrWhiteSpace(tile.ImageUrl))
@@ -242,9 +242,15 @@ public class StoryAssetLinkService : IStoryAssetLinkService
             assets.Add(new StoryAssetPathMapper.AssetInfo(tile.ImageUrl, StoryAssetPathMapper.AssetType.Image, null));
         }
 
+        _logger.LogDebug("Collecting assets for tileId={TileId}: translations count={TranslationsCount}", 
+            tile.TileId, tile.Translations.Count);
+
         foreach (var translation in tile.Translations)
         {
             var lang = translation.LanguageCode.ToLowerInvariant();
+            _logger.LogDebug("Processing translation: tileId={TileId} lang={Lang} audioUrl={AudioUrl} videoUrl={VideoUrl}",
+                tile.TileId, lang, translation.AudioUrl ?? "(null)", translation.VideoUrl ?? "(null)");
+                
             if (!string.IsNullOrWhiteSpace(translation.AudioUrl))
             {
                 assets.Add(new StoryAssetPathMapper.AssetInfo(translation.AudioUrl, StoryAssetPathMapper.AssetType.Audio, lang));
@@ -255,10 +261,16 @@ public class StoryAssetLinkService : IStoryAssetLinkService
             }
         }
 
-        return assets
+        var result = assets
             .GroupBy(a => $"{a.Type}|{a.Filename}|{a.Lang}")
             .Select(g => g.First())
             .ToList();
+            
+        _logger.LogInformation("Collected {AssetCount} assets for tileId={TileId}: {Assets}",
+            result.Count, tile.TileId, 
+            string.Join(", ", result.Select(a => $"{a.Type}/{a.Lang ?? "common"}/{a.Filename}")));
+
+        return result;
     }
 }
 
