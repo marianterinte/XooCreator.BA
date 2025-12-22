@@ -62,6 +62,7 @@ public class RequestPerformanceMiddleware
             // Calculate server response time (time from request start to response start)
             // This is approximate - actual server response time would be measured differently
             var serverResponseTime = requestDuration; // For now, use total duration
+            _logger.LogInformation("---------------------- ---------------------- ---------------------- ----------------------");
 
             // Log to ILogger
             _logger.LogInformation(
