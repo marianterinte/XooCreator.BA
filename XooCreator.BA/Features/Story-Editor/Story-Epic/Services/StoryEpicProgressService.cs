@@ -187,6 +187,13 @@ public class StoryEpicProgressService : IStoryEpicProgressService
 
             foreach (var rule in unlockRules)
             {
+                // Ignore story-targeted rules here; region unlock evaluation should only consider region-targeted rules.
+                // Story-target rules use ToStoryId and in FE they may carry ToRegionId="" for backward compatibility.
+                if (!string.IsNullOrWhiteSpace(rule.ToStoryId) || string.IsNullOrWhiteSpace(rule.ToRegionId))
+                {
+                    continue;
+                }
+
                 if (unlockedRegions.Contains(rule.ToRegionId))
                     continue;
 
