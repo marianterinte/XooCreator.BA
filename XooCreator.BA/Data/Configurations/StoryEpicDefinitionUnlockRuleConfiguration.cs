@@ -13,6 +13,7 @@ public class StoryEpicDefinitionUnlockRuleConfiguration : IEntityTypeConfigurati
         builder.Property(x => x.Type).HasMaxLength(20).IsRequired();
         builder.Property(x => x.FromId).HasMaxLength(100).IsRequired();
         builder.Property(x => x.ToRegionId).HasMaxLength(50).IsRequired();
+        builder.Property(x => x.ToStoryId).HasMaxLength(100);
         builder.HasOne(x => x.Epic).WithMany(x => x.UnlockRules).HasForeignKey(x => x.EpicId).OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -42,6 +42,13 @@ public class StoryEpicProgressService : IStoryEpicProgressService
             epicState.Epic.Regions
         );
 
+        // Evaluate unlocked stories (story-to-story rules). This is an additional gate on top of region visibility.
+        var unlockedStories = EvaluateUnlockedStories(
+            storyProgress.Select(sp => sp.StoryId).ToList(),
+            epicState.Epic.Rules,
+            epicState.Epic.Stories
+        );
+
         // Evaluate unlocked heroes based on completed stories
         // This includes heroes from StoryEpicHeroReferences AND heroes unlocked by completed stories (from StoryDefinitionUnlockedHeroes)
         var completedStoryIds = storyProgress.Select(sp => sp.StoryId).ToList();
@@ -75,6 +82,7 @@ public class StoryEpicProgressService : IStoryEpicProgressService
                 CompletedAt = sp.CompletedAt
             }).ToList(),
             UnlockedRegions = unlockedRegions,
+            UnlockedStories = unlockedStories,
             UnlockedHeroes = unlockedHeroes
         };
 
@@ -214,6 +222,56 @@ public class StoryEpicProgressService : IStoryEpicProgressService
         } while (changed);
 
         return unlockedRegions.ToList();
+    }
+
+    private List<string> EvaluateUnlockedStories(
+        List<string> completedStoryIds,
+        List<StoryEpicUnlockRuleDto> unlockRules,
+        List<StoryEpicStoryNodeDto> stories)
+    {
+        var completed = new HashSet<string>(completedStoryIds ?? new List<string>());
+        var storyIds = stories.Select(s => s.StoryId).ToHashSet();
+
+        // Incoming rules targeting stories: ToStoryId != null/empty
+        var storyTargetRules = unlockRules
+            .Where(r => !string.IsNullOrWhiteSpace(r.ToStoryId))
+            .Where(r => storyIds.Contains(r.ToStoryId!))
+            .GroupBy(r => r.ToStoryId!)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        // Default: unlocked if no incoming story-targeted rules exist.
+        var unlocked = new HashSet<string>();
+        foreach (var storyId in storyIds)
+        {
+            if (!storyTargetRules.ContainsKey(storyId))
+            {
+                unlocked.Add(storyId);
+            }
+        }
+
+        // If there are incoming rules, unlock if ANY rule is satisfied.
+        foreach (var (targetStoryId, rulesForTarget) in storyTargetRules)
+        {
+            var satisfied = rulesForTarget.Any(rule =>
+            {
+                return rule.Type switch
+                {
+                    "story" => completed.Contains(rule.StoryId ?? rule.FromId),
+                    "all" => rule.RequiredStories != null && rule.RequiredStories.Count > 0 &&
+                             rule.RequiredStories.All(storyId => completed.Contains(storyId)),
+                    "any" => rule.RequiredStories != null && rule.RequiredStories.Count > 0 &&
+                             rule.RequiredStories.Count(storyId => completed.Contains(storyId)) >= (rule.MinCount ?? 1),
+                    _ => false
+                };
+            });
+
+            if (satisfied)
+            {
+                unlocked.Add(targetStoryId);
+            }
+        }
+
+        return unlocked.ToList();
     }
 
     public async Task<ResetEpicProgressResult> ResetProgressAsync(string epicId, Guid userId, CancellationToken ct = default)

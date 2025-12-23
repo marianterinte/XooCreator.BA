@@ -7,6 +7,7 @@ public class StoryEpicCraftUnlockRule
     public string Type { get; set; } = string.Empty; // "story", "all", "any"
     public string FromId { get; set; } = string.Empty; // region ID sau story ID
     public string ToRegionId { get; set; } = string.Empty; // target region ID
+    public string? ToStoryId { get; set; } // target story ID (optional; when set, ToRegionId should be empty)
     public string? RequiredStoriesCsv { get; set; } // "story1,story2,story3"
     public int? MinCount { get; set; } // pentru type=any
     public string? StoryId { get; set; } // pentru type=story

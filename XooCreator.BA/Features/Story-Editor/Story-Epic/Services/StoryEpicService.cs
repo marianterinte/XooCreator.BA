@@ -448,6 +448,7 @@ public class StoryEpicService : IStoryEpicService
                 Type = defRule.Type,
                 FromId = defRule.FromId,
                 ToRegionId = defRule.ToRegionId,
+                ToStoryId = defRule.ToStoryId,
                 RequiredStoriesCsv = defRule.RequiredStoriesCsv,
                 MinCount = defRule.MinCount,
                 StoryId = defRule.StoryId,
@@ -542,6 +543,7 @@ public class StoryEpicService : IStoryEpicService
                 Type = r.Type,
                 FromId = r.FromId,
                 ToRegionId = r.ToRegionId,
+                ToStoryId = r.ToStoryId,
                 RequiredStories = r.RequiredStoriesCsv?.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList() ?? new List<string>(),
                 MinCount = r.MinCount,
                 StoryId = r.StoryId,
@@ -604,6 +606,7 @@ public class StoryEpicService : IStoryEpicService
                 Type = r.Type,
                 FromId = r.FromId,
                 ToRegionId = r.ToRegionId,
+                ToStoryId = r.ToStoryId,
                 RequiredStories = r.RequiredStoriesCsv?.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList() ?? new List<string>(),
                 MinCount = r.MinCount,
                 StoryId = r.StoryId,
@@ -821,11 +824,12 @@ public class StoryEpicService : IStoryEpicService
 
     private async Task UpdateCraftUnlockRulesAsync(StoryEpicCraft craft, List<StoryEpicUnlockRuleDto> ruleDtos, CancellationToken ct)
     {
-        var dtoRuleKeys = ruleDtos.Select(r => (r.FromId, r.ToRegionId, r.StoryId ?? "")).ToHashSet();
-        var existingByKey = craft.UnlockRules.ToDictionary(r => (r.FromId, r.ToRegionId, r.StoryId ?? ""));
+        // Include ToStoryId in key so story-targeted rules don't collide with region-targeted rules.
+        var dtoRuleKeys = ruleDtos.Select(r => (r.FromId, r.ToRegionId, r.ToStoryId ?? "", r.StoryId ?? "")).ToHashSet();
+        var existingByKey = craft.UnlockRules.ToDictionary(r => (r.FromId, r.ToRegionId, r.ToStoryId ?? "", r.StoryId ?? ""));
 
         // Remove rules not in DTO
-        var toRemove = craft.UnlockRules.Where(r => !dtoRuleKeys.Contains((r.FromId, r.ToRegionId, r.StoryId ?? ""))).ToList();
+        var toRemove = craft.UnlockRules.Where(r => !dtoRuleKeys.Contains((r.FromId, r.ToRegionId, r.ToStoryId ?? "", r.StoryId ?? ""))).ToList();
         foreach (var rule in toRemove)
         {
             craft.UnlockRules.Remove(rule);
@@ -834,10 +838,11 @@ public class StoryEpicService : IStoryEpicService
         // Update or add rules
         foreach (var ruleDto in ruleDtos)
         {
-            var key = (ruleDto.FromId, ruleDto.ToRegionId, ruleDto.StoryId ?? "");
+            var key = (ruleDto.FromId, ruleDto.ToRegionId, ruleDto.ToStoryId ?? "", ruleDto.StoryId ?? "");
             if (existingByKey.TryGetValue(key, out var existingRule))
             {
                 existingRule.Type = ruleDto.Type;
+                existingRule.ToStoryId = ruleDto.ToStoryId;
                 existingRule.RequiredStoriesCsv = ruleDto.RequiredStories.Any() 
                     ? string.Join(",", ruleDto.RequiredStories) 
                     : null;
@@ -852,6 +857,7 @@ public class StoryEpicService : IStoryEpicService
                     Type = ruleDto.Type,
                     FromId = ruleDto.FromId,
                     ToRegionId = ruleDto.ToRegionId,
+                    ToStoryId = ruleDto.ToStoryId,
                     RequiredStoriesCsv = ruleDto.RequiredStories.Any() 
                         ? string.Join(",", ruleDto.RequiredStories) 
                         : null,
@@ -992,10 +998,11 @@ public class StoryEpicService : IStoryEpicService
         // Add unlock rule edges
         foreach (var rule in epic.Rules)
         {
+            var targetId = !string.IsNullOrWhiteSpace(rule.ToStoryId) ? rule.ToStoryId : rule.ToRegionId;
             edges.Add(new StoryEpicPreviewEdgeDto
             {
                 FromId = rule.FromId,
-                ToId = rule.ToRegionId,
+                ToId = targetId,
                 Type = "unlock"
             });
         }

@@ -332,6 +332,7 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
                 Type = craftRule.Type,
                 FromId = craftRule.FromId,
                 ToRegionId = craftRule.ToRegionId,
+                ToStoryId = craftRule.ToStoryId,
                 RequiredStoriesCsv = craftRule.RequiredStoriesCsv,
                 MinCount = craftRule.MinCount,
                 StoryId = craftRule.StoryId,

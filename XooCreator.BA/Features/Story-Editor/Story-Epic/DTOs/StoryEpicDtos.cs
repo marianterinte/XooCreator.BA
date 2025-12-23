@@ -66,6 +66,7 @@ public record StoryEpicUnlockRuleDto
     public required string Type { get; init; }
     public required string FromId { get; init; }
     public required string ToRegionId { get; init; }
+    public string? ToStoryId { get; init; }
     public List<string> RequiredStories { get; init; } = new();
     public int? MinCount { get; init; }
     public string? StoryId { get; init; }
@@ -174,6 +175,7 @@ public record EpicProgressStateDto
 {
     public List<EpicCompletedStoryDto> CompletedStories { get; init; } = new();
     public List<string> UnlockedRegions { get; init; } = new();
+    public List<string> UnlockedStories { get; init; } = new();
     public List<UnlockedHeroDto> UnlockedHeroes { get; init; } = new();
 }
 
