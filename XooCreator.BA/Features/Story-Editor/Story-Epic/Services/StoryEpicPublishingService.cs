@@ -201,6 +201,7 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
                 Description = craft.Description,
                 OwnerUserId = craft.OwnerUserId,
                 Status = "published",
+                IsActive = true,
                 CoverImageUrl = craft.CoverImageUrl,
                 IsDefault = craft.IsDefault,
                 CreatedAt = DateTime.UtcNow,
@@ -222,6 +223,8 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
             definition.Name = craft.Name;
             definition.Description = craft.Description;
             definition.Status = "published";
+            // If epic was previously unpublished, ensure it becomes visible again in play-mode.
+            definition.IsActive = true;
             definition.CoverImageUrl = craft.CoverImageUrl;
             definition.IsDefault = craft.IsDefault;
             definition.UpdatedAt = DateTime.UtcNow;
@@ -332,6 +335,7 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
                 Type = craftRule.Type,
                 FromId = craftRule.FromId,
                 ToRegionId = craftRule.ToRegionId,
+                ToStoryId = craftRule.ToStoryId,
                 RequiredStoriesCsv = craftRule.RequiredStoriesCsv,
                 MinCount = craftRule.MinCount,
                 StoryId = craftRule.StoryId,
