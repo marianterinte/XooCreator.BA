@@ -42,6 +42,13 @@ public class StoryEpicProgressService : IStoryEpicProgressService
             epicState.Epic.Regions
         );
 
+        // Evaluate unlocked stories (story-to-story rules). This is an additional gate on top of region visibility.
+        var unlockedStories = EvaluateUnlockedStories(
+            storyProgress.Select(sp => sp.StoryId).ToList(),
+            epicState.Epic.Rules,
+            epicState.Epic.Stories
+        );
+
         // Evaluate unlocked heroes based on completed stories
         // This includes heroes from StoryEpicHeroReferences AND heroes unlocked by completed stories (from StoryDefinitionUnlockedHeroes)
         var completedStoryIds = storyProgress.Select(sp => sp.StoryId).ToList();
@@ -52,7 +59,8 @@ public class StoryEpicProgressService : IStoryEpicProgressService
         );
 
         // Also get heroes unlocked by completed stories themselves
-        var storyUnlockedHeroes = await GetUnlockedHeroesFromStoriesAsync(completedStoryIds, ct);
+        var allowedEpicHeroIds = new HashSet<string>(epicState.Epic.Heroes.Select(h => h.HeroId));
+        var storyUnlockedHeroes = await GetUnlockedHeroesFromStoriesAsync(completedStoryIds, allowedEpicHeroIds, ct);
         
         // Merge heroes from epic references and story definitions, avoiding duplicates
         var allUnlockedHeroIds = new HashSet<string>(unlockedHeroes.Select(h => h.HeroId));
@@ -75,6 +83,7 @@ public class StoryEpicProgressService : IStoryEpicProgressService
                 CompletedAt = sp.CompletedAt
             }).ToList(),
             UnlockedRegions = unlockedRegions,
+            UnlockedStories = unlockedStories,
             UnlockedHeroes = unlockedHeroes
         };
 
@@ -178,6 +187,13 @@ public class StoryEpicProgressService : IStoryEpicProgressService
 
             foreach (var rule in unlockRules)
             {
+                // Ignore story-targeted rules here; region unlock evaluation should only consider region-targeted rules.
+                // Story-target rules use ToStoryId and in FE they may carry ToRegionId="" for backward compatibility.
+                if (!string.IsNullOrWhiteSpace(rule.ToStoryId) || string.IsNullOrWhiteSpace(rule.ToRegionId))
+                {
+                    continue;
+                }
+
                 if (unlockedRegions.Contains(rule.ToRegionId))
                     continue;
 
@@ -214,6 +230,56 @@ public class StoryEpicProgressService : IStoryEpicProgressService
         } while (changed);
 
         return unlockedRegions.ToList();
+    }
+
+    private List<string> EvaluateUnlockedStories(
+        List<string> completedStoryIds,
+        List<StoryEpicUnlockRuleDto> unlockRules,
+        List<StoryEpicStoryNodeDto> stories)
+    {
+        var completed = new HashSet<string>(completedStoryIds ?? new List<string>());
+        var storyIds = stories.Select(s => s.StoryId).ToHashSet();
+
+        // Incoming rules targeting stories: ToStoryId != null/empty
+        var storyTargetRules = unlockRules
+            .Where(r => !string.IsNullOrWhiteSpace(r.ToStoryId))
+            .Where(r => storyIds.Contains(r.ToStoryId!))
+            .GroupBy(r => r.ToStoryId!)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        // Default: unlocked if no incoming story-targeted rules exist.
+        var unlocked = new HashSet<string>();
+        foreach (var storyId in storyIds)
+        {
+            if (!storyTargetRules.ContainsKey(storyId))
+            {
+                unlocked.Add(storyId);
+            }
+        }
+
+        // If there are incoming rules, unlock if ANY rule is satisfied.
+        foreach (var (targetStoryId, rulesForTarget) in storyTargetRules)
+        {
+            var satisfied = rulesForTarget.Any(rule =>
+            {
+                return rule.Type switch
+                {
+                    "story" => completed.Contains(rule.StoryId ?? rule.FromId),
+                    "all" => rule.RequiredStories != null && rule.RequiredStories.Count > 0 &&
+                             rule.RequiredStories.All(storyId => completed.Contains(storyId)),
+                    "any" => rule.RequiredStories != null && rule.RequiredStories.Count > 0 &&
+                             rule.RequiredStories.Count(storyId => completed.Contains(storyId)) >= (rule.MinCount ?? 1),
+                    _ => false
+                };
+            });
+
+            if (satisfied)
+            {
+                unlocked.Add(targetStoryId);
+            }
+        }
+
+        return unlocked.ToList();
     }
 
     public async Task<ResetEpicProgressResult> ResetProgressAsync(string epicId, Guid userId, CancellationToken ct = default)
@@ -332,6 +398,8 @@ public class StoryEpicProgressService : IStoryEpicProgressService
             .Include(sd => sd.UnlockedHeroes)
             .FirstOrDefaultAsync(sd => sd.StoryId == completedStoryId && sd.IsActive, ct);
 
+        var allowedEpicHeroIds = new HashSet<string>(heroReferences.Select(h => h.HeroId));
+
         if (storyDefinition != null && storyDefinition.UnlockedHeroes != null && storyDefinition.UnlockedHeroes.Count > 0)
         {
             foreach (var unlockedHero in storyDefinition.UnlockedHeroes)
@@ -339,8 +407,19 @@ public class StoryEpicProgressService : IStoryEpicProgressService
                 // Check if hero was already unlocked
                 if (!previousUnlockedHeroIds.Contains(unlockedHero.HeroId))
                 {
+                    // Only allow heroes that exist in the epic hero references AND resolve to a real hero.
+                    // This prevents legacy story definitions from introducing orphan/legacy heroIds like "puf-puf".
+                    if (!allowedEpicHeroIds.Contains(unlockedHero.HeroId))
+                    {
+                        continue;
+                    }
+
                     // Get hero image URL from EpicHero
                     var imageUrl = await GetHeroImageUrlAsync(unlockedHero.HeroId, ct);
+                    if (string.IsNullOrWhiteSpace(imageUrl))
+                    {
+                        continue;
+                    }
 
                     newlyUnlockedHeroes.Add(new UnlockedHeroDto
                     {
@@ -357,7 +436,10 @@ public class StoryEpicProgressService : IStoryEpicProgressService
     /// <summary>
     /// Gets heroes unlocked by completed stories (from StoryDefinitionUnlockedHeroes)
     /// </summary>
-    private async Task<List<UnlockedHeroDto>> GetUnlockedHeroesFromStoriesAsync(List<string> completedStoryIds, CancellationToken ct = default)
+    private async Task<List<UnlockedHeroDto>> GetUnlockedHeroesFromStoriesAsync(
+        List<string> completedStoryIds,
+        HashSet<string> allowedEpicHeroIds,
+        CancellationToken ct = default)
     {
         var unlockedHeroes = new List<UnlockedHeroDto>();
 
@@ -378,8 +460,17 @@ public class StoryEpicProgressService : IStoryEpicProgressService
             {
                 foreach (var unlockedHero in storyDefinition.UnlockedHeroes)
                 {
+                    if (!allowedEpicHeroIds.Contains(unlockedHero.HeroId))
+                    {
+                        continue;
+                    }
+
                     // Get hero image URL from EpicHero
                     var imageUrl = await GetHeroImageUrlAsync(unlockedHero.HeroId, ct);
+                    if (string.IsNullOrWhiteSpace(imageUrl))
+                    {
+                        continue;
+                    }
 
                     unlockedHeroes.Add(new UnlockedHeroDto
                     {

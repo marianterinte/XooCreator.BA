@@ -216,7 +216,13 @@ public class StoryExportService : IStoryExportService
                         id = a.AnswerId,
                         sortOrder = a.SortOrder,
                         isCorrect = a.IsCorrect,
-                        tokens = (a.Tokens ?? new()).Select(tok => new { type = tok.Type, value = tok.Value, quantity = tok.Quantity })
+                        text = a.Text,
+                        tokens = (a.Tokens ?? new()).Select(tok => new { type = tok.Type, value = tok.Value, quantity = tok.Quantity }).ToList(),
+                        translations = (a.Translations ?? new()).Select(at => new
+                        {
+                            lang = at.LanguageCode,
+                            text = at.Text
+                        }).ToList()
                     }).ToList()
                 }).ToList()
         };
@@ -291,6 +297,11 @@ public class StoryExportService : IStoryExportService
                         id = a.AnswerId,
                         sortOrder = a.SortOrder,
                         isCorrect = a.IsCorrect,
+                        // Convenience field: export answer text for the primary language at top-level.
+                        // (Draft answers store text per-language in Translations.)
+                        text = (a.Translations ?? new()).FirstOrDefault(at => at.LanguageCode == primaryTranslation.LanguageCode)?.Text
+                               ?? (a.Translations ?? new()).FirstOrDefault()?.Text
+                               ?? string.Empty,
                         tokens = (a.Tokens ?? new()).Select(tok => new { type = tok.Type, value = tok.Value, quantity = tok.Quantity }).ToList(),
                         translations = (a.Translations ?? new()).Select(at => new
                         {
