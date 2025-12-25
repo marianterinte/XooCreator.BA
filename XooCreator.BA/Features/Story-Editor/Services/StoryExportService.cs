@@ -24,7 +24,8 @@ public class StoryExportService : IStoryExportService
 
     public async Task<ExportResult> ExportPublishedStoryAsync(StoryDefinition def, string locale, CancellationToken ct)
     {
-        var exportObj = BuildExportJson(def);
+        var primaryLang = (locale ?? string.Empty).Trim().ToLowerInvariant();
+        var exportObj = BuildExportJson(def, primaryLang);
         var exportJson = JsonSerializer.Serialize(exportObj, new JsonSerializerOptions { WriteIndented = true });
         var fileName = $"{def.StoryId}-v{def.Version}.zip";
 
@@ -79,13 +80,22 @@ public class StoryExportService : IStoryExportService
     public async Task<ExportResult> ExportDraftStoryAsync(StoryCraft craft, string locale, string ownerEmail, CancellationToken ct)
     {
         // Build export JSON
-        var exportObj = BuildExportJson(craft);
+        var primaryLang = (locale ?? string.Empty).Trim().ToLowerInvariant();
+        var exportObj = BuildExportJson(craft, primaryLang);
         var exportJson = JsonSerializer.Serialize(exportObj, new JsonSerializerOptions { WriteIndented = true });
         var fileName = $"{craft.StoryId}-draft-export.zip";
 
         // Collect all assets for all languages with metadata
         var allAssets = new List<(AssetInfo Asset, string BlobPath, bool IsCoverImage)>();
-        var availableLanguages = craft.Translations.Select(t => t.LanguageCode).Distinct().ToList();
+
+        // Important: languages may exist in tile/answer translations even if story-level translation is missing.
+        var availableLanguages = craft.Translations.Select(t => t.LanguageCode)
+            .Concat(craft.Tiles.SelectMany(t => t.Translations.Select(tr => tr.LanguageCode)))
+            .Concat(craft.Tiles.SelectMany(t => (t.Answers ?? new()).SelectMany(a => (a.Translations ?? new()).Select(at => at.LanguageCode))))
+            .Where(l => !string.IsNullOrWhiteSpace(l))
+            .Select(l => l!.Trim().ToLowerInvariant())
+            .Distinct()
+            .ToList();
 
         // Extract assets for each language
         foreach (var lang in availableLanguages)
@@ -160,7 +170,7 @@ public class StoryExportService : IStoryExportService
         };
     }
 
-    private static object BuildExportJson(StoryDefinition def)
+    private static object BuildExportJson(StoryDefinition def, string primaryLang)
     {
         // Extract topic IDs
         var topicIds = def.Topics?
@@ -178,7 +188,8 @@ public class StoryExportService : IStoryExportService
         {
             id = def.StoryId,
             version = def.Version,
-            title = def.Title,
+            // Published definitions only have translated Title (no translated Summary field on StoryDefinitionTranslation)
+            title = def.Translations.FirstOrDefault(t => t.LanguageCode == primaryLang)?.Title ?? def.Title,
             summary = def.Summary,
             storyType = def.StoryType,
             coverImageUrl = def.CoverImageUrl,
@@ -228,10 +239,12 @@ public class StoryExportService : IStoryExportService
         };
     }
 
-    private static object BuildExportJson(StoryCraft craft)
+    private static object BuildExportJson(StoryCraft craft, string primaryLang)
     {
         // Get primary translation (first one or default)
-        var primaryTranslation = craft.Translations.FirstOrDefault() ?? new StoryCraftTranslation
+        var primaryTranslation = craft.Translations.FirstOrDefault(t => t.LanguageCode == primaryLang)
+                                 ?? craft.Translations.FirstOrDefault()
+                                 ?? new StoryCraftTranslation
         {
             LanguageCode = "ro-ro",
             Title = string.Empty,

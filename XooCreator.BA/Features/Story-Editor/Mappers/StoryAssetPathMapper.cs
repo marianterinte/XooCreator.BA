@@ -34,6 +34,7 @@ public static class StoryAssetPathMapper
     public static List<AssetInfo> ExtractAssets(StoryCraft craft, string langTag)
     {
         var results = new List<AssetInfo>();
+        var lang = (langTag ?? string.Empty).Trim().ToLowerInvariant();
 
         // Cover image (language-agnostic)
         if (!string.IsNullOrWhiteSpace(craft.CoverImageUrl))
@@ -51,17 +52,19 @@ public static class StoryAssetPathMapper
             }
 
             // Audio and Video are now language-specific (read from translation)
-            var tileTranslation = tile.Translations.FirstOrDefault(t => t.LanguageCode == langTag);
+            var tileTranslation = tile.Translations.FirstOrDefault(t =>
+                !string.IsNullOrWhiteSpace(t.LanguageCode) &&
+                t.LanguageCode.Equals(lang, StringComparison.OrdinalIgnoreCase));
             if (tileTranslation != null)
             {
                 if (!string.IsNullOrWhiteSpace(tileTranslation.AudioUrl))
                 {
-                    results.Add(new AssetInfo(tileTranslation.AudioUrl, AssetType.Audio, langTag));
+                    results.Add(new AssetInfo(tileTranslation.AudioUrl, AssetType.Audio, lang));
                 }
 
                 if (!string.IsNullOrWhiteSpace(tileTranslation.VideoUrl))
                 {
-                    results.Add(new AssetInfo(tileTranslation.VideoUrl, AssetType.Video, langTag));
+                    results.Add(new AssetInfo(tileTranslation.VideoUrl, AssetType.Video, lang));
                 }
             }
         }
