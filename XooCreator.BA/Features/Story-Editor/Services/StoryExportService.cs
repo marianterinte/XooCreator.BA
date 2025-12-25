@@ -188,8 +188,9 @@ public class StoryExportService : IStoryExportService
         {
             id = def.StoryId,
             version = def.Version,
+            // Published definitions only have translated Title (no translated Summary field on StoryDefinitionTranslation)
             title = def.Translations.FirstOrDefault(t => t.LanguageCode == primaryLang)?.Title ?? def.Title,
-            summary = def.Translations.FirstOrDefault(t => t.LanguageCode == primaryLang)?.Summary ?? def.Summary,
+            summary = def.Summary,
             storyType = def.StoryType,
             coverImageUrl = def.CoverImageUrl,
             storyTopic = def.StoryTopic,
