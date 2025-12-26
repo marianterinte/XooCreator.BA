@@ -46,6 +46,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IStoryForkQueue, StoryForkQueue>();
         services.AddSingleton<IStoryForkAssetsQueue, StoryForkAssetsQueue>();
         services.AddSingleton<IStoryExportQueue, StoryExportQueue>();
+        services.AddSingleton<IStoryDocumentExportQueue, StoryDocumentExportQueue>();
         services.AddSingleton<IEpicAggregatesQueue, EpicAggregatesQueue>();
         
         return services;
@@ -130,6 +131,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IStoryPublishedAssetCleanupService, StoryPublishedAssetCleanupService>();
         services.AddScoped<IStoryAssetReplacementService, StoryAssetReplacementService>();
         services.AddScoped<IStoryExportService, StoryExportService>();
+        services.AddScoped<IStoryDocumentExportService, StoryDocumentExportService>();
         
         // Story Epic Services
         services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.IStoryEpicService, XooCreator.BA.Features.StoryEditor.StoryEpic.Services.StoryEpicService>();
