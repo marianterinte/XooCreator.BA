@@ -24,6 +24,7 @@ public class StoryDocumentExportJob
     public string PaperSize { get; set; } = "A4"; // A4|Letter
     public bool IncludeCover { get; set; } = true;
     public bool IncludeQuizAnswers { get; set; } = false;
+    public bool UseMobileImageLayout { get; set; } = true; // If true, render images at ~60% width (mobile-like) to leave space for text.
 
     // Execution tracking
     public string Status { get; set; } = StoryDocumentExportJobStatus.Queued;

@@ -34,7 +34,8 @@ public class CreateStoryDocumentExportPublishedEndpoint
         string? LanguageCode,
         string? PaperSize,
         bool IncludeCover,
-        bool IncludeQuizAnswers);
+        bool IncludeQuizAnswers,
+        bool? UseMobileImageLayout);
 
     public record CreateStoryDocumentExportResponse(Guid JobId);
 
@@ -74,7 +75,8 @@ public class CreateStoryDocumentExportPublishedEndpoint
             LanguageCode: locale,
             PaperSize: "A4",
             IncludeCover: true,
-            IncludeQuizAnswers: false);
+            IncludeQuizAnswers: false,
+            UseMobileImageLayout: true);
 
         var format = (request.Format ?? StoryDocumentExportFormat.Pdf).Trim().ToLowerInvariant();
         if (format is not (StoryDocumentExportFormat.Pdf or StoryDocumentExportFormat.Docx))
@@ -103,6 +105,7 @@ public class CreateStoryDocumentExportPublishedEndpoint
             PaperSize = paperSize,
             IncludeCover = request.IncludeCover,
             IncludeQuizAnswers = request.IncludeQuizAnswers,
+            UseMobileImageLayout = request.UseMobileImageLayout ?? true,
             Status = StoryDocumentExportJobStatus.Queued,
             QueuedAtUtc = DateTime.UtcNow
         };

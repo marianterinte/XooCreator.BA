@@ -60,7 +60,8 @@ public class StoryDocumentExportService : IStoryDocumentExportService
         {
             IncludeCover = job.IncludeCover,
             IncludeQuizAnswers = job.IncludeQuizAnswers,
-            PaperSize = job.PaperSize
+            PaperSize = job.PaperSize,
+            UseMobileImageLayout = job.UseMobileImageLayout
         };
 
         return format switch
@@ -87,6 +88,7 @@ public class StoryDocumentExportService : IStoryDocumentExportService
         bool IncludeCover,
         bool IncludeQuizAnswers,
         string PaperSize,
+        bool UseMobileImageLayout,
         string? CoverImageBlobPath,
         List<StoryDocTile> Tiles);
 
@@ -169,6 +171,7 @@ public class StoryDocumentExportService : IStoryDocumentExportService
             IncludeCover: true,
             IncludeQuizAnswers: false,
             PaperSize: "A4",
+            UseMobileImageLayout: true,
             CoverImageBlobPath: coverBlobPath,
             Tiles: tiles
         );
@@ -240,6 +243,7 @@ public class StoryDocumentExportService : IStoryDocumentExportService
             IncludeCover: true,
             IncludeQuizAnswers: false,
             PaperSize: "A4",
+            UseMobileImageLayout: true,
             CoverImageBlobPath: coverBlobPath,
             Tiles: tiles
         );
@@ -364,15 +368,45 @@ public class StoryDocumentExportService : IStoryDocumentExportService
                     page.Content().Column(col =>
                     {
                         col.Spacing(6);
+
+                        // Image first (book-like layout) so text sits beneath it.
+                        if (tileImages.TryGetValue(tile.Index, out var imgBytes))
+                        {
+                            if (model.UseMobileImageLayout)
+                            {
+                                // Center image at ~60% width (6/10), leaving space for text like in mobile view.
+                                col.Item().Row(row =>
+                                {
+                                    row.RelativeItem(2);
+                                    row.RelativeItem(6).Image(imgBytes).FitWidth();
+                                    row.RelativeItem(2);
+                                });
+                            }
+                            else
+                            {
+                                col.Item().Image(imgBytes).FitWidth();
+                            }
+                        }
+
                         col.Item().Text($"Tile {tile.Index} ({tile.Type})").SemiBold();
 
                         if (!string.IsNullOrWhiteSpace(tile.Caption))
-                            col.Item().Text(tile.Caption).Italic();
+                        {
+                            foreach (var line in SplitPdfLines(tile.Caption))
+                            {
+                                col.Item().Text(line).Italic();
+                            }
+                        }
 
                         if (tile.Type.Equals("quiz", StringComparison.OrdinalIgnoreCase))
                         {
                             if (!string.IsNullOrWhiteSpace(tile.Question))
-                                col.Item().Text(tile.Question);
+                            {
+                                foreach (var line in SplitPdfLines(tile.Question))
+                                {
+                                    col.Item().Text(line);
+                                }
+                            }
 
                             if (tile.Answers.Count > 0)
                             {
@@ -380,24 +414,27 @@ public class StoryDocumentExportService : IStoryDocumentExportService
                                 foreach (var ans in tile.Answers)
                                 {
                                     var prefix = model.IncludeQuizAnswers && ans.IsCorrect ? "✅ " : "- ";
-                                    col.Item().Text(prefix + ans.Text);
+                                    foreach (var line in SplitPdfLines(prefix + (ans.Text ?? string.Empty)))
+                                    {
+                                        col.Item().Text(line);
+                                    }
                                 }
                             }
                         }
                         else
                         {
                             if (!string.IsNullOrWhiteSpace(tile.Text))
-                                col.Item().Text(tile.Text);
+                            {
+                                foreach (var line in SplitPdfLines(tile.Text))
+                                {
+                                    col.Item().Text(line);
+                                }
+                            }
                         }
 
                         if (!string.IsNullOrWhiteSpace(tile.VideoUrl))
                         {
                             col.Item().Text($"Video: {tile.VideoUrl}").FontSize(10).FontColor(Colors.Blue.Darken1);
-                        }
-
-                        if (tileImages.TryGetValue(tile.Index, out var imgBytes))
-                        {
-                            col.Item().Image(imgBytes).FitWidth();
                         }
                     });
                 });
@@ -406,6 +443,28 @@ public class StoryDocumentExportService : IStoryDocumentExportService
 
         var pdfBytes = doc.GeneratePdf();
         return new DocumentExportResult(pdfBytes, fileName);
+    }
+
+    /// <summary>
+    /// QuestPDF will try to shape every character into a glyph; control chars like \r and \n (U+000D/U+000A)
+    /// are not renderable glyphs and can crash the render with "Could not find an appropriate font fallback".
+    /// We normalize and split into separate lines/paragraph items.
+    /// </summary>
+    private static IEnumerable<string> SplitPdfLines(string? input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+            return Array.Empty<string>();
+
+        var normalized = input
+            .Replace("\r\n", "\n", StringComparison.Ordinal)
+            .Replace('\r', '\n');
+
+        // Keep it simple: omit empty lines, but preserve paragraph flow via column spacing.
+        return normalized
+            .Split('\n')
+            .Select(x => x.Trim())
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .ToArray();
     }
 
     private async Task<DocumentExportResult> RenderDocxAsync(StoryDocModel model, CancellationToken ct)
