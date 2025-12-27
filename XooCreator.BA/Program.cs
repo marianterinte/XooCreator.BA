@@ -9,6 +9,7 @@ using XooCreator.BA.Features.StoryEditor.Services;
 using XooCreator.BA.Infrastructure.Middleware;
 using XooCreator.BA.Infrastructure;
 using XooCreator.DbScriptRunner;
+using XooCreator.BA.Infrastructure.Services.Images;
 
 // Store startup exception for display
 Exception? startupException = null;
@@ -48,6 +49,7 @@ builder.Services.AddDatabaseConfiguration(builder.Configuration);
 
 // Register all application services using extension methods
 builder.Services.AddApplicationServices();
+builder.Services.Configure<ImageCompressionOptions>(builder.Configuration.GetSection(ImageCompressionOptions.SectionName));
 builder.Services.AddHostedService<StoryPublishQueueWorker>();
 builder.Services.AddHostedService<StoryVersionQueueWorker>();
 builder.Services.AddHostedService<StoryImportQueueWorker>();

@@ -13,11 +13,14 @@ Aplicația folosește imagini în format 4:5 pentru povești publicate. Toate im
 
 ### 1.1 Format și Calități
 
-- **Format**: Toate imaginile rămân **4:5** (aspect ratio fix)
+- **Aspect ratio**: Target **4:5**.
+  - **Nu facem crop și nu facem padding/letterbox** în backend.
+  - **Imaginile care nu sunt deja ~4:5 (în toleranță)** vor fi **lăsate în pace** (skip la generarea s/m).
+  - Pentru imagini noi presupunem că vin deja 4:5 (editor/upload).
 - **Variante de compresie**:
-  - **s** (small): Calitate JPEG/WebP = 60-65 (pentru mobile, conexiuni lente)
-  - **m** (medium): Calitate JPEG/WebP = 75-80 (pentru tablet, conexiuni medii)
-  - **l** (large): Calitate JPEG/WebP = 90-95 (pentru desktop, conexiuni rapide) = **original păstrat**
+  - **s** (small): pentru mobile (fișier mic)
+  - **m** (medium): pentru tablet/desktop mediu
+  - **l** (large): **originalul existent** (canonical) – nu îl mutăm în alt folder și nu îl procesăm obligatoriu
 
 ### 1.2 Structura Folderelor în Blob Storage
 
@@ -28,32 +31,31 @@ Aplicația folosește imagini în format 4:5 pentru povești publicate. Toate im
 images/tales-of-alchimalia/stories/{userEmail}/{storyId}/{filename}
 ```
 
-**Structură extinsă** (cu foldere s/m/l):
+**Structură extinsă** (cu foldere s/m; originalul rămâne la rădăcină):
 ```
 images/tales-of-alchimalia/stories/{userEmail}/{storyId}/s/{filename}
 images/tales-of-alchimalia/stories/{userEmail}/{storyId}/m/{filename}
-images/tales-of-alchimalia/stories/{userEmail}/{storyId}/l/{filename}
 ```
 
 **Exemplu concret**:
 ```
 images/tales-of-alchimalia/stories/seed@alchimalia.com/pufpuf-s1/s/1.bg.webp
 images/tales-of-alchimalia/stories/seed@alchimalia.com/pufpuf-s1/m/1.bg.webp
-images/tales-of-alchimalia/stories/seed@alchimalia.com/pufpuf-s1/l/1.bg.webp
+images/tales-of-alchimalia/stories/seed@alchimalia.com/pufpuf-s1/1.bg.webp   (original/canonical)
 ```
 
 **Notă**: 
 - **Imaginile nu au `{lang}` în path** (sunt comune pentru toate limbile)
-- Folderul `l/` conține imaginile originale (calitate maximă)
-- Folderele `s/` și `m/` conțin variantele comprimate
+- Originalul (large/canonical) rămâne în path-ul existent (fără `l/`)
+- Folderele `s/` și `m/` conțin variantele comprimate/optimizate
 - **Numele fișierelor rămân identice** în toate folderele (best practice)
 
 ### 1.3 Format de Output
 
-- **Format pentru toate variantele (s/m/l)**: **WebP** (best practice pentru mobile optimizat)
-- **Fallback**: **JPEG** (pentru browsere vechi care nu suportă WebP)
-- **Detectare automată** a suportului browser în frontend
-- **Cover images**: Procesate la fel ca tile images (s/m/l)
+- **Phase 1 (recomandat, risc minim)**: păstrăm extensia/numele fișierului pentru `s/` și `m/` (ex: dacă originalul e `.png`, derivatul rămâne `.png`).
+  - Motiv: în codul actual, API/DB livrează un singur string URL; schimbarea extensiei implică migrare/strategie de compatibilitate.
+- **Phase 2 (opțional)**: standardizăm upload-urile noi la `.webp` în editor și atunci toate derivatele devin natural `.webp`.
+- **Cover images / reward / region / heroes**: procesate la fel ca tile images (s/m + original)
 
 ---
 
@@ -70,10 +72,11 @@ images/tales-of-alchimalia/stories/seed@alchimalia.com/pufpuf-s1/l/1.bg.webp
 **Nou serviciu**: `IImageCompressionService`
 
 **Responsabilități**:
-- Comprimă o imagine în cele 3 variante (s, m, l)
-- **Forțează aspect ratio 4:5** (crop center - mai puțin dăunător decât resize cu padding)
-- Convertește toate variantele în **WebP** (optimizat pentru mobile)
-- Salvează în folderele corespunzătoare (`s/`, `m/`, `l/`)
+- Generează variantele **s** și **m** pentru o imagine publicată (originalul rămâne canonical)
+- **Validează aspect ratio ~4:5** (toleranță configurabilă)
+  - Dacă nu e 4:5 → **skip** (nu crop, nu padding) și lăsăm doar originalul
+- (Phase 1) păstrează extensia (nu schimbăm formatul)
+- Salvează în folderele corespunzătoare (`s/`, `m/`)
 - Păstrează același nume de fișier în toate folderele (best practice)
 - Returnează informații despre fișierele generate
 
@@ -82,10 +85,10 @@ images/tales-of-alchimalia/stories/seed@alchimalia.com/pufpuf-s1/l/1.bg.webp
 public interface IImageCompressionService
 {
     /// <summary>
-    /// Comprimă o imagine în cele 3 variante (s, m, l) și le salvează în blob storage.
+    /// Generează variantele s/m pentru o imagine. Dacă imaginea nu este ~4:5, face skip.
     /// </summary>
     /// <param name="sourceBlobPath">Calea către imaginea originală în blob storage</param>
-    /// <param name="targetBasePath">Calea de bază pentru folderele s/m/l (fără /s, /m, /l)</param>
+    /// <param name="targetBasePath">Calea de bază pentru folderele s/m (fără /s, /m)</param>
     /// <param name="filename">Numele fișierului (cu extensie)</param>
     /// <param name="ct">Cancellation token</param>
     /// <returns>Rezultat cu informații despre fișierele generate</returns>
@@ -103,10 +106,9 @@ public record ImageCompressionResult
     public long OriginalSizeBytes { get; init; }
     public long SmallSizeBytes { get; init; }
     public long MediumSizeBytes { get; init; }
-    public long LargeSizeBytes { get; init; }
     public string SmallPath { get; init; } = string.Empty;
     public string MediumPath { get; init; } = string.Empty;
-    public string LargePath { get; init; } = string.Empty;
+    public bool SkippedBecauseNotFourByFive { get; init; }
 }
 ```
 
@@ -116,10 +118,13 @@ public record ImageCompressionResult
 
 Când copiem o imagine de la draft la published:
 1. Citim imaginea originală din draft
-2. **Forțăm aspect ratio 4:5** (crop center dacă e nevoie)
-3. Generăm cele 3 variante (s, m, l) în format WebP
-4. Salvăm în folderele corespunzătoare: `s/`, `m/`, `l/`
-5. **Aplicăm pentru toate imaginile**: tile images și cover images
+2. Copiem originalul în published (canonical) conform path-ului existent
+3. Dacă imaginea este deja ~4:5 → generăm **s** și **m** în published în folderele `s/` și `m/`
+4. Dacă nu este ~4:5 → **skip** (rămâne doar originalul)
+5. **Aplicăm pentru toate imaginile** din `images/`:
+   - stories: tile images + cover images
+   - epics: epic cover + reward images + region images
+   - heroes: imagini sub `images/heroes/...`
 
 **Flux actual**:
 ```
@@ -128,47 +133,42 @@ Draft → Published (original)
 
 **Flux nou**:
 ```
-Draft → Published/l/ (original, calitate 95, WebP, 4:5 forced)
-     → Published/s/ (comprimat, calitate 65, WebP, 4:5 forced)
-     → Published/m/ (comprimat, calitate 80, WebP, 4:5 forced)
+Draft → Published/{filename} (original/canonical)
+     → Published/s/{filename} (optimizat pentru mobile; doar dacă originalul e ~4:5)
+     → Published/m/{filename} (optimizat; doar dacă originalul e ~4:5)
 ```
 
 **Notă**: 
 - Toate variantele au același nume de fișier (ex: `1.bg.webp`)
 - Path-ul complet: `images/tales-of-alchimalia/stories/{userEmail}/{storyId}/s/1.bg.webp`
 
-### 2.4 Job pentru Procesare Poze Existente
+### 2.4 Backfill pentru Poze Existente (fără job permanent)
 
-**Nou job**: `ImageCompressionBackgroundJob`
+Nu introducem un BackgroundService nou “permanent”.
 
 **Caracteristici**:
-- Rulează ca **BackgroundService** (similar cu `StoryPublishQueueWorker`)
-- Procesează toate imaginile din containerul `alchimaliacontent`
-- **Feature flag** pentru activare/dezactivare: `ImageCompression:EnableBackgroundJob`
-- Poate fi declanșat manual prin endpoint API sau rulează periodic (nocturn)
+- Se declanșează manual din **admin-dashboard** prin endpoint API
+- Procesează toate imaginile din `images/` din containerul `alchimaliacontent`
+- **Idempotent**:
+  - dacă `s/` și `m/` există → skip
+  - dacă imaginea nu e ~4:5 → skip
+  - dacă a eșuat o parte → rulezi din nou, ce e deja ok va fi skipped
 
-**Structură propusă**:
-```csharp
-public class ImageCompressionBackgroundJob : BackgroundService
-{
-    // Parcurge toate folderele images/stories/{storyId}/{lang}/
-    // Pentru fiecare imagine găsită:
-    //   1. Verifică dacă există deja variantele s/m/l
-    //   2. Dacă nu există, generează-le
-    //   3. Salvează în folderele corespunzătoare
-}
-```
+**Endpoint propus**:
+- `POST /api/admin/image-compression/backfill-images` (Admin)
+  - pornește procesarea (sincron sau cu jobId + polling)
+- `GET /api/admin/image-compression/backfill-images/{jobId}` (Admin) – dacă alegem varianta async
 
 **Configurare în `appsettings.json`**:
 ```json
 {
   "ImageCompression": {
-    "EnableBackgroundJob": false,
-    "BackgroundJobIntervalMinutes": 60,
     "ProcessBatchSize": 10,
     "SmallQuality": 65,
     "MediumQuality": 80,
-    "LargeQuality": 95
+    "FourByFiveTolerance": 0.01,
+    "SmallMaxWidth": 480,
+    "MediumMaxWidth": 768
   }
 }
 ```
@@ -205,8 +205,8 @@ public class ImageCompressionBackgroundJob : BackgroundService
 
 **Responsabilități**:
 - Interceptează toate URL-urile de imagini din aplicație
-- Transformă URL-urile pentru a include folderul corespunzător (s/m/l)
-- Detectează suportul WebP și alege formatul corespunzător
+- Transformă URL-urile pentru a include folderul corespunzător (**s/m**)
+- Dacă varianta `s/` sau `m/` nu există (sau a fost skipped pentru non-4:5), aplicația trebuie să aibă **fallback la original**
 
 **Exemplu transformare**:
 ```
@@ -252,16 +252,16 @@ const imageUrl = this.imageAdapter.getImageUrl('images/tales-of-alchimalia/stori
 #### ✅ Pas 1.2: Creare Serviciu de Compresie
 - [ ] Creează `IImageCompressionService` interface
 - [ ] Implementează `ImageCompressionService`:
-  - Metodă pentru compresie JPEG
-  - Metodă pentru compresie WebP
-  - Validare aspect ratio 4:5
-  - Salvare în blob storage (foldere s/m/l)
+  - Validare aspect ratio ~4:5 (toleranță configurabilă)
+  - Dacă nu e 4:5 → **skip** (nu crop/padding)
+  - Resize + compresie pentru s/m
+  - Salvare în blob storage (foldere s/m)
 
 #### ✅ Pas 1.3: Integrare în Publish Flow
 - [ ] Modifică `StoryPublishAssetService.CopyAssetsToPublishedAsync()`:
-  - Pentru **toate imaginile** (tile images + cover images), apelează `IImageCompressionService.CompressAndSaveAsync()`
-  - Generează și salvează toate cele 3 variante: `s/`, `m/`, `l/`
-  - Folosește structura extinsă: `images/tales-of-alchimalia/stories/{userEmail}/{storyId}/s/{filename}`
+  - Pentru **toate imaginile** (stories + epics + heroes), generează s/m (doar dacă imaginea e ~4:5)
+  - Generează și salvează variantele: `s/`, `m/` (originalul rămâne canonical)
+  - Folosește structura extinsă: `.../s/{filename}` și `.../m/{filename}`
   - Păstrează același nume de fișier în toate folderele
 
 #### ✅ Pas 1.4: Configurare
@@ -269,22 +269,13 @@ const imageUrl = this.imageAdapter.getImageUrl('images/tales-of-alchimalia/stori
   - Calități pentru s/m/l
   - Feature flag pentru job
 
-### Faza 2: Backend - Job pentru Poze Existente
+### Faza 2: Backend - Backfill manual pentru Poze Existente
 
-#### ✅ Pas 2.1: Creare Job
-- [ ] Creează `ImageCompressionBackgroundJob` (BackgroundService)
-- [ ] Implementează logica de parcurgere a containerului `alchimaliacontent`
-- [ ] Verificare existență variante s/m/l (skip dacă există deja)
-- [ ] Procesare în batch-uri (configurabil)
-
-#### ✅ Pas 2.2: Endpoint Manual Trigger
-- [ ] Creează endpoint `POST /api/admin/image-compression/process-all`
+#### ✅ Pas 2.1: Endpoint Manual Trigger (Admin)
+- [ ] Creează endpoint `POST /api/admin/image-compression/backfill-images`
 - [ ] Protejat cu rol `Admin`
-- [ ] Returnează status job (queued/running/completed)
-
-#### ✅ Pas 2.3: Înregistrare în DI
-- [ ] Adaugă `ImageCompressionBackgroundJob` în `Program.cs` sau `ServiceCollectionExtensions.cs`
-- [ ] Respectă feature flag-ul `ImageCompression:EnableBackgroundJob`
+- [ ] Idempotent: skip dacă există s/m, skip dacă nu e 4:5
+- [ ] (Opțional) jobId + polling pentru status
 
 ### Faza 3: Frontend - Detectare Device
 
@@ -367,56 +358,20 @@ const imageUrl = this.imageAdapter.getImageUrl('images/tales-of-alchimalia/stori
 // NOTĂ: Aceasta este varianta de calitate maximă, dar tot comprimată în WebP
 ```
 
-### 5.2 Forțare Aspect Ratio 4:5 (Crop Center)
+### 5.2 Regula 4:5 (fără crop/padding)
 
-**Algoritm**:
-```csharp
-// 1. Calculăm aspect ratio-ul actual
-var currentRatio = (float)image.Width / image.Height;
-var targetRatio = 4f / 5f; // 0.8
-
-// 2. Dacă nu e exact 4:5, aplicăm crop center
-if (Math.Abs(currentRatio - targetRatio) > 0.01) // toleranță 1%
-{
-    // Calculăm dimensiunile pentru crop center
-    int cropWidth, cropHeight;
-    
-    if (currentRatio > targetRatio)
-    {
-        // Imaginea e mai lată decât 4:5 → crop lățime
-        cropHeight = image.Height;
-        cropWidth = (int)(cropHeight * targetRatio);
-    }
-    else
-    {
-        // Imaginea e mai înaltă decât 4:5 → crop înălțime
-        cropWidth = image.Width;
-        cropHeight = (int)(cropWidth / targetRatio);
-    }
-    
-    // Crop center
-    var x = (image.Width - cropWidth) / 2;
-    var y = (image.Height - cropHeight) / 2;
-    image = image.Clone(ctx => ctx.Crop(new Rectangle(x, y, cropWidth, cropHeight)));
-}
-
-// 3. Continuăm cu compresia
-```
-
-**De ce crop center și nu resize cu padding?**
-- Crop center păstrează calitatea originală (nu adaugă pixeli artificiali)
-- Mai puțin dăunător decât resize cu padding (care poate distorsiona imaginea)
-- Păstrează partea centrală a imaginii (de obicei cea mai importantă)
+Regulă: **dacă imaginea nu e deja ~4:5, nu o modificăm**.
+- La publish/backfill, doar logăm și facem skip pentru s/m.
+- Pentru imaginile noi se impune 4:5 în editor/upload (înainte de publish).
 
 ### 5.3 Fallback Strategy
 
 **Backend**:
-- Dacă compresia eșuează pentru s sau m, păstrăm doar l (original)
+- Dacă generarea eșuează sau e skipped (non-4:5), păstrăm doar originalul (canonical)
 - Logăm eroarea dar nu blocăm procesul de publicare
 
 **Frontend**:
-- Dacă varianta s/m/l nu există, fallback la l (original)
-- Dacă WebP nu e suportat, fallback la JPEG
+- Dacă varianta s/m nu există, fallback la original (canonical)
 
 ### 5.4 Performance Considerations
 
@@ -467,8 +422,8 @@ export const environment = {
 ### 6.2 Feature Flags
 
 **Backend**:
-- `ImageCompression:EnableBackgroundJob` - activează/dezactivează job-ul pentru poze existente
-- Poate fi setat per environment (dev/staging/prod)
+- (Opțional) `ImageCompression:Enabled` - activează/dezactivează generarea s/m la publish
+- Backfill-ul e manual (endpoint Admin), nu job periodic
 
 **Frontend**:
 - `imageCompression.enabled` - activează/dezactivează interceptarea URL-urilor

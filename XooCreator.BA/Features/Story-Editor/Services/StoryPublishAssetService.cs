@@ -3,6 +3,7 @@ using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Features.StoryEditor.Mappers;
 using XooCreator.BA.Features.StoryEditor.Models;
 using XooCreator.BA.Infrastructure.Services.Blob;
+using XooCreator.BA.Infrastructure.Services.Images;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 
@@ -33,11 +34,16 @@ public interface IStoryPublishAssetService
 public class StoryPublishAssetService : IStoryPublishAssetService
 {
     private readonly IBlobSasService _sas;
+    private readonly IImageCompressionService _imageCompression;
     private readonly ILogger<StoryPublishAssetService> _logger;
 
-    public StoryPublishAssetService(IBlobSasService sas, ILogger<StoryPublishAssetService> logger)
+    public StoryPublishAssetService(
+        IBlobSasService sas,
+        IImageCompressionService imageCompression,
+        ILogger<StoryPublishAssetService> logger)
     {
         _sas = sas;
+        _imageCompression = imageCompression;
         _logger = logger;
     }
 
@@ -232,6 +238,25 @@ public class StoryPublishAssetService : IStoryPublishAssetService
                 await Task.Delay(250, ct);
             }
 
+            // After original is published, generate s/m variants (non-blocking) for images.
+            if (asset.Type == StoryAssetPathMapper.AssetType.Image)
+            {
+                try
+                {
+                    var (basePath, fileName) = SplitPath(targetBlobPath);
+                    await _imageCompression.EnsureStorySizeVariantsAsync(
+                        sourceBlobPath: targetBlobPath,
+                        targetBasePath: basePath,
+                        filename: fileName,
+                        overwriteExisting: true,
+                        ct: ct);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to generate image variants during publish: path={Path}", targetBlobPath);
+                }
+            }
+
             return AssetCopyResult.Success();
         }
         catch (Exception ex)
@@ -241,6 +266,19 @@ public class StoryPublishAssetService : IStoryPublishAssetService
                 storyId, asset.Filename, sourceBlobPath);
             return AssetCopyResult.CopyFailed(asset.Filename, storyId, ex.Message);
         }
+    }
+
+    private static (string BasePath, string FileName) SplitPath(string blobPath)
+    {
+        var trimmed = (blobPath ?? string.Empty).Trim().TrimStart('/');
+        var idx = trimmed.LastIndexOf('/');
+        if (idx < 0)
+        {
+            return (string.Empty, trimmed);
+        }
+        var basePath = trimmed.Substring(0, idx);
+        var fileName = trimmed.Substring(idx + 1);
+        return (basePath, fileName);
     }
 }
 
