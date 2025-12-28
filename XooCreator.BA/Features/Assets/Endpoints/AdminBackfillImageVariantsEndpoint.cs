@@ -67,8 +67,26 @@ public sealed class AdminBackfillImageVariantsEndpoint
         }
 
         var opt = ep._options.Value;
-        var limit = request?.MaxImages ?? opt.ProcessBatchSize;
-        limit = Math.Max(1, limit);
+        // If MaxImages is explicitly set, use it. If null, process all images (no limit)
+        // For backward compatibility: if request is null, use default from config
+        int? limit = null;
+        bool hasLimit = true;
+        if (request?.MaxImages.HasValue == true)
+        {
+            limit = Math.Max(1, request.MaxImages.Value);
+            hasLimit = true;
+        }
+        else if (request == null)
+        {
+            // Backward compatibility: if no request body, use config default
+            limit = Math.Max(1, opt.ProcessBatchSize);
+            hasLimit = true;
+        }
+        else
+        {
+            // MaxImages is explicitly null in request - process all images
+            hasLimit = false;
+        }
 
         var prefix = (request?.Prefix ?? "images/").Trim().TrimStart('/');
         if (!prefix.EndsWith("/")) prefix += "/";
@@ -86,13 +104,13 @@ public sealed class AdminBackfillImageVariantsEndpoint
         var skippedDerived = 0;
         var errors = new List<string>();
 
-        ep._logger.LogInformation("Starting image variants backfill: prefix={Prefix} limit={Limit} overwrite={Overwrite}", prefix, limit, overwrite);
+        ep._logger.LogInformation("Starting image variants backfill: prefix={Prefix} limit={Limit} overwrite={Overwrite}", prefix, hasLimit ? limit.ToString() : "unlimited", overwrite);
 
         await foreach (var blob in container.GetBlobsAsync(prefix: prefix, cancellationToken: ct))
         {
             scanned++;
 
-            if (attempted >= limit)
+            if (hasLimit && attempted >= limit)
             {
                 break;
             }
