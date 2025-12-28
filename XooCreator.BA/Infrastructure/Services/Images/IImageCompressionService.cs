@@ -7,7 +7,7 @@ public interface IImageCompressionService
     /// <summary>
     /// Ensures s/m variants exist for an image in the PUBLISHED container.
     /// Rules:
-    /// - If the image is not ~4:5 (tolerance), it will be skipped (no crop/pad).
+    /// - If the image is not close to an allowed aspect ratio (tolerance), it will be skipped (no crop/pad).
     /// - If overwriteExisting is false, existing variants are preserved.
     /// </summary>
     Task<ImageCompressionResult> EnsureStorySizeVariantsAsync(

@@ -12,7 +12,7 @@ namespace XooCreator.BA.Infrastructure.Services.Images;
 
 public sealed class ImageCompressionService : IImageCompressionService
 {
-    private static readonly double TargetRatio = 4d / 5d; // 0.8
+    private static readonly double[] DefaultAllowedRatios = { 4d / 5d, 7d / 9d }; // 4:5 and 7:9
 
     private readonly IBlobSasService _sas;
     private readonly IOptions<ImageCompressionOptions> _options;
@@ -60,16 +60,22 @@ public sealed class ImageCompressionService : IImageCompressionService
             using var image = await Image.LoadAsync(srcStream, ct);
 
             var ratio = image.Width / (double)image.Height;
-            var delta = Math.Abs(ratio - TargetRatio);
-            if (delta > opt.FourByFiveTolerance)
+            var allowed = (opt.AllowedAspectRatios is { Length: > 0 } ? opt.AllowedAspectRatios : DefaultAllowedRatios);
+            var bestMatch = allowed
+                .Select(r => new { Ratio = r, Delta = Math.Abs(ratio - r) })
+                .OrderBy(x => x.Delta)
+                .First();
+
+            if (bestMatch.Delta > opt.FourByFiveTolerance)
             {
                 _logger.LogInformation(
-                    "Image variant generation skipped (not 4:5): path={Path} w={W} h={H} ratio={Ratio} delta={Delta} tol={Tol}",
+                    "Image variant generation skipped (unsupported aspect ratio): path={Path} w={W} h={H} ratio={Ratio} bestMatch={BestMatch} delta={Delta} tol={Tol}",
                     sourceBlobPath,
                     image.Width,
                     image.Height,
                     ratio.ToString("0.####", CultureInfo.InvariantCulture),
-                    delta.ToString("0.####", CultureInfo.InvariantCulture),
+                    bestMatch.Ratio.ToString("0.####", CultureInfo.InvariantCulture),
+                    bestMatch.Delta.ToString("0.####", CultureInfo.InvariantCulture),
                     opt.FourByFiveTolerance.ToString("0.####", CultureInfo.InvariantCulture));
 
                 return new ImageCompressionResult
