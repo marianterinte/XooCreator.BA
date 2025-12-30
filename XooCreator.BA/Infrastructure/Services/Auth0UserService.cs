@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Memory;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Data.Repositories;
@@ -13,22 +14,32 @@ public interface IAuth0UserService
     Task<Guid?> GetCurrentUserIdAsync(CancellationToken ct = default);
     bool HasRole(AlchimaliaUser user, UserRole role);
     bool HasAnyRole(AlchimaliaUser user, params UserRole[] roles);
+    void InvalidateUserCache(string auth0Id);
 }
 
 public class Auth0UserService : IAuth0UserService
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IUserRepository _userRepository;
-    private AlchimaliaUser? _cachedUser;
+    private readonly IMemoryCache? _cache;
+    private AlchimaliaUser? _cachedUser; // Per-request cache (fallback)
+    
+    private const string CacheKeyPrefix = "user_auth0_";
+    private static readonly TimeSpan CacheExpiration = TimeSpan.FromMinutes(5); // Cache for 5 minutes
 
-    public Auth0UserService(IHttpContextAccessor httpContextAccessor, IUserRepository userRepository)
+    public Auth0UserService(
+        IHttpContextAccessor httpContextAccessor, 
+        IUserRepository userRepository,
+        IMemoryCache? cache = null)
     {
         _httpContextAccessor = httpContextAccessor;
         _userRepository = userRepository;
+        _cache = cache;
     }
 
     public async Task<AlchimaliaUser?> GetCurrentUserAsync(CancellationToken ct = default)
     {
+        // First check per-request cache (fastest)
         if (_cachedUser != null)
             return _cachedUser;
 
@@ -40,6 +51,14 @@ public class Auth0UserService : IAuth0UserService
         if (string.IsNullOrEmpty(auth0Id))
             return null;
 
+        // Try to get from memory cache (shared across requests)
+        var cacheKey = $"{CacheKeyPrefix}{auth0Id}";
+        if (_cache != null && _cache.TryGetValue(cacheKey, out AlchimaliaUser? cachedUser))
+        {
+            _cachedUser = cachedUser; // Store in per-request cache too
+            return cachedUser;
+        }
+
         var email = GetClaimValue(httpContext.User, "email");
         var name = GetClaimValue(httpContext.User, "name") ?? GetClaimValue(httpContext.User, "nickname");
         var picture = GetClaimValue(httpContext.User, "picture");
@@ -49,8 +68,42 @@ public class Auth0UserService : IAuth0UserService
         if (string.IsNullOrWhiteSpace(email)) email = $"{auth0Id.Replace("|", "+") }@unknown.local";
 
         // Ensure user exists and sync profile data
+        // Note: EnsureAsync may update user data, so we invalidate cache first to ensure fresh data
+        InvalidateUserCache(auth0Id);
         _cachedUser = await _userRepository.EnsureAsync(auth0Id, name, email, picture, ct);
+        
+        // Store in memory cache for future requests (with updated data)
+        if (_cache != null && _cachedUser != null)
+        {
+            var cacheOptions = new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = CacheExpiration,
+                SlidingExpiration = TimeSpan.FromMinutes(2), // Extend cache if accessed within 2 minutes
+                Priority = CacheItemPriority.Normal
+            };
+            _cache.Set(cacheKey, _cachedUser, cacheOptions);
+        }
+        
         return _cachedUser;
+    }
+    
+    /// <summary>
+    /// Invalidates the cache for a specific user by Auth0Id
+    /// Call this when user data is updated to ensure fresh data on next request
+    /// </summary>
+    public void InvalidateUserCache(string auth0Id)
+    {
+        if (string.IsNullOrEmpty(auth0Id))
+            return;
+            
+        var cacheKey = $"{CacheKeyPrefix}{auth0Id}";
+        _cache?.Remove(cacheKey);
+        
+        // Also clear per-request cache if it matches
+        if (_cachedUser?.Auth0Id == auth0Id)
+        {
+            _cachedUser = null;
+        }
     }
 
     public async Task<Guid?> GetCurrentUserIdAsync(CancellationToken ct = default)

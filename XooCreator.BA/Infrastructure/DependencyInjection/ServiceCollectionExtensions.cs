@@ -33,6 +33,7 @@ public static class ServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
     {
+        services.AddMemoryCache(); // Add memory cache for user caching
         services.AddHttpContextAccessor();
         services.AddScoped<IAuth0UserService, Auth0UserService>();
         services.AddScoped<IUserContextService, UserContextService>();

@@ -77,6 +77,12 @@ public class UserAdministrationService : IUserAdministrationService
 
             var success = await _repository.UpdateUserRolesAsync(userId, roles, ct);
             
+            // Invalidate cache for this user to ensure fresh data on next request
+            if (success && !string.IsNullOrEmpty(user.Auth0Id))
+            {
+                _auth0UserService.InvalidateUserCache(user.Auth0Id);
+            }
+            
             return new UpdateUserRoleResponse
             {
                 Success = success,
