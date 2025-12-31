@@ -5,7 +5,8 @@ using XooCreator.BA.Features.StoryEditor.StoryEpic.Services;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.DTOs;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
-using Microsoft.Extensions.Logging;
+using TokenReward = XooCreator.BA.Features.TreeOfLight.DTOs.TokenReward;
+using TokenFamily = XooCreator.BA.Features.TreeOfLight.DTOs.TokenFamily;
 
 namespace XooCreator.BA.Features.StoryEditor.StoryEpic.Endpoints;
 
@@ -39,8 +40,20 @@ public class CompleteEpicStoryEndpoint
         if (user == null) return TypedResults.Unauthorized();
 
         var selectedAnswer = request?.SelectedAnswer;
+        
+        // Map tokens from string type to TokenFamily enum
+        List<TokenReward>? tokens = null;
+        if (request?.Tokens != null && request.Tokens.Count > 0)
+        {
+            tokens = request.Tokens.Select(t => new TokenReward
+            {
+                Type = MapTokenFamily(t.Type),
+                Value = t.Value,
+                Quantity = t.Quantity
+            }).ToList();
+        }
 
-        var result = await ep._progressService.CompleteStoryAsync(epicId, user.Id, storyId, selectedAnswer, ct);
+        var result = await ep._progressService.CompleteStoryAsync(epicId, user.Id, storyId, selectedAnswer, tokens, ct);
         
         if (!result.Success)
         {
@@ -60,11 +73,36 @@ public class CompleteEpicStoryEndpoint
 
         return TypedResults.Ok(response);
     }
+
+    // Helper method to map string to TokenFamily enum
+    private static TokenFamily MapTokenFamily(string type)
+    {
+        if (string.IsNullOrWhiteSpace(type)) return TokenFamily.Personality;
+        return type.Trim() switch
+        {
+            "TreeOfHeroes" => TokenFamily.Personality,
+            "Personality" => TokenFamily.Personality,
+            "Alchemy" => TokenFamily.Alchemy,
+            "Discovery" => TokenFamily.Discovery,
+            "Generative" => TokenFamily.Generative,
+            "Learning" => TokenFamily.Discovery,
+            _ => Enum.TryParse<TokenFamily>(type, true, out var fam) ? fam : TokenFamily.Personality
+        };
+    }
 }
 
 public record CompleteEpicStoryRequest
 {
     public string? SelectedAnswer { get; init; }
+    public List<TokenRewardDto>? Tokens { get; init; }
+}
+
+// Intermediate DTO for deserialization (type as string)
+public record TokenRewardDto
+{
+    public string Type { get; init; } = string.Empty;
+    public string Value { get; init; } = string.Empty;
+    public int Quantity { get; init; }
 }
 
 public record CompleteEpicStoryResponse
