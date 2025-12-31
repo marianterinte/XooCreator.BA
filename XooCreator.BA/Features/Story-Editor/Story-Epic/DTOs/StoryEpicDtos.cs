@@ -179,6 +179,31 @@ public record EpicProgressStateDto
     public List<UnlockedHeroDto> UnlockedHeroes { get; init; } = new();
 }
 
+// Complete Epic Story Request/Response DTOs
+public record CompleteEpicStoryRequest
+{
+    public string? SelectedAnswer { get; init; }
+    public List<TokenRewardDto>? Tokens { get; init; }
+}
+
+// Intermediate DTO for deserialization (type as string)
+public record TokenRewardDto
+{
+    public string Type { get; init; } = string.Empty;
+    public string Value { get; init; } = string.Empty;
+    public int Quantity { get; init; }
+}
+
+public record CompleteEpicStoryResponse
+{
+    public required bool Success { get; init; }
+    public required string EpicId { get; init; }
+    public required string StoryId { get; init; }
+    public List<string> NewlyUnlockedRegions { get; init; } = new();
+    public List<UnlockedHeroDto> NewlyUnlockedHeroes { get; init; } = new();
+    public string? StoryCoverImageUrl { get; init; }
+}
+
 public record EpicCompletedStoryDto
 {
     public required string StoryId { get; init; }
