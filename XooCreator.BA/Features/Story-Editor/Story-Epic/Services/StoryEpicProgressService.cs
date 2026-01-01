@@ -102,6 +102,26 @@ public class StoryEpicProgressService : IStoryEpicProgressService
 
     public async Task<CompleteEpicStoryResult> CompleteStoryAsync(string epicId, Guid userId, string storyId, string? selectedAnswer = null, List<TokenReward>? tokens = null, CancellationToken ct = default)
     {
+        // Check if story is already completed BEFORE attempting to complete it
+        var existingStoryProgress = await _progressRepository.GetEpicStoryProgressAsync(userId, epicId);
+        var isAlreadyCompleted = existingStoryProgress.Any(sp => sp.StoryId == storyId);
+        
+        if (isAlreadyCompleted)
+        {
+            // Story is already completed - return success without recalculating tokens, regions, or heroes
+            var storyDefinition1 = await _context.StoryDefinitions
+                .FirstOrDefaultAsync(sd => sd.StoryId == storyId && sd.IsActive, ct);
+            var storyCoverImageUrl1 = storyDefinition1?.CoverImageUrl;
+            
+            return new CompleteEpicStoryResult 
+            { 
+                Success = true, 
+                NewlyUnlockedRegions = new List<string>(), 
+                NewlyUnlockedHeroes = new List<UnlockedHeroDto>(), 
+                StoryCoverImageUrl = storyCoverImageUrl1 
+            };
+        }
+
         // Get current unlocked regions BEFORE completing the story
         var currentProgress = await _progressRepository.GetEpicProgressAsync(userId, epicId);
         var currentUnlockedRegions = new HashSet<string>(

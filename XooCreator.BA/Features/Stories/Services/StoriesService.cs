@@ -45,6 +45,17 @@ public class StoriesService : IStoriesService
             ? await _repository.GetUserStoryProgressAsync(userId, storyId)
             : new List<UserStoryProgressDto>();
 
+        // Check completion status from UserStoryReadHistory
+        var isCompleted = false;
+        DateTime? completedAt = null;
+        if (story != null)
+        {
+            var completionInfo = await _repository.GetStoryCompletionStatusAsync(userId, storyId);
+            isCompleted = completionInfo.IsCompleted;
+            completedAt = completionInfo.CompletedAt;
+        }
+
+        // If story is completed and user is trying to read again, reset progress to allow re-reading
         if (story != null && story.Tiles?.Count > 0 && userProgress.Count >= story.Tiles.Count)
         {
             await _repository.ResetStoryProgressAsync(userId, storyId);
@@ -76,7 +87,9 @@ public class StoriesService : IStoriesService
         return new GetStoryByIdResponse
         {
             Story = story,
-            UserProgress = userProgress
+            UserProgress = userProgress,
+            IsCompleted = isCompleted,
+            CompletedAt = completedAt
         };
     }
 

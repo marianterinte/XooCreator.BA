@@ -116,17 +116,59 @@ public class EpicProgressRepository : IEpicProgressRepository
         try
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
-            
+
+            // Get all story IDs for this epic
+            var storyIds = await _context.StoryEpicDefinitionStoryNodes
+                .Where(sn => sn.EpicId == epicId)
+                .Select(sn => sn.StoryId)
+                .ToListAsync();
+
             // Delete all epic progress for this user and epic
             await _context.EpicProgress
                 .Where(ep => ep.UserId == userId && ep.EpicId == epicId)
                 .ExecuteDeleteAsync();
-            
+
             // Delete all epic story progress for this user and epic
             await _context.EpicStoryProgress
                 .Where(esp => esp.UserId == userId && esp.EpicId == epicId)
                 .ExecuteDeleteAsync();
-            
+
+            // Delete UserStoryReadHistory for all stories in this epic
+            // This clears the CompletedAt field that determines isCompleted
+            if (storyIds.Any())
+            {
+                var allHistory = await _context.UserStoryReadHistory
+                    .Where(h => h.UserId == userId)
+                    .ToListAsync();
+
+                var historyToDelete = allHistory
+                    .Where(h => storyIds.Any(sid => string.Equals(h.StoryId, sid, StringComparison.OrdinalIgnoreCase)))
+                    .ToList();
+
+                if (historyToDelete.Any())
+                {
+                    _context.UserStoryReadHistory.RemoveRange(historyToDelete);
+                }
+            }
+
+            // Delete StoryQuizAnswers for all stories in this epic
+            // This clears all quiz answers saved during story completion
+            if (storyIds.Any())
+            {
+                var allAnswers = await _context.StoryQuizAnswers
+                    .Where(a => a.UserId == userId)
+                    .ToListAsync();
+
+                var answersToDelete = allAnswers
+                    .Where(a => storyIds.Any(sid => string.Equals(a.StoryId, sid, StringComparison.OrdinalIgnoreCase)))
+                    .ToList();
+
+                if (answersToDelete.Any())
+                {
+                    _context.StoryQuizAnswers.RemoveRange(answersToDelete);
+                }
+            }
+
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
             return true;

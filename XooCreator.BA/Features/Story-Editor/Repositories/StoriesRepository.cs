@@ -212,6 +212,33 @@ public class StoriesRepository : IStoriesRepository
         await _context.SaveChangesAsync();
     }
 
+    public async Task<StoryCompletionInfo> GetStoryCompletionStatusAsync(Guid userId, string storyId)
+    {
+        storyId = NormalizeStoryId(storyId);
+        // Load all history for this user and filter in memory for case-insensitive match
+        var allHistory = await _context.UserStoryReadHistory
+            .Where(h => h.UserId == userId)
+            .ToListAsync();
+
+        var history = allHistory
+            .FirstOrDefault(h => string.Equals(h.StoryId, storyId, StringComparison.OrdinalIgnoreCase));
+
+        if (history != null && history.CompletedAt.HasValue)
+        {
+            return new StoryCompletionInfo
+            {
+                IsCompleted = true,
+                CompletedAt = history.CompletedAt
+            };
+        }
+
+        return new StoryCompletionInfo
+        {
+            IsCompleted = false,
+            CompletedAt = null
+        };
+    }
+
     public async Task SeedStoriesAsync()
     {
         try
