@@ -1,3 +1,6 @@
+using System;
+using System.IO;
+using System.Linq;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
@@ -6,10 +9,9 @@ using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.DTOs;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.Repositories;
 using XooCreator.BA.Infrastructure.Services.Blob;
+using XooCreator.BA.Infrastructure.Services.Images;
 using Azure.Storage.Blobs;
 using Azure.Storage.Sas;
-using System.IO;
-using System.Linq;
 
 namespace XooCreator.BA.Features.StoryEditor.StoryEpic.Services;
 
@@ -19,6 +21,7 @@ public class StoryRegionService : IStoryRegionService
     private readonly XooDbContext _context;
     private readonly IBlobSasService _blobSas;
     private readonly IRegionPublishedAssetCleanupService _assetCleanup;
+    private readonly IImageCompressionService _imageCompression;
     private readonly ILogger<StoryRegionService> _logger;
 
     public StoryRegionService(
@@ -26,12 +29,14 @@ public class StoryRegionService : IStoryRegionService
         XooDbContext context,
         IBlobSasService blobSas,
         IRegionPublishedAssetCleanupService assetCleanup,
+        IImageCompressionService imageCompression,
         ILogger<StoryRegionService> logger)
     {
         _repository = repository;
         _context = context;
         _blobSas = blobSas;
         _assetCleanup = assetCleanup;
+        _imageCompression = imageCompression;
         _logger = logger;
     }
 
@@ -532,7 +537,36 @@ public class StoryRegionService : IStoryRegionService
         var operation = await destinationClient.StartCopyFromUriAsync(sasUri, cancellationToken: ct);
         await operation.WaitForCompletionAsync(cancellationToken: ct);
 
+        // Generate s/m variants for region image (non-blocking).
+        try
+        {
+            var (basePath, fileName2) = SplitPath(destinationPath);
+            await _imageCompression.EnsureStorySizeVariantsAsync(
+                sourceBlobPath: destinationPath,
+                targetBasePath: basePath,
+                filename: fileName2,
+                overwriteExisting: true,
+                ct: ct);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to generate region image variants: path={Path}", destinationPath);
+        }
+
         return destinationPath;
+    }
+
+    private static (string BasePath, string FileName) SplitPath(string blobPath)
+    {
+        var trimmed = (blobPath ?? string.Empty).Trim().TrimStart('/');
+        var idx = trimmed.LastIndexOf('/');
+        if (idx < 0)
+        {
+            return (string.Empty, trimmed);
+        }
+        var basePath = trimmed.Substring(0, idx);
+        var fileName = trimmed.Substring(idx + 1);
+        return (basePath, fileName);
     }
 
     private static string NormalizeBlobPath(string path)

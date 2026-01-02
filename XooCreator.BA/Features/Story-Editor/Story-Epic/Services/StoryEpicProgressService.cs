@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.DTOs;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.Repositories;
+using XooCreator.BA.Features.TreeOfHeroes.Repositories;
+using TokenReward = XooCreator.BA.Features.TreeOfLight.DTOs.TokenReward;
 
 namespace XooCreator.BA.Features.StoryEditor.StoryEpic.Services;
 
@@ -10,17 +12,20 @@ public class StoryEpicProgressService : IStoryEpicProgressService
     private readonly IStoryEpicService _epicService;
     private readonly IEpicProgressRepository _progressRepository;
     private readonly IEpicHeroRepository _heroRepository;
+    private readonly ITreeOfHeroesRepository _treeOfHeroesRepository;
     private readonly XooDbContext _context;
 
     public StoryEpicProgressService(
         IStoryEpicService epicService,
         IEpicProgressRepository progressRepository,
         IEpicHeroRepository heroRepository,
+        ITreeOfHeroesRepository treeOfHeroesRepository,
         XooDbContext context)
     {
         _epicService = epicService;
         _progressRepository = progressRepository;
         _heroRepository = heroRepository;
+        _treeOfHeroesRepository = treeOfHeroesRepository;
         _context = context;
     }
 
@@ -95,8 +100,28 @@ public class StoryEpicProgressService : IStoryEpicProgressService
         };
     }
 
-    public async Task<CompleteEpicStoryResult> CompleteStoryAsync(string epicId, Guid userId, string storyId, string? selectedAnswer = null, CancellationToken ct = default)
+    public async Task<CompleteEpicStoryResult> CompleteStoryAsync(string epicId, Guid userId, string storyId, string? selectedAnswer = null, List<TokenReward>? tokens = null, CancellationToken ct = default)
     {
+        // Check if story is already completed BEFORE attempting to complete it
+        var existingStoryProgress = await _progressRepository.GetEpicStoryProgressAsync(userId, epicId);
+        var isAlreadyCompleted = existingStoryProgress.Any(sp => sp.StoryId == storyId);
+        
+        if (isAlreadyCompleted)
+        {
+            // Story is already completed - return success without recalculating tokens, regions, or heroes
+            var storyDefinition1 = await _context.StoryDefinitions
+                .FirstOrDefaultAsync(sd => sd.StoryId == storyId && sd.IsActive, ct);
+            var storyCoverImageUrl1 = storyDefinition1?.CoverImageUrl;
+            
+            return new CompleteEpicStoryResult 
+            { 
+                Success = true, 
+                NewlyUnlockedRegions = new List<string>(), 
+                NewlyUnlockedHeroes = new List<UnlockedHeroDto>(), 
+                StoryCoverImageUrl = storyCoverImageUrl1 
+            };
+        }
+
         // Get current unlocked regions BEFORE completing the story
         var currentProgress = await _progressRepository.GetEpicProgressAsync(userId, epicId);
         var currentUnlockedRegions = new HashSet<string>(
@@ -149,6 +174,12 @@ public class StoryEpicProgressService : IStoryEpicProgressService
         // Evaluate and unlock heroes based on completed story
         // This includes heroes from StoryEpicHeroReferences AND heroes unlocked by the story itself (from StoryDefinitionUnlockedHeroes)
         var newlyUnlockedHeroes = await EvaluateAndUnlockHeroesAsync(userId, epicId, storyId, epicState.Epic.Heroes, storyProgress.Select(sp => sp.StoryId).ToList(), ct);
+
+        // Award tokens if provided (similar to Tree of Light)
+        if (tokens != null && tokens.Count > 0)
+        {
+            await _treeOfHeroesRepository.AwardTokensAsync(userId, tokens);
+        }
 
         return new CompleteEpicStoryResult
         {

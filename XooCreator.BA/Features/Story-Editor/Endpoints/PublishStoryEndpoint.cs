@@ -312,7 +312,9 @@ public partial class PublishStoryEndpoint
             return TypedResults.Forbid();
         }
 
+        // Use AsNoTracking for read-only query to improve performance
         var job = await ep._db.StoryPublishJobs
+            .AsNoTracking()
             .FirstOrDefaultAsync(j => j.Id == jobId && j.StoryId == storyId, ct);
 
         if (job == null)

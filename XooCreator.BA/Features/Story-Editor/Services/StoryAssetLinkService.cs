@@ -220,11 +220,40 @@ public class StoryAssetLinkService : IStoryAssetLinkService
         {
             var client = _sas.GetBlobClient(_sas.PublishedContainer, publishedPath);
             await client.DeleteIfExistsAsync(cancellationToken: ct);
+
+            // Also delete derived s/m variants for images.
+            // We intentionally do NOT generate variants for non-4:5 images, so these might not exist.
+            if (publishedPath.StartsWith("images/", StringComparison.OrdinalIgnoreCase) &&
+                !publishedPath.Contains("/s/", StringComparison.OrdinalIgnoreCase) &&
+                !publishedPath.Contains("/m/", StringComparison.OrdinalIgnoreCase))
+            {
+                var (basePath, fileName) = SplitPath(publishedPath);
+                if (!string.IsNullOrWhiteSpace(basePath) && !string.IsNullOrWhiteSpace(fileName))
+                {
+                    var small = $"{basePath.TrimEnd('/')}/s/{fileName}";
+                    var medium = $"{basePath.TrimEnd('/')}/m/{fileName}";
+                    await _sas.GetBlobClient(_sas.PublishedContainer, small).DeleteIfExistsAsync(cancellationToken: ct);
+                    await _sas.GetBlobClient(_sas.PublishedContainer, medium).DeleteIfExistsAsync(cancellationToken: ct);
+                }
+            }
         }
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Failed to delete published asset path={Path}", publishedPath);
         }
+    }
+
+    private static (string BasePath, string FileName) SplitPath(string blobPath)
+    {
+        var trimmed = (blobPath ?? string.Empty).Trim().TrimStart('/');
+        var idx = trimmed.LastIndexOf('/');
+        if (idx < 0)
+        {
+            return (string.Empty, trimmed);
+        }
+        var basePath = trimmed.Substring(0, idx);
+        var fileName = trimmed.Substring(idx + 1);
+        return (basePath, fileName);
     }
 
     private static string ComputeAssetHash(StoryAssetPathMapper.AssetInfo asset, int draftVersion)

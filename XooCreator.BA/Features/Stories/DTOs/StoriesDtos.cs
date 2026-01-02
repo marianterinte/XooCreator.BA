@@ -64,6 +64,8 @@ public record GetStoryByIdResponse
 {
     public StoryContentDto? Story { get; init; }
     public List<UserStoryProgressDto> UserProgress { get; init; } = new();
+    public bool IsCompleted { get; init; } = false;
+    public DateTime? CompletedAt { get; init; }
 }
 
 public record MarkTileAsReadRequest
@@ -87,5 +89,11 @@ public record ResetStoryProgressResponse
 {
     public bool Success { get; init; }
     public string? ErrorMessage { get; init; }
+}
+
+public record StoryCompletionInfo
+{
+    public bool IsCompleted { get; init; }
+    public DateTime? CompletedAt { get; init; }
 }
 

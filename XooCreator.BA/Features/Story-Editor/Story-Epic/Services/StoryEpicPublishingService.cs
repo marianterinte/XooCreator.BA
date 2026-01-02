@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Infrastructure.Services.Blob;
+using XooCreator.BA.Infrastructure.Services.Images;
 
 namespace XooCreator.BA.Features.StoryEditor.StoryEpic.Services;
 
@@ -19,15 +20,18 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
 {
     private readonly XooDbContext _context;
     private readonly IBlobSasService _blobSas;
+    private readonly IImageCompressionService _imageCompression;
     private readonly ILogger<StoryEpicPublishingService> _logger;
 
     public StoryEpicPublishingService(
         XooDbContext context,
         IBlobSasService blobSas,
+        IImageCompressionService imageCompression,
         ILogger<StoryEpicPublishingService> logger)
     {
         _context = context;
         _blobSas = blobSas;
+        _imageCompression = imageCompression;
         _logger = logger;
     }
 
@@ -107,6 +111,25 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
                 var sourceSas = sourceClient.GenerateSasUri(BlobSasPermissions.Read, DateTimeOffset.UtcNow.AddMinutes(10));
                 var copyOperation = await destinationClient.StartCopyFromUriAsync(sourceSas, cancellationToken: ct);
                 await copyOperation.WaitForCompletionAsync(cancellationToken: ct);
+
+                // Generate s/m variants for images (non-blocking).
+                if (asset.PublishedPath.StartsWith("images/", StringComparison.OrdinalIgnoreCase))
+                {
+                    try
+                    {
+                        var (basePath, fileName) = SplitPath(asset.PublishedPath);
+                        await _imageCompression.EnsureStorySizeVariantsAsync(
+                            sourceBlobPath: asset.PublishedPath,
+                            targetBasePath: basePath,
+                            filename: fileName,
+                            overwriteExisting: true,
+                            ct: ct);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to generate epic image variants: path={Path}", asset.PublishedPath);
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -141,7 +164,36 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
         var operation = await destinationClient.StartCopyFromUriAsync(sasUri, cancellationToken: ct);
         await operation.WaitForCompletionAsync(cancellationToken: ct);
 
+        // Generate s/m variants for region images (non-blocking).
+        try
+        {
+            var (basePath, fileName2) = SplitPath(destinationPath);
+            await _imageCompression.EnsureStorySizeVariantsAsync(
+                sourceBlobPath: destinationPath,
+                targetBasePath: basePath,
+                filename: fileName2,
+                overwriteExisting: true,
+                ct: ct);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to generate region image variants: path={Path}", destinationPath);
+        }
+
         return destinationPath;
+    }
+
+    private static (string BasePath, string FileName) SplitPath(string blobPath)
+    {
+        var trimmed = (blobPath ?? string.Empty).Trim().TrimStart('/');
+        var idx = trimmed.LastIndexOf('/');
+        if (idx < 0)
+        {
+            return (string.Empty, trimmed);
+        }
+        var basePath = trimmed.Substring(0, idx);
+        var fileName = trimmed.Substring(idx + 1);
+        return (basePath, fileName);
     }
 
     private static string NormalizeBlobPath(string path)

@@ -22,6 +22,7 @@ public interface ITreeOfHeroesRepository
     Task<bool> AwardTokensAsync(Guid userId, IEnumerable<TokenReward> tokenRewards);
     Task<bool> SaveHeroProgressAsync(Guid userId, string heroId);
     Task<List<string>> AutoUnlockNodesBasedOnPrerequisitesAsync(Guid userId);
+    Task<ResetPersonalityTokensResult> ResetPersonalityTokensAsync(Guid userId);
 }
 
 public class TreeOfHeroesRepository : ITreeOfHeroesRepository
@@ -290,6 +291,67 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
         };
 
         return config;
+    }
+
+    public async Task<ResetPersonalityTokensResult> ResetPersonalityTokensAsync(Guid userId)
+    {
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        
+        try
+        {
+            // Get all hero tree progress for user to calculate tokens to return
+            var heroTreeProgress = await _context.HeroTreeProgress
+                .Where(htp => htp.UserId == userId)
+                .ToListAsync();
+
+            // Calculate total tokens consumed
+            int totalCourage = heroTreeProgress.Sum(h => h.TokensCostCourage);
+            int totalCuriosity = heroTreeProgress.Sum(h => h.TokensCostCuriosity);
+            int totalThinking = heroTreeProgress.Sum(h => h.TokensCostThinking);
+            int totalCreativity = heroTreeProgress.Sum(h => h.TokensCostCreativity);
+            int totalSafety = heroTreeProgress.Sum(h => h.TokensCostSafety);
+
+            // Return tokens to user
+            if (totalCourage > 0 || totalCuriosity > 0 || totalThinking > 0 || totalCreativity > 0 || totalSafety > 0)
+            {
+                await AwardTokensAsync(userId, totalCourage, totalCuriosity, totalThinking, totalCreativity, totalSafety);
+            }
+
+            // Delete hero tree progress
+            if (heroTreeProgress.Count > 0)
+            {
+                _context.HeroTreeProgress.RemoveRange(heroTreeProgress);
+            }
+
+            // Delete hero progress
+            var heroProgress = await _context.HeroProgress
+                .Where(hp => hp.UserId == userId)
+                .ToListAsync();
+            
+            if (heroProgress.Count > 0)
+            {
+                _context.HeroProgress.RemoveRange(heroProgress);
+            }
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            return new ResetPersonalityTokensResult
+            {
+                Success = true,
+                TokensReturned = totalCourage + totalCuriosity + totalThinking + totalCreativity + totalSafety
+            };
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            return new ResetPersonalityTokensResult
+            {
+                Success = false,
+                ErrorMessage = ex.Message,
+                TokensReturned = 0
+            };
+        }
     }
 
     public async Task<bool> SaveHeroProgressAsync(Guid userId, string heroId)
