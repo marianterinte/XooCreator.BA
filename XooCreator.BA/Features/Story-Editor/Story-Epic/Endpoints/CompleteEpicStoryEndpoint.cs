@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.Services;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.DTOs;
+using XooCreator.BA.Features.Stories.Mappers;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
-using Microsoft.Extensions.Logging;
+using TokenReward = XooCreator.BA.Features.TreeOfLight.DTOs.TokenReward;
 
 namespace XooCreator.BA.Features.StoryEditor.StoryEpic.Endpoints;
 
@@ -39,8 +41,20 @@ public class CompleteEpicStoryEndpoint
         if (user == null) return TypedResults.Unauthorized();
 
         var selectedAnswer = request?.SelectedAnswer;
+        
+        // Map tokens from string type to TokenFamily enum using StoryDefinitionMapper
+        List<TokenReward>? tokens = null;
+        if (request?.Tokens != null && request.Tokens.Count > 0)
+        {
+            tokens = request.Tokens.Select(t => new TokenReward
+            {
+                Type = StoryDefinitionMapper.MapFamily(t.Type),
+                Value = t.Value,
+                Quantity = t.Quantity
+            }).ToList();
+        }
 
-        var result = await ep._progressService.CompleteStoryAsync(epicId, user.Id, storyId, selectedAnswer, ct);
+        var result = await ep._progressService.CompleteStoryAsync(epicId, user.Id, storyId, selectedAnswer, tokens, ct);
         
         if (!result.Success)
         {
@@ -60,20 +74,5 @@ public class CompleteEpicStoryEndpoint
 
         return TypedResults.Ok(response);
     }
-}
-
-public record CompleteEpicStoryRequest
-{
-    public string? SelectedAnswer { get; init; }
-}
-
-public record CompleteEpicStoryResponse
-{
-    public required bool Success { get; init; }
-    public required string EpicId { get; init; }
-    public required string StoryId { get; init; }
-    public List<string> NewlyUnlockedRegions { get; init; } = new();
-    public List<UnlockedHeroDto> NewlyUnlockedHeroes { get; init; } = new();
-    public string? StoryCoverImageUrl { get; init; }
 }
 

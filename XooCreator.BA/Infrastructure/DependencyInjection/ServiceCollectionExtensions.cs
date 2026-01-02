@@ -22,6 +22,7 @@ using XooCreator.BA.Features.TalesOfAlchimalia.Market.Mappers;
 using XooCreator.BA.Features.Payment.Services;
 using XooCreator.BA.Features.StoryFeedback.Repositories;
 using XooCreator.BA.Features.StoryFeedback.Services;
+using XooCreator.BA.Infrastructure.Services.Images;
 
 namespace XooCreator.BA.Infrastructure.DependencyInjection;
 
@@ -32,6 +33,7 @@ public static class ServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
     {
+        services.AddMemoryCache(); // Add memory cache for user caching
         services.AddHttpContextAccessor();
         services.AddScoped<IAuth0UserService, Auth0UserService>();
         services.AddScoped<IUserContextService, UserContextService>();
@@ -104,6 +106,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IStoriesService, StoriesService>();
         services.AddScoped<IStoriesRepository, StoriesRepository>();
         services.AddScoped<IStoryCraftsRepository, StoryCraftsRepository>();
+
+        // Image size variants (s/m) for published images
+        services.AddScoped<IImageCompressionService, ImageCompressionService>();
         
         // Refactored Story Editor Services (Content Management)
         services.AddScoped<IStoryDraftManager, StoryDraftManager>();

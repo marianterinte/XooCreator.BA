@@ -1,11 +1,12 @@
 using XooCreator.BA.Features.StoryEditor.StoryEpic.DTOs;
+using TokenReward = XooCreator.BA.Features.TreeOfLight.DTOs.TokenReward;
 
 namespace XooCreator.BA.Features.StoryEditor.StoryEpic.Services;
 
 public interface IStoryEpicProgressService
 {
     Task<StoryEpicStateWithProgressDto?> GetEpicStateWithProgressAsync(string epicId, Guid userId, CancellationToken ct = default);
-    Task<CompleteEpicStoryResult> CompleteStoryAsync(string epicId, Guid userId, string storyId, string? selectedAnswer = null, CancellationToken ct = default);
+    Task<CompleteEpicStoryResult> CompleteStoryAsync(string epicId, Guid userId, string storyId, string? selectedAnswer = null, List<TokenReward>? tokens = null, CancellationToken ct = default);
     Task<ResetEpicProgressResult> ResetProgressAsync(string epicId, Guid userId, CancellationToken ct = default);
 }
 

@@ -6,6 +6,7 @@ using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.DTOs;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.Repositories;
 using XooCreator.BA.Infrastructure.Services.Blob;
+using XooCreator.BA.Infrastructure.Services.Images;
 using Azure.Storage.Blobs;
 using Azure.Storage.Sas;
 using System.IO;
@@ -18,6 +19,7 @@ public class EpicHeroService : IEpicHeroService
     private readonly XooDbContext _context;
     private readonly IBlobSasService _blobSas;
     private readonly IHeroPublishedAssetCleanupService _assetCleanup;
+    private readonly IImageCompressionService _imageCompression;
     private readonly ILogger<EpicHeroService> _logger;
 
     public EpicHeroService(
@@ -25,12 +27,14 @@ public class EpicHeroService : IEpicHeroService
         XooDbContext context,
         IBlobSasService blobSas,
         IHeroPublishedAssetCleanupService assetCleanup,
+        IImageCompressionService imageCompression,
         ILogger<EpicHeroService> logger)
     {
         _repository = repository;
         _context = context;
         _blobSas = blobSas;
         _assetCleanup = assetCleanup;
+        _imageCompression = imageCompression;
         _logger = logger;
     }
 
@@ -635,7 +639,36 @@ public class EpicHeroService : IEpicHeroService
         var operation = await destinationClient.StartCopyFromUriAsync(sasUri, cancellationToken: ct);
         await operation.WaitForCompletionAsync(cancellationToken: ct);
 
+        // Generate s/m variants for hero image (non-blocking).
+        try
+        {
+            var (basePath, fileName2) = SplitPath(destinationPath);
+            await _imageCompression.EnsureStorySizeVariantsAsync(
+                sourceBlobPath: destinationPath,
+                targetBasePath: basePath,
+                filename: fileName2,
+                overwriteExisting: true,
+                ct: ct);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to generate hero image variants: path={Path}", destinationPath);
+        }
+
         return destinationPath;
+    }
+
+    private static (string BasePath, string FileName) SplitPath(string blobPath)
+    {
+        var trimmed = (blobPath ?? string.Empty).Trim().TrimStart('/');
+        var idx = trimmed.LastIndexOf('/');
+        if (idx < 0)
+        {
+            return (string.Empty, trimmed);
+        }
+        var basePath = trimmed.Substring(0, idx);
+        var fileName = trimmed.Substring(idx + 1);
+        return (basePath, fileName);
     }
 
     private async Task<string> PublishGreetingAudioAsync(string heroId, string draftPath, string languageCode, string ownerEmail, CancellationToken ct)

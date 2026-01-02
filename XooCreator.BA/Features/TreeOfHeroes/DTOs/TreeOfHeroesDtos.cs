@@ -103,5 +103,12 @@ public record TreeOfHeroesConfigDto
     public required Dictionary<string, string> CanonicalHybridByPair { get; init; }
 }
 
+public record ResetPersonalityTokensResult
+{
+    public bool Success { get; init; }
+    public string? ErrorMessage { get; init; }
+    public int TokensReturned { get; init; }
+}
+
 
 
