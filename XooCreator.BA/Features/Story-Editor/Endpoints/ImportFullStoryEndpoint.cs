@@ -158,6 +158,24 @@ public partial class ImportFullStoryEndpoint
             return TypedResults.BadRequest(new ImportFullStoryResponse { Success = false, Errors = errors });
         }
 
+        // Read media options from form (default to true if not provided)
+        var includeImages = true;
+        var includeAudio = true;
+        var includeVideo = true;
+        
+        if (form.TryGetValue("includeImages", out var imagesValue) && bool.TryParse(imagesValue, out var imagesBool))
+        {
+            includeImages = imagesBool;
+        }
+        if (form.TryGetValue("includeAudio", out var audioValue) && bool.TryParse(audioValue, out var audioBool))
+        {
+            includeAudio = audioBool;
+        }
+        if (form.TryGetValue("includeVideo", out var videoValue) && bool.TryParse(videoValue, out var videoBool))
+        {
+            includeVideo = videoBool;
+        }
+
         if (file.Length > MaxZipSizeBytes)
         {
             errors.Add($"File size exceeds maximum allowed size of {MaxZipSizeBytes / (1024 * 1024)}MB");
@@ -252,7 +270,10 @@ public partial class ImportFullStoryEndpoint
             ZipFileName = sanitizedFileName,
             ZipSizeBytes = file.Length,
             QueuedAtUtc = DateTime.UtcNow,
-            Status = StoryImportJobStatus.Queued
+            Status = StoryImportJobStatus.Queued,
+            IncludeImages = includeImages,
+            IncludeAudio = includeAudio,
+            IncludeVideo = includeVideo
         };
 
         ep._db.StoryImportJobs.Add(job);
@@ -468,12 +489,12 @@ public partial class ImportFullStoryEndpoint
         return newStoryId;
     }
 
-    private List<(string ZipPath, AssetInfo Asset)> CollectExpectedAssets(JsonElement root, List<string> warnings)
+    private List<(string ZipPath, AssetInfo Asset)> CollectExpectedAssets(JsonElement root, List<string> warnings, bool includeImages = true, bool includeAudio = true, bool includeVideo = true)
     {
         var assets = new List<(string, AssetInfo)>();
 
         // Cover image
-        if (root.TryGetProperty("coverImageUrl", out var coverElement) && coverElement.ValueKind == JsonValueKind.String)
+        if (includeImages && root.TryGetProperty("coverImageUrl", out var coverElement) && coverElement.ValueKind == JsonValueKind.String)
         {
             var coverPath = coverElement.GetString();
             if (!string.IsNullOrWhiteSpace(coverPath))
@@ -492,7 +513,7 @@ public partial class ImportFullStoryEndpoint
             foreach (var tile in tilesElement.EnumerateArray())
             {
                 // Tile image
-                if (tile.TryGetProperty("imageUrl", out var imageElement) && imageElement.ValueKind == JsonValueKind.String)
+                if (includeImages && tile.TryGetProperty("imageUrl", out var imageElement) && imageElement.ValueKind == JsonValueKind.String)
                 {
                     var imagePath = imageElement.GetString();
                     if (!string.IsNullOrWhiteSpace(imagePath))
@@ -518,7 +539,7 @@ public partial class ImportFullStoryEndpoint
                             : lang!.Trim().ToLowerInvariant();
 
                         // Audio
-                        if (translation.TryGetProperty("audioUrl", out var audioElement) && audioElement.ValueKind == JsonValueKind.String)
+                        if (includeAudio && translation.TryGetProperty("audioUrl", out var audioElement) && audioElement.ValueKind == JsonValueKind.String)
                         {
                             var audioPath = audioElement.GetString();
                             if (!string.IsNullOrWhiteSpace(audioPath) && !string.IsNullOrWhiteSpace(normalizedLang))
@@ -532,7 +553,7 @@ public partial class ImportFullStoryEndpoint
                         }
 
                         // Video
-                        if (translation.TryGetProperty("videoUrl", out var videoElement) && videoElement.ValueKind == JsonValueKind.String)
+                        if (includeVideo && translation.TryGetProperty("videoUrl", out var videoElement) && videoElement.ValueKind == JsonValueKind.String)
                         {
                             var videoPath = videoElement.GetString();
                             if (!string.IsNullOrWhiteSpace(videoPath) && !string.IsNullOrWhiteSpace(normalizedLang))
