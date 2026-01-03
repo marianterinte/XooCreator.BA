@@ -4,6 +4,7 @@ using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Logging;
+using XooCreator.BA.Common.Exceptions;
 
 namespace XooCreator.BA.Infrastructure.Errors;
 
@@ -40,6 +41,7 @@ public class GlobalExceptionMiddleware
         {
             ValidationException => (int)HttpStatusCode.BadRequest,
             NotFoundException => (int)HttpStatusCode.NotFound,
+            ConcurrencyException => (int)HttpStatusCode.Conflict,
             RepositoryException => (int)HttpStatusCode.InternalServerError,
             ServiceException => (int)HttpStatusCode.BadRequest,
             EndpointException => (int)HttpStatusCode.BadRequest,

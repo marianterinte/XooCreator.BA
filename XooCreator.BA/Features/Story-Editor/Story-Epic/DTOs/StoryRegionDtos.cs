@@ -21,6 +21,7 @@ public record StoryRegionDto
     public DateTime CreatedAt { get; init; }
     public DateTime UpdatedAt { get; init; }
     public DateTime? PublishedAtUtc { get; init; }
+    public byte[]? RowVersion { get; init; } // For optimistic concurrency control
     
     // Review workflow fields (similar to StoryCraft/EditableStoryDto)
     public Guid? AssignedReviewerUserId { get; init; }

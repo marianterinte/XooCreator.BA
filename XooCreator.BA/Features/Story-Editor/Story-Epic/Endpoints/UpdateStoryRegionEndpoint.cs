@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using XooCreator.BA.Common.Exceptions;
 using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.DTOs;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.Services;
@@ -29,7 +30,7 @@ public class UpdateStoryRegionEndpoint
 
     [Route("/api/story-editor/regions/{regionId}")]
     [Authorize]
-    public static async Task<Results<Ok, NotFound, BadRequest<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePut(
+    public static async Task<Results<Ok, NotFound, BadRequest<string>, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePut(
         [FromRoute] string regionId,
         [FromBody] StoryRegionDto dto,
         [FromServices] UpdateStoryRegionEndpoint ep,
@@ -55,6 +56,11 @@ public class UpdateStoryRegionEndpoint
             await ep._regionService.SaveRegionAsync(user.Id, regionId, dto, ct);
             ep._logger.LogInformation("UpdateStoryRegion: userId={UserId} regionId={RegionId}", user.Id, regionId);
             return TypedResults.Ok();
+        }
+        catch (ConcurrencyException ex)
+        {
+            ep._logger.LogWarning(ex, "Concurrency conflict saving region: regionId={RegionId} userId={UserId}", regionId, user.Id);
+            return TypedResults.Conflict(ex.Message);
         }
         catch (InvalidOperationException ex)
         {

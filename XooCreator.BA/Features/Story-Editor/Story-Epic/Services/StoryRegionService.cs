@@ -10,6 +10,7 @@ using XooCreator.BA.Features.StoryEditor.StoryEpic.DTOs;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.Repositories;
 using XooCreator.BA.Infrastructure.Services.Blob;
 using XooCreator.BA.Infrastructure.Services.Images;
+using XooCreator.BA.Common.Services;
 using Azure.Storage.Blobs;
 using Azure.Storage.Sas;
 
@@ -23,6 +24,7 @@ public class StoryRegionService : IStoryRegionService
     private readonly IRegionPublishedAssetCleanupService _assetCleanup;
     private readonly IImageCompressionService _imageCompression;
     private readonly ILogger<StoryRegionService> _logger;
+    private readonly IConcurrencyService _concurrencyService;
 
     public StoryRegionService(
         IStoryRegionRepository repository,
@@ -30,7 +32,8 @@ public class StoryRegionService : IStoryRegionService
         IBlobSasService blobSas,
         IRegionPublishedAssetCleanupService assetCleanup,
         IImageCompressionService imageCompression,
-        ILogger<StoryRegionService> logger)
+        ILogger<StoryRegionService> logger,
+        IConcurrencyService concurrencyService)
     {
         _repository = repository;
         _context = context;
@@ -38,6 +41,7 @@ public class StoryRegionService : IStoryRegionService
         _assetCleanup = assetCleanup;
         _imageCompression = imageCompression;
         _logger = logger;
+        _concurrencyService = concurrencyService;
     }
 
     public async Task<StoryRegionDto?> GetRegionAsync(string regionId, CancellationToken ct = default)
@@ -54,6 +58,7 @@ public class StoryRegionService : IStoryRegionService
                 CreatedAt = craft.CreatedAt,
                 UpdatedAt = craft.UpdatedAt,
                 PublishedAtUtc = null,
+                RowVersion = craft.RowVersion, // For optimistic concurrency control
                 AssignedReviewerUserId = craft.AssignedReviewerUserId,
                 ReviewedByUserId = craft.ReviewedByUserId,
                 ApprovedByUserId = craft.ApprovedByUserId,
@@ -157,6 +162,13 @@ public class StoryRegionService : IStoryRegionService
             throw new UnauthorizedAccessException($"User does not own region '{regionId}'");
         }
 
+        // Set RowVersion from DTO if provided (for optimistic concurrency control)
+        // This allows EF Core to detect concurrent modifications
+        if (dto.RowVersion != null && dto.RowVersion.Length > 0)
+        {
+            regionCraft.RowVersion = dto.RowVersion;
+        }
+
         // Update properties (non-translatable)
         regionCraft.ImageUrl = dto.ImageUrl;
         regionCraft.UpdatedAt = DateTime.UtcNow;
@@ -188,7 +200,12 @@ public class StoryRegionService : IStoryRegionService
             }
         }
 
-        await _repository.SaveCraftAsync(regionCraft, ct);
+        // Save changes with concurrency handling
+        await _concurrencyService.SaveChangesWithConcurrencyHandlingAsync(
+            _context,
+            "StoryRegion",
+            regionId,
+            ct);
     }
 
     public async Task<List<StoryRegionListItemDto>> ListRegionsByOwnerAsync(Guid ownerUserId, string? status = null, Guid? currentUserId = null, CancellationToken ct = default)

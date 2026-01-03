@@ -14,6 +14,12 @@ public class StoryCraftConfiguration : IEntityTypeConfiguration<StoryCraft>
         builder.Property(x => x.Status).HasMaxLength(20).IsRequired();
         builder.Property(x => x.UpdatedAt).IsRequired();
         builder.Property(x => x.LastDraftVersion).HasDefaultValue(0);
+
+        // Configure RowVersion for optimistic concurrency
+        builder.Property(x => x.RowVersion)
+            .IsConcurrencyToken()
+            .ValueGeneratedOnAddOrUpdate();
+
         builder.HasIndex(x => x.StoryId).IsUnique();
         builder.HasMany(x => x.Translations).WithOne(x => x.StoryCraft).HasForeignKey(x => x.StoryCraftId).OnDelete(DeleteBehavior.Cascade);
         builder.HasMany(x => x.Tiles).WithOne(x => x.StoryCraft).HasForeignKey(x => x.StoryCraftId).OnDelete(DeleteBehavior.Cascade);

@@ -2,6 +2,7 @@ using global::System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using XooCreator.BA.Common.Exceptions;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Services;
@@ -117,10 +118,21 @@ public class SaveStoryEditEndpoint
         }
 
         // Save using the new structure
-        await ep._editorService.SaveDraftAsync(user.Id, finalStoryId, langTag, dto, ct);
-        ep._logger.LogInformation("Save story draft: storyId={StoryId} lang={Lang}", finalStoryId, langTag);
+        try
+        {
+            await ep._editorService.SaveDraftAsync(user.Id, finalStoryId, langTag, dto, ct);
+            ep._logger.LogInformation("Save story draft: storyId={StoryId} lang={Lang}", finalStoryId, langTag);
 
-        return TypedResults.Ok(new SaveResponse { StoryId = finalStoryId });
+            return TypedResults.Ok(new SaveResponse { StoryId = finalStoryId });
+        }
+        catch (ConcurrencyException ex)
+        {
+            ep._logger.LogWarning(ex, "Concurrency conflict saving story: storyId={StoryId} userId={UserId}", finalStoryId, user.Id);
+            
+            // Return Conflict - frontend will handle the message with translations
+            // The exception message will be used by ErrorHandlerService which supports translations
+            return TypedResults.Conflict(ex.Message);
+        }
     }
 }
 

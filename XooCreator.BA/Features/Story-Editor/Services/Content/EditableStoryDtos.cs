@@ -31,6 +31,9 @@ public class EditableStoryDto
 
     // Version reference
     public int? BaseVersion { get; set; }
+    
+    // Optimistic concurrency control - RowVersion from database
+    public byte[]? RowVersion { get; set; }
 }
 
 public class EditableTileDto

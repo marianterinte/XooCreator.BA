@@ -51,7 +51,11 @@ public class StoryCraft
     
     // Incremental counter for changes performed in the editor (consumed by delta publish)
     public int LastDraftVersion { get; set; } = 0;
-    
+
+    // Concurrency control
+    [Timestamp]
+    public byte[]? RowVersion { get; set; }
+
     // Navigation
     public List<StoryCraftTranslation> Translations { get; set; } = new();
     public List<StoryCraftTile> Tiles { get; set; } = new();

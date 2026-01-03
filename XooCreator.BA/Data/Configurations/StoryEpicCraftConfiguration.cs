@@ -13,6 +13,12 @@ public class StoryEpicCraftConfiguration : IEntityTypeConfiguration<StoryEpicCra
         builder.Property(x => x.Name).HasMaxLength(200).IsRequired();
         builder.Property(x => x.Description).HasMaxLength(1000);
         builder.Property(x => x.Status).HasMaxLength(20).IsRequired();
+
+        // Configure RowVersion for optimistic concurrency
+        builder.Property(x => x.RowVersion)
+            .IsConcurrencyToken()
+            .ValueGeneratedOnAddOrUpdate();
+
         builder.HasIndex(x => new { x.OwnerUserId, x.Id }).IsUnique();
         builder.HasIndex(x => x.Status);
         builder.HasIndex(x => x.AssignedReviewerUserId).HasFilter($"[{nameof(StoryEpicCraft.AssignedReviewerUserId)}] IS NOT NULL");

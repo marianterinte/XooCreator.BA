@@ -13,6 +13,12 @@ public class EpicHeroCraftConfiguration : IEntityTypeConfiguration<EpicHeroCraft
         builder.Property(x => x.Id).HasMaxLength(100).IsRequired();
         builder.Property(x => x.Name).HasMaxLength(200).IsRequired();
         builder.Property(x => x.Status).HasMaxLength(20).IsRequired();
+
+        // Configure RowVersion for optimistic concurrency
+        builder.Property(x => x.RowVersion)
+            .IsConcurrencyToken()
+            .ValueGeneratedOnAddOrUpdate();
+
         builder.HasIndex(x => new { x.OwnerUserId, x.Id }).IsUnique();
         builder.HasIndex(x => new { x.Id, x.Status });
         builder.HasIndex(x => x.Status);

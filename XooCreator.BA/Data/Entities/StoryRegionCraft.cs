@@ -37,7 +37,11 @@ public class StoryRegionCraft
     public DateTime? ReviewEndedAt { get; set; }
     public Guid? ReviewedByUserId { get; set; }
     public Guid? ApprovedByUserId { get; set; }
-    
+
+    // Concurrency control
+    [Timestamp]
+    public byte[]? RowVersion { get; set; }
+
     // Navigation properties
     public AlchimaliaUser Owner { get; set; } = null!;
     public ICollection<StoryRegionCraftTranslation> Translations { get; set; } = new List<StoryRegionCraftTranslation>();

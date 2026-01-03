@@ -18,6 +18,7 @@ public record StoryEpicDto
     public string? CoverImageUrl { get; init; }
     public string Status { get; init; } = "draft";
     public DateTime? PublishedAtUtc { get; init; }
+    public byte[]? RowVersion { get; init; } // For optimistic concurrency control
     public List<StoryEpicRegionDto> Regions { get; init; } = new();
     public List<StoryEpicStoryNodeDto> Stories { get; init; } = new();
     public List<StoryEpicUnlockRuleDto> Rules { get; init; } = new();

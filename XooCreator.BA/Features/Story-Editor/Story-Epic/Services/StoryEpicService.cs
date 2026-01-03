@@ -3,6 +3,8 @@ using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.DTOs;
 using XooCreator.BA.Infrastructure;
+using XooCreator.BA.Common.Services;
+using XooCreator.BA.Common.Exceptions;
 
 namespace XooCreator.BA.Features.StoryEditor.StoryEpic.Services;
 
@@ -12,17 +14,20 @@ public class StoryEpicService : IStoryEpicService
     private readonly IUserContextService _userContext;
     private readonly IEpicPublishedAssetCleanupService _assetCleanup;
     private readonly ILogger<StoryEpicService> _logger;
+    private readonly IConcurrencyService _concurrencyService;
 
     public StoryEpicService(
-        XooDbContext context, 
-        IUserContextService userContext, 
+        XooDbContext context,
+        IUserContextService userContext,
         IEpicPublishedAssetCleanupService assetCleanup,
-        ILogger<StoryEpicService> logger)
+        ILogger<StoryEpicService> logger,
+        IConcurrencyService concurrencyService)
     {
         _context = context;
         _userContext = userContext;
         _assetCleanup = assetCleanup;
         _logger = logger;
+        _concurrencyService = concurrencyService;
     }
 
     public async Task EnsureEpicAsync(Guid ownerUserId, string epicId, string name, CancellationToken ct = default)
@@ -134,6 +139,13 @@ public class StoryEpicService : IStoryEpicService
             }
         }
 
+        // Set RowVersion from DTO if provided (for optimistic concurrency control)
+        // This allows EF Core to detect concurrent modifications
+        if (dto.RowVersion != null && dto.RowVersion.Length > 0)
+        {
+            craft.RowVersion = dto.RowVersion;
+        }
+
         // Update basic properties
         craft.CoverImageUrl = dto.CoverImageUrl;
         craft.Status = dto.Status ?? craft.Status;
@@ -155,8 +167,12 @@ public class StoryEpicService : IStoryEpicService
         // Update hero references
         await UpdateCraftHeroReferencesAsync(craft, dto.Heroes, ct);
 
-        // Save changes
-        await _context.SaveChangesAsync(ct);
+        // Save changes with concurrency handling
+        await _concurrencyService.SaveChangesWithConcurrencyHandlingAsync(
+            _context,
+            "StoryEpic",
+            epicId,
+            ct);
     }
 
     public async Task<StoryEpicDto?> GetEpicAsync(string epicId, CancellationToken ct = default)
@@ -517,6 +533,7 @@ public class StoryEpicService : IStoryEpicService
             CoverImageUrl = craft.CoverImageUrl,
             Status = craft.Status,
             PublishedAtUtc = null, // Crafts are not published
+            RowVersion = craft.RowVersion, // For optimistic concurrency control
             Translations = translations,
             Regions = craft.Regions.Select(r => new StoryEpicRegionDto
             {

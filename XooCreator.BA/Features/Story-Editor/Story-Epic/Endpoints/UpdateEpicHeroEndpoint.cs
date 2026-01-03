@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using XooCreator.BA.Common.Exceptions;
 using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.DTOs;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.Services;
@@ -29,7 +30,7 @@ public class UpdateEpicHeroEndpoint
 
     [Route("/api/story-editor/heroes/{heroId}")]
     [Authorize]
-    public static async Task<Results<Ok, NotFound, BadRequest<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePut(
+    public static async Task<Results<Ok, NotFound, BadRequest<string>, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePut(
         [FromRoute] string heroId,
         [FromBody] EpicHeroDto dto,
         [FromServices] UpdateEpicHeroEndpoint ep,
@@ -55,6 +56,11 @@ public class UpdateEpicHeroEndpoint
             await ep._heroService.SaveHeroAsync(user.Id, heroId, dto, ct);
             ep._logger.LogInformation("UpdateEpicHero: userId={UserId} heroId={HeroId}", user.Id, heroId);
             return TypedResults.Ok();
+        }
+        catch (ConcurrencyException ex)
+        {
+            ep._logger.LogWarning(ex, "Concurrency conflict saving hero: heroId={HeroId} userId={UserId}", heroId, user.Id);
+            return TypedResults.Conflict(ex.Message);
         }
         catch (InvalidOperationException ex)
         {

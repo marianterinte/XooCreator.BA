@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using XooCreator.BA.Common.Exceptions;
 using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.DTOs;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.Services;
@@ -30,7 +31,7 @@ public class SaveStoryEpicEndpoint
     // Route without locale - middleware UseLocaleInApiPath() strips locale from path before routing
     [Route("/api/story-editor/epics/{epicId}")]
     [Authorize]
-    public static async Task<Results<Ok, BadRequest<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePut(
+    public static async Task<Results<Ok, BadRequest<string>, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePut(
         [FromRoute] string epicId,
         [FromServices] SaveStoryEpicEndpoint ep,
         [FromBody] StoryEpicDto dto,
@@ -58,6 +59,11 @@ public class SaveStoryEpicEndpoint
             await ep._epicService.SaveEpicAsync(user.Id, epicId, dto, ct);
             ep._logger.LogInformation("SaveStoryEpic: userId={UserId} epicId={EpicId}", user.Id, epicId);
             return TypedResults.Ok();
+        }
+        catch (ConcurrencyException ex)
+        {
+            ep._logger.LogWarning(ex, "Concurrency conflict saving epic: epicId={EpicId} userId={UserId}", epicId, user.Id);
+            return TypedResults.Conflict(ex.Message);
         }
         catch (UnauthorizedAccessException ex)
         {

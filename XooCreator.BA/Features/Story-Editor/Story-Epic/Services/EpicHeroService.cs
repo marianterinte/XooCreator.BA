@@ -7,6 +7,7 @@ using XooCreator.BA.Features.StoryEditor.StoryEpic.DTOs;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.Repositories;
 using XooCreator.BA.Infrastructure.Services.Blob;
 using XooCreator.BA.Infrastructure.Services.Images;
+using XooCreator.BA.Common.Services;
 using Azure.Storage.Blobs;
 using Azure.Storage.Sas;
 using System.IO;
@@ -21,6 +22,7 @@ public class EpicHeroService : IEpicHeroService
     private readonly IHeroPublishedAssetCleanupService _assetCleanup;
     private readonly IImageCompressionService _imageCompression;
     private readonly ILogger<EpicHeroService> _logger;
+    private readonly IConcurrencyService _concurrencyService;
 
     public EpicHeroService(
         IEpicHeroRepository repository,
@@ -28,7 +30,8 @@ public class EpicHeroService : IEpicHeroService
         IBlobSasService blobSas,
         IHeroPublishedAssetCleanupService assetCleanup,
         IImageCompressionService imageCompression,
-        ILogger<EpicHeroService> logger)
+        ILogger<EpicHeroService> logger,
+        IConcurrencyService concurrencyService)
     {
         _repository = repository;
         _context = context;
@@ -36,6 +39,7 @@ public class EpicHeroService : IEpicHeroService
         _assetCleanup = assetCleanup;
         _imageCompression = imageCompression;
         _logger = logger;
+        _concurrencyService = concurrencyService;
     }
 
     public async Task<EpicHeroDto?> GetHeroAsync(string heroId, CancellationToken ct = default)
@@ -53,6 +57,7 @@ public class EpicHeroService : IEpicHeroService
                 CreatedAt = craft.CreatedAt,
                 UpdatedAt = craft.UpdatedAt,
                 PublishedAtUtc = null,
+                RowVersion = craft.RowVersion, // For optimistic concurrency control
                 AssignedReviewerUserId = craft.AssignedReviewerUserId,
                 ReviewedByUserId = craft.ReviewedByUserId,
                 ApprovedByUserId = craft.ApprovedByUserId,
@@ -166,6 +171,13 @@ public class EpicHeroService : IEpicHeroService
             throw new UnauthorizedAccessException($"User does not own hero '{heroId}'");
         }
 
+        // Set RowVersion from DTO if provided (for optimistic concurrency control)
+        // This allows EF Core to detect concurrent modifications
+        if (dto.RowVersion != null && dto.RowVersion.Length > 0)
+        {
+            heroCraft.RowVersion = dto.RowVersion;
+        }
+
         // Update properties (non-translatable)
         heroCraft.ImageUrl = dto.ImageUrl;
         heroCraft.UpdatedAt = DateTime.UtcNow;
@@ -201,7 +213,12 @@ public class EpicHeroService : IEpicHeroService
             }
         }
 
-        await _repository.SaveCraftAsync(heroCraft, ct);
+        // Save changes with concurrency handling
+        await _concurrencyService.SaveChangesWithConcurrencyHandlingAsync(
+            _context,
+            "EpicHero",
+            heroId,
+            ct);
     }
 
     public async Task<List<EpicHeroListItemDto>> ListHeroesByOwnerAsync(Guid ownerUserId, string? status = null, Guid? currentUserId = null, CancellationToken ct = default)

@@ -23,6 +23,7 @@ using XooCreator.BA.Features.Payment.Services;
 using XooCreator.BA.Features.StoryFeedback.Repositories;
 using XooCreator.BA.Features.StoryFeedback.Services;
 using XooCreator.BA.Infrastructure.Services.Images;
+using XooCreator.BA.Common.Services;
 
 namespace XooCreator.BA.Infrastructure.DependencyInjection;
 
@@ -37,6 +38,7 @@ public static class ServiceCollectionExtensions
         services.AddHttpContextAccessor();
         services.AddScoped<IAuth0UserService, Auth0UserService>();
         services.AddScoped<IUserContextService, UserContextService>();
+        services.AddScoped<IConcurrencyService, ConcurrencyService>();
         services.AddSingleton<IBlobSasService, BlobSasService>();
         services.AddScoped<IDbHealthService, DbHealthService>();
         services.AddSingleton<IAzureQueueClientFactory, AzureQueueClientFactory>();

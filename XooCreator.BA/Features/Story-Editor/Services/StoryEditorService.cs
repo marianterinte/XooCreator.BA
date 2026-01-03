@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using XooCreator.BA.Common.Services;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.Enums;
@@ -21,6 +22,7 @@ public class StoryEditorService : IStoryEditorService
     private readonly IStoryOwnershipService _ownershipService;
     private readonly IStoryTileUpdater _tileUpdater;
     private readonly IStoryPublishChangeLogService _changeLogService;
+    private readonly IConcurrencyService _concurrencyService;
 
     public StoryEditorService(
         IStoryCraftsRepository crafts,
@@ -29,7 +31,8 @@ public class StoryEditorService : IStoryEditorService
         IStoryTranslationManager translationManager,
         IStoryOwnershipService ownershipService,
         IStoryTileUpdater tileUpdater,
-        IStoryPublishChangeLogService changeLogService)
+        IStoryPublishChangeLogService changeLogService,
+        IConcurrencyService concurrencyService)
     {
         _crafts = crafts;
         _context = context;
@@ -38,6 +41,7 @@ public class StoryEditorService : IStoryEditorService
         _ownershipService = ownershipService;
         _tileUpdater = tileUpdater;
         _changeLogService = changeLogService;
+        _concurrencyService = concurrencyService;
     }
 
     public async Task EnsureDraftAsync(Guid ownerUserId, string storyId, StoryType? storyType = null, CancellationToken ct = default)
@@ -61,6 +65,17 @@ public class StoryEditorService : IStoryEditorService
         
         // Verify ownership
         _ownershipService.VerifyOwnership(craft, ownerUserId);
+        
+        // Set RowVersion original value from DTO if provided (for optimistic concurrency control)
+        // EF Core compares the ORIGINAL value (when entity was tracked) with DB value on UPDATE
+        // This allows EF Core to detect concurrent modifications
+        if (dto.RowVersion != null && dto.RowVersion.Length > 0)
+        {
+            var entry = _context.Entry(craft);
+            entry.Property(x => x.RowVersion).OriginalValue = dto.RowVersion;
+            // Also set current value to match (EF Core will compare original with DB)
+            entry.Property(x => x.RowVersion).CurrentValue = dto.RowVersion;
+        }
         
         var lang = languageCode.ToLowerInvariant();
         var snapshotBeforeChanges = _changeLogService.CaptureSnapshot(craft, lang);
@@ -107,7 +122,13 @@ public class StoryEditorService : IStoryEditorService
         // Update tiles (delegated to TileUpdater)
         await _tileUpdater.UpdateTilesAsync(craft, dto.Tiles ?? new(), lang, ct);
         
-        await _context.SaveChangesAsync(ct);
+        // Save changes with concurrency handling
+        await _concurrencyService.SaveChangesWithConcurrencyHandlingAsync(
+            _context,
+            "StoryCraft",
+            storyId,
+            ct);
+        
         await _changeLogService.AppendChangesAsync(craft, snapshotBeforeChanges, lang, ownerUserId, ct);
     }
 

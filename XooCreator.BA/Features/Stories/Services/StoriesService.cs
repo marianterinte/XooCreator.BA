@@ -185,6 +185,7 @@ public class StoriesService : IStoriesService
                 ReviewStartedAt = craft.ReviewStartedAt,
                 ReviewEndedAt = craft.ReviewEndedAt,
                 BaseVersion = craft.BaseVersion,
+                RowVersion = craft.RowVersion,
                 Tiles = craft.Tiles.OrderBy(t => t.SortOrder).Select(t =>
                 {
                     var tileTranslation = t.Translations.FirstOrDefault(tr => tr.LanguageCode == lang);
