@@ -164,6 +164,7 @@ public class CopyStoryEndpoint
 
         var definition = await _db.StoryDefinitions
             .Include(d => d.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Tokens)
+            .Include(d => d.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Translations)
             .Include(d => d.Tiles).ThenInclude(t => t.Translations)
             .Include(d => d.Translations)
             .Include(d => d.Topics).ThenInclude(t => t.StoryTopic)
