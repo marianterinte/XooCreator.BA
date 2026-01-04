@@ -1,3 +1,4 @@
+using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.DTOs;
 
 namespace XooCreator.BA.Features.StoryEditor.StoryEpic.Services;
