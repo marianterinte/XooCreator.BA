@@ -444,26 +444,192 @@ public class EpicExportService : IEpicExportService
 
     private async Task<StoryExportDto> BuildStoryExportDto(object story, bool isDraft, CancellationToken ct)
     {
-        // Implementation will depend on whether it's a StoryCraft or StoryDefinition
-        // This is a placeholder - you'll need to implement based on your story structure
+        if (isDraft && story is Data.Entities.StoryCraft craft)
+        {
+            return BuildStoryExportDtoFromCraft(craft);
+        }
+        else if (!isDraft && story is Data.StoryDefinition def)
+        {
+            return BuildStoryExportDtoFromDefinition(def);
+        }
+        else
+        {
+            throw new ArgumentException($"Invalid story type: expected {(isDraft ? "StoryCraft" : "StoryDefinition")}, got {story?.GetType().Name}");
+        }
+    }
 
-        dynamic s = story;
+    private StoryExportDto BuildStoryExportDtoFromCraft(Data.Entities.StoryCraft craft)
+    {
+        // Get primary translation (first one or default)
+        var primaryTranslation = craft.Translations.FirstOrDefault()
+            ?? new Data.Entities.StoryCraftTranslation
+            {
+                LanguageCode = "ro-ro",
+                Title = string.Empty,
+                Summary = null
+            };
+
+        // Extract topic IDs
+        var topicIds = craft.Topics?
+            .Where(t => t.StoryTopic != null)
+            .Select(t => t.StoryTopic!.TopicId)
+            .ToList();
+
+        // Extract age group IDs
+        var ageGroupIds = craft.AgeGroups?
+            .Where(ag => ag.StoryAgeGroup != null)
+            .Select(ag => ag.StoryAgeGroup!.AgeGroupId)
+            .ToList();
+
+        // Extract unlocked heroes
+        var unlockedHeroes = craft.UnlockedHeroes.Select(h => h.HeroId).ToList();
+
         return new StoryExportDto
         {
-            StoryId = s.StoryId,
-            Title = s.Title ?? string.Empty,
-            Summary = s.Summary ?? string.Empty,
-            CoverImageUrl = s.CoverImageUrl ?? string.Empty,
-            StoryTopic = s.StoryTopic,
-            AuthorName = s.AuthorName,
-            ClassicAuthorId = s.ClassicAuthorId,
-            LanguageCode = "ro-ro", // Default, should be from translation
-            StoryType = s.StoryType,
-            SortOrder = s.SortOrder ?? 0,
-            IsEvaluative = s.IsEvaluative,
-            UnlockedStoryHeroes = new List<string>(), // Need to populate from relationships
-            Tiles = new List<StoryTileExportDto>(), // Need to populate from tiles
-            Translations = new List<StoryTranslationExportDto>() // Need to populate from translations
+            StoryId = craft.StoryId,
+            Title = primaryTranslation.Title,
+            Summary = primaryTranslation.Summary ?? craft.StoryTopic ?? string.Empty,
+            CoverImageUrl = craft.CoverImageUrl ?? string.Empty,
+            StoryTopic = craft.StoryTopic,
+            TopicIds = topicIds,
+            AuthorName = craft.AuthorName,
+            ClassicAuthorId = craft.ClassicAuthorId?.ToString(),
+            AgeGroupIds = ageGroupIds,
+            PriceInCredits = (int)craft.PriceInCredits,
+            LanguageCode = primaryTranslation.LanguageCode,
+            StoryType = (int)craft.StoryType,
+            SortOrder = 0, // Not used in epic context
+            UnlockedStoryHeroes = unlockedHeroes,
+            IsEvaluative = craft.IsEvaluative,
+            Translations = craft.Translations.Select(t => new StoryTranslationExportDto
+            {
+                LanguageCode = t.LanguageCode,
+                Title = t.Title,
+                Summary = t.Summary ?? string.Empty
+            }).ToList(),
+            Tiles = craft.Tiles
+                .OrderBy(t => t.SortOrder)
+                .Select(t =>
+                {
+                    // Get first translation for tile (Caption, Text, Question, AudioUrl, VideoUrl are language-specific in draft)
+                    var tileTranslation = t.Translations.FirstOrDefault();
+                    return new StoryTileExportDto
+                    {
+                        TileId = t.TileId,
+                        Type = t.Type,
+                        SortOrder = t.SortOrder,
+                        ImageUrl = t.ImageUrl ?? string.Empty,
+                        Caption = tileTranslation?.Caption ?? string.Empty,
+                        Text = tileTranslation?.Text,
+                        AudioUrl = tileTranslation?.AudioUrl,
+                        VideoUrl = tileTranslation?.VideoUrl,
+                        Question = tileTranslation?.Question,
+                        Answers = (t.Answers ?? new()).OrderBy(a => a.SortOrder).Select(a => new StoryAnswerExportDto
+                        {
+                            AnswerId = a.AnswerId,
+                            Text = (a.Translations ?? new()).FirstOrDefault()?.Text ?? string.Empty,
+                            IsCorrect = a.IsCorrect,
+                            SortOrder = a.SortOrder,
+                            Tokens = (a.Tokens ?? new()).Select(tok => new AnswerTokenExportDto
+                            {
+                                Type = tok.Type,
+                                Value = tok.Value,
+                                Quantity = tok.Quantity
+                            }).ToList()
+                        }).ToList()
+                    };
+                }).ToList()
         };
+
+        // Note: Tile translations (Caption, Text, Question, AudioUrl, VideoUrl) use the first translation available
+        // as the DTO structure only has single fields. This matches the structure defined in EpicExportDtos.cs
+        // If multi-language tile content is needed, the DTO structure would need to be updated.
+    }
+
+    private StoryExportDto BuildStoryExportDtoFromDefinition(Data.StoryDefinition def)
+    {
+        // Get primary translation
+        var primaryTranslation = def.Translations.FirstOrDefault()
+            ?? new Data.StoryDefinitionTranslation
+            {
+                LanguageCode = "ro-ro",
+                Title = def.Title
+            };
+
+        // Extract topic IDs
+        var topicIds = def.Topics?
+            .Where(t => t.StoryTopic != null)
+            .Select(t => t.StoryTopic!.TopicId)
+            .ToList();
+
+        // Extract age group IDs
+        var ageGroupIds = def.AgeGroups?
+            .Where(ag => ag.StoryAgeGroup != null)
+            .Select(ag => ag.StoryAgeGroup!.AgeGroupId)
+            .ToList();
+
+        // Extract unlocked heroes
+        var unlockedHeroes = def.UnlockedHeroes?.Select(h => h.HeroId).ToList() ?? new List<string>();
+
+        return new StoryExportDto
+        {
+            StoryId = def.StoryId,
+            Title = primaryTranslation.Title ?? def.Title,
+            Summary = def.Summary ?? string.Empty,
+            CoverImageUrl = def.CoverImageUrl ?? string.Empty,
+            StoryTopic = def.StoryTopic,
+            TopicIds = topicIds,
+            AuthorName = def.AuthorName,
+            ClassicAuthorId = def.ClassicAuthorId?.ToString(),
+            AgeGroupIds = ageGroupIds,
+            PriceInCredits = (int)def.PriceInCredits,
+            LanguageCode = primaryTranslation.LanguageCode,
+            StoryType = (int)def.StoryType,
+            SortOrder = 0, // Not used in epic context
+            UnlockedStoryHeroes = unlockedHeroes,
+            IsEvaluative = def.IsEvaluative,
+            Translations = def.Translations.Select(t => new StoryTranslationExportDto
+            {
+                LanguageCode = t.LanguageCode,
+                Title = t.Title,
+                Summary = def.Summary ?? string.Empty // StoryDefinition only has Title in translations, Summary is at definition level
+            }).ToList(),
+            Tiles = def.Tiles
+                .OrderBy(t => t.SortOrder)
+                .Select(t =>
+                {
+                    // Published tiles have Caption, Text, Question at tile level
+                    // AudioUrl and VideoUrl are language-specific in translations
+                    var tileTranslation = t.Translations.FirstOrDefault();
+                    return new StoryTileExportDto
+                    {
+                        TileId = t.TileId,
+                        Type = t.Type,
+                        SortOrder = t.SortOrder,
+                        ImageUrl = t.ImageUrl ?? string.Empty,
+                        Caption = t.Caption ?? tileTranslation?.Caption ?? string.Empty,
+                        Text = t.Text ?? tileTranslation?.Text,
+                        AudioUrl = tileTranslation?.AudioUrl,
+                        VideoUrl = tileTranslation?.VideoUrl,
+                        Question = t.Question ?? tileTranslation?.Question,
+                        Answers = (t.Answers ?? new()).OrderBy(a => a.SortOrder).Select(a => new StoryAnswerExportDto
+                        {
+                            AnswerId = a.AnswerId,
+                            Text = a.Text ?? (a.Translations?.FirstOrDefault()?.Text ?? string.Empty),
+                            IsCorrect = a.IsCorrect,
+                            SortOrder = a.SortOrder,
+                            Tokens = (a.Tokens ?? new()).Select(tok => new AnswerTokenExportDto
+                            {
+                                Type = tok.Type,
+                                Value = tok.Value,
+                                Quantity = tok.Quantity
+                            }).ToList()
+                        }).ToList()
+                    };
+                }).ToList()
+        };
+
+        // Note: Similar to draft, tile translations (AudioUrl, VideoUrl) are not included
+        // as they are language-specific but the DTO structure doesn't support per-language tile content.
     }
 }
