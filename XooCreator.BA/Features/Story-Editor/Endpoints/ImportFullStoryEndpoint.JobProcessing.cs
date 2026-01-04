@@ -62,7 +62,7 @@ public partial class ImportFullStoryEndpoint
                 return ImportJobResult.Failed(errors, warnings, totalAssets, uploadedAssets, referencedBytes, uploadedBytes, new List<string>());
             }
 
-            var expectedAssets = CollectExpectedAssets(root, warnings);
+            var expectedAssets = CollectExpectedAssets(root, warnings, job.IncludeImages, job.IncludeAudio, job.IncludeVideo);
             totalAssets = expectedAssets.Count;
             referencedBytes = CalculateReferencedAssetBytes(zip, expectedAssets);
 

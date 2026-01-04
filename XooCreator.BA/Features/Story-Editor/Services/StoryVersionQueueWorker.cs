@@ -132,6 +132,7 @@ public class StoryVersionQueueWorker : BackgroundService
                         // Load published StoryDefinition with all necessary includes
                         var definition = await db.StoryDefinitions
                             .Include(d => d.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Tokens)
+                            .Include(d => d.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Translations)
                             .Include(d => d.Tiles).ThenInclude(t => t.Translations)
                             .Include(d => d.Translations)
                             .Include(d => d.Topics).ThenInclude(t => t.StoryTopic)

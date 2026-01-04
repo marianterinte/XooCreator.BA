@@ -21,6 +21,9 @@ public class StoryImportJob
     public int ImportedLanguagesCount { get; set; }
     public string? ErrorMessage { get; set; }
     public string? WarningSummary { get; set; }
+    public bool IncludeImages { get; set; } = true;
+    public bool IncludeAudio { get; set; } = true;
+    public bool IncludeVideo { get; set; } = true;
 }
 
 public static class StoryImportJobStatus
