@@ -60,6 +60,8 @@ builder.Services.AddHostedService<StoryDocumentExportQueueWorker>();
 builder.Services.AddHostedService<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.EpicPublishQueueJob>();
 builder.Services.AddHostedService<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.EpicVersionQueueJob>();
 builder.Services.AddHostedService<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.EpicAggregatesQueueJob>();
+builder.Services.AddHostedService<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.EpicExportQueueWorker>();
+builder.Services.AddHostedService<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.EpicImportQueueWorker>();
 
 builder.Services.AddAuthConfiguration(builder.Configuration);
 

@@ -157,6 +157,12 @@ public static class ServiceCollectionExtensions
         services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.IHeroPublishedAssetCleanupService, XooCreator.BA.Features.StoryEditor.StoryEpic.Services.HeroPublishedAssetCleanupService>();
         services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.IEpicPublishedAssetCleanupService, XooCreator.BA.Features.StoryEditor.StoryEpic.Services.EpicPublishedAssetCleanupService>();
         
+        // Epic Import/Export Services
+        services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.IEpicExportService, XooCreator.BA.Features.StoryEditor.StoryEpic.Services.EpicExportService>();
+        services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.IEpicImportService, XooCreator.BA.Features.StoryEditor.StoryEpic.Services.EpicImportService>();
+        services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.IEpicExportQueueService, XooCreator.BA.Features.StoryEditor.StoryEpic.Services.EpicExportQueueService>();
+        services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.IEpicImportQueueService, XooCreator.BA.Features.StoryEditor.StoryEpic.Services.EpicImportQueueService>();
+        
         return services;
     }
 
