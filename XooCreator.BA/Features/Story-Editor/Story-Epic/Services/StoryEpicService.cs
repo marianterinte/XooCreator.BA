@@ -11,17 +11,20 @@ public class StoryEpicService : IStoryEpicService
     private readonly XooDbContext _context;
     private readonly IUserContextService _userContext;
     private readonly IEpicPublishedAssetCleanupService _assetCleanup;
+    private readonly IEpicPublishChangeLogService _changeLogService;
     private readonly ILogger<StoryEpicService> _logger;
 
     public StoryEpicService(
         XooDbContext context, 
         IUserContextService userContext, 
         IEpicPublishedAssetCleanupService assetCleanup,
+        IEpicPublishChangeLogService changeLogService,
         ILogger<StoryEpicService> logger)
     {
         _context = context;
         _userContext = userContext;
         _assetCleanup = assetCleanup;
+        _changeLogService = changeLogService;
         _logger = logger;
     }
 
@@ -134,11 +137,18 @@ public class StoryEpicService : IStoryEpicService
             }
         }
 
+        // Determine language code for change tracking (use first translation or default)
+        const string defaultLang = "ro-ro";
+        var langForTracking = dto.Translations?.FirstOrDefault()?.LanguageCode ?? defaultLang;
+        
+        // Capture snapshot before changes
+        var snapshotBeforeChanges = _changeLogService.CaptureSnapshot(craft, langForTracking);
+
         // Update basic properties
         craft.CoverImageUrl = dto.CoverImageUrl;
         craft.Status = dto.Status ?? craft.Status;
         craft.UpdatedAt = DateTime.UtcNow;
-        craft.LastDraftVersion += 1; // Increment draft version on each save
+        // Note: LastDraftVersion will be incremented in AppendChangesAsync
 
         // Update translations
         await UpdateCraftTranslationsAsync(craft, dto.Translations, ct);
@@ -157,6 +167,9 @@ public class StoryEpicService : IStoryEpicService
 
         // Save changes
         await _context.SaveChangesAsync(ct);
+
+        // Append changes to change log after saving
+        await _changeLogService.AppendChangesAsync(craft, snapshotBeforeChanges, langForTracking, ownerUserId, ct);
     }
 
     public async Task<StoryEpicDto?> GetEpicAsync(string epicId, CancellationToken ct = default)
@@ -192,7 +205,7 @@ public class StoryEpicService : IStoryEpicService
         var heroes2 = await _context.StoryEpicHeroReferences
             .Where(h => h.EpicId == epicId)
             .ToListAsync(ct);
-        return MapDefinitionToDto(definition, locale2, heroes2);
+        return await MapDefinitionToDtoAsync(definition, locale2, heroes2, ct);
     }
 
     public async Task<StoryEpicStateDto?> GetEpicStateAsync(string epicId, CancellationToken ct = default)
@@ -557,7 +570,7 @@ public class StoryEpicService : IStoryEpicService
         };
     }
 
-    private StoryEpicDto MapDefinitionToDto(StoryEpicDefinition definition, string locale, List<StoryEpicHeroReference> heroes)
+    private async Task<StoryEpicDto> MapDefinitionToDtoAsync(StoryEpicDefinition definition, string locale, List<StoryEpicHeroReference> heroes, CancellationToken ct = default)
     {
         // Get translations
         var translations = definition.Translations.Select(t => new StoryEpicTranslationDto
@@ -572,6 +585,41 @@ public class StoryEpicService : IStoryEpicService
         var name = translation?.Name ?? translations.FirstOrDefault()?.Name ?? definition.Name;
         var description = translation?.Description ?? translations.FirstOrDefault()?.Description ?? definition.Description;
 
+        // Load published regions with translations to get localized labels
+        var regionIds = definition.Regions.Select(r => r.RegionId).ToList();
+        var publishedRegions = await _context.StoryRegionDefinitions
+            .Include(r => r.Translations)
+            .Where(r => regionIds.Contains(r.Id) && r.Status == "published" && r.IsActive)
+            .ToDictionaryAsync(r => r.Id, r => r, ct);
+
+        // Map regions with translated labels
+        var regions = new List<StoryEpicRegionDto>();
+        foreach (var r in definition.Regions)
+        {
+            var publishedRegion = publishedRegions.TryGetValue(r.RegionId, out var region) ? region : null;
+            var regionLabel = r.Label; // Default to stored label
+            
+            if (publishedRegion?.Translations != null && publishedRegion.Translations.Any())
+            {
+                // Try to get translation for requested locale
+                var regionTranslation = publishedRegion.Translations.FirstOrDefault(t => 
+                    t.LanguageCode.Equals(locale, StringComparison.OrdinalIgnoreCase));
+                regionLabel = regionTranslation?.Name ?? publishedRegion.Translations.FirstOrDefault()?.Name ?? r.Label;
+            }
+
+            regions.Add(new StoryEpicRegionDto
+            {
+                Id = r.RegionId,
+                Label = regionLabel,
+                ImageUrl = r.ImageUrl,
+                SortOrder = r.SortOrder,
+                IsLocked = r.IsLocked,
+                IsStartupRegion = r.IsStartupRegion,
+                X = r.X,
+                Y = r.Y
+            });
+        }
+
         return new StoryEpicDto
         {
             Id = definition.Id,
@@ -581,17 +629,7 @@ public class StoryEpicService : IStoryEpicService
             Status = definition.Status,
             PublishedAtUtc = definition.PublishedAtUtc,
             Translations = translations,
-            Regions = definition.Regions.Select(r => new StoryEpicRegionDto
-            {
-                Id = r.RegionId,
-                Label = r.Label,
-                ImageUrl = r.ImageUrl,
-                SortOrder = r.SortOrder,
-                IsLocked = r.IsLocked,
-                IsStartupRegion = r.IsStartupRegion,
-                X = r.X,
-                Y = r.Y
-            }).ToList(),
+            Regions = regions,
             Stories = definition.StoryNodes.Select(sn => new StoryEpicStoryNodeDto
             {
                 StoryId = sn.StoryId,
@@ -638,7 +676,7 @@ public class StoryEpicService : IStoryEpicService
             .Where(h => h.EpicId == epicId)
             .ToListAsync(ct);
         
-        return MapDefinitionToDto(definition, locale, heroes);
+        return await MapDefinitionToDtoAsync(definition, locale, heroes, ct);
     }
 
     public async Task<StoryEpicDefinition?> GetStoryEpicDefinitionByIdAsync(string epicId, CancellationToken ct = default)
@@ -683,7 +721,7 @@ public class StoryEpicService : IStoryEpicService
         foreach (var definition in definitions)
         {
             var heroes = heroesByEpicId.GetValueOrDefault(definition.Id, new List<StoryEpicHeroReference>());
-            result.Add(MapDefinitionToDto(definition, locale, heroes));
+            result.Add(await MapDefinitionToDtoAsync(definition, locale, heroes, ct));
         }
 
         return result;
@@ -948,14 +986,14 @@ public class StoryEpicService : IStoryEpicService
             }
         }
 
-        // Add region nodes
+        // Add region nodes (regions already have translated labels from MapDefinitionToDtoAsync)
         foreach (var region in epic.Regions)
         {
             nodes.Add(new StoryEpicPreviewNodeDto
             {
                 Id = region.Id,
                 Type = "region",
-                Label = region.Label,
+                Label = region.Label, // Already translated in MapDefinitionToDtoAsync
                 ImageUrl = region.ImageUrl,
                 X = region.X,
                 Y = region.Y

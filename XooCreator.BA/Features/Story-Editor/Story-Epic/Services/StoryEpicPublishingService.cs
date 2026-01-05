@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Azure.Storage.Blobs;
@@ -10,6 +11,7 @@ using Azure.Storage.Blobs.Specialized;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using XooCreator.BA.Data;
+using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Infrastructure.Services.Blob;
 using XooCreator.BA.Infrastructure.Services.Images;
@@ -21,17 +23,23 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
     private readonly XooDbContext _context;
     private readonly IBlobSasService _blobSas;
     private readonly IImageCompressionService _imageCompression;
+    private readonly IEpicPublishChangeLogService _changeLogService;
+    private readonly IEpicAssetLinkService _assetLinkService;
     private readonly ILogger<StoryEpicPublishingService> _logger;
 
     public StoryEpicPublishingService(
         XooDbContext context,
         IBlobSasService blobSas,
         IImageCompressionService imageCompression,
+        IEpicPublishChangeLogService changeLogService,
+        IEpicAssetLinkService assetLinkService,
         ILogger<StoryEpicPublishingService> logger)
     {
         _context = context;
         _blobSas = blobSas;
         _imageCompression = imageCompression;
+        _changeLogService = changeLogService;
+        _assetLinkService = assetLinkService;
         _logger = logger;
     }
 
@@ -244,17 +252,88 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
             .FirstOrDefaultAsync(d => d.Id == craft.Id, ct);
 
         var isNew = definition == null;
+        var requiresFullPublish = forceFull || isNew;
+        List<EpicPublishChangeLog>? pendingLogs = null;
+
+        if (!requiresFullPublish && definition != null)
+        {
+            pendingLogs = await _context.EpicPublishChangeLogs
+                .Where(x => x.EpicId == craft.Id && x.DraftVersion > definition.LastPublishedVersion)
+                .OrderBy(x => x.DraftVersion)
+                .ThenBy(x => x.CreatedAt)
+                .ToListAsync(ct);
+
+            if (pendingLogs.Count == 0)
+            {
+                requiresFullPublish = true;
+            }
+        }
+
+        if (!requiresFullPublish && definition != null && pendingLogs != null)
+        {
+            var deltaApplied = await TryApplyDeltaPublishAsync(definition, craft, pendingLogs, requestedByEmail, langTag, ct);
+            if (deltaApplied)
+            {
+                await CleanupChangeLogsAsync(craft.Id, craft.LastDraftVersion, ct);
+                await CleanupCraftAsync(craft, ct);
+                _logger.LogInformation(
+                    "Published StoryEpicCraft to StoryEpicDefinition (delta): epicId={EpicId} version={Version} draftVersion={DraftVersion}",
+                    craft.Id, definition.Version, craft.LastDraftVersion);
+                return;
+            }
+
+            requiresFullPublish = true;
+        }
+
+        await ApplyFullPublishAsync(definition, craft, requestedByEmail, langTag, ct);
+        await CleanupChangeLogsAsync(craft.Id, craft.LastDraftVersion, ct);
+        await CleanupCraftAsync(craft, ct);
+    }
+
+    private async Task ApplyFullPublishAsync(StoryEpicDefinition? existingDefinition, StoryEpicCraft craft, string requestedByEmail, string langTag, CancellationToken ct)
+    {
+        var isNew = existingDefinition == null;
+        var definition = existingDefinition;
+
+        // Sync assets first
+        await _assetLinkService.SyncAllAssetsAsync(craft, requestedByEmail, ct);
+
+        // Get published cover image URL from asset link
+        string? publishedCoverImageUrl = null;
+        if (!string.IsNullOrWhiteSpace(craft.CoverImageUrl))
+        {
+            var normalizedPath = NormalizeBlobPath(craft.CoverImageUrl);
+            var assetLink = await _context.EpicAssetLinks
+                .FirstOrDefaultAsync(x => x.EpicId == craft.Id && x.DraftPath == normalizedPath && x.AssetType == "Cover", ct);
+            
+            if (assetLink != null && !string.IsNullOrWhiteSpace(assetLink.PublishedPath))
+            {
+                publishedCoverImageUrl = assetLink.PublishedPath;
+            }
+            else if (IsAlreadyPublished(normalizedPath))
+            {
+                publishedCoverImageUrl = normalizedPath;
+            }
+        }
+
+        // Use first translation for Name and Description, prefer ro-ro as default (or fallback to craft.Name/Description)
+        // This ensures marketplace shows the correct language when new translations are added
+        var defaultTranslation = craft.Translations.FirstOrDefault(t => t.LanguageCode == "ro-ro")
+            ?? craft.Translations.OrderBy(t => t.LanguageCode).FirstOrDefault();
+        var defaultName = defaultTranslation?.Name ?? craft.Name;
+        var defaultDescription = defaultTranslation?.Description ?? craft.Description;
+
         if (isNew)
         {
             definition = new StoryEpicDefinition
             {
                 Id = craft.Id,
-                Name = craft.Name,
-                Description = craft.Description,
+                Name = defaultName,
+                Description = defaultDescription,
                 OwnerUserId = craft.OwnerUserId,
                 Status = "published",
                 IsActive = true,
-                CoverImageUrl = craft.CoverImageUrl,
+                CoverImageUrl = publishedCoverImageUrl,
                 IsDefault = craft.IsDefault,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
@@ -267,64 +346,35 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
         }
         else
         {
-            // Update existing definition
-            // Save current version as BaseVersion BEFORE incrementing
             definition.BaseVersion = definition.Version;
             definition.Version = definition.Version <= 0 ? 1 : definition.Version + 1;
-            
-            definition.Name = craft.Name;
-            definition.Description = craft.Description;
+            definition.Name = defaultName;
+            definition.Description = defaultDescription;
             definition.Status = "published";
-            // If epic was previously unpublished, ensure it becomes visible again in play-mode.
             definition.IsActive = true;
-            definition.CoverImageUrl = craft.CoverImageUrl;
+            definition.CoverImageUrl = publishedCoverImageUrl;
             definition.IsDefault = craft.IsDefault;
             definition.UpdatedAt = DateTime.UtcNow;
             definition.PublishedAtUtc = DateTime.UtcNow;
             definition.LastPublishedVersion = craft.LastDraftVersion;
-        }
 
-        // Collect and copy assets from craft
-        var assets = CollectEpicAssetsFromCraft(craft);
-        var copyResult = await CopyEpicAssetsAsync(assets, requestedByEmail, craft.Id, ct);
-        if (copyResult.HasError)
-        {
-            throw new InvalidOperationException(copyResult.ErrorMessage);
-        }
+            // Remove existing content
+            _context.StoryEpicDefinitionRegions.RemoveRange(definition.Regions);
+            definition.Regions.Clear();
+            _context.StoryEpicDefinitionStoryNodes.RemoveRange(definition.StoryNodes);
+            definition.StoryNodes.Clear();
+            _context.StoryEpicDefinitionUnlockRules.RemoveRange(definition.UnlockRules);
+            definition.UnlockRules.Clear();
+            _context.StoryEpicDefinitionTranslations.RemoveRange(definition.Translations);
+            definition.Translations.Clear();
 
-        // Remove existing content before adding new content
-        // Always remove to avoid duplication when re-publishing
-        // This ensures clean state before copying new content from craft
-        // Remove existing regions
-        _context.StoryEpicDefinitionRegions.RemoveRange(definition.Regions);
-        definition.Regions.Clear();
-
-        // Remove existing story nodes
-        _context.StoryEpicDefinitionStoryNodes.RemoveRange(definition.StoryNodes);
-        definition.StoryNodes.Clear();
-
-        // Remove existing unlock rules
-        _context.StoryEpicDefinitionUnlockRules.RemoveRange(definition.UnlockRules);
-        definition.UnlockRules.Clear();
-
-        // Remove existing translations
-        _context.StoryEpicDefinitionTranslations.RemoveRange(definition.Translations);
-        definition.Translations.Clear();
-
-        // Remove existing hero references
-        var existingHeroReferences = await _context.StoryEpicHeroReferences
-            .Where(h => h.EpicId == definition.Id)
-            .ToListAsync(ct);
-        if (existingHeroReferences.Count > 0)
-        {
-            _context.StoryEpicHeroReferences.RemoveRange(existingHeroReferences);
-        }
-
-        // Update definition with published asset paths
-        var coverAsset = assets.FirstOrDefault(a => a.Type == EpicAssetType.Cover);
-        if (coverAsset != null)
-        {
-            definition.CoverImageUrl = coverAsset.PublishedPath;
+            var existingHeroReferences = await _context.StoryEpicHeroReferences
+                .Where(h => h.EpicId == definition.Id)
+                .ToListAsync(ct);
+            if (existingHeroReferences.Count > 0)
+            {
+                _context.StoryEpicHeroReferences.RemoveRange(existingHeroReferences);
+            }
         }
 
         // Copy Regions (and publish region images if they're draft assets)
@@ -332,7 +382,6 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
         {
             var publishedImageUrl = craftRegion.ImageUrl;
             
-            // If region has an image URL and it's a draft asset (not already published), publish it
             if (!string.IsNullOrWhiteSpace(craftRegion.ImageUrl) && !IsAlreadyPublished(craftRegion.ImageUrl))
             {
                 try
@@ -344,7 +393,6 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
                 catch (Exception ex)
                 {
                     _logger.LogWarning(ex, "Failed to publish region image for regionId={RegionId}, using draft path", craftRegion.RegionId);
-                    // Continue with draft path if publish fails (non-blocking)
                 }
             }
             
@@ -352,7 +400,7 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
             {
                 RegionId = craftRegion.RegionId,
                 Label = craftRegion.Label,
-                ImageUrl = publishedImageUrl, // Use published path if copied, otherwise original draft path
+                ImageUrl = publishedImageUrl,
                 SortOrder = craftRegion.SortOrder,
                 IsLocked = craftRegion.IsLocked,
                 IsStartupRegion = craftRegion.IsStartupRegion,
@@ -364,15 +412,28 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
         // Copy StoryNodes
         foreach (var craftNode in craft.StoryNodes)
         {
-            // Find the corresponding reward asset to get published path
-            var rewardAsset = assets.FirstOrDefault(a => a.Type == EpicAssetType.Reward && a.StoryId == craftNode.StoryId);
-            var rewardImageUrl = rewardAsset?.PublishedPath ?? craftNode.RewardImageUrl;
+            var rewardImageUrl = craftNode.RewardImageUrl;
+            if (!string.IsNullOrWhiteSpace(craftNode.RewardImageUrl))
+            {
+                var normalizedPath = NormalizeBlobPath(craftNode.RewardImageUrl);
+                var assetLink = await _context.EpicAssetLinks
+                    .FirstOrDefaultAsync(x => x.EpicId == craft.Id && x.DraftPath == normalizedPath && x.EntityId == $"__reward_image__{craftNode.StoryId}", ct);
+                
+                if (assetLink != null && !string.IsNullOrWhiteSpace(assetLink.PublishedPath))
+                {
+                    rewardImageUrl = assetLink.PublishedPath;
+                }
+                else if (IsAlreadyPublished(normalizedPath))
+                {
+                    rewardImageUrl = normalizedPath;
+                }
+            }
 
             definition.StoryNodes.Add(new StoryEpicDefinitionStoryNode
             {
                 StoryId = craftNode.StoryId,
                 RegionId = craftNode.RegionId,
-                RewardImageUrl = rewardImageUrl, // Use published path if asset was copied
+                RewardImageUrl = rewardImageUrl,
                 SortOrder = craftNode.SortOrder,
                 X = craftNode.X,
                 Y = craftNode.Y
@@ -407,7 +468,7 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
             });
         }
 
-        // Copy Hero References from StoryEpicCraftHeroReference (craft) to StoryEpicHeroReference (definition)
+        // Copy Hero References
         foreach (var craftHeroRef in craft.HeroReferences)
         {
             _context.StoryEpicHeroReferences.Add(new StoryEpicHeroReference
@@ -419,7 +480,6 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
         }
 
         // Copy unlocked heroes from StoryCrafts in this epic
-        // For each story node, get the corresponding StoryCraft and copy its unlocked heroes to StoryDefinition
         foreach (var craftNode in craft.StoryNodes)
         {
             var storyCraft = await _context.StoryCrafts
@@ -428,13 +488,11 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
 
             if (storyCraft != null && storyCraft.UnlockedHeroes != null && storyCraft.UnlockedHeroes.Count > 0)
             {
-                // Get or create StoryDefinition for this story
                 var storyDefinition = await _context.StoryDefinitions
                     .FirstOrDefaultAsync(sd => sd.StoryId == craftNode.StoryId, ct);
 
                 if (storyDefinition != null)
                 {
-                    // Remove existing unlocked heroes for this story definition
                     var existingUnlockedHeroes = await _context.StoryDefinitionUnlockedHeroes
                         .Where(h => h.StoryDefinitionId == storyDefinition.Id)
                         .ToListAsync(ct);
@@ -443,7 +501,6 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
                         _context.StoryDefinitionUnlockedHeroes.RemoveRange(existingUnlockedHeroes);
                     }
 
-                    // Copy unlocked heroes from StoryCraft to StoryDefinition
                     foreach (var craftUnlockedHero in storyCraft.UnlockedHeroes)
                     {
                         _context.StoryDefinitionUnlockedHeroes.Add(new StoryDefinitionUnlockedHero
@@ -466,5 +523,475 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
         _logger.LogInformation(
             "Published StoryEpicCraft to StoryEpicDefinition: epicId={EpicId} version={Version} draftVersion={DraftVersion} isNew={IsNew}",
             craft.Id, definition.Version, craft.LastDraftVersion, isNew);
+    }
+
+    private async Task<bool> TryApplyDeltaPublishAsync(
+        StoryEpicDefinition definition,
+        StoryEpicCraft craft,
+        IReadOnlyCollection<EpicPublishChangeLog> changeLogs,
+        string ownerEmail,
+        string langTag,
+        CancellationToken ct)
+    {
+        if (changeLogs.Count == 0)
+        {
+            return false;
+        }
+
+        var headerChanged = changeLogs.Any(l =>
+            string.Equals(l.EntityType, "Header", StringComparison.OrdinalIgnoreCase));
+
+        var regionReferenceChanges = changeLogs
+            .Where(l => string.Equals(l.EntityType, "RegionReference", StringComparison.OrdinalIgnoreCase)
+                        && !string.IsNullOrWhiteSpace(l.EntityId))
+            .GroupBy(l => l.EntityId!)
+            .Select(g => g.OrderBy(l => l.DraftVersion).ThenBy(l => l.CreatedAt).Last())
+            .ToList();
+
+        var storyNodeChanges = changeLogs
+            .Where(l => string.Equals(l.EntityType, "StoryNode", StringComparison.OrdinalIgnoreCase)
+                        && !string.IsNullOrWhiteSpace(l.EntityId))
+            .GroupBy(l => l.EntityId!)
+            .Select(g => g.OrderBy(l => l.DraftVersion).ThenBy(l => l.CreatedAt).Last())
+            .ToList();
+
+        var unlockRuleChanges = changeLogs
+            .Where(l => string.Equals(l.EntityType, "UnlockRule", StringComparison.OrdinalIgnoreCase)
+                        && !string.IsNullOrWhiteSpace(l.EntityId))
+            .GroupBy(l => l.EntityId!)
+            .Select(g => g.OrderBy(l => l.DraftVersion).ThenBy(l => l.CreatedAt).Last())
+            .ToList();
+
+        var translationChanges = changeLogs
+            .Where(l => string.Equals(l.EntityType, "Translation", StringComparison.OrdinalIgnoreCase)
+                        && !string.IsNullOrWhiteSpace(l.EntityId))
+            .GroupBy(l => l.EntityId!)
+            .Select(g => g.OrderBy(l => l.DraftVersion).ThenBy(l => l.CreatedAt).Last())
+            .ToList();
+
+        var heroReferenceChanges = changeLogs
+            .Where(l => string.Equals(l.EntityType, "HeroReference", StringComparison.OrdinalIgnoreCase)
+                        && !string.IsNullOrWhiteSpace(l.EntityId))
+            .GroupBy(l => l.EntityId!)
+            .Select(g => g.OrderBy(l => l.DraftVersion).ThenBy(l => l.CreatedAt).Last())
+            .ToList();
+
+        if (!headerChanged && regionReferenceChanges.Count == 0 && storyNodeChanges.Count == 0 &&
+            unlockRuleChanges.Count == 0 && translationChanges.Count == 0 && heroReferenceChanges.Count == 0)
+        {
+            return false;
+        }
+
+        if (headerChanged)
+        {
+            await ApplyDefinitionMetadataDeltaAsync(definition, craft, ownerEmail, ct);
+        }
+
+        foreach (var change in regionReferenceChanges)
+        {
+            var applied = await ApplyRegionReferenceChangeAsync(definition, craft, change, ownerEmail, ct);
+            if (!applied) return false;
+        }
+
+        foreach (var change in storyNodeChanges)
+        {
+            var applied = await ApplyStoryNodeChangeAsync(definition, craft, change, ownerEmail, ct);
+            if (!applied) return false;
+        }
+
+        foreach (var change in unlockRuleChanges)
+        {
+            var applied = await ApplyUnlockRuleChangeAsync(definition, craft, change, ct);
+            if (!applied) return false;
+        }
+
+        foreach (var change in translationChanges)
+        {
+            var applied = await ApplyTranslationChangeAsync(definition, craft, change, ct);
+            if (!applied) return false;
+        }
+
+        foreach (var change in heroReferenceChanges)
+        {
+            var applied = await ApplyHeroReferenceChangeAsync(definition, craft, change, ct);
+            if (!applied) return false;
+        }
+
+        definition.LastPublishedVersion = craft.LastDraftVersion;
+        definition.Version = definition.Version <= 0 ? 1 : definition.Version + 1;
+        definition.Status = "published";
+        definition.IsActive = true;
+        definition.UpdatedAt = DateTime.UtcNow;
+        definition.PublishedAtUtc = DateTime.UtcNow;
+
+        return true;
+    }
+
+    private async Task ApplyDefinitionMetadataDeltaAsync(StoryEpicDefinition definition, StoryEpicCraft craft, string ownerEmail, CancellationToken ct)
+    {
+        // Use first translation for Name and Description, prefer ro-ro as default (or fallback to craft.Name/Description)
+        // This ensures marketplace shows the correct language when new translations are added
+        var defaultTranslation = craft.Translations.FirstOrDefault(t => t.LanguageCode == "ro-ro")
+            ?? craft.Translations.OrderBy(t => t.LanguageCode).FirstOrDefault();
+        definition.Name = defaultTranslation?.Name ?? craft.Name;
+        definition.Description = defaultTranslation?.Description ?? craft.Description;
+        definition.IsDefault = craft.IsDefault;
+        definition.UpdatedAt = DateTime.UtcNow;
+
+        await _assetLinkService.SyncCoverImageAsync(craft, ownerEmail, ct);
+
+        if (!string.IsNullOrWhiteSpace(craft.CoverImageUrl))
+        {
+            var normalizedPath = NormalizeBlobPath(craft.CoverImageUrl);
+            var assetLink = await _context.EpicAssetLinks
+                .FirstOrDefaultAsync(x => x.EpicId == craft.Id && x.DraftPath == normalizedPath && x.AssetType == "Cover", ct);
+            
+            if (assetLink != null && !string.IsNullOrWhiteSpace(assetLink.PublishedPath))
+            {
+                definition.CoverImageUrl = assetLink.PublishedPath;
+            }
+            else if (IsAlreadyPublished(normalizedPath))
+            {
+                definition.CoverImageUrl = normalizedPath;
+            }
+        }
+        else
+        {
+            definition.CoverImageUrl = null;
+            await _assetLinkService.RemoveCoverImageAsync(craft.Id, ct);
+        }
+    }
+
+    private async Task<bool> ApplyRegionReferenceChangeAsync(StoryEpicDefinition definition, StoryEpicCraft craft, EpicPublishChangeLog change, string ownerEmail, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(change.EntityId))
+        {
+            return true;
+        }
+
+        var regionId = change.EntityId;
+
+        if (string.Equals(change.ChangeType, "Removed", StringComparison.OrdinalIgnoreCase))
+        {
+            var existingRegion = definition.Regions.FirstOrDefault(r => r.RegionId == regionId);
+            if (existingRegion != null)
+            {
+                _context.StoryEpicDefinitionRegions.Remove(existingRegion);
+                definition.Regions.Remove(existingRegion);
+            }
+            return true;
+        }
+
+        var craftRegion = craft.Regions.FirstOrDefault(r => r.RegionId == regionId);
+        if (craftRegion == null)
+        {
+            _logger.LogWarning("Delta publish failed: epicId={EpicId} regionId={RegionId} missing in craft.", definition.Id, regionId);
+            return false;
+        }
+
+        var publishedImageUrl = craftRegion.ImageUrl;
+        if (!string.IsNullOrWhiteSpace(craftRegion.ImageUrl) && !IsAlreadyPublished(craftRegion.ImageUrl))
+        {
+            try
+            {
+                publishedImageUrl = await PublishRegionImageAsync(craft.Id, craftRegion.RegionId, craftRegion.ImageUrl, ct);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to publish region image for regionId={RegionId}", craftRegion.RegionId);
+            }
+        }
+
+        var existingRegion2 = definition.Regions.FirstOrDefault(r => r.RegionId == regionId);
+        if (existingRegion2 != null)
+        {
+            existingRegion2.Label = craftRegion.Label;
+            existingRegion2.ImageUrl = publishedImageUrl;
+            existingRegion2.SortOrder = craftRegion.SortOrder;
+            existingRegion2.IsLocked = craftRegion.IsLocked;
+            existingRegion2.IsStartupRegion = craftRegion.IsStartupRegion;
+            existingRegion2.X = craftRegion.X;
+            existingRegion2.Y = craftRegion.Y;
+        }
+        else
+        {
+            definition.Regions.Add(new StoryEpicDefinitionRegion
+            {
+                RegionId = craftRegion.RegionId,
+                Label = craftRegion.Label,
+                ImageUrl = publishedImageUrl,
+                SortOrder = craftRegion.SortOrder,
+                IsLocked = craftRegion.IsLocked,
+                IsStartupRegion = craftRegion.IsStartupRegion,
+                X = craftRegion.X,
+                Y = craftRegion.Y
+            });
+        }
+
+        return true;
+    }
+
+    private async Task<bool> ApplyStoryNodeChangeAsync(StoryEpicDefinition definition, StoryEpicCraft craft, EpicPublishChangeLog change, string ownerEmail, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(change.EntityId))
+        {
+            return true;
+        }
+
+        var storyId = change.EntityId;
+
+        if (string.Equals(change.ChangeType, "Removed", StringComparison.OrdinalIgnoreCase))
+        {
+            var existingNode = definition.StoryNodes.FirstOrDefault(n => n.StoryId == storyId);
+            if (existingNode != null)
+            {
+                _context.StoryEpicDefinitionStoryNodes.Remove(existingNode);
+                definition.StoryNodes.Remove(existingNode);
+            }
+            return true;
+        }
+
+        var craftNode = craft.StoryNodes.FirstOrDefault(n => n.StoryId == storyId);
+        if (craftNode == null)
+        {
+            _logger.LogWarning("Delta publish failed: epicId={EpicId} storyId={StoryId} missing in craft.", definition.Id, storyId);
+            return false;
+        }
+
+        var rewardImageUrl = craftNode.RewardImageUrl;
+        if (!string.IsNullOrWhiteSpace(craftNode.RewardImageUrl))
+        {
+            await _assetLinkService.SyncRewardImageAsync(craft, storyId, ownerEmail, ct);
+            
+            var normalizedPath = NormalizeBlobPath(craftNode.RewardImageUrl);
+            var assetLink = await _context.EpicAssetLinks
+                .FirstOrDefaultAsync(x => x.EpicId == craft.Id && x.DraftPath == normalizedPath && x.EntityId == $"__reward_image__{storyId}", ct);
+            
+            if (assetLink != null && !string.IsNullOrWhiteSpace(assetLink.PublishedPath))
+            {
+                rewardImageUrl = assetLink.PublishedPath;
+            }
+            else if (IsAlreadyPublished(normalizedPath))
+            {
+                rewardImageUrl = normalizedPath;
+            }
+        }
+
+        var existingNode2 = definition.StoryNodes.FirstOrDefault(n => n.StoryId == storyId);
+        if (existingNode2 != null)
+        {
+            existingNode2.RegionId = craftNode.RegionId;
+            existingNode2.RewardImageUrl = rewardImageUrl;
+            existingNode2.SortOrder = craftNode.SortOrder;
+            existingNode2.X = craftNode.X;
+            existingNode2.Y = craftNode.Y;
+        }
+        else
+        {
+            definition.StoryNodes.Add(new StoryEpicDefinitionStoryNode
+            {
+                StoryId = craftNode.StoryId,
+                RegionId = craftNode.RegionId,
+                RewardImageUrl = rewardImageUrl,
+                SortOrder = craftNode.SortOrder,
+                X = craftNode.X,
+                Y = craftNode.Y
+            });
+        }
+
+        return true;
+    }
+
+    private async Task<bool> ApplyUnlockRuleChangeAsync(StoryEpicDefinition definition, StoryEpicCraft craft, EpicPublishChangeLog change, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(change.EntityId))
+        {
+            return true;
+        }
+
+        var ruleId = change.EntityId;
+        var payload = JsonSerializer.Deserialize<Dictionary<string, object>>(change.PayloadJson ?? "{}");
+
+        if (string.Equals(change.ChangeType, "Removed", StringComparison.OrdinalIgnoreCase))
+        {
+            var existingRule = definition.UnlockRules.FirstOrDefault(r => 
+                $"{r.Type}:{r.FromId}:{r.ToRegionId}:{r.ToStoryId}" == ruleId);
+            if (existingRule != null)
+            {
+                _context.StoryEpicDefinitionUnlockRules.Remove(existingRule);
+                definition.UnlockRules.Remove(existingRule);
+            }
+            return true;
+        }
+
+        var craftRule = craft.UnlockRules.FirstOrDefault(r => 
+            $"{r.Type}:{r.FromId}:{r.ToRegionId}:{r.ToStoryId}" == ruleId);
+        if (craftRule == null)
+        {
+            _logger.LogWarning("Delta publish failed: epicId={EpicId} ruleId={RuleId} missing in craft.", definition.Id, ruleId);
+            return false;
+        }
+
+        var existingRule2 = definition.UnlockRules.FirstOrDefault(r => 
+            $"{r.Type}:{r.FromId}:{r.ToRegionId}:{r.ToStoryId}" == ruleId);
+        if (existingRule2 != null)
+        {
+            existingRule2.Type = craftRule.Type;
+            existingRule2.FromId = craftRule.FromId;
+            existingRule2.ToRegionId = craftRule.ToRegionId;
+            existingRule2.ToStoryId = craftRule.ToStoryId;
+            existingRule2.RequiredStoriesCsv = craftRule.RequiredStoriesCsv;
+            existingRule2.MinCount = craftRule.MinCount;
+            existingRule2.StoryId = craftRule.StoryId;
+            existingRule2.SortOrder = craftRule.SortOrder;
+        }
+        else
+        {
+            definition.UnlockRules.Add(new StoryEpicDefinitionUnlockRule
+            {
+                Type = craftRule.Type,
+                FromId = craftRule.FromId,
+                ToRegionId = craftRule.ToRegionId,
+                ToStoryId = craftRule.ToStoryId,
+                RequiredStoriesCsv = craftRule.RequiredStoriesCsv,
+                MinCount = craftRule.MinCount,
+                StoryId = craftRule.StoryId,
+                SortOrder = craftRule.SortOrder
+            });
+        }
+
+        return true;
+    }
+
+    private async Task<bool> ApplyTranslationChangeAsync(StoryEpicDefinition definition, StoryEpicCraft craft, EpicPublishChangeLog change, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(change.EntityId))
+        {
+            return true;
+        }
+
+        var languageCode = change.EntityId;
+
+        if (string.Equals(change.ChangeType, "Removed", StringComparison.OrdinalIgnoreCase))
+        {
+            var existingTranslation = await _context.StoryEpicDefinitionTranslations
+                .FirstOrDefaultAsync(t => t.StoryEpicDefinitionId == definition.Id && t.LanguageCode == languageCode, ct);
+            
+            if (existingTranslation != null)
+            {
+                _context.StoryEpicDefinitionTranslations.Remove(existingTranslation);
+            }
+            return true;
+        }
+
+        var craftTranslation = craft.Translations.FirstOrDefault(t => 
+            string.Equals(t.LanguageCode, languageCode, StringComparison.OrdinalIgnoreCase));
+        
+        if (craftTranslation == null)
+        {
+            _logger.LogWarning("Delta publish failed: epicId={EpicId} languageCode={LanguageCode} missing in craft.", definition.Id, languageCode);
+            return false;
+        }
+
+        var existingTranslation2 = await _context.StoryEpicDefinitionTranslations
+            .FirstOrDefaultAsync(t => t.StoryEpicDefinitionId == definition.Id && t.LanguageCode == languageCode, ct);
+        
+        if (existingTranslation2 != null)
+        {
+            existingTranslation2.Name = craftTranslation.Name;
+            existingTranslation2.Description = craftTranslation.Description;
+        }
+        else
+        {
+            definition.Translations.Add(new StoryEpicDefinitionTranslation
+            {
+                StoryEpicDefinitionId = definition.Id,
+                LanguageCode = craftTranslation.LanguageCode,
+                Name = craftTranslation.Name,
+                Description = craftTranslation.Description
+            });
+        }
+
+        return true;
+    }
+
+    private async Task<bool> ApplyHeroReferenceChangeAsync(StoryEpicDefinition definition, StoryEpicCraft craft, EpicPublishChangeLog change, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(change.EntityId))
+        {
+            return true;
+        }
+
+        var heroId = change.EntityId;
+
+        if (string.Equals(change.ChangeType, "Removed", StringComparison.OrdinalIgnoreCase))
+        {
+            var existingHeroRef = await _context.StoryEpicHeroReferences
+                .FirstOrDefaultAsync(h => h.EpicId == definition.Id && h.HeroId == heroId, ct);
+            
+            if (existingHeroRef != null)
+            {
+                _context.StoryEpicHeroReferences.Remove(existingHeroRef);
+            }
+            return true;
+        }
+
+        var craftHeroRef = craft.HeroReferences.FirstOrDefault(h => h.HeroId == heroId);
+        if (craftHeroRef == null)
+        {
+            _logger.LogWarning("Delta publish failed: epicId={EpicId} heroId={HeroId} missing in craft.", definition.Id, heroId);
+            return false;
+        }
+
+        var existingHeroRef2 = await _context.StoryEpicHeroReferences
+            .FirstOrDefaultAsync(h => h.EpicId == definition.Id && h.HeroId == heroId, ct);
+        
+        if (existingHeroRef2 != null)
+        {
+            existingHeroRef2.StoryId = craftHeroRef.StoryId;
+        }
+        else
+        {
+            _context.StoryEpicHeroReferences.Add(new StoryEpicHeroReference
+            {
+                EpicId = definition.Id,
+                HeroId = craftHeroRef.HeroId,
+                StoryId = craftHeroRef.StoryId
+            });
+        }
+
+        return true;
+    }
+
+    private async Task CleanupChangeLogsAsync(string epicId, int lastDraftVersion, CancellationToken ct)
+    {
+        if (lastDraftVersion <= 0)
+        {
+            return;
+        }
+
+        await _context.EpicPublishChangeLogs
+            .Where(x => x.EpicId == epicId && x.DraftVersion <= lastDraftVersion)
+            .ExecuteDeleteAsync(ct);
+    }
+
+    private async Task CleanupCraftAsync(StoryEpicCraft craft, CancellationToken ct)
+    {
+        try
+        {
+            var craftToDelete = await _context.StoryEpicCrafts
+                .FirstOrDefaultAsync(c => c.Id == craft.Id, ct);
+            
+            if (craftToDelete != null)
+            {
+                _context.StoryEpicCrafts.Remove(craftToDelete);
+                await _context.SaveChangesAsync(ct);
+                _logger.LogInformation("Epic published and craft cleaned up: epicId={EpicId}", craft.Id);
+            }
+        }
+        catch (Exception cleanupEx)
+        {
+            _logger.LogWarning(cleanupEx, "Failed to cleanup epic craft after publish: epicId={EpicId}, but publish succeeded", craft.Id);
+        }
     }
 }

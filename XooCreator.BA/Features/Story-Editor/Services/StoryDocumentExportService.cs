@@ -77,6 +77,21 @@ public class StoryDocumentExportService : IStoryDocumentExportService
         return (locale ?? "ro-ro").Trim().ToLowerInvariant();
     }
 
+    private static string GetLanguageName(string locale)
+    {
+        var normalized = NormalizeLocale(locale);
+        return normalized switch
+        {
+            "ro-ro" => "Romana",
+            "en-us" => "English",
+            "hu-hu" => "Magyar",
+            "de-de" => "Deutsch",
+            "es-es" => "Español",
+            "it-it" => "Italiano",
+            _ => normalized
+        };
+    }
+
     private sealed record StoryDocModel(
         string StoryId,
         string Locale,
@@ -341,9 +356,9 @@ public class StoryDocumentExportService : IStoryDocumentExportService
                     page.Content().Column(col =>
                     {
                         col.Spacing(10);
-                        col.Item().Text(model.Title).SemiBold().FontSize(22);
+                        col.Item().AlignCenter().Text(model.Title).SemiBold().FontSize(22);
                         col.Item().Text($"StoryId: {model.StoryId}").FontSize(10).FontColor(Colors.Grey.Darken1);
-                        col.Item().Text($"Language: {model.Locale}").FontSize(10).FontColor(Colors.Grey.Darken1);
+                        col.Item().Text($"Language: {GetLanguageName(model.Locale)}").FontSize(10).FontColor(Colors.Grey.Darken1);
 
                         if (coverBytes != null)
                         {
@@ -357,14 +372,23 @@ public class StoryDocumentExportService : IStoryDocumentExportService
                 });
             }
 
+            var pageNumber = model.IncludeCover ? 1 : 0;
             foreach (var tile in model.Tiles)
             {
+                pageNumber++;
                 container.Page(page =>
                 {
                     page.Size(pageSize);
                     page.Margin(30);
                     page.PageColor(Colors.White);
                     page.DefaultTextStyle(x => x.FontSize(12));
+                    
+                    // Add page number in footer (centered, like in books)
+                    page.Footer().Column(footerCol =>
+                    {
+                        footerCol.Item().AlignCenter().Text(pageNumber.ToString()).FontSize(10).FontColor(Colors.Grey.Darken1);
+                    });
+                    
                     page.Content().Column(col =>
                     {
                         col.Spacing(6);
@@ -387,8 +411,6 @@ public class StoryDocumentExportService : IStoryDocumentExportService
                                 col.Item().Image(imgBytes).FitWidth();
                             }
                         }
-
-                        col.Item().Text($"Tile {tile.Index} ({tile.Type})").SemiBold();
 
                         if (!string.IsNullOrWhiteSpace(tile.Caption))
                         {

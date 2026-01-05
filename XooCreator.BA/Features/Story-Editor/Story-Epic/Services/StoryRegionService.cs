@@ -22,6 +22,8 @@ public class StoryRegionService : IStoryRegionService
     private readonly IBlobSasService _blobSas;
     private readonly IRegionPublishedAssetCleanupService _assetCleanup;
     private readonly IImageCompressionService _imageCompression;
+    private readonly IRegionPublishChangeLogService _changeLogService;
+    private readonly IRegionAssetLinkService _assetLinkService;
     private readonly ILogger<StoryRegionService> _logger;
 
     public StoryRegionService(
@@ -30,6 +32,8 @@ public class StoryRegionService : IStoryRegionService
         IBlobSasService blobSas,
         IRegionPublishedAssetCleanupService assetCleanup,
         IImageCompressionService imageCompression,
+        IRegionPublishChangeLogService changeLogService,
+        IRegionAssetLinkService assetLinkService,
         ILogger<StoryRegionService> logger)
     {
         _repository = repository;
@@ -37,6 +41,8 @@ public class StoryRegionService : IStoryRegionService
         _blobSas = blobSas;
         _assetCleanup = assetCleanup;
         _imageCompression = imageCompression;
+        _changeLogService = changeLogService;
+        _assetLinkService = assetLinkService;
         _logger = logger;
     }
 
@@ -157,6 +163,13 @@ public class StoryRegionService : IStoryRegionService
             throw new UnauthorizedAccessException($"User does not own region '{regionId}'");
         }
 
+        // Determine language code for change tracking (use first translation or default)
+        const string defaultLang = "ro-ro";
+        var langForTracking = dto.Translations?.FirstOrDefault()?.LanguageCode ?? defaultLang;
+        
+        // Capture snapshot before changes
+        var snapshotBeforeChanges = _changeLogService.CaptureSnapshot(regionCraft, langForTracking);
+
         // Update properties (non-translatable)
         regionCraft.ImageUrl = dto.ImageUrl;
         regionCraft.UpdatedAt = DateTime.UtcNow;
@@ -189,6 +202,9 @@ public class StoryRegionService : IStoryRegionService
         }
 
         await _repository.SaveCraftAsync(regionCraft, ct);
+        
+        // Append changes to change log for delta publish
+        await _changeLogService.AppendChangesAsync(regionCraft, snapshotBeforeChanges, langForTracking, ownerUserId, ct);
     }
 
     public async Task<List<StoryRegionListItemDto>> ListRegionsByOwnerAsync(Guid ownerUserId, string? status = null, Guid? currentUserId = null, CancellationToken ct = default)
@@ -339,15 +355,79 @@ public class StoryRegionService : IStoryRegionService
             throw new InvalidOperationException($"Cannot publish region. Expected Approved, got {currentStatus}");
         }
 
-        // Copy image asset synchronously if exists
-        string? publishedImageUrl = regionCraft.ImageUrl;
-        if (!string.IsNullOrWhiteSpace(regionCraft.ImageUrl))
-        {
-            publishedImageUrl = await PublishImageAsync(regionId, regionCraft.ImageUrl, ownerEmail, ct);
-        }
+        // Load craft with translations
+        regionCraft = await _context.StoryRegionCrafts
+            .Include(c => c.Translations)
+            .FirstOrDefaultAsync(c => c.Id == regionId, ct) ?? regionCraft;
 
         // Check if definition already exists
         var existingDefinition = await _repository.GetDefinitionAsync(regionId, ct);
+        
+        var requiresFullPublish = existingDefinition == null;
+        List<RegionPublishChangeLog>? pendingLogs = null;
+        const string defaultLangTag = "ro-ro"; // Default language for delta publish
+
+        if (!requiresFullPublish && existingDefinition != null)
+        {
+            pendingLogs = await _context.RegionPublishChangeLogs
+                .Where(x => x.RegionId == regionId && x.DraftVersion > existingDefinition.LastPublishedVersion)
+                .OrderBy(x => x.DraftVersion)
+                .ThenBy(x => x.CreatedAt)
+                .ToListAsync(ct);
+
+            if (pendingLogs.Count == 0)
+            {
+                requiresFullPublish = true;
+            }
+        }
+
+        if (!requiresFullPublish && existingDefinition != null && pendingLogs != null)
+        {
+            var deltaApplied = await TryApplyDeltaPublishAsync(existingDefinition, regionCraft, pendingLogs, ownerEmail, defaultLangTag, ct);
+            if (deltaApplied)
+            {
+                await _context.SaveChangesAsync(ct);
+                await CleanupChangeLogsAsync(regionId, regionCraft.LastDraftVersion, ct);
+                
+                // Cleanup craft after successful publish
+                await CleanupCraftAsync(regionId, ct);
+                return;
+            }
+
+            requiresFullPublish = true;
+        }
+
+        // Full publish
+        await ApplyFullPublishAsync(existingDefinition, regionCraft, ownerEmail, ct);
+        await CleanupChangeLogsAsync(regionId, regionCraft.LastDraftVersion, ct);
+        
+        // Cleanup craft after successful publish
+        await CleanupCraftAsync(regionId, ct);
+    }
+
+    private async Task ApplyFullPublishAsync(StoryRegionDefinition? existingDefinition, StoryRegionCraft regionCraft, string ownerEmail, CancellationToken ct)
+    {
+        // Sync assets first
+        await _assetLinkService.SyncImageAsync(regionCraft, ownerEmail, ct);
+
+        // Get published image URL from asset link
+        string? publishedImageUrl = null;
+        if (!string.IsNullOrWhiteSpace(regionCraft.ImageUrl))
+        {
+            var normalizedPath = NormalizeBlobPath(regionCraft.ImageUrl);
+            var assetLink = await _context.RegionAssetLinks
+                .FirstOrDefaultAsync(x => x.RegionId == regionCraft.Id && x.DraftPath == normalizedPath, ct);
+            
+            if (assetLink != null && !string.IsNullOrWhiteSpace(assetLink.PublishedPath))
+            {
+                publishedImageUrl = assetLink.PublishedPath;
+            }
+            else if (IsAlreadyPublished(normalizedPath))
+            {
+                publishedImageUrl = normalizedPath;
+            }
+        }
+
         StoryRegionDefinition definition;
         
         if (existingDefinition == null)
@@ -363,7 +443,8 @@ public class StoryRegionService : IStoryRegionService
                 CreatedAt = regionCraft.CreatedAt,
                 UpdatedAt = DateTime.UtcNow,
                 PublishedAtUtc = DateTime.UtcNow,
-                Version = 1
+                Version = 1,
+                LastPublishedVersion = regionCraft.LastDraftVersion
             };
             _context.StoryRegionDefinitions.Add(definition);
         }
@@ -375,11 +456,12 @@ public class StoryRegionService : IStoryRegionService
             existingDefinition.UpdatedAt = DateTime.UtcNow;
             existingDefinition.PublishedAtUtc = DateTime.UtcNow;
             existingDefinition.Version += 1;
+            existingDefinition.LastPublishedVersion = regionCraft.LastDraftVersion;
             definition = existingDefinition;
             
             // Remove old translations
             var oldTranslations = await _context.StoryRegionDefinitionTranslations
-                .Where(t => t.StoryRegionDefinitionId == regionId)
+                .Where(t => t.StoryRegionDefinitionId == regionCraft.Id)
                 .ToListAsync(ct);
             _context.StoryRegionDefinitionTranslations.RemoveRange(oldTranslations);
         }
@@ -398,11 +480,162 @@ public class StoryRegionService : IStoryRegionService
         }
 
         await _context.SaveChangesAsync(ct);
+    }
+
+    private async Task<bool> TryApplyDeltaPublishAsync(
+        StoryRegionDefinition definition,
+        StoryRegionCraft craft,
+        IReadOnlyCollection<RegionPublishChangeLog> changeLogs,
+        string ownerEmail,
+        string langTag,
+        CancellationToken ct)
+    {
+        if (changeLogs.Count == 0)
+        {
+            return false;
+        }
+
+        var headerChanged = changeLogs.Any(l =>
+            string.Equals(l.EntityType, "Header", StringComparison.OrdinalIgnoreCase));
+
+        var translationChanges = changeLogs
+            .Where(l => string.Equals(l.EntityType, "Translation", StringComparison.OrdinalIgnoreCase)
+                        && !string.IsNullOrWhiteSpace(l.EntityId))
+            .GroupBy(l => l.EntityId!)
+            .Select(g => g.OrderBy(l => l.DraftVersion).ThenBy(l => l.CreatedAt).Last())
+            .ToList();
+
+        if (!headerChanged && translationChanges.Count == 0)
+        {
+            return false;
+        }
+
+        if (headerChanged)
+        {
+            await ApplyDefinitionMetadataDeltaAsync(definition, craft, ownerEmail, ct);
+        }
+
+        foreach (var change in translationChanges)
+        {
+            var applied = await ApplyTranslationChangeAsync(definition, craft, change, ct);
+            if (!applied)
+            {
+                return false;
+            }
+        }
+
+        definition.LastPublishedVersion = craft.LastDraftVersion;
+        definition.Version = definition.Version <= 0 ? 1 : definition.Version + 1;
+        definition.Status = "published";
+        definition.UpdatedAt = DateTime.UtcNow;
+        definition.PublishedAtUtc = DateTime.UtcNow;
+
+        return true;
+    }
+
+    private async Task ApplyDefinitionMetadataDeltaAsync(StoryRegionDefinition definition, StoryRegionCraft craft, string ownerEmail, CancellationToken ct)
+    {
+        definition.Name = craft.Name;
+        definition.UpdatedAt = DateTime.UtcNow;
+
+        // Sync image asset
+        await _assetLinkService.SyncImageAsync(craft, ownerEmail, ct);
+
+        // Get published path from asset link
+        if (!string.IsNullOrWhiteSpace(craft.ImageUrl))
+        {
+            var normalizedPath = NormalizeBlobPath(craft.ImageUrl);
+            var assetLink = await _context.RegionAssetLinks
+                .FirstOrDefaultAsync(x => x.RegionId == craft.Id && x.DraftPath == normalizedPath, ct);
+            
+            if (assetLink != null && !string.IsNullOrWhiteSpace(assetLink.PublishedPath))
+            {
+                definition.ImageUrl = assetLink.PublishedPath;
+            }
+            else if (IsAlreadyPublished(normalizedPath))
+            {
+                definition.ImageUrl = normalizedPath;
+            }
+        }
+        else
+        {
+            definition.ImageUrl = null;
+            await _assetLinkService.RemoveImageAsync(craft.Id, ct);
+        }
+    }
+
+    private async Task<bool> ApplyTranslationChangeAsync(
+        StoryRegionDefinition definition,
+        StoryRegionCraft craft,
+        RegionPublishChangeLog change,
+        CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(change.EntityId))
+        {
+            return true;
+        }
+
+        var languageCode = change.EntityId;
+
+        if (string.Equals(change.ChangeType, "Removed", StringComparison.OrdinalIgnoreCase))
+        {
+            var existingTranslation = await _context.StoryRegionDefinitionTranslations
+                .FirstOrDefaultAsync(t => t.StoryRegionDefinitionId == definition.Id && t.LanguageCode == languageCode, ct);
+            
+            if (existingTranslation != null)
+            {
+                _context.StoryRegionDefinitionTranslations.Remove(existingTranslation);
+            }
+            return true;
+        }
+
+        var craftTranslation = craft.Translations.FirstOrDefault(t => 
+            string.Equals(t.LanguageCode, languageCode, StringComparison.OrdinalIgnoreCase));
         
-        // Cleanup: Delete StoryRegionCraft after successful publish (similar to Epics)
+        if (craftTranslation == null)
+        {
+            _logger.LogWarning("Delta publish failed: regionId={RegionId} languageCode={LanguageCode} missing in craft.", 
+                definition.Id, languageCode);
+            return false;
+        }
+
+        // Remove existing translation if exists
+        var existingTranslation2 = await _context.StoryRegionDefinitionTranslations
+            .FirstOrDefaultAsync(t => t.StoryRegionDefinitionId == definition.Id && t.LanguageCode == languageCode, ct);
+        
+        if (existingTranslation2 != null)
+        {
+            _context.StoryRegionDefinitionTranslations.Remove(existingTranslation2);
+        }
+
+        // Add new translation
+        _context.StoryRegionDefinitionTranslations.Add(new StoryRegionDefinitionTranslation
+        {
+            StoryRegionDefinitionId = definition.Id,
+            LanguageCode = craftTranslation.LanguageCode,
+            Name = craftTranslation.Name,
+            Description = craftTranslation.Description
+        });
+
+        return true;
+    }
+
+    private async Task CleanupChangeLogsAsync(string regionId, int lastDraftVersion, CancellationToken ct)
+    {
+        if (lastDraftVersion <= 0)
+        {
+            return;
+        }
+
+        await _context.RegionPublishChangeLogs
+            .Where(x => x.RegionId == regionId && x.DraftVersion <= lastDraftVersion)
+            .ExecuteDeleteAsync(ct);
+    }
+
+    private async Task CleanupCraftAsync(string regionId, CancellationToken ct)
+    {
         try
         {
-            // Reload craft in current context to ensure it's tracked properly
             var craftToDelete = await _context.StoryRegionCrafts
                 .FirstOrDefaultAsync(c => c.Id == regionId, ct);
             
@@ -410,17 +643,12 @@ public class StoryRegionService : IStoryRegionService
             {
                 _context.StoryRegionCrafts.Remove(craftToDelete);
                 await _context.SaveChangesAsync(ct);
-                _logger.LogInformation("Region published and craft cleaned up: regionId={RegionId} version={Version}", regionId, definition.Version);
-            }
-            else
-            {
-                _logger.LogWarning("StoryRegionCraft not found for cleanup: regionId={RegionId}", regionId);
+                _logger.LogInformation("Region published and craft cleaned up: regionId={RegionId}", regionId);
             }
         }
         catch (Exception cleanupEx)
         {
             _logger.LogWarning(cleanupEx, "Failed to cleanup region craft after publish: regionId={RegionId}, but publish succeeded", regionId);
-            // Don't fail if cleanup fails - publish was successful
         }
     }
 
