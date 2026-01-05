@@ -11,17 +11,20 @@ public class StoryEpicService : IStoryEpicService
     private readonly XooDbContext _context;
     private readonly IUserContextService _userContext;
     private readonly IEpicPublishedAssetCleanupService _assetCleanup;
+    private readonly IEpicPublishChangeLogService _changeLogService;
     private readonly ILogger<StoryEpicService> _logger;
 
     public StoryEpicService(
         XooDbContext context, 
         IUserContextService userContext, 
         IEpicPublishedAssetCleanupService assetCleanup,
+        IEpicPublishChangeLogService changeLogService,
         ILogger<StoryEpicService> logger)
     {
         _context = context;
         _userContext = userContext;
         _assetCleanup = assetCleanup;
+        _changeLogService = changeLogService;
         _logger = logger;
     }
 
@@ -134,11 +137,18 @@ public class StoryEpicService : IStoryEpicService
             }
         }
 
+        // Determine language code for change tracking (use first translation or default)
+        const string defaultLang = "ro-ro";
+        var langForTracking = dto.Translations?.FirstOrDefault()?.LanguageCode ?? defaultLang;
+        
+        // Capture snapshot before changes
+        var snapshotBeforeChanges = _changeLogService.CaptureSnapshot(craft, langForTracking);
+
         // Update basic properties
         craft.CoverImageUrl = dto.CoverImageUrl;
         craft.Status = dto.Status ?? craft.Status;
         craft.UpdatedAt = DateTime.UtcNow;
-        craft.LastDraftVersion += 1; // Increment draft version on each save
+        // Note: LastDraftVersion will be incremented in AppendChangesAsync
 
         // Update translations
         await UpdateCraftTranslationsAsync(craft, dto.Translations, ct);
@@ -157,6 +167,9 @@ public class StoryEpicService : IStoryEpicService
 
         // Save changes
         await _context.SaveChangesAsync(ct);
+
+        // Append changes to change log after saving
+        await _changeLogService.AppendChangesAsync(craft, snapshotBeforeChanges, langForTracking, ownerUserId, ct);
     }
 
     public async Task<StoryEpicDto?> GetEpicAsync(string epicId, CancellationToken ct = default)

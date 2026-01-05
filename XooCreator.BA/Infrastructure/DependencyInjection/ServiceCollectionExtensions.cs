@@ -156,6 +156,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.IHeroPublishChangeLogService, XooCreator.BA.Features.StoryEditor.StoryEpic.Services.HeroPublishChangeLogService>();
         services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.IHeroAssetLinkService, XooCreator.BA.Features.StoryEditor.StoryEpic.Services.HeroAssetLinkService>();
         
+        // Epic Delta Publish Services
+        services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.IEpicPublishChangeLogService, XooCreator.BA.Features.StoryEditor.StoryEpic.Services.EpicPublishChangeLogService>();
+        services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.IEpicAssetLinkService, XooCreator.BA.Features.StoryEditor.StoryEpic.Services.EpicAssetLinkService>();
+        
         // Region and Hero Asset Cleanup Services
         services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.IRegionPublishedAssetCleanupService, XooCreator.BA.Features.StoryEditor.StoryEpic.Services.RegionPublishedAssetCleanupService>();
         services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.IHeroPublishedAssetCleanupService, XooCreator.BA.Features.StoryEditor.StoryEpic.Services.HeroPublishedAssetCleanupService>();

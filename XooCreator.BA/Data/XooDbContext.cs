@@ -119,6 +119,10 @@ public class XooDbContext : DbContext
     public DbSet<RegionAssetLink> RegionAssetLinks => Set<RegionAssetLink>();
     public DbSet<HeroAssetLink> HeroAssetLinks => Set<HeroAssetLink>();
     
+    // Epic Delta Publish
+    public DbSet<EpicPublishChangeLog> EpicPublishChangeLogs => Set<EpicPublishChangeLog>();
+    public DbSet<EpicAssetLink> EpicAssetLinks => Set<EpicAssetLink>();
+    
     public DbSet<StoryPublishJob> StoryPublishJobs => Set<StoryPublishJob>();
     public DbSet<StoryVersionJob> StoryVersionJobs => Set<StoryVersionJob>();
     public DbSet<EpicVersionJob> EpicVersionJobs => Set<EpicVersionJob>();
