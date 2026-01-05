@@ -147,10 +147,18 @@ public static class ServiceCollectionExtensions
         // Story Region Services (Independent Regions)
         services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Repositories.IStoryRegionRepository, XooCreator.BA.Features.StoryEditor.StoryEpic.Repositories.StoryRegionRepository>();
         services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.IStoryRegionService, XooCreator.BA.Features.StoryEditor.StoryEpic.Services.StoryRegionService>();
+        services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.IRegionPublishChangeLogService, XooCreator.BA.Features.StoryEditor.StoryEpic.Services.RegionPublishChangeLogService>();
+        services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.IRegionAssetLinkService, XooCreator.BA.Features.StoryEditor.StoryEpic.Services.RegionAssetLinkService>();
         
         // Epic Hero Services (Independent Heroes)
         services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Repositories.IEpicHeroRepository, XooCreator.BA.Features.StoryEditor.StoryEpic.Repositories.EpicHeroRepository>();
         services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.IEpicHeroService, XooCreator.BA.Features.StoryEditor.StoryEpic.Services.EpicHeroService>();
+        services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.IHeroPublishChangeLogService, XooCreator.BA.Features.StoryEditor.StoryEpic.Services.HeroPublishChangeLogService>();
+        services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.IHeroAssetLinkService, XooCreator.BA.Features.StoryEditor.StoryEpic.Services.HeroAssetLinkService>();
+        
+        // Epic Delta Publish Services
+        services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.IEpicPublishChangeLogService, XooCreator.BA.Features.StoryEditor.StoryEpic.Services.EpicPublishChangeLogService>();
+        services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.IEpicAssetLinkService, XooCreator.BA.Features.StoryEditor.StoryEpic.Services.EpicAssetLinkService>();
         
         // Region and Hero Asset Cleanup Services
         services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.IRegionPublishedAssetCleanupService, XooCreator.BA.Features.StoryEditor.StoryEpic.Services.RegionPublishedAssetCleanupService>();

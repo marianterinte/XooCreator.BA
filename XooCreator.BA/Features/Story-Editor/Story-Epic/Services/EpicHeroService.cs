@@ -20,6 +20,8 @@ public class EpicHeroService : IEpicHeroService
     private readonly IBlobSasService _blobSas;
     private readonly IHeroPublishedAssetCleanupService _assetCleanup;
     private readonly IImageCompressionService _imageCompression;
+    private readonly IHeroPublishChangeLogService _changeLogService;
+    private readonly IHeroAssetLinkService _assetLinkService;
     private readonly ILogger<EpicHeroService> _logger;
 
     public EpicHeroService(
@@ -28,6 +30,8 @@ public class EpicHeroService : IEpicHeroService
         IBlobSasService blobSas,
         IHeroPublishedAssetCleanupService assetCleanup,
         IImageCompressionService imageCompression,
+        IHeroPublishChangeLogService changeLogService,
+        IHeroAssetLinkService assetLinkService,
         ILogger<EpicHeroService> logger)
     {
         _repository = repository;
@@ -35,6 +39,8 @@ public class EpicHeroService : IEpicHeroService
         _blobSas = blobSas;
         _assetCleanup = assetCleanup;
         _imageCompression = imageCompression;
+        _changeLogService = changeLogService;
+        _assetLinkService = assetLinkService;
         _logger = logger;
     }
 
@@ -166,6 +172,13 @@ public class EpicHeroService : IEpicHeroService
             throw new UnauthorizedAccessException($"User does not own hero '{heroId}'");
         }
 
+        // Determine language code for change tracking (use first translation or default)
+        const string defaultLang = "ro-ro";
+        var langForTracking = dto.Translations?.FirstOrDefault()?.LanguageCode ?? defaultLang;
+        
+        // Capture snapshot before changes
+        var snapshotBeforeChanges = _changeLogService.CaptureSnapshot(heroCraft, langForTracking);
+
         // Update properties (non-translatable)
         heroCraft.ImageUrl = dto.ImageUrl;
         heroCraft.UpdatedAt = DateTime.UtcNow;
@@ -202,6 +215,9 @@ public class EpicHeroService : IEpicHeroService
         }
 
         await _repository.SaveCraftAsync(heroCraft, ct);
+        
+        // Append changes to change log for delta publish
+        await _changeLogService.AppendChangesAsync(heroCraft, snapshotBeforeChanges, langForTracking, ownerUserId, ct);
     }
 
     public async Task<List<EpicHeroListItemDto>> ListHeroesByOwnerAsync(Guid ownerUserId, string? status = null, Guid? currentUserId = null, CancellationToken ct = default)
@@ -434,15 +450,79 @@ public class EpicHeroService : IEpicHeroService
             throw new InvalidOperationException($"Cannot publish hero. Expected Approved, got {currentStatus}");
         }
 
-        // Copy image asset synchronously if exists
-        string? publishedImageUrl = heroCraft.ImageUrl;
-        if (!string.IsNullOrWhiteSpace(heroCraft.ImageUrl))
-        {
-            publishedImageUrl = await PublishImageAsync(heroId, heroCraft.ImageUrl, ownerEmail, ct);
-        }
+        // Load craft with translations
+        heroCraft = await _context.EpicHeroCrafts
+            .Include(c => c.Translations)
+            .FirstOrDefaultAsync(c => c.Id == heroId, ct) ?? heroCraft;
 
         // Check if definition already exists
         var existingDefinition = await _repository.GetDefinitionAsync(heroId, ct);
+        
+        var requiresFullPublish = existingDefinition == null;
+        List<HeroPublishChangeLog>? pendingLogs = null;
+        const string defaultLangTag = "ro-ro"; // Default language for delta publish
+
+        if (!requiresFullPublish && existingDefinition != null)
+        {
+            pendingLogs = await _context.HeroPublishChangeLogs
+                .Where(x => x.HeroId == heroId && x.DraftVersion > existingDefinition.LastPublishedVersion)
+                .OrderBy(x => x.DraftVersion)
+                .ThenBy(x => x.CreatedAt)
+                .ToListAsync(ct);
+
+            if (pendingLogs.Count == 0)
+            {
+                requiresFullPublish = true;
+            }
+        }
+
+        if (!requiresFullPublish && existingDefinition != null && pendingLogs != null)
+        {
+            var deltaApplied = await TryApplyDeltaPublishAsync(existingDefinition, heroCraft, pendingLogs, ownerEmail, defaultLangTag, ct);
+            if (deltaApplied)
+            {
+                await _context.SaveChangesAsync(ct);
+                await CleanupChangeLogsAsync(heroId, heroCraft.LastDraftVersion, ct);
+                
+                // Cleanup craft after successful publish
+                await CleanupCraftAsync(heroId, ct);
+                return;
+            }
+
+            requiresFullPublish = true;
+        }
+
+        // Full publish
+        await ApplyFullPublishAsync(existingDefinition, heroCraft, ownerEmail, ct);
+        await CleanupChangeLogsAsync(heroId, heroCraft.LastDraftVersion, ct);
+        
+        // Cleanup craft after successful publish
+        await CleanupCraftAsync(heroId, ct);
+    }
+
+    private async Task ApplyFullPublishAsync(EpicHeroDefinition? existingDefinition, EpicHeroCraft heroCraft, string ownerEmail, CancellationToken ct)
+    {
+        // Sync image asset first
+        await _assetLinkService.SyncImageAsync(heroCraft, ownerEmail, ct);
+
+        // Get published image URL from asset link
+        string? publishedImageUrl = null;
+        if (!string.IsNullOrWhiteSpace(heroCraft.ImageUrl))
+        {
+            var normalizedPath = NormalizeBlobPath(heroCraft.ImageUrl);
+            var assetLink = await _context.HeroAssetLinks
+                .FirstOrDefaultAsync(x => x.HeroId == heroCraft.Id && x.DraftPath == normalizedPath, ct);
+            
+            if (assetLink != null && !string.IsNullOrWhiteSpace(assetLink.PublishedPath))
+            {
+                publishedImageUrl = assetLink.PublishedPath;
+            }
+            else if (IsAlreadyPublished(normalizedPath))
+            {
+                publishedImageUrl = normalizedPath;
+            }
+        }
+
         EpicHeroDefinition definition;
         
         if (existingDefinition == null)
@@ -458,7 +538,8 @@ public class EpicHeroService : IEpicHeroService
                 CreatedAt = heroCraft.CreatedAt,
                 UpdatedAt = DateTime.UtcNow,
                 PublishedAtUtc = DateTime.UtcNow,
-                Version = 1
+                Version = 1,
+                LastPublishedVersion = heroCraft.LastDraftVersion
             };
             _context.EpicHeroDefinitions.Add(definition);
         }
@@ -470,11 +551,12 @@ public class EpicHeroService : IEpicHeroService
             existingDefinition.UpdatedAt = DateTime.UtcNow;
             existingDefinition.PublishedAtUtc = DateTime.UtcNow;
             existingDefinition.Version += 1;
+            existingDefinition.LastPublishedVersion = heroCraft.LastDraftVersion;
             definition = existingDefinition;
             
             // Remove old translations
             var oldTranslations = await _context.EpicHeroDefinitionTranslations
-                .Where(t => t.EpicHeroDefinitionId == heroId)
+                .Where(t => t.EpicHeroDefinitionId == heroCraft.Id)
                 .ToListAsync(ct);
             _context.EpicHeroDefinitionTranslations.RemoveRange(oldTranslations);
         }
@@ -507,18 +589,27 @@ public class EpicHeroService : IEpicHeroService
             var craftTranslation = item.Translation;
             var lang = item.Lang;
 
-            // Copy greeting audio from draft to published container if exists
+            // Sync greeting audio asset
+            await _assetLinkService.SyncGreetingAudioAsync(heroCraft, lang, ownerEmail, ct);
+
+            // Get published audio URL from asset link
             string? publishedAudioUrl = craftTranslation.GreetingAudioUrl;
             if (!string.IsNullOrWhiteSpace(craftTranslation.GreetingAudioUrl))
             {
-                try
+                var normalizedAudioPath = NormalizeBlobPath(craftTranslation.GreetingAudioUrl);
+                var audioAssetLink = await _context.HeroAssetLinks
+                    .FirstOrDefaultAsync(x => x.HeroId == heroCraft.Id && 
+                                             x.LanguageCode == lang && 
+                                             x.EntityId == $"__greeting_{lang}__" &&
+                                             x.DraftPath == normalizedAudioPath, ct);
+                
+                if (audioAssetLink != null && !string.IsNullOrWhiteSpace(audioAssetLink.PublishedPath))
                 {
-                    publishedAudioUrl = await PublishGreetingAudioAsync(heroId, craftTranslation.GreetingAudioUrl, lang, ownerEmail, ct);
+                    publishedAudioUrl = audioAssetLink.PublishedPath;
                 }
-                catch (Exception ex)
+                else if (IsAlreadyPublished(normalizedAudioPath))
                 {
-                    _logger.LogWarning(ex, "Failed to publish greeting audio for heroId={HeroId} lang={Lang}, using draft path", heroId, craftTranslation.LanguageCode);
-                    // Continue with draft path if publish fails (non-blocking)
+                    publishedAudioUrl = normalizedAudioPath;
                 }
             }
             
@@ -536,22 +627,203 @@ public class EpicHeroService : IEpicHeroService
 
         try
         {
-            // If this hero was previously unpublished, publish should re-activate it
             definition.IsActive = true;
             definition.Status = "published";
-
             await _context.SaveChangesAsync(ct);
         }
         catch (DbUpdateException ex)
         {
-            _logger.LogError(ex, "Failed to publish hero (DB update). heroId={HeroId}", heroId);
+            _logger.LogError(ex, "Failed to publish hero (DB update). heroId={HeroId}", heroCraft.Id);
             throw new InvalidOperationException("Failed to publish hero due to invalid/duplicate translation data. Please review the hero translations and try again.");
         }
+    }
+
+    private async Task<bool> TryApplyDeltaPublishAsync(
+        EpicHeroDefinition definition,
+        EpicHeroCraft craft,
+        IReadOnlyCollection<HeroPublishChangeLog> changeLogs,
+        string ownerEmail,
+        string langTag,
+        CancellationToken ct)
+    {
+        if (changeLogs.Count == 0)
+        {
+            return false;
+        }
+
+        var headerChanged = changeLogs.Any(l =>
+            string.Equals(l.EntityType, "Header", StringComparison.OrdinalIgnoreCase));
+
+        var translationChanges = changeLogs
+            .Where(l => string.Equals(l.EntityType, "Translation", StringComparison.OrdinalIgnoreCase)
+                        && !string.IsNullOrWhiteSpace(l.EntityId))
+            .GroupBy(l => l.EntityId!)
+            .Select(g => g.OrderBy(l => l.DraftVersion).ThenBy(l => l.CreatedAt).Last())
+            .ToList();
+
+        if (!headerChanged && translationChanges.Count == 0)
+        {
+            return false;
+        }
+
+        if (headerChanged)
+        {
+            await ApplyDefinitionMetadataDeltaAsync(definition, craft, ownerEmail, ct);
+        }
+
+        foreach (var change in translationChanges)
+        {
+            var applied = await ApplyTranslationChangeAsync(definition, craft, change, ownerEmail, ct);
+            if (!applied)
+            {
+                return false;
+            }
+        }
+
+        definition.LastPublishedVersion = craft.LastDraftVersion;
+        definition.Version = definition.Version <= 0 ? 1 : definition.Version + 1;
+        definition.Status = "published";
+        definition.IsActive = true;
+        definition.UpdatedAt = DateTime.UtcNow;
+        definition.PublishedAtUtc = DateTime.UtcNow;
+
+        return true;
+    }
+
+    private async Task ApplyDefinitionMetadataDeltaAsync(EpicHeroDefinition definition, EpicHeroCraft craft, string ownerEmail, CancellationToken ct)
+    {
+        definition.Name = craft.Name;
+        definition.UpdatedAt = DateTime.UtcNow;
+
+        // Sync image asset
+        await _assetLinkService.SyncImageAsync(craft, ownerEmail, ct);
+
+        // Get published path from asset link
+        if (!string.IsNullOrWhiteSpace(craft.ImageUrl))
+        {
+            var normalizedPath = NormalizeBlobPath(craft.ImageUrl);
+            var assetLink = await _context.HeroAssetLinks
+                .FirstOrDefaultAsync(x => x.HeroId == craft.Id && x.DraftPath == normalizedPath, ct);
+            
+            if (assetLink != null && !string.IsNullOrWhiteSpace(assetLink.PublishedPath))
+            {
+                definition.ImageUrl = assetLink.PublishedPath;
+            }
+            else if (IsAlreadyPublished(normalizedPath))
+            {
+                definition.ImageUrl = normalizedPath;
+            }
+        }
+        else
+        {
+            definition.ImageUrl = null;
+            await _assetLinkService.RemoveImageAsync(craft.Id, ct);
+        }
+    }
+
+    private async Task<bool> ApplyTranslationChangeAsync(
+        EpicHeroDefinition definition,
+        EpicHeroCraft craft,
+        HeroPublishChangeLog change,
+        string ownerEmail,
+        CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(change.EntityId))
+        {
+            return true;
+        }
+
+        var languageCode = change.EntityId;
+
+        if (string.Equals(change.ChangeType, "Removed", StringComparison.OrdinalIgnoreCase))
+        {
+            var existingTranslation = await _context.EpicHeroDefinitionTranslations
+                .FirstOrDefaultAsync(t => t.EpicHeroDefinitionId == definition.Id && t.LanguageCode == languageCode, ct);
+            
+            if (existingTranslation != null)
+            {
+                _context.EpicHeroDefinitionTranslations.Remove(existingTranslation);
+            }
+
+            // Remove greeting audio asset
+            await _assetLinkService.RemoveGreetingAudioAsync(definition.Id, languageCode, ct);
+            
+            return true;
+        }
+
+        var craftTranslation = craft.Translations.FirstOrDefault(t => 
+            string.Equals(t.LanguageCode, languageCode, StringComparison.OrdinalIgnoreCase));
         
-        // Cleanup: Delete EpicHeroCraft after successful publish (similar to Epics)
+        if (craftTranslation == null)
+        {
+            _logger.LogWarning("Delta publish failed: heroId={HeroId} languageCode={LanguageCode} missing in craft.", 
+                definition.Id, languageCode);
+            return false;
+        }
+
+        // Sync greeting audio asset
+        await _assetLinkService.SyncGreetingAudioAsync(craft, languageCode, ownerEmail, ct);
+
+        // Remove existing translation if exists
+        var existingTranslation2 = await _context.EpicHeroDefinitionTranslations
+            .FirstOrDefaultAsync(t => t.EpicHeroDefinitionId == definition.Id && t.LanguageCode == languageCode, ct);
+        
+        if (existingTranslation2 != null)
+        {
+            _context.EpicHeroDefinitionTranslations.Remove(existingTranslation2);
+        }
+
+        // Get published audio URL from asset link
+        string? publishedAudioUrl = craftTranslation.GreetingAudioUrl;
+        if (!string.IsNullOrWhiteSpace(craftTranslation.GreetingAudioUrl))
+        {
+            var normalizedAudioPath = NormalizeBlobPath(craftTranslation.GreetingAudioUrl);
+            var audioAssetLink = await _context.HeroAssetLinks
+                .FirstOrDefaultAsync(x => x.HeroId == craft.Id && 
+                                         x.LanguageCode == languageCode && 
+                                         x.EntityId == $"__greeting_{languageCode}__" &&
+                                         x.DraftPath == normalizedAudioPath, ct);
+            
+            if (audioAssetLink != null && !string.IsNullOrWhiteSpace(audioAssetLink.PublishedPath))
+            {
+                publishedAudioUrl = audioAssetLink.PublishedPath;
+            }
+            else if (IsAlreadyPublished(normalizedAudioPath))
+            {
+                publishedAudioUrl = normalizedAudioPath;
+            }
+        }
+
+        // Add new translation
+        _context.EpicHeroDefinitionTranslations.Add(new EpicHeroDefinitionTranslation
+        {
+            EpicHeroDefinitionId = definition.Id,
+            LanguageCode = craftTranslation.LanguageCode,
+            Name = craftTranslation.Name,
+            Description = craftTranslation.Description,
+            GreetingText = craftTranslation.GreetingText,
+            GreetingAudioUrl = publishedAudioUrl
+        });
+
+        return true;
+    }
+
+    private async Task CleanupChangeLogsAsync(string heroId, int lastDraftVersion, CancellationToken ct)
+    {
+        if (lastDraftVersion <= 0)
+        {
+            return;
+        }
+
+        await _context.HeroPublishChangeLogs
+            .Where(x => x.HeroId == heroId && x.DraftVersion <= lastDraftVersion)
+            .ExecuteDeleteAsync(ct);
+    }
+
+    private async Task CleanupCraftAsync(string heroId, CancellationToken ct)
+    {
         try
         {
-            // Reload craft in current context to ensure it's tracked properly
             var craftToDelete = await _context.EpicHeroCrafts
                 .FirstOrDefaultAsync(c => c.Id == heroId, ct);
             
@@ -559,17 +831,12 @@ public class EpicHeroService : IEpicHeroService
             {
                 _context.EpicHeroCrafts.Remove(craftToDelete);
                 await _context.SaveChangesAsync(ct);
-                _logger.LogInformation("Hero published and craft cleaned up: heroId={HeroId} version={Version}", heroId, definition.Version);
-            }
-            else
-            {
-                _logger.LogWarning("EpicHeroCraft not found for cleanup: heroId={HeroId}", heroId);
+                _logger.LogInformation("Hero published and craft cleaned up: heroId={HeroId}", heroId);
             }
         }
         catch (Exception cleanupEx)
         {
             _logger.LogWarning(cleanupEx, "Failed to cleanup hero craft after publish: heroId={HeroId}, but publish succeeded", heroId);
-            // Don't fail if cleanup fails - publish was successful
         }
     }
 

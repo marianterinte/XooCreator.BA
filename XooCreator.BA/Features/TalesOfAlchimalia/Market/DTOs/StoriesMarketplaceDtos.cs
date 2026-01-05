@@ -244,6 +244,7 @@ public record EpicDetailsDto
     public double AverageRating { get; init; } // From epic reviews, not story reviews
     public int TotalReviews { get; init; } // From epic reviews, not story reviews
     public EpicReviewDto? UserReview { get; init; } // Current user's review if exists
+    public List<string> AvailableLanguages { get; init; } = new(); // e.g., ["ro-ro", "en-us", "hu-hu"]
 }
 
 public record GetMarketplaceEpicsResponse
