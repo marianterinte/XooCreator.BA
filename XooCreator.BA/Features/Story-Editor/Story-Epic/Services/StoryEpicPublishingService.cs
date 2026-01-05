@@ -316,13 +316,20 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
             }
         }
 
+        // Use first translation for Name and Description, prefer ro-ro as default (or fallback to craft.Name/Description)
+        // This ensures marketplace shows the correct language when new translations are added
+        var defaultTranslation = craft.Translations.FirstOrDefault(t => t.LanguageCode == "ro-ro")
+            ?? craft.Translations.OrderBy(t => t.LanguageCode).FirstOrDefault();
+        var defaultName = defaultTranslation?.Name ?? craft.Name;
+        var defaultDescription = defaultTranslation?.Description ?? craft.Description;
+
         if (isNew)
         {
             definition = new StoryEpicDefinition
             {
                 Id = craft.Id,
-                Name = craft.Name,
-                Description = craft.Description,
+                Name = defaultName,
+                Description = defaultDescription,
                 OwnerUserId = craft.OwnerUserId,
                 Status = "published",
                 IsActive = true,
@@ -341,8 +348,8 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
         {
             definition.BaseVersion = definition.Version;
             definition.Version = definition.Version <= 0 ? 1 : definition.Version + 1;
-            definition.Name = craft.Name;
-            definition.Description = craft.Description;
+            definition.Name = defaultName;
+            definition.Description = defaultDescription;
             definition.Status = "published";
             definition.IsActive = true;
             definition.CoverImageUrl = publishedCoverImageUrl;
@@ -622,8 +629,12 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
 
     private async Task ApplyDefinitionMetadataDeltaAsync(StoryEpicDefinition definition, StoryEpicCraft craft, string ownerEmail, CancellationToken ct)
     {
-        definition.Name = craft.Name;
-        definition.Description = craft.Description;
+        // Use first translation for Name and Description, prefer ro-ro as default (or fallback to craft.Name/Description)
+        // This ensures marketplace shows the correct language when new translations are added
+        var defaultTranslation = craft.Translations.FirstOrDefault(t => t.LanguageCode == "ro-ro")
+            ?? craft.Translations.OrderBy(t => t.LanguageCode).FirstOrDefault();
+        definition.Name = defaultTranslation?.Name ?? craft.Name;
+        definition.Description = defaultTranslation?.Description ?? craft.Description;
         definition.IsDefault = craft.IsDefault;
         definition.UpdatedAt = DateTime.UtcNow;
 

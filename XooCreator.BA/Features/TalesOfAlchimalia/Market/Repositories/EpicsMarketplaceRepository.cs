@@ -30,6 +30,7 @@ public class EpicsMarketplaceRepository
             var query = _context.StoryEpicDefinitions
                 .Include(e => e.Owner)
                 .Include(e => e.StoryNodes)
+                .Include(e => e.Translations)
                 .Where(e => e.Status == "published" && e.PublishedAtUtc != null);
 
             // Apply search filter - search in Name and Description (case-insensitive)
@@ -103,11 +104,17 @@ public class EpicsMarketplaceRepository
                 var totalReviews = reviewData?.TotalReviews ?? 0;
                 var avgRating = reviewData?.AverageRating ?? 0.0;
 
+                // Get translated name and description based on locale
+                var translation = epic.Translations?.FirstOrDefault(t => 
+                    t.LanguageCode.Equals(locale, StringComparison.OrdinalIgnoreCase));
+                var name = translation?.Name ?? epic.Translations?.FirstOrDefault()?.Name ?? epic.Name;
+                var description = translation?.Description ?? epic.Translations?.FirstOrDefault()?.Description ?? epic.Description;
+
                 return new EpicMarketplaceItemDto
                 {
                     Id = epic.Id,
-                    Name = epic.Name,
-                    Description = epic.Description,
+                    Name = name,
+                    Description = description,
                     CoverImageUrl = epic.CoverImageUrl,
                     CreatedBy = epic.OwnerUserId,
                     CreatedByName = epic.Owner?.Email ?? epic.Owner?.Name ?? "Unknown",
@@ -140,6 +147,7 @@ public class EpicsMarketplaceRepository
                 .Include(e => e.Owner)
                 .Include(e => e.StoryNodes)
                 .Include(e => e.Regions)
+                .Include(e => e.Translations)
                 .FirstOrDefaultAsync(e => e.Id == epicId && e.Status == "published");
 
             if (epic == null)
@@ -184,11 +192,20 @@ public class EpicsMarketplaceRepository
                 };
             }
 
+            // Get translated name and description based on locale
+            var translation = epic.Translations?.FirstOrDefault(t => 
+                t.LanguageCode.Equals(locale, StringComparison.OrdinalIgnoreCase));
+            var name = translation?.Name ?? epic.Translations?.FirstOrDefault()?.Name ?? epic.Name;
+            var description = translation?.Description ?? epic.Translations?.FirstOrDefault()?.Description ?? epic.Description;
+
+            // Get available languages from translations
+            var availableLanguages = epic.Translations?.Select(t => t.LanguageCode).OrderBy(l => l).ToList() ?? new List<string>();
+
             return new EpicDetailsDto
             {
                 Id = epic.Id,
-                Name = epic.Name,
-                Description = epic.Description,
+                Name = name,
+                Description = description,
                 CoverImageUrl = epic.CoverImageUrl,
                 CreatedBy = epic.OwnerUserId,
                 CreatedByName = epic.Owner?.Email ?? epic.Owner?.Name ?? "Unknown",
@@ -199,7 +216,8 @@ public class EpicsMarketplaceRepository
                 ReadersCount = totalReaders,
                 AverageRating = avgRating,
                 TotalReviews = totalReviews,
-                UserReview = userReview
+                UserReview = userReview,
+                AvailableLanguages = availableLanguages
             };
         }
         catch (Exception ex)
