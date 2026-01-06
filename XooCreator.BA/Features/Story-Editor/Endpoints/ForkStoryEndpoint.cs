@@ -16,6 +16,7 @@ using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Features.StoryEditor.Services;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
+using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Infrastructure.Services.Queue;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
@@ -34,6 +35,7 @@ public partial class ForkStoryEndpoint
     private readonly IStoryForkQueue _forkQueue;
     private readonly string _forkQueueName;
     private readonly IStoryForkAssetsQueue _forkAssetsQueue;
+    private readonly IJobEventsHub _jobEvents;
 
     public ForkStoryEndpoint(
         IStoryCraftsRepository crafts,
@@ -46,6 +48,7 @@ public partial class ForkStoryEndpoint
         IConfiguration configuration,
         IStoryForkQueue forkQueue,
         IStoryForkAssetsQueue forkAssetsQueue,
+        IJobEventsHub jobEvents,
         TelemetryClient? telemetryClient = null)
     {
         _crafts = crafts;
@@ -58,6 +61,7 @@ public partial class ForkStoryEndpoint
         _forkQueue = forkQueue;
         _forkQueueName = configuration.GetSection("AzureStorage:Queues")?["Fork"] ?? "story-fork-queue";
         _forkAssetsQueue = forkAssetsQueue;
+        _jobEvents = jobEvents;
         _telemetryClient = telemetryClient;
     }
 
@@ -218,6 +222,24 @@ public partial class ForkStoryEndpoint
 
             ep._db.StoryForkJobs.Add(job);
             await ep._db.SaveChangesAsync(ct);
+
+            ep._jobEvents.Publish(JobTypes.StoryFork, job.Id, new
+            {
+                jobId = job.Id,
+                storyId = job.TargetStoryId,
+                sourceStoryId = job.SourceStoryId,
+                status = job.Status,
+                copyAssets = job.CopyAssets,
+                queueName = ep._forkQueueName,
+                queuedAtUtc = job.QueuedAtUtc,
+                startedAtUtc = job.StartedAtUtc,
+                completedAtUtc = job.CompletedAtUtc,
+                errorMessage = job.ErrorMessage,
+                warningSummary = job.WarningSummary,
+                sourceTranslations = job.SourceTranslations,
+                sourceTiles = job.SourceTiles,
+                assetJob = (object?)null
+            });
 
             await ep._forkQueue.EnqueueAsync(job, ct);
 

@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
+using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Infrastructure.Services.Queue;
 
 namespace XooCreator.BA.Features.StoryEditor.StoryEpic.Services;
@@ -16,15 +17,18 @@ public class EpicVersionQueueJob : BackgroundService
     private readonly IServiceProvider _services;
     private readonly ILogger<EpicVersionQueueJob> _logger;
     private readonly QueueClient _queueClient;
+    private readonly IJobEventsHub _jobEvents;
 
     public EpicVersionQueueJob(
         IServiceProvider services,
         ILogger<EpicVersionQueueJob> logger,
         IConfiguration configuration,
+        IJobEventsHub jobEvents,
         IAzureQueueClientFactory queueClientFactory)
     {
         _services = services;
         _logger = logger;
+        _jobEvents = jobEvents;
 
         var queueName = configuration.GetSection("AzureStorage:Queues")?["EpicVersion"];
         _queueClient = queueClientFactory.CreateClient(queueName, "epic-version-queue");
@@ -105,6 +109,22 @@ public class EpicVersionQueueJob : BackgroundService
                         continue;
                     }
 
+                    void PublishStatus()
+                    {
+                        _jobEvents.Publish(JobTypes.EpicVersion, job.Id, new
+                        {
+                            jobId = job.Id,
+                            epicId = job.EpicId,
+                            status = job.Status,
+                            queuedAtUtc = job.QueuedAtUtc,
+                            startedAtUtc = job.StartedAtUtc,
+                            completedAtUtc = job.CompletedAtUtc,
+                            errorMessage = job.ErrorMessage,
+                            dequeueCount = job.DequeueCount,
+                            baseVersion = job.BaseVersion
+                        });
+                    }
+
                     // Check if there's another running job for the same epic
                     var runningJob = await db.EpicVersionJobs
                         .FirstOrDefaultAsync(j => j.EpicId == job.EpicId && j.Id != job.Id && j.Status == EpicVersionJobStatus.Running, stoppingToken);
@@ -114,6 +134,7 @@ public class EpicVersionQueueJob : BackgroundService
                         job.ErrorMessage = $"Job superseded by running job {runningJob.Id}.";
                         job.CompletedAtUtc = DateTime.UtcNow;
                         await db.SaveChangesAsync(stoppingToken);
+                        PublishStatus();
                         await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                         continue;
                     }
@@ -122,6 +143,7 @@ public class EpicVersionQueueJob : BackgroundService
                     job.StartedAtUtc ??= DateTime.UtcNow;
                     job.Status = EpicVersionJobStatus.Running;
                     await db.SaveChangesAsync(stoppingToken);
+                    PublishStatus();
 
                     try
                     {
@@ -140,6 +162,7 @@ public class EpicVersionQueueJob : BackgroundService
                             job.ErrorMessage = "StoryEpicDefinition not found.";
                             job.CompletedAtUtc = DateTime.UtcNow;
                             await db.SaveChangesAsync(stoppingToken);
+                            PublishStatus();
                             await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                             continue;
                         }
@@ -150,6 +173,7 @@ public class EpicVersionQueueJob : BackgroundService
                             job.ErrorMessage = $"Epic is not published (status: {definition.Status}).";
                             job.CompletedAtUtc = DateTime.UtcNow;
                             await db.SaveChangesAsync(stoppingToken);
+                            PublishStatus();
                             await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                             continue;
                         }
@@ -160,6 +184,7 @@ public class EpicVersionQueueJob : BackgroundService
                             job.ErrorMessage = $"Epic version changed from {job.BaseVersion} to {definition.Version}.";
                             job.CompletedAtUtc = DateTime.UtcNow;
                             await db.SaveChangesAsync(stoppingToken);
+                            PublishStatus();
                             await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                             continue;
                         }
@@ -172,6 +197,7 @@ public class EpicVersionQueueJob : BackgroundService
                             job.ErrorMessage = "A draft already exists for this epic. Please edit or publish it first.";
                             job.CompletedAtUtc = DateTime.UtcNow;
                             await db.SaveChangesAsync(stoppingToken);
+                            PublishStatus();
                             await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                             continue;
                         }
@@ -195,6 +221,7 @@ public class EpicVersionQueueJob : BackgroundService
                         job.ErrorMessage = null;
                         
                         await db.SaveChangesAsync(stoppingToken);
+                        PublishStatus();
 
                         _logger.LogInformation("EpicVersionJob completed: jobId={JobId} epicId={EpicId} baseVersion={BaseVersion}",
                             job.Id, job.EpicId, job.BaseVersion);
@@ -211,6 +238,7 @@ public class EpicVersionQueueJob : BackgroundService
                             job.ErrorMessage = ex.Message;
                             job.CompletedAtUtc = DateTime.UtcNow;
                             await db.SaveChangesAsync(stoppingToken);
+                            PublishStatus();
                             await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                         }
                         // If DequeueCount < 3, don't delete message - queue will re-deliver it

@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Features.StoryEditor.Endpoints;
+using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Infrastructure.Services.Queue;
 
 namespace XooCreator.BA.Features.StoryEditor.Services;
@@ -21,15 +22,18 @@ public class StoryForkAssetsQueueWorker : BackgroundService
     private readonly IServiceProvider _services;
     private readonly ILogger<StoryForkAssetsQueueWorker> _logger;
     private readonly QueueClient _queueClient;
+    private readonly IJobEventsHub _jobEvents;
 
     public StoryForkAssetsQueueWorker(
         IServiceProvider services,
         ILogger<StoryForkAssetsQueueWorker> logger,
         IConfiguration configuration,
+        IJobEventsHub jobEvents,
         IAzureQueueClientFactory queueClientFactory)
     {
         _services = services;
         _logger = logger;
+        _jobEvents = jobEvents;
 
         var queueName = configuration.GetSection("AzureStorage:Queues")?["ForkAssets"];
         _queueClient = queueClientFactory.CreateClient(queueName, "story-fork-assets-queue");
@@ -101,10 +105,51 @@ public class StoryForkAssetsQueueWorker : BackgroundService
                         continue;
                     }
 
+                    async Task PublishAssetAndParentAsync(CancellationToken token)
+                    {
+                        _jobEvents.Publish(JobTypes.StoryForkAssets, job.Id, new
+                        {
+                            jobId = job.Id,
+                            status = job.Status,
+                            attemptedAssets = job.AttemptedAssets,
+                            copiedAssets = job.CopiedAssets,
+                            dequeueCount = job.DequeueCount,
+                            queuedAtUtc = job.QueuedAtUtc,
+                            startedAtUtc = job.StartedAtUtc,
+                            completedAtUtc = job.CompletedAtUtc,
+                            errorMessage = job.ErrorMessage,
+                            warningSummary = job.WarningSummary
+                        });
+
+                        // Also publish parent fork job update if present (so UI can show asset progress).
+                        var parent = await db.StoryForkJobs.AsNoTracking().FirstOrDefaultAsync(j => j.AssetJobId == job.Id, token);
+                        if (parent != null)
+                        {
+                            _jobEvents.Publish(JobTypes.StoryFork, parent.Id, new
+                            {
+                                jobId = parent.Id,
+                                storyId = parent.TargetStoryId,
+                                sourceStoryId = parent.SourceStoryId,
+                                status = parent.Status,
+                                copyAssets = parent.CopyAssets,
+                                queuedAtUtc = parent.QueuedAtUtc,
+                                startedAtUtc = parent.StartedAtUtc,
+                                completedAtUtc = parent.CompletedAtUtc,
+                                errorMessage = parent.ErrorMessage,
+                                warningSummary = parent.WarningSummary,
+                                sourceTranslations = parent.SourceTranslations,
+                                sourceTiles = parent.SourceTiles,
+                                assetJobId = parent.AssetJobId,
+                                assetJobStatus = parent.AssetJobStatus
+                            });
+                        }
+                    }
+
                     job.DequeueCount += 1;
                     job.StartedAtUtc ??= DateTime.UtcNow;
                     job.Status = StoryForkAssetJobStatus.Running;
                     await db.SaveChangesAsync(stoppingToken);
+                    await PublishAssetAndParentAsync(stoppingToken);
 
                     try
                     {
@@ -123,6 +168,7 @@ public class StoryForkAssetsQueueWorker : BackgroundService
                             job.CompletedAtUtc = DateTime.UtcNow;
                             await UpdateParentForkJobStatusAsync(db, job, stoppingToken);
                             await db.SaveChangesAsync(stoppingToken);
+                            await PublishAssetAndParentAsync(stoppingToken);
                             await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                         }
                         else if (job.DequeueCount >= 3)
@@ -131,12 +177,14 @@ public class StoryForkAssetsQueueWorker : BackgroundService
                             job.CompletedAtUtc = DateTime.UtcNow;
                             await UpdateParentForkJobStatusAsync(db, job, stoppingToken);
                             await db.SaveChangesAsync(stoppingToken);
+                            await PublishAssetAndParentAsync(stoppingToken);
                             await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                         }
                         else
                         {
                             await UpdateParentForkJobStatusAsync(db, job, stoppingToken);
                             await db.SaveChangesAsync(stoppingToken);
+                            await PublishAssetAndParentAsync(stoppingToken);
                         }
                     }
                     catch (Exception ex)
@@ -150,12 +198,14 @@ public class StoryForkAssetsQueueWorker : BackgroundService
                             job.CompletedAtUtc = DateTime.UtcNow;
                             await UpdateParentForkJobStatusAsync(db, job, stoppingToken);
                             await db.SaveChangesAsync(stoppingToken);
+                            await PublishAssetAndParentAsync(stoppingToken);
                             await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                         }
                         else
                         {
                             await UpdateParentForkJobStatusAsync(db, job, stoppingToken);
                             await db.SaveChangesAsync(stoppingToken);
+                            await PublishAssetAndParentAsync(stoppingToken);
                         }
                     }
                 }

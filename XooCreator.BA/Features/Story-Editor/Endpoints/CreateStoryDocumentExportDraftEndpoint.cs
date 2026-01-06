@@ -9,6 +9,7 @@ using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
+using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Infrastructure.Services.Queue;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
@@ -20,17 +21,20 @@ public class CreateStoryDocumentExportDraftEndpoint
     private readonly IAuth0UserService _auth0;
     private readonly IStoryCraftsRepository _crafts;
     private readonly IStoryDocumentExportQueue _queue;
+    private readonly IJobEventsHub _jobEvents;
 
     public CreateStoryDocumentExportDraftEndpoint(
         XooDbContext db,
         IAuth0UserService auth0,
         IStoryCraftsRepository crafts,
-        IStoryDocumentExportQueue queue)
+        IStoryDocumentExportQueue queue,
+        IJobEventsHub jobEvents)
     {
         _db = db;
         _auth0 = auth0;
         _crafts = crafts;
         _queue = queue;
+        _jobEvents = jobEvents;
     }
 
     public record CreateStoryDocumentExportRequest(
@@ -104,6 +108,23 @@ public class CreateStoryDocumentExportDraftEndpoint
 
         ep._db.StoryDocumentExportJobs.Add(job);
         await ep._db.SaveChangesAsync(ct);
+
+        ep._jobEvents.Publish(JobTypes.StoryDocumentExport, job.Id, new
+        {
+            jobId = job.Id,
+            storyId = job.StoryId,
+            status = job.Status,
+            format = job.Format,
+            locale = job.Locale,
+            queuedAtUtc = job.QueuedAtUtc,
+            startedAtUtc = job.StartedAtUtc,
+            completedAtUtc = job.CompletedAtUtc,
+            errorMessage = job.ErrorMessage,
+            downloadUrl = (string?)null,
+            outputFileName = job.OutputFileName,
+            outputSizeBytes = job.OutputSizeBytes
+        });
+
         await ep._queue.EnqueueAsync(job, ct);
 
         var location = $"/api/stories/{Uri.EscapeDataString(storyId)}/pdf-jobs/{job.Id}";

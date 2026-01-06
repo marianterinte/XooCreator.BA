@@ -23,6 +23,7 @@ using XooCreator.BA.Features.Payment.Services;
 using XooCreator.BA.Features.StoryFeedback.Repositories;
 using XooCreator.BA.Features.StoryFeedback.Services;
 using XooCreator.BA.Infrastructure.Services.Images;
+using XooCreator.BA.Infrastructure.Services.Jobs;
 
 namespace XooCreator.BA.Infrastructure.DependencyInjection;
 
@@ -39,6 +40,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserContextService, UserContextService>();
         services.AddSingleton<IBlobSasService, BlobSasService>();
         services.AddScoped<IDbHealthService, DbHealthService>();
+        services.AddSingleton<IJobEventsHub, InMemoryJobEventsHub>();
         services.AddSingleton<IAzureQueueClientFactory, AzureQueueClientFactory>();
         services.AddSingleton<IStoryPublishQueue, StoryPublishQueue>();
         services.AddSingleton<IStoryVersionQueue, StoryVersionQueue>();

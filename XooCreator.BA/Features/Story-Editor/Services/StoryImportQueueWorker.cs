@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Infrastructure.Services.Blob;
+using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Infrastructure.Services.Queue;
 using XooCreator.BA.Features.StoryEditor.Endpoints;
 using System.Text.Json;
@@ -20,17 +21,20 @@ public class StoryImportQueueWorker : BackgroundService
     private readonly ILogger<StoryImportQueueWorker> _logger;
     private readonly QueueClient _queueClient;
     private readonly IBlobSasService _sas;
+    private readonly IJobEventsHub _jobEvents;
 
     public StoryImportQueueWorker(
         IServiceProvider services,
         ILogger<StoryImportQueueWorker> logger,
         IConfiguration configuration,
         IAzureQueueClientFactory queueClientFactory,
-        IBlobSasService sas)
+        IBlobSasService sas,
+        IJobEventsHub jobEvents)
     {
         _services = services;
         _logger = logger;
         _sas = sas;
+        _jobEvents = jobEvents;
 
         var queueName = configuration.GetSection("AzureStorage:Queues")?["Import"];
         _queueClient = queueClientFactory.CreateClient(queueName, "story-import-queue");
@@ -102,10 +106,31 @@ public class StoryImportQueueWorker : BackgroundService
                         continue;
                     }
 
+                    void PublishStatus()
+                    {
+                        _jobEvents.Publish(JobTypes.StoryImport, job.Id, new
+                        {
+                            jobId = job.Id,
+                            storyId = job.StoryId,
+                            originalStoryId = job.OriginalStoryId,
+                            status = job.Status,
+                            queuedAtUtc = job.QueuedAtUtc,
+                            startedAtUtc = job.StartedAtUtc,
+                            completedAtUtc = job.CompletedAtUtc,
+                            importedAssets = job.ImportedAssets,
+                            totalAssets = job.TotalAssets,
+                            importedLanguagesCount = job.ImportedLanguagesCount,
+                            errorMessage = job.ErrorMessage,
+                            warningSummary = job.WarningSummary,
+                            dequeueCount = job.DequeueCount
+                        });
+                    }
+
                     job.DequeueCount += 1;
                     job.StartedAtUtc ??= DateTime.UtcNow;
                     job.Status = StoryImportJobStatus.Running;
                     await db.SaveChangesAsync(stoppingToken);
+                    PublishStatus();
 
                     try
                     {
@@ -118,6 +143,7 @@ public class StoryImportQueueWorker : BackgroundService
                             job.ErrorMessage = "Import archive not found.";
                             job.CompletedAtUtc = DateTime.UtcNow;
                             await db.SaveChangesAsync(stoppingToken);
+                            PublishStatus();
                             await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                             continue;
                         }
@@ -156,6 +182,7 @@ public class StoryImportQueueWorker : BackgroundService
                         }
 
                         await db.SaveChangesAsync(stoppingToken);
+                        PublishStatus();
 
                         if (result.Success || job.Status == StoryImportJobStatus.Failed)
                         {
@@ -172,11 +199,13 @@ public class StoryImportQueueWorker : BackgroundService
                             job.ErrorMessage = ex.Message;
                             job.CompletedAtUtc = DateTime.UtcNow;
                             await db.SaveChangesAsync(stoppingToken);
+                            PublishStatus();
                             await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                         }
                         else
                         {
                             await db.SaveChangesAsync(stoppingToken);
+                            PublishStatus();
                         }
                     }
                 }

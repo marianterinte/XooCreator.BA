@@ -11,6 +11,7 @@ using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Features.StoryEditor.Services;
 using XooCreator.BA.Infrastructure.Services.Blob;
+using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Infrastructure.Services.Queue;
 
 namespace XooCreator.BA.Features.StoryEditor.Services;
@@ -20,15 +21,18 @@ public class StoryExportQueueWorker : BackgroundService
     private readonly IServiceProvider _services;
     private readonly ILogger<StoryExportQueueWorker> _logger;
     private readonly QueueClient _queueClient;
+    private readonly IJobEventsHub _jobEvents;
 
     public StoryExportQueueWorker(
         IServiceProvider services,
         ILogger<StoryExportQueueWorker> logger,
         IConfiguration configuration,
+        IJobEventsHub jobEvents,
         IAzureQueueClientFactory queueClientFactory)
     {
         _services = services;
         _logger = logger;
+        _jobEvents = jobEvents;
 
         var queueName = configuration.GetSection("AzureStorage:Queues")?["Export"];
         _queueClient = queueClientFactory.CreateClient(queueName, "story-export-full-export-queue");
@@ -110,10 +114,30 @@ public class StoryExportQueueWorker : BackgroundService
                         continue;
                     }
 
+                    void PublishStatus()
+                    {
+                        _jobEvents.Publish(JobTypes.StoryExport, job.Id, new
+                        {
+                            jobId = job.Id,
+                            storyId = job.StoryId,
+                            status = job.Status,
+                            queuedAtUtc = job.QueuedAtUtc,
+                            startedAtUtc = job.StartedAtUtc,
+                            completedAtUtc = job.CompletedAtUtc,
+                            errorMessage = job.ErrorMessage,
+                            zipDownloadUrl = (string?)null,
+                            zipFileName = job.ZipFileName,
+                            zipSizeBytes = job.ZipSizeBytes,
+                            mediaCount = job.MediaCount,
+                            languageCount = job.LanguageCount
+                        });
+                    }
+
                     job.DequeueCount += 1;
                     job.StartedAtUtc ??= DateTime.UtcNow;
                     job.Status = StoryExportJobStatus.Running;
                     await db.SaveChangesAsync(stoppingToken);
+                    PublishStatus();
 
                     try
                     {
@@ -148,6 +172,7 @@ public class StoryExportQueueWorker : BackgroundService
                         job.LanguageCount = exportResult.LanguageCount;
 
                         await db.SaveChangesAsync(stoppingToken);
+                        PublishStatus();
                         await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
 
                         _logger.LogInformation("Successfully completed StoryExportJob: jobId={JobId} storyId={StoryId} zipSizeBytes={ZipSizeBytes}",
@@ -164,6 +189,7 @@ public class StoryExportQueueWorker : BackgroundService
                             job.ErrorMessage = ex.Message;
                             job.CompletedAtUtc = DateTime.UtcNow;
                             await db.SaveChangesAsync(stoppingToken);
+                            PublishStatus();
                             await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                         }
                         // If DequeueCount < 3, don't delete message - it will be retried
