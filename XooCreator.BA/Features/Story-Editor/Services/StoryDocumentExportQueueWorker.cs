@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Infrastructure.Services.Blob;
+using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Infrastructure.Services.Queue;
 
 namespace XooCreator.BA.Features.StoryEditor.Services;
@@ -17,15 +18,18 @@ public class StoryDocumentExportQueueWorker : BackgroundService
     private readonly IServiceProvider _services;
     private readonly ILogger<StoryDocumentExportQueueWorker> _logger;
     private readonly QueueClient _queueClient;
+    private readonly IJobEventsHub _jobEvents;
 
     public StoryDocumentExportQueueWorker(
         IServiceProvider services,
         ILogger<StoryDocumentExportQueueWorker> logger,
         IConfiguration configuration,
+        IJobEventsHub jobEvents,
         IAzureQueueClientFactory queueClientFactory)
     {
         _services = services;
         _logger = logger;
+        _jobEvents = jobEvents;
 
         var queueName = configuration.GetSection("AzureStorage:Queues")?["DocumentExport"];
         _queueClient = queueClientFactory.CreateClient(queueName, "story-document-export-queue");
@@ -101,10 +105,30 @@ public class StoryDocumentExportQueueWorker : BackgroundService
                     continue;
                 }
 
+                void PublishStatus()
+                {
+                    _jobEvents.Publish(JobTypes.StoryDocumentExport, job.Id, new
+                    {
+                        jobId = job.Id,
+                        storyId = job.StoryId,
+                        status = job.Status,
+                        format = job.Format,
+                        locale = job.Locale,
+                        queuedAtUtc = job.QueuedAtUtc,
+                        startedAtUtc = job.StartedAtUtc,
+                        completedAtUtc = job.CompletedAtUtc,
+                        errorMessage = job.ErrorMessage,
+                        downloadUrl = (string?)null,
+                        outputFileName = job.OutputFileName,
+                        outputSizeBytes = job.OutputSizeBytes
+                    });
+                }
+
                 job.DequeueCount += 1;
                 job.StartedAtUtc ??= DateTime.UtcNow;
                 job.Status = StoryDocumentExportJobStatus.Running;
                 await db.SaveChangesAsync(stoppingToken);
+                PublishStatus();
 
                 try
                 {
@@ -131,6 +155,7 @@ public class StoryDocumentExportQueueWorker : BackgroundService
                     job.OutputSizeBytes = result.SizeBytes;
 
                     await db.SaveChangesAsync(stoppingToken);
+                    PublishStatus();
                     await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
 
                     _logger.LogInformation("Successfully completed StoryDocumentExportJob: jobId={JobId} storyId={StoryId} sizeBytes={SizeBytes}",
@@ -146,6 +171,7 @@ public class StoryDocumentExportQueueWorker : BackgroundService
                         job.ErrorMessage = ex.Message;
                         job.CompletedAtUtc = DateTime.UtcNow;
                         await db.SaveChangesAsync(stoppingToken);
+                        PublishStatus();
                         await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                     }
                     // If DequeueCount < 3, don't delete message - it will be retried

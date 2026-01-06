@@ -8,6 +8,7 @@ using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
 using XooCreator.BA.Infrastructure.Services.Queue;
+using XooCreator.BA.Infrastructure.Services.Jobs;
 
 namespace XooCreator.BA.Features.StoryEditor.StoryEpic.Endpoints;
 
@@ -18,16 +19,19 @@ public class CreateRegionVersionEndpoint
     private readonly XooDbContext _db;
     private readonly IEpicAggregatesQueue _queue;
     private readonly ILogger<CreateRegionVersionEndpoint> _logger;
+    private readonly IJobEventsHub _jobEvents;
 
     public CreateRegionVersionEndpoint(
         IAuth0UserService auth0,
         XooDbContext db,
         IEpicAggregatesQueue queue,
+        IJobEventsHub jobEvents,
         ILogger<CreateRegionVersionEndpoint> logger)
     {
         _auth0 = auth0;
         _db = db;
         _queue = queue;
+        _jobEvents = jobEvents;
         _logger = logger;
     }
 
@@ -84,6 +88,20 @@ public class CreateRegionVersionEndpoint
         };
 
         await ep.CreateVersionJobAsync(job, ct);
+
+        ep._jobEvents.Publish(JobTypes.RegionVersion, job.Id, new
+        {
+            jobId = job.Id,
+            regionId = job.RegionId,
+            status = job.Status,
+            queuedAtUtc = job.QueuedAtUtc,
+            startedAtUtc = job.StartedAtUtc,
+            completedAtUtc = job.CompletedAtUtc,
+            errorMessage = job.ErrorMessage,
+            dequeueCount = job.DequeueCount,
+            baseVersion = job.BaseVersion
+        });
+
         await ep._queue.EnqueueRegionVersionAsync(job, ct);
 
         ep._logger.LogInformation(

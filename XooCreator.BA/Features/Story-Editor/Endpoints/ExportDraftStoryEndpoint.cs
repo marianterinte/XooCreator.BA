@@ -18,6 +18,7 @@ using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
 using XooCreator.BA.Infrastructure.Services.Blob;
 using XooCreator.BA.Infrastructure.Services.Queue;
+using XooCreator.BA.Infrastructure.Services.Jobs;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 
@@ -32,6 +33,7 @@ public class ExportDraftStoryEndpoint
     private readonly ILogger<ExportDraftStoryEndpoint> _logger;
     private readonly TelemetryClient? _telemetryClient;
     private readonly IStoryExportQueue _queue;
+    private readonly IJobEventsHub _jobEvents;
 
     public ExportDraftStoryEndpoint(
         XooDbContext db,
@@ -41,6 +43,7 @@ public class ExportDraftStoryEndpoint
         IStoryCraftsRepository crafts,
         ILogger<ExportDraftStoryEndpoint> logger,
         IStoryExportQueue queue,
+        IJobEventsHub jobEvents,
         TelemetryClient? telemetryClient = null)
     {
         _db = db;
@@ -50,6 +53,7 @@ public class ExportDraftStoryEndpoint
         _crafts = crafts;
         _logger = logger;
         _queue = queue;
+        _jobEvents = jobEvents;
         _telemetryClient = telemetryClient;
     }
 
@@ -124,6 +128,22 @@ public class ExportDraftStoryEndpoint
 
             ep._db.StoryExportJobs.Add(job);
             await ep._db.SaveChangesAsync(ct);
+
+            ep._jobEvents.Publish(JobTypes.StoryExport, job.Id, new
+            {
+                jobId = job.Id,
+                storyId = job.StoryId,
+                status = job.Status,
+                queuedAtUtc = job.QueuedAtUtc,
+                startedAtUtc = job.StartedAtUtc,
+                completedAtUtc = job.CompletedAtUtc,
+                errorMessage = job.ErrorMessage,
+                zipDownloadUrl = (string?)null,
+                zipFileName = job.ZipFileName,
+                zipSizeBytes = job.ZipSizeBytes,
+                mediaCount = job.MediaCount,
+                languageCount = job.LanguageCount
+            });
 
             // Enqueue job
             await ep._queue.EnqueueAsync(job, ct);
