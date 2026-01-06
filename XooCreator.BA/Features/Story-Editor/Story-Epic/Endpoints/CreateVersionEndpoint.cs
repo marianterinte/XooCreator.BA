@@ -10,6 +10,7 @@ using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
 using XooCreator.BA.Infrastructure.Services.Queue;
 using Microsoft.Extensions.Logging;
+using XooCreator.BA.Infrastructure.Services.Jobs;
 
 namespace XooCreator.BA.Features.StoryEditor.StoryEpic.Endpoints;
 
@@ -21,18 +22,21 @@ public class CreateVersionEndpoint
     private readonly XooDbContext _db;
     private readonly IEpicVersionQueue _queue;
     private readonly ILogger<CreateVersionEndpoint> _logger;
+    private readonly IJobEventsHub _jobEvents;
 
     public CreateVersionEndpoint(
         IStoryEpicService epicService,
         IAuth0UserService auth0,
         XooDbContext db,
         IEpicVersionQueue queue,
+        IJobEventsHub jobEvents,
         ILogger<CreateVersionEndpoint> logger)
     {
         _epicService = epicService;
         _auth0 = auth0;
         _db = db;
         _queue = queue;
+        _jobEvents = jobEvents;
         _logger = logger;
     }
 
@@ -105,6 +109,20 @@ public class CreateVersionEndpoint
             };
 
             await ep.CreateVersionJobAsync(job, ct);
+
+            ep._jobEvents.Publish(JobTypes.EpicVersion, job.Id, new
+            {
+                jobId = job.Id,
+                epicId = job.EpicId,
+                status = job.Status,
+                queuedAtUtc = job.QueuedAtUtc,
+                startedAtUtc = job.StartedAtUtc,
+                completedAtUtc = job.CompletedAtUtc,
+                errorMessage = job.ErrorMessage,
+                dequeueCount = job.DequeueCount,
+                baseVersion = job.BaseVersion
+            });
+
             await ep._queue.EnqueueAsync(job, ct);
 
             ep._logger.LogInformation(

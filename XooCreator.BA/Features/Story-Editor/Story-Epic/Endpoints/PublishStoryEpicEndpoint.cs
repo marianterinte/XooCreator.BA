@@ -11,6 +11,7 @@ using XooCreator.BA.Features.StoryEditor.StoryEpic.Services;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
 using XooCreator.BA.Infrastructure.Services.Queue;
+using XooCreator.BA.Infrastructure.Services.Jobs;
 
 namespace XooCreator.BA.Features.StoryEditor.StoryEpic.Endpoints;
 
@@ -22,18 +23,21 @@ public class PublishStoryEpicEndpoint
     private readonly XooDbContext _db;
     private readonly IEpicPublishQueue _queue;
     private readonly ILogger<PublishStoryEpicEndpoint> _logger;
+    private readonly IJobEventsHub _jobEvents;
 
     public PublishStoryEpicEndpoint(
         IStoryEpicPublishingService publishingService,
         IAuth0UserService auth0,
         XooDbContext db,
         IEpicPublishQueue queue,
+        IJobEventsHub jobEvents,
         ILogger<PublishStoryEpicEndpoint> logger)
     {
         _publishingService = publishingService;
         _auth0 = auth0;
         _db = db;
         _queue = queue;
+        _jobEvents = jobEvents;
         _logger = logger;
     }
 
@@ -114,6 +118,20 @@ public class PublishStoryEpicEndpoint
             };
 
             await ep.CreatePublishJobAsync(job, ct);
+
+            ep._jobEvents.Publish(JobTypes.EpicPublish, job.Id, new
+            {
+                jobId = job.Id,
+                epicId = job.EpicId,
+                status = job.Status,
+                queuedAtUtc = job.QueuedAtUtc,
+                startedAtUtc = job.StartedAtUtc,
+                completedAtUtc = job.CompletedAtUtc,
+                errorMessage = job.ErrorMessage,
+                dequeueCount = job.DequeueCount,
+                draftVersion = job.DraftVersion
+            });
+
             await ep._queue.EnqueueAsync(job, ct);
 
             ep._logger.LogInformation("PublishStoryEpic job queued: userId={UserId} epicId={EpicId} jobId={JobId} draftVersion={DraftVersion}",

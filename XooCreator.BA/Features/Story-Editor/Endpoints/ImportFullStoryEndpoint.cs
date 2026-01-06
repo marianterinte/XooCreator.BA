@@ -21,6 +21,7 @@ using XooCreator.BA.Features.StoryEditor.Services;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
 using XooCreator.BA.Infrastructure.Services.Blob;
+using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Infrastructure.Services.Queue;
 using static XooCreator.BA.Features.StoryEditor.Mappers.StoryAssetPathMapper;
 
@@ -38,6 +39,7 @@ public partial class ImportFullStoryEndpoint
     private readonly TelemetryClient? _telemetryClient;
     private readonly string _importQueueName;
     private readonly IStoryImportQueue _importQueue;
+    private readonly IJobEventsHub _jobEvents;
     private const long MaxZipSizeBytes = 500 * 1024 * 1024; // 500MB
     private const long MaxAssetSizeBytes = 50 * 1024 * 1024; // 50MB per asset
     private static readonly HashSet<string> AllowedExtensions = new(StringComparer.OrdinalIgnoreCase)
@@ -56,6 +58,7 @@ public partial class ImportFullStoryEndpoint
         IConfiguration configuration,
         ILogger<ImportFullStoryEndpoint> logger,
         IStoryImportQueue importQueue,
+        IJobEventsHub jobEvents,
         TelemetryClient? telemetryClient = null)
     {
         _db = db;
@@ -66,6 +69,7 @@ public partial class ImportFullStoryEndpoint
         _importQueueName = configuration.GetSection("AzureStorage:Queues")?["Import"] ?? "story-import-queue";
         _logger = logger;
         _importQueue = importQueue;
+        _jobEvents = jobEvents;
         _telemetryClient = telemetryClient;
     }
 
@@ -278,6 +282,23 @@ public partial class ImportFullStoryEndpoint
 
         ep._db.StoryImportJobs.Add(job);
         await ep._db.SaveChangesAsync(ct);
+
+        ep._jobEvents.Publish(JobTypes.StoryImport, job.Id, new
+        {
+            jobId = job.Id,
+            storyId = job.StoryId,
+            originalStoryId = job.OriginalStoryId,
+            status = job.Status,
+            queuedAtUtc = job.QueuedAtUtc,
+            startedAtUtc = job.StartedAtUtc,
+            completedAtUtc = job.CompletedAtUtc,
+            importedAssets = job.ImportedAssets,
+            totalAssets = job.TotalAssets,
+            importedLanguagesCount = job.ImportedLanguagesCount,
+            errorMessage = job.ErrorMessage,
+            warningSummary = job.WarningSummary,
+            dequeueCount = job.DequeueCount
+        });
 
         await ep._importQueue.EnqueueAsync(job, ct);
 

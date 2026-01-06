@@ -31,6 +31,24 @@ public static class AuthConfiguration
 
             options.Events = new JwtBearerEvents
             {
+                OnMessageReceived = context =>
+                {
+                    // EventSource (SSE) cannot set custom headers, so we support passing the JWT in query string
+                    // ONLY for our SSE endpoint(s).
+                    var path = context.HttpContext.Request.Path;
+                    if (path.HasValue &&
+                        path.Value.StartsWith("/api/jobs/", StringComparison.OrdinalIgnoreCase) &&
+                        path.Value.EndsWith("/events", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var accessToken = context.HttpContext.Request.Query["access_token"].ToString();
+                        if (!string.IsNullOrWhiteSpace(accessToken))
+                        {
+                            context.Token = accessToken;
+                        }
+                    }
+
+                    return Task.CompletedTask;
+                },
                 OnAuthenticationFailed = context =>
                 {
                     Console.WriteLine($"[JWT] Authentication failed: {context.Exception.Message}");

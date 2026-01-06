@@ -20,6 +20,7 @@ using Microsoft.Extensions.Logging;
 using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Data;
 using XooCreator.BA.Features.StoryEditor.Models;
+using XooCreator.BA.Infrastructure.Services.Jobs;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 
@@ -37,6 +38,7 @@ public partial class PublishStoryEndpoint
     private readonly IStoryPublishQueue _queue;
     private readonly XooDbContext _db;
     private readonly TelemetryClient? _telemetryClient;
+    private readonly IJobEventsHub _jobEvents;
 
     public PublishStoryEndpoint(
         IStoryCraftsRepository crafts, 
@@ -47,6 +49,7 @@ public partial class PublishStoryEndpoint
         IStoryDraftAssetCleanupService cleanupService,
         IStoryPublishQueue queue,
         XooDbContext db,
+        IJobEventsHub jobEvents,
         TelemetryClient? telemetryClient = null)
     {
         _crafts = crafts;
@@ -57,6 +60,7 @@ public partial class PublishStoryEndpoint
         _cleanupService = cleanupService;
         _queue = queue;
         _db = db;
+        _jobEvents = jobEvents;
         _telemetryClient = telemetryClient;
     }
 
@@ -138,6 +142,19 @@ public partial class PublishStoryEndpoint
             };
 
             await ep.CreatePublishJobAsync(job, ct);
+
+            ep._jobEvents.Publish(JobTypes.StoryPublish, job.Id, new
+            {
+                jobId = job.Id,
+                storyId = job.StoryId,
+                status = job.Status.ToString(),
+                queuedAtUtc = job.QueuedAtUtc,
+                startedAtUtc = job.StartedAtUtc,
+                completedAtUtc = job.CompletedAtUtc,
+                errorMessage = job.ErrorMessage,
+                dequeueCount = job.DequeueCount
+            });
+
             await ep._queue.EnqueueAsync(job, ct);
 
             outcome = "Queued";

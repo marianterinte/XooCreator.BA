@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Features.StoryEditor.Endpoints;
+using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Infrastructure.Services.Queue;
 
 namespace XooCreator.BA.Features.StoryEditor.Services;
@@ -21,15 +22,18 @@ public class StoryForkQueueWorker : BackgroundService
     private readonly IServiceProvider _services;
     private readonly ILogger<StoryForkQueueWorker> _logger;
     private readonly QueueClient _queueClient;
+    private readonly IJobEventsHub _jobEvents;
 
     public StoryForkQueueWorker(
         IServiceProvider services,
         ILogger<StoryForkQueueWorker> logger,
         IConfiguration configuration,
+        IJobEventsHub jobEvents,
         IAzureQueueClientFactory queueClientFactory)
     {
         _services = services;
         _logger = logger;
+        _jobEvents = jobEvents;
 
         var queueName = configuration.GetSection("AzureStorage:Queues")?["Fork"];
         _queueClient = queueClientFactory.CreateClient(queueName, "story-fork-queue");
@@ -101,10 +105,32 @@ public class StoryForkQueueWorker : BackgroundService
                         continue;
                     }
 
+                    void PublishStatus()
+                    {
+                        _jobEvents.Publish(JobTypes.StoryFork, job.Id, new
+                        {
+                            jobId = job.Id,
+                            storyId = job.TargetStoryId,
+                            sourceStoryId = job.SourceStoryId,
+                            status = job.Status,
+                            copyAssets = job.CopyAssets,
+                            queuedAtUtc = job.QueuedAtUtc,
+                            startedAtUtc = job.StartedAtUtc,
+                            completedAtUtc = job.CompletedAtUtc,
+                            errorMessage = job.ErrorMessage,
+                            warningSummary = job.WarningSummary,
+                            sourceTranslations = job.SourceTranslations,
+                            sourceTiles = job.SourceTiles,
+                            assetJobId = job.AssetJobId,
+                            assetJobStatus = job.AssetJobStatus
+                        });
+                    }
+
                     job.DequeueCount += 1;
                     job.StartedAtUtc ??= DateTime.UtcNow;
                     job.Status = StoryForkJobStatus.Running;
                     await db.SaveChangesAsync(stoppingToken);
+                    PublishStatus();
 
                     try
                     {
@@ -124,6 +150,7 @@ public class StoryForkQueueWorker : BackgroundService
                             job.Status = StoryForkJobStatus.Completed;
                             job.CompletedAtUtc = DateTime.UtcNow;
                             await db.SaveChangesAsync(stoppingToken);
+                            PublishStatus();
                             await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                         }
                         else if (job.DequeueCount >= 3)
@@ -131,11 +158,13 @@ public class StoryForkQueueWorker : BackgroundService
                             job.Status = StoryForkJobStatus.Failed;
                             job.CompletedAtUtc = DateTime.UtcNow;
                             await db.SaveChangesAsync(stoppingToken);
+                            PublishStatus();
                             await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                         }
                         else
                         {
                             await db.SaveChangesAsync(stoppingToken);
+                            PublishStatus();
                         }
                     }
                     catch (Exception ex)
@@ -148,11 +177,13 @@ public class StoryForkQueueWorker : BackgroundService
                             job.ErrorMessage = ex.Message;
                             job.CompletedAtUtc = DateTime.UtcNow;
                             await db.SaveChangesAsync(stoppingToken);
+                            PublishStatus();
                             await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                         }
                         else
                         {
                             await db.SaveChangesAsync(stoppingToken);
+                            PublishStatus();
                         }
                     }
                 }

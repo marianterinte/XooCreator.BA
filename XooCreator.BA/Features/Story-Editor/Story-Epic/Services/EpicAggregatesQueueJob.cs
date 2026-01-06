@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
+using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Infrastructure.Services.Queue;
 
 namespace XooCreator.BA.Features.StoryEditor.StoryEpic.Services;
@@ -17,15 +18,18 @@ public class EpicAggregatesQueueJob : BackgroundService
     private readonly IServiceProvider _services;
     private readonly ILogger<EpicAggregatesQueueJob> _logger;
     private readonly QueueClient _queueClient;
+    private readonly IJobEventsHub _jobEvents;
 
     public EpicAggregatesQueueJob(
         IServiceProvider services,
         ILogger<EpicAggregatesQueueJob> logger,
         IConfiguration configuration,
+        IJobEventsHub jobEvents,
         IAzureQueueClientFactory queueClientFactory)
     {
         _services = services;
         _logger = logger;
+        _jobEvents = jobEvents;
 
         var queueName = configuration.GetSection("AzureStorage:Queues")?["EpicAggregates"];
         _queueClient = queueClientFactory.CreateClient(queueName, "epic-aggregates-queue");
@@ -150,6 +154,22 @@ public class EpicAggregatesQueueJob : BackgroundService
                 return;
             }
 
+            void PublishStatus()
+            {
+                _jobEvents.Publish(JobTypes.HeroVersion, job.Id, new
+                {
+                    jobId = job.Id,
+                    heroId = job.HeroId,
+                    status = job.Status,
+                    queuedAtUtc = job.QueuedAtUtc,
+                    startedAtUtc = job.StartedAtUtc,
+                    completedAtUtc = job.CompletedAtUtc,
+                    errorMessage = job.ErrorMessage,
+                    dequeueCount = job.DequeueCount,
+                    baseVersion = job.BaseVersion
+                });
+            }
+
             // Check if there's another running job for the same hero
             var runningJob = await db.HeroVersionJobs
                 .FirstOrDefaultAsync(j => j.HeroId == job.HeroId && j.Id != job.Id && j.Status == HeroVersionJobStatus.Running, stoppingToken);
@@ -159,6 +179,7 @@ public class EpicAggregatesQueueJob : BackgroundService
                 job.ErrorMessage = $"Job superseded by running job {runningJob.Id}.";
                 job.CompletedAtUtc = DateTime.UtcNow;
                 await db.SaveChangesAsync(stoppingToken);
+                PublishStatus();
                 await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                 return;
             }
@@ -167,6 +188,7 @@ public class EpicAggregatesQueueJob : BackgroundService
             job.StartedAtUtc ??= DateTime.UtcNow;
             job.Status = HeroVersionJobStatus.Running;
             await db.SaveChangesAsync(stoppingToken);
+            PublishStatus();
 
             try
             {
@@ -182,6 +204,7 @@ public class EpicAggregatesQueueJob : BackgroundService
                     job.ErrorMessage = "EpicHeroDefinition not found.";
                     job.CompletedAtUtc = DateTime.UtcNow;
                     await db.SaveChangesAsync(stoppingToken);
+                    PublishStatus();
                     await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                     return;
                 }
@@ -192,6 +215,7 @@ public class EpicAggregatesQueueJob : BackgroundService
                     job.ErrorMessage = $"Hero is not published (status: {definition.Status}).";
                     job.CompletedAtUtc = DateTime.UtcNow;
                     await db.SaveChangesAsync(stoppingToken);
+                    PublishStatus();
                     await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                     return;
                 }
@@ -202,6 +226,7 @@ public class EpicAggregatesQueueJob : BackgroundService
                     job.ErrorMessage = $"Hero version changed from {job.BaseVersion} to {definition.Version}.";
                     job.CompletedAtUtc = DateTime.UtcNow;
                     await db.SaveChangesAsync(stoppingToken);
+                    PublishStatus();
                     await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                     return;
                 }
@@ -216,6 +241,7 @@ public class EpicAggregatesQueueJob : BackgroundService
                     job.ErrorMessage = "A draft already exists for this hero. Please edit or publish it first.";
                     job.CompletedAtUtc = DateTime.UtcNow;
                     await db.SaveChangesAsync(stoppingToken);
+                    PublishStatus();
                     await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                     return;
                 }
@@ -239,6 +265,7 @@ public class EpicAggregatesQueueJob : BackgroundService
                 job.ErrorMessage = null;
                 
                 await db.SaveChangesAsync(stoppingToken);
+                PublishStatus();
 
                 _logger.LogInformation("HeroVersionJob completed: jobId={JobId} heroId={HeroId} baseVersion={BaseVersion}",
                     job.Id, job.HeroId, job.BaseVersion);
@@ -255,6 +282,7 @@ public class EpicAggregatesQueueJob : BackgroundService
                     job.ErrorMessage = ex.Message;
                     job.CompletedAtUtc = DateTime.UtcNow;
                     await db.SaveChangesAsync(stoppingToken);
+                    PublishStatus();
                     await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                 }
                 // If DequeueCount < 3, don't delete message - queue will re-deliver it
@@ -277,6 +305,22 @@ public class EpicAggregatesQueueJob : BackgroundService
                 return;
             }
 
+            void PublishStatus()
+            {
+                _jobEvents.Publish(JobTypes.RegionVersion, job.Id, new
+                {
+                    jobId = job.Id,
+                    regionId = job.RegionId,
+                    status = job.Status,
+                    queuedAtUtc = job.QueuedAtUtc,
+                    startedAtUtc = job.StartedAtUtc,
+                    completedAtUtc = job.CompletedAtUtc,
+                    errorMessage = job.ErrorMessage,
+                    dequeueCount = job.DequeueCount,
+                    baseVersion = job.BaseVersion
+                });
+            }
+
             // Check if there's another running job for the same region
             var runningJob = await db.RegionVersionJobs
                 .FirstOrDefaultAsync(j => j.RegionId == job.RegionId && j.Id != job.Id && j.Status == RegionVersionJobStatus.Running, stoppingToken);
@@ -286,6 +330,7 @@ public class EpicAggregatesQueueJob : BackgroundService
                 job.ErrorMessage = $"Job superseded by running job {runningJob.Id}.";
                 job.CompletedAtUtc = DateTime.UtcNow;
                 await db.SaveChangesAsync(stoppingToken);
+                PublishStatus();
                 await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                 return;
             }
@@ -294,6 +339,7 @@ public class EpicAggregatesQueueJob : BackgroundService
             job.StartedAtUtc ??= DateTime.UtcNow;
             job.Status = RegionVersionJobStatus.Running;
             await db.SaveChangesAsync(stoppingToken);
+            PublishStatus();
 
             try
             {
@@ -309,6 +355,7 @@ public class EpicAggregatesQueueJob : BackgroundService
                     job.ErrorMessage = "StoryRegionDefinition not found.";
                     job.CompletedAtUtc = DateTime.UtcNow;
                     await db.SaveChangesAsync(stoppingToken);
+                    PublishStatus();
                     await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                     return;
                 }
@@ -319,6 +366,7 @@ public class EpicAggregatesQueueJob : BackgroundService
                     job.ErrorMessage = $"Region is not published (status: {definition.Status}).";
                     job.CompletedAtUtc = DateTime.UtcNow;
                     await db.SaveChangesAsync(stoppingToken);
+                    PublishStatus();
                     await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                     return;
                 }
@@ -329,6 +377,7 @@ public class EpicAggregatesQueueJob : BackgroundService
                     job.ErrorMessage = $"Region version changed from {job.BaseVersion} to {definition.Version}.";
                     job.CompletedAtUtc = DateTime.UtcNow;
                     await db.SaveChangesAsync(stoppingToken);
+                    PublishStatus();
                     await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                     return;
                 }
@@ -343,6 +392,7 @@ public class EpicAggregatesQueueJob : BackgroundService
                     job.ErrorMessage = "A draft already exists for this region. Please edit or publish it first.";
                     job.CompletedAtUtc = DateTime.UtcNow;
                     await db.SaveChangesAsync(stoppingToken);
+                    PublishStatus();
                     await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                     return;
                 }
@@ -366,6 +416,7 @@ public class EpicAggregatesQueueJob : BackgroundService
                 job.ErrorMessage = null;
                 
                 await db.SaveChangesAsync(stoppingToken);
+                PublishStatus();
 
                 _logger.LogInformation("RegionVersionJob completed: jobId={JobId} regionId={RegionId} baseVersion={BaseVersion}",
                     job.Id, job.RegionId, job.BaseVersion);
@@ -382,6 +433,7 @@ public class EpicAggregatesQueueJob : BackgroundService
                     job.ErrorMessage = ex.Message;
                     job.CompletedAtUtc = DateTime.UtcNow;
                     await db.SaveChangesAsync(stoppingToken);
+                    PublishStatus();
                     await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                 }
                 // If DequeueCount < 3, don't delete message - queue will re-deliver it

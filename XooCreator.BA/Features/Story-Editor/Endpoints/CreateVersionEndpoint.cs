@@ -10,6 +10,7 @@ using XooCreator.BA.Features.StoryEditor.Services;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
 using XooCreator.BA.Infrastructure.Services.Queue;
+using XooCreator.BA.Infrastructure.Services.Jobs;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 
@@ -21,18 +22,21 @@ public class CreateVersionEndpoint
     private readonly XooDbContext _db;
     private readonly IStoryVersionQueue _queue;
     private readonly ILogger<CreateVersionEndpoint> _logger;
+    private readonly IJobEventsHub _jobEvents;
 
     public CreateVersionEndpoint(
         IStoryCraftsRepository crafts,
         IAuth0UserService auth0,
         XooDbContext db,
         IStoryVersionQueue queue,
+        IJobEventsHub jobEvents,
         ILogger<CreateVersionEndpoint> logger)
     {
         _crafts = crafts;
         _auth0 = auth0;
         _db = db;
         _queue = queue;
+        _jobEvents = jobEvents;
         _logger = logger;
     }
 
@@ -89,6 +93,20 @@ public class CreateVersionEndpoint
         };
 
         await ep.CreateVersionJobAsync(job, ct);
+
+        ep._jobEvents.Publish(JobTypes.StoryVersion, job.Id, new
+        {
+            jobId = job.Id,
+            storyId = job.StoryId,
+            status = job.Status,
+            queuedAtUtc = job.QueuedAtUtc,
+            startedAtUtc = job.StartedAtUtc,
+            completedAtUtc = job.CompletedAtUtc,
+            errorMessage = job.ErrorMessage,
+            dequeueCount = job.DequeueCount,
+            baseVersion = job.BaseVersion
+        });
+
         await ep._queue.EnqueueAsync(job, ct);
 
         ep._logger.LogInformation(

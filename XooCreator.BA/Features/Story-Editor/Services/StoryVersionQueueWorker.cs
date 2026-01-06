@@ -9,6 +9,7 @@ using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Features.StoryEditor.Repositories;
+using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Infrastructure.Services.Queue;
 
 namespace XooCreator.BA.Features.StoryEditor.Services;
@@ -18,15 +19,18 @@ public class StoryVersionQueueWorker : BackgroundService
     private readonly IServiceProvider _services;
     private readonly ILogger<StoryVersionQueueWorker> _logger;
     private readonly QueueClient _queueClient;
+    private readonly IJobEventsHub _jobEvents;
 
     public StoryVersionQueueWorker(
         IServiceProvider services,
         ILogger<StoryVersionQueueWorker> logger,
         IConfiguration configuration,
+        IJobEventsHub jobEvents,
         IAzureQueueClientFactory queueClientFactory)
     {
         _services = services;
         _logger = logger;
+        _jobEvents = jobEvents;
 
         var queueName = configuration.GetSection("AzureStorage:Queues")?["Version"];
         _queueClient = queueClientFactory.CreateClient(queueName, "story-version-queue");
@@ -109,6 +113,22 @@ public class StoryVersionQueueWorker : BackgroundService
                         continue;
                     }
 
+                    void PublishStatus()
+                    {
+                        _jobEvents.Publish(JobTypes.StoryVersion, job.Id, new
+                        {
+                            jobId = job.Id,
+                            storyId = job.StoryId,
+                            status = job.Status,
+                            queuedAtUtc = job.QueuedAtUtc,
+                            startedAtUtc = job.StartedAtUtc,
+                            completedAtUtc = job.CompletedAtUtc,
+                            errorMessage = job.ErrorMessage,
+                            dequeueCount = job.DequeueCount,
+                            baseVersion = job.BaseVersion
+                        });
+                    }
+
                     // Check if there's another running job for the same story
                     var runningJob = await db.StoryVersionJobs
                         .FirstOrDefaultAsync(j => j.StoryId == job.StoryId && j.Id != job.Id && j.Status == StoryVersionJobStatus.Running, stoppingToken);
@@ -118,6 +138,7 @@ public class StoryVersionQueueWorker : BackgroundService
                         job.ErrorMessage = $"Job superseded by running job {runningJob.Id}.";
                         job.CompletedAtUtc = DateTime.UtcNow;
                         await db.SaveChangesAsync(stoppingToken);
+                        PublishStatus();
                         await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                         continue;
                     }
@@ -126,6 +147,7 @@ public class StoryVersionQueueWorker : BackgroundService
                     job.StartedAtUtc ??= DateTime.UtcNow;
                     job.Status = StoryVersionJobStatus.Running;
                     await db.SaveChangesAsync(stoppingToken);
+                    PublishStatus();
 
                     try
                     {
@@ -146,6 +168,7 @@ public class StoryVersionQueueWorker : BackgroundService
                             job.ErrorMessage = "StoryDefinition not found.";
                             job.CompletedAtUtc = DateTime.UtcNow;
                             await db.SaveChangesAsync(stoppingToken);
+                            PublishStatus();
                             await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                             continue;
                         }
@@ -156,6 +179,7 @@ public class StoryVersionQueueWorker : BackgroundService
                             job.ErrorMessage = $"Story is not published (status: {definition.Status}).";
                             job.CompletedAtUtc = DateTime.UtcNow;
                             await db.SaveChangesAsync(stoppingToken);
+                            PublishStatus();
                             await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                             continue;
                         }
@@ -166,6 +190,7 @@ public class StoryVersionQueueWorker : BackgroundService
                             job.ErrorMessage = $"Story version changed from {job.BaseVersion} to {definition.Version}.";
                             job.CompletedAtUtc = DateTime.UtcNow;
                             await db.SaveChangesAsync(stoppingToken);
+                            PublishStatus();
                             await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                             continue;
                         }
@@ -178,6 +203,7 @@ public class StoryVersionQueueWorker : BackgroundService
                             job.ErrorMessage = "A draft already exists for this story. Please edit or publish it first.";
                             job.CompletedAtUtc = DateTime.UtcNow;
                             await db.SaveChangesAsync(stoppingToken);
+                            PublishStatus();
                             await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                             continue;
                         }
@@ -212,6 +238,7 @@ public class StoryVersionQueueWorker : BackgroundService
                         job.ErrorMessage = null;
                         
                         await db.SaveChangesAsync(stoppingToken);
+                        PublishStatus();
 
                         _logger.LogInformation("StoryVersionJob completed: jobId={JobId} storyId={StoryId} baseVersion={BaseVersion}",
                             job.Id, job.StoryId, job.BaseVersion);
@@ -228,6 +255,7 @@ public class StoryVersionQueueWorker : BackgroundService
                             job.ErrorMessage = ex.Message;
                             job.CompletedAtUtc = DateTime.UtcNow;
                             await db.SaveChangesAsync(stoppingToken);
+                            PublishStatus();
                             await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                         }
                         // If DequeueCount < 3, don't delete message - queue will re-deliver it

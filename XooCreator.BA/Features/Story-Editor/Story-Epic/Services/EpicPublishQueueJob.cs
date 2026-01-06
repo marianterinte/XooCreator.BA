@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.Services;
+using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Infrastructure.Services.Queue;
 
 namespace XooCreator.BA.Features.StoryEditor.StoryEpic.Services;
@@ -17,15 +18,18 @@ public class EpicPublishQueueJob : BackgroundService
     private readonly IServiceProvider _services;
     private readonly ILogger<EpicPublishQueueJob> _logger;
     private readonly QueueClient _queueClient;
+    private readonly IJobEventsHub _jobEvents;
 
     public EpicPublishQueueJob(
         IServiceProvider services,
         ILogger<EpicPublishQueueJob> logger,
         IConfiguration configuration,
+        IJobEventsHub jobEvents,
         IAzureQueueClientFactory queueClientFactory)
     {
         _services = services;
         _logger = logger;
+        _jobEvents = jobEvents;
 
         var queueName = configuration.GetSection("AzureStorage:Queues")?["EpicPublish"];
         _queueClient = queueClientFactory.CreateClient(queueName, "epic-publish-queue");
@@ -107,10 +111,27 @@ public class EpicPublishQueueJob : BackgroundService
                         continue;
                     }
 
+                    void PublishStatus()
+                    {
+                        _jobEvents.Publish(JobTypes.EpicPublish, job.Id, new
+                        {
+                            jobId = job.Id,
+                            epicId = job.EpicId,
+                            status = job.Status,
+                            queuedAtUtc = job.QueuedAtUtc,
+                            startedAtUtc = job.StartedAtUtc,
+                            completedAtUtc = job.CompletedAtUtc,
+                            errorMessage = job.ErrorMessage,
+                            dequeueCount = job.DequeueCount,
+                            draftVersion = job.DraftVersion
+                        });
+                    }
+
                     job.DequeueCount += 1;
                     job.StartedAtUtc ??= DateTime.UtcNow;
                     job.Status = EpicPublishJobStatus.Running;
                     await db.SaveChangesAsync(stoppingToken);
+                    PublishStatus();
 
                     try
                     {
@@ -127,16 +148,19 @@ public class EpicPublishQueueJob : BackgroundService
                         {
                             job.Status = EpicPublishJobStatus.Failed;
                             job.ErrorMessage = "StoryEpicCraft not found.";
+                            job.CompletedAtUtc = DateTime.UtcNow;
                         }
                         else if (craft.LastDraftVersion < job.DraftVersion)
                         {
                             job.Status = EpicPublishJobStatus.Failed;
                             job.ErrorMessage = $"Draft version {job.DraftVersion} no longer available (LastDraftVersion={craft.LastDraftVersion}).";
+                            job.CompletedAtUtc = DateTime.UtcNow;
                         }
                         else if (craft.LastDraftVersion > job.DraftVersion)
                         {
                             job.Status = EpicPublishJobStatus.Superseded;
                             job.ErrorMessage = $"Job draftVersion={job.DraftVersion} superseded by newer draftVersion={craft.LastDraftVersion}.";
+                            job.CompletedAtUtc = DateTime.UtcNow;
                         }
                         else
                         {
@@ -161,6 +185,7 @@ public class EpicPublishQueueJob : BackgroundService
                             job.ErrorMessage = null;
                             
                             await db.SaveChangesAsync(stoppingToken);
+                            PublishStatus();
                             _logger.LogInformation("Job status saved as Completed: jobId={JobId}", job.Id);
 
                             // Cleanup: Delete StoryEpicCraft and draft assets after successful publish
@@ -206,6 +231,7 @@ public class EpicPublishQueueJob : BackgroundService
                         }
 
                         await db.SaveChangesAsync(stoppingToken);
+                        PublishStatus();
                         await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                     }
                     catch (Exception ex)
@@ -218,6 +244,7 @@ public class EpicPublishQueueJob : BackgroundService
                             job.ErrorMessage = ex.Message;
                             job.CompletedAtUtc = DateTime.UtcNow;
                             await db.SaveChangesAsync(stoppingToken);
+                            PublishStatus();
                             await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                         }
                         // If DequeueCount < 3, don't delete message - queue will re-deliver it

@@ -1,0 +1,136 @@
+{
+  "universe": "Alchimalia",
+  "generatedAt": "2026-01-07",
+  "timezone": "Europe/Bucharest",
+  "notes": [
+    "Mapping-ul de mai jos este un snapshot al lumilor asa cum reies din povestile si discutiile noastre de pana acum.",
+    "Campul canonStatus arata cat de 'fix' e fiecare lume: confirmed (apar clar in povesti), mentioned (doar mentionata), direction (avem directie/rol, dar inca nu e betonata in text)."
+  ],
+  "worlds": [
+    {
+      "id": "kelo_ketis",
+      "name": "Kelo-Ketis",
+      "type": "planet",
+      "biomes": ["imperial/urban", "curte regala", "atelier/laborator (alchimie)"],
+      "population": ["pisici (linia Pufus Alchimus, Puf-Puf)"],
+      "populationVibe": ["ceremonial", "mandrie + invatare", "responsabilitate de conducere"],
+      "educationalThemes": ["leadership fara control", "responsabilitate", "curajul de a cere ajutor"],
+      "keyElements": ["coroana", "curtea imperiala", "alchimie"],
+      "canonStatus": "confirmed"
+    },
+    {
+      "id": "lunaria",
+      "name": "Lunaria",
+      "type": "planet",
+      "biomes": ["campuri verde-portocalii", "vizuini", "poteci de munte", "manastire veche (Muntele Negru)"],
+      "population": ["iepuri (consiliu, comunitati)"],
+      "populationVibe": ["blanzi", "comunitari", "se sperie usor dar se mobilizeaza repede"],
+      "educationalThemes": ["ajutor reciproc", "vindecare simpla", "calm in criza"],
+      "keyElements": ["insigna semiluna", "manastirea", "Pietrele Vietii"],
+      "canonStatus": "confirmed"
+    },
+    {
+      "id": "terra",
+      "name": "Terra",
+      "type": "planet",
+      "biomes": ["ferma", "hambar", "campuri agricole"],
+      "population": ["oameni (fermieri)", "fauna locala"],
+      "populationVibe": ["speriati la inceput", "apoi recunoscatori", "pragmatici"],
+      "educationalThemes": ["observa inainte sa reactionezi", "empatie fata de cei raniti", "rezolvare fara panica"],
+      "keyElements": ["Umbra de la ferma", "pasarea ranita", "Ochiul Verde"],
+      "canonStatus": "confirmed"
+    },
+    {
+      "id": "crystalia",
+      "name": "Crystalia",
+      "type": "planet",
+      "biomes": ["cristal", "lumina rece", "ecou puternic", "platforme/porti de cristal"],
+      "population": ["gardieni (dragon de cristal)", "entitati/structuri de testare"],
+      "populationVibe": ["riguroasa", "testeaza intentia", "protectie fara agresiune"],
+      "educationalThemes": ["claritate", "adevar vs aparenta", "rabdare si respect pentru reguli"],
+      "keyElements": ["Cele trei oglinzi", "poarta de cristal", "drumul spre Sylvaria"],
+      "canonStatus": "confirmed"
+    },
+    {
+      "id": "sylvaria",
+      "name": "Sylvaria",
+      "type": "planet",
+      "biomes": ["paduri adanci", "radacini", "lumina filtrata verde", "sol umed"],
+      "population": ["locuitori legati de natura (inca nefixat exact: spirite/triburi/animale)"],
+      "populationVibe": ["tacuti", "atenti", "reactioneaza la graba si intentie"],
+      "educationalThemes": ["respect pentru natura", "pasii mici", "rabdarea repara ce forta rupe"],
+      "keyElements": ["radacini", "noduri/legaturi intre lumi", "copaci-batrani"],
+      "canonStatus": "confirmed_biome_role_population_tbd"
+    },
+    {
+      "id": "canis_prime",
+      "name": "Canis-Prime",
+      "type": "planet",
+      "biomes": ["(inca nefixat vizual: urban/fortificat/ceremonial)"],
+      "population": ["caini"],
+      "populationVibe": ["loialitate", "disciplina", "poate parea dur, dar e protectiv"],
+      "educationalThemes": ["protectie vs agresiune", "incredere", "forta folosita pentru ajutor"],
+      "keyElements": ["parade/ritualuri", "garda de ajutor (directie propusa)"],
+      "canonStatus": "direction"
+    },
+    {
+      "id": "uak_mak",
+      "name": "Uak-Mak",
+      "type": "planet",
+      "biomes": ["(inca nefixat: lacuri/mlaștini/ape putine sau multe)"],
+      "population": ["rate"],
+      "populationVibe": ["comunitare", "pofta de resurse", "tentația de a lua repede"],
+      "educationalThemes": ["cere, nu fura", "munca rasplatibila", "schimb cinstit"],
+      "keyElements": ["motivatie legata de resurse (ex: iarba)", "legaturi cu origin story Zeronia (directie)"],
+      "canonStatus": "mentioned_direction"
+    },
+    {
+      "id": "cao_lactis",
+      "name": "Cao-Lactis",
+      "type": "planet",
+      "biomes": ["pajisti bogate", "pastoral", "iarba speciala"],
+      "population": ["vaci", "ecosistem asociat"],
+      "populationVibe": ["jucaus", "abundenta, dar cere echilibru"],
+      "educationalThemes": ["moderație", "respect pentru resurse", "ecosistem si grija"],
+      "keyElements": ["iarba valoroasa", "model de poveste educativ-empatizanta"],
+      "canonStatus": "confirmed_as_reference"
+    },
+    {
+      "id": "marmotia",
+      "name": "Marmotia",
+      "type": "planet",
+      "biomes": ["subteran", "tuneluri", "stanca", "ateliere"],
+      "population": ["marmoti"],
+      "populationVibe": ["practici", "constructori", "orientati pe colaborare"],
+      "educationalThemes": ["construieste, nu domina", "repara legaturi", "cooperare"],
+      "keyElements": ["poduri", "mecanisme", "inginerie"],
+      "canonStatus": "mentioned_direction"
+    },
+    {
+      "id": "barkhonia",
+      "name": "Barkhonia",
+      "type": "planet_or_kingdom",
+      "biomes": ["(inca nefixat: regat istoric/epic)"],
+      "population": ["lupi/caini (Ham-Lupus, cronici vechi)"],
+      "populationVibe": ["regal", "epic", "back-in-time"],
+      "educationalThemes": ["loialitate", "prietenie", "tentația puterii"],
+      "keyElements": ["vraja asupra regelui", "cronici/istorie"],
+      "canonStatus": "mentioned"
+    }
+  ],
+  "structures": [
+    {
+      "id": "copacul_luminii",
+      "name": "Copacul Luminii",
+      "type": "interworld_structure",
+      "role": ["retea intre lumi", "harta/poduri", "echilibru intre ramuri"],
+      "behavior": [
+        "reactioneaza la intentii",
+        "ramurile/podurile se deschid prin semne/artefacte",
+        "poate fi destabilizat de elixire/actiuni care 'supara legile universului'"
+      ],
+      "keyElements": ["cristal-harta", "semne (ex: Ochiul Verde)", "ramuri/poduri intre lumi"],
+      "canonStatus": "confirmed"
+    }
+  ]
+}
