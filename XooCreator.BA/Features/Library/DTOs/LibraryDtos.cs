@@ -43,6 +43,8 @@ public class CreatedStoryDto
     public DateTime? PublishedAt { get; set; }
     public bool IsPublished { get; set; }
     public string? CreationNotes { get; set; }
+    public string? OwnerEmail { get; set; }
+    public bool IsOwnedByCurrentUser { get; set; }
 }
 
 
