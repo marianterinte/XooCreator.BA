@@ -260,6 +260,19 @@ public class EpicHeroService : IEpicHeroService
         var publishedDefinitions = await _repository.ListPublishedDefinitionsAsync(excludeOwnerId: null, ct); // Include owner's published heroes
         var craftsForReview = await _repository.ListCraftsForReviewAsync(ct);
 
+        // Get unique owner IDs for email lookup
+        var uniqueOwnerIds = ownedCrafts.Select(c => c.OwnerUserId)
+            .Concat(publishedDefinitions.Select(d => d.OwnerUserId))
+            .Concat(craftsForReview.Select(c => c.OwnerUserId))
+            .Distinct()
+            .ToList();
+        
+        var ownerEmailMap = await _context.AlchimaliaUsers
+            .AsNoTracking()
+            .Where(u => uniqueOwnerIds.Contains(u.Id))
+            .Select(u => new { u.Id, u.Email })
+            .ToDictionaryAsync(u => u.Id, u => u.Email ?? "", ct);
+
         var combined = new List<EpicHeroListItemDto>();
 
         _logger.LogInformation(
@@ -273,14 +286,16 @@ public class EpicHeroService : IEpicHeroService
         // Add owned crafts
         foreach (var craft in ownedCrafts)
         {
-            combined.Add(MapCraftToListItem(craft, currentUserId));
+            var ownerEmail = ownerEmailMap.TryGetValue(craft.OwnerUserId, out var email) ? email : "";
+            combined.Add(MapCraftToListItem(craft, currentUserId, ownerEmail));
         }
 
         // Add published definitions - always include, even if draft exists
         // This allows published heroes to remain visible when "new version" creates a draft
         foreach (var definition in publishedDefinitions)
         {
-            combined.Add(MapDefinitionToListItem(definition, currentUserId));
+            var ownerEmail = ownerEmailMap.TryGetValue(definition.OwnerUserId, out var email) ? email : "";
+            combined.Add(MapDefinitionToListItem(definition, currentUserId, ownerEmail));
         }
 
         // Add crafts for review (avoid duplicates)
@@ -289,7 +304,8 @@ public class EpicHeroService : IEpicHeroService
         {
             if (!ownedIds.Contains(craft.Id))
             {
-                combined.Add(MapCraftToListItem(craft, currentUserId));
+                var ownerEmail = ownerEmailMap.TryGetValue(craft.OwnerUserId, out var email) ? email : "";
+                combined.Add(MapCraftToListItem(craft, currentUserId, ownerEmail));
             }
         }
 
@@ -299,7 +315,61 @@ public class EpicHeroService : IEpicHeroService
             .ToList();
     }
 
-    private EpicHeroListItemDto MapCraftToListItem(EpicHeroCraft craft, Guid? currentUserId)
+    public async Task<List<EpicHeroListItemDto>> ListAllHeroesAsync(Guid currentUserId, string? status = null, CancellationToken ct = default)
+    {
+        // Get all crafts - no owner filter
+        var craftQuery = _context.EpicHeroCrafts.AsQueryable();
+        if (!string.IsNullOrWhiteSpace(status))
+        {
+            craftQuery = craftQuery.Where(x => x.Status == status);
+        }
+        var allCrafts = await craftQuery
+            .Include(x => x.Translations)
+            .OrderByDescending(x => x.UpdatedAt)
+            .ToListAsync(ct);
+
+        // Get all published definitions - no owner filter
+        var allDefinitions = await _context.EpicHeroDefinitions
+            .Where(x => x.Status == "published")
+            .Include(x => x.Translations)
+            .OrderByDescending(x => x.UpdatedAt)
+            .ToListAsync(ct);
+
+        // Get unique owner IDs for email lookup
+        var uniqueOwnerIds = allCrafts.Select(c => c.OwnerUserId)
+            .Concat(allDefinitions.Select(d => d.OwnerUserId))
+            .Distinct()
+            .ToList();
+        
+        var ownerEmailMap = await _context.AlchimaliaUsers
+            .AsNoTracking()
+            .Where(u => uniqueOwnerIds.Contains(u.Id))
+            .Select(u => new { u.Id, u.Email })
+            .ToDictionaryAsync(u => u.Id, u => u.Email ?? "", ct);
+
+        var combined = new List<EpicHeroListItemDto>();
+
+        // Add all crafts
+        foreach (var craft in allCrafts)
+        {
+            var ownerEmail = ownerEmailMap.TryGetValue(craft.OwnerUserId, out var email) ? email : "";
+            combined.Add(MapCraftToListItem(craft, currentUserId, ownerEmail));
+        }
+
+        // Add all published definitions
+        foreach (var definition in allDefinitions)
+        {
+            var ownerEmail = ownerEmailMap.TryGetValue(definition.OwnerUserId, out var email) ? email : "";
+            combined.Add(MapDefinitionToListItem(definition, currentUserId, ownerEmail));
+        }
+
+        return combined
+            .OrderByDescending(h => h.IsOwnedByCurrentUser)
+            .ThenBy(h => h.Name, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    private EpicHeroListItemDto MapCraftToListItem(EpicHeroCraft craft, Guid? currentUserId, string? ownerEmail = null)
     {
         var firstTranslation = craft.Translations.FirstOrDefault();
         var name = firstTranslation?.Name ?? string.Empty;
@@ -323,11 +393,12 @@ public class EpicHeroService : IEpicHeroService
             PublishedAtUtc = null,
             AssignedReviewerUserId = craft.AssignedReviewerUserId,
             IsAssignedToCurrentUser = isAssignedToCurrentUser,
-            IsOwnedByCurrentUser = isOwnedByCurrentUser
+            IsOwnedByCurrentUser = isOwnedByCurrentUser,
+            OwnerEmail = ownerEmail
         };
     }
 
-    private EpicHeroListItemDto MapDefinitionToListItem(EpicHeroDefinition definition, Guid? currentUserId)
+    private EpicHeroListItemDto MapDefinitionToListItem(EpicHeroDefinition definition, Guid? currentUserId, string? ownerEmail = null)
     {
         var firstTranslation = definition.Translations.FirstOrDefault();
         var name = firstTranslation?.Name ?? string.Empty;
@@ -348,7 +419,8 @@ public class EpicHeroService : IEpicHeroService
             PublishedAtUtc = definition.PublishedAtUtc,
             AssignedReviewerUserId = null,
             IsAssignedToCurrentUser = false,
-            IsOwnedByCurrentUser = isOwnedByCurrentUser
+            IsOwnedByCurrentUser = isOwnedByCurrentUser,
+            OwnerEmail = ownerEmail
         };
     }
 

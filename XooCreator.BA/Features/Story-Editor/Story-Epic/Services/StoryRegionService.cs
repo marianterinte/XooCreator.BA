@@ -210,7 +210,20 @@ public class StoryRegionService : IStoryRegionService
     public async Task<List<StoryRegionListItemDto>> ListRegionsByOwnerAsync(Guid ownerUserId, string? status = null, Guid? currentUserId = null, CancellationToken ct = default)
     {
         var regionCrafts = await _repository.ListCraftsByOwnerAsync(ownerUserId, status, ct);
-        return regionCrafts.Select(r => MapCraftToListItem(r, currentUserId)).ToList();
+        
+        // Get unique owner IDs for email lookup
+        var uniqueOwnerIds = regionCrafts.Select(c => c.OwnerUserId).Distinct().ToList();
+        var ownerEmailMap = await _context.AlchimaliaUsers
+            .AsNoTracking()
+            .Where(u => uniqueOwnerIds.Contains(u.Id))
+            .Select(u => new { u.Id, u.Email })
+            .ToDictionaryAsync(u => u.Id, u => u.Email ?? "", ct);
+        
+        return regionCrafts.Select(r => 
+        {
+            var ownerEmail = ownerEmailMap.TryGetValue(r.OwnerUserId, out var email) ? email : "";
+            return MapCraftToListItem(r, currentUserId, ownerEmail);
+        }).ToList();
     }
 
     public async Task<List<StoryRegionListItemDto>> ListRegionsForEditorAsync(Guid currentUserId, string? status = null, CancellationToken ct = default)
@@ -219,19 +232,34 @@ public class StoryRegionService : IStoryRegionService
         var publishedDefinitions = await _repository.ListPublishedDefinitionsAsync(excludeOwnerId: null, ct); // Include owner's published regions
         var craftsForReview = await _repository.ListCraftsForReviewAsync(ct);
 
+        // Get unique owner IDs for email lookup
+        var uniqueOwnerIds = ownedCrafts.Select(c => c.OwnerUserId)
+            .Concat(publishedDefinitions.Select(d => d.OwnerUserId))
+            .Concat(craftsForReview.Select(c => c.OwnerUserId))
+            .Distinct()
+            .ToList();
+        
+        var ownerEmailMap = await _context.AlchimaliaUsers
+            .AsNoTracking()
+            .Where(u => uniqueOwnerIds.Contains(u.Id))
+            .Select(u => new { u.Id, u.Email })
+            .ToDictionaryAsync(u => u.Id, u => u.Email ?? "", ct);
+
         var combined = new List<StoryRegionListItemDto>();
 
         // Add owned crafts
         foreach (var craft in ownedCrafts)
         {
-            combined.Add(MapCraftToListItem(craft, currentUserId));
+            var ownerEmail = ownerEmailMap.TryGetValue(craft.OwnerUserId, out var email) ? email : "";
+            combined.Add(MapCraftToListItem(craft, currentUserId, ownerEmail));
         }
 
         // Add published definitions - always include, even if draft exists
         // This allows published regions to remain visible when "new version" creates a draft
         foreach (var definition in publishedDefinitions)
         {
-            combined.Add(MapDefinitionToListItem(definition, currentUserId));
+            var ownerEmail = ownerEmailMap.TryGetValue(definition.OwnerUserId, out var email) ? email : "";
+            combined.Add(MapDefinitionToListItem(definition, currentUserId, ownerEmail));
         }
 
         // Add crafts for review (avoid duplicates)
@@ -240,8 +268,63 @@ public class StoryRegionService : IStoryRegionService
         {
             if (!ownedIds.Contains(craft.Id))
             {
-                combined.Add(MapCraftToListItem(craft, currentUserId));
+                var ownerEmail = ownerEmailMap.TryGetValue(craft.OwnerUserId, out var email) ? email : "";
+                combined.Add(MapCraftToListItem(craft, currentUserId, ownerEmail));
             }
+        }
+
+        return combined
+            .OrderByDescending(r => r.IsOwnedByCurrentUser)
+            .ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    public async Task<List<StoryRegionListItemDto>> ListAllRegionsAsync(Guid currentUserId, string? status = null, CancellationToken ct = default)
+    {
+        // Get all crafts - no owner filter
+        var craftQuery = _context.StoryRegionCrafts.AsQueryable();
+        if (!string.IsNullOrWhiteSpace(status))
+        {
+            craftQuery = craftQuery.Where(x => x.Status == status);
+        }
+        var allCrafts = await craftQuery
+            .Include(x => x.Translations)
+            .OrderByDescending(x => x.UpdatedAt)
+            .ToListAsync(ct);
+
+        // Get all published definitions - no owner filter
+        var allDefinitions = await _context.StoryRegionDefinitions
+            .Where(x => x.Status == "published")
+            .Include(x => x.Translations)
+            .OrderByDescending(x => x.UpdatedAt)
+            .ToListAsync(ct);
+
+        // Get unique owner IDs for email lookup
+        var uniqueOwnerIds = allCrafts.Select(c => c.OwnerUserId)
+            .Concat(allDefinitions.Select(d => d.OwnerUserId))
+            .Distinct()
+            .ToList();
+        
+        var ownerEmailMap = await _context.AlchimaliaUsers
+            .AsNoTracking()
+            .Where(u => uniqueOwnerIds.Contains(u.Id))
+            .Select(u => new { u.Id, u.Email })
+            .ToDictionaryAsync(u => u.Id, u => u.Email ?? "", ct);
+
+        var combined = new List<StoryRegionListItemDto>();
+
+        // Add all crafts
+        foreach (var craft in allCrafts)
+        {
+            var ownerEmail = ownerEmailMap.TryGetValue(craft.OwnerUserId, out var email) ? email : "";
+            combined.Add(MapCraftToListItem(craft, currentUserId, ownerEmail));
+        }
+
+        // Add all published definitions
+        foreach (var definition in allDefinitions)
+        {
+            var ownerEmail = ownerEmailMap.TryGetValue(definition.OwnerUserId, out var email) ? email : "";
+            combined.Add(MapDefinitionToListItem(definition, currentUserId, ownerEmail));
         }
 
         return combined
@@ -688,7 +771,7 @@ public class StoryRegionService : IStoryRegionService
         _logger.LogInformation("Region craft retracted: regionId={RegionId}", regionId);
     }
 
-    private StoryRegionListItemDto MapCraftToListItem(StoryRegionCraft craft, Guid? currentUserId)
+    private StoryRegionListItemDto MapCraftToListItem(StoryRegionCraft craft, Guid? currentUserId, string? ownerEmail = null)
     {
         var firstTranslation = craft.Translations.FirstOrDefault();
         var name = firstTranslation?.Name ?? string.Empty;
@@ -709,11 +792,12 @@ public class StoryRegionService : IStoryRegionService
             PublishedAtUtc = null,
             AssignedReviewerUserId = craft.AssignedReviewerUserId,
             IsAssignedToCurrentUser = isAssignedToCurrentUser,
-            IsOwnedByCurrentUser = isOwnedByCurrentUser
+            IsOwnedByCurrentUser = isOwnedByCurrentUser,
+            OwnerEmail = ownerEmail
         };
     }
 
-    private StoryRegionListItemDto MapDefinitionToListItem(StoryRegionDefinition definition, Guid? currentUserId)
+    private StoryRegionListItemDto MapDefinitionToListItem(StoryRegionDefinition definition, Guid? currentUserId, string? ownerEmail = null)
     {
         var firstTranslation = definition.Translations.FirstOrDefault();
         var name = firstTranslation?.Name ?? string.Empty;
@@ -731,7 +815,8 @@ public class StoryRegionService : IStoryRegionService
             PublishedAtUtc = definition.PublishedAtUtc,
             AssignedReviewerUserId = null,
             IsAssignedToCurrentUser = false,
-            IsOwnedByCurrentUser = isOwnedByCurrentUser
+            IsOwnedByCurrentUser = isOwnedByCurrentUser,
+            OwnerEmail = ownerEmail
         };
     }
 

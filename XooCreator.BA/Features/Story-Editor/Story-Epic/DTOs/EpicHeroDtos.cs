@@ -84,5 +84,6 @@ public record EpicHeroListItemDto
     public Guid? AssignedReviewerUserId { get; init; }
     public bool IsAssignedToCurrentUser { get; init; } // Computed in service based on current user
     public bool IsOwnedByCurrentUser { get; init; } // Computed in service based on current user
+    public string? OwnerEmail { get; init; } // Owner's email (for admin filtering)
 }
 

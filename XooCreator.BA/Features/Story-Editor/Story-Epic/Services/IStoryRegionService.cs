@@ -20,6 +20,9 @@ public interface IStoryRegionService
     // List regions available to the current editor (own + published)
     Task<List<StoryRegionListItemDto>> ListRegionsForEditorAsync(Guid currentUserId, string? status = null, CancellationToken ct = default);
     
+    // List all regions (for admin)
+    Task<List<StoryRegionListItemDto>> ListAllRegionsAsync(Guid currentUserId, string? status = null, CancellationToken ct = default);
+    
     // Delete region
     Task DeleteRegionAsync(Guid ownerUserId, string regionId, CancellationToken ct = default);
     

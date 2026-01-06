@@ -256,6 +256,18 @@ public class StoryEpicService : IStoryEpicService
             .Where(d => d.OwnerUserId == ownerUserId)
             .ToListAsync(ct);
         
+        // Get unique owner IDs for email lookup
+        var uniqueOwnerIds = crafts.Select(c => c.OwnerUserId)
+            .Concat(definitions.Select(d => d.OwnerUserId))
+            .Distinct()
+            .ToList();
+        
+        var ownerEmailMap = await _context.AlchimaliaUsers
+            .AsNoTracking()
+            .Where(u => uniqueOwnerIds.Contains(u.Id))
+            .Select(u => new { u.Id, u.Email })
+            .ToDictionaryAsync(u => u.Id, u => u.Email ?? "", ct);
+        
         var result = new List<StoryEpicListItemDto>();
         
         // Add crafts (drafts)
@@ -269,6 +281,8 @@ public class StoryEpicService : IStoryEpicService
             var translation = craft.Translations.FirstOrDefault(t => t.LanguageCode.Equals(locale, StringComparison.OrdinalIgnoreCase));
             var name = translation?.Name ?? craft.Translations.FirstOrDefault()?.Name ?? craft.Name;
             var description = translation?.Description ?? craft.Translations.FirstOrDefault()?.Description ?? craft.Description;
+            
+            var ownerEmail = ownerEmailMap.TryGetValue(craft.OwnerUserId, out var email) ? email : "";
             
             result.Add(new StoryEpicListItemDto
             {
@@ -284,7 +298,8 @@ public class StoryEpicService : IStoryEpicService
                 RegionCount = craft.Regions.Count,
                 AssignedReviewerUserId = craft.AssignedReviewerUserId,
                 IsAssignedToCurrentUser = isAssignedToCurrentUser,
-                IsOwnedByCurrentUser = isOwnedByCurrentUser
+                IsOwnedByCurrentUser = isOwnedByCurrentUser,
+                OwnerEmail = ownerEmail
             });
         }
         
@@ -297,6 +312,8 @@ public class StoryEpicService : IStoryEpicService
             var translation = definition.Translations.FirstOrDefault(t => t.LanguageCode.Equals(locale, StringComparison.OrdinalIgnoreCase));
             var name = translation?.Name ?? definition.Translations.FirstOrDefault()?.Name ?? definition.Name;
             var description = translation?.Description ?? definition.Translations.FirstOrDefault()?.Description ?? definition.Description;
+            
+            var ownerEmail = ownerEmailMap.TryGetValue(definition.OwnerUserId, out var email) ? email : "";
             
             result.Add(new StoryEpicListItemDto
             {
@@ -312,7 +329,105 @@ public class StoryEpicService : IStoryEpicService
                 RegionCount = definition.Regions.Count,
                 AssignedReviewerUserId = null, // Definitions don't have reviewers
                 IsAssignedToCurrentUser = false,
-                IsOwnedByCurrentUser = isOwnedByCurrentUser
+                IsOwnedByCurrentUser = isOwnedByCurrentUser,
+                OwnerEmail = ownerEmail
+            });
+        }
+        
+        return result.OrderByDescending(e => e.UpdatedAt).ToList();
+    }
+
+    public async Task<List<StoryEpicListItemDto>> ListAllEpicsAsync(Guid currentUserId, CancellationToken ct = default)
+    {
+        var locale = _userContext.GetRequestLocaleOrDefault("ro-ro");
+        
+        // Get all crafts (drafts) and definitions (published) - no owner filter
+        var crafts = await _context.StoryEpicCrafts
+            .Include(c => c.Regions)
+            .Include(c => c.StoryNodes)
+            .Include(c => c.Translations)
+            .ToListAsync(ct);
+        
+        var definitions = await _context.StoryEpicDefinitions
+            .Include(d => d.Regions)
+            .Include(d => d.StoryNodes)
+            .Include(d => d.Translations)
+            .ToListAsync(ct);
+        
+        // Get unique owner IDs for email lookup
+        var uniqueOwnerIds = crafts.Select(c => c.OwnerUserId)
+            .Concat(definitions.Select(d => d.OwnerUserId))
+            .Distinct()
+            .ToList();
+        
+        var ownerEmailMap = await _context.AlchimaliaUsers
+            .AsNoTracking()
+            .Where(u => uniqueOwnerIds.Contains(u.Id))
+            .Select(u => new { u.Id, u.Email })
+            .ToDictionaryAsync(u => u.Id, u => u.Email ?? "", ct);
+        
+        var result = new List<StoryEpicListItemDto>();
+        
+        // Add crafts (drafts)
+        foreach (var craft in crafts)
+        {
+            var isOwnedByCurrentUser = craft.OwnerUserId == currentUserId;
+            var isAssignedToCurrentUser = craft.AssignedReviewerUserId.HasValue && 
+                                          craft.AssignedReviewerUserId.Value == currentUserId;
+            
+            var translation = craft.Translations.FirstOrDefault(t => t.LanguageCode.Equals(locale, StringComparison.OrdinalIgnoreCase));
+            var name = translation?.Name ?? craft.Translations.FirstOrDefault()?.Name ?? craft.Name;
+            var description = translation?.Description ?? craft.Translations.FirstOrDefault()?.Description ?? craft.Description;
+            
+            var ownerEmail = ownerEmailMap.TryGetValue(craft.OwnerUserId, out var email) ? email : "";
+            
+            result.Add(new StoryEpicListItemDto
+            {
+                Id = craft.Id,
+                Name = name,
+                Description = description,
+                CoverImageUrl = craft.CoverImageUrl,
+                Status = craft.Status,
+                CreatedAt = craft.CreatedAt,
+                UpdatedAt = craft.UpdatedAt,
+                PublishedAtUtc = null, // Crafts are not published
+                StoryCount = craft.StoryNodes.Count,
+                RegionCount = craft.Regions.Count,
+                AssignedReviewerUserId = craft.AssignedReviewerUserId,
+                IsAssignedToCurrentUser = isAssignedToCurrentUser,
+                IsOwnedByCurrentUser = isOwnedByCurrentUser,
+                OwnerEmail = ownerEmail
+            });
+        }
+        
+        // Add definitions (published) - always include published epics, even if draft exists
+        // This allows published epics to remain visible when "new version" creates a draft
+        foreach (var definition in definitions)
+        {
+            var isOwnedByCurrentUser = definition.OwnerUserId == currentUserId;
+            
+            var translation = definition.Translations.FirstOrDefault(t => t.LanguageCode.Equals(locale, StringComparison.OrdinalIgnoreCase));
+            var name = translation?.Name ?? definition.Translations.FirstOrDefault()?.Name ?? definition.Name;
+            var description = translation?.Description ?? definition.Translations.FirstOrDefault()?.Description ?? definition.Description;
+            
+            var ownerEmail = ownerEmailMap.TryGetValue(definition.OwnerUserId, out var email) ? email : "";
+            
+            result.Add(new StoryEpicListItemDto
+            {
+                Id = definition.Id,
+                Name = name,
+                Description = description,
+                CoverImageUrl = definition.CoverImageUrl,
+                Status = definition.Status,
+                CreatedAt = definition.CreatedAt,
+                UpdatedAt = definition.UpdatedAt,
+                PublishedAtUtc = definition.PublishedAtUtc,
+                StoryCount = definition.StoryNodes.Count,
+                RegionCount = definition.Regions.Count,
+                AssignedReviewerUserId = null, // Definitions don't have reviewers
+                IsAssignedToCurrentUser = false,
+                IsOwnedByCurrentUser = isOwnedByCurrentUser,
+                OwnerEmail = ownerEmail
             });
         }
         
