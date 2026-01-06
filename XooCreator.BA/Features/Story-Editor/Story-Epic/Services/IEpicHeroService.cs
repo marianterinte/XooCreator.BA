@@ -20,6 +20,9 @@ public interface IEpicHeroService
     // List heroes available to the current editor (own + published)
     Task<List<EpicHeroListItemDto>> ListHeroesForEditorAsync(Guid currentUserId, string? status = null, CancellationToken ct = default);
     
+    // List all heroes (for admin)
+    Task<List<EpicHeroListItemDto>> ListAllHeroesAsync(Guid currentUserId, string? status = null, CancellationToken ct = default);
+    
     // Delete hero
     Task DeleteHeroAsync(Guid ownerUserId, string heroId, CancellationToken ct = default);
     

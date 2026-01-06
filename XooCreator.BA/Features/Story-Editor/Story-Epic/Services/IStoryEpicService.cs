@@ -23,6 +23,9 @@ public interface IStoryEpicService
     // List epics by owner
     Task<List<StoryEpicListItemDto>> ListEpicsByOwnerAsync(Guid ownerUserId, Guid? currentUserId = null, CancellationToken ct = default);
     
+    // List all epics (for admin)
+    Task<List<StoryEpicListItemDto>> ListAllEpicsAsync(Guid currentUserId, CancellationToken ct = default);
+    
     // Delete epic
     Task DeleteEpicAsync(Guid ownerUserId, string epicId, CancellationToken ct = default);
     

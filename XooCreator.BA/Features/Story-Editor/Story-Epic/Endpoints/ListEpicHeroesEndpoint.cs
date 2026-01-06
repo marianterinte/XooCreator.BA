@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.DTOs;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.Services;
 using XooCreator.BA.Infrastructure.Endpoints;
@@ -36,8 +37,11 @@ public class ListEpicHeroesEndpoint
         var user = await ep._auth0.GetCurrentUserAsync(ct);
         if (user == null) return TypedResults.Unauthorized();
 
-        // List heroes available to the current editor (own + published)
-        var heroes = await ep._heroService.ListHeroesForEditorAsync(user.Id, status, ct);
+        var isAdmin = ep._auth0.HasRole(user, UserRole.Admin);
+        var heroes = isAdmin 
+            ? await ep._heroService.ListAllHeroesAsync(user.Id, status, ct)
+            : await ep._heroService.ListHeroesForEditorAsync(user.Id, status, ct);
+        
         return TypedResults.Ok(heroes);
     }
 }

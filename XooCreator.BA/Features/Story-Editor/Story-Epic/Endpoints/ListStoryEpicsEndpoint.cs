@@ -37,7 +37,11 @@ public class ListStoryEpicsEndpoint
         var user = await ep._auth0.GetCurrentUserAsync(ct);
         if (user == null) return TypedResults.Unauthorized();
 
-        var epics = await ep._epicService.ListEpicsByOwnerAsync(user.Id, user.Id, ct);
+        var isAdmin = ep._auth0.HasRole(user, UserRole.Admin);
+        var epics = isAdmin 
+            ? await ep._epicService.ListAllEpicsAsync(user.Id, ct)
+            : await ep._epicService.ListEpicsByOwnerAsync(user.Id, user.Id, ct);
+        
         return TypedResults.Ok(epics);
     }
 }

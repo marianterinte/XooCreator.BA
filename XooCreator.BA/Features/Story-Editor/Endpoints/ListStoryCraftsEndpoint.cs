@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Enums;
@@ -19,12 +20,14 @@ public class ListStoryCraftsEndpoint
     private readonly IStoryCraftsRepository _crafts;
     private readonly IUserContextService _userContext;
     private readonly IAuth0UserService _auth0;
+    private readonly XooDbContext _db;
 
-    public ListStoryCraftsEndpoint(IStoryCraftsRepository crafts, IUserContextService userContext, IAuth0UserService auth0)
+    public ListStoryCraftsEndpoint(IStoryCraftsRepository crafts, IUserContextService userContext, IAuth0UserService auth0, XooDbContext db)
     {
         _crafts = crafts;
         _userContext = userContext;
         _auth0 = auth0;
+        _db = db;
     }
 
     [Route("/api/{locale}/story-editor/crafts")]
@@ -56,6 +59,14 @@ public class ListStoryCraftsEndpoint
             list = list.Where(c => c.AssignedReviewerUserId == null && StoryStatusExtensions.FromDb(c.Status) == StoryStatus.SentForApproval).ToList();
         }
 
+        // Enrich OwnerEmail by querying Users table
+        var uniqueOwnerIds = list.Select(c => c.OwnerUserId).Distinct().ToList();
+        var ownerEmailMap = await ep._db.AlchimaliaUsers
+            .AsNoTracking()
+            .Where(u => uniqueOwnerIds.Contains(u.Id))
+            .Select(u => new { u.Id, u.Email })
+            .ToDictionaryAsync(u => u.Id, u => u.Email ?? "", ct);
+
         var items = new List<StoryCraftListItemDto>(list.Count);
         foreach (var c in list)
         {
@@ -70,6 +81,8 @@ public class ListStoryCraftsEndpoint
             var primaryLang = availableLangs.FirstOrDefault() ?? "ro-ro";
 
             var status = StoryStatusExtensions.FromDb(c.Status);
+            var ownerEmail = ownerEmailMap.TryGetValue(c.OwnerUserId, out var email) ? email : "";
+            
             items.Add(new StoryCraftListItemDto
             {
                 StoryId = c.StoryId,
@@ -78,7 +91,7 @@ public class ListStoryCraftsEndpoint
                 CoverImageUrl = cover,
                 Status = MapStatusForFrontend(status),
                 UpdatedAt = c.UpdatedAt,
-                OwnerEmail = "", // could be enriched later by joining users table
+                OwnerEmail = ownerEmail,
                 IsOwnedByCurrentUser = c.OwnerUserId == user.Id,
                 AssignedReviewerUserId = c.AssignedReviewerUserId,
                 IsAssignedToCurrentUser = c.AssignedReviewerUserId == user.Id
