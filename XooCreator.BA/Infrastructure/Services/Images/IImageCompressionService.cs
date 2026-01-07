@@ -15,7 +15,8 @@ public interface IImageCompressionService
         string targetBasePath,
         string filename,
         bool overwriteExisting,
-        CancellationToken ct);
+        CancellationToken ct,
+        bool allowAnyAspectRatio = false);
 }
 
 public sealed record ImageCompressionResult

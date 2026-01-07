@@ -19,6 +19,7 @@ using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Services;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Mappers;
+using XooCreator.BA.Features.TalesOfAlchimalia.Market.Caching;
 using XooCreator.BA.Features.Payment.Services;
 using XooCreator.BA.Features.StoryFeedback.Repositories;
 using XooCreator.BA.Features.StoryFeedback.Services;
@@ -197,6 +198,11 @@ public static class ServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddMarketplaceServices(this IServiceCollection services)
     {
+        // Marketplace in-memory cache (single-instance). Base TTL + Stats TTL configured in Program.cs.
+        services.AddSingleton<IMarketplaceCatalogCache, MarketplaceCatalogCache>();
+        services.AddSingleton<IMarketplaceCacheControl>(sp => (MarketplaceCatalogCache)sp.GetRequiredService<IMarketplaceCatalogCache>());
+        services.AddSingleton<IMarketplaceCacheInvalidator>(sp => sp.GetRequiredService<IMarketplaceCacheControl>());
+
         services.AddScoped<IStoryReviewsRepository, StoryReviewsRepository>();
         services.AddScoped<IStoryReviewsService, StoryReviewsService>();
         services.AddScoped<IEpicReviewsRepository, EpicReviewsRepository>();
