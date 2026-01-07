@@ -36,6 +36,7 @@ public sealed class AdminBackfillImageVariantsEndpoint
     public sealed record BackfillRequest(
         int? MaxImages = null,
         bool OverwriteExisting = false,
+        bool AllowAnyAspectRatio = false,
         string Prefix = "images/");
 
     public sealed record BackfillResponse
@@ -92,6 +93,7 @@ public sealed class AdminBackfillImageVariantsEndpoint
         if (!prefix.EndsWith("/")) prefix += "/";
 
         var overwrite = request?.OverwriteExisting ?? false;
+        var allowAnyAspect = request?.AllowAnyAspectRatio ?? false;
 
         var resp = new BackfillResponse();
         var container = ep._sas.GetContainerClient(ep._sas.PublishedContainer);
@@ -104,7 +106,12 @@ public sealed class AdminBackfillImageVariantsEndpoint
         var skippedDerived = 0;
         var errors = new List<string>();
 
-        ep._logger.LogInformation("Starting image variants backfill: prefix={Prefix} limit={Limit} overwrite={Overwrite}", prefix, hasLimit ? limit.ToString() : "unlimited", overwrite);
+        ep._logger.LogInformation(
+            "Starting image variants backfill: prefix={Prefix} limit={Limit} overwrite={Overwrite} allowAnyAspectRatio={AllowAnyAspectRatio}",
+            prefix,
+            hasLimit ? limit.ToString() : "unlimited",
+            overwrite,
+            allowAnyAspect);
 
         await foreach (var blob in container.GetBlobsAsync(prefix: prefix, cancellationToken: ct))
         {
@@ -137,6 +144,7 @@ public sealed class AdminBackfillImageVariantsEndpoint
                     targetBasePath: basePath,
                     filename: fileName,
                     overwriteExisting: overwrite,
+                    allowAnyAspectRatio: allowAnyAspect,
                     ct: ct);
 
                 if (!result.Success)

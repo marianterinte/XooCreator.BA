@@ -99,6 +99,7 @@ public record SearchStoriesRequest
     public string? SearchTerm { get; init; }
     public List<string> Regions { get; init; } = new();
     public List<string> AgeRatings { get; init; } = new();
+    public List<string> AgeGroupIds { get; init; } = new(); // Filter by age group IDs (e.g., ["preschool_3_5"])
     public List<string> Characters { get; init; } = new();
     public List<string> Categories { get; init; } = new();
     public List<string> Difficulties { get; init; } = new();

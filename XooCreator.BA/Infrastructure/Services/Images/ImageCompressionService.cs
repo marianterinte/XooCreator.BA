@@ -33,7 +33,8 @@ public sealed class ImageCompressionService : IImageCompressionService
         string targetBasePath,
         string filename,
         bool overwriteExisting,
-        CancellationToken ct)
+        CancellationToken ct,
+        bool allowAnyAspectRatio = false)
     {
         if (string.IsNullOrWhiteSpace(sourceBlobPath))
         {
@@ -66,7 +67,7 @@ public sealed class ImageCompressionService : IImageCompressionService
                 .OrderBy(x => x.Delta)
                 .First();
 
-            if (bestMatch.Delta > opt.FourByFiveTolerance)
+            if (!allowAnyAspectRatio && bestMatch.Delta > opt.FourByFiveTolerance)
             {
                 _logger.LogInformation(
                     "Image variant generation skipped (unsupported aspect ratio): path={Path} w={W} h={H} ratio={Ratio} bestMatch={BestMatch} delta={Delta} tol={Tol}",

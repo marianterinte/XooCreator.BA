@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Enums;
+using XooCreator.BA.Features.TalesOfAlchimalia.Market.Caching;
 using XooCreator.BA.Data.SeedData.DTOs;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.DTOs;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Mappers;
@@ -43,18 +44,21 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
     private readonly XooDbContext _context;
     private readonly StoryDetailsMapper _storyDetailsMapper;
     private readonly EpicsMarketplaceRepository? _epicsRepository;
+    private readonly IMarketplaceCatalogCache _catalogCache;
     private readonly ILogger<StoriesMarketplaceRepository>? _logger;
     private readonly TelemetryClient? _telemetryClient;
 
     public StoriesMarketplaceRepository(
         XooDbContext context, 
         StoryDetailsMapper storyDetailsMapper,
+        IMarketplaceCatalogCache catalogCache,
         EpicsMarketplaceRepository? epicsRepository = null,
         ILogger<StoriesMarketplaceRepository>? logger = null,
         TelemetryClient? telemetryClient = null)
     {
         _context = context;
         _storyDetailsMapper = storyDetailsMapper;
+        _catalogCache = catalogCache;
         _epicsRepository = epicsRepository;
         _logger = logger;
         _telemetryClient = telemetryClient;
@@ -67,86 +71,135 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         
         try
         {
-            // Get user preferences for age filtering
+            // Base data + stats are cached (global, per-locale for text fields).
+            var baseItems = await _catalogCache.GetStoriesBaseAsync(normalizedLocale, CancellationToken.None);
+            var stats = await _catalogCache.GetStoryStatsAsync(CancellationToken.None);
+
+            // User preferences for auto age-filter (kept exact behavior).
             var user = await _context.AlchimaliaUsers
                 .Where(u => u.Id == userId)
                 .Select(u => new { u.AutoFilterStoriesByAge, u.SelectedAgeGroupIds })
                 .FirstOrDefaultAsync();
 
-            var query = _context.StoryDefinitions
-                .Include(s => s.Translations)
-                .Include(s => s.Topics)
-                    .ThenInclude(t => t.StoryTopic)
-                .Include(s => s.AgeGroups)
-                    .ThenInclude(ag => ag.StoryAgeGroup)
-                .Where(s => s.IsActive);
+            IEnumerable<StoryMarketplaceBaseItem> q = baseItems;
 
-            // Filtre implicite: doar Published + StoryType = Indie (dacă nu s-au cerut categorii specifice)
-            query = query.Where(s => s.Status == StoryStatus.Published);
+            // Implicit filters: Published already enforced by cache source; apply Indie default if no categories.
             if (!(request.Categories?.Any() ?? false))
             {
-                query = query.Where(s => s.StoryType == StoryType.Indie);
+                q = q.Where(s => s.StoryType == StoryType.Indie);
             }
 
-            // Exclude stories that are part of an epic (using IsPartOfEpic flag)
-            query = query.Where(s => !s.IsPartOfEpic);
-
-            // Filter by topics (topic IDs)
+            // Filter by topics
             if (request.Topics?.Any() == true)
             {
-                query = query.Where(s => s.Topics.Any(t => 
-                    t.StoryTopic != null && 
-                    request.Topics.Contains(t.StoryTopic.TopicId)));
+                var topics = new HashSet<string>(request.Topics, StringComparer.OrdinalIgnoreCase);
+                q = q.Where(s => s.TopicIds.Any(t => topics.Contains(t)));
             }
 
-            // Filter by IsEvaluative flag
+            // Filter by age groups (explicit)
+            if (request.AgeGroupIds?.Any() == true)
+            {
+                var ageGroupIds = new HashSet<string>(request.AgeGroupIds, StringComparer.OrdinalIgnoreCase);
+                q = q.Where(s => s.AgeGroupIds.Any(id => ageGroupIds.Contains(id)));
+            }
+
+            // Filter by IsEvaluative
             if (request.IsEvaluative.HasValue)
             {
-                query = query.Where(s => s.IsEvaluative == request.IsEvaluative.Value);
+                q = q.Where(s => s.IsEvaluative == request.IsEvaluative.Value);
             }
 
             // Auto-filter by age groups if enabled in parent dashboard
             if (user != null && user.AutoFilterStoriesByAge && user.SelectedAgeGroupIds != null && user.SelectedAgeGroupIds.Count > 0)
             {
-                query = query.Where(s => s.AgeGroups.Any(ag => 
-                    ag.StoryAgeGroup != null && 
-                    user.SelectedAgeGroupIds.Contains(ag.StoryAgeGroup.AgeGroupId)));
+                var selected = new HashSet<string>(user.SelectedAgeGroupIds, StringComparer.OrdinalIgnoreCase);
+                q = q.Where(s => s.AgeGroupIds.Any(id => selected.Contains(id)));
             }
 
-            // Apply search filter - search in Title and Translations.Title (case-insensitive)
+            // Search by title/translation titles (case-insensitive)
             if (!string.IsNullOrWhiteSpace(request.SearchTerm))
             {
                 var searchTerm = request.SearchTerm.Trim();
-                query = query.Where(s => 
-                    (s.Title != null && EF.Functions.ILike(s.Title, $"%{searchTerm}%")) ||
-                    (s.Translations != null && s.Translations.Any(t => 
-                        t.Title != null && EF.Functions.ILike(t.Title, $"%{searchTerm}%"))));
+                q = q.Where(s => s.SearchTitles.Any(t =>
+                    !string.IsNullOrWhiteSpace(t) &&
+                    t.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
             }
 
-            query = ApplySorting(query, request);
+            // Sorting (keep same keys)
+            var sortBy = (request.SortBy ?? "sortOrder").ToLowerInvariant();
+            var sortDesc = string.Equals(request.SortOrder, "desc", StringComparison.OrdinalIgnoreCase);
 
-            // Calculate total count BEFORE pagination
-            var totalCount = await query.CountAsync();
-
-            // Apply pagination
-            var stories = await query
-                .Skip((request.Page - 1) * request.PageSize)
-                .Take(request.PageSize)
-                .ToListAsync();
-
-            var dtoList = await MapToMarketplaceListAsync(stories, normalizedLocale, userId);
-
-            if (string.Equals(request.SortBy, "readers", StringComparison.OrdinalIgnoreCase))
+            q = sortBy switch
             {
-                var ordered = string.Equals(request.SortOrder, "asc", StringComparison.OrdinalIgnoreCase)
-                    ? dtoList.OrderBy(d => d.ReadersCount)
-                    : dtoList.OrderByDescending(d => d.ReadersCount);
-                dtoList = ordered.ToList();
-            }
+                "title" => sortDesc ? q.OrderByDescending(s => s.Title) : q.OrderBy(s => s.Title),
+                "date" => sortDesc ? q.OrderByDescending(s => s.CreatedAt) : q.OrderBy(s => s.CreatedAt),
+                "price" => sortDesc ? q.OrderByDescending(s => s.PriceInCredits) : q.OrderBy(s => s.PriceInCredits),
+                "readers" => sortDesc
+                    ? q.OrderByDescending(s => stats.TryGetValue(s.StoryId, out var st) ? st.ReadersCount : 0)
+                    : q.OrderBy(s => stats.TryGetValue(s.StoryId, out var st) ? st.ReadersCount : 0),
+                _ => sortDesc ? q.OrderByDescending(s => s.SortOrder) : q.OrderBy(s => s.SortOrder)
+            };
 
-            // Calculate hasMore: check if there are more items after the current page
-            var hasMore = (request.Page * request.PageSize) < totalCount;
+            var filtered = q.ToList();
+            var totalCount = filtered.Count;
 
+            var page = request.Page <= 0 ? 1 : request.Page;
+            var pageSize = request.PageSize <= 0 ? 20 : request.PageSize;
+            var pageItems = filtered
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            // Per-user overlay (small, batched): purchased + owned for only the current page.
+            var pageStoryIds = pageItems.Select(p => p.StoryId).ToList();
+            var purchasedIds = await _context.StoryPurchases
+                .AsNoTracking()
+                .Where(sp => sp.UserId == userId && pageStoryIds.Contains(sp.StoryId))
+                .Select(sp => sp.StoryId)
+                .ToListAsync();
+            var purchasedSet = purchasedIds.ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            var defIds = pageItems.Select(p => p.DefinitionId).ToList();
+            var ownedDefIds = await _context.UserOwnedStories
+                .AsNoTracking()
+                .Where(uos => uos.UserId == userId && defIds.Contains(uos.StoryDefinitionId))
+                .Select(uos => uos.StoryDefinitionId)
+                .ToListAsync();
+            var ownedSet = ownedDefIds.ToHashSet();
+
+            var dtoList = pageItems.Select(p =>
+            {
+                stats.TryGetValue(p.StoryId, out var st);
+                var isPurchased = purchasedSet.Contains(p.StoryId);
+                var isOwned = isPurchased || ownedSet.Contains(p.DefinitionId);
+
+                return new StoryMarketplaceItemDto
+                {
+                    Id = p.StoryId,
+                    Title = p.Title,
+                    CoverImageUrl = p.CoverImageUrl,
+                    CreatedBy = p.CreatedBy,
+                    CreatedByName = p.CreatedByName,
+                    Summary = p.Summary,
+                    PriceInCredits = p.PriceInCredits,
+                    AgeRating = p.AgeRating,
+                    Characters = p.Characters,
+                    Tags = p.TopicIds,
+                    CreatedAt = p.CreatedAt,
+                    StoryTopic = p.StoryTopic,
+                    StoryType = p.StoryType.ToString(),
+                    Status = p.Status.ToString(),
+                    AvailableLanguages = p.AvailableLanguages,
+                    IsPurchased = isPurchased,
+                    IsOwned = isOwned,
+                    ReadersCount = st.ReadersCount,
+                    AverageRating = st.AverageRating,
+                    TotalReviews = st.TotalReviews,
+                    IsEvaluative = p.IsEvaluative
+                };
+            }).ToList();
+
+            var hasMore = (page * pageSize) < totalCount;
             return (dtoList, totalCount, hasMore);
         }
         finally
@@ -195,83 +248,8 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
 
     public async Task<List<StoryMarketplaceItemDto>> GetMarketplaceStoriesAsync(Guid userId, string locale, SearchStoriesRequest request)
     {
-        var normalizedLocale = (locale ?? "ro-ro").ToLowerInvariant();
-        
-        // Get user preferences for age filtering
-        var user = await _context.AlchimaliaUsers
-            .Where(u => u.Id == userId)
-            .Select(u => new { u.AutoFilterStoriesByAge, u.SelectedAgeGroupIds })
-            .FirstOrDefaultAsync();
-        
-        var query = _context.StoryDefinitions
-            .Include(s => s.Translations)
-            .Include(s => s.Topics)
-                .ThenInclude(t => t.StoryTopic)
-            .Include(s => s.AgeGroups)
-                .ThenInclude(ag => ag.StoryAgeGroup)
-            .Where(s => s.IsActive);
-
-        // Filtre implicite: doar Published + StoryType = Indie (dacă nu s-au cerut categorii specifice)
-        query = query.Where(s => s.Status == StoryStatus.Published);
-        if (!(request.Categories?.Any() ?? false))
-        {
-            query = query.Where(s => s.StoryType == StoryType.Indie);
-        }
-
-        // Exclude stories that are part of an epic (using IsPartOfEpic flag)
-        query = query.Where(s => !s.IsPartOfEpic);
-
-        // Filter by topics (topic IDs)
-        if (request.Topics?.Any() == true)
-        {
-            query = query.Where(s => s.Topics.Any(t => 
-                t.StoryTopic != null && 
-                request.Topics.Contains(t.StoryTopic.TopicId)));
-        }
-
-        // Filter by IsEvaluative flag
-        if (request.IsEvaluative.HasValue)
-        {
-            query = query.Where(s => s.IsEvaluative == request.IsEvaluative.Value);
-        }
-
-        // Auto-filter by age groups if enabled in parent dashboard
-        if (user != null && user.AutoFilterStoriesByAge && user.SelectedAgeGroupIds != null && user.SelectedAgeGroupIds.Count > 0)
-        {
-            query = query.Where(s => s.AgeGroups.Any(ag => 
-                ag.StoryAgeGroup != null && 
-                user.SelectedAgeGroupIds.Contains(ag.StoryAgeGroup.AgeGroupId)));
-        }
-
-        // Apply search filter - search in Title and Translations.Title (case-insensitive)
-        if (!string.IsNullOrWhiteSpace(request.SearchTerm))
-        {
-            var searchTerm = request.SearchTerm.Trim();
-            query = query.Where(s => 
-                (s.Title != null && EF.Functions.ILike(s.Title, $"%{searchTerm}%")) ||
-                (s.Translations != null && s.Translations.Any(t => 
-                    t.Title != null && EF.Functions.ILike(t.Title, $"%{searchTerm}%"))));
-        }
-
-        query = ApplySorting(query, request);
-
-        // Apply pagination
-        var stories = await query
-            .Skip((request.Page - 1) * request.PageSize)
-            .Take(request.PageSize)
-            .ToListAsync();
-
-        var dtoList = await MapToMarketplaceListAsync(stories, normalizedLocale, userId);
-
-        if (string.Equals(request.SortBy, "readers", StringComparison.OrdinalIgnoreCase))
-        {
-            var ordered = string.Equals(request.SortOrder, "asc", StringComparison.OrdinalIgnoreCase)
-                ? dtoList.OrderBy(d => d.ReadersCount)
-                : dtoList.OrderByDescending(d => d.ReadersCount);
-            dtoList = ordered.ToList();
-        }
-
-        return dtoList;
+        var (stories, _, _) = await GetMarketplaceStoriesWithPaginationAsync(userId, locale, request);
+        return stories;
     }
 
     private IQueryable<StoryDefinition> ApplySorting(IQueryable<StoryDefinition> query, SearchStoriesRequest request)
@@ -290,40 +268,74 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
 
     public async Task<List<StoryMarketplaceItemDto>> GetFeaturedStoriesAsync(Guid userId, string locale)
     {
-        // Normalize locale to lowercase (e.g., "ro-RO" -> "ro-ro") to match database LanguageCode format
         var normalizedLocale = (locale ?? "ro-ro").ToLowerInvariant();
-        
-        // Get user preferences for age filtering
+        var baseItems = await _catalogCache.GetStoriesBaseAsync(normalizedLocale, CancellationToken.None);
+        var stats = await _catalogCache.GetStoryStatsAsync(CancellationToken.None);
+
         var user = await _context.AlchimaliaUsers
             .Where(u => u.Id == userId)
             .Select(u => new { u.AutoFilterStoriesByAge, u.SelectedAgeGroupIds })
             .FirstOrDefaultAsync();
-        
-        var query = _context.StoryDefinitions
-            .Include(s => s.Translations)
-            .Include(s => s.Topics)
-                .ThenInclude(t => t.StoryTopic)
-            .Include(s => s.AgeGroups)
-                .ThenInclude(ag => ag.StoryAgeGroup)
-            .Where(s => s.IsActive && s.Status == StoryStatus.Published);
 
-        // Exclude stories that are part of an epic (using IsPartOfEpic flag)
-        query = query.Where(s => !s.IsPartOfEpic);
-
-        // Auto-filter by age groups if enabled in parent dashboard
+        IEnumerable<StoryMarketplaceBaseItem> q = baseItems;
         if (user != null && user.AutoFilterStoriesByAge && user.SelectedAgeGroupIds != null && user.SelectedAgeGroupIds.Count > 0)
         {
-            query = query.Where(s => s.AgeGroups.Any(ag => 
-                ag.StoryAgeGroup != null && 
-                user.SelectedAgeGroupIds.Contains(ag.StoryAgeGroup.AgeGroupId)));
+            var selected = new HashSet<string>(user.SelectedAgeGroupIds, StringComparer.OrdinalIgnoreCase);
+            q = q.Where(s => s.AgeGroupIds.Any(id => selected.Contains(id)));
         }
-        
-        var featuredStories = await query
+
+        var featured = q
             .OrderBy(s => s.SortOrder)
             .Take(5)
-            .ToListAsync();
+            .ToList();
 
-        return await MapToMarketplaceListAsync(featuredStories, normalizedLocale, userId);
+        var storyIds = featured.Select(s => s.StoryId).ToList();
+        var purchased = await _context.StoryPurchases
+            .AsNoTracking()
+            .Where(sp => sp.UserId == userId && storyIds.Contains(sp.StoryId))
+            .Select(sp => sp.StoryId)
+            .ToListAsync();
+        var purchasedSet = purchased.ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        var defIds = featured.Select(s => s.DefinitionId).ToList();
+        var ownedDefIds = await _context.UserOwnedStories
+            .AsNoTracking()
+            .Where(uos => uos.UserId == userId && defIds.Contains(uos.StoryDefinitionId))
+            .Select(uos => uos.StoryDefinitionId)
+            .ToListAsync();
+        var ownedSet = ownedDefIds.ToHashSet();
+
+        return featured.Select(p =>
+        {
+            stats.TryGetValue(p.StoryId, out var st);
+            var isPurchased = purchasedSet.Contains(p.StoryId);
+            var isOwned = isPurchased || ownedSet.Contains(p.DefinitionId);
+
+            return new StoryMarketplaceItemDto
+            {
+                Id = p.StoryId,
+                Title = p.Title,
+                CoverImageUrl = p.CoverImageUrl,
+                CreatedBy = p.CreatedBy,
+                CreatedByName = p.CreatedByName,
+                Summary = p.Summary,
+                PriceInCredits = p.PriceInCredits,
+                AgeRating = p.AgeRating,
+                Characters = p.Characters,
+                Tags = p.TopicIds,
+                CreatedAt = p.CreatedAt,
+                StoryTopic = p.StoryTopic,
+                StoryType = p.StoryType.ToString(),
+                Status = p.Status.ToString(),
+                AvailableLanguages = p.AvailableLanguages,
+                IsPurchased = isPurchased,
+                IsOwned = isOwned,
+                ReadersCount = st.ReadersCount,
+                AverageRating = st.AverageRating,
+                TotalReviews = st.TotalReviews,
+                IsEvaluative = p.IsEvaluative
+            };
+        }).ToList();
     }
 
     public async Task<List<string>> GetAvailableRegionsAsync()

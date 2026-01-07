@@ -10,6 +10,7 @@ using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Infrastructure.Services.Queue;
+using XooCreator.BA.Features.TalesOfAlchimalia.Market.Caching;
 
 namespace XooCreator.BA.Features.StoryEditor.Services;
 
@@ -104,6 +105,7 @@ public class StoryPublishQueueWorker : BackgroundService
                     var publisher = scope.ServiceProvider.GetRequiredService<IStoryPublishingService>();
                     var crafts = scope.ServiceProvider.GetRequiredService<IStoryCraftsRepository>();
                     var cleanupService = scope.ServiceProvider.GetRequiredService<IStoryDraftAssetCleanupService>();
+                    var marketplaceCacheInvalidator = scope.ServiceProvider.GetService<IMarketplaceCacheInvalidator>();
 
                     var job = await db.StoryPublishJobs.FirstOrDefaultAsync(j => j.Id == payload.JobId, stoppingToken);
                     if (job == null || job.Status is StoryPublishJobStatus.Completed or StoryPublishJobStatus.Failed or StoryPublishJobStatus.Superseded)
@@ -184,6 +186,17 @@ public class StoryPublishQueueWorker : BackgroundService
                             job.ErrorMessage = null;
                             
                             await db.SaveChangesAsync(stoppingToken);
+                            
+                            // Reset marketplace cache after successful publish (safe: all locales).
+                            // Best-effort: do not affect job completion if cache reset fails.
+                            try
+                            {
+                                marketplaceCacheInvalidator?.ResetAll();
+                            }
+                            catch (Exception cacheEx)
+                            {
+                                _logger.LogWarning(cacheEx, "Failed to reset marketplace cache after story publish. storyId={StoryId} jobId={JobId}", job.StoryId, job.Id);
+                            }
 
                             try
                             {

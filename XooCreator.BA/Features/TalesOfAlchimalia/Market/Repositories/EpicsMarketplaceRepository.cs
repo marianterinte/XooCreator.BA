@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Enums;
+using XooCreator.BA.Features.TalesOfAlchimalia.Market.Caching;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.DTOs;
 
 namespace XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories;
@@ -9,13 +10,16 @@ namespace XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories;
 public class EpicsMarketplaceRepository
 {
     private readonly XooDbContext _context;
+    private readonly IMarketplaceCatalogCache _catalogCache;
     private readonly ILogger<EpicsMarketplaceRepository>? _logger;
 
     public EpicsMarketplaceRepository(
         XooDbContext context,
+        IMarketplaceCatalogCache catalogCache,
         ILogger<EpicsMarketplaceRepository>? logger = null)
     {
         _context = context;
+        _catalogCache = catalogCache;
         _logger = logger;
     }
 
@@ -26,110 +30,65 @@ public class EpicsMarketplaceRepository
     {
         try
         {
-            // Query only published epics (use StoryEpicDefinitions)
-            var query = _context.StoryEpicDefinitions
-                .Include(e => e.Owner)
-                .Include(e => e.StoryNodes)
-                .Include(e => e.Translations)
-                .Where(e => e.Status == "published" && e.PublishedAtUtc != null);
+            var normalizedLocale = string.IsNullOrWhiteSpace(locale) ? "ro-ro" : locale.Trim().ToLowerInvariant();
+            var baseItems = await _catalogCache.GetEpicsBaseAsync(normalizedLocale, CancellationToken.None);
+            var stats = await _catalogCache.GetEpicStatsAsync(CancellationToken.None);
 
-            // Apply search filter - search in Name and Description (case-insensitive)
+            IEnumerable<EpicMarketplaceBaseItem> q = baseItems;
+
             if (!string.IsNullOrWhiteSpace(request.SearchTerm))
             {
-                var searchTerm = request.SearchTerm.Trim();
-                query = query.Where(e =>
-                    (e.Name != null && EF.Functions.ILike(e.Name, $"%{searchTerm}%")) ||
-                    (e.Description != null && EF.Functions.ILike(e.Description, $"%{searchTerm}%")));
+                var search = request.SearchTerm.Trim();
+                q = q.Where(e => e.SearchTexts.Any(t => !string.IsNullOrWhiteSpace(t) && t.Contains(search, StringComparison.OrdinalIgnoreCase)));
             }
 
-            // Apply sorting
-            query = request.SortBy.ToLowerInvariant() switch
+            var sortBy = (request.SortBy ?? "publishedAt").ToLowerInvariant();
+            var sortDesc = string.Equals(request.SortOrder, "desc", StringComparison.OrdinalIgnoreCase);
+
+            q = sortBy switch
             {
-                "name" => request.SortOrder.ToLowerInvariant() == "asc"
-                    ? query.OrderBy(e => e.Name)
-                    : query.OrderByDescending(e => e.Name),
-                "readers" => request.SortOrder.ToLowerInvariant() == "asc"
-                    ? query.OrderBy(e => e.StoryNodes.Count) // Simplified: use story count as proxy
-                    : query.OrderByDescending(e => e.StoryNodes.Count),
-                "rating" => request.SortOrder.ToLowerInvariant() == "asc"
-                    ? query.OrderBy(e => e.CreatedAt) // Placeholder: would need to join with reviews
-                    : query.OrderByDescending(e => e.CreatedAt),
-                _ => request.SortOrder.ToLowerInvariant() == "asc"
-                    ? query.OrderBy(e => e.PublishedAtUtc)
-                    : query.OrderByDescending(e => e.PublishedAtUtc)
+                "name" => sortDesc ? q.OrderByDescending(e => e.Name) : q.OrderBy(e => e.Name),
+                "readers" => sortDesc
+                    ? q.OrderByDescending(e => stats.TryGetValue(e.EpicId, out var st) ? st.ReadersCount : 0)
+                    : q.OrderBy(e => stats.TryGetValue(e.EpicId, out var st) ? st.ReadersCount : 0),
+                "rating" => sortDesc
+                    ? q.OrderByDescending(e => stats.TryGetValue(e.EpicId, out var st) ? st.AverageRating : 0.0)
+                    : q.OrderBy(e => stats.TryGetValue(e.EpicId, out var st) ? st.AverageRating : 0.0),
+                _ => sortDesc ? q.OrderByDescending(e => e.PublishedAtUtc) : q.OrderBy(e => e.PublishedAtUtc)
             };
 
-            // Calculate total count BEFORE pagination
-            var totalCount = await query.CountAsync();
+            var filtered = q.ToList();
+            var totalCount = filtered.Count;
 
-            // Apply pagination
-            var epics = await query
-                .Skip((request.Page - 1) * request.PageSize)
-                .Take(request.PageSize)
-                .ToListAsync();
+            var page = request.Page <= 0 ? 1 : request.Page;
+            var pageSize = request.PageSize <= 0 ? 20 : request.PageSize;
 
-            // Get epic IDs to calculate readers count and review statistics
-            var epicIds = epics.Select(e => e.Id).ToList();
+            var pageItems = filtered
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
 
-            // Get readers count for epics (direct count from EpicReaders table)
-            var epicReadersCounts = await _context.EpicReaders
-                .Where(er => epicIds.Contains(er.EpicId))
-                .GroupBy(er => er.EpicId)
-                .ToDictionaryAsync(g => g.Key, g => g.Count());
-
-            // Get review statistics from EpicReviews (not StoryReviews)
-            var epicReviewStats = await _context.EpicReviews
-                .Where(r => epicIds.Contains(r.EpicId) && r.IsActive)
-                .GroupBy(r => r.EpicId)
-                .Select(g => new
-                {
-                    EpicId = g.Key,
-                    AverageRating = g.Average(r => (double)r.Rating),
-                    TotalReviews = g.Count()
-                })
-                .ToListAsync();
-
-            var reviewStats = epicReviewStats.ToDictionary(
-                x => x.EpicId,
-                x => new { x.AverageRating, x.TotalReviews });
-
-            // Map to DTOs
-            var dtoList = epics.Select(epic =>
+            var dtoList = pageItems.Select(epic =>
             {
-                // Get epic readers count (direct from EpicReaders)
-                var totalReaders = epicReadersCounts.TryGetValue(epic.Id, out var count) ? count : 0;
-                
-                // Get review statistics from EpicReviews
-                var reviewData = reviewStats.TryGetValue(epic.Id, out var stats) ? stats : null;
-                var totalReviews = reviewData?.TotalReviews ?? 0;
-                var avgRating = reviewData?.AverageRating ?? 0.0;
-
-                // Get translated name and description based on locale
-                var translation = epic.Translations?.FirstOrDefault(t => 
-                    t.LanguageCode.Equals(locale, StringComparison.OrdinalIgnoreCase));
-                var name = translation?.Name ?? epic.Translations?.FirstOrDefault()?.Name ?? epic.Name;
-                var description = translation?.Description ?? epic.Translations?.FirstOrDefault()?.Description ?? epic.Description;
-
+                stats.TryGetValue(epic.EpicId, out var st);
                 return new EpicMarketplaceItemDto
                 {
-                    Id = epic.Id,
-                    Name = name,
-                    Description = description,
+                    Id = epic.EpicId,
+                    Name = epic.Name,
+                    Description = epic.Description,
                     CoverImageUrl = epic.CoverImageUrl,
-                    CreatedBy = epic.OwnerUserId,
-                    CreatedByName = epic.Owner?.Email ?? epic.Owner?.Name ?? "Unknown",
+                    CreatedBy = epic.CreatedBy,
+                    CreatedByName = epic.CreatedByName ?? "Unknown",
                     CreatedAt = epic.CreatedAt,
                     PublishedAtUtc = epic.PublishedAtUtc,
-                    StoryCount = epic.StoryNodes.Count,
-                    RegionCount = epic.Regions.Count,
-                    ReadersCount = totalReaders,
-                    AverageRating = avgRating
+                    StoryCount = epic.StoryCount,
+                    RegionCount = epic.RegionCount,
+                    ReadersCount = st.ReadersCount,
+                    AverageRating = st.AverageRating
                 };
             }).ToList();
 
-            // Calculate hasMore
-            var hasMore = (request.Page * request.PageSize) < totalCount;
-
+            var hasMore = (page * pageSize) < totalCount;
             return (dtoList, totalCount, hasMore);
         }
         catch (Exception ex)
