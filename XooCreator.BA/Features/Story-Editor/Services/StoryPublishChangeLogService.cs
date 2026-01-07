@@ -185,6 +185,8 @@ public sealed class StoryDraftSnapshot
             craft.ClassicAuthorId,
             craft.PriceInCredits,
             craft.StoryType,
+            craft.IsEvaluative,
+            craft.IsPartOfEpic,
             craft.Topics.Select(t => t.StoryTopic.TopicId).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToList(),
             craft.AgeGroups.Select(ag => ag.StoryAgeGroup.AgeGroupId).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToList());
 
@@ -223,7 +225,19 @@ public sealed class StoryDraftSnapshot
 
     public sealed class HeaderState
     {
-        private HeaderState(string title, string? summary, string? coverImage, string? storyTopic, string? authorName, Guid? classicAuthorId, double priceInCredits, StoryType storyType, IReadOnlyCollection<string> topicIds, IReadOnlyCollection<string> ageGroupIds)
+        private HeaderState(
+            string title,
+            string? summary,
+            string? coverImage,
+            string? storyTopic,
+            string? authorName,
+            Guid? classicAuthorId,
+            double priceInCredits,
+            StoryType storyType,
+            bool isEvaluative,
+            bool isPartOfEpic,
+            IReadOnlyCollection<string> topicIds,
+            IReadOnlyCollection<string> ageGroupIds)
         {
             Title = title;
             Summary = summary;
@@ -233,6 +247,8 @@ public sealed class StoryDraftSnapshot
             ClassicAuthorId = classicAuthorId;
             PriceInCredits = priceInCredits;
             StoryType = storyType;
+            IsEvaluative = isEvaluative;
+            IsPartOfEpic = isPartOfEpic;
             TopicIds = topicIds;
             AgeGroupIds = ageGroupIds;
             Hash = HashHelper.ComputeHash(new
@@ -245,6 +261,8 @@ public sealed class StoryDraftSnapshot
                 ClassicAuthorId,
                 PriceInCredits,
                 StoryType,
+                IsEvaluative,
+                IsPartOfEpic,
                 TopicIds,
                 AgeGroupIds
             });
@@ -258,6 +276,8 @@ public sealed class StoryDraftSnapshot
         public Guid? ClassicAuthorId { get; }
         public double PriceInCredits { get; }
         public StoryType StoryType { get; }
+        public bool IsEvaluative { get; }
+        public bool IsPartOfEpic { get; }
         public IReadOnlyCollection<string> TopicIds { get; }
         public IReadOnlyCollection<string> AgeGroupIds { get; }
         public string Hash { get; }
@@ -273,14 +293,29 @@ public sealed class StoryDraftSnapshot
             classicAuthorId = ClassicAuthorId,
             priceInCredits = PriceInCredits,
             storyType = StoryType,
+            isEvaluative = IsEvaluative,
+            isPartOfEpic = IsPartOfEpic,
             topicIds = TopicIds,
             ageGroupIds = AgeGroupIds
         };
 
-        public static HeaderState Create(string title, string? summary, string? coverImage, string? storyTopic, string? authorName, Guid? classicAuthorId, double priceInCredits, StoryType storyType, IReadOnlyCollection<string> topicIds, IReadOnlyCollection<string> ageGroupIds)
-            => new(title, summary, coverImage, storyTopic, authorName, classicAuthorId, priceInCredits, storyType, topicIds, ageGroupIds);
+        public static HeaderState Create(
+            string title,
+            string? summary,
+            string? coverImage,
+            string? storyTopic,
+            string? authorName,
+            Guid? classicAuthorId,
+            double priceInCredits,
+            StoryType storyType,
+            bool isEvaluative,
+            bool isPartOfEpic,
+            IReadOnlyCollection<string> topicIds,
+            IReadOnlyCollection<string> ageGroupIds)
+            => new(title, summary, coverImage, storyTopic, authorName, classicAuthorId, priceInCredits, storyType, isEvaluative, isPartOfEpic, topicIds, ageGroupIds);
 
-        public static HeaderState Empty() => new(string.Empty, null, null, null, null, null, 0, StoryType.Indie, Array.Empty<string>(), Array.Empty<string>());
+        public static HeaderState Empty()
+            => new(string.Empty, null, null, null, null, null, 0, StoryType.Indie, false, false, Array.Empty<string>(), Array.Empty<string>());
     }
 
     public sealed class TileState
