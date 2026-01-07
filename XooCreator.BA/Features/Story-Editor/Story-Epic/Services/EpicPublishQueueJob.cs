@@ -10,6 +10,7 @@ using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.Services;
 using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Infrastructure.Services.Queue;
+using XooCreator.BA.Features.TalesOfAlchimalia.Market.Caching;
 
 namespace XooCreator.BA.Features.StoryEditor.StoryEpic.Services;
 
@@ -103,6 +104,7 @@ public class EpicPublishQueueJob : BackgroundService
                 {
                     var db = scope.ServiceProvider.GetRequiredService<XooDbContext>();
                     var publisher = scope.ServiceProvider.GetRequiredService<IStoryEpicPublishingService>();
+                    var marketplaceCacheInvalidator = scope.ServiceProvider.GetService<IMarketplaceCacheInvalidator>();
 
                     var job = await db.EpicPublishJobs.FirstOrDefaultAsync(j => j.Id == payload.JobId, stoppingToken);
                     if (job == null || job.Status is EpicPublishJobStatus.Completed or EpicPublishJobStatus.Failed or EpicPublishJobStatus.Superseded)
@@ -187,6 +189,17 @@ public class EpicPublishQueueJob : BackgroundService
                             await db.SaveChangesAsync(stoppingToken);
                             PublishStatus();
                             _logger.LogInformation("Job status saved as Completed: jobId={JobId}", job.Id);
+                            
+                            // Reset marketplace cache after successful epic publish (safe: all locales).
+                            // Best-effort: do not affect job completion if cache reset fails.
+                            try
+                            {
+                                marketplaceCacheInvalidator?.ResetAll();
+                            }
+                            catch (Exception cacheEx)
+                            {
+                                _logger.LogWarning(cacheEx, "Failed to reset marketplace cache after epic publish. epicId={EpicId} jobId={JobId}", job.EpicId, job.Id);
+                            }
 
                             // Cleanup: Delete StoryEpicCraft and draft assets after successful publish
                             // This is done in a separate try-catch to not affect the job status
