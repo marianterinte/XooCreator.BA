@@ -47,6 +47,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
     private readonly IMarketplaceCatalogCache _catalogCache;
     private readonly ILogger<StoriesMarketplaceRepository>? _logger;
     private readonly TelemetryClient? _telemetryClient;
+    private readonly IStoryLikesRepository? _likesRepository;
 
     public StoriesMarketplaceRepository(
         XooDbContext context, 
@@ -54,11 +55,13 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         IMarketplaceCatalogCache catalogCache,
         EpicsMarketplaceRepository? epicsRepository = null,
         ILogger<StoriesMarketplaceRepository>? logger = null,
-        TelemetryClient? telemetryClient = null)
+        TelemetryClient? telemetryClient = null,
+        IStoryLikesRepository? likesRepository = null)
     {
         _context = context;
         _storyDetailsMapper = storyDetailsMapper;
         _catalogCache = catalogCache;
+        _likesRepository = likesRepository;
         _epicsRepository = epicsRepository;
         _logger = logger;
         _telemetryClient = telemetryClient;
@@ -167,11 +170,23 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
                 .ToListAsync();
             var ownedSet = ownedDefIds.ToHashSet();
 
+            // Get likes counts for page items
+            var likesCounts = new Dictionary<string, int>();
+            if (_likesRepository != null)
+            {
+                foreach (var storyId in pageStoryIds)
+                {
+                    var likesCount = await _likesRepository.GetStoryLikesCountAsync(storyId);
+                    likesCounts[storyId] = likesCount;
+                }
+            }
+
             var dtoList = pageItems.Select(p =>
             {
                 stats.TryGetValue(p.StoryId, out var st);
                 var isPurchased = purchasedSet.Contains(p.StoryId);
                 var isOwned = isPurchased || ownedSet.Contains(p.DefinitionId);
+                var likesCount = likesCounts.TryGetValue(p.StoryId, out var likes) ? likes : 0;
 
                 return new StoryMarketplaceItemDto
                 {
@@ -193,6 +208,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
                     IsPurchased = isPurchased,
                     IsOwned = isOwned,
                     ReadersCount = st.ReadersCount,
+                    LikesCount = likesCount,
                     AverageRating = st.AverageRating,
                     TotalReviews = st.TotalReviews,
                     IsEvaluative = p.IsEvaluative
@@ -305,11 +321,23 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             .ToListAsync();
         var ownedSet = ownedDefIds.ToHashSet();
 
+        // Get likes counts for featured stories
+        var likesCounts = new Dictionary<string, int>();
+        if (_likesRepository != null)
+        {
+            foreach (var storyId in storyIds)
+            {
+                var likesCount = await _likesRepository.GetStoryLikesCountAsync(storyId);
+                likesCounts[storyId] = likesCount;
+            }
+        }
+
         return featured.Select(p =>
         {
             stats.TryGetValue(p.StoryId, out var st);
             var isPurchased = purchasedSet.Contains(p.StoryId);
             var isOwned = isPurchased || ownedSet.Contains(p.DefinitionId);
+            var likesCount = likesCounts.TryGetValue(p.StoryId, out var likes) ? likes : 0;
 
             return new StoryMarketplaceItemDto
             {
@@ -331,6 +359,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
                 IsPurchased = isPurchased,
                 IsOwned = isOwned,
                 ReadersCount = st.ReadersCount,
+                LikesCount = likesCount,
                 AverageRating = st.AverageRating,
                 TotalReviews = st.TotalReviews,
                 IsEvaluative = p.IsEvaluative
@@ -510,6 +539,15 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         // Normalize locale to lowercase for mapping
         var normalizedLocale = (locale ?? "ro-ro").ToLowerInvariant();
         var readersCount = await GetStoryReadersCountAsync(storyId);
+        
+        // Get likes count and isLiked status
+        var likesCount = _likesRepository != null 
+            ? await _likesRepository.GetStoryLikesCountAsync(storyId) 
+            : 0;
+        var isLiked = _likesRepository != null 
+            ? await _likesRepository.IsLikedAsync(userId, storyId) 
+            : false;
+        
         return await _storyDetailsMapper.MapToStoryDetailsFromDefinitionAsync(
             def,
             normalizedLocale,
@@ -522,7 +560,9 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             lastRead?.TileId,
             lastRead?.ReadAt,
             userId,
-            readersCount);
+            readersCount,
+            likesCount,
+            isLiked);
     }
 
     public async Task EnsureStoryReaderAsync(Guid userId, string storyId, StoryAcquisitionSource source)
@@ -805,9 +845,21 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             x => x.StoryId,
             x => new { x.AverageRating, x.TotalReviews });
 
+        // Get likes counts for all stories
+        var likesCounts = new Dictionary<string, int>();
+        if (_likesRepository != null)
+        {
+            foreach (var storyId in storyIds)
+            {
+                var likesCount = await _likesRepository.GetStoryLikesCountAsync(storyId);
+                likesCounts[storyId] = likesCount;
+            }
+        }
+
         foreach (var def in defs)
         {
             var readersCount = readersCounts.TryGetValue(def.StoryId, out var count) ? count : 0;
+            var likesCount = likesCounts.TryGetValue(def.StoryId, out var likes) ? likes : 0;
             var stats = reviewStats.TryGetValue(def.StoryId, out var value)
                 ? value
                 : new { AverageRating = 0d, TotalReviews = 0 };
@@ -816,6 +868,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
                 locale,
                 userId,
                 readersCount,
+                likesCount,
                 stats.AverageRating,
                 stats.TotalReviews));
         }
@@ -827,6 +880,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         string locale,
         Guid userId,
         int readersCount,
+        int likesCount,
         double averageRating,
         int totalReviews)
     {
@@ -889,6 +943,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             IsPurchased = isPurchased,
             IsOwned = isOwned,
             ReadersCount = readersCount,
+            LikesCount = likesCount,
             AverageRating = Math.Round(averageRating, 2),
             TotalReviews = totalReviews,
             IsEvaluative = def.IsEvaluative

@@ -25,6 +25,7 @@ using XooCreator.BA.Features.StoryFeedback.Repositories;
 using XooCreator.BA.Features.StoryFeedback.Services;
 using XooCreator.BA.Infrastructure.Services.Images;
 using XooCreator.BA.Infrastructure.Services.Jobs;
+using XooCreator.BA.Data;
 
 namespace XooCreator.BA.Infrastructure.DependencyInjection;
 
@@ -211,7 +212,15 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IFavoritesService, FavoritesService>();
         services.AddScoped<IEpicFavoritesRepository, EpicFavoritesRepository>();
         services.AddScoped<IEpicFavoritesService, EpicFavoritesService>();
-        services.AddScoped<StoryDetailsMapper>();
+        services.AddScoped<IStoryLikesRepository, StoryLikesRepository>();
+        services.AddScoped<IStoryLikesService, StoryLikesService>();
+        services.AddScoped<StoryDetailsMapper>(sp => 
+        {
+            var context = sp.GetRequiredService<XooDbContext>();
+            var reviewsRepo = sp.GetService<IStoryReviewsRepository>();
+            var likesRepo = sp.GetService<IStoryLikesRepository>();
+            return new StoryDetailsMapper(context, reviewsRepo, likesRepo);
+        });
         services.AddScoped<IStoriesMarketplaceRepository, StoriesMarketplaceRepository>();
         services.AddScoped<IStoriesMarketplaceService, StoriesMarketplaceService>();
         services.AddScoped<EpicsMarketplaceRepository>();
