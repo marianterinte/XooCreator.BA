@@ -105,6 +105,7 @@ public class XooDbContext : DbContext
     public DbSet<UserFavoriteEpics> UserFavoriteEpics => Set<UserFavoriteEpics>();
     public DbSet<StoryReader> StoryReaders => Set<StoryReader>();
     public DbSet<EpicReader> EpicReaders => Set<EpicReader>();
+    public DbSet<StoryLike> StoryLikes => Set<StoryLike>();
     
     // User Story Relations
     public DbSet<UserOwnedStories> UserOwnedStories => Set<UserOwnedStories>();

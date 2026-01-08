@@ -37,6 +37,8 @@ public record StoryDetailsDto
     public int TotalReviews { get; init; }
     public StoryReviewDto? UserReview { get; init; } // Current user's review if exists
     public int ReadersCount { get; init; }
+    public int LikesCount { get; init; } // Total likes for this story
+    public bool IsLiked { get; init; } // Whether current user has liked this story
     public bool IsEvaluative { get; init; } = false; // If true, this story contains quizzes that should be evaluated
     public bool IsPartOfEpic { get; init; } = false; // If true, this story is part of an epic (draft or published) and should not appear as independent story
 }
@@ -69,6 +71,7 @@ public record StoryMarketplaceItemDto
     public bool IsPurchased { get; init; } = false;
     public bool IsOwned { get; init; } = false;
     public int ReadersCount { get; init; }
+    public int LikesCount { get; init; } // Total likes for this story
     public double AverageRating { get; init; }
     public int TotalReviews { get; init; }
     public bool IsEvaluative { get; init; } = false;
