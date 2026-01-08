@@ -10,11 +10,13 @@ public class StoryDetailsMapper
 {
     private readonly XooDbContext _context;
     private readonly IStoryReviewsRepository? _reviewsRepository;
+    private readonly IStoryLikesRepository? _likesRepository;
 
-    public StoryDetailsMapper(XooDbContext context, IStoryReviewsRepository? reviewsRepository = null)
+    public StoryDetailsMapper(XooDbContext context, IStoryReviewsRepository? reviewsRepository = null, IStoryLikesRepository? likesRepository = null)
     {
         _context = context;
         _reviewsRepository = reviewsRepository;
+        _likesRepository = likesRepository;
     }
 
     public async Task<StoryDetailsDto> MapToStoryDetailsFromDefinitionAsync(
@@ -29,7 +31,9 @@ public class StoryDetailsMapper
         string? lastReadTileId = null,
         DateTime? lastReadAt = null,
         Guid? userId = null,
-        int readersCount = 0)
+        int readersCount = 0,
+        int likesCount = 0,
+        bool isLiked = false)
     {
         var translation = def.Translations?.FirstOrDefault(t => t.LanguageCode == locale);
         var title = translation?.Title ?? def.Title;
@@ -124,6 +128,8 @@ public class StoryDetailsMapper
             TotalReviews = totalReviews,
             UserReview = userReview,
             ReadersCount = readersCount,
+            LikesCount = likesCount,
+            IsLiked = isLiked,
             IsEvaluative = def.IsEvaluative,
             IsPartOfEpic = def.IsPartOfEpic
         };

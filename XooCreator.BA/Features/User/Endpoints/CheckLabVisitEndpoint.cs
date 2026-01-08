@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using XooCreator.BA.Data;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Endpoints;
+using XooCreator.BA.Features.Stories.Repositories;
 
 namespace XooCreator.BA.Features.User.Endpoints;
 
@@ -22,6 +23,7 @@ public class CheckLabVisitEndpoint
         [FromRoute] string locale,
         [FromServices] IUserContextService userContext,
         [FromServices] XooDbContext dbContext,
+        [FromServices] IStoriesRepository storiesRepository,
         CancellationToken ct)
     {
         var userId = await userContext.GetUserIdAsync();
@@ -36,6 +38,15 @@ public class CheckLabVisitEndpoint
             return Results.NotFound("User not found.");
         }
 
-        return Results.Ok(new FirstVisitDto { IsFirstVisit = !user.HasVisitedImaginationLaboratory });
+        // Check if user has completed the loi-intro story
+        const string introStoryId = "loi-intro";
+        var completionInfo = await storiesRepository.GetStoryCompletionStatusAsync(userId.Value, introStoryId);
+        var hasCompletedIntroStory = completionInfo.IsCompleted;
+
+        // If user has completed the intro story, it's not a first visit
+        // Otherwise, check the legacy flag
+        var isFirstVisit = !hasCompletedIntroStory && !user.HasVisitedImaginationLaboratory;
+
+        return Results.Ok(new FirstVisitDto { IsFirstVisit = isFirstVisit });
     }
 }
