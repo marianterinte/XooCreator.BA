@@ -319,8 +319,23 @@ public sealed class GetUserBestiaryEndpoint
             // If text is already a translation key, use it directly
             if (text.StartsWith("hero_tree_", StringComparison.OrdinalIgnoreCase))
             {
-                // Try to get the translation for the requested locale
-                var heroTreeFilePath = Path.Combine(baseDir, "Data", "SeedData", "BookOfHeroes", "i18n", locale, "hero-tree.json");
+                // Fix: Remove duplicate "hero_" if present in the key
+                // Keys in DB might be "hero_tree_hero_playful_horse_name" but in JSON they are "hero_tree_playful_horse_name"
+                string normalizedKey = text;
+                if (text.Contains("_hero_hero_"))
+                {
+                    // Replace "_hero_hero_" with "_hero_" to fix duplicate
+                    normalizedKey = text.Replace("_hero_hero_", "_hero_");
+                }
+                else if (text.StartsWith("hero_tree_hero_", StringComparison.OrdinalIgnoreCase))
+                {
+                    // If key is "hero_tree_hero_xxx", remove the extra "hero_" to get "hero_tree_xxx"
+                    normalizedKey = "hero_tree_" + text.Substring("hero_tree_hero_".Length);
+                }
+                
+                // Normalize locale for folder path
+                var normalizedLocale = NormalizeLocaleForTranslationsFolder(locale);
+                var heroTreeFilePath = Path.Combine(baseDir, "Data", "SeedData", "BookOfHeroes", "i18n", normalizedLocale, "hero-tree.json");
                 
                 if (File.Exists(heroTreeFilePath))
                 {
@@ -331,6 +346,13 @@ public sealed class GetUserBestiaryEndpoint
                         PropertyNameCaseInsensitive = true
                     });
 
+                    // Try normalized key first
+                    if (heroTreeData?.ContainsKey(normalizedKey) == true)
+                    {
+                        return heroTreeData[normalizedKey];
+                    }
+                    
+                    // Fallback: try original key
                     if (heroTreeData?.ContainsKey(text) == true)
                     {
                         return heroTreeData[text];
@@ -338,9 +360,9 @@ public sealed class GetUserBestiaryEndpoint
                 }
                 
                 // Fallback to English if not found in requested locale
-                if (locale != "en-us")
+                if (normalizedLocale != "en-US")
                 {
-                    var fallbackFilePath = Path.Combine(baseDir, "Data", "SeedData", "BookOfHeroes", "i18n", "en-us", "hero-tree.json");
+                    var fallbackFilePath = Path.Combine(baseDir, "Data", "SeedData", "BookOfHeroes", "i18n", "en-US", "hero-tree.json");
                     
                     if (File.Exists(fallbackFilePath))
                     {
@@ -351,6 +373,13 @@ public sealed class GetUserBestiaryEndpoint
                             PropertyNameCaseInsensitive = true
                         });
 
+                        // Try normalized key first
+                        if (heroTreeData?.ContainsKey(normalizedKey) == true)
+                        {
+                            return heroTreeData[normalizedKey];
+                        }
+                        
+                        // Fallback: try original key
                         if (heroTreeData?.ContainsKey(text) == true)
                         {
                             return heroTreeData[text];
@@ -420,7 +449,8 @@ public sealed class GetUserBestiaryEndpoint
                 // If we found the key, use it to get the translation in the requested locale
                 if (foundKey != null)
                 {
-                    var heroTreeFilePath = Path.Combine(baseDir, "Data", "SeedData", "BookOfHeroes", "i18n", locale, "hero-tree.json");
+                    var normalizedLocale = NormalizeLocaleForTranslationsFolder(locale);
+                    var heroTreeFilePath = Path.Combine(baseDir, "Data", "SeedData", "BookOfHeroes", "i18n", normalizedLocale, "hero-tree.json");
                     
                     if (File.Exists(heroTreeFilePath))
                     {
@@ -441,9 +471,14 @@ public sealed class GetUserBestiaryEndpoint
                 {
                     // Fallback: try to construct the key using the heroId and field detection
                     var field = GetTreeOfHeroesField(text);
-                    var key = $"hero_tree_{heroId}_{field}";
+                    // Remove "hero_" prefix from heroId if present (heroId might be "hero_playful_horse" but key should be "hero_tree_playful_horse_name")
+                    var normalizedHeroId = heroId.StartsWith("hero_", StringComparison.OrdinalIgnoreCase) 
+                        ? heroId.Substring("hero_".Length) 
+                        : heroId;
+                    var key = $"hero_tree_{normalizedHeroId}_{field}";
                     
-                    var heroTreeFilePath = Path.Combine(baseDir, "Data", "SeedData", "BookOfHeroes", "i18n", locale, "hero-tree.json");
+                    var normalizedLocale = NormalizeLocaleForTranslationsFolder(locale);
+                    var heroTreeFilePath = Path.Combine(baseDir, "Data", "SeedData", "BookOfHeroes", "i18n", normalizedLocale, "hero-tree.json");
                     
                     if (File.Exists(heroTreeFilePath))
                     {

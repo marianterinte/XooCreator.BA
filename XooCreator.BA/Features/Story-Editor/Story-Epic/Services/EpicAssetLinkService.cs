@@ -212,6 +212,11 @@ public class EpicAssetLinkService : IEpicAssetLinkService
         try
         {
             var sourceSas = sourceClient.GenerateSasUri(BlobSasPermissions.Read, DateTimeOffset.UtcNow.AddMinutes(10));
+
+            // Ensure the published blob is overwritten when replacing a cover image.
+            // This prevents "old cover" issues when the published path stays the same (images/epics/{epicId}/cover.ext).
+            await destinationClient.DeleteIfExistsAsync(cancellationToken: ct);
+
             var copyOperation = await destinationClient.StartCopyFromUriAsync(sourceSas, cancellationToken: ct);
             await copyOperation.WaitForCompletionAsync(cancellationToken: ct);
 
@@ -271,6 +276,10 @@ public class EpicAssetLinkService : IEpicAssetLinkService
         try
         {
             var sourceSas = sourceClient.GenerateSasUri(BlobSasPermissions.Read, DateTimeOffset.UtcNow.AddMinutes(10));
+
+            // Ensure the published blob is overwritten when replacing a reward image.
+            await destinationClient.DeleteIfExistsAsync(cancellationToken: ct);
+
             var copyOperation = await destinationClient.StartCopyFromUriAsync(sourceSas, cancellationToken: ct);
             await copyOperation.WaitForCompletionAsync(cancellationToken: ct);
 
@@ -313,9 +322,13 @@ public class EpicAssetLinkService : IEpicAssetLinkService
     {
         var hash = ComputeAssetHash(draftPath, draftVersion);
 
-        // Check by DraftPath in database to avoid duplicate key violations
+        // Check by EpicId, DraftPath, and AssetType to find the correct link
+        // This ensures we update the right link when doing replacement (same filename, new version)
         var existing = await _db.EpicAssetLinks
-            .FirstOrDefaultAsync(x => x.DraftPath == draftPath, ct);
+            .FirstOrDefaultAsync(x => 
+                x.EpicId == epicId && 
+                x.DraftPath == draftPath && 
+                x.AssetType == (entityId == CoverImageEntityId ? "Cover" : "Reward"), ct);
 
         if (existing == null)
         {
@@ -336,7 +349,8 @@ public class EpicAssetLinkService : IEpicAssetLinkService
         }
         else
         {
-            // Update existing link
+            // Update existing link with new version and published path
+            // This handles the case when doing replacement (same filename, new version)
             existing.EpicId = epicId;
             existing.DraftVersion = draftVersion;
             existing.PublishedPath = publishedPath;
