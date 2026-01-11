@@ -304,7 +304,9 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
         {
             var normalizedPath = NormalizeBlobPath(craft.CoverImageUrl);
             var assetLink = await _context.EpicAssetLinks
-                .FirstOrDefaultAsync(x => x.EpicId == craft.Id && x.DraftPath == normalizedPath && x.AssetType == "Cover", ct);
+                .Where(x => x.EpicId == craft.Id && x.DraftPath == normalizedPath && x.AssetType == "Cover")
+                .OrderByDescending(x => x.DraftVersion)
+                .FirstOrDefaultAsync(ct);
             
             if (assetLink != null && !string.IsNullOrWhiteSpace(assetLink.PublishedPath))
             {
@@ -417,7 +419,9 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
             {
                 var normalizedPath = NormalizeBlobPath(craftNode.RewardImageUrl);
                 var assetLink = await _context.EpicAssetLinks
-                    .FirstOrDefaultAsync(x => x.EpicId == craft.Id && x.DraftPath == normalizedPath && x.EntityId == $"__reward_image__{craftNode.StoryId}", ct);
+                    .Where(x => x.EpicId == craft.Id && x.DraftPath == normalizedPath && x.EntityId == $"__reward_image__{craftNode.StoryId}")
+                    .OrderByDescending(x => x.DraftVersion)
+                    .FirstOrDefaultAsync(ct);
                 
                 if (assetLink != null && !string.IsNullOrWhiteSpace(assetLink.PublishedPath))
                 {
@@ -643,8 +647,12 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
         if (!string.IsNullOrWhiteSpace(craft.CoverImageUrl))
         {
             var normalizedPath = NormalizeBlobPath(craft.CoverImageUrl);
+            // Find the asset link for the current draft version to ensure we get the correct published path
+            // This is important when doing replacement (same filename, new version)
             var assetLink = await _context.EpicAssetLinks
-                .FirstOrDefaultAsync(x => x.EpicId == craft.Id && x.DraftPath == normalizedPath && x.AssetType == "Cover", ct);
+                .Where(x => x.EpicId == craft.Id && x.DraftPath == normalizedPath && x.AssetType == "Cover")
+                .OrderByDescending(x => x.DraftVersion) // Get the latest version
+                .FirstOrDefaultAsync(ct);
             
             if (assetLink != null && !string.IsNullOrWhiteSpace(assetLink.PublishedPath))
             {
@@ -765,7 +773,9 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
             
             var normalizedPath = NormalizeBlobPath(craftNode.RewardImageUrl);
             var assetLink = await _context.EpicAssetLinks
-                .FirstOrDefaultAsync(x => x.EpicId == craft.Id && x.DraftPath == normalizedPath && x.EntityId == $"__reward_image__{storyId}", ct);
+                .Where(x => x.EpicId == craft.Id && x.DraftPath == normalizedPath && x.EntityId == $"__reward_image__{storyId}")
+                .OrderByDescending(x => x.DraftVersion)
+                .FirstOrDefaultAsync(ct);
             
             if (assetLink != null && !string.IsNullOrWhiteSpace(assetLink.PublishedPath))
             {
