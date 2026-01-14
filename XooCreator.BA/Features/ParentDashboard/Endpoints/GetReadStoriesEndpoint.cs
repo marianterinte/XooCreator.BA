@@ -128,7 +128,8 @@ public class GetReadStoriesEndpoint
                 TotalTiles = totalTiles,
                 ProgressPercentage = progressPercentage,
                 LastReadAt = lastReadAt,
-                IsCompleted = isCompleted
+                IsCompleted = isCompleted,
+                IsPartOfEpic = story.IsPartOfEpic
             });
         }
 
