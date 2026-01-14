@@ -22,6 +22,7 @@ public record ReadStoryDto
     public int ProgressPercentage { get; init; }
     public DateTime? LastReadAt { get; init; }
     public bool IsCompleted { get; init; }
+    public bool IsPartOfEpic { get; init; } = false; // If true, this story is part of an epic (draft or published) and should not appear as independent story
 }
 
 /// <summary>
