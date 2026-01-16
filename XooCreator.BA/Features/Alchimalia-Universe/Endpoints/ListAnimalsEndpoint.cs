@@ -35,6 +35,7 @@ public class ListAnimalsEndpoint
         [FromQuery] Guid? regionId,
         [FromQuery] bool? isHybrid,
         [FromQuery] string? search,
+        [FromQuery] string? language,
         [FromServices] ListAnimalsEndpoint ep,
         CancellationToken ct)
     {
@@ -47,7 +48,7 @@ public class ListAnimalsEndpoint
             return TypedResults.Forbid();
         }
 
-        var response = await ep._service.ListAsync(status, regionId, isHybrid, search, ct);
+        var response = await ep._service.ListAsync(status, regionId, isHybrid, search, language, ct);
         return TypedResults.Ok(response);
     }
 }

@@ -42,23 +42,37 @@ public class StoryHeroService : IStoryHeroService
         return MapToDto(fullHero!, languageCode);
     }
 
-    public async Task<ListStoryHeroesResponse> ListAsync(string? status = null, string? search = null, CancellationToken ct = default)
+    public async Task<ListStoryHeroesResponse> ListAsync(string? status = null, string? search = null, string? languageCode = null, CancellationToken ct = default)
     {
         var storyHeroes = await _repository.ListAsync(status, search, ct);
         var totalCount = await _repository.CountAsync(status, ct);
 
         var items = storyHeroes.Select(sh =>
         {
-            var translation = sh.Translations.FirstOrDefault();
+            // Get translation for selected language, or first available
+            StoryHeroTranslation? selectedTranslation = null;
+            if (!string.IsNullOrWhiteSpace(languageCode))
+            {
+                var normalizedLang = languageCode.ToLowerInvariant();
+                selectedTranslation = sh.Translations.FirstOrDefault(t => t.LanguageCode.ToLowerInvariant() == normalizedLang);
+            }
+            
+            // Fallback to first translation if no match
+            selectedTranslation ??= sh.Translations.FirstOrDefault();
+            
+            // Get all available language codes
+            var availableLanguages = sh.Translations.Select(t => t.LanguageCode.ToLowerInvariant()).ToList();
+            
             return new StoryHeroListItemDto
             {
                 Id = sh.Id,
                 HeroId = sh.HeroId,
-                Name = translation?.Name ?? sh.HeroId,
+                Name = selectedTranslation?.Name ?? sh.HeroId,
                 ImageUrl = sh.ImageUrl,
                 Status = sh.Status,
                 UpdatedAt = sh.UpdatedAt,
-                CreatedByUserId = sh.CreatedByUserId
+                CreatedByUserId = sh.CreatedByUserId,
+                AvailableLanguages = availableLanguages
             };
         }).ToList();
 

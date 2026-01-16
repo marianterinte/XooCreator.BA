@@ -43,11 +43,12 @@ public record HeroDefinitionListItemDto
 {
     public required string Id { get; init; }
     public required string Type { get; init; }
-    public required string Name { get; init; } // From translation
+    public required string Name { get; init; } // From translation (for selected language or first available)
     public string? Image { get; init; }
     public required string Status { get; init; }
     public DateTime UpdatedAt { get; init; }
     public Guid? CreatedByUserId { get; init; }
+    public List<string> AvailableLanguages { get; init; } = new(); // List of language codes that have translations
 }
 
 public record CreateHeroDefinitionRequest
@@ -141,6 +142,7 @@ public record AnimalListItemDto
     public required string Status { get; init; }
     public DateTime? UpdatedAt { get; init; }
     public Guid? CreatedByUserId { get; init; }
+    public List<string> AvailableLanguages { get; init; } = new(); // List of language codes that have translations
 }
 
 public record CreateAnimalRequest
@@ -215,6 +217,7 @@ public record StoryHeroListItemDto
     public required string Status { get; init; }
     public DateTime UpdatedAt { get; init; }
     public Guid? CreatedByUserId { get; init; }
+    public List<string> AvailableLanguages { get; init; } = new(); // List of language codes that have translations
 }
 
 public record CreateStoryHeroRequest

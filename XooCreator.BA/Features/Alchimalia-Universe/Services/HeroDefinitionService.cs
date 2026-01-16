@@ -30,23 +30,37 @@ public class HeroDefinitionService : IHeroDefinitionService
         return MapToDto(hero, languageCode);
     }
 
-    public async Task<ListHeroDefinitionsResponse> ListAsync(string? status = null, string? type = null, string? search = null, CancellationToken ct = default)
+    public async Task<ListHeroDefinitionsResponse> ListAsync(string? status = null, string? type = null, string? search = null, string? languageCode = null, CancellationToken ct = default)
     {
         var heroes = await _repository.ListAsync(status, type, search, ct);
         var totalCount = await _repository.CountAsync(status, type, ct);
 
         var items = heroes.Select(h =>
         {
-            var translation = h.Translations.FirstOrDefault();
+            // Get translation for selected language, or first available
+            HeroDefinitionTranslation? selectedTranslation = null;
+            if (!string.IsNullOrWhiteSpace(languageCode))
+            {
+                var normalizedLang = languageCode.ToLowerInvariant();
+                selectedTranslation = h.Translations.FirstOrDefault(t => t.LanguageCode.ToLowerInvariant() == normalizedLang);
+            }
+            
+            // Fallback to first translation if no match
+            selectedTranslation ??= h.Translations.FirstOrDefault();
+            
+            // Get all available language codes
+            var availableLanguages = h.Translations.Select(t => t.LanguageCode.ToLowerInvariant()).ToList();
+            
             return new HeroDefinitionListItemDto
             {
                 Id = h.Id,
                 Type = h.Type,
-                Name = translation?.Name ?? h.Id,
+                Name = selectedTranslation?.Name ?? h.Id,
                 Image = h.Image,
                 Status = h.Status,
                 UpdatedAt = h.UpdatedAt,
-                CreatedByUserId = h.CreatedByUserId
+                CreatedByUserId = h.CreatedByUserId,
+                AvailableLanguages = availableLanguages
             };
         }).ToList();
 

@@ -34,25 +34,39 @@ public class AnimalService : IAnimalService
         return MapToDto(animal, languageCode);
     }
 
-    public async Task<ListAnimalsResponse> ListAsync(string? status = null, Guid? regionId = null, bool? isHybrid = null, string? search = null, CancellationToken ct = default)
+    public async Task<ListAnimalsResponse> ListAsync(string? status = null, Guid? regionId = null, bool? isHybrid = null, string? search = null, string? languageCode = null, CancellationToken ct = default)
     {
         var animals = await _repository.ListAsync(status, regionId, isHybrid, search, ct);
         var totalCount = await _repository.CountAsync(status, regionId, isHybrid, ct);
 
         var items = animals.Select(a =>
         {
-            var translation = a.Translations.FirstOrDefault();
+            // Get translation for selected language, or first available
+            AnimalTranslation? selectedTranslation = null;
+            if (!string.IsNullOrWhiteSpace(languageCode))
+            {
+                var normalizedLang = languageCode.ToLowerInvariant();
+                selectedTranslation = a.Translations.FirstOrDefault(t => t.LanguageCode.ToLowerInvariant() == normalizedLang);
+            }
+            
+            // Fallback to first translation if no match
+            selectedTranslation ??= a.Translations.FirstOrDefault();
+            
+            // Get all available language codes
+            var availableLanguages = a.Translations.Select(t => t.LanguageCode.ToLowerInvariant()).ToList();
+            
             return new AnimalListItemDto
             {
                 Id = a.Id,
-                Label = translation?.Label ?? a.Label,
+                Label = selectedTranslation?.Label ?? a.Label,
                 Src = a.Src,
                 IsHybrid = a.IsHybrid,
                 RegionId = a.RegionId,
                 RegionName = a.Region?.Name,
                 Status = a.Status,
                 UpdatedAt = a.UpdatedAt,
-                CreatedByUserId = a.CreatedByUserId
+                CreatedByUserId = a.CreatedByUserId,
+                AvailableLanguages = availableLanguages
             };
         }).ToList();
 

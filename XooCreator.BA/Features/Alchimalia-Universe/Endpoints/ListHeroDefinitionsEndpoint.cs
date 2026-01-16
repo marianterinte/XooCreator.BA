@@ -34,6 +34,7 @@ public class ListHeroDefinitionsEndpoint
         [FromQuery] string? status,
         [FromQuery] string? type,
         [FromQuery] string? search,
+        [FromQuery] string? language,
         [FromServices] ListHeroDefinitionsEndpoint ep,
         CancellationToken ct)
     {
@@ -46,7 +47,7 @@ public class ListHeroDefinitionsEndpoint
             return TypedResults.Forbid();
         }
 
-        var response = await ep._service.ListAsync(status, type, search, ct);
+        var response = await ep._service.ListAsync(status, type, search, language, ct);
         return TypedResults.Ok(response);
     }
 }

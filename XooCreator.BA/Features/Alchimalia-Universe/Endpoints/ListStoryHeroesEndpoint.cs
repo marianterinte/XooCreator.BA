@@ -33,6 +33,7 @@ public class ListStoryHeroesEndpoint
         [FromRoute] string locale,
         [FromQuery] string? status,
         [FromQuery] string? search,
+        [FromQuery] string? language,
         [FromServices] ListStoryHeroesEndpoint ep,
         CancellationToken ct)
     {
@@ -45,7 +46,7 @@ public class ListStoryHeroesEndpoint
             return TypedResults.Forbid();
         }
 
-        var response = await ep._service.ListAsync(status, search, ct);
+        var response = await ep._service.ListAsync(status, search, language, ct);
         return TypedResults.Ok(response);
     }
 }
