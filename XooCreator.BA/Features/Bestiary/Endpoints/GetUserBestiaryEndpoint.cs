@@ -91,12 +91,12 @@ public sealed class GetUserBestiaryEndpoint
             var (name, story) = ep.ResolveText(item, locale, heroTranslations, storyHeroes, storyHeroTranslations);
             var imageUrl = ep.ResolveImageUrl(item, heroDefinitions, storyHeroes);
             return new BestiaryItemDto(
-                item.Id,
+            item.Id,
                 name,
                 imageUrl,
                 story,
-                item.DiscoveredAt,
-                item.BestiaryType
+            item.DiscoveredAt,
+            item.BestiaryType
             );
         }).ToList();
 

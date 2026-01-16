@@ -90,11 +90,11 @@ INSERT INTO "alchimalia_schema"."AnimalDefinitionPartSupports" (
     "AnimalDefinitionId", "BodyPartKey"
 )
 SELECT
-    aps."AnimalId", aps."BodyPartKey"
+    aps."AnimalId", aps."PartKey"
 FROM "alchimalia_schema"."AnimalPartSupports" aps
 WHERE NOT EXISTS (
     SELECT 1 FROM "alchimalia_schema"."AnimalDefinitionPartSupports" dps
-    WHERE dps."AnimalDefinitionId" = aps."AnimalId" AND dps."BodyPartKey" = aps."BodyPartKey"
+    WHERE dps."AnimalDefinitionId" = aps."AnimalId" AND dps."BodyPartKey" = aps."PartKey"
 );
 
 -- =========================
@@ -127,11 +127,11 @@ INSERT INTO "alchimalia_schema"."AnimalCraftPartSupports" (
     "AnimalCraftId", "BodyPartKey"
 )
 SELECT
-    aps."AnimalId", aps."BodyPartKey"
+    aps."AnimalId", aps."PartKey"
 FROM "alchimalia_schema"."AnimalPartSupports" aps
 WHERE NOT EXISTS (
     SELECT 1 FROM "alchimalia_schema"."AnimalCraftPartSupports" cps
-    WHERE cps."AnimalCraftId" = aps."AnimalId" AND cps."BodyPartKey" = aps."BodyPartKey"
+    WHERE cps."AnimalCraftId" = aps."AnimalId" AND cps."BodyPartKey" = aps."PartKey"
 );
 
 COMMIT;

@@ -39,7 +39,7 @@ public class AnimalCraftService : IAnimalCraftService
 
         var items = animals.Select(a =>
         {
-            AnimalTranslation? selectedTranslation = null;
+            AnimalCraftTranslation? selectedTranslation = null;
             if (!string.IsNullOrWhiteSpace(languageCode))
             {
                 var normalizedLang = languageCode.ToLowerInvariant();

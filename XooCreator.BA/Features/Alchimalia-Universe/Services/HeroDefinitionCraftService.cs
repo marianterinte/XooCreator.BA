@@ -39,7 +39,7 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
 
         var items = heroes.Select(h =>
         {
-            HeroDefinitionTranslation? selectedTranslation = null;
+            HeroDefinitionCraftTranslation? selectedTranslation = null;
             if (!string.IsNullOrWhiteSpace(languageCode))
             {
                 var normalizedLang = languageCode.ToLowerInvariant();
