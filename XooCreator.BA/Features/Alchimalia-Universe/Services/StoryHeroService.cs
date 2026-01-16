@@ -1,4 +1,4 @@
-using XooCreator.BA.Data.Entities;
+using XooCreator.BA.Data;
 using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Features.AlchimaliaUniverse.DTOs;
 using XooCreator.BA.Features.AlchimaliaUniverse.Repositories;

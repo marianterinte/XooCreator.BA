@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
-using XooCreator.BA.Data.Entities;
+using XooCreator.BA.Data;
 
 namespace XooCreator.BA.Features.AlchimaliaUniverse.Repositories;
 

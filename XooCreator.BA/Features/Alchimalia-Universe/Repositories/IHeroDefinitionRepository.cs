@@ -1,4 +1,4 @@
-using XooCreator.BA.Data.Entities;
+using XooCreator.BA.Data;
 
 namespace XooCreator.BA.Features.AlchimaliaUniverse.Repositories;
 

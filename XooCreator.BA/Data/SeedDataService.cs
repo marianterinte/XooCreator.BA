@@ -124,8 +124,8 @@ public class SeedDataService
             Id = GetFixedStoryHeroId(sh.HeroId), // Use fixed IDs for seeding
             HeroId = sh.HeroId,
             ImageUrl = sh.ImageUrl,
-            UnlockConditionJson = JsonSerializer.Serialize(sh.UnlockConditions),
-            IsActive = true,
+            UnlockConditionsJson = JsonSerializer.Serialize(sh.UnlockConditions),
+            Status = AlchimaliaUniverseStatus.Published.ToDb(),
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         }).ToList() ?? new List<StoryHero>();
@@ -138,7 +138,7 @@ public class SeedDataService
 
         foreach (var storyHero in storyHeroes)
         {
-            var unlockConditions = JsonSerializer.Deserialize<UnlockConditions>(storyHero.UnlockConditionJson);
+            var unlockConditions = JsonSerializer.Deserialize<UnlockConditions>(storyHero.UnlockConditionsJson);
             if (unlockConditions?.RequiredStories != null)
             {
                 foreach (var storyId in unlockConditions.RequiredStories)

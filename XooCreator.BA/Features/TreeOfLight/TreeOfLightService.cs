@@ -208,7 +208,7 @@ public class TreeOfLightService : ITreeOfLightService
                 continue;
             }
 
-            var unlockConditions = JsonSerializer.Deserialize<UnlockConditions>(storyHero.UnlockConditionJson);
+            var unlockConditions = JsonSerializer.Deserialize<UnlockConditions>(storyHero.UnlockConditionsJson);
             if (unlockConditions?.Type == "story_completion" && unlockConditions.RequiredStories != null)
             {
                 if (unlockConditions.RequiredStories.Contains(storyId))

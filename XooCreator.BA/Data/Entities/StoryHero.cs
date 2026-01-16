@@ -37,28 +37,6 @@ public class StoryHero
 }
 
 /// <summary>
-/// Translation for StoryHero (Name, Description, GreetingText, GreetingAudioUrl per language)
-/// </summary>
-public class StoryHeroTranslation
-{
-    public Guid Id { get; set; }
-    public Guid StoryHeroId { get; set; }
-    
-    [MaxLength(10)]
-    public string LanguageCode { get; set; } = "en-us"; // "en-us", "ro-ro", "hu-hu"
-    
-    [MaxLength(255)]
-    public string Name { get; set; } = string.Empty;
-    public string? Description { get; set; }
-    public string? GreetingText { get; set; }
-    
-    [MaxLength(500)]
-    public string? GreetingAudioUrl { get; set; } // URL pentru audio greeting (per limbă)
-
-    public StoryHero StoryHero { get; set; } = null!;
-}
-
-/// <summary>
 /// Version snapshot for StoryHero
 /// </summary>
 public class StoryHeroVersion

@@ -1,5 +1,4 @@
 using XooCreator.BA.Data;
-using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Features.AlchimaliaUniverse.DTOs;
 using XooCreator.BA.Features.AlchimaliaUniverse.Repositories;
@@ -97,9 +96,8 @@ public class AnimalService : IAnimalService
             },
             SupportedParts = request.SupportedParts.Select(partKey => new AnimalPartSupport
             {
-                Id = Guid.NewGuid(),
                 AnimalId = Guid.Empty, // Will be set after save
-                BodyPartKey = partKey
+                PartKey = partKey
             }).ToList()
         };
 
@@ -158,7 +156,7 @@ public class AnimalService : IAnimalService
             var existingParts = animal.SupportedParts.ToList();
             foreach (var part in existingParts)
             {
-                if (!request.SupportedParts.Contains(part.BodyPartKey))
+                if (!request.SupportedParts.Contains(part.PartKey))
                 {
                     _context.AnimalPartSupports.Remove(part);
                 }
@@ -166,13 +164,12 @@ public class AnimalService : IAnimalService
             // Add new parts
             foreach (var partKey in request.SupportedParts)
             {
-                if (!existingParts.Any(p => p.BodyPartKey == partKey))
+                if (!existingParts.Any(p => p.PartKey == partKey))
                 {
                     animal.SupportedParts.Add(new AnimalPartSupport
                     {
-                        Id = Guid.NewGuid(),
                         AnimalId = animal.Id,
-                        BodyPartKey = partKey
+                        PartKey = partKey
                     });
                 }
             }
@@ -314,7 +311,7 @@ public class AnimalService : IAnimalService
             ParentVersionId = animal.ParentVersionId,
             CreatedAt = animal.CreatedAt,
             UpdatedAt = animal.UpdatedAt,
-            SupportedParts = animal.SupportedParts.Select(p => p.BodyPartKey).ToList(),
+            SupportedParts = animal.SupportedParts.Select(p => p.PartKey).ToList(),
             Translations = animal.Translations.Select(t => new AnimalTranslationDto
             {
                 Id = t.Id,
