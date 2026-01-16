@@ -4,6 +4,7 @@ using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Features.AlchimaliaUniverse.DTOs;
 using XooCreator.BA.Features.AlchimaliaUniverse.Repositories;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
 
 namespace XooCreator.BA.Features.AlchimaliaUniverse.Services;
 
@@ -98,7 +99,11 @@ public class TreeOfHeroesConfigCraftService : ITreeOfHeroesConfigCraftService
                 CuriosityCost = n.CuriosityCost,
                 ThinkingCost = n.ThinkingCost,
                 CreativityCost = n.CreativityCost,
-                SafetyCost = n.SafetyCost
+                SafetyCost = n.SafetyCost,
+                IsStartup = n.IsStartup ?? false,
+                PrerequisitesJson = n.Prerequisites != null && n.Prerequisites.Count > 0 
+                    ? JsonSerializer.Serialize(n.Prerequisites) 
+                    : "[]"
             }).ToList(),
             Edges = request.Edges.Select(e => new TreeOfHeroesConfigCraftEdge
             {
@@ -147,7 +152,11 @@ public class TreeOfHeroesConfigCraftService : ITreeOfHeroesConfigCraftService
                 CuriosityCost = n.CuriosityCost,
                 ThinkingCost = n.ThinkingCost,
                 CreativityCost = n.CreativityCost,
-                SafetyCost = n.SafetyCost
+                SafetyCost = n.SafetyCost,
+                IsStartup = n.IsStartup ?? false,
+                PrerequisitesJson = n.Prerequisites != null && n.Prerequisites.Count > 0 
+                    ? JsonSerializer.Serialize(n.Prerequisites) 
+                    : "[]"
             }).ToList();
 
             config.Edges = edges.Select(e => new TreeOfHeroesConfigCraftEdge
@@ -236,7 +245,9 @@ public class TreeOfHeroesConfigCraftService : ITreeOfHeroesConfigCraftService
                     CuriosityCost = n.CuriosityCost,
                     ThinkingCost = n.ThinkingCost,
                     CreativityCost = n.CreativityCost,
-                    SafetyCost = n.SafetyCost
+                    SafetyCost = n.SafetyCost,
+                    IsStartup = n.IsStartup,
+                    PrerequisitesJson = n.PrerequisitesJson
                 }).ToList(),
                 Edges = config.Edges.Select(e => new TreeOfHeroesConfigDefinitionEdge
                 {
@@ -269,7 +280,9 @@ public class TreeOfHeroesConfigCraftService : ITreeOfHeroesConfigCraftService
                 CuriosityCost = n.CuriosityCost,
                 ThinkingCost = n.ThinkingCost,
                 CreativityCost = n.CreativityCost,
-                SafetyCost = n.SafetyCost
+                SafetyCost = n.SafetyCost,
+                IsStartup = n.IsStartup,
+                PrerequisitesJson = n.PrerequisitesJson
             }).ToList();
 
             definition.Edges = config.Edges.Select(e => new TreeOfHeroesConfigDefinitionEdge
@@ -337,7 +350,11 @@ public class TreeOfHeroesConfigCraftService : ITreeOfHeroesConfigCraftService
                 CuriosityCost = n.CuriosityCost,
                 ThinkingCost = n.ThinkingCost,
                 CreativityCost = n.CreativityCost,
-                SafetyCost = n.SafetyCost
+                SafetyCost = n.SafetyCost,
+                IsStartup = n.IsStartup,
+                Prerequisites = string.IsNullOrWhiteSpace(n.PrerequisitesJson) || n.PrerequisitesJson == "[]"
+                    ? new List<string>()
+                    : JsonSerializer.Deserialize<List<string>>(n.PrerequisitesJson) ?? new List<string>()
             }).ToList(),
             Edges = config.Edges.Select(e => new TreeOfHeroesConfigEdgeDto
             {

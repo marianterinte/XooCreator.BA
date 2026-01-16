@@ -52,6 +52,7 @@ public class AnimalCraftService : IAnimalCraftService
             return new AnimalCraftListItemDto
             {
                 Id = a.Id,
+                PublishedDefinitionId = a.PublishedDefinitionId,
                 Label = selectedTranslation?.Label ?? a.Label,
                 Src = a.Src,
                 IsHybrid = a.IsHybrid,
@@ -123,6 +124,90 @@ public class AnimalCraftService : IAnimalCraftService
 
         await _repository.SaveAsync(animal, ct);
         return MapToDto(animal, request.LanguageCode);
+    }
+
+    public async Task<AnimalCraftDto> CreateCraftFromDefinitionAsync(Guid userId, Guid definitionId, CancellationToken ct = default)
+    {
+        var definition = await _db.AnimalDefinitions
+            .Include(d => d.Translations)
+            .Include(d => d.SupportedParts)
+            .Include(d => d.HybridParts)
+            .FirstOrDefaultAsync(d => d.Id == definitionId, ct);
+
+        if (definition == null)
+            throw new KeyNotFoundException($"AnimalDefinition with Id '{definitionId}' not found");
+
+        // Check if there's already a draft craft for this definition
+        var existingCraft = await _db.AnimalCrafts
+            .FirstOrDefaultAsync(c => c.PublishedDefinitionId == definitionId && 
+                (c.Status == AlchimaliaUniverseStatus.Draft.ToDb() || 
+                 c.Status == AlchimaliaUniverseStatus.ChangesRequested.ToDb()), ct);
+
+        if (existingCraft != null)
+        {
+            // Return existing draft instead of creating a new one
+            return await GetAsync(existingCraft.Id, null, ct);
+        }
+
+        // Validate hybrid parts if this is a hybrid
+        if (definition.IsHybrid && definition.HybridParts.Any())
+        {
+            var hybridParts = definition.HybridParts.Select(p => new AnimalHybridPartDto
+            {
+                SourceAnimalId = p.SourceAnimalId,
+                BodyPartKey = p.BodyPartKey,
+                OrderIndex = p.OrderIndex
+            }).ToList();
+            await ValidateHybridPartsAsync(hybridParts, ct);
+        }
+
+        var animal = new AnimalCraft
+        {
+            Id = Guid.NewGuid(),
+            PublishedDefinitionId = definitionId,
+            Label = definition.Label,
+            Src = definition.Src,
+            IsHybrid = definition.IsHybrid,
+            RegionId = definition.RegionId,
+            Status = AlchimaliaUniverseStatus.Draft.ToDb(),
+            CreatedByUserId = userId,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+            Translations = definition.Translations.Select(t => new AnimalCraftTranslation
+            {
+                Id = Guid.NewGuid(),
+                AnimalCraftId = Guid.Empty, // set after save
+                LanguageCode = t.LanguageCode,
+                Label = t.Label,
+                AudioUrl = t.AudioUrl
+            }).ToList(),
+            SupportedParts = definition.SupportedParts.Select(p => new AnimalCraftPartSupport
+            {
+                AnimalCraftId = Guid.Empty, // set after save
+                BodyPartKey = p.BodyPartKey
+            }).ToList(),
+            HybridParts = definition.HybridParts.Select(p => new AnimalHybridCraftPart
+            {
+                Id = Guid.NewGuid(),
+                AnimalCraftId = Guid.Empty, // set after save
+                SourceAnimalId = p.SourceAnimalId,
+                BodyPartKey = p.BodyPartKey,
+                OrderIndex = p.OrderIndex
+            }).ToList()
+        };
+
+        await _repository.CreateAsync(animal, ct);
+
+        foreach (var translation in animal.Translations)
+            translation.AnimalCraftId = animal.Id;
+        foreach (var part in animal.SupportedParts)
+            part.AnimalCraftId = animal.Id;
+        foreach (var hybrid in animal.HybridParts)
+            hybrid.AnimalCraftId = animal.Id;
+
+        await _repository.SaveAsync(animal, ct);
+        _logger.LogInformation("AnimalCraft {AnimalId} created from definition {DefinitionId} by user {UserId}", animal.Id, definitionId, userId);
+        return MapToDto(animal);
     }
 
     public async Task<AnimalCraftDto> UpdateAsync(Guid userId, Guid animalId, UpdateAnimalCraftRequest request, CancellationToken ct = default)

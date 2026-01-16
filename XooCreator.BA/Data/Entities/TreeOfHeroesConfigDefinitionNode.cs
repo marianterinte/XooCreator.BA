@@ -12,6 +12,8 @@ public class TreeOfHeroesConfigDefinitionNode
     public int ThinkingCost { get; set; }
     public int CreativityCost { get; set; }
     public int SafetyCost { get; set; }
+    public bool IsStartup { get; set; }
+    public string PrerequisitesJson { get; set; } = "[]"; // JSON array of hero definition IDs
 
     public TreeOfHeroesConfigDefinition Config { get; set; } = null!;
     public HeroDefinitionDefinition HeroDefinition { get; set; } = null!;

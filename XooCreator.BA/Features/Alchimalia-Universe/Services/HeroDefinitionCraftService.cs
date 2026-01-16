@@ -52,6 +52,7 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
             return new HeroDefinitionCraftListItemDto
             {
                 Id = h.Id,
+                PublishedDefinitionId = h.PublishedDefinitionId,
                 Type = h.Type,
                 Name = selectedTranslation?.Name ?? h.Id,
                 Image = h.Image,
@@ -116,6 +117,69 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
 
         await _repository.CreateAsync(hero, ct);
         return MapToDto(hero, request.LanguageCode);
+    }
+
+    public async Task<HeroDefinitionCraftDto> CreateCraftFromDefinitionAsync(Guid userId, string definitionId, CancellationToken ct = default)
+    {
+        var definition = await _db.HeroDefinitionDefinitions
+            .Include(d => d.Translations)
+            .FirstOrDefaultAsync(d => d.Id == definitionId, ct);
+
+        if (definition == null)
+            throw new KeyNotFoundException($"HeroDefinitionDefinition with Id '{definitionId}' not found");
+
+        // Check if there's already a draft craft for this definition
+        var existingCraft = await _db.HeroDefinitionCrafts
+            .FirstOrDefaultAsync(c => c.PublishedDefinitionId == definitionId && 
+                (c.Status == AlchimaliaUniverseStatus.Draft.ToDb() || 
+                 c.Status == AlchimaliaUniverseStatus.ChangesRequested.ToDb()), ct);
+
+        if (existingCraft != null)
+        {
+            // Return existing draft instead of creating a new one
+            return await GetAsync(existingCraft.Id, null, ct);
+        }
+
+        var hero = new HeroDefinitionCraft
+        {
+            Id = $"hero_{DateTime.UtcNow:yyyyMMddHHmmssfff}",
+            PublishedDefinitionId = definitionId,
+            Type = definition.Type,
+            CourageCost = definition.CourageCost,
+            CuriosityCost = definition.CuriosityCost,
+            ThinkingCost = definition.ThinkingCost,
+            CreativityCost = definition.CreativityCost,
+            SafetyCost = definition.SafetyCost,
+            PrerequisitesJson = definition.PrerequisitesJson,
+            RewardsJson = definition.RewardsJson,
+            IsUnlocked = definition.IsUnlocked,
+            PositionX = definition.PositionX,
+            PositionY = definition.PositionY,
+            Image = definition.Image,
+            Status = AlchimaliaUniverseStatus.Draft.ToDb(),
+            CreatedByUserId = userId,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+            Translations = definition.Translations.Select(t => new HeroDefinitionCraftTranslation
+            {
+                Id = Guid.NewGuid(),
+                HeroDefinitionCraftId = string.Empty, // set after save
+                LanguageCode = t.LanguageCode,
+                Name = t.Name,
+                Description = t.Description,
+                Story = t.Story,
+                AudioUrl = t.AudioUrl
+            }).ToList()
+        };
+
+        await _repository.CreateAsync(hero, ct);
+
+        foreach (var translation in hero.Translations)
+            translation.HeroDefinitionCraftId = hero.Id;
+
+        await _repository.SaveAsync(hero, ct);
+        _logger.LogInformation("HeroDefinitionCraft {HeroId} created from definition {DefinitionId} by user {UserId}", hero.Id, definitionId, userId);
+        return MapToDto(hero);
     }
 
     public async Task<HeroDefinitionCraftDto> UpdateAsync(Guid userId, string heroId, UpdateHeroDefinitionCraftRequest request, CancellationToken ct = default)

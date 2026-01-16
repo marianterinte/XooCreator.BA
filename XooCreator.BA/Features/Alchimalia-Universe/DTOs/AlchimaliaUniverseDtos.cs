@@ -134,6 +134,7 @@ public record HeroDefinitionCraftDto
 public record HeroDefinitionCraftListItemDto
 {
     public required string Id { get; init; }
+    public string? PublishedDefinitionId { get; init; }
     public required string Type { get; init; }
     public required string Name { get; init; }
     public string? Image { get; init; }
@@ -208,6 +209,8 @@ public record TreeOfHeroesConfigNodeDto
     public int ThinkingCost { get; init; }
     public int CreativityCost { get; init; }
     public int SafetyCost { get; init; }
+    public bool? IsStartup { get; init; }
+    public List<string>? Prerequisites { get; init; } // Array of hero definition IDs that must be unlocked before this node
 }
 
 public record TreeOfHeroesConfigEdgeDto
@@ -402,6 +405,7 @@ public record AnimalCraftDto
 public record AnimalCraftListItemDto
 {
     public Guid Id { get; init; }
+    public Guid? PublishedDefinitionId { get; init; }
     public required string Label { get; init; }
     public string? Src { get; init; }
     public bool IsHybrid { get; init; }
