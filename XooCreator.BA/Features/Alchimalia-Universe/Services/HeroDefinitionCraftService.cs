@@ -53,7 +53,6 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
             {
                 Id = h.Id,
                 PublishedDefinitionId = h.PublishedDefinitionId,
-                Type = h.Type,
                 Name = selectedTranslation?.Name ?? h.Id,
                 Image = h.Image,
                 Status = h.Status,
@@ -80,12 +79,9 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
         if (existing != null)
             throw new InvalidOperationException($"HeroDefinitionCraft with Id '{heroId}' already exists");
 
-        var heroType = string.IsNullOrWhiteSpace(request.Type) ? "hero" : request.Type.Trim();
-
         var hero = new HeroDefinitionCraft
         {
             Id = heroId,
-            Type = heroType,
             CourageCost = request.CourageCost ?? 0,
             CuriosityCost = request.CuriosityCost ?? 0,
             ThinkingCost = request.ThinkingCost ?? 0,
@@ -144,7 +140,6 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
         {
             Id = $"hero_{DateTime.UtcNow:yyyyMMddHHmmssfff}",
             PublishedDefinitionId = definitionId,
-            Type = definition.Type,
             CourageCost = definition.CourageCost,
             CuriosityCost = definition.CuriosityCost,
             ThinkingCost = definition.ThinkingCost,
@@ -195,7 +190,6 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
         if (hero.CreatedByUserId != userId)
             throw new UnauthorizedAccessException("Only the creator can update this HeroDefinitionCraft");
 
-        if (request.Type != null) hero.Type = request.Type;
         if (request.CourageCost.HasValue) hero.CourageCost = request.CourageCost.Value;
         if (request.CuriosityCost.HasValue) hero.CuriosityCost = request.CuriosityCost.Value;
         if (request.ThinkingCost.HasValue) hero.ThinkingCost = request.ThinkingCost.Value;
@@ -298,7 +292,6 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
             definition = new HeroDefinitionDefinition
             {
                 Id = definitionId,
-                Type = hero.Type,
                 CourageCost = hero.CourageCost,
                 CuriosityCost = hero.CuriosityCost,
                 ThinkingCost = hero.ThinkingCost,
@@ -329,7 +322,6 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
         }
         else
         {
-            definition.Type = hero.Type;
             definition.CourageCost = hero.CourageCost;
             definition.CuriosityCost = hero.CuriosityCost;
             definition.ThinkingCost = hero.ThinkingCost;
@@ -373,7 +365,6 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
         {
             Id = hero.Id,
             PublishedDefinitionId = hero.PublishedDefinitionId,
-            Type = hero.Type,
             CourageCost = hero.CourageCost,
             CuriosityCost = hero.CuriosityCost,
             ThinkingCost = hero.ThinkingCost,

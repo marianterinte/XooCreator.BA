@@ -8,8 +8,6 @@ public class HeroDefinition
     [Key]
     public string Id { get; set; } = string.Empty;
 
-    public string Type { get; set; } = string.Empty;
-
     public int CourageCost { get; set; }
     public int CuriosityCost { get; set; }
     public int ThinkingCost { get; set; }

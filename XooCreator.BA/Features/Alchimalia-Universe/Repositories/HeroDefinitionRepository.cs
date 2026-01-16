@@ -71,10 +71,7 @@ public class HeroDefinitionRepository : IHeroDefinitionRepository
             query = query.Where(x => x.Status == status);
         }
         
-        if (!string.IsNullOrWhiteSpace(type))
-        {
-            query = query.Where(x => x.Type == type);
-        }
+        // Type parameter kept for backward compatibility but no longer used
         
         if (!string.IsNullOrWhiteSpace(search))
         {
@@ -97,10 +94,7 @@ public class HeroDefinitionRepository : IHeroDefinitionRepository
             query = query.Where(x => x.Status == status);
         }
         
-        if (!string.IsNullOrWhiteSpace(type))
-        {
-            query = query.Where(x => x.Type == type);
-        }
+        // Type parameter kept for backward compatibility but no longer used
         
         return await query.CountAsync(ct);
     }

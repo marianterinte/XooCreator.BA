@@ -57,6 +57,7 @@ public class HeroDefinitionCraftRepository : IHeroDefinitionCraftRepository
     }
 
     public async Task<List<HeroDefinitionCraft>> ListAsync(string? status = null, string? type = null, string? search = null, CancellationToken ct = default)
+        // Type parameter kept for backward compatibility but no longer used
     {
         var query = _context.HeroDefinitionCrafts
             .Include(x => x.Translations)
@@ -64,9 +65,6 @@ public class HeroDefinitionCraftRepository : IHeroDefinitionCraftRepository
 
         if (!string.IsNullOrWhiteSpace(status))
             query = query.Where(x => x.Status == status);
-
-        if (!string.IsNullOrWhiteSpace(type))
-            query = query.Where(x => x.Type == type);
 
         if (!string.IsNullOrWhiteSpace(search))
             query = query.Where(x => x.Id.Contains(search) || x.Translations.Any(t => t.Name.Contains(search)));
@@ -81,8 +79,7 @@ public class HeroDefinitionCraftRepository : IHeroDefinitionCraftRepository
         var query = _context.HeroDefinitionCrafts.AsQueryable();
         if (!string.IsNullOrWhiteSpace(status))
             query = query.Where(x => x.Status == status);
-        if (!string.IsNullOrWhiteSpace(type))
-            query = query.Where(x => x.Type == type);
+        // Type parameter kept for backward compatibility but no longer used
         return await query.CountAsync(ct);
     }
 }

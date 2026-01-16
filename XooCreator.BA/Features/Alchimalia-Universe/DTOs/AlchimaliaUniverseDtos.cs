@@ -7,7 +7,6 @@ namespace XooCreator.BA.Features.AlchimaliaUniverse.DTOs;
 public record HeroDefinitionDto
 {
     public required string Id { get; init; }
-    public required string Type { get; init; }
     public int CourageCost { get; init; }
     public int CuriosityCost { get; init; }
     public int ThinkingCost { get; init; }
@@ -43,7 +42,6 @@ public record HeroDefinitionTranslationDto
 public record HeroDefinitionListItemDto
 {
     public required string Id { get; init; }
-    public required string Type { get; init; }
     public required string Name { get; init; } // From translation (for selected language or first available)
     public string? Image { get; init; }
     public required string Status { get; init; }
@@ -55,7 +53,6 @@ public record HeroDefinitionListItemDto
 public record CreateHeroDefinitionRequest
 {
     public string? Id { get; init; }
-    public string? Type { get; init; }
     public int? CourageCost { get; init; }
     public int? CuriosityCost { get; init; }
     public int? ThinkingCost { get; init; }
@@ -75,7 +72,6 @@ public record CreateHeroDefinitionRequest
 
 public record UpdateHeroDefinitionRequest
 {
-    public string? Type { get; init; }
     public int? CourageCost { get; init; }
     public int? CuriosityCost { get; init; }
     public int? ThinkingCost { get; init; }
@@ -110,7 +106,6 @@ public record HeroDefinitionCraftDto
 {
     public required string Id { get; init; }
     public string? PublishedDefinitionId { get; init; }
-    public required string Type { get; init; }
     public int CourageCost { get; init; }
     public int CuriosityCost { get; init; }
     public int ThinkingCost { get; init; }
@@ -135,7 +130,6 @@ public record HeroDefinitionCraftListItemDto
 {
     public required string Id { get; init; }
     public string? PublishedDefinitionId { get; init; }
-    public required string Type { get; init; }
     public required string Name { get; init; }
     public string? Image { get; init; }
     public required string Status { get; init; }
@@ -147,7 +141,6 @@ public record HeroDefinitionCraftListItemDto
 public record CreateHeroDefinitionCraftRequest
 {
     public string? Id { get; init; }
-    public string? Type { get; init; }
     public int? CourageCost { get; init; }
     public int? CuriosityCost { get; init; }
     public int? ThinkingCost { get; init; }
@@ -167,7 +160,6 @@ public record CreateHeroDefinitionCraftRequest
 
 public record UpdateHeroDefinitionCraftRequest
 {
-    public string? Type { get; init; }
     public int? CourageCost { get; init; }
     public int? CuriosityCost { get; init; }
     public int? ThinkingCost { get; init; }

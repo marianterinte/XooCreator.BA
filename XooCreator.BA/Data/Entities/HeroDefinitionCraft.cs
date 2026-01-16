@@ -13,9 +13,6 @@ public class HeroDefinitionCraft
     [MaxLength(100)]
     public string? PublishedDefinitionId { get; set; }
 
-    [MaxLength(50)]
-    public required string Type { get; set; } = string.Empty;
-
     public int CourageCost { get; set; }
     public int CuriosityCost { get; set; }
     public int ThinkingCost { get; set; }

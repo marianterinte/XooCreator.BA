@@ -10,7 +10,6 @@ public class HeroDefinitionConfiguration : IEntityTypeConfiguration<HeroDefiniti
     {
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Id).HasMaxLength(100);
-        builder.Property(x => x.Type).HasMaxLength(50).IsRequired();
         builder.Property(x => x.PrerequisitesJson).HasMaxLength(2000);
         builder.Property(x => x.RewardsJson).HasMaxLength(2000);
         builder.Property(x => x.PositionX).HasColumnType("decimal(10,6)");

@@ -54,7 +54,6 @@ public class HeroDefinitionService : IHeroDefinitionService
             return new HeroDefinitionListItemDto
             {
                 Id = h.Id,
-                Type = h.Type,
                 Name = selectedTranslation?.Name ?? h.Id,
                 Image = h.Image,
                 Status = h.Status,
@@ -85,7 +84,6 @@ public class HeroDefinitionService : IHeroDefinitionService
         var hero = new HeroDefinition
         {
             Id = heroId,
-            Type = string.IsNullOrWhiteSpace(request.Type) ? "hero" : request.Type.Trim(),
             CourageCost = request.CourageCost ?? 0,
             CuriosityCost = request.CuriosityCost ?? 0,
             ThinkingCost = request.ThinkingCost ?? 0,
@@ -141,7 +139,6 @@ public class HeroDefinitionService : IHeroDefinitionService
         }
 
         // Update fields
-        if (request.Type != null) hero.Type = request.Type;
         if (request.CourageCost.HasValue) hero.CourageCost = request.CourageCost.Value;
         if (request.CuriosityCost.HasValue) hero.CuriosityCost = request.CuriosityCost.Value;
         if (request.ThinkingCost.HasValue) hero.ThinkingCost = request.ThinkingCost.Value;
@@ -283,7 +280,6 @@ public class HeroDefinitionService : IHeroDefinitionService
         return new HeroDefinitionDto
         {
             Id = hero.Id,
-            Type = hero.Type,
             CourageCost = hero.CourageCost,
             CuriosityCost = hero.CuriosityCost,
             ThinkingCost = hero.ThinkingCost,

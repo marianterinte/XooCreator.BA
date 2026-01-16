@@ -10,9 +10,6 @@ public class HeroDefinitionDefinition
     [MaxLength(100)]
     public required string Id { get; set; } = string.Empty;
 
-    [MaxLength(50)]
-    public required string Type { get; set; } = string.Empty;
-
     public int CourageCost { get; set; }
     public int CuriosityCost { get; set; }
     public int ThinkingCost { get; set; }
