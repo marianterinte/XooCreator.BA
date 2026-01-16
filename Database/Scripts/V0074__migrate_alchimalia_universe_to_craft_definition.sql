@@ -69,7 +69,7 @@ INSERT INTO "alchimalia_schema"."AnimalDefinitions" (
 )
 SELECT
     a."Id", a."Label", a."Src", a."IsHybrid", a."RegionId", 'published', NULL,
-    COALESCE(a."CreatedAt", now() at time zone 'utc'), COALESCE(a."UpdatedAt", now() at time zone 'utc'), now() at time zone 'utc'
+    now() at time zone 'utc', now() at time zone 'utc', now() at time zone 'utc'
 FROM "alchimalia_schema"."Animals" a
 WHERE NOT EXISTS (
     SELECT 1 FROM "alchimalia_schema"."AnimalDefinitions" d WHERE d."Id" = a."Id"
@@ -106,7 +106,7 @@ INSERT INTO "alchimalia_schema"."AnimalCrafts" (
 )
 SELECT
     a."Id", a."Id", a."Label", a."Src", a."IsHybrid", a."RegionId",
-    'published', NULL, NULL, NULL, COALESCE(a."CreatedAt", now() at time zone 'utc'), COALESCE(a."UpdatedAt", now() at time zone 'utc')
+    'published', NULL, NULL, NULL, now() at time zone 'utc', now() at time zone 'utc'
 FROM "alchimalia_schema"."Animals" a
 WHERE NOT EXISTS (
     SELECT 1 FROM "alchimalia_schema"."AnimalCrafts" c WHERE c."Id" = a."Id"
