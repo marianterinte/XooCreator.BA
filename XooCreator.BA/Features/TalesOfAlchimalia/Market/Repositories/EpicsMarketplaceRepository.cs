@@ -167,7 +167,7 @@ public class EpicsMarketplaceRepository
                 Description = description,
                 CoverImageUrl = epic.CoverImageUrl,
                 CreatedBy = epic.OwnerUserId,
-                CreatedByName = epic.Owner?.Email ?? epic.Owner?.Name ?? "Unknown",
+                CreatedByName = epic.Owner?.Name ?? epic.Owner?.Email ?? "Unknown",
                 CreatedAt = epic.CreatedAt,
                 PublishedAtUtc = epic.PublishedAtUtc,
                 StoryCount = epic.StoryNodes.Count,

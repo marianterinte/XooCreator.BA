@@ -342,7 +342,7 @@ public sealed class MarketplaceCatalogCache : IMarketplaceCatalogCache, IMarketp
                 Description = description,
                 CoverImageUrl = epic.CoverImageUrl,
                 CreatedBy = epic.OwnerUserId,
-                CreatedByName = epic.Owner?.Email ?? epic.Owner?.Name,
+                CreatedByName = epic.Owner?.Name ?? epic.Owner?.Email,
                 CreatedAt = epic.CreatedAt,
                 PublishedAtUtc = epic.PublishedAtUtc,
                 StoryCount = epic.StoryNodes?.Count ?? 0,
