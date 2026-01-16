@@ -15,6 +15,12 @@ public class HeroDefinitionConfiguration : IEntityTypeConfiguration<HeroDefiniti
         builder.Property(x => x.RewardsJson).HasMaxLength(2000);
         builder.Property(x => x.PositionX).HasColumnType("decimal(10,6)");
         builder.Property(x => x.PositionY).HasColumnType("decimal(10,6)");
+        builder.Property(x => x.Status).HasMaxLength(50).IsRequired().HasDefaultValue("draft");
+        builder.Property(x => x.Version).IsRequired().HasDefaultValue(1);
+        builder.Property(x => x.ReviewNotes).HasMaxLength(2000);
+        builder.Property(x => x.ParentVersionId).HasMaxLength(100);
         builder.HasIndex(x => x.Id).IsUnique();
+        builder.HasIndex(x => x.Status);
+        builder.HasIndex(x => new { x.Id, x.Status });
     }
 }

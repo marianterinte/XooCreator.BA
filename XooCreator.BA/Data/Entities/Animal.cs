@@ -1,3 +1,5 @@
+using XooCreator.BA.Data.Enums;
+
 namespace XooCreator.BA.Data;
 
 public class Animal
@@ -11,6 +13,17 @@ public class Animal
     // Region relation
     public Guid RegionId { get; set; }
     public Region Region { get; set; } = null!;
+
+    // Workflow fields
+    public string Status { get; set; } = AlchimaliaUniverseStatus.Draft.ToDb();
+    public Guid? CreatedByUserId { get; set; }
+    public Guid? ReviewedByUserId { get; set; }
+    public string? ReviewNotes { get; set; }
+    public int Version { get; set; } = 1;
+    public Guid? ParentVersionId { get; set; } // FK către Animals (pentru versioning)
+    
+    public DateTime? CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 
     public ICollection<AnimalPartSupport> SupportedParts { get; set; } = new List<AnimalPartSupport>();
     public List<AnimalTranslation> Translations { get; set; } = new();

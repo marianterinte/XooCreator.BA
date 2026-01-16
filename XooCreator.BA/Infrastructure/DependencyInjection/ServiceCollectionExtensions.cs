@@ -23,6 +23,8 @@ using XooCreator.BA.Features.TalesOfAlchimalia.Market.Caching;
 using XooCreator.BA.Features.Payment.Services;
 using XooCreator.BA.Features.StoryFeedback.Repositories;
 using XooCreator.BA.Features.StoryFeedback.Services;
+using XooCreator.BA.Features.AlchimaliaUniverse.Repositories;
+using XooCreator.BA.Features.AlchimaliaUniverse.Services;
 using XooCreator.BA.Infrastructure.Services.Images;
 using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Data;
@@ -251,6 +253,24 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
+    /// Registers Alchimalia Universe editor services
+    /// </summary>
+    public static IServiceCollection AddAlchimaliaUniverseServices(this IServiceCollection services)
+    {
+        // Repositories
+        services.AddScoped<IHeroDefinitionRepository, HeroDefinitionRepository>();
+        services.AddScoped<IAnimalRepository, AnimalRepository>();
+        services.AddScoped<IStoryHeroRepository, StoryHeroRepository>();
+        
+        // Services
+        services.AddScoped<IHeroDefinitionService, HeroDefinitionService>();
+        services.AddScoped<IAnimalService, AnimalService>();
+        services.AddScoped<IStoryHeroService, StoryHeroService>();
+        
+        return services;
+    }
+
+    /// <summary>
     /// Registers all application services
     /// </summary>
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
@@ -264,6 +284,7 @@ public static class ServiceCollectionExtensions
         services.AddMarketplaceServices();
         services.AddPaymentServices();
         services.AddFeedbackServices();
+        services.AddAlchimaliaUniverseServices();
         
         return services;
     }

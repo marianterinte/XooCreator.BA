@@ -36,6 +36,7 @@ public class XooDbContext : DbContext
     public DbSet<HeroTreeProgress> HeroTreeProgress => Set<HeroTreeProgress>();
     public DbSet<HeroDefinition> HeroDefinitions => Set<HeroDefinition>();
     public DbSet<HeroDefinitionTranslation> HeroDefinitionTranslations => Set<HeroDefinitionTranslation>();
+    public DbSet<HeroDefinitionVersion> HeroDefinitionVersions => Set<HeroDefinitionVersion>();
     public DbSet<PlatformSetting> PlatformSettings => Set<PlatformSetting>();
     
     public DbSet<TreeRegion> TreeRegions => Set<TreeRegion>();
@@ -85,6 +86,8 @@ public class XooDbContext : DbContext
     public DbSet<StoryQuizAnswer> StoryQuizAnswers => Set<StoryQuizAnswer>();
     public DbSet<StoryEvaluationResult> StoryEvaluationResults => Set<StoryEvaluationResult>();
     public DbSet<StoryHero> StoryHeroes => Set<StoryHero>();
+    public DbSet<StoryHeroTranslation> StoryHeroTranslations => Set<StoryHeroTranslation>();
+    public DbSet<StoryHeroVersion> StoryHeroVersions => Set<StoryHeroVersion>();
     public DbSet<StoryHeroUnlock> StoryHeroUnlocks => Set<StoryHeroUnlock>();
     public DbSet<HeroMessage> HeroMessages => Set<HeroMessage>();
     public DbSet<HeroClickMessage> HeroClickMessages => Set<HeroClickMessage>();
@@ -94,6 +97,7 @@ public class XooDbContext : DbContext
     public DbSet<Animal> Animals => Set<Animal>();
     public DbSet<AnimalTranslation> AnimalTranslations => Set<AnimalTranslation>();
     public DbSet<AnimalPartSupport> AnimalPartSupports => Set<AnimalPartSupport>();
+    public DbSet<AnimalVersion> AnimalVersions => Set<AnimalVersion>();
     public DbSet<BuilderConfig> BuilderConfigs => Set<BuilderConfig>();
     public DbSet<Region> Regions => Set<Region>();
     
