@@ -23,6 +23,7 @@ public class AnimalCraftRepository : IAnimalCraftRepository
         return await _context.AnimalCrafts
             .Include(x => x.Translations)
             .Include(x => x.SupportedParts)
+            .Include(x => x.HybridParts)
             .FirstOrDefaultAsync(x => x.Id == animalId, ct);
     }
 
@@ -60,6 +61,7 @@ public class AnimalCraftRepository : IAnimalCraftRepository
         var query = _context.AnimalCrafts
             .Include(x => x.Translations)
             .Include(x => x.SupportedParts)
+            .Include(x => x.HybridParts)
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(status))

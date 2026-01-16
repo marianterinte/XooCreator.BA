@@ -12,6 +12,7 @@ public class AnimalDefinitionTranslationConfiguration : IEntityTypeConfiguration
         builder.HasKey(x => x.Id);
         builder.Property(x => x.LanguageCode).HasMaxLength(10).IsRequired();
         builder.Property(x => x.Label).HasMaxLength(255).IsRequired();
+        builder.Property(x => x.AudioUrl).HasMaxLength(500);
         builder.HasIndex(x => new { x.AnimalDefinitionId, x.LanguageCode }).IsUnique();
         builder.HasIndex(x => x.AnimalDefinitionId);
         builder.HasOne(x => x.AnimalDefinition).WithMany(x => x.Translations).HasForeignKey(x => x.AnimalDefinitionId).OnDelete(DeleteBehavior.Cascade);

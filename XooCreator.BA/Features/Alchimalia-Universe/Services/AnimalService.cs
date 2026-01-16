@@ -326,11 +326,13 @@ public class AnimalService : IAnimalService
             CreatedAt = animal.CreatedAt,
             UpdatedAt = animal.UpdatedAt,
             SupportedParts = animal.SupportedParts.Select(p => p.PartKey).ToList(),
+            HybridParts = new List<AnimalHybridPartDto>(),
             Translations = animal.Translations.Select(t => new AnimalTranslationDto
             {
                 Id = t.Id,
                 LanguageCode = t.LanguageCode,
-                Label = t.Label
+                Label = t.Label,
+                AudioUrl = null
             }).ToList()
         };
     }

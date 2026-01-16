@@ -32,4 +32,5 @@ public class AnimalCraft
     public Region Region { get; set; } = null!;
     public ICollection<AnimalCraftTranslation> Translations { get; set; } = new List<AnimalCraftTranslation>();
     public ICollection<AnimalCraftPartSupport> SupportedParts { get; set; } = new List<AnimalCraftPartSupport>();
+    public ICollection<AnimalHybridCraftPart> HybridParts { get; set; } = new List<AnimalHybridCraftPart>();
 }

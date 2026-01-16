@@ -18,7 +18,8 @@ SELECT
     hd."PrerequisitesJson", hd."RewardsJson", hd."IsUnlocked", hd."PositionX", hd."PositionY", hd."Image",
     'published', NULL, COALESCE(hd."CreatedAt", now() at time zone 'utc'), COALESCE(hd."UpdatedAt", now() at time zone 'utc'), now() at time zone 'utc'
 FROM "alchimalia_schema"."HeroDefinitions" hd
-WHERE NOT EXISTS (
+WHERE hd."Id" NOT IN ('puf-puf', 'linkaro', 'grubot')
+AND NOT EXISTS (
     SELECT 1 FROM "alchimalia_schema"."HeroDefinitionDefinitions" d WHERE d."Id" = hd."Id"
 );
 
@@ -28,7 +29,8 @@ INSERT INTO "alchimalia_schema"."HeroDefinitionDefinitionTranslations" (
 SELECT
     hdt."Id", hdt."HeroDefinitionId", hdt."LanguageCode", hdt."Name", hdt."Description", hdt."Story"
 FROM "alchimalia_schema"."HeroDefinitionTranslations" hdt
-WHERE NOT EXISTS (
+WHERE hdt."HeroDefinitionId" NOT IN ('puf-puf', 'linkaro', 'grubot')
+AND NOT EXISTS (
     SELECT 1 FROM "alchimalia_schema"."HeroDefinitionDefinitionTranslations" dt
     WHERE dt."HeroDefinitionDefinitionId" = hdt."HeroDefinitionId" AND dt."LanguageCode" = hdt."LanguageCode"
 );
@@ -46,7 +48,8 @@ SELECT
     hd."PrerequisitesJson", hd."RewardsJson", hd."IsUnlocked", hd."PositionX", hd."PositionY", hd."Image",
     'published', NULL, NULL, NULL, COALESCE(hd."CreatedAt", now() at time zone 'utc'), COALESCE(hd."UpdatedAt", now() at time zone 'utc')
 FROM "alchimalia_schema"."HeroDefinitions" hd
-WHERE NOT EXISTS (
+WHERE hd."Id" NOT IN ('puf-puf', 'linkaro', 'grubot')
+AND NOT EXISTS (
     SELECT 1 FROM "alchimalia_schema"."HeroDefinitionCrafts" c WHERE c."Id" = hd."Id"
 );
 
@@ -56,7 +59,8 @@ INSERT INTO "alchimalia_schema"."HeroDefinitionCraftTranslations" (
 SELECT
     hdt."Id", hdt."HeroDefinitionId", hdt."LanguageCode", hdt."Name", hdt."Description", hdt."Story"
 FROM "alchimalia_schema"."HeroDefinitionTranslations" hdt
-WHERE NOT EXISTS (
+WHERE hdt."HeroDefinitionId" NOT IN ('puf-puf', 'linkaro', 'grubot')
+AND NOT EXISTS (
     SELECT 1 FROM "alchimalia_schema"."HeroDefinitionCraftTranslations" ct
     WHERE ct."HeroDefinitionCraftId" = hdt."HeroDefinitionId" AND ct."LanguageCode" = hdt."LanguageCode"
 );

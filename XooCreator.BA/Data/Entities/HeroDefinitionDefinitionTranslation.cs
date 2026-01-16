@@ -20,6 +20,7 @@ public class HeroDefinitionDefinitionTranslation
 
     public required string Description { get; set; } = string.Empty;
     public required string Story { get; set; } = string.Empty;
+    public string? AudioUrl { get; set; }
 
     public HeroDefinitionDefinition HeroDefinitionDefinition { get; set; } = null!;
 }

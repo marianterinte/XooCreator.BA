@@ -1318,6 +1318,12 @@ INSERT INTO "alchimalia_schema"."AnimalDefinitionTranslations" ("Id", "AnimalDef
 INSERT INTO "alchimalia_schema"."AnimalCraftTranslations" ("Id", "AnimalCraftId", "LanguageCode", "Label") VALUES (uuid_generate_v4(), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'HippoGiraffeHippo'), 'ro-ro', 'Hipogafon') ON CONFLICT ("AnimalCraftId", "LanguageCode") DO NOTHING;
 INSERT INTO "alchimalia_schema"."AnimalCraftTranslations" ("Id", "AnimalCraftId", "LanguageCode", "Label") VALUES (uuid_generate_v4(), uuid_generate_v5('00000000-0000-0000-0000-000000000000', 'HippoGiraffeHippo'), 'en-us', 'Hippogaffon') ON CONFLICT ("AnimalCraftId", "LanguageCode") DO NOTHING;
 
+-- Remove legacy heroes that do not belong in Tree of Heroes
+DELETE FROM "alchimalia_schema"."HeroDefinitionCraftTranslations" WHERE "HeroDefinitionCraftId" IN ('puf-puf', 'linkaro', 'grubot');
+DELETE FROM "alchimalia_schema"."HeroDefinitionDefinitionTranslations" WHERE "HeroDefinitionDefinitionId" IN ('puf-puf', 'linkaro', 'grubot');
+DELETE FROM "alchimalia_schema"."HeroDefinitionCrafts" WHERE "Id" IN ('puf-puf', 'linkaro', 'grubot');
+DELETE FROM "alchimalia_schema"."HeroDefinitionDefinitions" WHERE "Id" IN ('puf-puf', 'linkaro', 'grubot');
+
 COMMIT;
 
 

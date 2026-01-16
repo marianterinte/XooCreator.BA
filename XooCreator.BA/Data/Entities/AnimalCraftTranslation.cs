@@ -16,6 +16,7 @@ public class AnimalCraftTranslation
 
     [MaxLength(255)]
     public required string Label { get; set; } = string.Empty;
+    public string? AudioUrl { get; set; }
 
     public AnimalCraft AnimalCraft { get; set; } = null!;
 }

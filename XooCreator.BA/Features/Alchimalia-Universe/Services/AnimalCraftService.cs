@@ -73,6 +73,8 @@ public class AnimalCraftService : IAnimalCraftService
 
     public async Task<AnimalCraftDto> CreateAsync(Guid userId, CreateAnimalCraftRequest request, CancellationToken ct = default)
     {
+        await ValidateHybridPartsAsync(request.HybridParts, ct);
+
         var animal = new AnimalCraft
         {
             Id = Guid.NewGuid(),
@@ -91,13 +93,22 @@ public class AnimalCraftService : IAnimalCraftService
                     Id = Guid.NewGuid(),
                     AnimalCraftId = Guid.Empty, // set after save
                     LanguageCode = request.LanguageCode.ToLowerInvariant(),
-                    Label = request.TranslatedLabel
+                    Label = request.TranslatedLabel,
+                    AudioUrl = null
                 }
             },
             SupportedParts = request.SupportedParts.Select(partKey => new AnimalCraftPartSupport
             {
                 AnimalCraftId = Guid.Empty,
                 BodyPartKey = partKey
+            }).ToList(),
+            HybridParts = request.HybridParts.Select(part => new AnimalHybridCraftPart
+            {
+                Id = Guid.NewGuid(),
+                AnimalCraftId = Guid.Empty,
+                SourceAnimalId = part.SourceAnimalId,
+                BodyPartKey = part.BodyPartKey,
+                OrderIndex = part.OrderIndex
             }).ToList()
         };
 
@@ -107,6 +118,8 @@ public class AnimalCraftService : IAnimalCraftService
             translation.AnimalCraftId = animal.Id;
         foreach (var part in animal.SupportedParts)
             part.AnimalCraftId = animal.Id;
+        foreach (var hybrid in animal.HybridParts)
+            hybrid.AnimalCraftId = animal.Id;
 
         await _repository.SaveAsync(animal, ct);
         return MapToDto(animal, request.LanguageCode);
@@ -143,6 +156,23 @@ public class AnimalCraftService : IAnimalCraftService
             }).ToList();
         }
 
+        if (request.HybridParts != null)
+        {
+            await ValidateHybridPartsAsync(request.HybridParts, ct);
+            var existingHybrid = animal.HybridParts.ToList();
+            foreach (var part in existingHybrid)
+                _db.AnimalHybridCraftParts.Remove(part);
+
+            animal.HybridParts = request.HybridParts.Select(part => new AnimalHybridCraftPart
+            {
+                Id = Guid.NewGuid(),
+                AnimalCraftId = animal.Id,
+                SourceAnimalId = part.SourceAnimalId,
+                BodyPartKey = part.BodyPartKey,
+                OrderIndex = part.OrderIndex
+            }).ToList();
+        }
+
         if (request.Translations != null)
         {
             foreach (var (langCode, translationDto) in request.Translations)
@@ -152,6 +182,7 @@ public class AnimalCraftService : IAnimalCraftService
                 if (existingTranslation != null)
                 {
                     existingTranslation.Label = translationDto.Label;
+                    existingTranslation.AudioUrl = translationDto.AudioUrl;
                 }
                 else
                 {
@@ -160,7 +191,8 @@ public class AnimalCraftService : IAnimalCraftService
                         Id = Guid.NewGuid(),
                         AnimalCraftId = animal.Id,
                         LanguageCode = normalizedLang,
-                        Label = translationDto.Label
+                        Label = translationDto.Label,
+                        AudioUrl = translationDto.AudioUrl
                     });
                 }
             }
@@ -168,6 +200,21 @@ public class AnimalCraftService : IAnimalCraftService
 
         await _repository.SaveAsync(animal, ct);
         return MapToDto(animal);
+    }
+
+    private async Task ValidateHybridPartsAsync(List<AnimalHybridPartDto> parts, CancellationToken ct)
+    {
+        if (parts.Count == 0) return;
+
+        var sourceIds = parts.Select(p => p.SourceAnimalId).Distinct().ToList();
+        var validSources = await _db.AnimalDefinitions
+            .Where(a => sourceIds.Contains(a.Id) && !a.IsHybrid && a.Status == AlchimaliaUniverseStatus.Published.ToDb())
+            .Select(a => a.Id)
+            .ToListAsync(ct);
+
+        var missing = sourceIds.Except(validSources).ToList();
+        if (missing.Count > 0)
+            throw new InvalidOperationException("Hybrid parts must reference published base animals only.");
     }
 
     public async Task SubmitForReviewAsync(Guid userId, Guid animalId, CancellationToken ct = default)
@@ -221,6 +268,7 @@ public class AnimalCraftService : IAnimalCraftService
         var definition = await _db.AnimalDefinitions
             .Include(d => d.Translations)
             .Include(d => d.SupportedParts)
+            .Include(d => d.HybridParts)
             .FirstOrDefaultAsync(d => d.Id == definitionId, ct);
 
         if (definition == null)
@@ -242,12 +290,21 @@ public class AnimalCraftService : IAnimalCraftService
                     Id = Guid.NewGuid(),
                     AnimalDefinitionId = definitionId,
                     LanguageCode = t.LanguageCode,
-                    Label = t.Label
+                    Label = t.Label,
+                    AudioUrl = t.AudioUrl
                 }).ToList(),
                 SupportedParts = animal.SupportedParts.Select(p => new AnimalDefinitionPartSupport
                 {
                     AnimalDefinitionId = definitionId,
                     BodyPartKey = p.BodyPartKey
+                }).ToList(),
+                HybridParts = animal.HybridParts.Select(p => new AnimalHybridDefinitionPart
+                {
+                    Id = Guid.NewGuid(),
+                    AnimalDefinitionId = definitionId,
+                    SourceAnimalId = p.SourceAnimalId,
+                    BodyPartKey = p.BodyPartKey,
+                    OrderIndex = p.OrderIndex
                 }).ToList()
             };
             _db.AnimalDefinitions.Add(definition);
@@ -269,7 +326,8 @@ public class AnimalCraftService : IAnimalCraftService
                 Id = Guid.NewGuid(),
                 AnimalDefinitionId = definitionId,
                 LanguageCode = t.LanguageCode,
-                Label = t.Label
+                Label = t.Label,
+                AudioUrl = t.AudioUrl
             }).ToList();
 
             _db.AnimalDefinitionPartSupports.RemoveRange(definition.SupportedParts);
@@ -277,6 +335,16 @@ public class AnimalCraftService : IAnimalCraftService
             {
                 AnimalDefinitionId = definitionId,
                 BodyPartKey = p.BodyPartKey
+            }).ToList();
+
+            _db.AnimalHybridDefinitionParts.RemoveRange(definition.HybridParts);
+            definition.HybridParts = animal.HybridParts.Select(p => new AnimalHybridDefinitionPart
+            {
+                Id = Guid.NewGuid(),
+                AnimalDefinitionId = definitionId,
+                SourceAnimalId = p.SourceAnimalId,
+                BodyPartKey = p.BodyPartKey,
+                OrderIndex = p.OrderIndex
             }).ToList();
         }
 
@@ -305,11 +373,18 @@ public class AnimalCraftService : IAnimalCraftService
             CreatedAt = animal.CreatedAt,
             UpdatedAt = animal.UpdatedAt,
             SupportedParts = animal.SupportedParts.Select(p => p.BodyPartKey).ToList(),
+            HybridParts = animal.HybridParts.Select(p => new AnimalHybridPartDto
+            {
+                SourceAnimalId = p.SourceAnimalId,
+                BodyPartKey = p.BodyPartKey,
+                OrderIndex = p.OrderIndex
+            }).ToList(),
             Translations = animal.Translations.Select(t => new AnimalTranslationDto
             {
                 Id = t.Id,
                 LanguageCode = t.LanguageCode,
-                Label = t.Label
+                Label = t.Label,
+                AudioUrl = t.AudioUrl
             }).ToList()
         };
     }

@@ -30,4 +30,5 @@ public class AnimalDefinition
     public Region Region { get; set; } = null!;
     public ICollection<AnimalDefinitionTranslation> Translations { get; set; } = new List<AnimalDefinitionTranslation>();
     public ICollection<AnimalDefinitionPartSupport> SupportedParts { get; set; } = new List<AnimalDefinitionPartSupport>();
+    public ICollection<AnimalHybridDefinitionPart> HybridParts { get; set; } = new List<AnimalHybridDefinitionPart>();
 }

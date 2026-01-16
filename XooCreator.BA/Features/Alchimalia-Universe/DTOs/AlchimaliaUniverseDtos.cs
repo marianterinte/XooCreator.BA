@@ -37,6 +37,7 @@ public record HeroDefinitionTranslationDto
     public required string Name { get; init; }
     public required string Description { get; init; }
     public required string Story { get; init; }
+    public string? AudioUrl { get; init; }
 }
 
 public record HeroDefinitionListItemDto
@@ -54,12 +55,12 @@ public record HeroDefinitionListItemDto
 public record CreateHeroDefinitionRequest
 {
     public string? Id { get; init; }
-    public required string Type { get; init; }
-    public int CourageCost { get; init; }
-    public int CuriosityCost { get; init; }
-    public int ThinkingCost { get; init; }
-    public int CreativityCost { get; init; }
-    public int SafetyCost { get; init; }
+    public string? Type { get; init; }
+    public int? CourageCost { get; init; }
+    public int? CuriosityCost { get; init; }
+    public int? ThinkingCost { get; init; }
+    public int? CreativityCost { get; init; }
+    public int? SafetyCost { get; init; }
     public string PrerequisitesJson { get; init; } = "[]";
     public string RewardsJson { get; init; } = "[]";
     public double PositionX { get; init; }
@@ -69,6 +70,7 @@ public record CreateHeroDefinitionRequest
     public required string Name { get; init; }
     public required string Description { get; init; }
     public required string Story { get; init; }
+    public string? AudioUrl { get; init; }
 }
 
 public record UpdateHeroDefinitionRequest
@@ -144,12 +146,12 @@ public record HeroDefinitionCraftListItemDto
 public record CreateHeroDefinitionCraftRequest
 {
     public string? Id { get; init; }
-    public required string Type { get; init; }
-    public int CourageCost { get; init; }
-    public int CuriosityCost { get; init; }
-    public int ThinkingCost { get; init; }
-    public int CreativityCost { get; init; }
-    public int SafetyCost { get; init; }
+    public string? Type { get; init; }
+    public int? CourageCost { get; init; }
+    public int? CuriosityCost { get; init; }
+    public int? ThinkingCost { get; init; }
+    public int? CreativityCost { get; init; }
+    public int? SafetyCost { get; init; }
     public string PrerequisitesJson { get; init; } = "[]";
     public string RewardsJson { get; init; } = "[]";
     public double PositionX { get; init; }
@@ -159,6 +161,7 @@ public record CreateHeroDefinitionCraftRequest
     public required string Name { get; init; }
     public required string Description { get; init; }
     public required string Story { get; init; }
+    public string? AudioUrl { get; init; }
 }
 
 public record UpdateHeroDefinitionCraftRequest
@@ -192,7 +195,107 @@ public record ListHeroDefinitionCraftsResponse
 
 #endregion
 
+#region Tree of Heroes Config DTOs
+
+public record TreeOfHeroesConfigNodeDto
+{
+    public Guid Id { get; init; }
+    public required string HeroDefinitionId { get; init; }
+    public double PositionX { get; init; }
+    public double PositionY { get; init; }
+    public int CourageCost { get; init; }
+    public int CuriosityCost { get; init; }
+    public int ThinkingCost { get; init; }
+    public int CreativityCost { get; init; }
+    public int SafetyCost { get; init; }
+}
+
+public record TreeOfHeroesConfigEdgeDto
+{
+    public Guid Id { get; init; }
+    public required string FromHeroId { get; init; }
+    public required string ToHeroId { get; init; }
+}
+
+public record TreeOfHeroesConfigCraftDto
+{
+    public Guid Id { get; init; }
+    public Guid? PublishedDefinitionId { get; init; }
+    public required string Label { get; init; }
+    public string Status { get; init; } = "draft";
+    public Guid? CreatedByUserId { get; init; }
+    public Guid? ReviewedByUserId { get; init; }
+    public string? ReviewNotes { get; init; }
+    public DateTime CreatedAt { get; init; }
+    public DateTime UpdatedAt { get; init; }
+    public List<TreeOfHeroesConfigNodeDto> Nodes { get; init; } = new();
+    public List<TreeOfHeroesConfigEdgeDto> Edges { get; init; } = new();
+}
+
+public record TreeOfHeroesConfigDefinitionDto
+{
+    public Guid Id { get; init; }
+    public required string Label { get; init; }
+    public string Status { get; init; } = "published";
+    public Guid? PublishedByUserId { get; init; }
+    public DateTime CreatedAt { get; init; }
+    public DateTime UpdatedAt { get; init; }
+    public DateTime? PublishedAtUtc { get; init; }
+    public List<TreeOfHeroesConfigNodeDto> Nodes { get; init; } = new();
+    public List<TreeOfHeroesConfigEdgeDto> Edges { get; init; } = new();
+}
+
+public record TreeOfHeroesConfigListItemDto
+{
+    public Guid Id { get; init; }
+    public required string Label { get; init; }
+    public string Status { get; init; } = "draft";
+    public DateTime UpdatedAt { get; init; }
+    public Guid? CreatedByUserId { get; init; }
+}
+
+public record CreateTreeOfHeroesConfigCraftRequest
+{
+    public required string Label { get; init; }
+    public List<TreeOfHeroesConfigNodeDto> Nodes { get; init; } = new();
+    public List<TreeOfHeroesConfigEdgeDto> Edges { get; init; } = new();
+}
+
+public record UpdateTreeOfHeroesConfigCraftRequest
+{
+    public string? Label { get; init; }
+    public List<TreeOfHeroesConfigNodeDto>? Nodes { get; init; }
+    public List<TreeOfHeroesConfigEdgeDto>? Edges { get; init; }
+}
+
+public record ReviewTreeOfHeroesConfigCraftRequest
+{
+    public required bool Approve { get; init; }
+    public string? Notes { get; init; }
+}
+
+public record ListTreeOfHeroesConfigCraftsResponse
+{
+    public List<TreeOfHeroesConfigListItemDto> Configs { get; init; } = new();
+    public int TotalCount { get; init; }
+}
+
+public record ListTreeOfHeroesConfigDefinitionsResponse
+{
+    public List<TreeOfHeroesConfigListItemDto> Configs { get; init; } = new();
+    public int TotalCount { get; init; }
+}
+
+#endregion
+
 #region Animal DTOs
+
+public record AnimalHybridPartDto
+{
+    public Guid SourceAnimalId { get; init; }
+    public required string BodyPartKey { get; init; }
+    public int OrderIndex { get; init; }
+}
 
 public record AnimalDto
 {
@@ -211,6 +314,7 @@ public record AnimalDto
     public DateTime? CreatedAt { get; init; }
     public DateTime? UpdatedAt { get; init; }
     public List<string> SupportedParts { get; init; } = new();
+    public List<AnimalHybridPartDto> HybridParts { get; init; } = new();
     public List<AnimalTranslationDto> Translations { get; init; } = new();
 }
 
@@ -219,6 +323,7 @@ public record AnimalTranslationDto
     public Guid Id { get; init; }
     public required string LanguageCode { get; init; }
     public required string Label { get; init; }
+    public string? AudioUrl { get; init; }
 }
 
 public record AnimalListItemDto
@@ -242,6 +347,7 @@ public record CreateAnimalRequest
     public bool IsHybrid { get; init; }
     public required Guid RegionId { get; init; }
     public List<string> SupportedParts { get; init; } = new();
+    public List<AnimalHybridPartDto> HybridParts { get; init; } = new();
     public required string LanguageCode { get; init; }
     public required string TranslatedLabel { get; init; }
 }
@@ -253,6 +359,7 @@ public record UpdateAnimalRequest
     public bool? IsHybrid { get; init; }
     public Guid? RegionId { get; init; }
     public List<string>? SupportedParts { get; init; }
+    public List<AnimalHybridPartDto>? HybridParts { get; init; }
     public Dictionary<string, AnimalTranslationDto>? Translations { get; init; }
 }
 
@@ -288,6 +395,7 @@ public record AnimalCraftDto
     public DateTime? CreatedAt { get; init; }
     public DateTime? UpdatedAt { get; init; }
     public List<string> SupportedParts { get; init; } = new();
+    public List<AnimalHybridPartDto> HybridParts { get; init; } = new();
     public List<AnimalTranslationDto> Translations { get; init; } = new();
 }
 
@@ -312,6 +420,7 @@ public record CreateAnimalCraftRequest
     public bool IsHybrid { get; init; }
     public required Guid RegionId { get; init; }
     public List<string> SupportedParts { get; init; } = new();
+    public List<AnimalHybridPartDto> HybridParts { get; init; } = new();
     public required string LanguageCode { get; init; }
     public required string TranslatedLabel { get; init; }
 }
@@ -323,6 +432,7 @@ public record UpdateAnimalCraftRequest
     public bool? IsHybrid { get; init; }
     public Guid? RegionId { get; init; }
     public List<string>? SupportedParts { get; init; }
+    public List<AnimalHybridPartDto>? HybridParts { get; init; }
     public Dictionary<string, AnimalTranslationDto>? Translations { get; init; }
 }
 

@@ -11,6 +11,7 @@ public class HeroDefinitionTranslationConfiguration : IEntityTypeConfiguration<H
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Id).ValueGeneratedOnAdd();
         builder.Property(x => x.LanguageCode).HasMaxLength(10);
+        builder.Property(x => x.AudioUrl).HasMaxLength(500);
         builder.HasIndex(x => new { x.HeroDefinitionId, x.LanguageCode }).IsUnique();
         builder.HasOne(x => x.HeroDefinition)
             .WithMany(s => s.Translations)

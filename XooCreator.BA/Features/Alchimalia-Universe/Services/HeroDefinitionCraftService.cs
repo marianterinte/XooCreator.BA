@@ -71,21 +71,25 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
 
     public async Task<HeroDefinitionCraftDto> CreateAsync(Guid userId, CreateHeroDefinitionCraftRequest request, CancellationToken ct = default)
     {
-        var heroId = string.IsNullOrWhiteSpace(request.Id) ? Guid.NewGuid().ToString() : request.Id.Trim();
+        var heroId = string.IsNullOrWhiteSpace(request.Id)
+            ? $"hero_{DateTime.UtcNow:yyyyMMddHHmmssfff}"
+            : request.Id.Trim();
 
         var existing = await _repository.GetAsync(heroId, ct);
         if (existing != null)
             throw new InvalidOperationException($"HeroDefinitionCraft with Id '{heroId}' already exists");
 
+        var heroType = string.IsNullOrWhiteSpace(request.Type) ? "hero" : request.Type.Trim();
+
         var hero = new HeroDefinitionCraft
         {
             Id = heroId,
-            Type = request.Type,
-            CourageCost = request.CourageCost,
-            CuriosityCost = request.CuriosityCost,
-            ThinkingCost = request.ThinkingCost,
-            CreativityCost = request.CreativityCost,
-            SafetyCost = request.SafetyCost,
+            Type = heroType,
+            CourageCost = request.CourageCost ?? 0,
+            CuriosityCost = request.CuriosityCost ?? 0,
+            ThinkingCost = request.ThinkingCost ?? 0,
+            CreativityCost = request.CreativityCost ?? 0,
+            SafetyCost = request.SafetyCost ?? 0,
             PrerequisitesJson = request.PrerequisitesJson ?? "[]",
             RewardsJson = request.RewardsJson ?? "[]",
             PositionX = request.PositionX,
@@ -104,7 +108,8 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
                     LanguageCode = request.LanguageCode.ToLowerInvariant(),
                     Name = request.Name,
                     Description = request.Description,
-                    Story = request.Story
+                    Story = request.Story,
+                    AudioUrl = request.AudioUrl
                 }
             }
         };
@@ -150,6 +155,7 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
                     existingTranslation.Name = translationDto.Name;
                     existingTranslation.Description = translationDto.Description;
                     existingTranslation.Story = translationDto.Story;
+                    existingTranslation.AudioUrl = translationDto.AudioUrl;
                 }
                 else
                 {
@@ -160,7 +166,8 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
                         LanguageCode = normalizedLang,
                         Name = translationDto.Name,
                         Description = translationDto.Description,
-                        Story = translationDto.Story
+                        Story = translationDto.Story,
+                        AudioUrl = translationDto.AudioUrl
                     });
                 }
             }
@@ -284,7 +291,8 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
                 LanguageCode = t.LanguageCode,
                 Name = t.Name,
                 Description = t.Description,
-                Story = t.Story
+                Story = t.Story,
+                AudioUrl = t.AudioUrl
             }).ToList();
         }
 
@@ -325,7 +333,8 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
                 LanguageCode = t.LanguageCode,
                 Name = t.Name,
                 Description = t.Description,
-                Story = t.Story
+                Story = t.Story,
+                AudioUrl = t.AudioUrl
             }).ToList()
         };
     }

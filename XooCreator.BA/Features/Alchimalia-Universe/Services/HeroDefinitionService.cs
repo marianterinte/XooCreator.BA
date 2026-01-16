@@ -85,12 +85,12 @@ public class HeroDefinitionService : IHeroDefinitionService
         var hero = new HeroDefinition
         {
             Id = heroId,
-            Type = request.Type,
-            CourageCost = request.CourageCost,
-            CuriosityCost = request.CuriosityCost,
-            ThinkingCost = request.ThinkingCost,
-            CreativityCost = request.CreativityCost,
-            SafetyCost = request.SafetyCost,
+            Type = string.IsNullOrWhiteSpace(request.Type) ? "hero" : request.Type.Trim(),
+            CourageCost = request.CourageCost ?? 0,
+            CuriosityCost = request.CuriosityCost ?? 0,
+            ThinkingCost = request.ThinkingCost ?? 0,
+            CreativityCost = request.CreativityCost ?? 0,
+            SafetyCost = request.SafetyCost ?? 0,
             PrerequisitesJson = request.PrerequisitesJson ?? "[]",
             RewardsJson = request.RewardsJson ?? "[]",
             PositionX = request.PositionX,
@@ -110,7 +110,8 @@ public class HeroDefinitionService : IHeroDefinitionService
                     LanguageCode = request.LanguageCode.ToLowerInvariant(),
                     Name = request.Name,
                     Description = request.Description,
-                    Story = request.Story
+                    Story = request.Story,
+                    AudioUrl = request.AudioUrl
                 }
             }
         };
@@ -166,6 +167,7 @@ public class HeroDefinitionService : IHeroDefinitionService
                     existingTranslation.Name = translationDto.Name;
                     existingTranslation.Description = translationDto.Description;
                     existingTranslation.Story = translationDto.Story;
+                    existingTranslation.AudioUrl = translationDto.AudioUrl;
                 }
                 else
                 {
@@ -176,7 +178,8 @@ public class HeroDefinitionService : IHeroDefinitionService
                         LanguageCode = normalizedLang,
                         Name = translationDto.Name,
                         Description = translationDto.Description,
-                        Story = translationDto.Story
+                        Story = translationDto.Story,
+                        AudioUrl = translationDto.AudioUrl
                     });
                 }
             }
@@ -306,7 +309,8 @@ public class HeroDefinitionService : IHeroDefinitionService
                 LanguageCode = t.LanguageCode,
                 Name = t.Name,
                 Description = t.Description,
-                Story = t.Story
+                Story = t.Story,
+                AudioUrl = t.AudioUrl
             }).ToList()
         };
     }

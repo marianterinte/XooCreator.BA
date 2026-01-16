@@ -262,6 +262,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IStoryHeroRepository, StoryHeroRepository>();
         services.AddScoped<IHeroDefinitionCraftRepository, HeroDefinitionCraftRepository>();
         services.AddScoped<IAnimalCraftRepository, AnimalCraftRepository>();
+        services.AddScoped<ITreeOfHeroesConfigCraftRepository, TreeOfHeroesConfigCraftRepository>();
         
         // Services
         services.AddScoped<IHeroDefinitionService, HeroDefinitionService>();
@@ -269,6 +270,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IStoryHeroService, StoryHeroService>();
         services.AddScoped<IHeroDefinitionCraftService, HeroDefinitionCraftService>();
         services.AddScoped<IAnimalCraftService, AnimalCraftService>();
+        services.AddScoped<ITreeOfHeroesConfigCraftService, TreeOfHeroesConfigCraftService>();
         
         return services;
     }

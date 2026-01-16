@@ -105,11 +105,21 @@ public class XooDbContext : DbContext
     public DbSet<AnimalCraft> AnimalCrafts => Set<AnimalCraft>();
     public DbSet<AnimalCraftTranslation> AnimalCraftTranslations => Set<AnimalCraftTranslation>();
     public DbSet<AnimalCraftPartSupport> AnimalCraftPartSupports => Set<AnimalCraftPartSupport>();
+    public DbSet<AnimalHybridCraftPart> AnimalHybridCraftParts => Set<AnimalHybridCraftPart>();
     public DbSet<AnimalDefinition> AnimalDefinitions => Set<AnimalDefinition>();
     public DbSet<AnimalDefinitionTranslation> AnimalDefinitionTranslations => Set<AnimalDefinitionTranslation>();
     public DbSet<AnimalDefinitionPartSupport> AnimalDefinitionPartSupports => Set<AnimalDefinitionPartSupport>();
+    public DbSet<AnimalHybridDefinitionPart> AnimalHybridDefinitionParts => Set<AnimalHybridDefinitionPart>();
     public DbSet<BuilderConfig> BuilderConfigs => Set<BuilderConfig>();
     public DbSet<Region> Regions => Set<Region>();
+
+    // Tree of Heroes configs (Craft/Definition)
+    public DbSet<TreeOfHeroesConfigCraft> TreeOfHeroesConfigCrafts => Set<TreeOfHeroesConfigCraft>();
+    public DbSet<TreeOfHeroesConfigCraftNode> TreeOfHeroesConfigCraftNodes => Set<TreeOfHeroesConfigCraftNode>();
+    public DbSet<TreeOfHeroesConfigCraftEdge> TreeOfHeroesConfigCraftEdges => Set<TreeOfHeroesConfigCraftEdge>();
+    public DbSet<TreeOfHeroesConfigDefinition> TreeOfHeroesConfigDefinitions => Set<TreeOfHeroesConfigDefinition>();
+    public DbSet<TreeOfHeroesConfigDefinitionNode> TreeOfHeroesConfigDefinitionNodes => Set<TreeOfHeroesConfigDefinitionNode>();
+    public DbSet<TreeOfHeroesConfigDefinitionEdge> TreeOfHeroesConfigDefinitionEdges => Set<TreeOfHeroesConfigDefinitionEdge>();
     
     // Story Marketplace
     public DbSet<StoryPurchase> StoryPurchases => Set<StoryPurchase>();

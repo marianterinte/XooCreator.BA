@@ -20,6 +20,7 @@ public class HeroDefinitionCraftTranslation
 
     public required string Description { get; set; } = string.Empty;
     public required string Story { get; set; } = string.Empty;
+    public string? AudioUrl { get; set; }
 
     public HeroDefinitionCraft HeroDefinitionCraft { get; set; } = null!;
 }
