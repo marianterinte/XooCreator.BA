@@ -75,7 +75,7 @@ public class UserProfileService : IUserProfileService
             var lockedParts = hasFullAccess ? new List<string>() : allParts.Except(baseUnlockedBodyPartKeys).ToList();
 
             // Animal count: if full access, all animals, otherwise base count
-            var totalAnimals = await _db.Animals.Where(a => !a.IsHybrid).CountAsync();
+            var totalAnimals = await _db.AnimalDefinitions.Where(a => !a.IsHybrid).CountAsync();
             var unlockedAnimalCount = hasFullAccess ? totalAnimals : baseUnlockedAnimalIds.Count;
 
             var userProfile = new UserProfileDto

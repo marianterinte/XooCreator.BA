@@ -20,11 +20,11 @@ public sealed class CreatureBuilderService : ICreatureBuilderService
             .Select(p => new CreatureBuilderPartDto(p.Key, p.Name, p.Image, p.IsBaseLocked))
             .ToListAsync(ct);
 
-        var animals = await _db.Animals.Where(a => !a.IsHybrid)
+        var animals = await _db.AnimalDefinitions.Where(a => !a.IsHybrid)
             .Select(a => new CreatureBuilderAnimalDto(
                 a.Src,
                 a.Label,
-                a.SupportedParts.Select(sp => sp.PartKey).ToList(),
+                a.SupportedParts.Select(sp => sp.BodyPartKey).ToList(),
                 false)
             ).ToListAsync(ct);
 
@@ -69,7 +69,7 @@ public sealed class CreatureBuilderService : ICreatureBuilderService
         )).ToList();
 
         // Get animals with lock status
-        var allAnimals = await _db.Animals
+        var allAnimals = await _db.AnimalDefinitions
             .Where(a => !a.IsHybrid)
             .Include(a => a.SupportedParts)
             .ToListAsync(ct);
@@ -98,7 +98,7 @@ public sealed class CreatureBuilderService : ICreatureBuilderService
         var animals = allAnimals.Select(a => new CreatureBuilderAnimalDto(
             a.Src,
             a.Label,
-            a.SupportedParts.Select(sp => sp.PartKey).ToList(),
+            a.SupportedParts.Select(sp => sp.BodyPartKey).ToList(),
             IsLocked: !hasFullAccess && !baseUnlockedAnimalIds.Contains(a.Id.ToString())
         // Locked if no full access and not in base unlocked list
         )).ToList();

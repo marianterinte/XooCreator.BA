@@ -37,6 +37,10 @@ public class XooDbContext : DbContext
     public DbSet<HeroDefinition> HeroDefinitions => Set<HeroDefinition>();
     public DbSet<HeroDefinitionTranslation> HeroDefinitionTranslations => Set<HeroDefinitionTranslation>();
     public DbSet<HeroDefinitionVersion> HeroDefinitionVersions => Set<HeroDefinitionVersion>();
+    public DbSet<HeroDefinitionCraft> HeroDefinitionCrafts => Set<HeroDefinitionCraft>();
+    public DbSet<HeroDefinitionCraftTranslation> HeroDefinitionCraftTranslations => Set<HeroDefinitionCraftTranslation>();
+    public DbSet<HeroDefinitionDefinition> HeroDefinitionDefinitions => Set<HeroDefinitionDefinition>();
+    public DbSet<HeroDefinitionDefinitionTranslation> HeroDefinitionDefinitionTranslations => Set<HeroDefinitionDefinitionTranslation>();
     public DbSet<PlatformSetting> PlatformSettings => Set<PlatformSetting>();
     
     public DbSet<TreeRegion> TreeRegions => Set<TreeRegion>();
@@ -98,6 +102,12 @@ public class XooDbContext : DbContext
     public DbSet<AnimalTranslation> AnimalTranslations => Set<AnimalTranslation>();
     public DbSet<AnimalPartSupport> AnimalPartSupports => Set<AnimalPartSupport>();
     public DbSet<AnimalVersion> AnimalVersions => Set<AnimalVersion>();
+    public DbSet<AnimalCraft> AnimalCrafts => Set<AnimalCraft>();
+    public DbSet<AnimalCraftTranslation> AnimalCraftTranslations => Set<AnimalCraftTranslation>();
+    public DbSet<AnimalCraftPartSupport> AnimalCraftPartSupports => Set<AnimalCraftPartSupport>();
+    public DbSet<AnimalDefinition> AnimalDefinitions => Set<AnimalDefinition>();
+    public DbSet<AnimalDefinitionTranslation> AnimalDefinitionTranslations => Set<AnimalDefinitionTranslation>();
+    public DbSet<AnimalDefinitionPartSupport> AnimalDefinitionPartSupports => Set<AnimalDefinitionPartSupport>();
     public DbSet<BuilderConfig> BuilderConfigs => Set<BuilderConfig>();
     public DbSet<Region> Regions => Set<Region>();
     
@@ -175,11 +185,7 @@ public class XooDbContext : DbContext
         // Explicitly set schema for PlatformSettings table
         modelBuilder.Entity<PlatformSetting>().ToTable("PlatformSettings", _defaultSchema);
 
-        // Seed data methods
-        SeedBuilderDataFromJson(modelBuilder);
-        SeedStoryHeroesDataFromJson(modelBuilder);
-        SeedHeroMessagesDataFromJson(modelBuilder);
-        SeedStoryHeroDefinitions(modelBuilder);
+        // Seed data methods removed (JSON is no longer a runtime source)
 
         // Seed data for AlchimaliaUser and related entities
         var systemAdminUserId = Guid.Parse("33333333-3333-3333-3333-333333333333");
@@ -223,158 +229,7 @@ public class XooDbContext : DbContext
     // Removed all individual entity configurations - they are now in separate configuration files
     // in the Configurations folder and are applied via ApplyConfigurationsFromAssembly
 
-    private void SeedBuilderDataFromJson(ModelBuilder modelBuilder)
-    {
-        try
-        {
-            var seedService = new SeedDataService(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SeedData", "LaboratoryOfImagination", "i18n", "ro-ro"));
-            
-            var bodyParts = LoadDataSync(() => seedService.LoadBodyPartsAsync());
-            var regions = LoadDataSync(() => seedService.LoadRegionsAsync());
-            var animals = LoadDataSync(() => seedService.LoadAnimalsAsync());
-            var animalPartSupports = LoadDataSync(() => seedService.LoadAnimalPartSupportsAsync());
-
-            modelBuilder.Entity<BodyPart>().HasData(bodyParts);
-            modelBuilder.Entity<Region>().HasData(regions);
-            modelBuilder.Entity<Animal>().HasData(animals);
-            modelBuilder.Entity<AnimalPartSupport>().HasData(animalPartSupports);
-
-            var enPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SeedData", "LaboratoryOfImagination", "i18n", "en-us");
-            if (Directory.Exists(enPath))
-            {
-                var enSeed = new SeedDataService(enPath);
-                var bodyPartsEn = LoadDataSync(() => enSeed.LoadBodyPartsAsync());
-                var animalsEn = LoadDataSync(() => enSeed.LoadAnimalsAsync());
-
-                var bodyPartTranslations = bodyPartsEn.Select(bp => new BodyPartTranslation
-                {
-                    Id = Guid.NewGuid(),
-                    BodyPartKey = bp.Key,
-                    LanguageCode = "en-us",
-                    Name = bp.Name
-                }).ToArray();
-                modelBuilder.Entity<BodyPartTranslation>().HasData(bodyPartTranslations);
-
-                var animalTranslations = animalsEn.Select(a => new AnimalTranslation
-                {
-                    Id = Guid.NewGuid(),
-                    AnimalId = a.Id,
-                    LanguageCode = "en-us",
-                    Label = a.Label
-                }).ToArray();
-                modelBuilder.Entity<AnimalTranslation>().HasData(animalTranslations);
-            }
-        }
-        catch (Exception ex)
-        {
-            throw new InvalidOperationException("Failed to load seed data from JSON files", ex);
-        }
-    }
-
-    private static T LoadDataSync<T>(Func<Task<T>> asyncOperation)
-    {
-        return Task.Run(async () => await asyncOperation()).GetAwaiter().GetResult();
-    }
-
-    private void SeedStoryHeroesDataFromJson(ModelBuilder modelBuilder)
-    {
-        try
-        {
-            var seedService = new SeedDataService();
-            
-            var storyHeroes = LoadDataSync(() => seedService.LoadStoryHeroesAsync());
-            
-            modelBuilder.Entity<StoryHero>().HasData(storyHeroes);
-            
-            var storyHeroUnlocks = LoadDataSync(() => seedService.LoadStoryHeroUnlocksAsync());
-            modelBuilder.Entity<StoryHeroUnlock>().HasData(storyHeroUnlocks);
-        }
-        catch (Exception ex)
-        {
-            throw new InvalidOperationException("Failed to load story heroes seed data from JSON files", ex);
-        }
-    }
-
-    private void SeedHeroMessagesDataFromJson(ModelBuilder modelBuilder)
-    {
-        try
-        {
-            var seedService = new SeedDataService();
-            
-            var heroMessages = LoadDataSync(() => seedService.LoadHeroMessagesAsync());
-            modelBuilder.Entity<HeroMessage>().HasData(heroMessages);
-            
-            var heroClickMessages = LoadDataSync(() => seedService.LoadHeroClickMessagesAsync());
-            modelBuilder.Entity<HeroClickMessage>().HasData(heroClickMessages);
-        }
-        catch (Exception ex)
-        {
-            throw new InvalidOperationException("Failed to load hero messages seed data from JSON files", ex);
-        }
-    }
-
-    private void SeedStoryHeroDefinitions(ModelBuilder modelBuilder)
-    {
-        var heroDefinitions = new List<HeroDefinition>
-        {
-            new HeroDefinition
-            {
-                Id = "puf-puf",
-                Type = "STORY_HERO",
-                CourageCost = 0,
-                CuriosityCost = 0,
-                ThinkingCost = 0,
-                CreativityCost = 0,
-                SafetyCost = 0,
-                PrerequisitesJson = "[]",
-                RewardsJson = "[]",
-                IsUnlocked = false,
-                PositionX = 0,
-                PositionY = 0,
-                Image = "images/heroes/pufpufblink.gif",
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            },
-            new HeroDefinition
-            {
-                Id = "linkaro",
-                Type = "STORY_HERO",
-                CourageCost = 0,
-                CuriosityCost = 0,
-                ThinkingCost = 0,
-                CreativityCost = 0,
-                SafetyCost = 0,
-                PrerequisitesJson = "[]",
-                RewardsJson = "[]",
-                IsUnlocked = false,
-                PositionX = 0,
-                PositionY = 0,
-                Image = "images/heroes/linkaro.png",
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            },
-            new HeroDefinition
-            {
-                Id = "grubot",
-                Type = "STORY_HERO",
-                CourageCost = 0,
-                CuriosityCost = 0,
-                ThinkingCost = 0,
-                CreativityCost = 0,
-                SafetyCost = 0,
-                PrerequisitesJson = "[]",
-                RewardsJson = "[]",
-                IsUnlocked = false,
-                PositionX = 0,
-                PositionY = 0,
-                Image = "images/heroes/grubot.png",
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            }
-        };
-
-        modelBuilder.Entity<HeroDefinition>().HasData(heroDefinitions);
-    }
+    // JSON-based seeding removed; DB is the single source of truth.
 
     // REMOVED: SeedIndependentStoriesDataFromJson method
     // Independent stories are now seeded via StoriesRepository.SeedIndependentStoriesAsync()

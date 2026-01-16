@@ -102,6 +102,96 @@ public record ListHeroDefinitionsResponse
 
 #endregion
 
+#region Hero Craft DTOs
+
+public record HeroDefinitionCraftDto
+{
+    public required string Id { get; init; }
+    public string? PublishedDefinitionId { get; init; }
+    public required string Type { get; init; }
+    public int CourageCost { get; init; }
+    public int CuriosityCost { get; init; }
+    public int ThinkingCost { get; init; }
+    public int CreativityCost { get; init; }
+    public int SafetyCost { get; init; }
+    public string PrerequisitesJson { get; init; } = "[]";
+    public string RewardsJson { get; init; } = "[]";
+    public bool IsUnlocked { get; init; }
+    public double PositionX { get; init; }
+    public double PositionY { get; init; }
+    public string Image { get; init; } = string.Empty;
+    public string Status { get; init; } = "draft";
+    public Guid? CreatedByUserId { get; init; }
+    public Guid? ReviewedByUserId { get; init; }
+    public string? ReviewNotes { get; init; }
+    public DateTime CreatedAt { get; init; }
+    public DateTime UpdatedAt { get; init; }
+    public List<HeroDefinitionTranslationDto> Translations { get; init; } = new();
+}
+
+public record HeroDefinitionCraftListItemDto
+{
+    public required string Id { get; init; }
+    public required string Type { get; init; }
+    public required string Name { get; init; }
+    public string? Image { get; init; }
+    public required string Status { get; init; }
+    public DateTime UpdatedAt { get; init; }
+    public Guid? CreatedByUserId { get; init; }
+    public List<string> AvailableLanguages { get; init; } = new();
+}
+
+public record CreateHeroDefinitionCraftRequest
+{
+    public string? Id { get; init; }
+    public required string Type { get; init; }
+    public int CourageCost { get; init; }
+    public int CuriosityCost { get; init; }
+    public int ThinkingCost { get; init; }
+    public int CreativityCost { get; init; }
+    public int SafetyCost { get; init; }
+    public string PrerequisitesJson { get; init; } = "[]";
+    public string RewardsJson { get; init; } = "[]";
+    public double PositionX { get; init; }
+    public double PositionY { get; init; }
+    public string Image { get; init; } = string.Empty;
+    public required string LanguageCode { get; init; }
+    public required string Name { get; init; }
+    public required string Description { get; init; }
+    public required string Story { get; init; }
+}
+
+public record UpdateHeroDefinitionCraftRequest
+{
+    public string? Type { get; init; }
+    public int? CourageCost { get; init; }
+    public int? CuriosityCost { get; init; }
+    public int? ThinkingCost { get; init; }
+    public int? CreativityCost { get; init; }
+    public int? SafetyCost { get; init; }
+    public string? PrerequisitesJson { get; init; }
+    public string? RewardsJson { get; init; }
+    public bool? IsUnlocked { get; init; }
+    public double? PositionX { get; init; }
+    public double? PositionY { get; init; }
+    public string? Image { get; init; }
+    public Dictionary<string, HeroDefinitionTranslationDto>? Translations { get; init; }
+}
+
+public record ReviewHeroDefinitionCraftRequest
+{
+    public required bool Approve { get; init; }
+    public string? Notes { get; init; }
+}
+
+public record ListHeroDefinitionCraftsResponse
+{
+    public List<HeroDefinitionCraftListItemDto> Heroes { get; init; } = new();
+    public int TotalCount { get; init; }
+}
+
+#endregion
+
 #region Animal DTOs
 
 public record AnimalDto
@@ -175,6 +265,76 @@ public record ReviewAnimalRequest
 public record ListAnimalsResponse
 {
     public List<AnimalListItemDto> Animals { get; init; } = new();
+    public int TotalCount { get; init; }
+}
+
+#endregion
+
+#region Animal Craft DTOs
+
+public record AnimalCraftDto
+{
+    public Guid Id { get; init; }
+    public Guid? PublishedDefinitionId { get; init; }
+    public required string Label { get; init; }
+    public required string Src { get; init; }
+    public bool IsHybrid { get; init; }
+    public Guid RegionId { get; init; }
+    public string? RegionName { get; init; }
+    public string Status { get; init; } = "draft";
+    public Guid? CreatedByUserId { get; init; }
+    public Guid? ReviewedByUserId { get; init; }
+    public string? ReviewNotes { get; init; }
+    public DateTime? CreatedAt { get; init; }
+    public DateTime? UpdatedAt { get; init; }
+    public List<string> SupportedParts { get; init; } = new();
+    public List<AnimalTranslationDto> Translations { get; init; } = new();
+}
+
+public record AnimalCraftListItemDto
+{
+    public Guid Id { get; init; }
+    public required string Label { get; init; }
+    public string? Src { get; init; }
+    public bool IsHybrid { get; init; }
+    public Guid RegionId { get; init; }
+    public string? RegionName { get; init; }
+    public required string Status { get; init; }
+    public DateTime? UpdatedAt { get; init; }
+    public Guid? CreatedByUserId { get; init; }
+    public List<string> AvailableLanguages { get; init; } = new();
+}
+
+public record CreateAnimalCraftRequest
+{
+    public required string Label { get; init; }
+    public required string Src { get; init; }
+    public bool IsHybrid { get; init; }
+    public required Guid RegionId { get; init; }
+    public List<string> SupportedParts { get; init; } = new();
+    public required string LanguageCode { get; init; }
+    public required string TranslatedLabel { get; init; }
+}
+
+public record UpdateAnimalCraftRequest
+{
+    public string? Label { get; init; }
+    public string? Src { get; init; }
+    public bool? IsHybrid { get; init; }
+    public Guid? RegionId { get; init; }
+    public List<string>? SupportedParts { get; init; }
+    public Dictionary<string, AnimalTranslationDto>? Translations { get; init; }
+}
+
+public record ReviewAnimalCraftRequest
+{
+    public required bool Approve { get; init; }
+    public string? Notes { get; init; }
+}
+
+public record ListAnimalCraftsResponse
+{
+    public List<AnimalCraftListItemDto> Animals { get; init; } = new();
     public int TotalCount { get; init; }
 }
 

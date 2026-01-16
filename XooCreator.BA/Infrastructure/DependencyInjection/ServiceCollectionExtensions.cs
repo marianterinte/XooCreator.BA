@@ -82,7 +82,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISeedDiscoveryService, SeedDiscoveryService>();
         services.AddScoped<IBestiaryFileUpdater, BestiaryFileUpdater>();
         services.AddScoped<IHeroDefinitionSeedService, HeroDefinitionSeedService>();
-        services.AddScoped<IHeroTreeProvider, HeroTreeProvider>();
         services.AddScoped<IStoryTopicsSeedService, StoryTopicsSeedService>();
         
         return services;
@@ -261,11 +260,15 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IHeroDefinitionRepository, HeroDefinitionRepository>();
         services.AddScoped<IAnimalRepository, AnimalRepository>();
         services.AddScoped<IStoryHeroRepository, StoryHeroRepository>();
+        services.AddScoped<IHeroDefinitionCraftRepository, HeroDefinitionCraftRepository>();
+        services.AddScoped<IAnimalCraftRepository, AnimalCraftRepository>();
         
         // Services
         services.AddScoped<IHeroDefinitionService, HeroDefinitionService>();
         services.AddScoped<IAnimalService, AnimalService>();
         services.AddScoped<IStoryHeroService, StoryHeroService>();
+        services.AddScoped<IHeroDefinitionCraftService, HeroDefinitionCraftService>();
+        services.AddScoped<IAnimalCraftService, AnimalCraftService>();
         
         return services;
     }

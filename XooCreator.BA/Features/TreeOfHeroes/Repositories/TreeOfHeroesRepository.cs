@@ -28,12 +28,10 @@ public interface ITreeOfHeroesRepository
 public class TreeOfHeroesRepository : ITreeOfHeroesRepository
 {
     private readonly XooDbContext _context;
-    private readonly IHeroTreeProvider _heroTreeProvider;
 
-    public TreeOfHeroesRepository(XooDbContext context, IHeroTreeProvider heroTreeProvider)
+    public TreeOfHeroesRepository(XooDbContext context)
     {
         _context = context;
-        _heroTreeProvider = heroTreeProvider;
     }
 
     public async Task<UserTokensDto> GetUserTokensAsync(Guid userId)
@@ -194,7 +192,7 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
 
     public async Task<List<HeroDefinitionDto>> GetHeroDefinitionsAsync(string locale)
     {
-        return await _context.HeroDefinitions
+        return await _context.HeroDefinitionDefinitions
             .Include(hd => hd.Translations)
             .Select(hd => new HeroDefinitionDto
             {
@@ -220,7 +218,7 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
 
     public async Task<HeroDefinitionDto?> GetHeroDefinitionByIdAsync(string heroId, string locale)
     {
-        var heroDefinition = await _context.HeroDefinitions
+        var heroDefinition = await _context.HeroDefinitionDefinitions
             .Include(hd => hd.Translations)
             .FirstOrDefaultAsync(hd => hd.Id == heroId);
 
@@ -252,28 +250,40 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
 
     public async Task<TreeOfHeroesConfigDto> GetTreeOfHeroesConfigAsync()
     {
-        var heroTree = await _heroTreeProvider.GetHeroTree(LanguageCode.RoRo);
-        var heroTreeStructure = await _heroTreeProvider.GetHeroTreeStructure();
+        var definitions = await _context.HeroDefinitionDefinitions
+            .Include(d => d.Translations)
+            .ToListAsync();
 
-        var heroImages = heroTree?.Nodes.Select(n => new HeroImageDto
+        var heroImages = definitions.Select(d => new HeroImageDto
         {
-            Id = n.Id,
-            Name = n.Name,
-            Image = n.Image
-        }).ToList() ?? new List<HeroImageDto>();
+            Id = d.Id,
+            Name = d.Translations.FirstOrDefault()?.Name ?? d.Id,
+            Image = d.Image
+        }).ToList();
 
         var canonicalHybridByPair = new Dictionary<string, string>();
-        if (heroTreeStructure != null)
+        foreach (var def in definitions)
         {
-            foreach (var node in heroTreeStructure.Nodes)
+            var prereqs = SafeParsePrerequisites(def.PrerequisitesJson);
+            if (prereqs.Count == 2)
             {
-                if (node.Prerequisites != null && node.Prerequisites.Count == 2)
+                var key = string.Join("|", prereqs.OrderBy(p => p));
+                if (!canonicalHybridByPair.ContainsKey(key))
                 {
-                    var key = string.Join("|", node.Prerequisites.OrderBy(p => p));
-                    canonicalHybridByPair[key] = node.Id;
+                    canonicalHybridByPair[key] = def.Id;
                 }
             }
         }
+
+        var rootId = definitions.Any(d => d.Id == "alchimalia_hero") ? "alchimalia_hero" : "seed";
+        var baseHeroIds = definitions
+            .Where(d =>
+            {
+                var prereqs = SafeParsePrerequisites(d.PrerequisitesJson);
+                return prereqs.Count == 1 && prereqs[0] == rootId;
+            })
+            .Select(d => d.Id)
+            .ToList();
 
         var config = new TreeOfHeroesConfigDto
         {
@@ -286,7 +296,7 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
                 new() { Id = "token_safety", Label = "Siguranță", Trait = "safety", Icon = "🛡️", Angle = -Math.PI * 0.95 }
             },
             HeroImages = heroImages,
-            BaseHeroIds = heroTree?.BaseHeroIds ?? new List<string>(),
+            BaseHeroIds = baseHeroIds,
             CanonicalHybridByPair = canonicalHybridByPair
         };
 
@@ -385,7 +395,7 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
         var newlyUnlockedNodes = new List<string>();
 
         // Get all hero definitions
-        var allHeroDefinitions = await _context.HeroDefinitions.ToListAsync();
+        var allHeroDefinitions = await _context.HeroDefinitionDefinitions.ToListAsync();
         
         // Get user's current progress (transformed heroes)
         var userHeroProgress = await _context.HeroProgress
@@ -410,7 +420,7 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
                 continue;
 
             // Parse prerequisites
-            var prerequisites = JsonSerializer.Deserialize<List<string>>(heroDef.PrerequisitesJson) ?? new List<string>();
+            var prerequisites = SafeParsePrerequisites(heroDef.PrerequisitesJson);
             
             // Special logic for base heroes: only unlock when seed is transformed
             if (baseHeroIds.Contains(heroDef.Id))
@@ -468,5 +478,17 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
         }
 
         return newlyUnlockedNodes;
+    }
+
+    private static List<string> SafeParsePrerequisites(string? json)
+    {
+        try
+        {
+            return JsonSerializer.Deserialize<List<string>>(json ?? "[]") ?? new List<string>();
+        }
+        catch
+        {
+            return new List<string>();
+        }
     }
 }
