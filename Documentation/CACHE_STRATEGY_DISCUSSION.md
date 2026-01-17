@@ -219,7 +219,8 @@ var purchasedIds = await _cache.GetOrCreateAsync(purchasedKey, async entry => {
 ### 1. Cache Global (per locale)
 ```csharp
 // Cache key: marketplace:stories:base:{locale}
-// TTL: 60 minute
+// TTL: 12 ore (720 minute) - configurabil în MarketplaceCacheOptions.BaseTtlMinutes
+// Motiv: Story-urile nu se publică des, deci lista nu se schimbă frecvent
 // Conține: toate proprietățile GLOBAL (fără isPurchased/isOwned)
 ```
 

@@ -17,8 +17,9 @@ Epics au **deja cache 100% global implementat** - lista de epics este complet ca
   - `marketplace:epics:base:{locale}` - datele de bază ale epic-urilor (global, per locale)
   - `marketplace:epics:stats` - statistici globale (readersCount, averageRating, totalReviews)
 - **TTL**: 
-  - Base: 60 minute (configurabil în `MarketplaceCacheOptions.BaseTtlMinutes`)
-  - Stats: 10 minute (configurabil în `MarketplaceCacheOptions.StatsTtlMinutes`)
+  - Base: 12 ore (720 minute) - configurabil în `MarketplaceCacheOptions.BaseTtlMinutes`
+  - Stats: 10 minute - configurabil în `MarketplaceCacheOptions.StatsTtlMinutes`
+  - Motiv pentru TTL mare: Story-urile/epics nu se publică des, deci lista nu se schimbă frecvent
 
 #### Repository Implementation
 - **Loc**: `Features/TalesOfAlchimalia/Market/Repositories/EpicsMarketplaceRepository.cs`
@@ -89,8 +90,9 @@ Epics au **deja cache 100% global implementat** - lista de epics este complet ca
 
 ```csharp
 // Cache key: marketplace:epics:base:{locale}
-// TTL: 60 minute (configurabil)
+// TTL: 12 ore (720 minute) - configurabil în MarketplaceCacheOptions.BaseTtlMinutes
 // Conține: toate proprietățile globale (fără user-dependent)
+// Motiv: Epics nu se publică des, deci lista nu se schimbă frecvent
 
 private async Task<IReadOnlyList<EpicMarketplaceBaseItem>> LoadEpicsBaseAsync(string locale, CancellationToken ct)
 {

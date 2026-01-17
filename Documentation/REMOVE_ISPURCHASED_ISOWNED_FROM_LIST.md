@@ -135,7 +135,7 @@ public record EpicDetailsDto
   - `marketplace:epics:base:{locale}` - datele de bază ale epic-urilor (global, per locale)
   - `marketplace:epics:stats` - statistici globale (readersCount, averageRating, totalReviews)
 - **TTL**: 
-  - Base: 60 minute (configurabil)
+  - Base: 12 ore (720 minute) - configurabil în `MarketplaceCacheOptions.BaseTtlMinutes`
   - Stats: 10 minute (configurabil)
 
 #### Repository Implementation
@@ -254,7 +254,8 @@ export interface StoryMarketplaceItem {
 ### ✅ Cache 100% Global
 - Lista de povești se cache-uiește complet (fără query-uri per-user)
 - Cache key: `marketplace:stories:base:{locale}`
-- TTL: 60 minute (configurabil)
+- TTL: 12 ore (720 minute) - configurabil în `MarketplaceCacheOptions.BaseTtlMinutes`
+- Motiv: Story-urile nu se publică des, deci lista nu se schimbă frecvent
 
 ### ✅ Performance Maximă
 - Fără query-uri DB per-user pentru listă

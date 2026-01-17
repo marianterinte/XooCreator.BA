@@ -13,8 +13,9 @@ Identificarea tuturor proprietăților care sunt user-dependent în lista de pov
   - `marketplace:stories:base:{locale}` - datele de bază ale poveștilor (global, per locale)
   - `marketplace:stories:stats` - statistici globale (readersCount, averageRating, totalReviews)
 - **TTL**: 
-  - Base: 60 minute (configurabil)
-  - Stats: 10 minute (configurabil)
+  - Base: 12 ore (720 minute) - configurabil în `MarketplaceCacheOptions.BaseTtlMinutes`
+  - Stats: 10 minute - configurabil în `MarketplaceCacheOptions.StatsTtlMinutes`
+  - **Motiv pentru TTL mare**: Story-urile nu se publică des, deci lista nu se schimbă frecvent
 
 ### Repository care folosește cache-ul
 - **Loc**: `Features/TalesOfAlchimalia/Market/StoriesMarketplaceRepository.cs`
@@ -264,14 +265,17 @@ estimatedReadingTime: number       // Nu există în backend
 ## 8. Concluzie
 
 **Proprietăți user-dependent în lista de povești**:
-1. `isPurchased` - ✅ User-dependent, query per request
-2. `isOwned` - ✅ User-dependent, query per request
-3. `AutoFilterStoriesByAge` - ✅ User-dependent, filtrează lista
-4. `SelectedAgeGroupIds` - ✅ User-dependent, filtrează lista
+1. `isPurchased` - ✅ User-dependent, query per request (se va elimina pentru cache 100% global)
+2. `isOwned` - ✅ User-dependent, query per request (se va elimina pentru cache 100% global)
+3. `AutoFilterStoriesByAge` - ✅ User-dependent, filtrează lista (rămâne - se aplică pe cache)
+4. `SelectedAgeGroupIds` - ✅ User-dependent, filtrează lista (rămâne - se aplică pe cache)
 
 **Proprietăți user-dependent în story details**:
 - Toate proprietățile de progress (`isCompleted`, `progressPercentage`, etc.)
 - `isLiked`, `userReview`
 - `unlockedStoryHeroes`
+- `isPurchased`, `isOwned` (rămân în details)
 
-**Strategia actuală este optimă** pentru cache-ul global cu overlay per-user lightweight. Nu recomandăm cache per-user pentru proprietățile de progress (se schimbă prea des).
+**Strategia recomandată**: Eliminăm `isPurchased`/`isOwned` din listă pentru cache 100% global (similar cu epics care sunt deja optimizate).
+
+**Vezi**: `EPICS_CACHE_ANALYSIS.md` pentru comparație cu implementarea epics (care este deja optimă).

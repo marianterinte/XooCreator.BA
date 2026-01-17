@@ -153,24 +153,11 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
                 .Take(pageSize)
                 .ToList();
 
-            // Per-user overlay (small, batched): purchased + owned for only the current page.
-            var pageStoryIds = pageItems.Select(p => p.StoryId).ToList();
-            var purchasedIds = await _context.StoryPurchases
-                .AsNoTracking()
-                .Where(sp => sp.UserId == userId && pageStoryIds.Contains(sp.StoryId))
-                .Select(sp => sp.StoryId)
-                .ToListAsync();
-            var purchasedSet = purchasedIds.ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-            var defIds = pageItems.Select(p => p.DefinitionId).ToList();
-            var ownedDefIds = await _context.UserOwnedStories
-                .AsNoTracking()
-                .Where(uos => uos.UserId == userId && defIds.Contains(uos.StoryDefinitionId))
-                .Select(uos => uos.StoryDefinitionId)
-                .ToListAsync();
-            var ownedSet = ownedDefIds.ToHashSet();
+            // Note: Removed per-user queries for isPurchased/isOwned to enable 100% global cache.
+            // These properties are now only available in StoryDetailsDto (loaded per request when viewing story details).
 
             // Get likes counts for page items
+            var pageStoryIds = pageItems.Select(p => p.StoryId).ToList();
             var likesCounts = new Dictionary<string, int>();
             if (_likesRepository != null)
             {
@@ -184,8 +171,6 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             var dtoList = pageItems.Select(p =>
             {
                 stats.TryGetValue(p.StoryId, out var st);
-                var isPurchased = purchasedSet.Contains(p.StoryId);
-                var isOwned = isPurchased || ownedSet.Contains(p.DefinitionId);
                 var likesCount = likesCounts.TryGetValue(p.StoryId, out var likes) ? likes : 0;
 
                 return new StoryMarketplaceItemDto
@@ -205,8 +190,6 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
                     StoryType = p.StoryType.ToString(),
                     Status = p.Status.ToString(),
                     AvailableLanguages = p.AvailableLanguages,
-                    IsPurchased = isPurchased,
-                    IsOwned = isOwned,
                     ReadersCount = st.ReadersCount,
                     LikesCount = likesCount,
                     AverageRating = st.AverageRating,
@@ -305,23 +288,11 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             .Take(5)
             .ToList();
 
-        var storyIds = featured.Select(s => s.StoryId).ToList();
-        var purchased = await _context.StoryPurchases
-            .AsNoTracking()
-            .Where(sp => sp.UserId == userId && storyIds.Contains(sp.StoryId))
-            .Select(sp => sp.StoryId)
-            .ToListAsync();
-        var purchasedSet = purchased.ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-        var defIds = featured.Select(s => s.DefinitionId).ToList();
-        var ownedDefIds = await _context.UserOwnedStories
-            .AsNoTracking()
-            .Where(uos => uos.UserId == userId && defIds.Contains(uos.StoryDefinitionId))
-            .Select(uos => uos.StoryDefinitionId)
-            .ToListAsync();
-        var ownedSet = ownedDefIds.ToHashSet();
+        // Note: Removed per-user queries for isPurchased/isOwned to enable 100% global cache.
+        // These properties are now only available in StoryDetailsDto (loaded per request when viewing story details).
 
         // Get likes counts for featured stories
+        var storyIds = featured.Select(s => s.StoryId).ToList();
         var likesCounts = new Dictionary<string, int>();
         if (_likesRepository != null)
         {
@@ -335,8 +306,6 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         return featured.Select(p =>
         {
             stats.TryGetValue(p.StoryId, out var st);
-            var isPurchased = purchasedSet.Contains(p.StoryId);
-            var isOwned = isPurchased || ownedSet.Contains(p.DefinitionId);
             var likesCount = likesCounts.TryGetValue(p.StoryId, out var likes) ? likes : 0;
 
             return new StoryMarketplaceItemDto
@@ -356,8 +325,6 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
                 StoryType = p.StoryType.ToString(),
                 Status = p.Status.ToString(),
                 AvailableLanguages = p.AvailableLanguages,
-                IsPurchased = isPurchased,
-                IsOwned = isOwned,
                 ReadersCount = st.ReadersCount,
                 LikesCount = likesCount,
                 AverageRating = st.AverageRating,
@@ -908,14 +875,8 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             ?? def.Summary 
             ?? string.Empty;
 
-        // Check if user has purchased this story
-        var isPurchased = await _context.StoryPurchases
-            .AnyAsync(sp => sp.UserId == userId && sp.StoryId == def.StoryId);
-
-        // Check if user owns this story (UserOwnedStories)
-        var ownedRow = await _context.UserOwnedStories
-            .AnyAsync(uos => uos.UserId == userId && uos.StoryDefinitionId == def.Id);
-        var isOwned = isPurchased || ownedRow;
+        // Note: Removed per-user queries for isPurchased/isOwned to enable 100% global cache.
+        // These properties are now only available in StoryDetailsDto (loaded per request when viewing story details).
 
         // Extract topic IDs from Topics collection
         var topicIds = def.Topics?
@@ -940,8 +901,6 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             StoryType = def.StoryType.ToString(),
             Status = def.Status.ToString(),
             AvailableLanguages = availableLanguages,
-            IsPurchased = isPurchased,
-            IsOwned = isOwned,
             ReadersCount = readersCount,
             LikesCount = likesCount,
             AverageRating = Math.Round(averageRating, 2),
