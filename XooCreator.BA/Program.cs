@@ -65,6 +65,8 @@ builder.Services.AddHostedService<XooCreator.BA.Features.StoryEditor.StoryEpic.S
 builder.Services.AddHostedService<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.EpicAggregatesQueueJob>();
 builder.Services.AddHostedService<HeroDefinitionVersionQueueWorker>();
 builder.Services.AddHostedService<AnimalVersionQueueWorker>();
+builder.Services.AddHostedService<HeroPublishQueueWorker>();
+builder.Services.AddHostedService<AnimalPublishQueueWorker>();
 
 builder.Services.AddAuthConfiguration(builder.Configuration);
 

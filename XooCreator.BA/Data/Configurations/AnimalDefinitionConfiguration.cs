@@ -15,7 +15,7 @@ public class AnimalDefinitionConfiguration : IEntityTypeConfiguration<AnimalDefi
         builder.Property(x => x.Status).HasMaxLength(20).IsRequired();
         builder.HasIndex(x => x.Status);
         builder.HasIndex(x => x.RegionId);
-        builder.HasOne(x => x.Region).WithMany().HasForeignKey(x => x.RegionId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(x => x.Region).WithMany().HasForeignKey(x => x.RegionId).OnDelete(DeleteBehavior.Restrict).IsRequired(false);
         builder.HasOne<AlchimaliaUser>().WithMany().HasForeignKey(x => x.PublishedByUserId).OnDelete(DeleteBehavior.SetNull);
     }
 }

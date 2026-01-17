@@ -20,7 +20,7 @@ public class AnimalDefinition
     public required string Src { get; set; } = string.Empty;
 
     public bool IsHybrid { get; set; }
-    public Guid RegionId { get; set; }
+    public Guid? RegionId { get; set; }
 
     [MaxLength(20)]
     public required string Status { get; set; } = "published";
@@ -31,7 +31,7 @@ public class AnimalDefinition
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-    public Region Region { get; set; } = null!;
+    public Region? Region { get; set; }
     public ICollection<AnimalDefinitionTranslation> Translations { get; set; } = new List<AnimalDefinitionTranslation>();
     public ICollection<AnimalDefinitionPartSupport> SupportedParts { get; set; } = new List<AnimalDefinitionPartSupport>();
     public ICollection<AnimalHybridDefinitionPart> HybridParts { get; set; } = new List<AnimalHybridDefinitionPart>();

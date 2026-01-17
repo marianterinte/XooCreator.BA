@@ -13,6 +13,8 @@ public static class JobTypes
     public const string EpicPublish = "epic-publish";
     public const string HeroVersion = "hero-version";
     public const string RegionVersion = "region-version";
+    public const string HeroPublish = "hero-publish";
+    public const string AnimalPublish = "animal-publish";
 }
 
 

@@ -277,7 +277,7 @@ public sealed class AnimalDraftSnapshot
     public sealed class DetailsState
     {
         private DetailsState(
-            string label, string src, bool isHybrid, Guid regionId)
+            string label, string src, bool isHybrid, Guid? regionId)
         {
             Label = label;
             Src = src;
@@ -292,7 +292,7 @@ public sealed class AnimalDraftSnapshot
         public string Label { get; }
         public string Src { get; }
         public bool IsHybrid { get; }
-        public Guid RegionId { get; }
+        public Guid? RegionId { get; }
         
         public string Hash { get; }
         public bool HasContent => !string.IsNullOrEmpty(Label) || !string.IsNullOrEmpty(Src);
@@ -305,10 +305,10 @@ public sealed class AnimalDraftSnapshot
             regionId = RegionId
         };
 
-        public static DetailsState Create(string label, string src, bool isHybrid, Guid regionId)
+        public static DetailsState Create(string label, string src, bool isHybrid, Guid? regionId)
             => new(label, src, isHybrid, regionId);
 
-        public static DetailsState Empty() => new(string.Empty, string.Empty, false, Guid.Empty);
+        public static DetailsState Empty() => new(string.Empty, string.Empty, false, null);
     }
 
     public sealed class TranslationState

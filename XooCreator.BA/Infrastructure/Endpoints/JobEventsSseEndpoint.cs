@@ -29,7 +29,9 @@ public sealed class JobEventsSseEndpoint
         JobTypes.EpicVersion,
         JobTypes.EpicPublish,
         JobTypes.HeroVersion,
-        JobTypes.RegionVersion
+        JobTypes.RegionVersion,
+        JobTypes.HeroPublish,
+        JobTypes.AnimalPublish
     };
 
     [Route("/api/jobs/{jobType}/{jobId}/events")]
@@ -451,6 +453,54 @@ public sealed class JobEventsSseEndpoint
                     errorMessage = job.ErrorMessage,
                     dequeueCount = job.DequeueCount,
                     baseVersion = job.BaseVersion
+                };
+
+                return new Snapshot(payload.status?.ToString() ?? string.Empty, JsonSerializer.Serialize(payload, Json));
+            }
+            case JobTypes.HeroPublish:
+            {
+                var job = await db.HeroPublishJobs.AsNoTracking().FirstOrDefaultAsync(j => j.Id == jobId, ct);
+                if (job == null) return null;
+
+                if (!auth0.HasRole(user, UserRole.Admin) && job.OwnerUserId != user.Id)
+                {
+                    return null;
+                }
+
+                var payload = new
+                {
+                    jobId = job.Id,
+                    heroId = job.HeroId,
+                    status = job.Status,
+                    queuedAtUtc = job.QueuedAtUtc,
+                    startedAtUtc = job.StartedAtUtc,
+                    completedAtUtc = job.CompletedAtUtc,
+                    errorMessage = job.ErrorMessage,
+                    dequeueCount = job.DequeueCount
+                };
+
+                return new Snapshot(payload.status?.ToString() ?? string.Empty, JsonSerializer.Serialize(payload, Json));
+            }
+            case JobTypes.AnimalPublish:
+            {
+                var job = await db.AnimalPublishJobs.AsNoTracking().FirstOrDefaultAsync(j => j.Id == jobId, ct);
+                if (job == null) return null;
+
+                if (!auth0.HasRole(user, UserRole.Admin) && job.OwnerUserId != user.Id)
+                {
+                    return null;
+                }
+
+                var payload = new
+                {
+                    jobId = job.Id,
+                    animalId = job.AnimalId,
+                    status = job.Status,
+                    queuedAtUtc = job.QueuedAtUtc,
+                    startedAtUtc = job.StartedAtUtc,
+                    completedAtUtc = job.CompletedAtUtc,
+                    errorMessage = job.ErrorMessage,
+                    dequeueCount = job.DequeueCount
                 };
 
                 return new Snapshot(payload.status?.ToString() ?? string.Empty, JsonSerializer.Serialize(payload, Json));

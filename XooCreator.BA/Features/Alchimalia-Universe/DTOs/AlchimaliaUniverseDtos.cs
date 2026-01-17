@@ -298,7 +298,7 @@ public record AnimalDto
     public required string Label { get; init; }
     public required string Src { get; init; }
     public bool IsHybrid { get; init; }
-    public Guid RegionId { get; init; }
+    public Guid? RegionId { get; init; }
     public string? RegionName { get; init; }
     public string Status { get; init; } = "draft";
     public Guid? CreatedByUserId { get; init; }
@@ -327,7 +327,7 @@ public record AnimalListItemDto
     public required string Label { get; init; } // From translation or base
     public string? Src { get; init; }
     public bool IsHybrid { get; init; }
-    public Guid RegionId { get; init; }
+    public Guid? RegionId { get; init; }
     public string? RegionName { get; init; }
     public required string Status { get; init; }
     public DateTime? UpdatedAt { get; init; }
@@ -340,7 +340,7 @@ public record CreateAnimalRequest
     public required string Label { get; init; }
     public required string Src { get; init; }
     public bool IsHybrid { get; init; }
-    public required Guid RegionId { get; init; }
+    public Guid? RegionId { get; init; }
     public List<string> SupportedParts { get; init; } = new();
     public List<AnimalHybridPartDto> HybridParts { get; init; } = new();
     public required string LanguageCode { get; init; }
@@ -381,7 +381,7 @@ public record AnimalCraftDto
     public required string Label { get; init; }
     public required string Src { get; init; }
     public bool IsHybrid { get; init; }
-    public Guid RegionId { get; init; }
+    public Guid? RegionId { get; init; }
     public string? RegionName { get; init; }
     public string Status { get; init; } = "draft";
     public Guid? CreatedByUserId { get; init; }
@@ -401,7 +401,7 @@ public record AnimalCraftListItemDto
     public required string Label { get; init; }
     public string? Src { get; init; }
     public bool IsHybrid { get; init; }
-    public Guid RegionId { get; init; }
+    public Guid? RegionId { get; init; }
     public string? RegionName { get; init; }
     public required string Status { get; init; }
     public DateTime? UpdatedAt { get; init; }
@@ -414,7 +414,7 @@ public record CreateAnimalCraftRequest
     public required string Label { get; init; }
     public required string Src { get; init; }
     public bool IsHybrid { get; init; }
-    public required Guid RegionId { get; init; }
+    public Guid? RegionId { get; init; }
     public List<string> SupportedParts { get; init; } = new();
     public List<AnimalHybridPartDto> HybridParts { get; init; } = new();
     public required string LanguageCode { get; init; }

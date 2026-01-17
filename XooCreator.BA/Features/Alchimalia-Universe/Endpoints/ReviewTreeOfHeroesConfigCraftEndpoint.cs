@@ -27,10 +27,9 @@ public class ReviewTreeOfHeroesConfigCraftEndpoint
         _logger = logger;
     }
 
-    [Route("/api/{locale}/alchimalia-universe/tree-configs/crafts/{id}/review")]
+    [Route("/api/alchimalia-universe/tree-configs/crafts/{id}/review")]
     [Authorize]
     public static async Task<Results<Ok, BadRequest<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
-        [FromRoute] string locale,
         [FromRoute] Guid id,
         [FromServices] ReviewTreeOfHeroesConfigCraftEndpoint ep,
         [FromBody] ReviewTreeOfHeroesConfigCraftRequest req,

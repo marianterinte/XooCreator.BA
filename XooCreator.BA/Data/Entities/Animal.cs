@@ -11,8 +11,8 @@ public class Animal
     public bool IsHybrid { get; set; } // false = root, true = hybrid
 
     // Region relation
-    public Guid RegionId { get; set; }
-    public Region Region { get; set; } = null!;
+    public Guid? RegionId { get; set; }
+    public Region? Region { get; set; }
 
     // Workflow fields
     public string Status { get; set; } = AlchimaliaUniverseStatus.Draft.ToDb();

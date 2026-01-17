@@ -79,11 +79,14 @@ public class AnimalService : IAnimalService
 
     public async Task<AnimalDto> CreateAsync(Guid userId, CreateAnimalRequest request, CancellationToken ct = default)
     {
-        // Verify region exists
-        var region = await _context.Regions.FirstOrDefaultAsync(r => r.Id == request.RegionId, ct);
-        if (region == null)
+        // Verify region exists if provided
+        if (request.RegionId.HasValue)
         {
-            throw new KeyNotFoundException($"Region with Id '{request.RegionId}' not found");
+            var region = await _context.Regions.FirstOrDefaultAsync(r => r.Id == request.RegionId.Value, ct);
+            if (region == null)
+            {
+                throw new KeyNotFoundException($"Region with Id '{request.RegionId.Value}' not found");
+            }
         }
 
         var animal = new Animal

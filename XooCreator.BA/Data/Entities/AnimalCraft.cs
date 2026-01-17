@@ -17,7 +17,7 @@ public class AnimalCraft
     public required string Src { get; set; } = string.Empty;
 
     public bool IsHybrid { get; set; }
-    public Guid RegionId { get; set; }
+    public Guid? RegionId { get; set; }
 
     [MaxLength(20)]
     public required string Status { get; set; } = "draft";
@@ -36,7 +36,7 @@ public class AnimalCraft
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-    public Region Region { get; set; } = null!;
+    public Region? Region { get; set; }
     public ICollection<AnimalCraftTranslation> Translations { get; set; } = new List<AnimalCraftTranslation>();
     public ICollection<AnimalCraftPartSupport> SupportedParts { get; set; } = new List<AnimalCraftPartSupport>();
     public ICollection<AnimalHybridCraftPart> HybridParts { get; set; } = new List<AnimalHybridCraftPart>();

@@ -27,10 +27,9 @@ public class ListTreeOfHeroesConfigDefinitionsEndpoint
         _logger = logger;
     }
 
-    [Route("/api/{locale}/alchimalia-universe/tree-configs/definitions")]
+    [Route("/api/alchimalia-universe/tree-configs/definitions")]
     [Authorize]
     public static async Task<Results<Ok<ListTreeOfHeroesConfigDefinitionsResponse>, UnauthorizedHttpResult, ForbidHttpResult>> HandleGet(
-        [FromRoute] string locale,
         [FromQuery] string? status,
         [FromServices] ListTreeOfHeroesConfigDefinitionsEndpoint ep,
         CancellationToken ct)

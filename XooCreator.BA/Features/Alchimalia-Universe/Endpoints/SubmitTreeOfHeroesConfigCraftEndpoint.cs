@@ -26,10 +26,9 @@ public class SubmitTreeOfHeroesConfigCraftEndpoint
         _logger = logger;
     }
 
-    [Route("/api/{locale}/alchimalia-universe/tree-configs/crafts/{id}/submit")]
+    [Route("/api/alchimalia-universe/tree-configs/crafts/{id}/submit")]
     [Authorize]
     public static async Task<Results<Ok, BadRequest<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
-        [FromRoute] string locale,
         [FromRoute] Guid id,
         [FromServices] SubmitTreeOfHeroesConfigCraftEndpoint ep,
         CancellationToken ct)

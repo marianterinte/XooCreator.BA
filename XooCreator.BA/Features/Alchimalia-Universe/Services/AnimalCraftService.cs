@@ -64,7 +64,7 @@ public class AnimalCraftService : IAnimalCraftService
                 Src = a.Src,
                 IsHybrid = a.IsHybrid,
                 RegionId = a.RegionId,
-                RegionName = null,
+                RegionName = a.Region?.Name,
                 Status = a.Status,
                 UpdatedAt = a.UpdatedAt,
                 CreatedByUserId = a.CreatedByUserId,
@@ -82,6 +82,16 @@ public class AnimalCraftService : IAnimalCraftService
     public async Task<AnimalCraftDto> CreateAsync(Guid userId, CreateAnimalCraftRequest request, CancellationToken ct = default)
     {
         await ValidateHybridPartsAsync(request.HybridParts, ct);
+
+        // Verify region exists if provided
+        if (request.RegionId.HasValue)
+        {
+            var region = await _db.Regions.FirstOrDefaultAsync(r => r.Id == request.RegionId.Value, ct);
+            if (region == null)
+            {
+                throw new KeyNotFoundException($"Region with Id '{request.RegionId.Value}' not found");
+            }
+        }
 
         var animal = new AnimalCraft
         {
@@ -363,7 +373,9 @@ public class AnimalCraftService : IAnimalCraftService
             throw new UnauthorizedAccessException("Only the creator can retract this AnimalCraft");
 
         var currentStatus = AlchimaliaUniverseStatusExtensions.FromDb(animal.Status);
-        if (currentStatus != AlchimaliaUniverseStatus.SentForApproval && currentStatus != AlchimaliaUniverseStatus.InReview)
+        if (currentStatus != AlchimaliaUniverseStatus.SentForApproval && 
+            currentStatus != AlchimaliaUniverseStatus.InReview &&
+            currentStatus != AlchimaliaUniverseStatus.Approved)
             throw new InvalidOperationException($"Cannot retract AnimalCraft in status '{currentStatus}'");
 
         animal.Status = AlchimaliaUniverseStatus.Draft.ToDb();
@@ -403,8 +415,8 @@ public class AnimalCraftService : IAnimalCraftService
             throw new KeyNotFoundException($"AnimalCraft with Id '{animalId}' not found");
 
         var currentStatus = AlchimaliaUniverseStatusExtensions.FromDb(animal.Status);
-        if (currentStatus != AlchimaliaUniverseStatus.Approved)
-            throw new InvalidOperationException($"Cannot publish AnimalCraft in status '{currentStatus}'. Must be Approved.");
+        if (currentStatus != AlchimaliaUniverseStatus.Approved && currentStatus != AlchimaliaUniverseStatus.Published)
+            throw new InvalidOperationException($"Cannot publish AnimalCraft in status '{currentStatus}'. Must be Approved or Published.");
 
         var definitionId = animal.PublishedDefinitionId ?? animal.Id;
         var definition = await _db.AnimalDefinitions
@@ -415,6 +427,7 @@ public class AnimalCraftService : IAnimalCraftService
 
         if (definition == null)
         {
+            // ... (keep existing creation logic) ...
             definition = new AnimalDefinition
             {
                 Id = definitionId,
@@ -453,6 +466,7 @@ public class AnimalCraftService : IAnimalCraftService
         }
         else
         {
+            // ... (keep existing update logic) ...
             definition.Label = animal.Label;
             definition.Src = animal.Src;
             definition.IsHybrid = animal.IsHybrid;
@@ -490,8 +504,13 @@ public class AnimalCraftService : IAnimalCraftService
             }).ToList();
         }
 
-        animal.PublishedDefinitionId = definitionId;
-        animal.Status = AlchimaliaUniverseStatus.Published.ToDb();
+        // Delete Craft after successful copy to Definition
+        // Note: To align with Story Editor and support "New Version" flow, we delete the draft.
+        if (animal.Translations != null) _db.AnimalCraftTranslations.RemoveRange(animal.Translations);
+        if (animal.SupportedParts != null) _db.AnimalCraftPartSupports.RemoveRange(animal.SupportedParts);
+        if (animal.HybridParts != null) _db.AnimalHybridCraftParts.RemoveRange(animal.HybridParts);
+        
+        _db.AnimalCrafts.Remove(animal);
 
         // Copy assets and update definition paths
         var creatorUser = await _db.AlchimaliaUsers.FirstOrDefaultAsync(u => u.Id == (animal.CreatedByUserId ?? Guid.Empty), ct);
@@ -501,6 +520,7 @@ public class AnimalCraftService : IAnimalCraftService
         {
             try 
             {
+                // ... (keep existing asset copy logic) ...
                 var assets = AlchimaliaUniverseAssetPathMapper.CollectFromAnimalCraft(animal);
                 await _assetCopyService.CopyDraftToPublishedAsync(
                     assets,
@@ -541,7 +561,41 @@ public class AnimalCraftService : IAnimalCraftService
             }
         }
 
-        await _db.SaveChangesAsync(ct);
+        try
+        {
+            await _db.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+             _logger.LogWarning(ex, "Concurrency error publishing animal {AnimalId}. Attempting to resolve (Client Wins).", animalId);
+             
+             // Client Wins strategy: Update OriginalValues to match DatabaseValues
+             foreach (var entry in ex.Entries)
+             {
+                 var databaseValues = await entry.GetDatabaseValuesAsync(ct);
+                 if (databaseValues == null)
+                 {
+                     throw new InvalidOperationException("The entity being updated was deleted by another process.");
+                 }
+                 
+                 entry.OriginalValues.SetValues(databaseValues);
+             }
+             
+             // Retry save
+             await _db.SaveChangesAsync(ct);
+             _logger.LogInformation("AnimalCraft {AnimalId} published (concurrency resolved)", animalId);
+        }
+        catch (DbUpdateException ex)
+        {
+             _logger.LogError(ex, "Database update failed during publish for animal {AnimalId}", animalId);
+             // Wrap in InvalidOperationException to return 409 to client with details
+             throw new InvalidOperationException($"Database update failed: {ex.InnerException?.Message ?? ex.Message}");
+        }
+        catch (Exception ex)
+        {
+             _logger.LogError(ex, "Unexpected error publishing animal {AnimalId}", animalId);
+             throw new InvalidOperationException($"Unexpected error: {ex.Message}");
+        }
 
         _logger.LogInformation("AnimalCraft {AnimalId} published by user {UserId}", animalId, publisherId);
     }
@@ -557,18 +611,8 @@ public class AnimalCraftService : IAnimalCraftService
 
         var currentStatus = AlchimaliaUniverseStatusExtensions.FromDb(animal.Status);
         
-        // Only allow deletion of draft or changes_requested animals
-        if (currentStatus != AlchimaliaUniverseStatus.Draft && currentStatus != AlchimaliaUniverseStatus.ChangesRequested)
-        {
-            var statusName = currentStatus.ToString();
-            if (currentStatus == AlchimaliaUniverseStatus.SentForApproval || 
-                currentStatus == AlchimaliaUniverseStatus.InReview || 
-                currentStatus == AlchimaliaUniverseStatus.Approved)
-            {
-                throw new InvalidOperationException($"Cannot delete AnimalCraft '{animalId}' while it is in '{statusName}' status. Please retract it first to move it back to Draft.");
-            }
-            throw new InvalidOperationException($"Cannot delete AnimalCraft '{animalId}' in '{statusName}' status.");
-        }
+        // Allow deletion regardless of status (as requested)
+        // if (currentStatus != AlchimaliaUniverseStatus.Draft && currentStatus != AlchimaliaUniverseStatus.ChangesRequested) ...
 
         // Delete draft assets from Azure Storage before deleting from database
         var creatorUser = await _db.AlchimaliaUsers.FirstOrDefaultAsync(u => u.Id == userId, ct);
@@ -595,7 +639,7 @@ public class AnimalCraftService : IAnimalCraftService
             Src = animal.Src,
             IsHybrid = animal.IsHybrid,
             RegionId = animal.RegionId,
-            RegionName = null,
+            RegionName = animal.Region?.Name,
             Status = animal.Status,
             CreatedByUserId = animal.CreatedByUserId,
             ReviewedByUserId = animal.ReviewedByUserId,

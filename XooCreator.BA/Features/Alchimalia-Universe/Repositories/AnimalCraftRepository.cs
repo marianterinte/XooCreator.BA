@@ -15,12 +15,14 @@ public class AnimalCraftRepository : IAnimalCraftRepository
     public async Task<AnimalCraft?> GetAsync(Guid animalId, CancellationToken ct = default)
     {
         return await _context.AnimalCrafts
+            .Include(x => x.Region)
             .FirstOrDefaultAsync(x => x.Id == animalId, ct);
     }
 
     public async Task<AnimalCraft?> GetWithTranslationsAsync(Guid animalId, CancellationToken ct = default)
     {
         return await _context.AnimalCrafts
+            .Include(x => x.Region)
             .Include(x => x.Translations)
             .Include(x => x.SupportedParts)
             .Include(x => x.HybridParts)
@@ -77,6 +79,7 @@ public class AnimalCraftRepository : IAnimalCraftRepository
     public async Task<List<AnimalCraft>> ListAsync(string? status = null, Guid? regionId = null, bool? isHybrid = null, string? search = null, CancellationToken ct = default)
     {
         var query = _context.AnimalCrafts
+            .Include(x => x.Region)
             .Include(x => x.Translations)
             .Include(x => x.SupportedParts)
             .Include(x => x.HybridParts)

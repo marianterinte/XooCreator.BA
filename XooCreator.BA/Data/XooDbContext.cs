@@ -155,6 +155,8 @@ public class XooDbContext : DbContext
     public DbSet<AnimalPublishChangeLog> AnimalPublishChangeLogs => Set<AnimalPublishChangeLog>();
     
     // Background Jobs
+    public DbSet<HeroPublishJob> HeroPublishJobs { get; set; } = null!;
+    public DbSet<AnimalPublishJob> AnimalPublishJobs { get; set; } = null!;
     public DbSet<HeroDefinitionVersionJob> HeroDefinitionVersionJobs => Set<HeroDefinitionVersionJob>();
     public DbSet<AnimalVersionJob> AnimalVersionJobs => Set<AnimalVersionJob>();
 

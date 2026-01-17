@@ -27,10 +27,9 @@ public class CreateTreeOfHeroesConfigCraftEndpoint
         _logger = logger;
     }
 
-    [Route("/api/{locale}/alchimalia-universe/tree-configs/crafts")]
+    [Route("/api/alchimalia-universe/tree-configs/crafts")]
     [Authorize]
     public static async Task<Results<Ok<TreeOfHeroesConfigCraftDto>, BadRequest<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
-        [FromRoute] string locale,
         [FromServices] CreateTreeOfHeroesConfigCraftEndpoint ep,
         [FromBody] CreateTreeOfHeroesConfigCraftRequest req,
         CancellationToken ct)

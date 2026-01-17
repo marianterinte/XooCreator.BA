@@ -26,10 +26,9 @@ public class PublishTreeOfHeroesConfigCraftEndpoint
         _logger = logger;
     }
 
-    [Route("/api/{locale}/alchimalia-universe/tree-configs/crafts/{id}/publish")]
+    [Route("/api/alchimalia-universe/tree-configs/crafts/{id}/publish")]
     [Authorize]
     public static async Task<Results<Ok, BadRequest<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
-        [FromRoute] string locale,
         [FromRoute] Guid id,
         [FromServices] PublishTreeOfHeroesConfigCraftEndpoint ep,
         CancellationToken ct)
