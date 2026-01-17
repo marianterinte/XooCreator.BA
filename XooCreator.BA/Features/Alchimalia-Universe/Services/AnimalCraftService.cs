@@ -477,31 +477,43 @@ public class AnimalCraftService : IAnimalCraftService
             definition.UpdatedAt = DateTime.UtcNow;
 
             _db.AnimalDefinitionTranslations.RemoveRange(definition.Translations);
-            definition.Translations = animal.Translations.Select(t => new AnimalDefinitionTranslation
+            definition.Translations.Clear();
+            foreach (var t in animal.Translations)
             {
-                Id = Guid.NewGuid(),
-                AnimalDefinitionId = definitionId,
-                LanguageCode = t.LanguageCode,
-                Label = t.Label,
-                AudioUrl = t.AudioUrl
-            }).ToList();
+                definition.Translations.Add(new AnimalDefinitionTranslation
+                {
+                    Id = Guid.NewGuid(),
+                    AnimalDefinitionId = definitionId,
+                    LanguageCode = t.LanguageCode,
+                    Label = t.Label,
+                    AudioUrl = t.AudioUrl
+                });
+            }
 
             _db.AnimalDefinitionPartSupports.RemoveRange(definition.SupportedParts);
-            definition.SupportedParts = animal.SupportedParts.Select(p => new AnimalDefinitionPartSupport
+            definition.SupportedParts.Clear();
+            foreach (var p in animal.SupportedParts)
             {
-                AnimalDefinitionId = definitionId,
-                BodyPartKey = p.BodyPartKey
-            }).ToList();
+                definition.SupportedParts.Add(new AnimalDefinitionPartSupport
+                {
+                    AnimalDefinitionId = definitionId,
+                    BodyPartKey = p.BodyPartKey
+                });
+            }
 
             _db.AnimalHybridDefinitionParts.RemoveRange(definition.HybridParts);
-            definition.HybridParts = animal.HybridParts.Select(p => new AnimalHybridDefinitionPart
+            definition.HybridParts.Clear();
+            foreach (var p in animal.HybridParts)
             {
-                Id = Guid.NewGuid(),
-                AnimalDefinitionId = definitionId,
-                SourceAnimalId = p.SourceAnimalId,
-                BodyPartKey = p.BodyPartKey,
-                OrderIndex = p.OrderIndex
-            }).ToList();
+                definition.HybridParts.Add(new AnimalHybridDefinitionPart
+                {
+                    Id = Guid.NewGuid(),
+                    AnimalDefinitionId = definitionId,
+                    SourceAnimalId = p.SourceAnimalId,
+                    BodyPartKey = p.BodyPartKey,
+                    OrderIndex = p.OrderIndex
+                });
+            }
         }
 
         // Delete Craft after successful copy to Definition

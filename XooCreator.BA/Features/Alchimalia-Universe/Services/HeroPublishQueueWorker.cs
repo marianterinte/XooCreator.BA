@@ -140,12 +140,34 @@ public class HeroPublishQueueWorker : BackgroundService
 
                         if (job.DequeueCount >= 3)
                         {
-                            job.Status = HeroPublishJobStatus.Failed;
-                            job.ErrorMessage = ex.Message;
-                            job.CompletedAtUtc = DateTime.UtcNow;
-                            await db.SaveChangesAsync(stoppingToken);
-                            PublishStatus();
-                            await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
+                            // Clear the ChangeTracker to remove any invalid state from the failed PublishAsync call
+                            db.ChangeTracker.Clear();
+                            
+                            var jobToFail = await db.HeroPublishJobs.FirstOrDefaultAsync(j => j.Id == job.Id, stoppingToken);
+                            if (jobToFail != null)
+                            {
+                                jobToFail.Status = HeroPublishJobStatus.Failed;
+                                jobToFail.ErrorMessage = ex.Message;
+                                jobToFail.CompletedAtUtc = DateTime.UtcNow;
+                                jobToFail.DequeueCount = job.DequeueCount; // Preserve count or increment? It is already incremented in memory but we reloaded.
+                                // Actually we should probably use the job.DequeueCount from memory as it was ++ earlier.
+                                // But reloading from DB gets the DB state (which has old DequeueCount).
+                                // Let's just set it to ensure consistency if needed, or arguably we don't need to update it for Failed state.
+                                
+                                await db.SaveChangesAsync(stoppingToken);
+                                
+                                // Re-publish event with reloaded job
+                                // We need to define PublishStatus again or extract it.
+                                // Since PublishStatus() uses 'job' (the local variable), we should update 'job' reference or manually publish.
+                                _jobEvents.Publish("HeroPublish", jobToFail.Id, new
+                                {
+                                    jobId = jobToFail.Id,
+                                    heroId = jobToFail.HeroId,
+                                    status = jobToFail.Status
+                                });
+                                
+                                await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
+                            }
                         }
                     }
                 }

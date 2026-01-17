@@ -138,12 +138,28 @@ public class AnimalPublishQueueWorker : BackgroundService
 
                         if (job.DequeueCount >= 3)
                         {
-                            job.Status = AnimalPublishJobStatus.Failed;
-                            job.ErrorMessage = ex.Message;
-                            job.CompletedAtUtc = DateTime.UtcNow;
-                            await db.SaveChangesAsync(stoppingToken);
-                            PublishStatus();
-                            await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
+                            // Clear the ChangeTracker to remove any invalid state from the failed PublishAsync call
+                            db.ChangeTracker.Clear();
+                            
+                            var jobToFail = await db.AnimalPublishJobs.FirstOrDefaultAsync(j => j.Id == job.Id, stoppingToken);
+                            if (jobToFail != null)
+                            {
+                                jobToFail.Status = AnimalPublishJobStatus.Failed;
+                                jobToFail.ErrorMessage = ex.Message;
+                                jobToFail.CompletedAtUtc = DateTime.UtcNow;
+                                jobToFail.DequeueCount = job.DequeueCount;
+                                
+                                await db.SaveChangesAsync(stoppingToken);
+
+                                _jobEvents.Publish("AnimalPublish", jobToFail.Id, new
+                                {
+                                    jobId = jobToFail.Id,
+                                    animalId = jobToFail.AnimalId,
+                                    status = jobToFail.Status
+                                });
+                                
+                                await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
+                            }
                         }
                     }
                 }

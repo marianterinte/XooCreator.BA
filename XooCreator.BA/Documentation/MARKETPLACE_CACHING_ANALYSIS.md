@@ -122,9 +122,9 @@ E o direcție bună pentru B1 (CPU mic, DB roundtrips scumpe), dar trebuie să �
 Avantaj: cache-ul mare (stories/epics) nu explodează per-user, iar per-user query-ul devine mic și rapid.
 
 ### TTL & invalidare la publish
-- **TTL 60 min**: rezonabil dacă “publish-urile nu sunt dese”, dar:
-  - trebuie să acceptăm că “readersCount/rating” pot fi “stale” până la TTL.
-  - dacă vrem “fresh” după publish, invalidarea explicită ajută mult.
+- **TTL 12 ore (720 minute)**: optim pentru că "publish-urile nu sunt dese", deci lista nu se schimbă frecvent:
+  - trebuie să acceptăm că "readersCount/rating" pot fi "stale" până la TTL (stats au TTL separat de 10 minute).
+  - dacă vrem "fresh" după publish, invalidarea explicită ajută mult (se face automat după publish job).
 - **Invalidare la final de publish job**: foarte bună ca “cache busting” (stories list se schimbă).
   - Observație: invalidarea trebuie să fie per-locale sau “all locales”.
   - Dacă în viitor scalezi pe mai multe instanțe, invalidarea în memory cache trebuie replicată (distributed cache sau message bus). Pe B1 single-instance e OK.
@@ -170,7 +170,7 @@ Am implementat “quick win” caching pe backend pentru marketplace, fără bre
 - **Cache base catalog**:
   - stories: `marketplace:stories:base:{locale}`
   - epics: `marketplace:epics:base:{locale}`
-  - TTL: `MarketplaceCache:BaseTtlMinutes` (default 60)
+  - TTL: `MarketplaceCache:BaseTtlMinutes` (default 720 = 12 ore)
 - **Cache stats (volatil)**:
   - stories: `marketplace:stories:stats`
   - epics: `marketplace:epics:stats`

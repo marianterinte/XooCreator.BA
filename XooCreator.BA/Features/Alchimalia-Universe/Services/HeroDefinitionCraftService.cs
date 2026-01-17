@@ -410,16 +410,21 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
             definition.UpdatedAt = DateTime.UtcNow;
 
             _db.HeroDefinitionDefinitionTranslations.RemoveRange(definition.Translations);
-            definition.Translations = hero.Translations.Select(t => new HeroDefinitionDefinitionTranslation
+            definition.Translations.Clear();
+            
+            foreach (var t in hero.Translations)
             {
-                Id = Guid.NewGuid(),
-                HeroDefinitionDefinitionId = definitionId,
-                LanguageCode = t.LanguageCode,
-                Name = t.Name,
-                Description = t.Description,
-                Story = t.Story,
-                AudioUrl = t.AudioUrl
-            }).ToList();
+                definition.Translations.Add(new HeroDefinitionDefinitionTranslation
+                {
+                    Id = Guid.NewGuid(),
+                    HeroDefinitionDefinitionId = definitionId,
+                    LanguageCode = t.LanguageCode,
+                    Name = t.Name,
+                    Description = t.Description,
+                    Story = t.Story,
+                    AudioUrl = t.AudioUrl
+                });
+            }
         }
 
         try 
