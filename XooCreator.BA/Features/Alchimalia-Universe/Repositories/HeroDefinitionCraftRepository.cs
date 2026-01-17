@@ -56,6 +56,20 @@ public class HeroDefinitionCraftRepository : IHeroDefinitionCraftRepository
         await _context.SaveChangesAsync(ct);
     }
 
+    public async Task DeleteAsync(string heroId, CancellationToken ct = default)
+    {
+        var hero = await _context.HeroDefinitionCrafts
+            .Include(x => x.Translations)
+            .FirstOrDefaultAsync(x => x.Id == heroId, ct);
+
+        if (hero != null)
+        {
+            _context.HeroDefinitionCraftTranslations.RemoveRange(hero.Translations);
+            _context.HeroDefinitionCrafts.Remove(hero);
+            await _context.SaveChangesAsync(ct);
+        }
+    }
+
     public async Task<List<HeroDefinitionCraft>> ListAsync(string? status = null, string? type = null, string? search = null, CancellationToken ct = default)
         // Type parameter kept for backward compatibility but no longer used
     {

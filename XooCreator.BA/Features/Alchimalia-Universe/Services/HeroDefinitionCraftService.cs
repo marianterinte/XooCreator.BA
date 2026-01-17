@@ -331,7 +331,11 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
 
     public async Task PublishAsync(Guid publisherId, string heroId, CancellationToken ct = default)
     {
-        var hero = await _repository.GetWithTranslationsAsync(heroId, ct);
+        // Use _db directly to ensure we are on the same context as the SaveChanges call later
+        var hero = await _db.HeroDefinitionCrafts
+            .Include(x => x.Translations)
+            .FirstOrDefaultAsync(x => x.Id == heroId, ct);
+
         if (hero == null)
             throw new KeyNotFoundException($"HeroDefinitionCraft with Id '{heroId}' not found");
 
@@ -339,85 +343,99 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
         if (currentStatus != AlchimaliaUniverseStatus.Approved)
             throw new InvalidOperationException($"Cannot publish HeroDefinitionCraft in status '{currentStatus}'. Must be Approved.");
 
-        var definitionId = hero.PublishedDefinitionId ?? hero.Id;
+        var definitionId = hero.PublishedDefinitionId;
+        if (string.IsNullOrWhiteSpace(definitionId))
+        {
+            definitionId = hero.Id;
+        }
+
         var definition = await _db.HeroDefinitionDefinitions
             .Include(d => d.Translations)
             .FirstOrDefaultAsync(d => d.Id == definitionId, ct);
 
-        if (definition == null)
+        try 
         {
-            definition = new HeroDefinitionDefinition
+            if (definition == null)
             {
-                Id = definitionId,
-                CourageCost = hero.CourageCost,
-                CuriosityCost = hero.CuriosityCost,
-                ThinkingCost = hero.ThinkingCost,
-                CreativityCost = hero.CreativityCost,
-                SafetyCost = hero.SafetyCost,
-                PrerequisitesJson = hero.PrerequisitesJson,
-                RewardsJson = hero.RewardsJson,
-                IsUnlocked = hero.IsUnlocked,
-                PositionX = hero.PositionX,
-                PositionY = hero.PositionY,
-                Image = hero.Image,
-                Status = AlchimaliaUniverseStatus.Published.ToDb(),
-                PublishedByUserId = publisherId,
-                PublishedAtUtc = DateTime.UtcNow,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
-                Translations = hero.Translations.Select(t => new HeroDefinitionDefinitionTranslation
+                // Create new definition
+                definition = new HeroDefinitionDefinition
+                {
+                    Id = definitionId!,
+                    CourageCost = hero.CourageCost,
+                    CuriosityCost = hero.CuriosityCost,
+                    ThinkingCost = hero.ThinkingCost,
+                    CreativityCost = hero.CreativityCost,
+                    SafetyCost = hero.SafetyCost,
+                    PrerequisitesJson = hero.PrerequisitesJson,
+                    RewardsJson = hero.RewardsJson,
+                    IsUnlocked = hero.IsUnlocked,
+                    PositionX = hero.PositionX,
+                    PositionY = hero.PositionY,
+                    Image = hero.Image,
+                    Status = AlchimaliaUniverseStatus.Published.ToDb(),
+                    PublishedByUserId = publisherId,
+                    PublishedAtUtc = DateTime.UtcNow,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    Translations = hero.Translations.Select(t => new HeroDefinitionDefinitionTranslation
+                    {
+                        Id = Guid.NewGuid(),
+                        HeroDefinitionDefinitionId = definitionId!,
+                        LanguageCode = t.LanguageCode,
+                        Name = t.Name,
+                        Description = t.Description,
+                        Story = t.Story,
+                        AudioUrl = t.AudioUrl
+                    }).ToList()
+                };
+                _db.HeroDefinitionDefinitions.Add(definition);
+            }
+            else
+            {
+                // Update existing definition
+                definition.CourageCost = hero.CourageCost;
+                definition.CuriosityCost = hero.CuriosityCost;
+                definition.ThinkingCost = hero.ThinkingCost;
+                definition.CreativityCost = hero.CreativityCost;
+                definition.SafetyCost = hero.SafetyCost;
+                definition.PrerequisitesJson = hero.PrerequisitesJson;
+                definition.RewardsJson = hero.RewardsJson;
+                definition.IsUnlocked = hero.IsUnlocked;
+                definition.PositionX = hero.PositionX;
+                definition.PositionY = hero.PositionY;
+                definition.Image = hero.Image;
+                definition.Status = AlchimaliaUniverseStatus.Published.ToDb();
+                definition.PublishedByUserId = publisherId;
+                definition.PublishedAtUtc = DateTime.UtcNow;
+                definition.UpdatedAt = DateTime.UtcNow;
+
+                // Replace translations
+                if (definition.Translations != null)
+                {
+                   _db.HeroDefinitionDefinitionTranslations.RemoveRange(definition.Translations);
+                }
+
+                definition.Translations = hero.Translations.Select(t => new HeroDefinitionDefinitionTranslation
                 {
                     Id = Guid.NewGuid(),
-                    HeroDefinitionDefinitionId = definitionId,
+                    HeroDefinitionDefinitionId = definitionId!,
                     LanguageCode = t.LanguageCode,
                     Name = t.Name,
                     Description = t.Description,
-                    Story = t.Story
-                }).ToList()
-            };
-            _db.HeroDefinitionDefinitions.Add(definition);
-        }
-        else
-        {
-            definition.CourageCost = hero.CourageCost;
-            definition.CuriosityCost = hero.CuriosityCost;
-            definition.ThinkingCost = hero.ThinkingCost;
-            definition.CreativityCost = hero.CreativityCost;
-            definition.SafetyCost = hero.SafetyCost;
-            definition.PrerequisitesJson = hero.PrerequisitesJson;
-            definition.RewardsJson = hero.RewardsJson;
-            definition.IsUnlocked = hero.IsUnlocked;
-            definition.PositionX = hero.PositionX;
-            definition.PositionY = hero.PositionY;
-            definition.Image = hero.Image;
-            definition.Status = AlchimaliaUniverseStatus.Published.ToDb();
-            definition.PublishedByUserId = publisherId;
-            definition.PublishedAtUtc = DateTime.UtcNow;
-            definition.UpdatedAt = DateTime.UtcNow;
+                    Story = t.Story,
+                    AudioUrl = t.AudioUrl
+                }).ToList();
+            }
 
-            // Replace translations
-            _db.HeroDefinitionDefinitionTranslations.RemoveRange(definition.Translations);
-            definition.Translations = hero.Translations.Select(t => new HeroDefinitionDefinitionTranslation
-            {
-                Id = Guid.NewGuid(),
-                HeroDefinitionDefinitionId = definitionId,
-                LanguageCode = t.LanguageCode,
-                Name = t.Name,
-                Description = t.Description,
-                Story = t.Story,
-                AudioUrl = t.AudioUrl
-            }).ToList();
-        }
+            // Update Craft status
+            hero.PublishedDefinitionId = definitionId;
+            hero.Status = AlchimaliaUniverseStatus.Published.ToDb();
 
-        hero.PublishedDefinitionId = definitionId;
-        hero.Status = AlchimaliaUniverseStatus.Published.ToDb();
-        // Copy assets and update definition paths
-        var creatorUser = await _db.AlchimaliaUsers.FirstOrDefaultAsync(u => u.Id == (hero.CreatedByUserId ?? Guid.Empty), ct);
-        var creatorEmail = creatorUser?.Email;
+            // Copy assets and update definition paths
+            var creatorUser = await _db.AlchimaliaUsers.FirstOrDefaultAsync(u => u.Id == (hero.CreatedByUserId ?? Guid.Empty), ct);
+            var creatorEmail = creatorUser?.Email;
 
-        if (!string.IsNullOrWhiteSpace(creatorEmail))
-        {
-            try 
+            if (!string.IsNullOrWhiteSpace(creatorEmail))
             {
                 var assets = AlchimaliaUniverseAssetPathMapper.CollectFromHeroCraft(hero);
                 await _assetCopyService.CopyDraftToPublishedAsync(
@@ -436,32 +454,66 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
                     definition.Image = _assetCopyService.GetPublishedUrl(pubPath);
                 }
 
-                foreach (var t in hero.Translations)
+                foreach (var t in definition.Translations)
                 {
                     if (!string.IsNullOrWhiteSpace(t.AudioUrl))
                     {
                         var filename = Path.GetFileName(t.AudioUrl);
-                        var assetInfo = new AlchimaliaUniverseAssetPathMapper.AssetInfo(filename, AlchimaliaUniverseAssetPathMapper.AssetType.Audio, t.LanguageCode);
-                        var pubPath = AlchimaliaUniverseAssetPathMapper.BuildPublishedPath(assetInfo, creatorEmail, hero.Id, AlchimaliaUniverseAssetPathMapper.EntityType.Hero);
-                        var pubUrl = _assetCopyService.GetPublishedUrl(pubPath);
-                        
-                        var defTrans = definition.Translations.FirstOrDefault(dt => dt.LanguageCode == t.LanguageCode);
-                        if (defTrans != null)
-                        {
-                            defTrans.AudioUrl = pubUrl;
-                        }
+                         var assetInfo = new AlchimaliaUniverseAssetPathMapper.AssetInfo(filename, AlchimaliaUniverseAssetPathMapper.AssetType.Audio, t.LanguageCode);
+                         var pubPath = AlchimaliaUniverseAssetPathMapper.BuildPublishedPath(assetInfo, creatorEmail, hero.Id, AlchimaliaUniverseAssetPathMapper.EntityType.Hero);
+                         t.AudioUrl = _assetCopyService.GetPublishedUrl(pubPath);
                     }
                 }
             }
-            catch (Exception ex)
+
+            await _db.SaveChangesAsync(ct);
+            _logger.LogInformation("HeroDefinitionCraft {HeroId} published by user {UserId}. DefinitionId: {DefId}", heroId, publisherId, definitionId);
+
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+             _logger.LogError(ex, "Concurrency error publishing hero {HeroId}", heroId);
+             throw new InvalidOperationException("The hero was modified by another process. Please refresh and try again.");
+        }
+    }
+
+    public async Task DeleteAsync(Guid userId, string heroId, CancellationToken ct = default)
+    {
+        var hero = await _repository.GetAsync(heroId, ct);
+        if (hero == null)
+            throw new KeyNotFoundException($"HeroDefinitionCraft with Id '{heroId}' not found");
+
+        if (hero.CreatedByUserId != userId)
+            throw new UnauthorizedAccessException("Only the creator can delete this HeroDefinitionCraft");
+
+        var currentStatus = AlchimaliaUniverseStatusExtensions.FromDb(hero.Status);
+        
+        // Only allow deletion of draft or changes_requested heroes
+        if (currentStatus != AlchimaliaUniverseStatus.Draft && currentStatus != AlchimaliaUniverseStatus.ChangesRequested)
+        {
+            var statusName = currentStatus.ToString();
+            if (currentStatus == AlchimaliaUniverseStatus.SentForApproval || 
+                currentStatus == AlchimaliaUniverseStatus.InReview || 
+                currentStatus == AlchimaliaUniverseStatus.Approved)
             {
-                _logger.LogWarning(ex, "Asset copy failed during publish for Hero {HeroId}", hero.Id);
+                throw new InvalidOperationException($"Cannot delete HeroDefinitionCraft '{heroId}' while it is in '{statusName}' status. Please retract it first to move it back to Draft.");
             }
+            throw new InvalidOperationException($"Cannot delete HeroDefinitionCraft '{heroId}' in '{statusName}' status.");
         }
 
-        await _db.SaveChangesAsync(ct);
+        // Delete draft assets from Azure Storage before deleting from database
+        var creatorUser = await _db.AlchimaliaUsers.FirstOrDefaultAsync(u => u.Id == userId, ct);
+        var creatorEmail = creatorUser?.Email;
+        
+        if (!string.IsNullOrWhiteSpace(creatorEmail))
+        {
+            await _assetCopyService.DeleteDraftAssetsAsync(creatorEmail, heroId, AlchimaliaUniverseAssetPathMapper.EntityType.Hero, ct);
+        }
 
-        _logger.LogInformation("HeroDefinitionCraft {HeroId} published by user {UserId}", heroId, publisherId);
+        // Delete draft from database
+        await _repository.DeleteAsync(heroId, ct);
+        
+        _logger.LogInformation("HeroDefinitionCraft {HeroId} deleted by user {UserId}", heroId, userId);
     }
 
     private HeroDefinitionCraftDto MapToDto(HeroDefinitionCraft hero, string? preferredLanguageCode = null)

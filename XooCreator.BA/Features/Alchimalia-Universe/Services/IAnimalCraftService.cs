@@ -14,4 +14,5 @@ public interface IAnimalCraftService
     Task ClaimAsync(Guid reviewerId, Guid animalId, CancellationToken ct = default);
     Task RetractAsync(Guid userId, Guid animalId, CancellationToken ct = default);
     Task PublishAsync(Guid publisherId, Guid animalId, CancellationToken ct = default);
+    Task DeleteAsync(Guid userId, Guid animalId, CancellationToken ct = default);
 }

@@ -3,6 +3,7 @@ using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Features.AlchimaliaUniverse.Mappers;
 using XooCreator.BA.Features.StoryEditor.Models; // Reusing AssetCopyResult
 using XooCreator.BA.Infrastructure.Services.Blob;
+using Azure.Storage.Blobs;
 
 namespace XooCreator.BA.Features.AlchimaliaUniverse.Services;
 
@@ -35,6 +36,7 @@ public interface IAlchimaliaUniverseAssetCopyService
 
     string GetPublishedUrl(string path);
     string GetDraftUrl(string path);
+    Task DeleteDraftAssetsAsync(string userEmail, string entityId, AlchimaliaUniverseAssetPathMapper.EntityType entityType, CancellationToken ct);
 }
 
 public class AlchimaliaUniverseAssetCopyService : IAlchimaliaUniverseAssetCopyService
@@ -181,6 +183,48 @@ public class AlchimaliaUniverseAssetCopyService : IAlchimaliaUniverseAssetCopySe
         {
             _logger.LogError(ex, "Exception during asset copy: {Filename}", filename);
             return AssetCopyResult.CopyFailed(filename, entityId, ex.Message);
+        }
+    }
+
+    public async Task DeleteDraftAssetsAsync(string userEmail, string entityId, AlchimaliaUniverseAssetPathMapper.EntityType entityType, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(userEmail) || string.IsNullOrWhiteSpace(entityId))
+        {
+            _logger.LogWarning("Cannot cleanup draft assets. Missing userEmail or entityId. entityId={EntityId}", entityId);
+            return;
+        }
+
+        var emailEscaped = Uri.EscapeDataString(userEmail);
+        var typeSegment = entityType == AlchimaliaUniverseAssetPathMapper.EntityType.Hero ? "heroes" : "animals";
+        var prefix = $"draft/u/{emailEscaped}/alchimalia-universe/{typeSegment}/{entityId}/";
+
+        try
+        {
+            var containerClient = _sasService.GetContainerClient(_sasService.DraftContainer);
+            var deletedCount = 0;
+
+            await foreach (var blob in containerClient.GetBlobsAsync(prefix: prefix, cancellationToken: ct))
+            {
+                var blobClient = containerClient.GetBlobClient(blob.Name);
+                await blobClient.DeleteIfExistsAsync(cancellationToken: ct);
+                deletedCount++;
+            }
+
+            _logger.LogInformation(
+                "Draft assets cleanup complete: entityId={EntityId} entityType={EntityType} prefix={Prefix} deletedCount={Count}",
+                entityId,
+                entityType,
+                prefix,
+                deletedCount);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to cleanup draft assets: entityId={EntityId} entityType={EntityType}", entityId, entityType);
+            // Don't throw - cleanup failure shouldn't block delete
         }
     }
 }

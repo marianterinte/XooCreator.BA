@@ -546,6 +546,45 @@ public class AnimalCraftService : IAnimalCraftService
         _logger.LogInformation("AnimalCraft {AnimalId} published by user {UserId}", animalId, publisherId);
     }
 
+    public async Task DeleteAsync(Guid userId, Guid animalId, CancellationToken ct = default)
+    {
+        var animal = await _repository.GetAsync(animalId, ct);
+        if (animal == null)
+            throw new KeyNotFoundException($"AnimalCraft with Id '{animalId}' not found");
+
+        if (animal.CreatedByUserId != userId)
+            throw new UnauthorizedAccessException("Only the creator can delete this AnimalCraft");
+
+        var currentStatus = AlchimaliaUniverseStatusExtensions.FromDb(animal.Status);
+        
+        // Only allow deletion of draft or changes_requested animals
+        if (currentStatus != AlchimaliaUniverseStatus.Draft && currentStatus != AlchimaliaUniverseStatus.ChangesRequested)
+        {
+            var statusName = currentStatus.ToString();
+            if (currentStatus == AlchimaliaUniverseStatus.SentForApproval || 
+                currentStatus == AlchimaliaUniverseStatus.InReview || 
+                currentStatus == AlchimaliaUniverseStatus.Approved)
+            {
+                throw new InvalidOperationException($"Cannot delete AnimalCraft '{animalId}' while it is in '{statusName}' status. Please retract it first to move it back to Draft.");
+            }
+            throw new InvalidOperationException($"Cannot delete AnimalCraft '{animalId}' in '{statusName}' status.");
+        }
+
+        // Delete draft assets from Azure Storage before deleting from database
+        var creatorUser = await _db.AlchimaliaUsers.FirstOrDefaultAsync(u => u.Id == userId, ct);
+        var creatorEmail = creatorUser?.Email;
+        
+        if (!string.IsNullOrWhiteSpace(creatorEmail))
+        {
+            await _assetCopyService.DeleteDraftAssetsAsync(creatorEmail, animalId.ToString(), AlchimaliaUniverseAssetPathMapper.EntityType.Animal, ct);
+        }
+
+        // Delete draft from database
+        await _repository.DeleteAsync(animalId, ct);
+        
+        _logger.LogInformation("AnimalCraft {AnimalId} deleted by user {UserId}", animalId, userId);
+    }
+
     private AnimalCraftDto MapToDto(AnimalCraft animal, string? preferredLanguageCode = null)
     {
         return new AnimalCraftDto

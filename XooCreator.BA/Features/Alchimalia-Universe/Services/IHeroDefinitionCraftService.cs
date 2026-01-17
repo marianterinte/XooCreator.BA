@@ -14,4 +14,5 @@ public interface IHeroDefinitionCraftService
     Task ClaimAsync(Guid reviewerId, string heroId, CancellationToken ct = default);
     Task RetractAsync(Guid userId, string heroId, CancellationToken ct = default);
     Task PublishAsync(Guid publisherId, string heroId, CancellationToken ct = default);
+    Task DeleteAsync(Guid userId, string heroId, CancellationToken ct = default);
 }

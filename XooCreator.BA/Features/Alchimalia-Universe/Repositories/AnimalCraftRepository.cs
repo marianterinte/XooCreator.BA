@@ -56,6 +56,24 @@ public class AnimalCraftRepository : IAnimalCraftRepository
         await _context.SaveChangesAsync(ct);
     }
 
+    public async Task DeleteAsync(Guid animalId, CancellationToken ct = default)
+    {
+        var animal = await _context.AnimalCrafts
+            .Include(x => x.Translations)
+            .Include(x => x.SupportedParts)
+            .Include(x => x.HybridParts)
+            .FirstOrDefaultAsync(x => x.Id == animalId, ct);
+
+        if (animal != null)
+        {
+            _context.AnimalCraftTranslations.RemoveRange(animal.Translations);
+            _context.AnimalCraftPartSupports.RemoveRange(animal.SupportedParts);
+            _context.AnimalHybridCraftParts.RemoveRange(animal.HybridParts);
+            _context.AnimalCrafts.Remove(animal);
+            await _context.SaveChangesAsync(ct);
+        }
+    }
+
     public async Task<List<AnimalCraft>> ListAsync(string? status = null, Guid? regionId = null, bool? isHybrid = null, string? search = null, CancellationToken ct = default)
     {
         var query = _context.AnimalCrafts
