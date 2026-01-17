@@ -2,6 +2,7 @@
 -- Idempotent inserts; does not modify legacy tables.
 -- Story Heroes JSON -> DB handled separately (not possible in pure SQL).
 -- Run date: 2026-01-16
+-- Updated: 2025-01-28 - Removed Type column, added versioning fields
 
 BEGIN;
 
@@ -9,14 +10,14 @@ BEGIN;
 -- Tree of Heroes: Definitions
 -- =========================
 INSERT INTO "alchimalia_schema"."HeroDefinitionDefinitions" (
-    "Id", "Type", "CourageCost", "CuriosityCost", "ThinkingCost", "CreativityCost", "SafetyCost",
+    "Id", "CourageCost", "CuriosityCost", "ThinkingCost", "CreativityCost", "SafetyCost",
     "PrerequisitesJson", "RewardsJson", "IsUnlocked", "PositionX", "PositionY", "Image",
-    "Status", "PublishedByUserId", "CreatedAt", "UpdatedAt", "PublishedAtUtc"
+    "Status", "Version", "BaseVersion", "LastPublishedVersion", "PublishedByUserId", "CreatedAt", "UpdatedAt", "PublishedAtUtc"
 )
 SELECT
-    hd."Id", hd."Type", hd."CourageCost", hd."CuriosityCost", hd."ThinkingCost", hd."CreativityCost", hd."SafetyCost",
+    hd."Id", hd."CourageCost", hd."CuriosityCost", hd."ThinkingCost", hd."CreativityCost", hd."SafetyCost",
     hd."PrerequisitesJson", hd."RewardsJson", hd."IsUnlocked", hd."PositionX", hd."PositionY", hd."Image",
-    'published', NULL, COALESCE(hd."CreatedAt", now() at time zone 'utc'), COALESCE(hd."UpdatedAt", now() at time zone 'utc'), now() at time zone 'utc'
+    'published', 1, 0, 0, NULL, COALESCE(hd."CreatedAt", now() at time zone 'utc'), COALESCE(hd."UpdatedAt", now() at time zone 'utc'), now() at time zone 'utc'
 FROM "alchimalia_schema"."HeroDefinitions" hd
 WHERE hd."Id" NOT IN ('puf-puf', 'linkaro', 'grubot')
 AND NOT EXISTS (
@@ -39,14 +40,14 @@ AND NOT EXISTS (
 -- Tree of Heroes: Crafts (published mirror)
 -- =========================
 INSERT INTO "alchimalia_schema"."HeroDefinitionCrafts" (
-    "Id", "PublishedDefinitionId", "Type", "CourageCost", "CuriosityCost", "ThinkingCost", "CreativityCost", "SafetyCost",
+    "Id", "PublishedDefinitionId", "CourageCost", "CuriosityCost", "ThinkingCost", "CreativityCost", "SafetyCost",
     "PrerequisitesJson", "RewardsJson", "IsUnlocked", "PositionX", "PositionY", "Image",
-    "Status", "CreatedByUserId", "ReviewedByUserId", "ReviewNotes", "CreatedAt", "UpdatedAt"
+    "Status", "BaseVersion", "LastDraftVersion", "CreatedByUserId", "AssignedReviewerUserId", "ReviewedByUserId", "ApprovedByUserId", "ReviewNotes", "ReviewStartedAt", "ReviewEndedAt", "CreatedAt", "UpdatedAt"
 )
 SELECT
-    hd."Id", hd."Id", hd."Type", hd."CourageCost", hd."CuriosityCost", hd."ThinkingCost", hd."CreativityCost", hd."SafetyCost",
+    hd."Id", hd."Id", hd."CourageCost", hd."CuriosityCost", hd."ThinkingCost", hd."CreativityCost", hd."SafetyCost",
     hd."PrerequisitesJson", hd."RewardsJson", hd."IsUnlocked", hd."PositionX", hd."PositionY", hd."Image",
-    'published', NULL, NULL, NULL, COALESCE(hd."CreatedAt", now() at time zone 'utc'), COALESCE(hd."UpdatedAt", now() at time zone 'utc')
+    'published', 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, COALESCE(hd."CreatedAt", now() at time zone 'utc'), COALESCE(hd."UpdatedAt", now() at time zone 'utc')
 FROM "alchimalia_schema"."HeroDefinitions" hd
 WHERE hd."Id" NOT IN ('puf-puf', 'linkaro', 'grubot')
 AND NOT EXISTS (
@@ -69,10 +70,10 @@ AND NOT EXISTS (
 -- LOI Animals: Definitions
 -- =========================
 INSERT INTO "alchimalia_schema"."AnimalDefinitions" (
-    "Id", "Label", "Src", "IsHybrid", "RegionId", "Status", "PublishedByUserId", "CreatedAt", "UpdatedAt", "PublishedAtUtc"
+    "Id", "Label", "Src", "IsHybrid", "RegionId", "Status", "Version", "BaseVersion", "LastPublishedVersion", "PublishedByUserId", "CreatedAt", "UpdatedAt", "PublishedAtUtc"
 )
 SELECT
-    a."Id", a."Label", a."Src", a."IsHybrid", a."RegionId", 'published', NULL,
+    a."Id", a."Label", a."Src", a."IsHybrid", a."RegionId", 'published', 1, 0, 0, NULL,
     now() at time zone 'utc', now() at time zone 'utc', now() at time zone 'utc'
 FROM "alchimalia_schema"."Animals" a
 WHERE NOT EXISTS (
@@ -106,11 +107,11 @@ WHERE NOT EXISTS (
 -- =========================
 INSERT INTO "alchimalia_schema"."AnimalCrafts" (
     "Id", "PublishedDefinitionId", "Label", "Src", "IsHybrid", "RegionId",
-    "Status", "CreatedByUserId", "ReviewedByUserId", "ReviewNotes", "CreatedAt", "UpdatedAt"
+    "Status", "BaseVersion", "LastDraftVersion", "CreatedByUserId", "AssignedReviewerUserId", "ReviewedByUserId", "ApprovedByUserId", "ReviewNotes", "ReviewStartedAt", "ReviewEndedAt", "CreatedAt", "UpdatedAt"
 )
 SELECT
     a."Id", a."Id", a."Label", a."Src", a."IsHybrid", a."RegionId",
-    'published', NULL, NULL, NULL, now() at time zone 'utc', now() at time zone 'utc'
+    'published', 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, now() at time zone 'utc', now() at time zone 'utc'
 FROM "alchimalia_schema"."Animals" a
 WHERE NOT EXISTS (
     SELECT 1 FROM "alchimalia_schema"."AnimalCrafts" c WHERE c."Id" = a."Id"
