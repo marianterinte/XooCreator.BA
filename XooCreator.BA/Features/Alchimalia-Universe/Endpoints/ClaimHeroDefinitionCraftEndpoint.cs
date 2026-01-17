@@ -32,10 +32,9 @@ public class ClaimHeroDefinitionCraftEndpoint
         public string Status { get; init; } = "InReview";
     }
 
-    [Route("/api/{locale}/alchimalia-universe/hero-crafts/{heroId}/claim")]
+    [Route("/api/alchimalia-universe/hero-crafts/{heroId}/claim")]
     [Authorize]
     public static async Task<Results<Ok<ClaimResponse>, NotFound, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
-        [FromRoute] string locale,
         [FromRoute] string heroId,
         [FromServices] ClaimHeroDefinitionCraftEndpoint ep,
         CancellationToken ct)

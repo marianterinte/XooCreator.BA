@@ -32,10 +32,9 @@ public class PublishAnimalCraftEndpoint
         public string Status { get; init; } = "Published";
     }
 
-    [Route("/api/{locale}/alchimalia-universe/animal-crafts/{animalId}/publish")]
+    [Route("/api/alchimalia-universe/animal-crafts/{animalId}/publish")]
     [Authorize]
     public static async Task<Results<Ok<PublishResponse>, NotFound, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
-        [FromRoute] string locale,
         [FromRoute] Guid animalId,
         [FromServices] PublishAnimalCraftEndpoint ep,
         CancellationToken ct)

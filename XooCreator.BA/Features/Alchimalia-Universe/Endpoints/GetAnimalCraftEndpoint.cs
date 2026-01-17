@@ -27,10 +27,9 @@ public class GetAnimalCraftEndpoint
         _logger = logger;
     }
 
-    [Route("/api/{locale}/alchimalia-universe/animal-crafts/{animalId}")]
+    [Route("/api/alchimalia-universe/animal-crafts/{animalId}")]
     [Authorize]
     public static async Task<Results<Ok<AnimalCraftDto>, NotFound, UnauthorizedHttpResult, ForbidHttpResult>> HandleGet(
-        [FromRoute] string locale,
         [FromRoute] Guid animalId,
         [FromQuery] string? language,
         [FromServices] GetAnimalCraftEndpoint ep,

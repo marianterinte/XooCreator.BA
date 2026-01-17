@@ -27,10 +27,9 @@ public class CreateAnimalCraftEndpoint
         _logger = logger;
     }
 
-    [Route("/api/{locale}/alchimalia-universe/animal-crafts")]
+    [Route("/api/alchimalia-universe/animal-crafts")]
     [Authorize]
     public static async Task<Results<Ok<AnimalCraftDto>, BadRequest<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
-        [FromRoute] string locale,
         [FromServices] CreateAnimalCraftEndpoint ep,
         [FromBody] CreateAnimalCraftRequest req,
         CancellationToken ct)

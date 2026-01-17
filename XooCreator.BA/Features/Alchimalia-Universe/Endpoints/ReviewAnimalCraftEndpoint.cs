@@ -33,10 +33,9 @@ public class ReviewAnimalCraftEndpoint
         public string Status { get; init; } = "Reviewed";
     }
 
-    [Route("/api/{locale}/alchimalia-universe/animal-crafts/{animalId}/review")]
+    [Route("/api/alchimalia-universe/animal-crafts/{animalId}/review")]
     [Authorize]
     public static async Task<Results<Ok<ReviewResponse>, NotFound, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
-        [FromRoute] string locale,
         [FromRoute] Guid animalId,
         [FromServices] ReviewAnimalCraftEndpoint ep,
         [FromBody] ReviewAnimalCraftRequest req,

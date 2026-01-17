@@ -32,10 +32,9 @@ public class SubmitAnimalCraftEndpoint
         public string Status { get; init; } = "SentForApproval";
     }
 
-    [Route("/api/{locale}/alchimalia-universe/animal-crafts/{animalId}/submit")]
+    [Route("/api/alchimalia-universe/animal-crafts/{animalId}/submit")]
     [Authorize]
     public static async Task<Results<Ok<SubmitResponse>, NotFound, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
-        [FromRoute] string locale,
         [FromRoute] Guid animalId,
         [FromServices] SubmitAnimalCraftEndpoint ep,
         CancellationToken ct)

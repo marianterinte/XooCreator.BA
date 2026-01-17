@@ -27,10 +27,9 @@ public class CreateAnimalCraftFromDefinitionEndpoint
         _logger = logger;
     }
 
-    [Route("/api/{locale}/alchimalia-universe/animal-crafts/from-definition/{definitionId}")]
+    [Route("/api/alchimalia-universe/animal-crafts/from-definition/{definitionId}")]
     [Authorize]
     public static async Task<Results<Ok<AnimalCraftDto>, NotFound, BadRequest<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
-        [FromRoute] string locale,
         [FromRoute] Guid definitionId,
         [FromServices] CreateAnimalCraftFromDefinitionEndpoint ep,
         CancellationToken ct)

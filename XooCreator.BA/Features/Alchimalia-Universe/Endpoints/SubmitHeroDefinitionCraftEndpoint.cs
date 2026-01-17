@@ -32,10 +32,9 @@ public class SubmitHeroDefinitionCraftEndpoint
         public string Status { get; init; } = "SentForApproval";
     }
 
-    [Route("/api/{locale}/alchimalia-universe/hero-crafts/{heroId}/submit")]
+    [Route("/api/alchimalia-universe/hero-crafts/{heroId}/submit")]
     [Authorize]
     public static async Task<Results<Ok<SubmitResponse>, NotFound, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
-        [FromRoute] string locale,
         [FromRoute] string heroId,
         [FromServices] SubmitHeroDefinitionCraftEndpoint ep,
         CancellationToken ct)

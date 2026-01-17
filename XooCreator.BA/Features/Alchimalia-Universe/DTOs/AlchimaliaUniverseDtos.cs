@@ -31,7 +31,7 @@ public record HeroDefinitionDto
 
 public record HeroDefinitionTranslationDto
 {
-    public Guid Id { get; init; }
+    public Guid? Id { get; init; } // Optional - backend generates new GUID for new translations
     public required string LanguageCode { get; init; }
     public required string Name { get; init; }
     public required string Description { get; init; }

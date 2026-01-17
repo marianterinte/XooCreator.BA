@@ -32,10 +32,9 @@ public class RetractAnimalCraftEndpoint
         public string Status { get; init; } = "Draft";
     }
 
-    [Route("/api/{locale}/alchimalia-universe/animal-crafts/{animalId}/retract")]
+    [Route("/api/alchimalia-universe/animal-crafts/{animalId}/retract")]
     [Authorize]
     public static async Task<Results<Ok<RetractResponse>, NotFound, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
-        [FromRoute] string locale,
         [FromRoute] Guid animalId,
         [FromServices] RetractAnimalCraftEndpoint ep,
         CancellationToken ct)

@@ -32,10 +32,9 @@ public class ClaimAnimalCraftEndpoint
         public string Status { get; init; } = "InReview";
     }
 
-    [Route("/api/{locale}/alchimalia-universe/animal-crafts/{animalId}/claim")]
+    [Route("/api/alchimalia-universe/animal-crafts/{animalId}/claim")]
     [Authorize]
     public static async Task<Results<Ok<ClaimResponse>, NotFound, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
-        [FromRoute] string locale,
         [FromRoute] Guid animalId,
         [FromServices] ClaimAnimalCraftEndpoint ep,
         CancellationToken ct)

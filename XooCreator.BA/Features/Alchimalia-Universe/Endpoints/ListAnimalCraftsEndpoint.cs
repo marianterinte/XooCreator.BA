@@ -27,10 +27,9 @@ public class ListAnimalCraftsEndpoint
         _logger = logger;
     }
 
-    [Route("/api/{locale}/alchimalia-universe/animal-crafts")]
+    [Route("/api/alchimalia-universe/animal-crafts")]
     [Authorize]
     public static async Task<Results<Ok<ListAnimalCraftsResponse>, UnauthorizedHttpResult, ForbidHttpResult>> HandleGet(
-        [FromRoute] string locale,
         [FromQuery] string? status,
         [FromQuery] Guid? regionId,
         [FromQuery] bool? isHybrid,

@@ -27,10 +27,9 @@ public class ListHeroDefinitionCraftsEndpoint
         _logger = logger;
     }
 
-    [Route("/api/{locale}/alchimalia-universe/hero-crafts")]
+    [Route("/api/alchimalia-universe/hero-crafts")]
     [Authorize]
     public static async Task<Results<Ok<ListHeroDefinitionCraftsResponse>, UnauthorizedHttpResult, ForbidHttpResult>> HandleGet(
-        [FromRoute] string locale,
         [FromQuery] string? status,
         [FromQuery] string? type,
         [FromQuery] string? search,

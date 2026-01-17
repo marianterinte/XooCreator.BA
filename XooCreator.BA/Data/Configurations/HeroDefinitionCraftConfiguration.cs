@@ -14,6 +14,8 @@ public class HeroDefinitionCraftConfiguration : IEntityTypeConfiguration<HeroDef
         builder.Property(x => x.PublishedDefinitionId).HasMaxLength(100);
         builder.Property(x => x.Status).HasMaxLength(20).IsRequired();
         builder.Property(x => x.Image).HasMaxLength(500);
+        builder.Property(x => x.PrerequisitesJson).HasColumnType("jsonb").IsRequired();
+        builder.Property(x => x.RewardsJson).HasColumnType("jsonb").IsRequired();
         builder.HasIndex(x => x.Status);
         builder.HasIndex(x => x.CreatedByUserId).HasFilter($"[{nameof(HeroDefinitionCraft.CreatedByUserId)}] IS NOT NULL");
         builder.HasOne<AlchimaliaUser>().WithMany().HasForeignKey(x => x.CreatedByUserId).OnDelete(DeleteBehavior.SetNull);

@@ -32,10 +32,9 @@ public class PublishHeroDefinitionCraftEndpoint
         public string Status { get; init; } = "Published";
     }
 
-    [Route("/api/{locale}/alchimalia-universe/hero-crafts/{heroId}/publish")]
+    [Route("/api/alchimalia-universe/hero-crafts/{heroId}/publish")]
     [Authorize]
     public static async Task<Results<Ok<PublishResponse>, NotFound, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
-        [FromRoute] string locale,
         [FromRoute] string heroId,
         [FromServices] PublishHeroDefinitionCraftEndpoint ep,
         CancellationToken ct)

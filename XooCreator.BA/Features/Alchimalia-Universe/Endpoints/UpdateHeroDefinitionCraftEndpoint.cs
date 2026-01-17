@@ -27,10 +27,9 @@ public class UpdateHeroDefinitionCraftEndpoint
         _logger = logger;
     }
 
-    [Route("/api/{locale}/alchimalia-universe/hero-crafts/{heroId}")]
+    [Route("/api/alchimalia-universe/hero-crafts/{heroId}")]
     [Authorize]
     public static async Task<Results<Ok<HeroDefinitionCraftDto>, NotFound, BadRequest<string>, UnauthorizedHttpResult, ForbidHttpResult, Conflict<string>>> HandlePut(
-        [FromRoute] string locale,
         [FromRoute] string heroId,
         [FromServices] UpdateHeroDefinitionCraftEndpoint ep,
         [FromBody] UpdateHeroDefinitionCraftRequest req,
