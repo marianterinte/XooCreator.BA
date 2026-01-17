@@ -13,6 +13,13 @@ public class HeroDefinitionCraft
     [MaxLength(100)]
     public string? PublishedDefinitionId { get; set; }
 
+    public int BaseVersion { get; set; } = 0;
+    public int LastDraftVersion { get; set; } = 0;
+    public Guid? AssignedReviewerUserId { get; set; }
+    public DateTime? ReviewStartedAt { get; set; }
+    public DateTime? ReviewEndedAt { get; set; }
+    public Guid? ApprovedByUserId { get; set; }
+
     public int CourageCost { get; set; }
     public int CuriosityCost { get; set; }
     public int ThinkingCost { get; set; }

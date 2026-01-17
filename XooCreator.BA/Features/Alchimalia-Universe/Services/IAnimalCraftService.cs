@@ -11,5 +11,7 @@ public interface IAnimalCraftService
     Task<AnimalCraftDto> UpdateAsync(Guid userId, Guid animalId, UpdateAnimalCraftRequest request, CancellationToken ct = default);
     Task SubmitForReviewAsync(Guid userId, Guid animalId, CancellationToken ct = default);
     Task ReviewAsync(Guid reviewerId, Guid animalId, ReviewAnimalCraftRequest request, CancellationToken ct = default);
+    Task ClaimAsync(Guid reviewerId, Guid animalId, CancellationToken ct = default);
+    Task RetractAsync(Guid userId, Guid animalId, CancellationToken ct = default);
     Task PublishAsync(Guid publisherId, Guid animalId, CancellationToken ct = default);
 }

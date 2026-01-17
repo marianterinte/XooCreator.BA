@@ -3,6 +3,7 @@ using XooCreator.BA.Data;
 using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Features.AlchimaliaUniverse.DTOs;
 using XooCreator.BA.Features.AlchimaliaUniverse.Repositories;
+using XooCreator.BA.Features.AlchimaliaUniverse.Mappers;
 using Microsoft.Extensions.Logging;
 
 namespace XooCreator.BA.Features.AlchimaliaUniverse.Services;
@@ -11,15 +12,21 @@ public class AnimalCraftService : IAnimalCraftService
 {
     private readonly IAnimalCraftRepository _repository;
     private readonly XooDbContext _db;
+    private readonly IAnimalPublishChangeLogService _changeLogService;
+    private readonly IAlchimaliaUniverseAssetCopyService _assetCopyService;
     private readonly ILogger<AnimalCraftService> _logger;
 
     public AnimalCraftService(
         IAnimalCraftRepository repository,
         XooDbContext db,
+        IAnimalPublishChangeLogService changeLogService,
+        IAlchimaliaUniverseAssetCopyService assetCopyService,
         ILogger<AnimalCraftService> logger)
     {
         _repository = repository;
         _db = db;
+        _changeLogService = changeLogService;
+        _assetCopyService = assetCopyService;
         _logger = logger;
     }
 
@@ -223,6 +230,10 @@ public class AnimalCraftService : IAnimalCraftService
         if (animal.CreatedByUserId != userId)
             throw new UnauthorizedAccessException("Only the creator can update this AnimalCraft");
 
+        // Change Log Tracking
+        var langForTracking = request.Translations?.Keys.FirstOrDefault() ?? "ro-ro";
+        var snapshotBeforeChanges = _changeLogService.CaptureSnapshot(animal, langForTracking);
+
         if (request.Label != null) animal.Label = request.Label;
         if (request.Src != null) animal.Src = request.Src;
         if (request.IsHybrid.HasValue) animal.IsHybrid = request.IsHybrid.Value;
@@ -284,6 +295,10 @@ public class AnimalCraftService : IAnimalCraftService
         }
 
         await _repository.SaveAsync(animal, ct);
+
+        // Append changes after save
+        await _changeLogService.AppendChangesAsync(animal, snapshotBeforeChanges, langForTracking, userId, ct);
+
         return MapToDto(animal);
     }
 
@@ -318,6 +333,48 @@ public class AnimalCraftService : IAnimalCraftService
         animal.Status = AlchimaliaUniverseStatus.SentForApproval.ToDb();
         await _repository.SaveAsync(animal, ct);
         _logger.LogInformation("AnimalCraft {AnimalId} submitted for review by user {UserId}", animalId, userId);
+    }
+
+    public async Task ClaimAsync(Guid reviewerId, Guid animalId, CancellationToken ct = default)
+    {
+        var animal = await _repository.GetAsync(animalId, ct);
+        if (animal == null)
+            throw new KeyNotFoundException($"AnimalCraft with Id '{animalId}' not found");
+
+        var currentStatus = AlchimaliaUniverseStatusExtensions.FromDb(animal.Status);
+        if (currentStatus != AlchimaliaUniverseStatus.SentForApproval)
+            throw new InvalidOperationException($"Cannot claim AnimalCraft in status '{currentStatus}'. Must be SentForApproval.");
+
+        animal.Status = AlchimaliaUniverseStatus.InReview.ToDb();
+        animal.AssignedReviewerUserId = reviewerId;
+        animal.ReviewStartedAt = DateTime.UtcNow;
+
+        await _repository.SaveAsync(animal, ct);
+        _logger.LogInformation("AnimalCraft {AnimalId} claimed for review by {ReviewerId}", animalId, reviewerId);
+    }
+
+    public async Task RetractAsync(Guid userId, Guid animalId, CancellationToken ct = default)
+    {
+        var animal = await _repository.GetAsync(animalId, ct);
+        if (animal == null)
+            throw new KeyNotFoundException($"AnimalCraft with Id '{animalId}' not found");
+
+        if (animal.CreatedByUserId != userId)
+            throw new UnauthorizedAccessException("Only the creator can retract this AnimalCraft");
+
+        var currentStatus = AlchimaliaUniverseStatusExtensions.FromDb(animal.Status);
+        if (currentStatus != AlchimaliaUniverseStatus.SentForApproval && currentStatus != AlchimaliaUniverseStatus.InReview)
+            throw new InvalidOperationException($"Cannot retract AnimalCraft in status '{currentStatus}'");
+
+        animal.Status = AlchimaliaUniverseStatus.Draft.ToDb();
+        animal.AssignedReviewerUserId = null;
+        animal.ReviewStartedAt = null;
+        animal.ReviewEndedAt = null;
+        animal.ReviewedByUserId = null;
+        animal.ApprovedByUserId = null;
+
+        await _repository.SaveAsync(animal, ct);
+        _logger.LogInformation("AnimalCraft {AnimalId} retracted by user {UserId}", animalId, userId);
     }
 
     public async Task ReviewAsync(Guid reviewerId, Guid animalId, ReviewAnimalCraftRequest request, CancellationToken ct = default)
@@ -435,6 +492,55 @@ public class AnimalCraftService : IAnimalCraftService
 
         animal.PublishedDefinitionId = definitionId;
         animal.Status = AlchimaliaUniverseStatus.Published.ToDb();
+
+        // Copy assets and update definition paths
+        var creatorUser = await _db.AlchimaliaUsers.FirstOrDefaultAsync(u => u.Id == (animal.CreatedByUserId ?? Guid.Empty), ct);
+        var creatorEmail = creatorUser?.Email;
+
+        if (!string.IsNullOrWhiteSpace(creatorEmail))
+        {
+            try 
+            {
+                var assets = AlchimaliaUniverseAssetPathMapper.CollectFromAnimalCraft(animal);
+                await _assetCopyService.CopyDraftToPublishedAsync(
+                    assets,
+                    creatorEmail,
+                    animal.Id.ToString(), 
+                    AlchimaliaUniverseAssetPathMapper.EntityType.Animal,
+                    ct);
+
+                // Update definition with published URLs
+                if (!string.IsNullOrWhiteSpace(animal.Src))
+                {
+                    var filename = Path.GetFileName(animal.Src);
+                    var assetInfo = new AlchimaliaUniverseAssetPathMapper.AssetInfo(filename, AlchimaliaUniverseAssetPathMapper.AssetType.Image, null);
+                    var pubPath = AlchimaliaUniverseAssetPathMapper.BuildPublishedPath(assetInfo, creatorEmail, animal.Id.ToString(), AlchimaliaUniverseAssetPathMapper.EntityType.Animal);
+                    definition.Src = _assetCopyService.GetPublishedUrl(pubPath);
+                }
+
+                foreach (var t in animal.Translations)
+                {
+                    if (!string.IsNullOrWhiteSpace(t.AudioUrl))
+                    {
+                        var filename = Path.GetFileName(t.AudioUrl);
+                        var assetInfo = new AlchimaliaUniverseAssetPathMapper.AssetInfo(filename, AlchimaliaUniverseAssetPathMapper.AssetType.Audio, t.LanguageCode);
+                        var pubPath = AlchimaliaUniverseAssetPathMapper.BuildPublishedPath(assetInfo, creatorEmail, animal.Id.ToString(), AlchimaliaUniverseAssetPathMapper.EntityType.Animal);
+                        var pubUrl = _assetCopyService.GetPublishedUrl(pubPath);
+                        
+                        var defTrans = definition.Translations.FirstOrDefault(dt => dt.LanguageCode == t.LanguageCode);
+                        if (defTrans != null)
+                        {
+                            defTrans.AudioUrl = pubUrl;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Asset copy failed during publish for Animal {AnimalId}", animal.Id);
+            }
+        }
+
         await _db.SaveChangesAsync(ct);
 
         _logger.LogInformation("AnimalCraft {AnimalId} published by user {UserId}", animalId, publisherId);

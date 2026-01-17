@@ -271,6 +271,14 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IHeroDefinitionCraftService, HeroDefinitionCraftService>();
         services.AddScoped<IAnimalCraftService, AnimalCraftService>();
         services.AddScoped<ITreeOfHeroesConfigCraftService, TreeOfHeroesConfigCraftService>();
+        services.AddScoped<IHeroDefinitionPublishChangeLogService, HeroDefinitionPublishChangeLogService>();
+        services.AddScoped<IAnimalPublishChangeLogService, AnimalPublishChangeLogService>();
+        
+        // Queues
+        services.AddSingleton<IHeroDefinitionVersionQueue, HeroDefinitionVersionQueue>();
+        services.AddSingleton<IAnimalVersionQueue, AnimalVersionQueue>();
+
+        services.AddScoped<IAlchimaliaUniverseAssetCopyService, AlchimaliaUniverseAssetCopyService>();
         
         return services;
     }

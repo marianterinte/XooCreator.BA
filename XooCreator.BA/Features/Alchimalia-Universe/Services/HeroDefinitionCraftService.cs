@@ -3,6 +3,7 @@ using XooCreator.BA.Data;
 using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Features.AlchimaliaUniverse.DTOs;
 using XooCreator.BA.Features.AlchimaliaUniverse.Repositories;
+using XooCreator.BA.Features.AlchimaliaUniverse.Mappers;
 using Microsoft.Extensions.Logging;
 
 namespace XooCreator.BA.Features.AlchimaliaUniverse.Services;
@@ -11,15 +12,21 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
 {
     private readonly IHeroDefinitionCraftRepository _repository;
     private readonly XooDbContext _db;
+    private readonly IHeroDefinitionPublishChangeLogService _changeLogService;
+    private readonly IAlchimaliaUniverseAssetCopyService _assetCopyService;
     private readonly ILogger<HeroDefinitionCraftService> _logger;
 
     public HeroDefinitionCraftService(
         IHeroDefinitionCraftRepository repository,
         XooDbContext db,
+        IHeroDefinitionPublishChangeLogService changeLogService,
+        IAlchimaliaUniverseAssetCopyService assetCopyService,
         ILogger<HeroDefinitionCraftService> logger)
     {
         _repository = repository;
         _db = db;
+        _changeLogService = changeLogService;
+        _assetCopyService = assetCopyService;
         _logger = logger;
     }
 
@@ -190,6 +197,10 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
         if (hero.CreatedByUserId != userId)
             throw new UnauthorizedAccessException("Only the creator can update this HeroDefinitionCraft");
 
+        // Change Log Tracking
+        var langForTracking = request.Translations?.Keys.FirstOrDefault() ?? "ro-ro";
+        var snapshotBeforeChanges = _changeLogService.CaptureSnapshot(hero, langForTracking);
+
         if (request.CourageCost.HasValue) hero.CourageCost = request.CourageCost.Value;
         if (request.CuriosityCost.HasValue) hero.CuriosityCost = request.CuriosityCost.Value;
         if (request.ThinkingCost.HasValue) hero.ThinkingCost = request.ThinkingCost.Value;
@@ -232,6 +243,10 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
         }
 
         await _repository.SaveAsync(hero, ct);
+        
+        // Append changes after save
+        await _changeLogService.AppendChangesAsync(hero, snapshotBeforeChanges, langForTracking, userId, ct);
+
         return MapToDto(hero);
     }
 
@@ -251,6 +266,48 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
         hero.Status = AlchimaliaUniverseStatus.SentForApproval.ToDb();
         await _repository.SaveAsync(hero, ct);
         _logger.LogInformation("HeroDefinitionCraft {HeroId} submitted for review by user {UserId}", heroId, userId);
+    }
+
+    public async Task ClaimAsync(Guid reviewerId, string heroId, CancellationToken ct = default)
+    {
+        var hero = await _repository.GetAsync(heroId, ct);
+        if (hero == null)
+            throw new KeyNotFoundException($"HeroDefinitionCraft with Id '{heroId}' not found");
+
+        var currentStatus = AlchimaliaUniverseStatusExtensions.FromDb(hero.Status);
+        if (currentStatus != AlchimaliaUniverseStatus.SentForApproval)
+            throw new InvalidOperationException($"Cannot claim HeroDefinitionCraft in status '{currentStatus}'. Must be SentForApproval.");
+
+        hero.Status = AlchimaliaUniverseStatus.InReview.ToDb();
+        hero.AssignedReviewerUserId = reviewerId;
+        hero.ReviewStartedAt = DateTime.UtcNow;
+        
+        await _repository.SaveAsync(hero, ct);
+        _logger.LogInformation("HeroDefinitionCraft {HeroId} claimed for review by {ReviewerId}", heroId, reviewerId);
+    }
+
+    public async Task RetractAsync(Guid userId, string heroId, CancellationToken ct = default)
+    {
+        var hero = await _repository.GetAsync(heroId, ct);
+        if (hero == null)
+            throw new KeyNotFoundException($"HeroDefinitionCraft with Id '{heroId}' not found");
+
+        if (hero.CreatedByUserId != userId)
+            throw new UnauthorizedAccessException("Only the creator can retract this HeroDefinitionCraft");
+
+        var currentStatus = AlchimaliaUniverseStatusExtensions.FromDb(hero.Status);
+        if (currentStatus != AlchimaliaUniverseStatus.SentForApproval && currentStatus != AlchimaliaUniverseStatus.InReview)
+            throw new InvalidOperationException($"Cannot retract HeroDefinitionCraft in status '{currentStatus}'");
+
+        hero.Status = AlchimaliaUniverseStatus.Draft.ToDb();
+        hero.AssignedReviewerUserId = null;
+        hero.ReviewStartedAt = null;
+        hero.ReviewEndedAt = null;
+        hero.ReviewedByUserId = null;
+        hero.ApprovedByUserId = null;
+
+        await _repository.SaveAsync(hero, ct);
+        _logger.LogInformation("HeroDefinitionCraft {HeroId} retracted by user {UserId}", heroId, userId);
     }
 
     public async Task ReviewAsync(Guid reviewerId, string heroId, ReviewHeroDefinitionCraftRequest request, CancellationToken ct = default)
@@ -354,6 +411,54 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
 
         hero.PublishedDefinitionId = definitionId;
         hero.Status = AlchimaliaUniverseStatus.Published.ToDb();
+        // Copy assets and update definition paths
+        var creatorUser = await _db.AlchimaliaUsers.FirstOrDefaultAsync(u => u.Id == (hero.CreatedByUserId ?? Guid.Empty), ct);
+        var creatorEmail = creatorUser?.Email;
+
+        if (!string.IsNullOrWhiteSpace(creatorEmail))
+        {
+            try 
+            {
+                var assets = AlchimaliaUniverseAssetPathMapper.CollectFromHeroCraft(hero);
+                await _assetCopyService.CopyDraftToPublishedAsync(
+                    assets,
+                    creatorEmail,
+                    hero.Id, 
+                    AlchimaliaUniverseAssetPathMapper.EntityType.Hero,
+                    ct);
+
+                // Update definition with published URLs
+                if (!string.IsNullOrWhiteSpace(hero.Image))
+                {
+                    var filename = Path.GetFileName(hero.Image);
+                    var assetInfo = new AlchimaliaUniverseAssetPathMapper.AssetInfo(filename, AlchimaliaUniverseAssetPathMapper.AssetType.Image, null);
+                    var pubPath = AlchimaliaUniverseAssetPathMapper.BuildPublishedPath(assetInfo, creatorEmail, hero.Id, AlchimaliaUniverseAssetPathMapper.EntityType.Hero);
+                    definition.Image = _assetCopyService.GetPublishedUrl(pubPath);
+                }
+
+                foreach (var t in hero.Translations)
+                {
+                    if (!string.IsNullOrWhiteSpace(t.AudioUrl))
+                    {
+                        var filename = Path.GetFileName(t.AudioUrl);
+                        var assetInfo = new AlchimaliaUniverseAssetPathMapper.AssetInfo(filename, AlchimaliaUniverseAssetPathMapper.AssetType.Audio, t.LanguageCode);
+                        var pubPath = AlchimaliaUniverseAssetPathMapper.BuildPublishedPath(assetInfo, creatorEmail, hero.Id, AlchimaliaUniverseAssetPathMapper.EntityType.Hero);
+                        var pubUrl = _assetCopyService.GetPublishedUrl(pubPath);
+                        
+                        var defTrans = definition.Translations.FirstOrDefault(dt => dt.LanguageCode == t.LanguageCode);
+                        if (defTrans != null)
+                        {
+                            defTrans.AudioUrl = pubUrl;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Asset copy failed during publish for Hero {HeroId}", hero.Id);
+            }
+        }
+
         await _db.SaveChangesAsync(ct);
 
         _logger.LogInformation("HeroDefinitionCraft {HeroId} published by user {UserId}", heroId, publisherId);

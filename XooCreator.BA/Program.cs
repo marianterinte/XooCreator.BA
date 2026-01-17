@@ -11,6 +11,7 @@ using XooCreator.BA.Infrastructure;
 using XooCreator.DbScriptRunner;
 using XooCreator.BA.Infrastructure.Services.Images;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Caching;
+using XooCreator.BA.Features.AlchimaliaUniverse.Services;
 
 // Store startup exception for display
 Exception? startupException = null;
@@ -62,6 +63,8 @@ builder.Services.AddHostedService<StoryDocumentExportQueueWorker>();
 builder.Services.AddHostedService<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.EpicPublishQueueJob>();
 builder.Services.AddHostedService<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.EpicVersionQueueJob>();
 builder.Services.AddHostedService<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.EpicAggregatesQueueJob>();
+builder.Services.AddHostedService<HeroDefinitionVersionQueueWorker>();
+builder.Services.AddHostedService<AnimalVersionQueueWorker>();
 
 builder.Services.AddAuthConfiguration(builder.Configuration);
 

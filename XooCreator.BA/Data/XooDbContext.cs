@@ -147,7 +147,17 @@ public class XooDbContext : DbContext
     // Epic Delta Publish
     public DbSet<EpicPublishChangeLog> EpicPublishChangeLogs => Set<EpicPublishChangeLog>();
     public DbSet<EpicAssetLink> EpicAssetLinks => Set<EpicAssetLink>();
+
+    // Hero Definition Delta Publish
+    public DbSet<HeroDefinitionPublishChangeLog> HeroDefinitionPublishChangeLogs => Set<HeroDefinitionPublishChangeLog>();
+
+    // Animal Delta Publish
+    public DbSet<AnimalPublishChangeLog> AnimalPublishChangeLogs => Set<AnimalPublishChangeLog>();
     
+    // Background Jobs
+    public DbSet<HeroDefinitionVersionJob> HeroDefinitionVersionJobs => Set<HeroDefinitionVersionJob>();
+    public DbSet<AnimalVersionJob> AnimalVersionJobs => Set<AnimalVersionJob>();
+
     public DbSet<StoryPublishJob> StoryPublishJobs => Set<StoryPublishJob>();
     public DbSet<StoryVersionJob> StoryVersionJobs => Set<StoryVersionJob>();
     public DbSet<EpicVersionJob> EpicVersionJobs => Set<EpicVersionJob>();

@@ -22,6 +22,13 @@ public class AnimalCraft
     [MaxLength(20)]
     public required string Status { get; set; } = "draft";
 
+    public int BaseVersion { get; set; } = 0;
+    public int LastDraftVersion { get; set; } = 0;
+    public Guid? AssignedReviewerUserId { get; set; }
+    public DateTime? ReviewStartedAt { get; set; }
+    public DateTime? ReviewEndedAt { get; set; }
+    public Guid? ApprovedByUserId { get; set; }
+
     public Guid? CreatedByUserId { get; set; }
     public Guid? ReviewedByUserId { get; set; }
     public string? ReviewNotes { get; set; }

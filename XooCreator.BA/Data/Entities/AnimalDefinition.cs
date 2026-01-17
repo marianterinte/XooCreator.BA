@@ -9,6 +9,10 @@ public class AnimalDefinition
 {
     public Guid Id { get; set; }
 
+    public int Version { get; set; } = 1;
+    public int BaseVersion { get; set; } = 0;
+    public int LastPublishedVersion { get; set; } = 0;
+
     [MaxLength(255)]
     public required string Label { get; set; } = string.Empty;
 
