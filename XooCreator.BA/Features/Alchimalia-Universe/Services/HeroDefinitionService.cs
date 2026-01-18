@@ -38,7 +38,7 @@ public class HeroDefinitionService : IHeroDefinitionService
         return MapDefinitionToDto(definition);
     }
 
-    public async Task<ListHeroDefinitionsResponse> ListAsync(string? status = null, string? type = null, string? search = null, string? languageCode = null, CancellationToken ct = default)
+    public async Task<ListHeroDefinitionsResponse> ListAsync(Guid currentUserId, string? status = null, string? type = null, string? search = null, string? languageCode = null, CancellationToken ct = default)
     {
         var query = _db.HeroDefinitionDefinitions
             .Include(d => d.Translations)
@@ -57,7 +57,26 @@ public class HeroDefinitionService : IHeroDefinitionService
         }
 
         var definitions = await query.ToListAsync(ct);
-        var items = definitions.Select(d => MapDefinitionToListItem(d, languageCode)).ToList();
+
+        var ownerIds = definitions
+            .Where(d => d.PublishedByUserId.HasValue)
+            .Select(d => d.PublishedByUserId!.Value)
+            .Distinct()
+            .ToList();
+
+        var ownerEmailMap = await _db.AlchimaliaUsers
+            .AsNoTracking()
+            .Where(u => ownerIds.Contains(u.Id))
+            .Select(u => new { u.Id, u.Email })
+            .ToDictionaryAsync(u => u.Id, u => u.Email ?? string.Empty, ct);
+
+        var items = definitions.Select(d =>
+        {
+            var ownerEmail = d.PublishedByUserId.HasValue && ownerEmailMap.TryGetValue(d.PublishedByUserId.Value, out var email)
+                ? email
+                : string.Empty;
+            return MapDefinitionToListItem(d, languageCode, currentUserId, ownerEmail);
+        }).ToList();
 
         return new ListHeroDefinitionsResponse
         {
@@ -150,16 +169,16 @@ public class HeroDefinitionService : IHeroDefinitionService
         // Update translations
         if (request.Translations != null)
         {
-            foreach (var (langCode, translationDto) in request.Translations)
+            foreach (var translationDto in request.Translations)
             {
-                var normalizedLang = langCode.ToLowerInvariant();
+                var normalizedLang = translationDto.LanguageCode.ToLowerInvariant();
                 var existingTranslation = hero.Translations.FirstOrDefault(t => t.LanguageCode == normalizedLang);
                 
                 if (existingTranslation != null)
                 {
                     existingTranslation.Name = translationDto.Name;
-                    existingTranslation.Description = translationDto.Description;
-                    existingTranslation.Story = translationDto.Story;
+                    existingTranslation.Description = translationDto.Description ?? string.Empty;
+                    existingTranslation.Story = translationDto.Story ?? string.Empty;
                     existingTranslation.AudioUrl = translationDto.AudioUrl;
                 }
                 else
@@ -170,8 +189,8 @@ public class HeroDefinitionService : IHeroDefinitionService
                         HeroDefinitionId = heroId,
                         LanguageCode = normalizedLang,
                         Name = translationDto.Name,
-                        Description = translationDto.Description,
-                        Story = translationDto.Story,
+                        Description = translationDto.Description ?? string.Empty,
+                        Story = translationDto.Story ?? string.Empty,
                         AudioUrl = translationDto.AudioUrl
                     });
                 }
@@ -343,7 +362,7 @@ public class HeroDefinitionService : IHeroDefinitionService
         };
     }
 
-    private static HeroDefinitionListItemDto MapDefinitionToListItem(HeroDefinitionDefinition definition, string? languageCode)
+    private static HeroDefinitionListItemDto MapDefinitionToListItem(HeroDefinitionDefinition definition, string? languageCode, Guid currentUserId, string ownerEmail)
     {
         HeroDefinitionDefinitionTranslation? selectedTranslation = null;
         if (!string.IsNullOrWhiteSpace(languageCode))
@@ -355,6 +374,8 @@ public class HeroDefinitionService : IHeroDefinitionService
 
         var availableLanguages = definition.Translations.Select(t => t.LanguageCode.ToLowerInvariant()).ToList();
 
+        var isOwnedByCurrentUser = definition.PublishedByUserId.HasValue && definition.PublishedByUserId.Value == currentUserId;
+
         return new HeroDefinitionListItemDto
         {
             Id = definition.Id,
@@ -363,7 +384,11 @@ public class HeroDefinitionService : IHeroDefinitionService
             Status = definition.Status,
             UpdatedAt = definition.UpdatedAt,
             CreatedByUserId = definition.PublishedByUserId,
-            AvailableLanguages = availableLanguages
+            AvailableLanguages = availableLanguages,
+            AssignedReviewerUserId = null,
+            IsAssignedToCurrentUser = false,
+            IsOwnedByCurrentUser = isOwnedByCurrentUser,
+            OwnerEmail = ownerEmail
         };
     }
 }

@@ -33,6 +33,19 @@ public class TreeOfHeroesConfigCraftService : ITreeOfHeroesConfigCraftService
         return MapToDto(config);
     }
 
+    public async Task<TreeOfHeroesConfigDefinitionDto> GetDefinitionAsync(Guid configId, CancellationToken ct = default)
+    {
+        var definition = await _db.TreeOfHeroesConfigDefinitions
+            .Include(x => x.Nodes)
+            .Include(x => x.Edges)
+            .FirstOrDefaultAsync(x => x.Id == configId, ct);
+
+        if (definition == null)
+            throw new KeyNotFoundException($"TreeOfHeroesConfigDefinition with Id '{configId}' not found");
+
+        return MapDefinitionToDto(definition);
+    }
+
     public async Task<ListTreeOfHeroesConfigCraftsResponse> ListCraftsAsync(string? status = null, CancellationToken ct = default)
     {
         var configs = await _repository.ListAsync(status, ct);
@@ -117,7 +130,7 @@ public class TreeOfHeroesConfigCraftService : ITreeOfHeroesConfigCraftService
         return MapToDto(config);
     }
 
-    public async Task<TreeOfHeroesConfigCraftDto> UpdateCraftAsync(Guid userId, Guid configId, UpdateTreeOfHeroesConfigCraftRequest request, CancellationToken ct = default)
+    public async Task<TreeOfHeroesConfigCraftDto> UpdateCraftAsync(Guid userId, Guid configId, UpdateTreeOfHeroesConfigCraftRequest request, bool allowAdminOverride = false, CancellationToken ct = default)
     {
         var config = await _repository.GetWithDetailsAsync(configId, ct);
         if (config == null)
@@ -127,7 +140,7 @@ public class TreeOfHeroesConfigCraftService : ITreeOfHeroesConfigCraftService
         if (currentStatus != AlchimaliaUniverseStatus.Draft && currentStatus != AlchimaliaUniverseStatus.ChangesRequested)
             throw new InvalidOperationException($"Cannot update TreeOfHeroesConfigCraft in status '{currentStatus}'");
 
-        if (config.CreatedByUserId != userId)
+        if (config.CreatedByUserId != userId && !allowAdminOverride)
             throw new UnauthorizedAccessException("Only the creator can update this TreeOfHeroesConfigCraft");
 
         if (request.Label != null) config.Label = request.Label;
@@ -357,6 +370,42 @@ public class TreeOfHeroesConfigCraftService : ITreeOfHeroesConfigCraftService
                     : JsonSerializer.Deserialize<List<string>>(n.PrerequisitesJson) ?? new List<string>()
             }).ToList(),
             Edges = config.Edges.Select(e => new TreeOfHeroesConfigEdgeDto
+            {
+                Id = e.Id,
+                FromHeroId = e.FromHeroId,
+                ToHeroId = e.ToHeroId
+            }).ToList()
+        };
+    }
+
+    private TreeOfHeroesConfigDefinitionDto MapDefinitionToDto(TreeOfHeroesConfigDefinition definition)
+    {
+        return new TreeOfHeroesConfigDefinitionDto
+        {
+            Id = definition.Id,
+            Label = definition.Label,
+            Status = definition.Status,
+            PublishedByUserId = definition.PublishedByUserId,
+            CreatedAt = definition.CreatedAt,
+            UpdatedAt = definition.UpdatedAt,
+            PublishedAtUtc = definition.PublishedAtUtc,
+            Nodes = definition.Nodes.Select(n => new TreeOfHeroesConfigNodeDto
+            {
+                Id = n.Id,
+                HeroDefinitionId = n.HeroDefinitionId,
+                PositionX = n.PositionX,
+                PositionY = n.PositionY,
+                CourageCost = n.CourageCost,
+                CuriosityCost = n.CuriosityCost,
+                ThinkingCost = n.ThinkingCost,
+                CreativityCost = n.CreativityCost,
+                SafetyCost = n.SafetyCost,
+                IsStartup = n.IsStartup,
+                Prerequisites = string.IsNullOrWhiteSpace(n.PrerequisitesJson) || n.PrerequisitesJson == "[]"
+                    ? new List<string>()
+                    : JsonSerializer.Deserialize<List<string>>(n.PrerequisitesJson) ?? new List<string>()
+            }).ToList(),
+            Edges = definition.Edges.Select(e => new TreeOfHeroesConfigEdgeDto
             {
                 Id = e.Id,
                 FromHeroId = e.FromHeroId,

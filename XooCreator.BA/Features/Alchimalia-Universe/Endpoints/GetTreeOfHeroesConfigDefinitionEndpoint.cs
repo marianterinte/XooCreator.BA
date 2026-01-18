@@ -11,28 +11,27 @@ using Microsoft.Extensions.Logging;
 namespace XooCreator.BA.Features.AlchimaliaUniverse.Endpoints;
 
 [Endpoint]
-public class UpdateTreeOfHeroesConfigCraftEndpoint
+public class GetTreeOfHeroesConfigDefinitionEndpoint
 {
     private readonly ITreeOfHeroesConfigCraftService _service;
     private readonly IAuth0UserService _auth0;
-    private readonly ILogger<UpdateTreeOfHeroesConfigCraftEndpoint> _logger;
+    private readonly ILogger<GetTreeOfHeroesConfigDefinitionEndpoint> _logger;
 
-    public UpdateTreeOfHeroesConfigCraftEndpoint(
+    public GetTreeOfHeroesConfigDefinitionEndpoint(
         ITreeOfHeroesConfigCraftService service,
         IAuth0UserService auth0,
-        ILogger<UpdateTreeOfHeroesConfigCraftEndpoint> logger)
+        ILogger<GetTreeOfHeroesConfigDefinitionEndpoint> logger)
     {
         _service = service;
         _auth0 = auth0;
         _logger = logger;
     }
 
-    [Route("/api/alchimalia-universe/tree-configs/crafts/{id}")]
+    [Route("/api/alchimalia-universe/tree-configs/definitions/{id}")]
     [Authorize]
-    public static async Task<Results<Ok<TreeOfHeroesConfigCraftDto>, BadRequest<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePut(
+    public static async Task<Results<Ok<TreeOfHeroesConfigDefinitionDto>, BadRequest<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandleGet(
         [FromRoute] Guid id,
-        [FromServices] UpdateTreeOfHeroesConfigCraftEndpoint ep,
-        [FromBody] UpdateTreeOfHeroesConfigCraftRequest req,
+        [FromServices] GetTreeOfHeroesConfigDefinitionEndpoint ep,
         CancellationToken ct)
     {
         var user = await ep._auth0.GetCurrentUserAsync(ct);
@@ -40,15 +39,13 @@ public class UpdateTreeOfHeroesConfigCraftEndpoint
 
         if (!ep._auth0.HasRole(user, UserRole.Creator))
         {
-            ep._logger.LogWarning("UpdateTreeOfHeroesConfigCraft forbidden: userId={UserId}", user?.Id);
+            ep._logger.LogWarning("GetTreeOfHeroesConfigDefinition forbidden: userId={UserId}", user?.Id);
             return TypedResults.Forbid();
         }
 
-        var isAdmin = ep._auth0.HasRole(user, UserRole.Admin);
-
         try
         {
-            var config = await ep._service.UpdateCraftAsync(user.Id, id, req, allowAdminOverride: isAdmin, ct);
+            var config = await ep._service.GetDefinitionAsync(id, ct);
             return TypedResults.Ok(config);
         }
         catch (Exception ex)

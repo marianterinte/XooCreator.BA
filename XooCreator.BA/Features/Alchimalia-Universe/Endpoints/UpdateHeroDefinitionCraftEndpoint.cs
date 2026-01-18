@@ -45,9 +45,11 @@ public class UpdateHeroDefinitionCraftEndpoint
             return TypedResults.Forbid();
         }
 
+        var isAdmin = ep._auth0.HasRole(user, UserRole.Admin);
+
         try
         {
-            var hero = await ep._service.UpdateAsync(user.Id, heroId, req, ct);
+            var hero = await ep._service.UpdateAsync(user.Id, heroId, req, allowAdminOverride: isAdmin, ct);
             return TypedResults.Ok(hero);
         }
         catch (KeyNotFoundException)

@@ -36,18 +36,13 @@ public class HeroDefinitionCraftRepository : IHeroDefinitionCraftRepository
 
     public async Task SaveAsync(HeroDefinitionCraft hero, CancellationToken ct = default)
     {
-        var existing = await _context.HeroDefinitionCrafts
-            .Include(x => x.Translations)
-            .FirstOrDefaultAsync(x => x.Id == hero.Id, ct);
+        if (string.IsNullOrWhiteSpace(hero.Id))
+            throw new ArgumentException("HeroDefinitionCraft Id cannot be empty", nameof(hero));
 
-        if (existing == null)
-        {
-            if (string.IsNullOrWhiteSpace(hero.Id))
-                throw new ArgumentException("HeroDefinitionCraft Id cannot be empty", nameof(hero));
+        var tracked = _context.ChangeTracker.Entries<HeroDefinitionCraft>()
+            .FirstOrDefault(x => x.Entity.Id == hero.Id);
 
-            _context.HeroDefinitionCrafts.Add(hero);
-        }
-        else
+        if (tracked == null)
         {
             _context.HeroDefinitionCrafts.Update(hero);
         }

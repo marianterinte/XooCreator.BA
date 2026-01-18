@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using XooCreator.BA.Data.Enums;
 
 namespace XooCreator.BA.Features.AlchimaliaUniverse.DTOs;
@@ -34,8 +36,8 @@ public record HeroDefinitionTranslationDto
     public Guid? Id { get; init; } // Optional - backend generates new GUID for new translations
     public required string LanguageCode { get; init; }
     public required string Name { get; init; }
-    public required string Description { get; init; }
-    public required string Story { get; init; }
+    public string? Description { get; init; }
+    public string? Story { get; init; }
     public string? AudioUrl { get; init; }
 }
 
@@ -48,6 +50,10 @@ public record HeroDefinitionListItemDto
     public DateTime UpdatedAt { get; init; }
     public Guid? CreatedByUserId { get; init; }
     public List<string> AvailableLanguages { get; init; } = new(); // List of language codes that have translations
+    public Guid? AssignedReviewerUserId { get; init; }
+    public bool IsAssignedToCurrentUser { get; init; }
+    public bool IsOwnedByCurrentUser { get; init; }
+    public string? OwnerEmail { get; init; }
 }
 
 public record CreateHeroDefinitionRequest
@@ -65,8 +71,8 @@ public record CreateHeroDefinitionRequest
     public string Image { get; init; } = string.Empty;
     public required string LanguageCode { get; init; }
     public required string Name { get; init; }
-    public required string Description { get; init; }
-    public required string Story { get; init; }
+    public string? Description { get; init; }
+    public string? Story { get; init; }
     public string? AudioUrl { get; init; }
 }
 
@@ -83,7 +89,8 @@ public record UpdateHeroDefinitionRequest
     public double? PositionX { get; init; }
     public double? PositionY { get; init; }
     public string? Image { get; init; }
-    public Dictionary<string, HeroDefinitionTranslationDto>? Translations { get; init; }
+    [JsonConverter(typeof(HeroDefinitionTranslationsConverter))]
+    public List<HeroDefinitionTranslationDto>? Translations { get; init; }
 }
 
 public record ReviewHeroDefinitionRequest
@@ -136,6 +143,10 @@ public record HeroDefinitionCraftListItemDto
     public DateTime UpdatedAt { get; init; }
     public Guid? CreatedByUserId { get; init; }
     public List<string> AvailableLanguages { get; init; } = new();
+    public Guid? AssignedReviewerUserId { get; init; }
+    public bool IsAssignedToCurrentUser { get; init; }
+    public bool IsOwnedByCurrentUser { get; init; }
+    public string? OwnerEmail { get; init; }
 }
 
 public record CreateHeroDefinitionCraftRequest
@@ -153,8 +164,8 @@ public record CreateHeroDefinitionCraftRequest
     public string Image { get; init; } = string.Empty;
     public required string LanguageCode { get; init; }
     public required string Name { get; init; }
-    public required string Description { get; init; }
-    public required string Story { get; init; }
+    public string? Description { get; init; }
+    public string? Story { get; init; }
     public string? AudioUrl { get; init; }
 }
 
@@ -171,7 +182,42 @@ public record UpdateHeroDefinitionCraftRequest
     public double? PositionX { get; init; }
     public double? PositionY { get; init; }
     public string? Image { get; init; }
-    public Dictionary<string, HeroDefinitionTranslationDto>? Translations { get; init; }
+    [JsonConverter(typeof(HeroDefinitionTranslationsConverter))]
+    public List<HeroDefinitionTranslationDto>? Translations { get; init; }
+}
+
+public sealed class HeroDefinitionTranslationsConverter : JsonConverter<List<HeroDefinitionTranslationDto>>
+{
+    public override List<HeroDefinitionTranslationDto> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        if (reader.TokenType == JsonTokenType.StartArray)
+        {
+            var list = JsonSerializer.Deserialize<List<HeroDefinitionTranslationDto>>(ref reader, options);
+            return list ?? new List<HeroDefinitionTranslationDto>();
+        }
+
+        if (reader.TokenType == JsonTokenType.StartObject)
+        {
+            var dict = JsonSerializer.Deserialize<Dictionary<string, HeroDefinitionTranslationDto>>(ref reader, options);
+            if (dict == null) return new List<HeroDefinitionTranslationDto>();
+            return dict.Select(kvp =>
+            {
+                var dto = kvp.Value;
+                if (string.IsNullOrWhiteSpace(dto.LanguageCode))
+                {
+                    dto = dto with { LanguageCode = kvp.Key };
+                }
+                return dto;
+            }).ToList();
+        }
+
+        return new List<HeroDefinitionTranslationDto>();
+    }
+
+    public override void Write(Utf8JsonWriter writer, List<HeroDefinitionTranslationDto> value, JsonSerializerOptions options)
+    {
+        JsonSerializer.Serialize(writer, value, options);
+    }
 }
 
 public record ReviewHeroDefinitionCraftRequest

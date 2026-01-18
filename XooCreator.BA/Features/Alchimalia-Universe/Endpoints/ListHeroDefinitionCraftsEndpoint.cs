@@ -47,7 +47,7 @@ public class ListHeroDefinitionCraftsEndpoint
             return TypedResults.Forbid();
         }
 
-        var response = await ep._service.ListAsync(status, type, search, language, ct);
+        var response = await ep._service.ListAsync(user.Id, status, type, search, language, ct);
         return TypedResults.Ok(response);
     }
 }

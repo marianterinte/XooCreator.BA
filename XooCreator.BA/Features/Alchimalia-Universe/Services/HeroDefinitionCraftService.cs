@@ -49,7 +49,7 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
         return MapToDto(hero, languageCode);
     }
 
-    public async Task<ListHeroDefinitionCraftsResponse> ListAsync(string? status = null, string? type = null, string? search = null, string? languageCode = null, CancellationToken ct = default)
+    public async Task<ListHeroDefinitionCraftsResponse> ListAsync(Guid currentUserId, string? status = null, string? type = null, string? search = null, string? languageCode = null, CancellationToken ct = default)
     {
         // Crafts only (definitions are listed via hero-definitions endpoint)
         var craftQuery = _db.HeroDefinitionCrafts.Include(x => x.Translations).AsQueryable();
@@ -68,6 +68,18 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
         var normalizedLanguage = NormalizeLanguageCode(languageCode);
         var languageBase = GetLanguageBase(normalizedLanguage);
 
+        var ownerIds = allCrafts
+            .Where(c => c.CreatedByUserId.HasValue)
+            .Select(c => c.CreatedByUserId!.Value)
+            .Distinct()
+            .ToList();
+
+        var ownerEmailMap = await _db.AlchimaliaUsers
+            .AsNoTracking()
+            .Where(u => ownerIds.Contains(u.Id))
+            .Select(u => new { u.Id, u.Email })
+            .ToDictionaryAsync(u => u.Id, u => u.Email ?? string.Empty, ct);
+
         var items = new List<HeroDefinitionCraftListItemDto>();
         foreach (var craft in allCrafts)
         {
@@ -84,6 +96,13 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
+            var ownerEmail = craft.CreatedByUserId.HasValue && ownerEmailMap.TryGetValue(craft.CreatedByUserId.Value, out var email)
+                ? email
+                : string.Empty;
+
+            var isOwnedByCurrentUser = craft.CreatedByUserId.HasValue && craft.CreatedByUserId.Value == currentUserId;
+            var isAssignedToCurrentUser = craft.AssignedReviewerUserId.HasValue && craft.AssignedReviewerUserId.Value == currentUserId;
+
             items.Add(new HeroDefinitionCraftListItemDto
             {
                 Id = craft.Id,
@@ -93,7 +112,11 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
                 Status = craft.Status,
                 UpdatedAt = craft.UpdatedAt,
                 CreatedByUserId = craft.CreatedByUserId,
-                AvailableLanguages = availableLanguages
+                AvailableLanguages = availableLanguages,
+                AssignedReviewerUserId = craft.AssignedReviewerUserId,
+                IsAssignedToCurrentUser = isAssignedToCurrentUser,
+                IsOwnedByCurrentUser = isOwnedByCurrentUser,
+                OwnerEmail = ownerEmail
             });
         }
 
@@ -139,8 +162,8 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
                     HeroDefinitionCraftId = heroId,
                     LanguageCode = NormalizeLanguageCode(request.LanguageCode),
                     Name = request.Name,
-                    Description = request.Description,
-                    Story = request.Story,
+                    Description = request.Description ?? string.Empty,
+                    Story = request.Story ?? string.Empty,
                     AudioUrl = request.AudioUrl
                 }
             }
@@ -206,8 +229,8 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
                 HeroDefinitionCraftId = string.Empty, // set after save
                 LanguageCode = NormalizeLanguageCode(t.LanguageCode),
                 Name = t.Name,
-                Description = t.Description,
-                Story = t.Story,
+                Description = t.Description ?? string.Empty,
+                Story = t.Story ?? string.Empty,
                 AudioUrl = t.AudioUrl
             }).ToList()
         };
@@ -288,7 +311,7 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
         return MapToDto(hero);
     }
 
-    public async Task<HeroDefinitionCraftDto> UpdateAsync(Guid userId, string heroId, UpdateHeroDefinitionCraftRequest request, CancellationToken ct = default)
+    public async Task<HeroDefinitionCraftDto> UpdateAsync(Guid userId, string heroId, UpdateHeroDefinitionCraftRequest request, bool allowAdminOverride = false, CancellationToken ct = default)
     {
         var hero = await _repository.GetWithTranslationsAsync(heroId, ct);
         if (hero == null)
@@ -298,11 +321,11 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
         if (currentStatus != AlchimaliaUniverseStatus.Draft && currentStatus != AlchimaliaUniverseStatus.ChangesRequested)
             throw new InvalidOperationException($"Cannot update HeroDefinitionCraft in status '{currentStatus}'");
 
-        if (hero.CreatedByUserId != userId)
+        if (hero.CreatedByUserId != userId && !allowAdminOverride)
             throw new UnauthorizedAccessException("Only the creator can update this HeroDefinitionCraft");
 
         // Change Log Tracking
-        var langForTracking = request.Translations?.Keys.FirstOrDefault() ?? "ro-ro";
+        var langForTracking = request.Translations?.FirstOrDefault()?.LanguageCode ?? "ro-ro";
         var snapshotBeforeChanges = _changeLogService.CaptureSnapshot(hero, langForTracking);
 
         if (request.CourageCost.HasValue) hero.CourageCost = request.CourageCost.Value;
@@ -319,16 +342,16 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
 
         if (request.Translations != null)
         {
-            foreach (var (langCode, translationDto) in request.Translations)
+            foreach (var translationDto in request.Translations)
             {
-                var normalizedLang = NormalizeLanguageCode(langCode);
+                var normalizedLang = NormalizeLanguageCode(translationDto.LanguageCode);
                 var existingTranslation = hero.Translations.FirstOrDefault(t =>
                     NormalizeLanguageCode(t.LanguageCode) == normalizedLang);
                 if (existingTranslation != null)
                 {
                     existingTranslation.Name = translationDto.Name;
-                    existingTranslation.Description = translationDto.Description;
-                    existingTranslation.Story = translationDto.Story;
+                existingTranslation.Description = translationDto.Description ?? string.Empty;
+                existingTranslation.Story = translationDto.Story ?? string.Empty;
                     existingTranslation.AudioUrl = translationDto.AudioUrl;
                 }
                 else
@@ -339,8 +362,8 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
                         HeroDefinitionCraftId = heroId,
                         LanguageCode = normalizedLang,
                         Name = translationDto.Name,
-                        Description = translationDto.Description,
-                        Story = translationDto.Story,
+                    Description = translationDto.Description ?? string.Empty,
+                    Story = translationDto.Story ?? string.Empty,
                         AudioUrl = translationDto.AudioUrl
                     });
                 }
@@ -621,8 +644,8 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
                 HeroDefinitionDefinitionId = definitionId,
                 LanguageCode = lang,
                 Name = craftTranslation.Name,
-                Description = craftTranslation.Description,
-                Story = craftTranslation.Story,
+                Description = craftTranslation.Description ?? string.Empty,
+                Story = craftTranslation.Story ?? string.Empty,
                 AudioUrl = publishedAudioUrl
             };
             _db.HeroDefinitionDefinitionTranslations.Add(definitionTranslation);
