@@ -63,11 +63,35 @@ public class AnimalPublishChangeLogService : IAnimalPublishChangeLogService
 
             craft.LastDraftVersion = nextVersion;
             _context.AnimalPublishChangeLogs.AddRange(diffEntries);
-            await _context.SaveChangesAsync(ct);
+            await SaveChangesWithClientWinsAsync(ct);
         }
         catch (Exception)
         {
             throw;
+        }
+    }
+
+    private async Task SaveChangesWithClientWinsAsync(CancellationToken ct)
+    {
+        try
+        {
+            await _context.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            // If the craft was deleted (publish cleanup), we just skip logging changes.
+            foreach (var entry in ex.Entries)
+            {
+                var databaseValues = await entry.GetDatabaseValuesAsync(ct);
+                if (databaseValues == null)
+                {
+                    return;
+                }
+
+                entry.OriginalValues.SetValues(databaseValues);
+            }
+
+            await _context.SaveChangesAsync(ct);
         }
     }
 

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
+using XooCreator.BA.Data.Enums;
 
 namespace XooCreator.BA.Features.AlchimaliaUniverse.Repositories;
 
@@ -86,7 +87,25 @@ public class AnimalCraftRepository : IAnimalCraftRepository
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(status))
-            query = query.Where(x => x.Status == status);
+        {
+            var normalized = status.Trim()
+                .Replace("-", string.Empty)
+                .Replace("_", string.Empty)
+                .ToLowerInvariant();
+
+            // Special virtual status used by the editor tab: return all non-published crafts
+            // (draft/sent_for_approval/in_review/approved/changes_requested)
+            if (normalized == "inprogress")
+            {
+                query = query.Where(x =>
+                    x.Status != AlchimaliaUniverseStatus.Published.ToDb() &&
+                    x.Status != AlchimaliaUniverseStatus.Archived.ToDb());
+            }
+            else
+            {
+                query = query.Where(x => x.Status == status);
+            }
+        }
 
         if (regionId.HasValue)
             query = query.Where(x => x.RegionId == regionId.Value);
@@ -106,7 +125,23 @@ public class AnimalCraftRepository : IAnimalCraftRepository
     {
         var query = _context.AnimalCrafts.AsQueryable();
         if (!string.IsNullOrWhiteSpace(status))
-            query = query.Where(x => x.Status == status);
+        {
+            var normalized = status.Trim()
+                .Replace("-", string.Empty)
+                .Replace("_", string.Empty)
+                .ToLowerInvariant();
+
+            if (normalized == "inprogress")
+            {
+                query = query.Where(x =>
+                    x.Status != AlchimaliaUniverseStatus.Published.ToDb() &&
+                    x.Status != AlchimaliaUniverseStatus.Archived.ToDb());
+            }
+            else
+            {
+                query = query.Where(x => x.Status == status);
+            }
+        }
         if (regionId.HasValue)
             query = query.Where(x => x.RegionId == regionId.Value);
         return await query.CountAsync(ct);

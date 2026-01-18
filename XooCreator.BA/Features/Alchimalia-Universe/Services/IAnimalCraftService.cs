@@ -7,8 +7,8 @@ public interface IAnimalCraftService
     Task<AnimalCraftDto> GetAsync(Guid animalId, string? languageCode = null, CancellationToken ct = default);
     Task<ListAnimalCraftsResponse> ListAsync(string? status = null, Guid? regionId = null, bool? isHybrid = null, string? search = null, string? languageCode = null, CancellationToken ct = default);
     Task<AnimalCraftDto> CreateAsync(Guid userId, CreateAnimalCraftRequest request, CancellationToken ct = default);
-    Task<AnimalCraftDto> CreateCraftFromDefinitionAsync(Guid userId, Guid definitionId, CancellationToken ct = default);
-    Task<AnimalCraftDto> UpdateAsync(Guid userId, Guid animalId, UpdateAnimalCraftRequest request, CancellationToken ct = default);
+    Task<AnimalCraftDto> CreateCraftFromDefinitionAsync(Guid userId, Guid definitionId, bool allowAdminOverride = false, CancellationToken ct = default);
+    Task<AnimalCraftDto> UpdateAsync(Guid userId, Guid animalId, UpdateAnimalCraftRequest request, bool allowAdminOverride = false, CancellationToken ct = default);
     Task SubmitForReviewAsync(Guid userId, Guid animalId, CancellationToken ct = default);
     Task ReviewAsync(Guid reviewerId, Guid animalId, ReviewAnimalCraftRequest request, CancellationToken ct = default);
     Task ClaimAsync(Guid reviewerId, Guid animalId, CancellationToken ct = default);

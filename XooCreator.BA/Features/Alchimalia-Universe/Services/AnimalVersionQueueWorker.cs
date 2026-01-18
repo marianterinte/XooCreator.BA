@@ -149,7 +149,11 @@ public class AnimalVersionQueueWorker : BackgroundService
                         _logger.LogInformation("Processing AnimalVersionJob: jobId={JobId} animalId={AnimalId} baseVersion={BaseVersion}",
                             job.Id, job.AnimalId, job.BaseVersion);
                         
-                        await service.CreateCraftFromDefinitionAsync(job.OwnerUserId, job.AnimalId, stoppingToken);
+                        var owner = await db.AlchimaliaUsers
+                            .AsNoTracking()
+                            .FirstOrDefaultAsync(u => u.Id == job.OwnerUserId, stoppingToken);
+                        var isAdmin = owner?.Roles?.Contains(UserRole.Admin) == true || owner?.Role == UserRole.Admin;
+                        await service.CreateCraftFromDefinitionAsync(job.OwnerUserId, job.AnimalId, allowAdminOverride: isAdmin, stoppingToken);
 
                         // Load the created entity to update paths
                         var craft = await repository.GetAsync(job.AnimalId, stoppingToken);

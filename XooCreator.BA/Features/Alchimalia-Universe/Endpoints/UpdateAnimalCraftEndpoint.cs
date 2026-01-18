@@ -38,7 +38,7 @@ public class UpdateAnimalCraftEndpoint
         var user = await ep._auth0.GetCurrentUserAsync(ct);
         if (user == null) return TypedResults.Unauthorized();
 
-        if (!ep._auth0.HasRole(user, UserRole.Creator))
+        if (!ep._auth0.HasRole(user, UserRole.Creator) && !ep._auth0.HasRole(user, UserRole.Admin))
         {
             ep._logger.LogWarning("UpdateAnimalCraft forbidden: userId={UserId}", user?.Id);
             return TypedResults.Forbid();
@@ -46,7 +46,8 @@ public class UpdateAnimalCraftEndpoint
 
         try
         {
-            var animal = await ep._service.UpdateAsync(user.Id, animalId, req, ct);
+            var allowAdminOverride = ep._auth0.HasRole(user, UserRole.Admin);
+            var animal = await ep._service.UpdateAsync(user.Id, animalId, req, allowAdminOverride, ct);
             return TypedResults.Ok(animal);
         }
         catch (KeyNotFoundException)

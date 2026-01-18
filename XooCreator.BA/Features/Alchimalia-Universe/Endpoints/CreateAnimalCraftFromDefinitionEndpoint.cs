@@ -37,7 +37,7 @@ public class CreateAnimalCraftFromDefinitionEndpoint
         var user = await ep._auth0.GetCurrentUserAsync(ct);
         if (user == null) return TypedResults.Unauthorized();
 
-        if (!ep._auth0.HasRole(user, UserRole.Creator))
+        if (!ep._auth0.HasRole(user, UserRole.Creator) && !ep._auth0.HasRole(user, UserRole.Admin))
         {
             ep._logger.LogWarning("CreateAnimalCraftFromDefinition forbidden: userId={UserId}", user?.Id);
             return TypedResults.Forbid();
@@ -45,7 +45,8 @@ public class CreateAnimalCraftFromDefinitionEndpoint
 
         try
         {
-            var animal = await ep._service.CreateCraftFromDefinitionAsync(user.Id, definitionId, ct);
+            var allowAdminOverride = ep._auth0.HasRole(user, UserRole.Admin);
+            var animal = await ep._service.CreateCraftFromDefinitionAsync(user.Id, definitionId, allowAdminOverride, ct);
             return TypedResults.Ok(animal);
         }
         catch (KeyNotFoundException ex)

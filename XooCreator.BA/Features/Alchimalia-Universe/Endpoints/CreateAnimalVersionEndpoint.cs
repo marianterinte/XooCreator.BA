@@ -63,7 +63,8 @@ public class CreateAnimalVersionEndpoint
         var user = await ep._auth0.GetCurrentUserAsync(ct);
         if (user == null) return TypedResults.Unauthorized();
 
-        if (!ep._auth0.HasRole(user, UserRole.Creator) && !ep._auth0.HasRole(user, UserRole.Admin))
+        var isAdmin = ep._auth0.HasRole(user, UserRole.Admin);
+        if (!ep._auth0.HasRole(user, UserRole.Creator) && !isAdmin)
         {
             return TypedResults.Forbid();
         }
@@ -79,10 +80,16 @@ public class CreateAnimalVersionEndpoint
         // Ownership check: AnimalDefinition might not have CreatedBy, rely on Role check for now
         // if (definition.CreatedBy != user.Id && !ep._auth0.HasRole(user, UserRole.Admin)) ...
         
-        var existingCraft = await ep._repository.GetAsync(definitionId, ct);
-        if (existingCraft != null) 
+        // Prevent duplicate drafts, unless Admin explicitly wants another one
+        var existingDraft = await ep._db.AnimalCrafts
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c =>
+                c.PublishedDefinitionId == definitionId &&
+                (c.Status == AlchimaliaUniverseStatus.Draft.ToDb() || c.Status == AlchimaliaUniverseStatus.ChangesRequested.ToDb()),
+                ct);
+        if (existingDraft != null && !isAdmin)
         {
-             return TypedResults.Conflict($"A draft already exists for this animal (Id: {definitionId}). Please edit the existing draft.");
+            return TypedResults.Conflict($"A draft already exists for this animal (DefinitionId: {definitionId}). Please edit the existing draft.");
         }
 
         // Create version job

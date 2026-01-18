@@ -158,7 +158,7 @@ public class AnimalCraftService : IAnimalCraftService
         return MapToDto(animal, NormalizeLanguageCode(request.LanguageCode));
     }
 
-    public async Task<AnimalCraftDto> CreateCraftFromDefinitionAsync(Guid userId, Guid definitionId, CancellationToken ct = default)
+    public async Task<AnimalCraftDto> CreateCraftFromDefinitionAsync(Guid userId, Guid definitionId, bool allowAdminOverride = false, CancellationToken ct = default)
     {
         var definition = await _db.AnimalDefinitions
             .Include(d => d.Translations)
@@ -175,7 +175,7 @@ public class AnimalCraftService : IAnimalCraftService
                 (c.Status == AlchimaliaUniverseStatus.Draft.ToDb() || 
                  c.Status == AlchimaliaUniverseStatus.ChangesRequested.ToDb()), ct);
 
-        if (existingCraft != null)
+        if (existingCraft != null && !allowAdminOverride)
         {
             // Return existing draft instead of creating a new one
             return await GetAsync(existingCraft.Id, null, ct);
@@ -242,7 +242,7 @@ public class AnimalCraftService : IAnimalCraftService
         return MapToDto(animal);
     }
 
-    public async Task<AnimalCraftDto> UpdateAsync(Guid userId, Guid animalId, UpdateAnimalCraftRequest request, CancellationToken ct = default)
+    public async Task<AnimalCraftDto> UpdateAsync(Guid userId, Guid animalId, UpdateAnimalCraftRequest request, bool allowAdminOverride = false, CancellationToken ct = default)
     {
         var animal = await _repository.GetWithTranslationsAsync(animalId, ct);
         if (animal == null)
@@ -252,7 +252,7 @@ public class AnimalCraftService : IAnimalCraftService
         if (currentStatus != AlchimaliaUniverseStatus.Draft && currentStatus != AlchimaliaUniverseStatus.ChangesRequested)
             throw new InvalidOperationException($"Cannot update AnimalCraft in status '{currentStatus}'");
 
-        if (animal.CreatedByUserId != userId)
+        if (animal.CreatedByUserId != userId && !allowAdminOverride)
             throw new UnauthorizedAccessException("Only the creator can update this AnimalCraft");
 
         // Change Log Tracking
@@ -270,11 +270,15 @@ public class AnimalCraftService : IAnimalCraftService
             foreach (var part in existingParts)
                 _db.AnimalCraftPartSupports.Remove(part);
 
-            animal.SupportedParts = request.SupportedParts.Select(partKey => new AnimalCraftPartSupport
+            var newSupportedParts = request.SupportedParts.Select(partKey => new AnimalCraftPartSupport
             {
                 AnimalCraftId = animal.Id,
                 BodyPartKey = partKey
             }).ToList();
+
+            animal.SupportedParts = newSupportedParts;
+            // Ensure EF treats new graph nodes as Added (avoid Update() on detached graph issues)
+            _db.AnimalCraftPartSupports.AddRange(newSupportedParts);
         }
 
         if (request.HybridParts != null)
@@ -284,7 +288,7 @@ public class AnimalCraftService : IAnimalCraftService
             foreach (var part in existingHybrid)
                 _db.AnimalHybridCraftParts.Remove(part);
 
-            animal.HybridParts = request.HybridParts.Select(part => new AnimalHybridCraftPart
+            var newHybridParts = request.HybridParts.Select(part => new AnimalHybridCraftPart
             {
                 Id = Guid.NewGuid(),
                 AnimalCraftId = animal.Id,
@@ -292,6 +296,10 @@ public class AnimalCraftService : IAnimalCraftService
                 BodyPartKey = part.BodyPartKey,
                 OrderIndex = part.OrderIndex
             }).ToList();
+
+            animal.HybridParts = newHybridParts;
+            // Ensure EF treats new graph nodes as Added (avoid Update() on detached graph issues)
+            _db.AnimalHybridCraftParts.AddRange(newHybridParts);
         }
 
         if (request.Translations != null)
@@ -308,19 +316,24 @@ public class AnimalCraftService : IAnimalCraftService
                 }
                 else
                 {
-                    animal.Translations.Add(new AnimalCraftTranslation
+                    var newTranslation = new AnimalCraftTranslation
                     {
                         Id = Guid.NewGuid(),
                         AnimalCraftId = animal.Id,
                         LanguageCode = normalizedLang,
                         Label = translationDto.Label,
                         AudioUrl = translationDto.AudioUrl
-                    });
+                    };
+                    animal.Translations.Add(newTranslation);
+                    // Explicitly add to ensure it's tracked as Added
+                    _db.AnimalCraftTranslations.Add(newTranslation);
                 }
             }
         }
 
-        await _repository.SaveAsync(animal, ct);
+        // Avoid _repository.SaveAsync (Update on graph) to prevent concurrency errors on inserts
+        animal.UpdatedAt = DateTime.UtcNow;
+        await SaveChangesWithClientWinsAsync(ct);
 
         // Append changes after save
         await _changeLogService.AppendChangesAsync(animal, snapshotBeforeChanges, langForTracking, userId, ct);
@@ -595,23 +608,30 @@ public class AnimalCraftService : IAnimalCraftService
         }
         catch (DbUpdateConcurrencyException ex)
         {
-             _logger.LogWarning(ex, "Concurrency error publishing animal {AnimalId}. Attempting to resolve (Client Wins).", animalId);
-             
-             // Client Wins strategy: Update OriginalValues to match DatabaseValues
-             foreach (var entry in ex.Entries)
-             {
-                 var databaseValues = await entry.GetDatabaseValuesAsync(ct);
-                 if (databaseValues == null)
-                 {
-                     throw new InvalidOperationException("The entity being updated was deleted by another process.");
-                 }
-                 
-                 entry.OriginalValues.SetValues(databaseValues);
-             }
-             
-             // Retry save
-             await _db.SaveChangesAsync(ct);
-             _logger.LogInformation("AnimalCraft {AnimalId} published (concurrency resolved)", animalId);
+            _logger.LogWarning(ex, "Concurrency error publishing animal {AnimalId}. Attempting to resolve (Client Wins).", animalId);
+
+            // Client Wins strategy: if an entry was already deleted, detach it; otherwise refresh OriginalValues.
+            foreach (var entry in ex.Entries)
+            {
+                var databaseValues = await entry.GetDatabaseValuesAsync(ct);
+                if (databaseValues == null)
+                {
+                    // In publish we intentionally delete the craft as "cleanup". If it's already deleted elsewhere,
+                    // treat it as already done and continue the publish transaction.
+                    if (entry.State == EntityState.Deleted)
+                    {
+                        entry.State = EntityState.Detached;
+                        continue;
+                    }
+
+                    throw new InvalidOperationException("The entity being updated was deleted by another process.");
+                }
+
+                entry.OriginalValues.SetValues(databaseValues);
+            }
+
+            await _db.SaveChangesAsync(ct);
+            _logger.LogInformation("AnimalCraft {AnimalId} published (concurrency resolved)", animalId);
         }
         catch (DbUpdateException ex)
         {
@@ -626,6 +646,32 @@ public class AnimalCraftService : IAnimalCraftService
         }
 
         _logger.LogInformation("AnimalCraft {AnimalId} published by user {UserId}", animalId, publisherId);
+    }
+
+    private async Task SaveChangesWithClientWinsAsync(CancellationToken ct)
+    {
+        try
+        {
+            await _db.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            _logger.LogWarning(ex, "Concurrency error saving AnimalCraft. Attempting to resolve (Client Wins).");
+
+            foreach (var entry in ex.Entries)
+            {
+                var databaseValues = await entry.GetDatabaseValuesAsync(ct);
+                if (databaseValues == null)
+                {
+                    // Entity deleted while we were updating it; treat as non-recoverable here.
+                    throw new InvalidOperationException("The entity being updated was deleted by another process.");
+                }
+
+                entry.OriginalValues.SetValues(databaseValues);
+            }
+
+            await _db.SaveChangesAsync(ct);
+        }
     }
 
     public async Task DeleteAsync(Guid userId, Guid animalId, CancellationToken ct = default)
