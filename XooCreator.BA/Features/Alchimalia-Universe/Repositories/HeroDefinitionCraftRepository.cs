@@ -39,6 +39,9 @@ public class HeroDefinitionCraftRepository : IHeroDefinitionCraftRepository
         if (string.IsNullOrWhiteSpace(hero.Id))
             throw new ArgumentException("HeroDefinitionCraft Id cannot be empty", nameof(hero));
 
+        // Always rely on tracked graph when possible.
+        // Update() on a detached graph can incorrectly mark nested entities as Modified,
+        // which can cause DbUpdateConcurrencyException when inserting new translations.
         var tracked = _context.ChangeTracker.Entries<HeroDefinitionCraft>()
             .FirstOrDefault(x => x.Entity.Id == hero.Id);
 

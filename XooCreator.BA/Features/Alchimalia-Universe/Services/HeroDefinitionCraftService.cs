@@ -306,7 +306,8 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
             }
         }
 
-        await _repository.SaveAsync(hero, ct);
+        hero.UpdatedAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync(ct);
         _logger.LogInformation("HeroDefinitionCraft {HeroId} created from definition {DefinitionId} by user {UserId}", hero.Id, definitionId, userId);
         return MapToDto(hero);
     }
@@ -356,7 +357,7 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
                 }
                 else
                 {
-                    hero.Translations.Add(new HeroDefinitionCraftTranslation
+                    var newTranslation = new HeroDefinitionCraftTranslation
                     {
                         Id = Guid.NewGuid(),
                         HeroDefinitionCraftId = heroId,
@@ -365,17 +366,46 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
                         Description = translationDto.Description ?? string.Empty,
                         Story = translationDto.Story ?? string.Empty,
                         AudioUrl = translationDto.AudioUrl
-                    });
+                    };
+
+                    // Add explicitly to DbSet to guarantee state = Added
+                    _db.HeroDefinitionCraftTranslations.Add(newTranslation);
+                    hero.Translations.Add(newTranslation);
                 }
             }
         }
 
-        await _repository.SaveAsync(hero, ct);
+        hero.UpdatedAt = DateTime.UtcNow;
+        await SaveChangesWithClientWinsAsync(ct);
         
         // Append changes after save
         await _changeLogService.AppendChangesAsync(hero, snapshotBeforeChanges, langForTracking, userId, ct);
 
         return MapToDto(hero);
+    }
+
+    private async Task SaveChangesWithClientWinsAsync(CancellationToken ct)
+    {
+        try
+        {
+            await _db.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            _logger.LogWarning(ex, "Concurrency error saving HeroDefinitionCraft. Attempting to resolve (Client Wins).");
+
+            foreach (var entry in ex.Entries)
+            {
+                var databaseValues = await entry.GetDatabaseValuesAsync(ct);
+                if (databaseValues == null)
+                {
+                    throw new InvalidOperationException("The entity being updated was deleted by another process.");
+                }
+                entry.OriginalValues.SetValues(databaseValues);
+            }
+
+            await _db.SaveChangesAsync(ct);
+        }
     }
 
     public async Task SubmitForReviewAsync(Guid userId, string heroId, CancellationToken ct = default)

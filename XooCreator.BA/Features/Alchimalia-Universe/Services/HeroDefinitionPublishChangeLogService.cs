@@ -55,11 +55,34 @@ public class HeroDefinitionPublishChangeLogService : IHeroDefinitionPublishChang
 
             craft.LastDraftVersion = nextVersion;
             _context.HeroDefinitionPublishChangeLogs.AddRange(diffEntries);
-            await _context.SaveChangesAsync(ct);
+            await SaveChangesWithClientWinsAsync(ct);
         }
         catch (Exception)
         {
             throw;
+        }
+    }
+
+    private async Task SaveChangesWithClientWinsAsync(CancellationToken ct)
+    {
+        try
+        {
+            await _context.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            // Same strategy used in Animal publish: refresh OriginalValues, then retry.
+            foreach (var entry in ex.Entries)
+            {
+                var databaseValues = await entry.GetDatabaseValuesAsync(ct);
+                if (databaseValues == null)
+                {
+                    throw new InvalidOperationException("The entity being updated was deleted by another process.");
+                }
+                entry.OriginalValues.SetValues(databaseValues);
+            }
+
+            await _context.SaveChangesAsync(ct);
         }
     }
 
