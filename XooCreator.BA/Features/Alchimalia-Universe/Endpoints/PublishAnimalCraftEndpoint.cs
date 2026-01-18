@@ -72,6 +72,18 @@ public class PublishAnimalCraftEndpoint
                 return TypedResults.Forbid();
             }
 
+            // Supersede any previous queued/running publish jobs for this animal to avoid race conditions
+            var existingJobs = await ep._db.AnimalPublishJobs
+                .Where(j => j.AnimalId == animalId.ToString() &&
+                            (j.Status == AnimalPublishJobStatus.Queued || j.Status == AnimalPublishJobStatus.Running))
+                .ToListAsync(ct);
+
+            foreach (var existing in existingJobs)
+            {
+                existing.Status = AnimalPublishJobStatus.Superseded;
+                existing.CompletedAtUtc = DateTime.UtcNow;
+            }
+
             var job = new AnimalPublishJob
             {
                 Id = Guid.NewGuid(),

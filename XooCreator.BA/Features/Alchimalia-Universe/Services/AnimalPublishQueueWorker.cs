@@ -93,7 +93,10 @@ public class AnimalPublishQueueWorker : BackgroundService
                     var service = scope.ServiceProvider.GetRequiredService<IAnimalCraftService>();
 
                     var job = await db.AnimalPublishJobs.FirstOrDefaultAsync(j => j.Id == payload.JobId, stoppingToken);
-                    if (job == null || job.Status == AnimalPublishJobStatus.Completed || job.Status == AnimalPublishJobStatus.Failed)
+                    if (job == null ||
+                        job.Status == AnimalPublishJobStatus.Completed ||
+                        job.Status == AnimalPublishJobStatus.Failed ||
+                        job.Status == AnimalPublishJobStatus.Superseded)
                     {
                         await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                         continue;

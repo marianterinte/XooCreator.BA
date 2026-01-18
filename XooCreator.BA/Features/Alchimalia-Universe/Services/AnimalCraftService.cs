@@ -509,39 +509,45 @@ public class AnimalCraftService : IAnimalCraftService
             definition.Translations.Clear();
             foreach (var t in animal.Translations)
             {
-                definition.Translations.Add(new AnimalDefinitionTranslation
+                var newTranslation = new AnimalDefinitionTranslation
                 {
                     Id = Guid.NewGuid(),
                     AnimalDefinitionId = definitionId,
                     LanguageCode = t.LanguageCode,
                     Label = t.Label,
                     AudioUrl = t.AudioUrl
-                });
+                };
+                definition.Translations.Add(newTranslation);
+                _db.AnimalDefinitionTranslations.Add(newTranslation);
             }
 
             _db.AnimalDefinitionPartSupports.RemoveRange(definition.SupportedParts);
             definition.SupportedParts.Clear();
             foreach (var p in animal.SupportedParts)
             {
-                definition.SupportedParts.Add(new AnimalDefinitionPartSupport
+                var newPart = new AnimalDefinitionPartSupport
                 {
                     AnimalDefinitionId = definitionId,
                     BodyPartKey = p.BodyPartKey
-                });
+                };
+                definition.SupportedParts.Add(newPart);
+                _db.AnimalDefinitionPartSupports.Add(newPart);
             }
 
             _db.AnimalHybridDefinitionParts.RemoveRange(definition.HybridParts);
             definition.HybridParts.Clear();
             foreach (var p in animal.HybridParts)
             {
-                definition.HybridParts.Add(new AnimalHybridDefinitionPart
+                var newHybridPart = new AnimalHybridDefinitionPart
                 {
                     Id = Guid.NewGuid(),
                     AnimalDefinitionId = definitionId,
                     SourceAnimalId = p.SourceAnimalId,
                     BodyPartKey = p.BodyPartKey,
                     OrderIndex = p.OrderIndex
-                });
+                };
+                definition.HybridParts.Add(newHybridPart);
+                _db.AnimalHybridDefinitionParts.Add(newHybridPart);
             }
         }
 
@@ -613,12 +619,34 @@ public class AnimalCraftService : IAnimalCraftService
             // Client Wins strategy: if an entry was already deleted, detach it; otherwise refresh OriginalValues.
             foreach (var entry in ex.Entries)
             {
+                _logger.LogWarning(
+                    "Publish concurrency entry: entity={EntityType} state={State}",
+                    entry.Metadata.ClrType.Name,
+                    entry.State);
+
                 var databaseValues = await entry.GetDatabaseValuesAsync(ct);
                 if (databaseValues == null)
                 {
                     // In publish we intentionally delete the craft as "cleanup". If it's already deleted elsewhere,
                     // treat it as already done and continue the publish transaction.
                     if (entry.State == EntityState.Deleted)
+                    {
+                        entry.State = EntityState.Detached;
+                        continue;
+                    }
+
+                    // If the definition (or its children) was deleted concurrently, recreate/skip as appropriate.
+                    var clrType = entry.Metadata.ClrType;
+                    if (clrType.Name == "AnimalDefinition")
+                    {
+                        // Reinsert definition on retry
+                        entry.State = EntityState.Added;
+                        continue;
+                    }
+
+                    // If a child row disappeared, detach and continue (we recreate the full set each publish anyway)
+                    if (clrType.Name is "AnimalDefinitionTranslation" or "AnimalDefinitionPartSupport" or "AnimalHybridDefinitionPart" or
+                        "AnimalCraft" or "AnimalCraftTranslation" or "AnimalCraftPartSupport" or "AnimalHybridCraftPart")
                     {
                         entry.State = EntityState.Detached;
                         continue;
