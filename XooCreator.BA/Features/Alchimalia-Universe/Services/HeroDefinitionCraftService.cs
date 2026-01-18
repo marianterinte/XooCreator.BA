@@ -173,7 +173,7 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
         return MapToDto(hero, request.LanguageCode);
     }
 
-    public async Task<HeroDefinitionCraftDto> CreateCraftFromDefinitionAsync(Guid userId, string definitionId, CancellationToken ct = default)
+    public async Task<HeroDefinitionCraftDto> CreateCraftFromDefinitionAsync(Guid userId, string definitionId, bool allowAdminOverride = false, CancellationToken ct = default)
     {
         var definition = await _db.HeroDefinitionDefinitions
             .Include(d => d.Translations)
@@ -188,7 +188,7 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
                 (c.Status == AlchimaliaUniverseStatus.Draft.ToDb() || 
                  c.Status == AlchimaliaUniverseStatus.ChangesRequested.ToDb()), ct);
 
-        if (existingCraft != null)
+        if (existingCraft != null && !allowAdminOverride)
         {
             // Return existing draft instead of creating a new one
             return await GetAsync(existingCraft.Id, null, ct);
@@ -350,8 +350,8 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
                 if (existingTranslation != null)
                 {
                     existingTranslation.Name = translationDto.Name;
-                existingTranslation.Description = translationDto.Description ?? string.Empty;
-                existingTranslation.Story = translationDto.Story ?? string.Empty;
+                    existingTranslation.Description = translationDto.Description ?? string.Empty;
+                    existingTranslation.Story = translationDto.Story ?? string.Empty;
                     existingTranslation.AudioUrl = translationDto.AudioUrl;
                 }
                 else
@@ -362,8 +362,8 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
                         HeroDefinitionCraftId = heroId,
                         LanguageCode = normalizedLang,
                         Name = translationDto.Name,
-                    Description = translationDto.Description ?? string.Empty,
-                    Story = translationDto.Story ?? string.Empty,
+                        Description = translationDto.Description ?? string.Empty,
+                        Story = translationDto.Story ?? string.Empty,
                         AudioUrl = translationDto.AudioUrl
                     });
                 }

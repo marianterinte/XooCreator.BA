@@ -64,7 +64,8 @@ public class CreateHeroDefinitionVersionEndpoint
         var user = await ep._auth0.GetCurrentUserAsync(ct);
         if (user == null) return TypedResults.Unauthorized();
 
-        if (!ep._auth0.HasRole(user, UserRole.Creator) && !ep._auth0.HasRole(user, UserRole.Admin))
+        var isAdmin = ep._auth0.HasRole(user, UserRole.Admin);
+        if (!ep._auth0.HasRole(user, UserRole.Creator) && !isAdmin)
         {
             return TypedResults.Forbid();
         }
@@ -93,7 +94,7 @@ public class CreateHeroDefinitionVersionEndpoint
         // Let's assume we check repository.
         
         var existingCraft = await ep._repository.GetAsync(definitionId, ct);
-        if (existingCraft != null) 
+        if (existingCraft != null && !isAdmin)
         {
              // If a draft exists, we conflcit?
              // Story logic: if existingCraft != null && status != Published => Conflict.

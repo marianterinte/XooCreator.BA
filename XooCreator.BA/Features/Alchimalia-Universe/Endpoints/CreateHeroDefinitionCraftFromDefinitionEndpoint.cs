@@ -38,7 +38,7 @@ public class CreateHeroDefinitionCraftFromDefinitionEndpoint
         var user = await ep._auth0.GetCurrentUserAsync(ct);
         if (user == null) return TypedResults.Unauthorized();
 
-        if (!ep._auth0.HasRole(user, UserRole.Creator))
+        if (!ep._auth0.HasRole(user, UserRole.Creator) && !ep._auth0.HasRole(user, UserRole.Admin))
         {
             ep._logger.LogWarning("CreateHeroDefinitionCraftFromDefinition forbidden: userId={UserId}", user?.Id);
             return TypedResults.Forbid();
@@ -46,7 +46,8 @@ public class CreateHeroDefinitionCraftFromDefinitionEndpoint
 
         try
         {
-            var hero = await ep._service.CreateCraftFromDefinitionAsync(user.Id, definitionId, ct);
+            var allowAdminOverride = ep._auth0.HasRole(user, UserRole.Admin);
+            var hero = await ep._service.CreateCraftFromDefinitionAsync(user.Id, definitionId, allowAdminOverride, ct);
             return TypedResults.Ok(hero);
         }
         catch (KeyNotFoundException ex)

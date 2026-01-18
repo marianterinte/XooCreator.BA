@@ -39,7 +39,7 @@ public class UpdateHeroDefinitionCraftEndpoint
         var user = await ep._auth0.GetCurrentUserAsync(ct);
         if (user == null) return TypedResults.Unauthorized();
 
-        if (!ep._auth0.HasRole(user, UserRole.Creator))
+        if (!ep._auth0.HasRole(user, UserRole.Creator) && !ep._auth0.HasRole(user, UserRole.Admin))
         {
             ep._logger.LogWarning("UpdateHeroDefinitionCraft forbidden: userId={UserId}", user?.Id);
             return TypedResults.Forbid();

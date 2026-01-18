@@ -33,6 +33,7 @@ public class ClaimHeroDefinitionCraftEndpoint
     }
 
     [Route("/api/alchimalia-universe/hero-crafts/{heroId}/claim")]
+    [Route("/api/alchimalia-universe/toh-hero-crafts/{heroId}/claim")]
     [Authorize]
     public static async Task<Results<Ok<ClaimResponse>, NotFound, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
         [FromRoute] string heroId,

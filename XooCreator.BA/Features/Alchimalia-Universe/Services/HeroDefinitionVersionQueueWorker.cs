@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.Enums;
+using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Features.AlchimaliaUniverse.Mappers;
 using XooCreator.BA.Data.Entities;
@@ -160,7 +161,11 @@ public class HeroDefinitionVersionQueueWorker : BackgroundService
                             job.Id, job.HeroId, job.BaseVersion);
 
                         // Create craft (points to published assets initially)
-                        var craftDto = await service.CreateCraftFromDefinitionAsync(job.OwnerUserId, job.HeroId, stoppingToken);
+                        var owner = await db.AlchimaliaUsers
+                            .AsNoTracking()
+                            .FirstOrDefaultAsync(u => u.Id == job.OwnerUserId, stoppingToken);
+                        var isAdmin = owner?.Roles?.Contains(UserRole.Admin) == true || owner?.Role == UserRole.Admin;
+                        var craftDto = await service.CreateCraftFromDefinitionAsync(job.OwnerUserId, job.HeroId, allowAdminOverride: isAdmin, stoppingToken);
 
                         // Load the created entity to update paths
                         var craft = await repository.GetAsync(job.HeroId, stoppingToken);
