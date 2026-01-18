@@ -5,14 +5,15 @@ namespace XooCreator.BA.Features.StoryEditor.Services.Content;
 
 public interface IStoryOwnershipService
 {
-    void VerifyOwnership(StoryCraft craft, Guid userId);
+    void VerifyOwnership(StoryCraft craft, Guid userId, bool bypassCheck = false);
     Task<bool> IsOwnerAsync(string storyId, Guid userId, CancellationToken ct = default);
 }
 
 public class StoryOwnershipService : IStoryOwnershipService
 {
-    public void VerifyOwnership(StoryCraft craft, Guid userId)
+    public void VerifyOwnership(StoryCraft craft, Guid userId, bool bypassCheck = false)
     {
+        if (bypassCheck) return;
         if (craft.OwnerUserId != userId)
         {
             throw new UnauthorizedAccessException($"User {userId} is not the owner of story {craft.StoryId}");
