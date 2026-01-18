@@ -90,7 +90,7 @@ public class PublishHeroDefinitionCraftEndpoint
             await ep._db.SaveChangesAsync(ct);
 
             // Notify UI
-            ep._jobEvents.Publish("HeroPublish", job.Id, new
+            ep._jobEvents.Publish(JobTypes.HeroPublish, job.Id, new
             {
                 jobId = job.Id,
                 heroId = job.HeroId,

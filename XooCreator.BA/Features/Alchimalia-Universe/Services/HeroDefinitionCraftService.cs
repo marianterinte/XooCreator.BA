@@ -10,6 +10,16 @@ namespace XooCreator.BA.Features.AlchimaliaUniverse.Services;
 
 public class HeroDefinitionCraftService : IHeroDefinitionCraftService
 {
+    private static readonly Dictionary<string, string> LanguageAliasMap = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["ro"] = "ro-ro",
+        ["en"] = "en-us",
+        ["hu"] = "hu-hu",
+        ["de"] = "de-de",
+        ["es"] = "es-es",
+        ["it"] = "it-it"
+    };
+
     private readonly IHeroDefinitionCraftRepository _repository;
     private readonly XooDbContext _db;
     private readonly IHeroDefinitionPublishChangeLogService _changeLogService;
@@ -41,38 +51,127 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
 
     public async Task<ListHeroDefinitionCraftsResponse> ListAsync(string? status = null, string? type = null, string? search = null, string? languageCode = null, CancellationToken ct = default)
     {
-        var heroes = await _repository.ListAsync(status, type, search, ct);
-        var totalCount = await _repository.CountAsync(status, type, ct);
-
-        var items = heroes.Select(h =>
+        // Get all crafts (matching status filter if provided)
+        var craftQuery = _db.HeroDefinitionCrafts.Include(x => x.Translations).AsQueryable();
+        if (!string.IsNullOrWhiteSpace(status))
         {
-            HeroDefinitionCraftTranslation? selectedTranslation = null;
-            if (!string.IsNullOrWhiteSpace(languageCode))
+            craftQuery = craftQuery.Where(x => x.Status == status);
+        }
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            craftQuery = craftQuery.Where(x => 
+                x.Id.Contains(search) ||
+                x.Translations.Any(t => t.Name.Contains(search)));
+        }
+        var allCrafts = await craftQuery.ToListAsync(ct);
+
+        // Get all published definitions (always include, even if craft exists - allows published heroes to remain visible when "new version" creates a draft)
+        var definitionQuery = _db.HeroDefinitionDefinitions
+            .Include(d => d.Translations)
+            .Where(x => x.Status == AlchimaliaUniverseStatus.Published.ToDb())
+            .AsQueryable();
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            definitionQuery = definitionQuery.Where(x => 
+                x.Id.Contains(search) ||
+                x.Translations.Any(t => t.Name.Contains(search)));
+        }
+        var allDefinitions = await definitionQuery.ToListAsync(ct);
+
+        // Combine crafts and definitions, avoiding duplicates (prefer craft if both exist)
+        var craftIds = new HashSet<string>(allCrafts.Select(c => c.Id), StringComparer.OrdinalIgnoreCase);
+        var definitionIds = new HashSet<string>(allDefinitions.Select(d => d.Id), StringComparer.OrdinalIgnoreCase);
+        var combined = new List<HeroDefinitionCraftListItemDto>();
+
+        // Add all crafts
+        var normalizedLanguage = NormalizeLanguageCode(languageCode);
+        var languageBase = GetLanguageBase(normalizedLanguage);
+
+        foreach (var craft in allCrafts)
+        {
+            // If a published definition exists, prefer definition data over any lingering published craft.
+            if (string.Equals(craft.Status, AlchimaliaUniverseStatus.Published.ToDb(), StringComparison.OrdinalIgnoreCase))
             {
-                var normalizedLang = languageCode.ToLowerInvariant();
-                selectedTranslation = h.Translations.FirstOrDefault(t => t.LanguageCode.ToLowerInvariant() == normalizedLang);
+                var definitionId = !string.IsNullOrWhiteSpace(craft.PublishedDefinitionId)
+                    ? craft.PublishedDefinitionId
+                    : craft.Id;
+                if (!string.IsNullOrWhiteSpace(definitionId) && definitionIds.Contains(definitionId))
+                {
+                    continue;
+                }
             }
-            selectedTranslation ??= h.Translations.FirstOrDefault();
 
-            var availableLanguages = h.Translations.Select(t => t.LanguageCode.ToLowerInvariant()).ToList();
+            // Select translation - use requested language if provided, otherwise first available (exactly like story heroes)
+            var selectedTranslation = FindBestTranslation(
+                craft.Translations,
+                normalizedLanguage,
+                languageBase,
+                t => t.LanguageCode);
 
-            return new HeroDefinitionCraftListItemDto
+            var availableLanguages = craft.Translations
+                .Select(t => NormalizeLanguageCode(t.LanguageCode))
+                .Where(code => !string.IsNullOrWhiteSpace(code))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            combined.Add(new HeroDefinitionCraftListItemDto
             {
-                Id = h.Id,
-                PublishedDefinitionId = h.PublishedDefinitionId,
-                Name = selectedTranslation?.Name ?? h.Id,
-                Image = h.Image,
-                Status = h.Status,
-                UpdatedAt = h.UpdatedAt,
-                CreatedByUserId = h.CreatedByUserId,
+                Id = craft.Id,
+                PublishedDefinitionId = craft.PublishedDefinitionId,
+                Name = selectedTranslation?.Name ?? craft.Id,
+                Image = craft.Image,
+                Status = craft.Status,
+                UpdatedAt = craft.UpdatedAt,
+                CreatedByUserId = craft.CreatedByUserId,
                 AvailableLanguages = availableLanguages
-            };
-        }).ToList();
+            });
+        }
+
+        // Add published definitions that don't have a craft (or if status filter is "published")
+        foreach (var definition in allDefinitions)
+        {
+            // If status filter is "published", include all definitions
+            // Otherwise, only include definitions that don't have a corresponding craft
+            if (status == AlchimaliaUniverseStatus.Published.ToDb() || !craftIds.Contains(definition.Id))
+            {
+                // Select translation - use requested language if provided, otherwise first available (exactly like story heroes)
+                var selectedTranslation = FindBestTranslation(
+                    definition.Translations,
+                    normalizedLanguage,
+                    languageBase,
+                    t => t.LanguageCode);
+
+                var availableLanguages = definition.Translations
+                    .Select(t => NormalizeLanguageCode(t.LanguageCode))
+                    .Where(code => !string.IsNullOrWhiteSpace(code))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                combined.Add(new HeroDefinitionCraftListItemDto
+                {
+                    Id = definition.Id,
+                    PublishedDefinitionId = definition.Id, // For definitions, PublishedDefinitionId is the same as Id
+                    Name = selectedTranslation?.Name ?? definition.Id,
+                    Image = definition.Image,
+                    Status = definition.Status,
+                    UpdatedAt = definition.UpdatedAt,
+                    CreatedByUserId = definition.PublishedByUserId, // Use PublishedByUserId for definitions
+                    AvailableLanguages = availableLanguages
+                });
+            }
+        }
+
+        // Apply status filter to combined list if needed (for published tab)
+        var filtered = combined;
+        if (!string.IsNullOrWhiteSpace(status))
+        {
+            filtered = combined.Where(h => h.Status == status).ToList();
+        }
 
         return new ListHeroDefinitionCraftsResponse
         {
-            Heroes = items,
-            TotalCount = totalCount
+            Heroes = filtered,
+            TotalCount = filtered.Count
         };
     }
 
@@ -109,7 +208,7 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
                 {
                     Id = Guid.NewGuid(),
                     HeroDefinitionCraftId = heroId,
-                    LanguageCode = request.LanguageCode.ToLowerInvariant(),
+                    LanguageCode = NormalizeLanguageCode(request.LanguageCode),
                     Name = request.Name,
                     Description = request.Description,
                     Story = request.Story,
@@ -166,7 +265,7 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
             {
                 Id = Guid.NewGuid(),
                 HeroDefinitionCraftId = string.Empty, // set after save
-                LanguageCode = t.LanguageCode,
+                LanguageCode = NormalizeLanguageCode(t.LanguageCode),
                 Name = t.Name,
                 Description = t.Description,
                 Story = t.Story,
@@ -217,8 +316,9 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
         {
             foreach (var (langCode, translationDto) in request.Translations)
             {
-                var normalizedLang = langCode.ToLowerInvariant();
-                var existingTranslation = hero.Translations.FirstOrDefault(t => t.LanguageCode == normalizedLang);
+                var normalizedLang = NormalizeLanguageCode(langCode);
+                var existingTranslation = hero.Translations.FirstOrDefault(t =>
+                    NormalizeLanguageCode(t.LanguageCode) == normalizedLang);
                 if (existingTranslation != null)
                 {
                     existingTranslation.Name = translationDto.Name;
@@ -333,19 +433,21 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
 
     public async Task PublishAsync(Guid publisherId, string heroId, CancellationToken ct = default)
     {
-        // Use _db directly to ensure we are on the same context as the SaveChanges call later
-        var hero = await _db.HeroDefinitionCrafts
-            .Include(x => x.Translations)
-            .FirstOrDefaultAsync(x => x.Id == heroId, ct);
-
+        var hero = await _repository.GetAsync(heroId, ct);
         if (hero == null)
             throw new KeyNotFoundException($"HeroDefinitionCraft with Id '{heroId}' not found");
 
+        if (hero.CreatedByUserId != publisherId)
+            throw new UnauthorizedAccessException($"User does not own hero '{heroId}'");
+
         var currentStatus = AlchimaliaUniverseStatusExtensions.FromDb(hero.Status);
-        
-        // Allow re-publishing if already published (idempotency)
-        if (currentStatus != AlchimaliaUniverseStatus.Approved && currentStatus != AlchimaliaUniverseStatus.Published)
-            throw new InvalidOperationException($"Cannot publish HeroDefinitionCraft in status '{currentStatus}'. Must be Approved or Published.");
+        if (currentStatus != AlchimaliaUniverseStatus.Approved)
+            throw new InvalidOperationException($"Cannot publish HeroDefinitionCraft in status '{currentStatus}'. Must be Approved.");
+
+        // Load craft with translations (exactly like story heroes)
+        hero = await _db.HeroDefinitionCrafts
+            .Include(x => x.Translations)
+            .FirstOrDefaultAsync(x => x.Id == heroId, ct) ?? hero;
 
         var definitionId = hero.PublishedDefinitionId;
         if (string.IsNullOrWhiteSpace(definitionId))
@@ -353,12 +455,42 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
              definitionId = hero.Id;
         }
 
+        // Get creator email for asset operations
+        var creatorUser = await _db.AlchimaliaUsers.FirstOrDefaultAsync(u => u.Id == (hero.CreatedByUserId ?? Guid.Empty), ct);
+        var creatorEmail = creatorUser?.Email;
+
+        if (string.IsNullOrWhiteSpace(creatorEmail))
+        {
+            throw new InvalidOperationException($"Cannot publish hero. Creator email not found for user {hero.CreatedByUserId}");
+        }
+
+        // Sync assets FIRST (before creating/updating definition) - exactly like story heroes/regions
+        var assets = AlchimaliaUniverseAssetPathMapper.CollectFromHeroCraft(hero);
+        await _assetCopyService.CopyDraftToPublishedAsync(
+            assets,
+            creatorEmail,
+            hero.Id, 
+            AlchimaliaUniverseAssetPathMapper.EntityType.Hero,
+            ct);
+
+        // Get published image URL
+        string? publishedImageUrl = null;
+        if (!string.IsNullOrWhiteSpace(hero.Image))
+        {
+            var filename = Path.GetFileName(hero.Image);
+            var assetInfo = new AlchimaliaUniverseAssetPathMapper.AssetInfo(filename, AlchimaliaUniverseAssetPathMapper.AssetType.Image, null);
+            var pubPath = AlchimaliaUniverseAssetPathMapper.BuildPublishedPath(assetInfo, creatorEmail, hero.Id, AlchimaliaUniverseAssetPathMapper.EntityType.Hero);
+            publishedImageUrl = _assetCopyService.GetPublishedUrl(pubPath);
+        }
+
+        // Load or create definition
         var definition = await _db.HeroDefinitionDefinitions
             .Include(d => d.Translations)
             .FirstOrDefaultAsync(d => d.Id == definitionId, ct);
 
         if (definition == null)
         {
+            // Create new definition
             definition = new HeroDefinitionDefinition
             {
                 Id = definitionId,
@@ -372,27 +504,20 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
                 IsUnlocked = hero.IsUnlocked,
                 PositionX = hero.PositionX,
                 PositionY = hero.PositionY,
-                Image = hero.Image,
+                Image = publishedImageUrl ?? string.Empty,
                 Status = AlchimaliaUniverseStatus.Published.ToDb(),
                 PublishedByUserId = publisherId,
                 PublishedAtUtc = DateTime.UtcNow,
-                CreatedAt = DateTime.UtcNow,
+                CreatedAt = hero.CreatedAt,
                 UpdatedAt = DateTime.UtcNow,
-                Translations = hero.Translations.Select(t => new HeroDefinitionDefinitionTranslation
-                {
-                    Id = Guid.NewGuid(),
-                    HeroDefinitionDefinitionId = definitionId,
-                    LanguageCode = t.LanguageCode,
-                    Name = t.Name,
-                    Description = t.Description,
-                    Story = t.Story,
-                    AudioUrl = t.AudioUrl
-                }).ToList()
+                Version = 1,
+                LastPublishedVersion = hero.LastDraftVersion
             };
             _db.HeroDefinitionDefinitions.Add(definition);
         }
         else
         {
+            // Update existing definition (new version)
             definition.CourageCost = hero.CourageCost;
             definition.CuriosityCost = hero.CuriosityCost;
             definition.ThinkingCost = hero.ThinkingCost;
@@ -403,131 +528,113 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
             definition.IsUnlocked = hero.IsUnlocked;
             definition.PositionX = hero.PositionX;
             definition.PositionY = hero.PositionY;
-            definition.Image = hero.Image;
-            definition.Status = AlchimaliaUniverseStatus.Published.ToDb();
+            definition.Image = publishedImageUrl ?? string.Empty;
             definition.PublishedByUserId = publisherId;
             definition.PublishedAtUtc = DateTime.UtcNow;
             definition.UpdatedAt = DateTime.UtcNow;
+            definition.Version += 1;
+            definition.LastPublishedVersion = hero.LastDraftVersion;
 
-            _db.HeroDefinitionDefinitionTranslations.RemoveRange(definition.Translations);
-            definition.Translations.Clear();
-            
-            foreach (var t in hero.Translations)
-            {
-                definition.Translations.Add(new HeroDefinitionDefinitionTranslation
-                {
-                    Id = Guid.NewGuid(),
-                    HeroDefinitionDefinitionId = definitionId,
-                    LanguageCode = t.LanguageCode,
-                    Name = t.Name,
-                    Description = t.Description,
-                    Story = t.Story,
-                    AudioUrl = t.AudioUrl
-                });
-            }
+            // Remove old translations BEFORE adding new ones
+            var oldTranslations = await _db.HeroDefinitionDefinitionTranslations
+                .Where(t => t.HeroDefinitionDefinitionId == definitionId)
+                .ToListAsync(ct);
+            _db.HeroDefinitionDefinitionTranslations.RemoveRange(oldTranslations);
         }
 
-        try 
+        // Copy translations from craft to definition
+        if (hero.Translations == null || hero.Translations.Count == 0)
         {
-            // Delete Craft after successful copy to Definition
-            if (hero.Translations != null)
+            throw new InvalidOperationException("Cannot publish hero. No translations found.");
+        }
+
+        // Normalize language codes and prevent duplicate translations (exactly like story heroes)
+        var normalizedTranslations = hero.Translations
+            .Select(t => new
             {
-                _db.HeroDefinitionCraftTranslations.RemoveRange(hero.Translations);
-            }
-            _db.HeroDefinitionCrafts.Remove(hero);
+                Translation = t,
+                Lang = NormalizeLanguageCode(t.LanguageCode)
+            })
+            .Where(x => !string.IsNullOrWhiteSpace(x.Lang))
+            .GroupBy(x => x.Lang, StringComparer.OrdinalIgnoreCase)
+            .Select(g => g
+                .OrderByDescending(x => (x.Translation.LanguageCode ?? string.Empty).Contains('-'))
+                .First())
+            .ToList();
 
-            // Copy assets and update definition paths
-            var creatorUser = await _db.AlchimaliaUsers.FirstOrDefaultAsync(u => u.Id == (hero.CreatedByUserId ?? Guid.Empty), ct);
-            var creatorEmail = creatorUser?.Email;
+        if (normalizedTranslations.Count == 0)
+        {
+            throw new InvalidOperationException("Cannot publish hero. All translations have empty language code.");
+        }
 
-            if (!string.IsNullOrWhiteSpace(creatorEmail))
+        // Add new translations with published audio URLs
+        foreach (var item in normalizedTranslations)
+        {
+            var craftTranslation = item.Translation;
+            var lang = item.Lang;
+
+            // Get published audio URL
+            string? publishedAudioUrl = craftTranslation.AudioUrl;
+            if (!string.IsNullOrWhiteSpace(craftTranslation.AudioUrl))
             {
-                var assets = AlchimaliaUniverseAssetPathMapper.CollectFromHeroCraft(hero);
-                await _assetCopyService.CopyDraftToPublishedAsync(
-                    assets,
-                    creatorEmail,
-                    hero.Id, 
-                    AlchimaliaUniverseAssetPathMapper.EntityType.Hero,
-                    ct);
-
-                // Update definition with published URLs
-                if (!string.IsNullOrWhiteSpace(hero.Image))
-                {
-                    var filename = Path.GetFileName(hero.Image);
-                    var assetInfo = new AlchimaliaUniverseAssetPathMapper.AssetInfo(filename, AlchimaliaUniverseAssetPathMapper.AssetType.Image, null);
-                    var pubPath = AlchimaliaUniverseAssetPathMapper.BuildPublishedPath(assetInfo, creatorEmail, hero.Id, AlchimaliaUniverseAssetPathMapper.EntityType.Hero);
-                    definition.Image = _assetCopyService.GetPublishedUrl(pubPath);
-                }
-
-                foreach (var t in hero.Translations)
-                {
-                    if (!string.IsNullOrWhiteSpace(t.AudioUrl))
-                    {
-                        var filename = Path.GetFileName(t.AudioUrl);
-                         var assetInfo = new AlchimaliaUniverseAssetPathMapper.AssetInfo(filename, AlchimaliaUniverseAssetPathMapper.AssetType.Audio, t.LanguageCode);
-                         var pubPath = AlchimaliaUniverseAssetPathMapper.BuildPublishedPath(assetInfo, creatorEmail, hero.Id, AlchimaliaUniverseAssetPathMapper.EntityType.Hero);
-                         var pubUrl = _assetCopyService.GetPublishedUrl(pubPath);
-
-                         var defTrans = definition.Translations.FirstOrDefault(dt => dt.LanguageCode == t.LanguageCode);
-                         if (defTrans != null)
-                         {
-                             defTrans.AudioUrl = pubUrl;
-                         }
-                    }
-                }
+                var filename = Path.GetFileName(craftTranslation.AudioUrl);
+                var assetInfo = new AlchimaliaUniverseAssetPathMapper.AssetInfo(filename, AlchimaliaUniverseAssetPathMapper.AssetType.Audio, lang);
+                var pubPath = AlchimaliaUniverseAssetPathMapper.BuildPublishedPath(assetInfo, creatorEmail, hero.Id, AlchimaliaUniverseAssetPathMapper.EntityType.Hero);
+                publishedAudioUrl = _assetCopyService.GetPublishedUrl(pubPath);
             }
 
+            var definitionTranslation = new HeroDefinitionDefinitionTranslation
+            {
+                Id = Guid.NewGuid(),
+                HeroDefinitionDefinitionId = definitionId,
+                LanguageCode = lang,
+                Name = craftTranslation.Name,
+                Description = craftTranslation.Description,
+                Story = craftTranslation.Story,
+                AudioUrl = publishedAudioUrl
+            };
+            _db.HeroDefinitionDefinitionTranslations.Add(definitionTranslation);
+        }
+
+        // Save definition first (before deleting craft)
+        try
+        {
+            definition.Status = AlchimaliaUniverseStatus.Published.ToDb();
             await _db.SaveChangesAsync(ct);
-            _logger.LogInformation("HeroDefinitionCraft {HeroId} published and craft deleted by user {UserId}. DefinitionId: {DefId}", heroId, publisherId, definitionId);
-        }
-        catch (DbUpdateConcurrencyException ex)
-        {
-             _logger.LogWarning(ex, "Concurrency error publishing hero {HeroId}. Attempting to resolve (Client Wins).", heroId);
-             
-             // Client Wins strategy for optimistic concurrency on database updates (though we are deleting the craft, 
-             // we might be updating the definition, which could theoretically conflict if two people publish same definition at once?)
-             // Since we delete the craft, we can't really "refresh" the craft. Use generic retry on definition update if needed.
-             // But simpler here: just retry the save. Concurrency usually happens on the Craft update (status), 
-             // but here we are deleting it. If it was modified by another, Delete might fail or succeed depending on tracking.
-             // We'll leave the simple retry logic or just throw.
-             // Given we are deleting, "Client Wins" roughly translates to "Proceed with Delete".
-             
-             foreach (var entry in ex.Entries)
-             {
-                 if (entry.State == EntityState.Deleted)
-                 {
-                     // If we are trying to delete and it's modified, we can just force delete?
-                     // Or if it's already deleted.
-                     var dbVal = await entry.GetDatabaseValuesAsync(ct);
-                     if (dbVal == null)
-                     {
-                         // Already deleted. Good.
-                         continue;
-                     }
-                     // Else, force delete (it's what we want)
-                     entry.OriginalValues.SetValues(dbVal);
-                 }
-                 else
-                 {
-                     // For definition updates
-                     var dbValues = await entry.GetDatabaseValuesAsync(ct);
-                     if (dbValues == null) throw new InvalidOperationException("Entity deleted by another process.");
-                     entry.OriginalValues.SetValues(dbValues);
-                 }
-             }
-             
-             await _db.SaveChangesAsync(ct);
-             _logger.LogInformation("HeroDefinitionCraft {HeroId} published (concurrency resolved)", heroId);
+            _logger.LogInformation("HeroDefinitionCraft {HeroId} definition published by user {UserId}. DefinitionId: {DefId}, Version: {Version}", heroId, publisherId, definitionId, definition.Version);
         }
         catch (DbUpdateException ex)
         {
-             _logger.LogError(ex, "Database update failed during publish for hero {HeroId}", heroId);
-             throw new InvalidOperationException($"Database update failed: {ex.InnerException?.Message ?? ex.Message}");
+            _logger.LogError(ex, "Database update failed during publish for hero {HeroId}", heroId);
+            throw new InvalidOperationException($"Database update failed: {ex.InnerException?.Message ?? ex.Message}");
         }
         catch (Exception ex)
         {
-             _logger.LogError(ex, "Unexpected error publishing hero {HeroId}", heroId);
-             throw new InvalidOperationException($"Unexpected error: {ex.Message}");
+            _logger.LogError(ex, "Unexpected error publishing hero {HeroId}", heroId);
+            throw new InvalidOperationException($"Unexpected error: {ex.Message}");
+        }
+
+        // Cleanup craft after successful publish
+        await CleanupCraftAsync(heroId, ct);
+    }
+
+    private async Task CleanupCraftAsync(string heroId, CancellationToken ct)
+    {
+        try
+        {
+            var craftToDelete = await _db.HeroDefinitionCrafts
+                .FirstOrDefaultAsync(c => c.Id == heroId, ct);
+            
+            if (craftToDelete != null)
+            {
+                _db.HeroDefinitionCrafts.Remove(craftToDelete);
+                await _db.SaveChangesAsync(ct);
+                _logger.LogInformation("Hero published and craft cleaned up: heroId={HeroId}", heroId);
+            }
+        }
+        catch (Exception cleanupEx)
+        {
+            _logger.LogWarning(cleanupEx, "Failed to cleanup hero craft after publish: heroId={HeroId}, but publish succeeded", heroId);
         }
     }
 
@@ -593,5 +700,62 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
                 AudioUrl = t.AudioUrl
             }).ToList()
         };
+    }
+
+    private static string NormalizeLanguageCode(string? code)
+    {
+        if (string.IsNullOrWhiteSpace(code)) return string.Empty;
+        var trimmed = code.Trim().ToLowerInvariant();
+        if (!trimmed.Contains('-') && LanguageAliasMap.TryGetValue(trimmed, out var normalized))
+        {
+            return normalized;
+        }
+        return trimmed;
+    }
+
+    private static string GetLanguageBase(string? code)
+    {
+        if (string.IsNullOrWhiteSpace(code)) return string.Empty;
+        var normalized = code.Trim().ToLowerInvariant();
+        var dashIndex = normalized.IndexOf('-');
+        return dashIndex > 0 ? normalized[..dashIndex] : normalized;
+    }
+
+    private static T? FindBestTranslation<T>(
+        IEnumerable<T>? translations,
+        string normalizedLanguage,
+        string languageBase,
+        Func<T, string?> getLanguage)
+    {
+        if (translations == null) return default;
+        var list = translations.ToList();
+        if (list.Count == 0) return default;
+        if (string.IsNullOrWhiteSpace(normalizedLanguage))
+        {
+            return list.FirstOrDefault();
+        }
+
+        var exact = list
+            .Where(t => string.Equals(getLanguage(t)?.Trim(), normalizedLanguage, StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(t => (getLanguage(t) ?? string.Empty).Contains('-'))
+            .FirstOrDefault();
+        if (exact != null) return exact;
+
+        var normalized = list
+            .Where(t => NormalizeLanguageCode(getLanguage(t)) == normalizedLanguage)
+            .OrderByDescending(t => (getLanguage(t) ?? string.Empty).Contains('-'))
+            .FirstOrDefault();
+        if (normalized != null) return normalized;
+
+        if (!string.IsNullOrWhiteSpace(languageBase))
+        {
+            var baseMatch = list
+                .Where(t => GetLanguageBase(NormalizeLanguageCode(getLanguage(t))) == languageBase)
+                .OrderByDescending(t => (getLanguage(t) ?? string.Empty).Contains('-'))
+                .FirstOrDefault();
+            if (baseMatch != null) return baseMatch;
+        }
+
+        return list.FirstOrDefault();
     }
 }

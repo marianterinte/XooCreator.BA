@@ -85,7 +85,7 @@ public class PublishAnimalCraftEndpoint
             ep._db.AnimalPublishJobs.Add(job);
             await ep._db.SaveChangesAsync(ct);
 
-            ep._jobEvents.Publish("AnimalPublish", job.Id, new
+            ep._jobEvents.Publish(JobTypes.AnimalPublish, job.Id, new
             {
                 jobId = job.Id,
                 animalId = job.AnimalId,

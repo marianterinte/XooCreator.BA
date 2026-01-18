@@ -103,7 +103,7 @@ public class HeroPublishQueueWorker : BackgroundService
                     {
                         // TODO: Add generic JobType or specific HeroPublish type to JobTypes
                         // For now using raw string or existing generic if available
-                        _jobEvents.Publish("HeroPublish", job.Id, new
+                        _jobEvents.Publish(JobTypes.HeroPublish, job.Id, new
                         {
                             jobId = job.Id,
                             heroId = job.HeroId,
@@ -159,7 +159,7 @@ public class HeroPublishQueueWorker : BackgroundService
                                 // Re-publish event with reloaded job
                                 // We need to define PublishStatus again or extract it.
                                 // Since PublishStatus() uses 'job' (the local variable), we should update 'job' reference or manually publish.
-                                _jobEvents.Publish("HeroPublish", jobToFail.Id, new
+                                _jobEvents.Publish(JobTypes.HeroPublish, jobToFail.Id, new
                                 {
                                     jobId = jobToFail.Id,
                                     heroId = jobToFail.HeroId,

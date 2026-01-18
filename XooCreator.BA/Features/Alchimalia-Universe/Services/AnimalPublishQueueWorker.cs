@@ -101,7 +101,7 @@ public class AnimalPublishQueueWorker : BackgroundService
 
                     void PublishStatus()
                     {
-                         _jobEvents.Publish("AnimalPublish", job.Id, new
+                         _jobEvents.Publish(JobTypes.AnimalPublish, job.Id, new
                         {
                             jobId = job.Id,
                             animalId = job.AnimalId,

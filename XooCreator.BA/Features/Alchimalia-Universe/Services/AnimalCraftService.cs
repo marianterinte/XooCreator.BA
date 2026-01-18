@@ -10,6 +10,16 @@ namespace XooCreator.BA.Features.AlchimaliaUniverse.Services;
 
 public class AnimalCraftService : IAnimalCraftService
 {
+    private static readonly Dictionary<string, string> LanguageAliasMap = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["ro"] = "ro-ro",
+        ["en"] = "en-us",
+        ["hu"] = "hu-hu",
+        ["de"] = "de-de",
+        ["es"] = "es-es",
+        ["it"] = "it-it"
+    };
+
     private readonly IAnimalCraftRepository _repository;
     private readonly XooDbContext _db;
     private readonly IAnimalPublishChangeLogService _changeLogService;
@@ -44,17 +54,22 @@ public class AnimalCraftService : IAnimalCraftService
         var animals = await _repository.ListAsync(status, regionId, isHybrid, search, ct);
         var totalCount = await _repository.CountAsync(status, regionId, ct);
 
+        var normalizedLanguage = NormalizeLanguageCode(languageCode);
+        var languageBase = GetLanguageBase(normalizedLanguage);
+
         var items = animals.Select(a =>
         {
-            AnimalCraftTranslation? selectedTranslation = null;
-            if (!string.IsNullOrWhiteSpace(languageCode))
-            {
-                var normalizedLang = languageCode.ToLowerInvariant();
-                selectedTranslation = a.Translations.FirstOrDefault(t => t.LanguageCode.ToLowerInvariant() == normalizedLang);
-            }
-            selectedTranslation ??= a.Translations.FirstOrDefault();
+            var selectedTranslation = FindBestTranslation(
+                a.Translations,
+                normalizedLanguage,
+                languageBase,
+                t => t.LanguageCode);
 
-            var availableLanguages = a.Translations.Select(t => t.LanguageCode.ToLowerInvariant()).ToList();
+            var availableLanguages = a.Translations
+                .Select(t => NormalizeLanguageCode(t.LanguageCode))
+                .Where(code => !string.IsNullOrWhiteSpace(code))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
 
             return new AnimalCraftListItemDto
             {
@@ -110,7 +125,7 @@ public class AnimalCraftService : IAnimalCraftService
                 {
                     Id = Guid.NewGuid(),
                     AnimalCraftId = Guid.Empty, // set after save
-                    LanguageCode = request.LanguageCode.ToLowerInvariant(),
+                    LanguageCode = NormalizeLanguageCode(request.LanguageCode),
                     Label = request.TranslatedLabel,
                     AudioUrl = null
                 }
@@ -140,7 +155,7 @@ public class AnimalCraftService : IAnimalCraftService
             hybrid.AnimalCraftId = animal.Id;
 
         await _repository.SaveAsync(animal, ct);
-        return MapToDto(animal, request.LanguageCode);
+        return MapToDto(animal, NormalizeLanguageCode(request.LanguageCode));
     }
 
     public async Task<AnimalCraftDto> CreateCraftFromDefinitionAsync(Guid userId, Guid definitionId, CancellationToken ct = default)
@@ -194,7 +209,7 @@ public class AnimalCraftService : IAnimalCraftService
             {
                 Id = Guid.NewGuid(),
                 AnimalCraftId = Guid.Empty, // set after save
-                LanguageCode = t.LanguageCode,
+                LanguageCode = NormalizeLanguageCode(t.LanguageCode),
                 Label = t.Label,
                 AudioUrl = t.AudioUrl
             }).ToList(),
@@ -283,8 +298,9 @@ public class AnimalCraftService : IAnimalCraftService
         {
             foreach (var (langCode, translationDto) in request.Translations)
             {
-                var normalizedLang = langCode.ToLowerInvariant();
-                var existingTranslation = animal.Translations.FirstOrDefault(t => t.LanguageCode == normalizedLang);
+                var normalizedLang = NormalizeLanguageCode(langCode);
+                var existingTranslation = animal.Translations.FirstOrDefault(t =>
+                    NormalizeLanguageCode(t.LanguageCode) == normalizedLang);
                 if (existingTranslation != null)
                 {
                     existingTranslation.Label = translationDto.Label;
@@ -673,5 +689,62 @@ public class AnimalCraftService : IAnimalCraftService
                 AudioUrl = t.AudioUrl
             }).ToList()
         };
+    }
+
+    private static string NormalizeLanguageCode(string? code)
+    {
+        if (string.IsNullOrWhiteSpace(code)) return string.Empty;
+        var trimmed = code.Trim().ToLowerInvariant();
+        if (!trimmed.Contains('-') && LanguageAliasMap.TryGetValue(trimmed, out var normalized))
+        {
+            return normalized;
+        }
+        return trimmed;
+    }
+
+    private static string GetLanguageBase(string? code)
+    {
+        if (string.IsNullOrWhiteSpace(code)) return string.Empty;
+        var normalized = code.Trim().ToLowerInvariant();
+        var dashIndex = normalized.IndexOf('-');
+        return dashIndex > 0 ? normalized[..dashIndex] : normalized;
+    }
+
+    private static T? FindBestTranslation<T>(
+        IEnumerable<T>? translations,
+        string normalizedLanguage,
+        string languageBase,
+        Func<T, string?> getLanguage)
+    {
+        if (translations == null) return default;
+        var list = translations.ToList();
+        if (list.Count == 0) return default;
+        if (string.IsNullOrWhiteSpace(normalizedLanguage))
+        {
+            return list.FirstOrDefault();
+        }
+
+        var exact = list
+            .Where(t => string.Equals(getLanguage(t)?.Trim(), normalizedLanguage, StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(t => (getLanguage(t) ?? string.Empty).Contains('-'))
+            .FirstOrDefault();
+        if (exact != null) return exact;
+
+        var normalized = list
+            .Where(t => NormalizeLanguageCode(getLanguage(t)) == normalizedLanguage)
+            .OrderByDescending(t => (getLanguage(t) ?? string.Empty).Contains('-'))
+            .FirstOrDefault();
+        if (normalized != null) return normalized;
+
+        if (!string.IsNullOrWhiteSpace(languageBase))
+        {
+            var baseMatch = list
+                .Where(t => GetLanguageBase(NormalizeLanguageCode(getLanguage(t))) == languageBase)
+                .OrderByDescending(t => (getLanguage(t) ?? string.Empty).Contains('-'))
+                .FirstOrDefault();
+            if (baseMatch != null) return baseMatch;
+        }
+
+        return list.FirstOrDefault();
     }
 }
