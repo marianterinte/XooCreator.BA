@@ -171,6 +171,16 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
             return await GetAsync(existingCraft.Id, null, ct);
         }
 
+        var currentUser = await _db.AlchimaliaUsers.FirstOrDefaultAsync(u => u.Id == userId, ct);
+        var currentUserEmail = currentUser?.Email;
+        string? publishedOwnerEmail = null;
+        if (definition.PublishedByUserId.HasValue)
+        {
+            var publishedOwner = await _db.AlchimaliaUsers
+                .FirstOrDefaultAsync(u => u.Id == definition.PublishedByUserId.Value, ct);
+            publishedOwnerEmail = publishedOwner?.Email;
+        }
+
         var hero = new HeroDefinitionCraft
         {
             Id = $"hero_{DateTime.UtcNow:yyyyMMddHHmmssfff}",
@@ -206,6 +216,72 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
 
         foreach (var translation in hero.Translations)
             translation.HeroDefinitionCraftId = hero.Id;
+
+        // If assets are published, copy them to draft and update draft paths
+        if (!string.IsNullOrWhiteSpace(currentUserEmail) && !string.IsNullOrWhiteSpace(publishedOwnerEmail))
+        {
+            var assets = new List<AlchimaliaUniverseAssetPathMapper.AssetInfo>();
+            if (!string.IsNullOrWhiteSpace(definition.Image))
+            {
+                assets.Add(new AlchimaliaUniverseAssetPathMapper.AssetInfo(
+                    Path.GetFileName(definition.Image),
+                    AlchimaliaUniverseAssetPathMapper.AssetType.Image,
+                    null));
+            }
+
+            foreach (var translation in definition.Translations)
+            {
+                if (!string.IsNullOrWhiteSpace(translation.AudioUrl))
+                {
+                    assets.Add(new AlchimaliaUniverseAssetPathMapper.AssetInfo(
+                        Path.GetFileName(translation.AudioUrl),
+                        AlchimaliaUniverseAssetPathMapper.AssetType.Audio,
+                        NormalizeLanguageCode(translation.LanguageCode)));
+                }
+            }
+
+            if (assets.Count > 0)
+            {
+                await _assetCopyService.CopyPublishedToDraftAsync(
+                    assets,
+                    publishedOwnerEmail,
+                    definition.Id,
+                    currentUserEmail,
+                    hero.Id,
+                    AlchimaliaUniverseAssetPathMapper.EntityType.Hero,
+                    ct);
+            }
+
+            // Update craft paths to point to draft locations
+            if (!string.IsNullOrWhiteSpace(definition.Image))
+            {
+                var imageAsset = new AlchimaliaUniverseAssetPathMapper.AssetInfo(
+                    Path.GetFileName(definition.Image),
+                    AlchimaliaUniverseAssetPathMapper.AssetType.Image,
+                    null);
+                hero.Image = AlchimaliaUniverseAssetPathMapper.BuildDraftPath(
+                    imageAsset,
+                    currentUserEmail,
+                    hero.Id,
+                    AlchimaliaUniverseAssetPathMapper.EntityType.Hero);
+            }
+
+            foreach (var translation in hero.Translations)
+            {
+                if (!string.IsNullOrWhiteSpace(translation.AudioUrl))
+                {
+                    var audioAsset = new AlchimaliaUniverseAssetPathMapper.AssetInfo(
+                        Path.GetFileName(translation.AudioUrl),
+                        AlchimaliaUniverseAssetPathMapper.AssetType.Audio,
+                        NormalizeLanguageCode(translation.LanguageCode));
+                    translation.AudioUrl = AlchimaliaUniverseAssetPathMapper.BuildDraftPath(
+                        audioAsset,
+                        currentUserEmail,
+                        hero.Id,
+                        AlchimaliaUniverseAssetPathMapper.EntityType.Hero);
+                }
+            }
+        }
 
         await _repository.SaveAsync(hero, ct);
         _logger.LogInformation("HeroDefinitionCraft {HeroId} created from definition {DefinitionId} by user {UserId}", hero.Id, definitionId, userId);
@@ -393,12 +469,17 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
             throw new InvalidOperationException($"Cannot publish hero. Creator email not found for user {hero.CreatedByUserId}");
         }
 
+        // Load or create definition
+        var definition = await _db.HeroDefinitionDefinitions
+            .Include(d => d.Translations)
+            .FirstOrDefaultAsync(d => d.Id == definitionId, ct);
+
         // Sync assets FIRST (before creating/updating definition) - exactly like story heroes/regions
         var assets = AlchimaliaUniverseAssetPathMapper.CollectFromHeroCraft(hero);
         await _assetCopyService.CopyDraftToPublishedAsync(
             assets,
             creatorEmail,
-            hero.Id, 
+            hero.Id,
             AlchimaliaUniverseAssetPathMapper.EntityType.Hero,
             ct);
 
@@ -406,16 +487,38 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
         string? publishedImageUrl = null;
         if (!string.IsNullOrWhiteSpace(hero.Image))
         {
-            var filename = Path.GetFileName(hero.Image);
-            var assetInfo = new AlchimaliaUniverseAssetPathMapper.AssetInfo(filename, AlchimaliaUniverseAssetPathMapper.AssetType.Image, null);
-            var pubPath = AlchimaliaUniverseAssetPathMapper.BuildPublishedPath(assetInfo, creatorEmail, hero.Id, AlchimaliaUniverseAssetPathMapper.EntityType.Hero);
-            publishedImageUrl = _assetCopyService.GetPublishedUrl(pubPath);
+            // If the craft image is a draft path, publish it.
+            if (hero.Image.StartsWith("draft/", StringComparison.OrdinalIgnoreCase))
+            {
+                var filename = Path.GetFileName(hero.Image);
+                var assetInfo = new AlchimaliaUniverseAssetPathMapper.AssetInfo(filename, AlchimaliaUniverseAssetPathMapper.AssetType.Image, null);
+                var pubPath = AlchimaliaUniverseAssetPathMapper.BuildPublishedPath(assetInfo, creatorEmail, hero.Id, AlchimaliaUniverseAssetPathMapper.EntityType.Hero);
+                publishedImageUrl = _assetCopyService.GetPublishedUrl(pubPath);
+            }
+            else if (definition != null && !string.IsNullOrWhiteSpace(definition.Image))
+            {
+                // If image wasn't changed (still published), keep the old published path.
+                publishedImageUrl = definition.Image;
+            }
+            else if (Uri.TryCreate(hero.Image, UriKind.Absolute, out _))
+            {
+                // Already a full URL
+                publishedImageUrl = hero.Image;
+            }
+            else if (hero.Image.StartsWith("images/", StringComparison.OrdinalIgnoreCase))
+            {
+                // Already a published relative path
+                publishedImageUrl = hero.Image;
+            }
+            else
+            {
+                // Fallback: treat as filename or legacy path
+                var filename = Path.GetFileName(hero.Image);
+                var assetInfo = new AlchimaliaUniverseAssetPathMapper.AssetInfo(filename, AlchimaliaUniverseAssetPathMapper.AssetType.Image, null);
+                var pubPath = AlchimaliaUniverseAssetPathMapper.BuildPublishedPath(assetInfo, creatorEmail, hero.Id, AlchimaliaUniverseAssetPathMapper.EntityType.Hero);
+                publishedImageUrl = _assetCopyService.GetPublishedUrl(pubPath);
+            }
         }
-
-        // Load or create definition
-        var definition = await _db.HeroDefinitionDefinitions
-            .Include(d => d.Translations)
-            .FirstOrDefaultAsync(d => d.Id == definitionId, ct);
 
         if (definition == null)
         {

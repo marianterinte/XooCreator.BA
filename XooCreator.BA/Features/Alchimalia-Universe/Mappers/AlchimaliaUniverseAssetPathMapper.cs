@@ -26,7 +26,10 @@ public static class AlchimaliaUniverseAssetPathMapper
          var results = new List<AssetInfo>();
          if (!string.IsNullOrWhiteSpace(craft.Image))
          {
-             results.Add(new AssetInfo(Path.GetFileName(craft.Image), AssetType.Image, null));
+             var imageRef = craft.Image.StartsWith("draft/", StringComparison.OrdinalIgnoreCase)
+                 ? craft.Image
+                 : Path.GetFileName(craft.Image);
+             results.Add(new AssetInfo(imageRef, AssetType.Image, null));
          }
          
          // AudioUrl in translations?
@@ -34,7 +37,10 @@ public static class AlchimaliaUniverseAssetPathMapper
          {
              if (!string.IsNullOrWhiteSpace(t.AudioUrl))
              {
-                 results.Add(new AssetInfo(Path.GetFileName(t.AudioUrl), AssetType.Audio, t.LanguageCode));
+                 var audioRef = t.AudioUrl.StartsWith("draft/", StringComparison.OrdinalIgnoreCase)
+                     ? t.AudioUrl
+                     : Path.GetFileName(t.AudioUrl);
+                 results.Add(new AssetInfo(audioRef, AssetType.Audio, t.LanguageCode));
              }
          }
          
@@ -46,14 +52,20 @@ public static class AlchimaliaUniverseAssetPathMapper
         var results = new List<AssetInfo>();
         if (!string.IsNullOrWhiteSpace(craft.Src))
         {
-             results.Add(new AssetInfo(Path.GetFileName(craft.Src), AssetType.Image, null));
+             var imageRef = craft.Src.StartsWith("draft/", StringComparison.OrdinalIgnoreCase)
+                 ? craft.Src
+                 : Path.GetFileName(craft.Src);
+             results.Add(new AssetInfo(imageRef, AssetType.Image, null));
         }
 
         foreach (var t in craft.Translations)
         {
              if (!string.IsNullOrWhiteSpace(t.AudioUrl))
              {
-                 results.Add(new AssetInfo(Path.GetFileName(t.AudioUrl), AssetType.Audio, t.LanguageCode));
+                 var audioRef = t.AudioUrl.StartsWith("draft/", StringComparison.OrdinalIgnoreCase)
+                     ? t.AudioUrl
+                     : Path.GetFileName(t.AudioUrl);
+                 results.Add(new AssetInfo(audioRef, AssetType.Audio, t.LanguageCode));
              }
         }
         
@@ -62,6 +74,12 @@ public static class AlchimaliaUniverseAssetPathMapper
 
     public static string BuildDraftPath(AssetInfo asset, string userEmail, string entityId, EntityType entityType)
     {
+        if (!string.IsNullOrWhiteSpace(asset.Filename) &&
+            asset.Filename.StartsWith("draft/", StringComparison.OrdinalIgnoreCase))
+        {
+            return asset.Filename.TrimStart('/');
+        }
+
         var emailEsc = Uri.EscapeDataString(userEmail);
         var typeSegment = entityType == EntityType.Hero ? "heroes" : "animals";
         var basePath = $"draft/u/{emailEsc}/alchimalia-universe/{typeSegment}/{entityId}";
@@ -96,7 +114,8 @@ public static class AlchimaliaUniverseAssetPathMapper
             basePath = $"{basePath}/{asset.Lang}";
         }
 
-        return $"{basePath}/{asset.Filename}";
+        var filename = Path.GetFileName(asset.Filename);
+        return $"{basePath}/{filename}";
     }
 
     public static string SanitizeEmailForFolder(string email)
