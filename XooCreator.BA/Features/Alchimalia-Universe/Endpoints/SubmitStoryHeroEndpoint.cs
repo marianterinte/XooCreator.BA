@@ -33,6 +33,7 @@ public class SubmitStoryHeroEndpoint
     }
 
     [Route("/api/{locale}/alchimalia-universe/story-heroes/{storyHeroId}/submit")]
+    [Route("/api/{locale}/alchimalia-universe/loi-heroes/{storyHeroId}/submit")]
     [Authorize]
     public static async Task<Results<Ok<SubmitResponse>, NotFound, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
         [FromRoute] string locale,

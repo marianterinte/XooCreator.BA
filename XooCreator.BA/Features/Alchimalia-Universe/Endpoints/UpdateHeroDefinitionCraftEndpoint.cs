@@ -28,6 +28,7 @@ public class UpdateHeroDefinitionCraftEndpoint
     }
 
     [Route("/api/alchimalia-universe/hero-crafts/{heroId}")]
+    [Route("/api/alchimalia-universe/toh-hero-crafts/{heroId}")]
     [Authorize]
     public static async Task<Results<Ok<HeroDefinitionCraftDto>, NotFound, BadRequest<string>, UnauthorizedHttpResult, ForbidHttpResult, Conflict<string>>> HandlePut(
         [FromRoute] string heroId,

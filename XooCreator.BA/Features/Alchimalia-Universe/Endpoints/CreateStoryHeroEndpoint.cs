@@ -28,6 +28,7 @@ public class CreateStoryHeroEndpoint
     }
 
     [Route("/api/{locale}/alchimalia-universe/story-heroes")]
+    [Route("/api/{locale}/alchimalia-universe/loi-heroes")]
     [Authorize]
     public static async Task<Results<Ok<StoryHeroDto>, BadRequest<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
         [FromRoute] string locale,

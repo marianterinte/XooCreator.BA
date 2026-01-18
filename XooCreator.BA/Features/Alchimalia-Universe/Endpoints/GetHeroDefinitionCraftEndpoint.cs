@@ -28,6 +28,7 @@ public class GetHeroDefinitionCraftEndpoint
     }
 
     [Route("/api/alchimalia-universe/hero-crafts/{heroId}")]
+    [Route("/api/alchimalia-universe/toh-hero-crafts/{heroId}")]
     [Authorize]
     public static async Task<Results<Ok<HeroDefinitionCraftDto>, NotFound, UnauthorizedHttpResult, ForbidHttpResult>> HandleGet(
         [FromRoute] string heroId,

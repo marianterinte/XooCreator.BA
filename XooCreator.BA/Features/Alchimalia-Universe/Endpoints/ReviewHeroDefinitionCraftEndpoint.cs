@@ -34,6 +34,7 @@ public class ReviewHeroDefinitionCraftEndpoint
     }
 
     [Route("/api/alchimalia-universe/hero-crafts/{heroId}/review")]
+    [Route("/api/alchimalia-universe/toh-hero-crafts/{heroId}/review")]
     [Authorize]
     public static async Task<Results<Ok<ReviewResponse>, NotFound, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
         [FromRoute] string heroId,

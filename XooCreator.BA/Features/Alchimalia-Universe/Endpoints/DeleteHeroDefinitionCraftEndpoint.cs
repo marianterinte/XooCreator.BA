@@ -27,6 +27,7 @@ public class DeleteHeroDefinitionCraftEndpoint
     }
 
     [Route("/api/alchimalia-universe/hero-crafts/{heroId}")]
+    [Route("/api/alchimalia-universe/toh-hero-crafts/{heroId}")]
     [Authorize]
     public static async Task<Results<Ok, NotFound, BadRequest<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandleDelete(
         [FromRoute] string heroId,

@@ -28,6 +28,7 @@ public class GetHeroDefinitionEndpoint
     }
 
     [Route("/api/{locale}/alchimalia-universe/hero-definitions/{heroId}")]
+    [Route("/api/{locale}/alchimalia-universe/toh-hero-definitions/{heroId}")]
     [Authorize]
     public static async Task<Results<Ok<HeroDefinitionDto>, NotFound, UnauthorizedHttpResult, ForbidHttpResult>> HandleGet(
         [FromRoute] string locale,

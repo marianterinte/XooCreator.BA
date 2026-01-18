@@ -51,7 +51,7 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
 
     public async Task<ListHeroDefinitionCraftsResponse> ListAsync(string? status = null, string? type = null, string? search = null, string? languageCode = null, CancellationToken ct = default)
     {
-        // Get all crafts (matching status filter if provided)
+        // Crafts only (definitions are listed via hero-definitions endpoint)
         var craftQuery = _db.HeroDefinitionCrafts.Include(x => x.Translations).AsQueryable();
         if (!string.IsNullOrWhiteSpace(status))
         {
@@ -65,42 +65,12 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
         }
         var allCrafts = await craftQuery.ToListAsync(ct);
 
-        // Get all published definitions (always include, even if craft exists - allows published heroes to remain visible when "new version" creates a draft)
-        var definitionQuery = _db.HeroDefinitionDefinitions
-            .Include(d => d.Translations)
-            .Where(x => x.Status == AlchimaliaUniverseStatus.Published.ToDb())
-            .AsQueryable();
-        if (!string.IsNullOrWhiteSpace(search))
-        {
-            definitionQuery = definitionQuery.Where(x => 
-                x.Id.Contains(search) ||
-                x.Translations.Any(t => t.Name.Contains(search)));
-        }
-        var allDefinitions = await definitionQuery.ToListAsync(ct);
-
-        // Combine crafts and definitions, avoiding duplicates (prefer craft if both exist)
-        var craftIds = new HashSet<string>(allCrafts.Select(c => c.Id), StringComparer.OrdinalIgnoreCase);
-        var definitionIds = new HashSet<string>(allDefinitions.Select(d => d.Id), StringComparer.OrdinalIgnoreCase);
-        var combined = new List<HeroDefinitionCraftListItemDto>();
-
-        // Add all crafts
         var normalizedLanguage = NormalizeLanguageCode(languageCode);
         var languageBase = GetLanguageBase(normalizedLanguage);
 
+        var items = new List<HeroDefinitionCraftListItemDto>();
         foreach (var craft in allCrafts)
         {
-            // If a published definition exists, prefer definition data over any lingering published craft.
-            if (string.Equals(craft.Status, AlchimaliaUniverseStatus.Published.ToDb(), StringComparison.OrdinalIgnoreCase))
-            {
-                var definitionId = !string.IsNullOrWhiteSpace(craft.PublishedDefinitionId)
-                    ? craft.PublishedDefinitionId
-                    : craft.Id;
-                if (!string.IsNullOrWhiteSpace(definitionId) && definitionIds.Contains(definitionId))
-                {
-                    continue;
-                }
-            }
-
             // Select translation - use requested language if provided, otherwise first available (exactly like story heroes)
             var selectedTranslation = FindBestTranslation(
                 craft.Translations,
@@ -114,7 +84,7 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
-            combined.Add(new HeroDefinitionCraftListItemDto
+            items.Add(new HeroDefinitionCraftListItemDto
             {
                 Id = craft.Id,
                 PublishedDefinitionId = craft.PublishedDefinitionId,
@@ -127,51 +97,10 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
             });
         }
 
-        // Add published definitions that don't have a craft (or if status filter is "published")
-        foreach (var definition in allDefinitions)
-        {
-            // If status filter is "published", include all definitions
-            // Otherwise, only include definitions that don't have a corresponding craft
-            if (status == AlchimaliaUniverseStatus.Published.ToDb() || !craftIds.Contains(definition.Id))
-            {
-                // Select translation - use requested language if provided, otherwise first available (exactly like story heroes)
-                var selectedTranslation = FindBestTranslation(
-                    definition.Translations,
-                    normalizedLanguage,
-                    languageBase,
-                    t => t.LanguageCode);
-
-                var availableLanguages = definition.Translations
-                    .Select(t => NormalizeLanguageCode(t.LanguageCode))
-                    .Where(code => !string.IsNullOrWhiteSpace(code))
-                    .Distinct(StringComparer.OrdinalIgnoreCase)
-                    .ToList();
-
-                combined.Add(new HeroDefinitionCraftListItemDto
-                {
-                    Id = definition.Id,
-                    PublishedDefinitionId = definition.Id, // For definitions, PublishedDefinitionId is the same as Id
-                    Name = selectedTranslation?.Name ?? definition.Id,
-                    Image = definition.Image,
-                    Status = definition.Status,
-                    UpdatedAt = definition.UpdatedAt,
-                    CreatedByUserId = definition.PublishedByUserId, // Use PublishedByUserId for definitions
-                    AvailableLanguages = availableLanguages
-                });
-            }
-        }
-
-        // Apply status filter to combined list if needed (for published tab)
-        var filtered = combined;
-        if (!string.IsNullOrWhiteSpace(status))
-        {
-            filtered = combined.Where(h => h.Status == status).ToList();
-        }
-
         return new ListHeroDefinitionCraftsResponse
         {
-            Heroes = filtered,
-            TotalCount = filtered.Count
+            Heroes = items,
+            TotalCount = items.Count
         };
     }
 

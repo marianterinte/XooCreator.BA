@@ -28,6 +28,7 @@ public class ListHeroDefinitionCraftsEndpoint
     }
 
     [Route("/api/alchimalia-universe/hero-crafts")]
+    [Route("/api/alchimalia-universe/toh-hero-crafts")]
     [Authorize]
     public static async Task<Results<Ok<ListHeroDefinitionCraftsResponse>, UnauthorizedHttpResult, ForbidHttpResult>> HandleGet(
         [FromQuery] string? status,

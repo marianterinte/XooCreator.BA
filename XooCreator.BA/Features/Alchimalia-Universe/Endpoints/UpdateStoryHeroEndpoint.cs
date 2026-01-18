@@ -28,6 +28,7 @@ public class UpdateStoryHeroEndpoint
     }
 
     [Route("/api/{locale}/alchimalia-universe/story-heroes/{storyHeroId}")]
+    [Route("/api/{locale}/alchimalia-universe/loi-heroes/{storyHeroId}")]
     [Authorize]
     public static async Task<Results<Ok<StoryHeroDto>, NotFound, BadRequest<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePut(
         [FromRoute] string locale,

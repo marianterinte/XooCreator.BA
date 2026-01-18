@@ -46,6 +46,7 @@ public class PublishHeroDefinitionCraftEndpoint
     }
 
     [Route("/api/alchimalia-universe/hero-crafts/{heroId}/publish")]
+    [Route("/api/alchimalia-universe/toh-hero-crafts/{heroId}/publish")]
     [Authorize]
     public static async Task<Results<Accepted<PublishHeroResponse>, NotFound, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult, BadRequest<string>>> HandlePost(
         [FromRoute] string heroId,

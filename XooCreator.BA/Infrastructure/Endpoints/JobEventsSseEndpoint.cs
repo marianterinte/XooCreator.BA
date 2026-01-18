@@ -36,7 +36,7 @@ public sealed class JobEventsSseEndpoint
 
     [Route("/api/jobs/{jobType}/{jobId}/events")]
     [Authorize]
-    public static async Task<Results<Ok, BadRequest<string>, UnauthorizedHttpResult, ForbidHttpResult, NotFound>> HandleGet(
+    public static async Task HandleGet(
         [FromRoute] string jobType,
         [FromRoute] Guid jobId,
         [FromServices] IJobEventsHub hub,
@@ -47,27 +47,32 @@ public sealed class JobEventsSseEndpoint
     {
         if (string.IsNullOrWhiteSpace(jobType) || !KnownJobTypes.Contains(jobType))
         {
-            return TypedResults.BadRequest($"Unknown jobType '{jobType}'.");
+            http.Response.StatusCode = StatusCodes.Status400BadRequest;
+            await http.Response.WriteAsync($"Unknown jobType '{jobType}'.", ct);
+            return;
         }
 
         var user = await auth0.GetCurrentUserAsync(ct);
         if (user == null)
         {
-            return TypedResults.Unauthorized();
+            http.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            return;
         }
 
         var isAdmin = auth0.HasRole(user, UserRole.Admin);
         var isCreator = auth0.HasRole(user, UserRole.Creator);
         if (!isAdmin && !isCreator)
         {
-            return TypedResults.Forbid();
+            http.Response.StatusCode = StatusCodes.Status403Forbidden;
+            return;
         }
 
         // Build an initial snapshot from DB so a late subscriber doesn't hang if the job is already finished.
         var snapshot = await TryBuildSnapshotAsync(jobType, jobId, db, user, auth0, ct);
         if (snapshot == null)
         {
-            return TypedResults.NotFound();
+            http.Response.StatusCode = StatusCodes.Status404NotFound;
+            return;
         }
 
         // SSE headers
@@ -81,7 +86,7 @@ public sealed class JobEventsSseEndpoint
 
         if (IsTerminalStatus(snapshot.Status))
         {
-            return TypedResults.Ok();
+            return;
         }
 
         await using var stream = hub.Subscribe(jobType, jobId);
@@ -105,14 +110,14 @@ public sealed class JobEventsSseEndpoint
                 var status = TryExtractStatus(json);
                 if (status != null && IsTerminalStatus(status))
                 {
-                    return TypedResults.Ok();
+                    return;
                 }
             }
 
             await Task.Delay(200, ct);
         }
 
-        return TypedResults.Ok();
+        return;
     }
 
     private static async Task WriteDataAsync(HttpContext http, string json, CancellationToken ct)

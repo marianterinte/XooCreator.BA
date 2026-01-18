@@ -33,6 +33,7 @@ public class SubmitHeroDefinitionCraftEndpoint
     }
 
     [Route("/api/alchimalia-universe/hero-crafts/{heroId}/submit")]
+    [Route("/api/alchimalia-universe/toh-hero-crafts/{heroId}/submit")]
     [Authorize]
     public static async Task<Results<Ok<SubmitResponse>, NotFound, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
         [FromRoute] string heroId,

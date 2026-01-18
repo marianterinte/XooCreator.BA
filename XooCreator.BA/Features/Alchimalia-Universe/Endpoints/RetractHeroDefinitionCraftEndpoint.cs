@@ -33,6 +33,7 @@ public class RetractHeroDefinitionCraftEndpoint
     }
 
     [Route("/api/alchimalia-universe/hero-crafts/{heroId}/retract")]
+    [Route("/api/alchimalia-universe/toh-hero-crafts/{heroId}/retract")]
     [Authorize]
     public static async Task<Results<Ok<RetractResponse>, NotFound, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
         [FromRoute] string heroId,

@@ -28,6 +28,7 @@ public class ListHeroDefinitionsEndpoint
     }
 
     [Route("/api/{locale}/alchimalia-universe/hero-definitions")]
+    [Route("/api/{locale}/alchimalia-universe/toh-hero-definitions")]
     [Authorize]
     public static async Task<Results<Ok<ListHeroDefinitionsResponse>, UnauthorizedHttpResult, ForbidHttpResult>> HandleGet(
         [FromRoute] string locale,

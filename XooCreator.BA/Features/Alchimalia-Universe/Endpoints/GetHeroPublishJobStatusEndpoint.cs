@@ -41,6 +41,7 @@ public class GetHeroPublishJobStatusEndpoint
     }
 
     [Route("/api/alchimalia-universe/hero-crafts/{heroId}/publish-jobs/{jobId}")]
+    [Route("/api/alchimalia-universe/toh-hero-crafts/{heroId}/publish-jobs/{jobId}")]
     [Authorize]
     public static async Task<Results<Ok<HeroPublishJobStatusResponse>, NotFound, UnauthorizedHttpResult, ForbidHttpResult>> HandleGet(
         [FromRoute] string heroId,

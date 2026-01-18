@@ -34,6 +34,7 @@ public class ReviewStoryHeroEndpoint
     }
 
     [Route("/api/{locale}/alchimalia-universe/story-heroes/{storyHeroId}/review")]
+    [Route("/api/{locale}/alchimalia-universe/loi-heroes/{storyHeroId}/review")]
     [Authorize]
     public static async Task<Results<Ok<ReviewResponse>, NotFound, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
         [FromRoute] string locale,

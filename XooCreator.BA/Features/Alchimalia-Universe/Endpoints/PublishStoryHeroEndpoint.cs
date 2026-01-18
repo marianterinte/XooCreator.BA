@@ -33,6 +33,7 @@ public class PublishStoryHeroEndpoint
     }
 
     [Route("/api/{locale}/alchimalia-universe/story-heroes/{storyHeroId}/publish")]
+    [Route("/api/{locale}/alchimalia-universe/loi-heroes/{storyHeroId}/publish")]
     [Authorize]
     public static async Task<Results<Ok<PublishResponse>, NotFound, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
         [FromRoute] string locale,

@@ -46,6 +46,7 @@ public class CreateHeroDefinitionVersionEndpoint
     }
 
     [Route("/api/{locale}/alchimalia-universe/hero-definitions/{definitionId}/create-version")]
+    [Route("/api/{locale}/alchimalia-universe/toh-hero-definitions/{definitionId}/create-version")]
     [Authorize]
     public static async Task<
         Results<

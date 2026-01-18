@@ -2,6 +2,7 @@ using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Data;
 using XooCreator.BA.Features.AlchimaliaUniverse.DTOs;
 using XooCreator.BA.Features.AlchimaliaUniverse.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace XooCreator.BA.Features.AlchimaliaUniverse.Services;
@@ -9,64 +10,59 @@ namespace XooCreator.BA.Features.AlchimaliaUniverse.Services;
 public class HeroDefinitionService : IHeroDefinitionService
 {
     private readonly IHeroDefinitionRepository _repository;
+    private readonly XooDbContext _db;
     private readonly ILogger<HeroDefinitionService> _logger;
 
     public HeroDefinitionService(
         IHeroDefinitionRepository repository,
+        XooDbContext db,
         ILogger<HeroDefinitionService> logger)
     {
         _repository = repository;
+        _db = db;
         _logger = logger;
     }
 
     public async Task<HeroDefinitionDto> GetAsync(string heroId, string? languageCode = null, CancellationToken ct = default)
     {
-        var hero = await _repository.GetWithTranslationsAsync(heroId, ct);
-        if (hero == null)
+        var definitionId = (heroId ?? string.Empty).Trim();
+        var definition = await _db.HeroDefinitionDefinitions
+            .Include(d => d.Translations)
+            .FirstOrDefaultAsync(d => d.Id == definitionId, ct);
+
+        if (definition == null)
         {
-            throw new KeyNotFoundException($"HeroDefinition with Id '{heroId}' not found");
+            throw new KeyNotFoundException($"HeroDefinitionDefinition with Id '{heroId}' not found");
         }
 
-        return MapToDto(hero, languageCode);
+        return MapDefinitionToDto(definition);
     }
 
     public async Task<ListHeroDefinitionsResponse> ListAsync(string? status = null, string? type = null, string? search = null, string? languageCode = null, CancellationToken ct = default)
     {
-        var heroes = await _repository.ListAsync(status, type, search, ct);
-        var totalCount = await _repository.CountAsync(status, type, ct);
+        var query = _db.HeroDefinitionDefinitions
+            .Include(d => d.Translations)
+            .AsQueryable();
 
-        var items = heroes.Select(h =>
+        if (!string.IsNullOrWhiteSpace(status))
         {
-            // Get translation for selected language, or first available
-            HeroDefinitionTranslation? selectedTranslation = null;
-            if (!string.IsNullOrWhiteSpace(languageCode))
-            {
-                var normalizedLang = languageCode.ToLowerInvariant();
-                selectedTranslation = h.Translations.FirstOrDefault(t => t.LanguageCode.ToLowerInvariant() == normalizedLang);
-            }
-            
-            // Fallback to first translation if no match
-            selectedTranslation ??= h.Translations.FirstOrDefault();
-            
-            // Get all available language codes
-            var availableLanguages = h.Translations.Select(t => t.LanguageCode.ToLowerInvariant()).ToList();
-            
-            return new HeroDefinitionListItemDto
-            {
-                Id = h.Id,
-                Name = selectedTranslation?.Name ?? h.Id,
-                Image = h.Image,
-                Status = h.Status,
-                UpdatedAt = h.UpdatedAt,
-                CreatedByUserId = h.CreatedByUserId,
-                AvailableLanguages = availableLanguages
-            };
-        }).ToList();
+            query = query.Where(d => d.Status == status);
+        }
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            query = query.Where(d =>
+                d.Id.Contains(search) ||
+                d.Translations.Any(t => t.Name.Contains(search)));
+        }
+
+        var definitions = await query.ToListAsync(ct);
+        var items = definitions.Select(d => MapDefinitionToListItem(d, languageCode)).ToList();
 
         return new ListHeroDefinitionsResponse
         {
             Heroes = items,
-            TotalCount = totalCount
+            TotalCount = items.Count
         };
     }
 
@@ -308,6 +304,66 @@ public class HeroDefinitionService : IHeroDefinitionService
                 Story = t.Story,
                 AudioUrl = t.AudioUrl
             }).ToList()
+        };
+    }
+
+    private HeroDefinitionDto MapDefinitionToDto(HeroDefinitionDefinition definition)
+    {
+        return new HeroDefinitionDto
+        {
+            Id = definition.Id,
+            CourageCost = definition.CourageCost,
+            CuriosityCost = definition.CuriosityCost,
+            ThinkingCost = definition.ThinkingCost,
+            CreativityCost = definition.CreativityCost,
+            SafetyCost = definition.SafetyCost,
+            PrerequisitesJson = definition.PrerequisitesJson,
+            RewardsJson = definition.RewardsJson,
+            IsUnlocked = definition.IsUnlocked,
+            PositionX = definition.PositionX,
+            PositionY = definition.PositionY,
+            Image = definition.Image,
+            Status = definition.Status,
+            CreatedByUserId = definition.PublishedByUserId,
+            ReviewedByUserId = null,
+            ReviewNotes = null,
+            Version = definition.Version,
+            ParentVersionId = null,
+            CreatedAt = definition.CreatedAt,
+            UpdatedAt = definition.UpdatedAt,
+            Translations = definition.Translations.Select(t => new HeroDefinitionTranslationDto
+            {
+                Id = t.Id,
+                LanguageCode = t.LanguageCode,
+                Name = t.Name,
+                Description = t.Description,
+                Story = t.Story,
+                AudioUrl = t.AudioUrl
+            }).ToList()
+        };
+    }
+
+    private static HeroDefinitionListItemDto MapDefinitionToListItem(HeroDefinitionDefinition definition, string? languageCode)
+    {
+        HeroDefinitionDefinitionTranslation? selectedTranslation = null;
+        if (!string.IsNullOrWhiteSpace(languageCode))
+        {
+            var normalizedLang = languageCode.ToLowerInvariant();
+            selectedTranslation = definition.Translations.FirstOrDefault(t => t.LanguageCode.ToLowerInvariant() == normalizedLang);
+        }
+        selectedTranslation ??= definition.Translations.FirstOrDefault();
+
+        var availableLanguages = definition.Translations.Select(t => t.LanguageCode.ToLowerInvariant()).ToList();
+
+        return new HeroDefinitionListItemDto
+        {
+            Id = definition.Id,
+            Name = selectedTranslation?.Name ?? definition.Id,
+            Image = definition.Image,
+            Status = definition.Status,
+            UpdatedAt = definition.UpdatedAt,
+            CreatedByUserId = definition.PublishedByUserId,
+            AvailableLanguages = availableLanguages
         };
     }
 }
