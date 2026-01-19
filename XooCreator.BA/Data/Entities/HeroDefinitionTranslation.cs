@@ -9,4 +9,5 @@ public class HeroDefinitionTranslation
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string Story { get; set; } = string.Empty;
+    public string? AudioUrl { get; set; }
 }

@@ -91,9 +91,14 @@ public class PublishStoryEpicEndpoint
                 return TypedResults.Forbid();
             }
 
-            if (craft.Status != "approved")
+            // Admin can publish from draft, changes_requested, or approved
+            if (!isAdmin && craft.Status != "approved")
             {
                 return TypedResults.BadRequest($"Epic is not approved (status: {craft.Status}). Only approved epics can be published.");
+            }
+            if (isAdmin && !(craft.Status == "approved" || craft.Status == "draft" || craft.Status == "changes_requested"))
+            {
+                return TypedResults.BadRequest($"Admin cannot publish epic in status '{craft.Status}'. Expected Draft, ChangesRequested, or Approved.");
             }
 
             // Use first available translation or ro-ro as fallback
@@ -113,6 +118,7 @@ public class PublishStoryEpicEndpoint
                 LangTag = langTag,
                 DraftVersion = craft.LastDraftVersion,
                 ForceFull = forceFull,
+                IsAdminPublish = isAdmin,
                 Status = EpicPublishJobStatus.Queued,
                 QueuedAtUtc = DateTime.UtcNow
             };

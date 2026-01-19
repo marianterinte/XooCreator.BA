@@ -68,8 +68,8 @@ public record StoryMarketplaceItemDto
     public string StoryType { get; init; } = string.Empty;
     public string Status { get; init; } = string.Empty;
     public List<string> AvailableLanguages { get; init; } = new(); // e.g., ["ro-ro", "en-us", "hu-hu"]
-    public bool IsPurchased { get; init; } = false;
-    public bool IsOwned { get; init; } = false;
+    // Note: IsPurchased and IsOwned removed from list DTO for 100% global cache.
+    // These properties remain in StoryDetailsDto (loaded per request when viewing story details).
     public int ReadersCount { get; init; }
     public int LikesCount { get; init; } // Total likes for this story
     public double AverageRating { get; init; }
@@ -113,6 +113,7 @@ public record SearchStoriesRequest
     public string SortOrder { get; init; } = "asc";
     public int Page { get; init; } = 1;
     public int PageSize { get; init; } = 20;
+    public string SearchType { get; init; } = "title"; // "title", "author"
 }
 
 public record GetUserPurchasedStoriesResponse
@@ -261,6 +262,7 @@ public record GetMarketplaceEpicsResponse
 public record SearchEpicsRequest
 {
     public string? SearchTerm { get; init; }
+    public string SearchType { get; init; } = "title"; // "title", "author"
     public string SortBy { get; init; } = "publishedAt"; // publishedAt, name, readers, rating
     public string SortOrder { get; init; } = "desc"; // asc, desc
     public int Page { get; init; } = 1;

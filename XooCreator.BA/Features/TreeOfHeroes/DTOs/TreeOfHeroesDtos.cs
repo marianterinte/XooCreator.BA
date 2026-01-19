@@ -7,7 +7,6 @@ public record HeroDefinitionDto
     public string Description { get; init; } = string.Empty;
     public string Story { get; init; } = string.Empty;
     public string Image { get; init; } = string.Empty;
-    public required string Type { get; init; }
     public int CourageCost { get; init; }
     public int CuriosityCost { get; init; }
     public int ThinkingCost { get; init; }

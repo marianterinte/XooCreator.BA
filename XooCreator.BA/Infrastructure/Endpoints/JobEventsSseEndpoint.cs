@@ -29,12 +29,14 @@ public sealed class JobEventsSseEndpoint
         JobTypes.EpicVersion,
         JobTypes.EpicPublish,
         JobTypes.HeroVersion,
-        JobTypes.RegionVersion
+        JobTypes.RegionVersion,
+        JobTypes.HeroPublish,
+        JobTypes.AnimalPublish
     };
 
     [Route("/api/jobs/{jobType}/{jobId}/events")]
     [Authorize]
-    public static async Task<Results<Ok, BadRequest<string>, UnauthorizedHttpResult, ForbidHttpResult, NotFound>> HandleGet(
+    public static async Task HandleGet(
         [FromRoute] string jobType,
         [FromRoute] Guid jobId,
         [FromServices] IJobEventsHub hub,
@@ -45,27 +47,32 @@ public sealed class JobEventsSseEndpoint
     {
         if (string.IsNullOrWhiteSpace(jobType) || !KnownJobTypes.Contains(jobType))
         {
-            return TypedResults.BadRequest($"Unknown jobType '{jobType}'.");
+            http.Response.StatusCode = StatusCodes.Status400BadRequest;
+            await http.Response.WriteAsync($"Unknown jobType '{jobType}'.", ct);
+            return;
         }
 
         var user = await auth0.GetCurrentUserAsync(ct);
         if (user == null)
         {
-            return TypedResults.Unauthorized();
+            http.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            return;
         }
 
         var isAdmin = auth0.HasRole(user, UserRole.Admin);
         var isCreator = auth0.HasRole(user, UserRole.Creator);
         if (!isAdmin && !isCreator)
         {
-            return TypedResults.Forbid();
+            http.Response.StatusCode = StatusCodes.Status403Forbidden;
+            return;
         }
 
         // Build an initial snapshot from DB so a late subscriber doesn't hang if the job is already finished.
         var snapshot = await TryBuildSnapshotAsync(jobType, jobId, db, user, auth0, ct);
         if (snapshot == null)
         {
-            return TypedResults.NotFound();
+            http.Response.StatusCode = StatusCodes.Status404NotFound;
+            return;
         }
 
         // SSE headers
@@ -79,7 +86,7 @@ public sealed class JobEventsSseEndpoint
 
         if (IsTerminalStatus(snapshot.Status))
         {
-            return TypedResults.Ok();
+            return;
         }
 
         await using var stream = hub.Subscribe(jobType, jobId);
@@ -103,14 +110,14 @@ public sealed class JobEventsSseEndpoint
                 var status = TryExtractStatus(json);
                 if (status != null && IsTerminalStatus(status))
                 {
-                    return TypedResults.Ok();
+                    return;
                 }
             }
 
             await Task.Delay(200, ct);
         }
 
-        return TypedResults.Ok();
+        return;
     }
 
     private static async Task WriteDataAsync(HttpContext http, string json, CancellationToken ct)
@@ -451,6 +458,54 @@ public sealed class JobEventsSseEndpoint
                     errorMessage = job.ErrorMessage,
                     dequeueCount = job.DequeueCount,
                     baseVersion = job.BaseVersion
+                };
+
+                return new Snapshot(payload.status?.ToString() ?? string.Empty, JsonSerializer.Serialize(payload, Json));
+            }
+            case JobTypes.HeroPublish:
+            {
+                var job = await db.HeroPublishJobs.AsNoTracking().FirstOrDefaultAsync(j => j.Id == jobId, ct);
+                if (job == null) return null;
+
+                if (!auth0.HasRole(user, UserRole.Admin) && job.OwnerUserId != user.Id)
+                {
+                    return null;
+                }
+
+                var payload = new
+                {
+                    jobId = job.Id,
+                    heroId = job.HeroId,
+                    status = job.Status,
+                    queuedAtUtc = job.QueuedAtUtc,
+                    startedAtUtc = job.StartedAtUtc,
+                    completedAtUtc = job.CompletedAtUtc,
+                    errorMessage = job.ErrorMessage,
+                    dequeueCount = job.DequeueCount
+                };
+
+                return new Snapshot(payload.status?.ToString() ?? string.Empty, JsonSerializer.Serialize(payload, Json));
+            }
+            case JobTypes.AnimalPublish:
+            {
+                var job = await db.AnimalPublishJobs.AsNoTracking().FirstOrDefaultAsync(j => j.Id == jobId, ct);
+                if (job == null) return null;
+
+                if (!auth0.HasRole(user, UserRole.Admin) && job.OwnerUserId != user.Id)
+                {
+                    return null;
+                }
+
+                var payload = new
+                {
+                    jobId = job.Id,
+                    animalId = job.AnimalId,
+                    status = job.Status,
+                    queuedAtUtc = job.QueuedAtUtc,
+                    startedAtUtc = job.StartedAtUtc,
+                    completedAtUtc = job.CompletedAtUtc,
+                    errorMessage = job.ErrorMessage,
+                    dequeueCount = job.DequeueCount
                 };
 
                 return new Snapshot(payload.status?.ToString() ?? string.Empty, JsonSerializer.Serialize(payload, Json));

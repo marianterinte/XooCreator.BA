@@ -170,7 +170,7 @@ public class TreeModelService : ITreeModelService
                 continue;
             }
 
-            var unlockConditions = JsonSerializer.Deserialize<UnlockConditions>(storyHero.UnlockConditionJson);
+            var unlockConditions = JsonSerializer.Deserialize<UnlockConditions>(storyHero.UnlockConditionsJson);
             if (unlockConditions?.Type == "story_completion" && unlockConditions.RequiredStories != null)
             {
                 var allRequiredStoriesCompleted = unlockConditions.RequiredStories.All(storyId => completedStoryIds.Contains(storyId));

@@ -7,6 +7,7 @@ using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Services;
 using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Data;
+using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Features.StoryEditor.Services;
 using XooCreator.BA.Features.StoryEditor.Services.Content;
 using Microsoft.Extensions.Logging;
@@ -100,14 +101,17 @@ public class SaveStoryEditEndpoint
         // Check if craft exists and verify ownership/status
         if (craft != null)
         {
-            // Only owner can edit
-            if (craft.OwnerUserId != user.Id)
+            // Only owner can edit (unless Admin)
+            if (craft.OwnerUserId != user.Id && !ep._auth0.HasRole(user, UserRole.Admin))
             {
                 ep._logger.LogWarning("Save forbidden: userId={UserId} storyId={StoryId} not owner", user.Id, finalStoryId);
                 return TypedResults.Forbid();
             }
 
-            // Disallow edits in SentForApproval/InReview/Approved/Published
+            // Disallow edits in SentForApproval/InReview/Approved/Published (Admin override optional, but keeping workflow strict for now unless critical)
+            // Actually, Admin might need to edit even in other states, but let's keep it safe. 
+            // If Admin acts as user, they should follow workflow. Admin specific override can be added if requested.
+            // For now, assume Admin follows same state rules for "Edit".
             var status = (craft.Status ?? "draft").ToLowerInvariant();
             if (status is "sent_for_approval" or "in_review" or "approved" or "published")
             {
@@ -117,7 +121,8 @@ public class SaveStoryEditEndpoint
         }
 
         // Save using the new structure
-        await ep._editorService.SaveDraftAsync(user.Id, finalStoryId, langTag, dto, ct);
+        var isAdmin = ep._auth0.HasRole(user, UserRole.Admin);
+        await ep._editorService.SaveDraftAsync(user.Id, finalStoryId, langTag, dto, isAdmin, ct);
         ep._logger.LogInformation("Save story draft: storyId={StoryId} lang={Lang}", finalStoryId, langTag);
 
         return TypedResults.Ok(new SaveResponse { StoryId = finalStoryId });

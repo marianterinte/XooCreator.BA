@@ -224,7 +224,7 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
         return path.StartsWith("images/", StringComparison.OrdinalIgnoreCase);
     }
 
-    public async Task PublishFromCraftAsync(StoryEpicCraft craft, string requestedByEmail, string langTag, bool forceFull, CancellationToken ct = default)
+    public async Task PublishFromCraftAsync(StoryEpicCraft craft, string requestedByEmail, string langTag, bool forceFull, bool isAdmin = false, CancellationToken ct = default)
     {
         // Load craft with all related data
         craft = await _context.StoryEpicCrafts
@@ -236,10 +236,14 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
             .AsSplitQuery()
             .FirstOrDefaultAsync(c => c.Id == craft.Id, ct) ?? craft;
 
-        // Validate craft status
-        if (craft.Status != "approved")
+        // Validate craft status - admin can publish from draft, changes_requested, or approved
+        if (!isAdmin && craft.Status != "approved")
         {
             throw new InvalidOperationException($"Epic craft must be approved before publishing (current status: {craft.Status})");
+        }
+        if (isAdmin && !(craft.Status == "approved" || craft.Status == "draft" || craft.Status == "changes_requested"))
+        {
+            throw new InvalidOperationException($"Admin cannot publish epic in status '{craft.Status}'. Expected Draft, ChangesRequested, or Approved.");
         }
 
         // Load or create StoryEpicDefinition

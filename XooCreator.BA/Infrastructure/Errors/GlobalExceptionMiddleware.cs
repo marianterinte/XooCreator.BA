@@ -97,6 +97,12 @@ public class GlobalExceptionMiddleware
         pd.Extensions["layer"] = layer;
         pd.Extensions["operation"] = operation;
 
+        if (context.Response.HasStarted)
+        {
+            _logger.LogWarning("Response already started; skipping error payload. TraceId={TraceId}", traceId);
+            return;
+        }
+
         context.Response.ContentType = "application/problem+json";
         context.Response.StatusCode = status;
         await context.Response.WriteAsJsonAsync(pd);

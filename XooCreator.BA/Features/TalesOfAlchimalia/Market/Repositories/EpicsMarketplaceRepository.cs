@@ -36,10 +36,23 @@ public class EpicsMarketplaceRepository
 
             IEnumerable<EpicMarketplaceBaseItem> q = baseItems;
 
+            // Search by title/translation titles OR author (case-insensitive)
             if (!string.IsNullOrWhiteSpace(request.SearchTerm))
             {
-                var search = request.SearchTerm.Trim();
-                q = q.Where(e => e.SearchTexts.Any(t => !string.IsNullOrWhiteSpace(t) && t.Contains(search, StringComparison.OrdinalIgnoreCase)));
+                var searchTerm = request.SearchTerm.Trim();
+                
+                if (string.Equals(request.SearchType, "author", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Search by Author Name
+                    q = q.Where(e => e.SearchAuthors.Any(a => 
+                        !string.IsNullOrWhiteSpace(a) &&
+                        a.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
+                }
+                else
+                {
+                    // Default: Search by Title/Description
+                    q = q.Where(e => e.SearchTexts.Any(t => !string.IsNullOrWhiteSpace(t) && t.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
+                }
             }
 
             var sortBy = (request.SortBy ?? "publishedAt").ToLowerInvariant();
@@ -167,7 +180,7 @@ public class EpicsMarketplaceRepository
                 Description = description,
                 CoverImageUrl = epic.CoverImageUrl,
                 CreatedBy = epic.OwnerUserId,
-                CreatedByName = epic.Owner?.Email ?? epic.Owner?.Name ?? "Unknown",
+                CreatedByName = epic.Owner?.Name ?? epic.Owner?.Email ?? "Unknown",
                 CreatedAt = epic.CreatedAt,
                 PublishedAtUtc = epic.PublishedAtUtc,
                 StoryCount = epic.StoryNodes.Count,

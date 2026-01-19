@@ -33,7 +33,7 @@ public interface IStoryRegionService
     Task ReviewAsync(Guid reviewerUserId, string regionId, bool approve, string? notes, CancellationToken ct = default);
     
     // Publish (synchronous - copies assets)
-    Task PublishAsync(Guid ownerUserId, string regionId, string ownerEmail, CancellationToken ct = default);
+    Task PublishAsync(Guid ownerUserId, string regionId, string ownerEmail, bool isAdmin = false, CancellationToken ct = default);
     
     // Retract from review
     Task RetractAsync(Guid ownerUserId, string regionId, CancellationToken ct = default);

@@ -26,6 +26,7 @@ public class TalesMarketEndpoint
         [FromRoute] string locale,
         [FromServices] TalesMarketEndpoint ep,
         [FromQuery] string? searchTerm = null,
+        [FromQuery] string searchType = "title",
         [FromQuery] string[]? regions = null,
         [FromQuery] string[]? ageRatings = null,
         [FromQuery] string[]? ageGroupIds = null,
@@ -46,6 +47,7 @@ public class TalesMarketEndpoint
         var request = new SearchStoriesRequest
         {
             SearchTerm = searchTerm,
+            SearchType = searchType,
             Regions = regions?.ToList() ?? new List<string>(),
             AgeRatings = ageRatings?.ToList() ?? new List<string>(),
             AgeGroupIds = ageGroupIds?.ToList() ?? new List<string>(),

@@ -37,6 +37,7 @@ public class GetMarketplaceEpicsEndpoint
         [FromRoute] string locale,
         [FromServices] GetMarketplaceEpicsEndpoint ep,
         [FromQuery] string? searchTerm = null,
+        [FromQuery] string searchType = "title",
         [FromQuery] string sortBy = "publishedAt",
         [FromQuery] string sortOrder = "desc",
         [FromQuery] int page = 1,
@@ -52,6 +53,7 @@ public class GetMarketplaceEpicsEndpoint
             var request = new SearchEpicsRequest
             {
                 SearchTerm = searchTerm,
+                SearchType = searchType,
                 SortBy = sortBy,
                 SortOrder = sortOrder,
                 Page = page,

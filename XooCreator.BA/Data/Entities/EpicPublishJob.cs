@@ -9,6 +9,7 @@ public class EpicPublishJob
     public string LangTag { get; set; } = "ro-ro";
     public int DraftVersion { get; set; }
     public bool ForceFull { get; set; }
+    public bool IsAdminPublish { get; set; } = false;
     public string Status { get; set; } = EpicPublishJobStatus.Queued;
     public int DequeueCount { get; set; }
     public DateTime QueuedAtUtc { get; set; } = DateTime.UtcNow;
