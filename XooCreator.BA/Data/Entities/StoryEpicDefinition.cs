@@ -1,5 +1,7 @@
 namespace XooCreator.BA.Data;
 
+using XooCreator.BA.Data.Entities;
+
 /// <summary>
 /// Represents a story epic definition (published version) in the system
 /// Similar to StoryDefinition but for epics
@@ -29,5 +31,7 @@ public class StoryEpicDefinition
     public ICollection<StoryEpicDefinitionStoryNode> StoryNodes { get; set; } = new List<StoryEpicDefinitionStoryNode>();
     public ICollection<StoryEpicDefinitionUnlockRule> UnlockRules { get; set; } = new List<StoryEpicDefinitionUnlockRule>();
     public ICollection<StoryEpicDefinitionTranslation> Translations { get; set; } = new List<StoryEpicDefinitionTranslation>();
+    public ICollection<StoryEpicDefinitionTopic> Topics { get; set; } = new List<StoryEpicDefinitionTopic>();
+    public ICollection<StoryEpicDefinitionAgeGroup> AgeGroups { get; set; } = new List<StoryEpicDefinitionAgeGroup>();
 }
 

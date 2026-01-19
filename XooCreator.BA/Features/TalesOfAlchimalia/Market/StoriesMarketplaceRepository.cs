@@ -119,13 +119,24 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
                 q = q.Where(s => s.AgeGroupIds.Any(id => selected.Contains(id)));
             }
 
-            // Search by title/translation titles (case-insensitive)
+            // Search by title/translation titles OR author (case-insensitive)
             if (!string.IsNullOrWhiteSpace(request.SearchTerm))
             {
                 var searchTerm = request.SearchTerm.Trim();
-                q = q.Where(s => s.SearchTitles.Any(t =>
-                    !string.IsNullOrWhiteSpace(t) &&
-                    t.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
+                
+                if (string.Equals(request.SearchType, "author", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Search by Author Name
+                    q = q.Where(s => !string.IsNullOrWhiteSpace(s.CreatedByName) && 
+                                     s.CreatedByName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+                }
+                else
+                {
+                    // Default: Search by Title
+                    q = q.Where(s => s.SearchTitles.Any(t =>
+                        !string.IsNullOrWhiteSpace(t) &&
+                        t.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
+                }
             }
 
             // Sorting (keep same keys)
