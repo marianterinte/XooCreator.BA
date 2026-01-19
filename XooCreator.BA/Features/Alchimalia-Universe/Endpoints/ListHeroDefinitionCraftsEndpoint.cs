@@ -41,7 +41,9 @@ public class ListHeroDefinitionCraftsEndpoint
         var user = await ep._auth0.GetCurrentUserAsync(ct);
         if (user == null) return TypedResults.Unauthorized();
 
-        if (!ep._auth0.HasRole(user, UserRole.Creator))
+        if (!ep._auth0.HasRole(user, UserRole.Creator) &&
+            !ep._auth0.HasRole(user, UserRole.Reviewer) &&
+            !ep._auth0.HasRole(user, UserRole.Admin))
         {
             ep._logger.LogWarning("ListHeroDefinitionCrafts forbidden: userId={UserId}", user?.Id);
             return TypedResults.Forbid();
