@@ -16,6 +16,8 @@ public class AnimalDefinitionTranslation
 
     [MaxLength(255)]
     public required string Label { get; set; } = string.Empty;
+
+    public string? Description { get; set; }
     public string? AudioUrl { get; set; }
 
     public AnimalDefinition AnimalDefinition { get; set; } = null!;

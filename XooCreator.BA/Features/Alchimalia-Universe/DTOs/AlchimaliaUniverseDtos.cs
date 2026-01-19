@@ -364,6 +364,7 @@ public record AnimalTranslationDto
     public Guid Id { get; init; }
     public required string LanguageCode { get; init; }
     public required string Label { get; init; }
+    public string? Description { get; init; }
     public string? AudioUrl { get; init; }
 }
 
@@ -379,6 +380,10 @@ public record AnimalListItemDto
     public DateTime? UpdatedAt { get; init; }
     public Guid? CreatedByUserId { get; init; }
     public List<string> AvailableLanguages { get; init; } = new(); // List of language codes that have translations
+    public Guid? AssignedReviewerUserId { get; init; }
+    public bool IsAssignedToCurrentUser { get; init; }
+    public bool IsOwnedByCurrentUser { get; init; }
+    public string? OwnerEmail { get; init; }
 }
 
 public record CreateAnimalRequest
@@ -391,6 +396,7 @@ public record CreateAnimalRequest
     public List<AnimalHybridPartDto> HybridParts { get; init; } = new();
     public required string LanguageCode { get; init; }
     public required string TranslatedLabel { get; init; }
+    public string? TranslatedDescription { get; init; }
 }
 
 public record UpdateAnimalRequest
@@ -453,6 +459,10 @@ public record AnimalCraftListItemDto
     public DateTime? UpdatedAt { get; init; }
     public Guid? CreatedByUserId { get; init; }
     public List<string> AvailableLanguages { get; init; } = new();
+    public Guid? AssignedReviewerUserId { get; init; }
+    public bool IsAssignedToCurrentUser { get; init; }
+    public bool IsOwnedByCurrentUser { get; init; }
+    public string? OwnerEmail { get; init; }
 }
 
 public record CreateAnimalCraftRequest
@@ -465,6 +475,7 @@ public record CreateAnimalCraftRequest
     public List<AnimalHybridPartDto> HybridParts { get; init; } = new();
     public required string LanguageCode { get; init; }
     public required string TranslatedLabel { get; init; }
+    public string? TranslatedDescription { get; init; }
 }
 
 public record UpdateAnimalCraftRequest

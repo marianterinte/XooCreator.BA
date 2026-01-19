@@ -49,13 +49,24 @@ public class AnimalCraftService : IAnimalCraftService
         return MapToDto(animal, languageCode);
     }
 
-    public async Task<ListAnimalCraftsResponse> ListAsync(string? status = null, Guid? regionId = null, bool? isHybrid = null, string? search = null, string? languageCode = null, CancellationToken ct = default)
+    public async Task<ListAnimalCraftsResponse> ListAsync(Guid currentUserId, string? status = null, Guid? regionId = null, bool? isHybrid = null, string? search = null, string? languageCode = null, CancellationToken ct = default)
     {
         var animals = await _repository.ListAsync(status, regionId, isHybrid, search, ct);
-        var totalCount = await _repository.CountAsync(status, regionId, ct);
 
         var normalizedLanguage = NormalizeLanguageCode(languageCode);
         var languageBase = GetLanguageBase(normalizedLanguage);
+
+        var ownerIds = animals
+            .Where(c => c.CreatedByUserId.HasValue)
+            .Select(c => c.CreatedByUserId!.Value)
+            .Distinct()
+            .ToList();
+
+        var ownerEmailMap = await _db.AlchimaliaUsers
+            .AsNoTracking()
+            .Where(u => ownerIds.Contains(u.Id))
+            .Select(u => new { u.Id, u.Email })
+            .ToDictionaryAsync(u => u.Id, u => u.Email ?? string.Empty, ct);
 
         var items = animals.Select(a =>
         {
@@ -71,6 +82,13 @@ public class AnimalCraftService : IAnimalCraftService
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
+            var ownerEmail = a.CreatedByUserId.HasValue && ownerEmailMap.TryGetValue(a.CreatedByUserId.Value, out var email)
+                ? email
+                : string.Empty;
+
+            var isOwnedByCurrentUser = a.CreatedByUserId.HasValue && a.CreatedByUserId.Value == currentUserId;
+            var isAssignedToCurrentUser = a.AssignedReviewerUserId.HasValue && a.AssignedReviewerUserId.Value == currentUserId;
+
             return new AnimalCraftListItemDto
             {
                 Id = a.Id,
@@ -83,14 +101,18 @@ public class AnimalCraftService : IAnimalCraftService
                 Status = a.Status,
                 UpdatedAt = a.UpdatedAt,
                 CreatedByUserId = a.CreatedByUserId,
-                AvailableLanguages = availableLanguages
+                AvailableLanguages = availableLanguages,
+                AssignedReviewerUserId = a.AssignedReviewerUserId,
+                IsAssignedToCurrentUser = isAssignedToCurrentUser,
+                IsOwnedByCurrentUser = isOwnedByCurrentUser,
+                OwnerEmail = ownerEmail
             };
         }).ToList();
 
         return new ListAnimalCraftsResponse
         {
             Animals = items,
-            TotalCount = totalCount
+            TotalCount = items.Count
         };
     }
 
@@ -127,6 +149,7 @@ public class AnimalCraftService : IAnimalCraftService
                     AnimalCraftId = Guid.Empty, // set after save
                     LanguageCode = NormalizeLanguageCode(request.LanguageCode),
                     Label = request.TranslatedLabel,
+                    Description = request.TranslatedDescription,
                     AudioUrl = null
                 }
             },
@@ -211,6 +234,7 @@ public class AnimalCraftService : IAnimalCraftService
                 AnimalCraftId = Guid.Empty, // set after save
                 LanguageCode = NormalizeLanguageCode(t.LanguageCode),
                 Label = t.Label,
+                Description = t.Description,
                 AudioUrl = t.AudioUrl
             }).ToList(),
             SupportedParts = definition.SupportedParts.Select(p => new AnimalCraftPartSupport
@@ -312,6 +336,7 @@ public class AnimalCraftService : IAnimalCraftService
                 if (existingTranslation != null)
                 {
                     existingTranslation.Label = translationDto.Label;
+                    existingTranslation.Description = translationDto.Description;
                     existingTranslation.AudioUrl = translationDto.AudioUrl;
                 }
                 else
@@ -322,6 +347,7 @@ public class AnimalCraftService : IAnimalCraftService
                         AnimalCraftId = animal.Id,
                         LanguageCode = normalizedLang,
                         Label = translationDto.Label,
+                        Description = translationDto.Description,
                         AudioUrl = translationDto.AudioUrl
                     };
                     animal.Translations.Add(newTranslation);
@@ -475,6 +501,7 @@ public class AnimalCraftService : IAnimalCraftService
                     AnimalDefinitionId = definitionId,
                     LanguageCode = t.LanguageCode,
                     Label = t.Label,
+                    Description = t.Description,
                     AudioUrl = t.AudioUrl
                 }).ToList(),
                 SupportedParts = animal.SupportedParts.Select(p => new AnimalDefinitionPartSupport
@@ -515,6 +542,7 @@ public class AnimalCraftService : IAnimalCraftService
                     AnimalDefinitionId = definitionId,
                     LanguageCode = t.LanguageCode,
                     Label = t.Label,
+                    Description = t.Description,
                     AudioUrl = t.AudioUrl
                 };
                 definition.Translations.Add(newTranslation);
@@ -568,7 +596,12 @@ public class AnimalCraftService : IAnimalCraftService
             try 
             {
                 // ... (keep existing asset copy logic) ...
-                var assets = AlchimaliaUniverseAssetPathMapper.CollectFromAnimalCraft(animal);
+                // Copy only draft assets. If the craft references already-published assets (images/... or full URL),
+                // there is nothing to copy from draft and forcing a new published URL would break the image.
+                var assets = AlchimaliaUniverseAssetPathMapper.CollectFromAnimalCraft(animal)
+                    .Where(a => !string.IsNullOrWhiteSpace(a.Filename) &&
+                                a.Filename.StartsWith("draft/", StringComparison.OrdinalIgnoreCase))
+                    .ToList();
                 await _assetCopyService.CopyDraftToPublishedAsync(
                     assets,
                     creatorEmail,
@@ -579,10 +612,40 @@ public class AnimalCraftService : IAnimalCraftService
                 // Update definition with published URLs
                 if (!string.IsNullOrWhiteSpace(animal.Src))
                 {
-                    var filename = Path.GetFileName(animal.Src);
-                    var assetInfo = new AlchimaliaUniverseAssetPathMapper.AssetInfo(filename, AlchimaliaUniverseAssetPathMapper.AssetType.Image, null);
-                    var pubPath = AlchimaliaUniverseAssetPathMapper.BuildPublishedPath(assetInfo, creatorEmail, animal.Id.ToString(), AlchimaliaUniverseAssetPathMapper.EntityType.Animal);
-                    definition.Src = _assetCopyService.GetPublishedUrl(pubPath);
+                    // Mirror Hero publish behavior:
+                    // - if craft src is a draft path, publish it and point definition to the published URL
+                    // - if craft src is already published (images/ or full URL), keep it / keep existing definition src
+                    if (animal.Src.StartsWith("draft/", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var filename = Path.GetFileName(animal.Src);
+                        var assetInfo = new AlchimaliaUniverseAssetPathMapper.AssetInfo(filename, AlchimaliaUniverseAssetPathMapper.AssetType.Image, null);
+                        var pubPath = AlchimaliaUniverseAssetPathMapper.BuildPublishedPath(assetInfo, creatorEmail, animal.Id.ToString(), AlchimaliaUniverseAssetPathMapper.EntityType.Animal);
+                        definition.Src = _assetCopyService.GetPublishedUrl(pubPath);
+                    }
+                    else if (definition != null && !string.IsNullOrWhiteSpace(definition.Src))
+                    {
+                        // If image wasn't changed (still published), keep the old published path.
+                        // (Prevents generating a URL to a blob that doesn't exist.)
+                        definition.Src = definition.Src;
+                    }
+                    else if (Uri.TryCreate(animal.Src, UriKind.Absolute, out _))
+                    {
+                        // Already a full URL
+                        definition.Src = animal.Src;
+                    }
+                    else if (animal.Src.StartsWith("images/", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Already a published relative path
+                        definition.Src = animal.Src;
+                    }
+                    else
+                    {
+                        // Fallback: treat as filename or legacy path
+                        var filename = Path.GetFileName(animal.Src);
+                        var assetInfo = new AlchimaliaUniverseAssetPathMapper.AssetInfo(filename, AlchimaliaUniverseAssetPathMapper.AssetType.Image, null);
+                        var pubPath = AlchimaliaUniverseAssetPathMapper.BuildPublishedPath(assetInfo, creatorEmail, animal.Id.ToString(), AlchimaliaUniverseAssetPathMapper.EntityType.Animal);
+                        definition.Src = _assetCopyService.GetPublishedUrl(pubPath);
+                    }
                 }
 
                 foreach (var t in animal.Translations)
@@ -760,6 +823,7 @@ public class AnimalCraftService : IAnimalCraftService
                 Id = t.Id,
                 LanguageCode = t.LanguageCode,
                 Label = t.Label,
+                Description = t.Description,
                 AudioUrl = t.AudioUrl
             }).ToList()
         };

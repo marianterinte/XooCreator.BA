@@ -41,13 +41,15 @@ public class ListAnimalCraftsEndpoint
         var user = await ep._auth0.GetCurrentUserAsync(ct);
         if (user == null) return TypedResults.Unauthorized();
 
-        if (!ep._auth0.HasRole(user, UserRole.Creator))
+        if (!ep._auth0.HasRole(user, UserRole.Creator) &&
+            !ep._auth0.HasRole(user, UserRole.Reviewer) &&
+            !ep._auth0.HasRole(user, UserRole.Admin))
         {
             ep._logger.LogWarning("ListAnimalCrafts forbidden: userId={UserId}", user?.Id);
             return TypedResults.Forbid();
         }
 
-        var response = await ep._service.ListAsync(status, regionId, isHybrid, search, language, ct);
+        var response = await ep._service.ListAsync(user.Id, status, regionId, isHybrid, search, language, ct);
         return TypedResults.Ok(response);
     }
 }

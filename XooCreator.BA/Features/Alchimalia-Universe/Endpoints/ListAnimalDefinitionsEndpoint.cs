@@ -80,6 +80,18 @@ public class ListAnimalDefinitionsEndpoint
             .OrderByDescending(x => x.UpdatedAt)
             .ToListAsync(ct);
 
+        var ownerIds = definitions
+            .Where(d => d.PublishedByUserId.HasValue)
+            .Select(d => d.PublishedByUserId!.Value)
+            .Distinct()
+            .ToList();
+
+        var ownerEmailMap = await ep._db.AlchimaliaUsers
+            .AsNoTracking()
+            .Where(u => ownerIds.Contains(u.Id))
+            .Select(u => new { u.Id, u.Email })
+            .ToDictionaryAsync(u => u.Id, u => u.Email ?? string.Empty, ct);
+
         var items = definitions.Select(d =>
         {
             // pick translation by requested language, fallback first
@@ -91,6 +103,12 @@ public class ListAnimalDefinitionsEndpoint
                 .Where(x => !string.IsNullOrWhiteSpace(x))
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
+
+            var ownerEmail = d.PublishedByUserId.HasValue && ownerEmailMap.TryGetValue(d.PublishedByUserId.Value, out var email)
+                ? email
+                : string.Empty;
+
+            var isOwnedByCurrentUser = d.PublishedByUserId.HasValue && d.PublishedByUserId.Value == user.Id;
 
             return new AnimalCraftListItemDto
             {
@@ -104,7 +122,11 @@ public class ListAnimalDefinitionsEndpoint
                 Status = d.Status,
                 UpdatedAt = d.UpdatedAt,
                 CreatedByUserId = d.PublishedByUserId,
-                AvailableLanguages = availableLanguages
+                AvailableLanguages = availableLanguages,
+                AssignedReviewerUserId = null,
+                IsAssignedToCurrentUser = false,
+                IsOwnedByCurrentUser = isOwnedByCurrentUser,
+                OwnerEmail = ownerEmail
             };
         }).ToList();
 
