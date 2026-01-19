@@ -463,14 +463,16 @@ public class AnimalCraftService : IAnimalCraftService
         _logger.LogInformation("AnimalCraft {AnimalId} reviewed by {ReviewerId}: {Decision}", animalId, reviewerId, request.Approve ? "Approved" : "ChangesRequested");
     }
 
-    public async Task PublishAsync(Guid publisherId, Guid animalId, CancellationToken ct = default)
+    public async Task PublishAsync(Guid publisherId, Guid animalId, bool allowAdminOverride = false, CancellationToken ct = default)
     {
         var animal = await _repository.GetWithTranslationsAsync(animalId, ct);
         if (animal == null)
             throw new KeyNotFoundException($"AnimalCraft with Id '{animalId}' not found");
 
         var currentStatus = AlchimaliaUniverseStatusExtensions.FromDb(animal.Status);
-        if (currentStatus != AlchimaliaUniverseStatus.Approved && currentStatus != AlchimaliaUniverseStatus.Published)
+        
+        // Relax status check if admin override is allowed
+        if (currentStatus != AlchimaliaUniverseStatus.Approved && currentStatus != AlchimaliaUniverseStatus.Published && !allowAdminOverride)
             throw new InvalidOperationException($"Cannot publish AnimalCraft in status '{currentStatus}'. Must be Approved or Published.");
 
         var definitionId = animal.PublishedDefinitionId ?? animal.Id;

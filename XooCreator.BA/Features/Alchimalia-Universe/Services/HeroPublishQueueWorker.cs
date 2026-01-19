@@ -121,8 +121,17 @@ public class HeroPublishQueueWorker : BackgroundService
                     {
                         _logger.LogInformation("Processing HeroPublishJob: jobId={JobId} heroId={HeroId}", job.Id, job.HeroId);
 
+                        // Check if the requesting user is an admin
+                        var requestingUser = await db.AlchimaliaUsers
+                            .AsNoTracking()
+                            .FirstOrDefaultAsync(u => u.Email == job.RequestedByEmail, stoppingToken);
+
+                        bool isAdmin = requestingUser != null && 
+                                       (requestingUser.Roles.Contains(XooCreator.BA.Data.Enums.UserRole.Admin) || 
+                                        requestingUser.Role == XooCreator.BA.Data.Enums.UserRole.Admin);
+
                         // The service now handles publishing AND deleting the draft
-                        await service.PublishAsync(job.OwnerUserId, job.HeroId, stoppingToken);
+                        await service.PublishAsync(job.OwnerUserId, job.HeroId, isAdmin, stoppingToken);
 
                         job.Status = HeroPublishJobStatus.Completed;
                         job.CompletedAtUtc = DateTime.UtcNow;

@@ -13,6 +13,6 @@ public interface IHeroDefinitionCraftService
     Task ReviewAsync(Guid reviewerId, string heroId, ReviewHeroDefinitionCraftRequest request, CancellationToken ct = default);
     Task ClaimAsync(Guid reviewerId, string heroId, CancellationToken ct = default);
     Task RetractAsync(Guid userId, string heroId, CancellationToken ct = default);
-    Task PublishAsync(Guid publisherId, string heroId, CancellationToken ct = default);
+    Task PublishAsync(Guid publisherId, string heroId, bool allowAdminOverride = false, CancellationToken ct = default);
     Task DeleteAsync(Guid userId, string heroId, CancellationToken ct = default);
 }

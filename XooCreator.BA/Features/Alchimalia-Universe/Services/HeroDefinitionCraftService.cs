@@ -489,18 +489,29 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
         _logger.LogInformation("HeroDefinitionCraft {HeroId} reviewed by {ReviewerId}: {Decision}", heroId, reviewerId, request.Approve ? "Approved" : "ChangesRequested");
     }
 
-    public async Task PublishAsync(Guid publisherId, string heroId, CancellationToken ct = default)
+    public async Task PublishAsync(Guid publisherId, string heroId, bool allowAdminOverride = false, CancellationToken ct = default)
     {
         var hero = await _repository.GetAsync(heroId, ct);
         if (hero == null)
             throw new KeyNotFoundException($"HeroDefinitionCraft with Id '{heroId}' not found");
 
-        if (hero.CreatedByUserId != publisherId)
+        if (hero.CreatedByUserId != publisherId && !allowAdminOverride)
             throw new UnauthorizedAccessException($"User does not own hero '{heroId}'");
 
         var currentStatus = AlchimaliaUniverseStatusExtensions.FromDb(hero.Status);
-        if (currentStatus != AlchimaliaUniverseStatus.Approved)
+        
+        // Relax status check if admin override is allowed
+        if (currentStatus != AlchimaliaUniverseStatus.Approved && !allowAdminOverride)
+        {
             throw new InvalidOperationException($"Cannot publish HeroDefinitionCraft in status '{currentStatus}'. Must be Approved.");
+        }
+        else if (currentStatus == AlchimaliaUniverseStatus.Published)
+        {
+            // Even admins shouldn't publish what's already published to avoid duplicates/confusion, 
+            // though tecnically harmless if logic handles it. Let's prevent it or ensure idempotency.
+            // Existing logic creates a new version if definition exists.
+            // For now, let's allow it if it falls through, but the check above was preventing non-approved.
+        }
 
         // Load craft with translations (exactly like story heroes)
         hero = await _db.HeroDefinitionCrafts

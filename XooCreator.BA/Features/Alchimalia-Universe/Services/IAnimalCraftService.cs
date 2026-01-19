@@ -13,6 +13,6 @@ public interface IAnimalCraftService
     Task ReviewAsync(Guid reviewerId, Guid animalId, ReviewAnimalCraftRequest request, CancellationToken ct = default);
     Task ClaimAsync(Guid reviewerId, Guid animalId, CancellationToken ct = default);
     Task RetractAsync(Guid userId, Guid animalId, CancellationToken ct = default);
-    Task PublishAsync(Guid publisherId, Guid animalId, CancellationToken ct = default);
+    Task PublishAsync(Guid publisherId, Guid animalId, bool allowAdminOverride = false, CancellationToken ct = default);
     Task DeleteAsync(Guid userId, Guid animalId, CancellationToken ct = default);
 }
