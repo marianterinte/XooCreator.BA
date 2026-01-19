@@ -262,6 +262,7 @@ public record GetMarketplaceEpicsResponse
 public record SearchEpicsRequest
 {
     public string? SearchTerm { get; init; }
+    public string SearchType { get; init; } = "title"; // "title", "author"
     public string SortBy { get; init; } = "publishedAt"; // publishedAt, name, readers, rating
     public string SortOrder { get; init; } = "desc"; // asc, desc
     public int Page { get; init; } = 1;

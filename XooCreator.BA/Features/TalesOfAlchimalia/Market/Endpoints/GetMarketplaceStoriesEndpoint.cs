@@ -60,6 +60,8 @@ public class GetMarketplaceStoriesEndpoint
             var userId = await ep._userContext.GetUserIdAsync();
             if (userId == null) throw new UnauthorizedAccessException("User not found");
 
+            ep._logger?.LogInformation("Marketplace Request: searchType={SearchType}, searchTerm={SearchTerm}", searchType, searchTerm);
+
             var request = new SearchStoriesRequest
             {
                 SearchTerm = searchTerm,

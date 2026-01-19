@@ -168,6 +168,7 @@ public sealed class MarketplaceCatalogCache : IMarketplaceCatalogCache, IMarketp
             .Include(s => s.Translations)
             .Include(s => s.Topics).ThenInclude(t => t.StoryTopic)
             .Include(s => s.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
+            .Include(s => s.ClassicAuthor)
             .Where(s => s.IsActive && s.Status == StoryStatus.Published && !s.IsPartOfEpic)
             .AsSplitQuery()
             .ToListAsync(ct);
@@ -230,6 +231,13 @@ public sealed class MarketplaceCatalogCache : IMarketplaceCatalogCache, IMarketp
                 .Select(id => id!)
                 .ToList() ?? new List<string>();
 
+            var searchAuthors = new List<string>();
+            if (!string.IsNullOrWhiteSpace(authorName)) searchAuthors.Add(authorName!);
+            if (!string.IsNullOrWhiteSpace(def.AuthorName)) searchAuthors.Add(def.AuthorName!);
+            if (!string.IsNullOrWhiteSpace(def.ClassicAuthor?.Name)) searchAuthors.Add(def.ClassicAuthor.Name!);
+            // Deduplicate
+            searchAuthors = searchAuthors.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+
             result.Add(new StoryMarketplaceBaseItem
             {
                 DefinitionId = def.Id,
@@ -238,7 +246,8 @@ public sealed class MarketplaceCatalogCache : IMarketplaceCatalogCache, IMarketp
                 DefaultTitle = def.Title,
                 CoverImageUrl = def.CoverImageUrl,
                 CreatedBy = def.CreatedBy,
-                CreatedByName = authorName,
+                CreatedByName = !string.IsNullOrWhiteSpace(def.AuthorName) ? def.AuthorName : 
+                               (!string.IsNullOrWhiteSpace(def.ClassicAuthor?.Name) ? def.ClassicAuthor.Name : authorName),
                 Summary = summary,
                 PriceInCredits = def.PriceInCredits,
                 SortOrder = def.SortOrder,
@@ -251,6 +260,7 @@ public sealed class MarketplaceCatalogCache : IMarketplaceCatalogCache, IMarketp
                 TopicIds = topicIds,
                 AgeGroupIds = ageGroupIds,
                 SearchTitles = searchTitles,
+                SearchAuthors = searchAuthors,
                 AgeRating = DetermineAgeRating(def.StoryId),
                 Characters = ExtractCharactersFromStoryId(def.StoryId)
             });
@@ -335,6 +345,12 @@ public sealed class MarketplaceCatalogCache : IMarketplaceCatalogCache, IMarketp
                 }
             }
 
+            // Build search authors list from owner name/email
+            var searchAuthors = new List<string>();
+            var authorName = epic.Owner?.Name ?? epic.Owner?.Email;
+            if (!string.IsNullOrWhiteSpace(authorName)) searchAuthors.Add(authorName!);
+            searchAuthors = searchAuthors.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+
             result.Add(new EpicMarketplaceBaseItem
             {
                 EpicId = epic.Id,
@@ -347,7 +363,8 @@ public sealed class MarketplaceCatalogCache : IMarketplaceCatalogCache, IMarketp
                 PublishedAtUtc = epic.PublishedAtUtc,
                 StoryCount = epic.StoryNodes?.Count ?? 0,
                 RegionCount = epic.Regions?.Count ?? 0,
-                SearchTexts = searchTexts
+                SearchTexts = searchTexts,
+                SearchAuthors = searchAuthors
             });
         }
 

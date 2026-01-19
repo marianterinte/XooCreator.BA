@@ -33,7 +33,7 @@ public interface IEpicHeroService
     Task ReviewAsync(Guid reviewerUserId, string heroId, bool approve, string? notes, CancellationToken ct = default);
     
     // Publish (synchronous - copies assets)
-    Task PublishAsync(Guid ownerUserId, string heroId, string ownerEmail, CancellationToken ct = default);
+    Task PublishAsync(Guid ownerUserId, string heroId, string ownerEmail, bool isAdmin = false, CancellationToken ct = default);
     
     // Retract from review
     Task RetractAsync(Guid ownerUserId, string heroId, CancellationToken ct = default);

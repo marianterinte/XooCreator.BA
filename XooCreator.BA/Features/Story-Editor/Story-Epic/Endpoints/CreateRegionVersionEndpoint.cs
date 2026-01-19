@@ -75,12 +75,12 @@ public class CreateRegionVersionEndpoint
         var existingDraftResult = await ep.CheckExistingDraftAsync(regionId, ct);
         if (existingDraftResult != null) return existingDraftResult;
 
-        // Create version job
+        // Create version job - preserve original author
         var job = new RegionVersionJob
         {
             Id = Guid.NewGuid(),
             RegionId = regionId,
-            OwnerUserId = currentUser.Id,
+            OwnerUserId = definition!.OwnerUserId, // Preserve original author
             RequestedByEmail = currentUser.Email ?? string.Empty,
             BaseVersion = definition!.Version,
             Status = RegionVersionJobStatus.Queued,

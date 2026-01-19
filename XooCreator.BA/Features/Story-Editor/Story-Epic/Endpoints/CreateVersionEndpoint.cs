@@ -89,6 +89,15 @@ public class CreateVersionEndpoint
                 return TypedResults.BadRequest($"Epic is not published (status: {definition.Status})");
             }
 
+            // Check ownership (unless admin)
+            var isAdmin = ep._auth0.HasRole(user, UserRole.Admin);
+            if (!isAdmin && definition.OwnerUserId != user.Id)
+            {
+                ep._logger.LogWarning("Create version unauthorized: userId={UserId} epicId={EpicId} ownerId={OwnerId}", 
+                    user.Id, epicId, definition.OwnerUserId);
+                return TypedResults.Forbid();
+            }
+
             // Check if draft already exists
             var existingCraft = await ep._db.StoryEpicCrafts.FirstOrDefaultAsync(c => c.Id == epicId, ct);
             if (existingCraft != null && existingCraft.Status != "published")
@@ -96,12 +105,12 @@ public class CreateVersionEndpoint
                 return TypedResults.Conflict("A draft already exists for this epic. Please edit or publish it first.");
             }
 
-            // Create version job
+            // Create version job - preserve original author
             var job = new EpicVersionJob
             {
                 Id = Guid.NewGuid(),
                 EpicId = epicId,
-                OwnerUserId = user.Id,
+                OwnerUserId = definition.OwnerUserId, // Preserve original author
                 RequestedByEmail = user.Email ?? string.Empty,
                 BaseVersion = definition.Version,
                 Status = EpicVersionJobStatus.Queued,

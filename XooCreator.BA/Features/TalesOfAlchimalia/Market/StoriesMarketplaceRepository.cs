@@ -120,15 +120,17 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             }
 
             // Search by title/translation titles OR author (case-insensitive)
+            // Search by title/translation titles OR author (case-insensitive)
             if (!string.IsNullOrWhiteSpace(request.SearchTerm))
             {
                 var searchTerm = request.SearchTerm.Trim();
                 
                 if (string.Equals(request.SearchType, "author", StringComparison.OrdinalIgnoreCase))
                 {
-                    // Search by Author Name
-                    q = q.Where(s => !string.IsNullOrWhiteSpace(s.CreatedByName) && 
-                                     s.CreatedByName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+                    // Search by Author Name (checks System User, Manual Author, and Classic Author)
+                    q = q.Where(s => s.SearchAuthors.Any(a => 
+                        !string.IsNullOrWhiteSpace(a) &&
+                        a.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
                 }
                 else
                 {
