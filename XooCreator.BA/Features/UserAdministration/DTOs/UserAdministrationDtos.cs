@@ -10,6 +10,8 @@ public class UserDto
     public string Email { get; set; } = string.Empty;
     public UserRole Role { get; set; }  // Kept for backward compatibility
     public List<UserRole> Roles { get; set; } = new();  // Multiple roles support
+    public string? LastLoginDateUtc { get; set; }  // ISO 8601 format
+    public string? CreatedAtUtc { get; set; }  // ISO 8601 format
 }
 
 public class GetAllUsersResponse
