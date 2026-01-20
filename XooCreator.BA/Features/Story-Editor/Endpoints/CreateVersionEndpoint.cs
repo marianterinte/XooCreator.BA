@@ -85,7 +85,7 @@ public class CreateVersionEndpoint
         {
             Id = Guid.NewGuid(),
             StoryId = storyId,
-            OwnerUserId = currentUser.Id,
+            OwnerUserId = definition!.CreatedBy.GetValueOrDefault(), // Ensure the new version belongs to the original creator
             RequestedByEmail = currentUser.Email ?? string.Empty,
             BaseVersion = definition!.Version,
             Status = StoryVersionJobStatus.Queued,

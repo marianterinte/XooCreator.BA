@@ -1,5 +1,7 @@
 namespace XooCreator.BA.Data;
 
+using XooCreator.BA.Data.Entities;
+
 /// <summary>
 /// Represents a story epic craft (draft/working copy) in the editor
 /// Similar to StoryCraft but for epics
@@ -37,5 +39,7 @@ public class StoryEpicCraft
     public ICollection<StoryEpicCraftUnlockRule> UnlockRules { get; set; } = new List<StoryEpicCraftUnlockRule>();
     public ICollection<StoryEpicCraftTranslation> Translations { get; set; } = new List<StoryEpicCraftTranslation>();
     public ICollection<StoryEpicCraftHeroReference> HeroReferences { get; set; } = new List<StoryEpicCraftHeroReference>();
+    public ICollection<StoryEpicCraftTopic> Topics { get; set; } = new List<StoryEpicCraftTopic>();
+    public ICollection<StoryEpicCraftAgeGroup> AgeGroups { get; set; } = new List<StoryEpicCraftAgeGroup>();
 }
 

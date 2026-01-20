@@ -25,6 +25,7 @@ public sealed record StoryMarketplaceBaseItem
     public List<string> TopicIds { get; init; } = new();
     public List<string> AgeGroupIds { get; init; } = new();
     public List<string> SearchTitles { get; init; } = new();
+    public List<string> SearchAuthors { get; init; } = new();
     public string AgeRating { get; init; } = string.Empty;
     public List<string> Characters { get; init; } = new();
 }
@@ -44,6 +45,7 @@ public sealed record EpicMarketplaceBaseItem
     public int StoryCount { get; init; }
     public int RegionCount { get; init; }
     public List<string> SearchTexts { get; init; } = new();
+    public List<string> SearchAuthors { get; init; } = new();
 }
 
 

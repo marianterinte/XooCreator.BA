@@ -2,7 +2,6 @@ using XooCreator.BA.Features.Stories.DTOs;
 using XooCreator.BA.Features.Stories.Repositories;
 using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Features.StoryEditor.Services.Content;
-using System.Text.Json;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Enums;
 
@@ -233,8 +232,8 @@ public class StoriesService : IStoriesService
             ?? story.Translations.FirstOrDefault(t => t.LanguageCode == "ro-ro")
             ?? story.Translations.FirstOrDefault();
 
-        // Load UnlockedStoryHeroes from published JSON (if available)
-        var unlockedHeroesFromJson = GetUnlockedHeroesFromPublishedJson(story.StoryId);
+        // Load UnlockedStoryHeroes from published definition (DB)
+        var unlockedHeroesFromJson = story.UnlockedHeroes?.Select(h => h.HeroId).ToList() ?? new List<string>();
 
         return new EditableStoryDto
         {
@@ -310,51 +309,7 @@ public class StoriesService : IStoriesService
         };
     }
 
-    private static List<string> GetUnlockedHeroesFromPublishedJson(string storyId)
-    {
-        try
-        {
-            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
-            var candidates = new[]
-            {
-                Path.Combine(baseDir, "Data", "SeedData", "en-us", "Stories", $"{storyId}.json"),
-                Path.Combine(baseDir, "Data", "SeedData", "ro-ro", "Stories", $"{storyId}.json"),
-                Path.Combine(baseDir, "Data", "SeedData", "hu-hu", "Stories", $"{storyId}.json"),
-                Path.Combine(baseDir, "Data", "SeedData", "Stories", "seed@alchimalia.com", "i18n", "en-us", $"{storyId}.json"),
-                Path.Combine(baseDir, "Data", "SeedData", "Stories", "seed@alchimalia.com", "i18n", "ro-ro", $"{storyId}.json"),
-                Path.Combine(baseDir, "Data", "SeedData", "Stories", "seed@alchimalia.com", "i18n", "hu-hu", $"{storyId}.json"),
-                Path.Combine(baseDir, "Data", "SeedData", "Stories", "seed@alchimalia.com", "independent", "i18n", "en-us", $"{storyId}.json"),
-                Path.Combine(baseDir, "Data", "SeedData", "Stories", "seed@alchimalia.com", "independent", "i18n", "ro-ro", $"{storyId}.json"),
-                Path.Combine(baseDir, "Data", "SeedData", "Stories", "seed@alchimalia.com", "independent", "i18n", "hu-hu", $"{storyId}.json")
-            };
-
-            foreach (var filePath in candidates)
-            {
-                if (File.Exists(filePath))
-                {
-                    var json = File.ReadAllText(filePath);
-                    var storyData = JsonSerializer.Deserialize<StoryJsonProbe>(json, new JsonSerializerOptions
-                    {
-                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                        PropertyNameCaseInsensitive = true
-                    });
-
-                    return storyData?.UnlockedStoryHeroes ?? new List<string>();
-                }
-            }
-        }
-        catch
-        {
-            // Ignore errors, return empty list
-        }
-
-        return new List<string>();
-    }
-
-    private sealed class StoryJsonProbe
-    {
-        public List<string> UnlockedStoryHeroes { get; set; } = new();
-    }
+    // JSON-based unlocked heroes removed (DB is source of truth).
 
 }
 

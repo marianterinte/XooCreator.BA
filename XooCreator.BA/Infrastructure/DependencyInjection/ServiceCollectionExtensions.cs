@@ -23,6 +23,8 @@ using XooCreator.BA.Features.TalesOfAlchimalia.Market.Caching;
 using XooCreator.BA.Features.Payment.Services;
 using XooCreator.BA.Features.StoryFeedback.Repositories;
 using XooCreator.BA.Features.StoryFeedback.Services;
+using XooCreator.BA.Features.AlchimaliaUniverse.Repositories;
+using XooCreator.BA.Features.AlchimaliaUniverse.Services;
 using XooCreator.BA.Infrastructure.Services.Images;
 using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Data;
@@ -54,6 +56,8 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IStoryExportQueue, StoryExportQueue>();
         services.AddSingleton<IStoryDocumentExportQueue, StoryDocumentExportQueue>();
         services.AddSingleton<IEpicAggregatesQueue, EpicAggregatesQueue>();
+        services.AddSingleton<IHeroPublishQueue, HeroPublishQueue>();
+        services.AddSingleton<IAnimalPublishQueue, AnimalPublishQueue>();
         
         return services;
     }
@@ -80,7 +84,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISeedDiscoveryService, SeedDiscoveryService>();
         services.AddScoped<IBestiaryFileUpdater, BestiaryFileUpdater>();
         services.AddScoped<IHeroDefinitionSeedService, HeroDefinitionSeedService>();
-        services.AddScoped<IHeroTreeProvider, HeroTreeProvider>();
         services.AddScoped<IStoryTopicsSeedService, StoryTopicsSeedService>();
         
         return services;
@@ -251,6 +254,38 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
+    /// Registers Alchimalia Universe editor services
+    /// </summary>
+    public static IServiceCollection AddAlchimaliaUniverseServices(this IServiceCollection services)
+    {
+        // Repositories
+        services.AddScoped<IHeroDefinitionRepository, HeroDefinitionRepository>();
+        services.AddScoped<IAnimalRepository, AnimalRepository>();
+        services.AddScoped<IStoryHeroRepository, StoryHeroRepository>();
+        services.AddScoped<IHeroDefinitionCraftRepository, HeroDefinitionCraftRepository>();
+        services.AddScoped<IAnimalCraftRepository, AnimalCraftRepository>();
+        services.AddScoped<ITreeOfHeroesConfigCraftRepository, TreeOfHeroesConfigCraftRepository>();
+        
+        // Services
+        services.AddScoped<IHeroDefinitionService, HeroDefinitionService>();
+        services.AddScoped<IAnimalService, AnimalService>();
+        services.AddScoped<IStoryHeroService, StoryHeroService>();
+        services.AddScoped<IHeroDefinitionCraftService, HeroDefinitionCraftService>();
+        services.AddScoped<IAnimalCraftService, AnimalCraftService>();
+        services.AddScoped<ITreeOfHeroesConfigCraftService, TreeOfHeroesConfigCraftService>();
+        services.AddScoped<IHeroDefinitionPublishChangeLogService, HeroDefinitionPublishChangeLogService>();
+        services.AddScoped<IAnimalPublishChangeLogService, AnimalPublishChangeLogService>();
+        
+        // Queues
+        services.AddSingleton<IHeroDefinitionVersionQueue, HeroDefinitionVersionQueue>();
+        services.AddSingleton<IAnimalVersionQueue, AnimalVersionQueue>();
+
+        services.AddScoped<IAlchimaliaUniverseAssetCopyService, AlchimaliaUniverseAssetCopyService>();
+        
+        return services;
+    }
+
+    /// <summary>
     /// Registers all application services
     /// </summary>
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
@@ -264,6 +299,7 @@ public static class ServiceCollectionExtensions
         services.AddMarketplaceServices();
         services.AddPaymentServices();
         services.AddFeedbackServices();
+        services.AddAlchimaliaUniverseServices();
         
         return services;
     }

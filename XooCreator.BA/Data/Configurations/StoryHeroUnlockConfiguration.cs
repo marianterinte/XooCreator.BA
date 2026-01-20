@@ -12,6 +12,6 @@ public class StoryHeroUnlockConfiguration : IEntityTypeConfiguration<StoryHeroUn
         builder.Property(x => x.Id).ValueGeneratedOnAdd();
         builder.Property(x => x.StoryId).HasMaxLength(100).IsRequired();
         builder.HasIndex(x => new { x.StoryHeroId, x.StoryId }).IsUnique();
-        builder.HasOne(x => x.StoryHero).WithMany(x => x.StoryUnlocks).HasForeignKey(x => x.StoryHeroId);
+        builder.HasOne(x => x.StoryHero).WithMany().HasForeignKey(x => x.StoryHeroId);
     }
 }

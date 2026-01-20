@@ -15,6 +15,7 @@ public class EpicPublishJobConfiguration : IEntityTypeConfiguration<EpicPublishJ
         builder.Property(x => x.LangTag).HasMaxLength(10).IsRequired();
         builder.Property(x => x.Status).HasMaxLength(32).IsRequired();
         builder.Property(x => x.ErrorMessage).HasMaxLength(2000);
+        builder.Property(x => x.IsAdminPublish).HasDefaultValue(false);
         builder.HasIndex(x => new { x.EpicId, x.Status });
         builder.HasIndex(x => x.QueuedAtUtc);
     }

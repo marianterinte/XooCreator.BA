@@ -50,7 +50,8 @@ public class GetMarketplaceStoriesEndpoint
         [FromQuery] string sortBy = "sortOrder",
         [FromQuery] string sortOrder = "asc",
         [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 5)
+        [FromQuery] int pageSize = 5,
+        [FromQuery] string searchType = "title")
     {
         var endpointStopwatch = Stopwatch.StartNew();
         
@@ -59,9 +60,12 @@ public class GetMarketplaceStoriesEndpoint
             var userId = await ep._userContext.GetUserIdAsync();
             if (userId == null) throw new UnauthorizedAccessException("User not found");
 
+            ep._logger?.LogInformation("Marketplace Request: searchType={SearchType}, searchTerm={SearchTerm}", searchType, searchTerm);
+
             var request = new SearchStoriesRequest
             {
                 SearchTerm = searchTerm,
+                SearchType = searchType,
                 Regions = regions?.ToList() ?? new List<string>(),
                 AgeRatings = ageRatings?.ToList() ?? new List<string>(),
                 AgeGroupIds = ageGroupIds?.ToList() ?? new List<string>(),

@@ -12,7 +12,7 @@ public interface IStoryEpicPublishingService
     Task<AssetCopyResult> CopyEpicAssetsAsync(List<EpicAssetInfo> assets, string ownerEmail, string epicId, CancellationToken ct);
     
     // Method for publishing from StoryEpicCraft to StoryEpicDefinition
-    Task PublishFromCraftAsync(StoryEpicCraft craft, string requestedByEmail, string langTag, bool forceFull, CancellationToken ct = default);
+    Task PublishFromCraftAsync(StoryEpicCraft craft, string requestedByEmail, string langTag, bool forceFull, bool isAdmin = false, CancellationToken ct = default);
 }
 
 public class ValidationResult

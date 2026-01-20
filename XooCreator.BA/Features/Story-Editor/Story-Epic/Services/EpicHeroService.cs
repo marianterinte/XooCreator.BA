@@ -503,7 +503,7 @@ public class EpicHeroService : IEpicHeroService
         _logger.LogInformation("Hero craft reviewed: heroId={HeroId} approved={Approve}", heroId, approve);
     }
 
-    public async Task PublishAsync(Guid ownerUserId, string heroId, string ownerEmail, CancellationToken ct = default)
+    public async Task PublishAsync(Guid ownerUserId, string heroId, string ownerEmail, bool isAdmin = false, CancellationToken ct = default)
     {
         var heroCraft = await _repository.GetCraftAsync(heroId, ct);
         if (heroCraft == null)
@@ -511,15 +511,20 @@ public class EpicHeroService : IEpicHeroService
             throw new InvalidOperationException($"Hero craft '{heroId}' not found");
         }
 
-        if (heroCraft.OwnerUserId != ownerUserId)
+        if (!isAdmin && heroCraft.OwnerUserId != ownerUserId)
         {
             throw new UnauthorizedAccessException($"User does not own hero '{heroId}'");
         }
 
         var currentStatus = StoryStatusExtensions.FromDb(heroCraft.Status);
-        if (currentStatus != StoryStatus.Approved)
+        // Admin can publish from draft, changes_requested, or approved
+        if (!isAdmin && currentStatus != StoryStatus.Approved)
         {
             throw new InvalidOperationException($"Cannot publish hero. Expected Approved, got {currentStatus}");
+        }
+        if (isAdmin && !(currentStatus == StoryStatus.Approved || currentStatus == StoryStatus.Draft || currentStatus == StoryStatus.ChangesRequested))
+        {
+            throw new InvalidOperationException($"Admin cannot publish hero in status '{currentStatus}'. Expected Draft, ChangesRequested, or Approved.");
         }
 
         // Load craft with translations

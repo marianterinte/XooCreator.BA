@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using XooCreator.BA.Data;
+using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Features.Stories.DTOs;
 using XooCreator.BA.Features.TreeOfLight.DTOs;
 
@@ -196,7 +197,7 @@ public class TreeOfLightRepository : ITreeOfLightRepository
     public async Task<List<StoryHero>> GetStoryHeroesAsync()
     {
         return await _context.StoryHeroes
-            .Where(sh => sh.IsActive)
+            .Where(sh => sh.Status == AlchimaliaUniverseStatus.Published.ToDb())
             .ToListAsync();
     }
 

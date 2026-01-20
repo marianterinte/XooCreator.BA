@@ -23,6 +23,8 @@ public record StoryEpicDto
     public List<StoryEpicUnlockRuleDto> Rules { get; init; } = new();
     public List<StoryEpicHeroReferenceDto> Heroes { get; init; } = new(); // Hero references with unlock stories
     public List<StoryEpicTranslationDto> Translations { get; init; } = new(); // All translations
+    public List<string> TopicIds { get; init; } = new(); // Topic IDs
+    public List<string> AgeGroupIds { get; init; } = new(); // Age Group IDs
     
     // Helper: Get name in a specific language (falls back to first available)
     public string GetName(string languageCode)

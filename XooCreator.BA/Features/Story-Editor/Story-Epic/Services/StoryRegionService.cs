@@ -419,7 +419,7 @@ public class StoryRegionService : IStoryRegionService
         _logger.LogInformation("Region craft reviewed: regionId={RegionId} approved={Approve}", regionId, approve);
     }
 
-    public async Task PublishAsync(Guid ownerUserId, string regionId, string ownerEmail, CancellationToken ct = default)
+    public async Task PublishAsync(Guid ownerUserId, string regionId, string ownerEmail, bool isAdmin = false, CancellationToken ct = default)
     {
         var regionCraft = await _repository.GetCraftAsync(regionId, ct);
         if (regionCraft == null)
@@ -427,15 +427,20 @@ public class StoryRegionService : IStoryRegionService
             throw new InvalidOperationException($"Region craft '{regionId}' not found");
         }
 
-        if (regionCraft.OwnerUserId != ownerUserId)
+        if (!isAdmin && regionCraft.OwnerUserId != ownerUserId)
         {
             throw new UnauthorizedAccessException($"User does not own region '{regionId}'");
         }
 
         var currentStatus = StoryStatusExtensions.FromDb(regionCraft.Status);
-        if (currentStatus != StoryStatus.Approved)
+        // Admin can publish from draft, changes_requested, or approved
+        if (!isAdmin && currentStatus != StoryStatus.Approved)
         {
             throw new InvalidOperationException($"Cannot publish region. Expected Approved, got {currentStatus}");
+        }
+        if (isAdmin && !(currentStatus == StoryStatus.Approved || currentStatus == StoryStatus.Draft || currentStatus == StoryStatus.ChangesRequested))
+        {
+            throw new InvalidOperationException($"Admin cannot publish region in status '{currentStatus}'. Expected Draft, ChangesRequested, or Approved.");
         }
 
         // Load craft with translations

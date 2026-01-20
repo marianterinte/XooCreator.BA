@@ -35,6 +35,9 @@ namespace XooCreator.BA.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
+                    b.Property<bool>("AutoFilterStoriesByAge")
+                        .HasColumnType("boolean");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -75,6 +78,9 @@ namespace XooCreator.BA.Migrations
                         .IsRequired()
                         .HasColumnType("integer[]");
 
+                    b.Property<string[]>("SelectedAgeGroupIds")
+                        .HasColumnType("text[]");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -90,16 +96,17 @@ namespace XooCreator.BA.Migrations
                         {
                             Id = new Guid("33333333-3333-3333-3333-333333333333"),
                             Auth0Id = "alchimalia-admin-sub",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 382, DateTimeKind.Utc).AddTicks(8833),
+                            AutoFilterStoriesByAge = false,
+                            CreatedAt = new DateTime(2026, 1, 19, 13, 6, 55, 276, DateTimeKind.Utc).AddTicks(9331),
                             Email = "alchimalia@admin.com",
                             FirstName = "Marian",
                             HasVisitedImaginationLaboratory = false,
-                            LastLoginAt = new DateTime(2025, 11, 26, 18, 40, 47, 382, DateTimeKind.Utc).AddTicks(8833),
+                            LastLoginAt = new DateTime(2026, 1, 19, 13, 6, 55, 276, DateTimeKind.Utc).AddTicks(9332),
                             LastName = "Teacher",
                             Name = "Marian Teacher",
                             Role = 2,
                             Roles = new[] { 2 },
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 382, DateTimeKind.Utc).AddTicks(8834)
+                            UpdatedAt = new DateTime(2026, 1, 19, 13, 6, 55, 276, DateTimeKind.Utc).AddTicks(9334)
                         });
                 });
 
@@ -107,6 +114,12 @@ namespace XooCreator.BA.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedByUserId")
                         .HasColumnType("uuid");
 
                     b.Property<bool>("IsHybrid")
@@ -119,7 +132,17 @@ namespace XooCreator.BA.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
-                    b.Property<Guid>("RegionId")
+                    b.Property<Guid?>("ParentVersionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("RegionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ReviewNotes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<Guid?>("ReviewedByUserId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Src")
@@ -127,285 +150,333 @@ namespace XooCreator.BA.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasDefaultValue("draft");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Version")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1);
+
                     b.HasKey("Id");
 
                     b.HasIndex("RegionId");
 
-                    b.ToTable("Animals", "alchimalia_schema");
+                    b.HasIndex("Status");
 
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000001"),
-                            IsHybrid = false,
-                            Label = "Bunny",
-                            RegionId = new Guid("10000000-0000-0000-0000-000000000003"),
-                            Src = "images/animals/base/bunny.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000002"),
-                            IsHybrid = false,
-                            Label = "Hippo",
-                            RegionId = new Guid("10000000-0000-0000-0000-000000000006"),
-                            Src = "images/animals/base/hippo.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000003"),
-                            IsHybrid = false,
-                            Label = "Giraffe",
-                            RegionId = new Guid("10000000-0000-0000-0000-000000000004"),
-                            Src = "images/animals/base/giraffe.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000004"),
-                            IsHybrid = false,
-                            Label = "Dog",
-                            RegionId = new Guid("10000000-0000-0000-0000-000000000003"),
-                            Src = "images/animals/base/dog.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000005"),
-                            IsHybrid = false,
-                            Label = "Fox",
-                            RegionId = new Guid("10000000-0000-0000-0000-000000000005"),
-                            Src = "images/animals/base/fox.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000006"),
-                            IsHybrid = false,
-                            Label = "Cat",
-                            RegionId = new Guid("10000000-0000-0000-0000-000000000003"),
-                            Src = "images/animals/base/cat.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000007"),
-                            IsHybrid = false,
-                            Label = "Monkey",
-                            RegionId = new Guid("10000000-0000-0000-0000-000000000002"),
-                            Src = "images/animals/base/monkey.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000008"),
-                            IsHybrid = false,
-                            Label = "Camel",
-                            RegionId = new Guid("10000000-0000-0000-0000-000000000001"),
-                            Src = "images/animals/base/camel.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000009"),
-                            IsHybrid = false,
-                            Label = "Deer",
-                            RegionId = new Guid("10000000-0000-0000-0000-000000000005"),
-                            Src = "images/animals/base/deer.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-00000000000a"),
-                            IsHybrid = false,
-                            Label = "Duck",
-                            RegionId = new Guid("10000000-0000-0000-0000-000000000006"),
-                            Src = "images/animals/base/duck.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-00000000000b"),
-                            IsHybrid = false,
-                            Label = "Eagle",
-                            RegionId = new Guid("10000000-0000-0000-0000-000000000007"),
-                            Src = "images/animals/base/eagle.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-00000000000c"),
-                            IsHybrid = false,
-                            Label = "Elephant",
-                            RegionId = new Guid("10000000-0000-0000-0000-000000000004"),
-                            Src = "images/animals/base/elephant.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-00000000000d"),
-                            IsHybrid = false,
-                            Label = "Ostrich",
-                            RegionId = new Guid("10000000-0000-0000-0000-000000000004"),
-                            Src = "images/animals/base/ostrich.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-00000000000e"),
-                            IsHybrid = false,
-                            Label = "Parrot",
-                            RegionId = new Guid("10000000-0000-0000-0000-000000000002"),
-                            Src = "images/animals/base/parrot.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-00000000000f"),
-                            IsHybrid = false,
-                            Label = "Jaguar",
-                            RegionId = new Guid("10000000-0000-0000-0000-000000000002"),
-                            Src = "images/animals/base/jaguar.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000010"),
-                            IsHybrid = false,
-                            Label = "Toucan",
-                            RegionId = new Guid("10000000-0000-0000-0000-000000000002"),
-                            Src = "images/animals/base/toucan.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000011"),
-                            IsHybrid = false,
-                            Label = "Anaconda",
-                            RegionId = new Guid("10000000-0000-0000-0000-000000000002"),
-                            Src = "images/animals/base/anaconda.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000012"),
-                            IsHybrid = false,
-                            Label = "Capuchin Monkey",
-                            RegionId = new Guid("10000000-0000-0000-0000-000000000002"),
-                            Src = "images/animals/base/capuchin_monkey.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000013"),
-                            IsHybrid = false,
-                            Label = "Poison Dart Frog",
-                            RegionId = new Guid("10000000-0000-0000-0000-000000000002"),
-                            Src = "images/animals/base/poison_dart_frog.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000014"),
-                            IsHybrid = false,
-                            Label = "Lion",
-                            RegionId = new Guid("10000000-0000-0000-0000-000000000004"),
-                            Src = "images/animals/base/lion.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000015"),
-                            IsHybrid = false,
-                            Label = "African Elephant",
-                            RegionId = new Guid("10000000-0000-0000-0000-000000000004"),
-                            Src = "images/animals/base/african_elephant.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000016"),
-                            IsHybrid = false,
-                            Label = "Giraffe",
-                            RegionId = new Guid("10000000-0000-0000-0000-000000000004"),
-                            Src = "images/animals/base/giraffe.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000017"),
-                            IsHybrid = false,
-                            Label = "Zebra",
-                            RegionId = new Guid("10000000-0000-0000-0000-000000000004"),
-                            Src = "images/animals/base/zebra.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000018"),
-                            IsHybrid = false,
-                            Label = "Rhinoceros",
-                            RegionId = new Guid("10000000-0000-0000-0000-000000000004"),
-                            Src = "images/animals/base/rhinoceros.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000019"),
-                            IsHybrid = false,
-                            Label = "Bison",
-                            RegionId = new Guid("10000000-0000-0000-0000-000000000007"),
-                            Src = "images/animals/base/bison.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-00000000001a"),
-                            IsHybrid = false,
-                            Label = "Saiga Antelope",
-                            RegionId = new Guid("10000000-0000-0000-0000-000000000004"),
-                            Src = "images/animals/base/saiga_antelope.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-00000000001b"),
-                            IsHybrid = false,
-                            Label = "Gray Wolf",
-                            RegionId = new Guid("10000000-0000-0000-0000-000000000005"),
-                            Src = "images/animals/base/gray_wolf.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-00000000001c"),
-                            IsHybrid = false,
-                            Label = "Przewalski's Horse",
-                            RegionId = new Guid("10000000-0000-0000-0000-000000000007"),
-                            Src = "images/animals/base/przewalski_horse.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-00000000001d"),
-                            IsHybrid = false,
-                            Label = "Steppe Eagle",
-                            RegionId = new Guid("10000000-0000-0000-0000-000000000007"),
-                            Src = "images/animals/base/steppe_eagle.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-00000000001e"),
-                            IsHybrid = false,
-                            Label = "Cow",
-                            RegionId = new Guid("10000000-0000-0000-0000-000000000003"),
-                            Src = "images/animals/base/cow.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-00000000001f"),
-                            IsHybrid = false,
-                            Label = "Sheep",
-                            RegionId = new Guid("10000000-0000-0000-0000-000000000003"),
-                            Src = "images/animals/base/sheep.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000020"),
-                            IsHybrid = false,
-                            Label = "Horse",
-                            RegionId = new Guid("10000000-0000-0000-0000-000000000003"),
-                            Src = "images/animals/base/horse.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000021"),
-                            IsHybrid = false,
-                            Label = "Chicken",
-                            RegionId = new Guid("10000000-0000-0000-0000-000000000003"),
-                            Src = "images/animals/base/chicken.jpg"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000022"),
-                            IsHybrid = false,
-                            Label = "Pig",
-                            RegionId = new Guid("10000000-0000-0000-0000-000000000003"),
-                            Src = "images/animals/base/pig.jpg"
-                        });
+                    b.HasIndex("Id", "Status");
+
+                    b.ToTable("Animals", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.AnimalCraft", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ApprovedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AssignedReviewerUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("BaseVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsHybrid")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<int>("LastDraftVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid?>("PublishedDefinitionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("RegionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("ReviewEndedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ReviewNotes")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ReviewStartedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ReviewedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Src")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("RegionId");
+
+                    b.HasIndex("ReviewedByUserId");
+
+                    b.HasIndex("Status");
+
+                    b.ToTable("AnimalCrafts", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.AnimalCraftPartSupport", b =>
+                {
+                    b.Property<Guid>("AnimalCraftId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("BodyPartKey")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("AnimalCraftId", "BodyPartKey");
+
+                    b.HasIndex("BodyPartKey");
+
+                    b.ToTable("AnimalCraftPartSupports", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.AnimalCraftTranslation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AnimalCraftId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AudioUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("LanguageCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AnimalCraftId");
+
+                    b.HasIndex("AnimalCraftId", "LanguageCode")
+                        .IsUnique();
+
+                    b.ToTable("AnimalCraftTranslations", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.AnimalDefinition", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("BaseVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsHybrid")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<int>("LastPublishedVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("PublishedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("PublishedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("RegionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Src")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PublishedByUserId");
+
+                    b.HasIndex("RegionId");
+
+                    b.HasIndex("Status");
+
+                    b.ToTable("AnimalDefinitions", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.AnimalDefinitionPartSupport", b =>
+                {
+                    b.Property<Guid>("AnimalDefinitionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("BodyPartKey")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("AnimalDefinitionId", "BodyPartKey");
+
+                    b.HasIndex("BodyPartKey");
+
+                    b.ToTable("AnimalDefinitionPartSupports", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.AnimalDefinitionTranslation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AnimalDefinitionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AudioUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("LanguageCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AnimalDefinitionId");
+
+                    b.HasIndex("AnimalDefinitionId", "LanguageCode")
+                        .IsUnique();
+
+                    b.ToTable("AnimalDefinitionTranslations", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.AnimalHybridCraftPart", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AnimalCraftId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("BodyPartKey")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("OrderIndex")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("SourceAnimalId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AnimalCraftId");
+
+                    b.HasIndex("BodyPartKey");
+
+                    b.HasIndex("SourceAnimalId");
+
+                    b.ToTable("AnimalHybridCraftParts", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.AnimalHybridDefinitionPart", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AnimalDefinitionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("BodyPartKey")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("OrderIndex")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("SourceAnimalId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AnimalDefinitionId");
+
+                    b.HasIndex("BodyPartKey");
+
+                    b.HasIndex("SourceAnimalId");
+
+                    b.ToTable("AnimalHybridDefinitionParts", "alchimalia_schema");
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.AnimalPartSupport", b =>
@@ -421,738 +492,6 @@ namespace XooCreator.BA.Migrations
                     b.HasIndex("PartKey");
 
                     b.ToTable("AnimalPartSupports", "alchimalia_schema");
-
-                    b.HasData(
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000001"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000001"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000001"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000002"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000002"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000002"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000003"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000003"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000003"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000003"),
-                            PartKey = "legs"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000003"),
-                            PartKey = "tail"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000003"),
-                            PartKey = "horn"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000003"),
-                            PartKey = "horns"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000004"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000004"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000004"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000005"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000005"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000005"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000006"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000006"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000006"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000007"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000007"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000007"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000008"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000008"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000008"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000009"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000009"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000009"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000009"),
-                            PartKey = "legs"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000009"),
-                            PartKey = "tail"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000009"),
-                            PartKey = "horn"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000009"),
-                            PartKey = "horns"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000a"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000a"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000a"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000a"),
-                            PartKey = "legs"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000a"),
-                            PartKey = "tail"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000a"),
-                            PartKey = "wings"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000b"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000b"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000b"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000b"),
-                            PartKey = "legs"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000b"),
-                            PartKey = "tail"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000b"),
-                            PartKey = "wings"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000c"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000c"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000c"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000d"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000d"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000d"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000d"),
-                            PartKey = "legs"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000d"),
-                            PartKey = "tail"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000d"),
-                            PartKey = "wings"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000e"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000e"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000e"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000e"),
-                            PartKey = "legs"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000e"),
-                            PartKey = "tail"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000e"),
-                            PartKey = "wings"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000f"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000f"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000f"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000010"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000010"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000010"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000010"),
-                            PartKey = "legs"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000010"),
-                            PartKey = "tail"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000010"),
-                            PartKey = "wings"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000011"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000011"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000011"),
-                            PartKey = "tail"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000012"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000012"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000012"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000013"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000013"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000013"),
-                            PartKey = "legs"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000013"),
-                            PartKey = "tail"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000014"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000014"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000014"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000015"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000015"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000015"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000016"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000016"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000016"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000016"),
-                            PartKey = "legs"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000016"),
-                            PartKey = "tail"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000017"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000017"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000017"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000017"),
-                            PartKey = "legs"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000017"),
-                            PartKey = "tail"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000018"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000018"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000018"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000018"),
-                            PartKey = "legs"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000018"),
-                            PartKey = "tail"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000018"),
-                            PartKey = "horn"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000019"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000019"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000019"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001a"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001a"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001a"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001a"),
-                            PartKey = "legs"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001a"),
-                            PartKey = "tail"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001a"),
-                            PartKey = "horns"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001b"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001b"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001b"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001c"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001c"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001c"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001c"),
-                            PartKey = "legs"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001c"),
-                            PartKey = "tail"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001d"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001d"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001d"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001d"),
-                            PartKey = "legs"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001d"),
-                            PartKey = "tail"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001d"),
-                            PartKey = "wings"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001e"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001e"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001e"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001f"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001f"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001f"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000020"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000020"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000020"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000020"),
-                            PartKey = "legs"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000020"),
-                            PartKey = "tail"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000021"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000021"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000021"),
-                            PartKey = "arms"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000021"),
-                            PartKey = "legs"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000021"),
-                            PartKey = "tail"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000021"),
-                            PartKey = "wings"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000022"),
-                            PartKey = "head"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000022"),
-                            PartKey = "body"
-                        },
-                        new
-                        {
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000022"),
-                            PartKey = "arms"
-                        });
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.AnimalTranslation", b =>
@@ -1179,246 +518,40 @@ namespace XooCreator.BA.Migrations
                         .IsUnique();
 
                     b.ToTable("AnimalTranslations", "alchimalia_schema");
+                });
 
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("0f7f5fcf-cdd4-4a2f-aee6-04c11ef21c7e"),
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000001"),
-                            Label = "Bunny",
-                            LanguageCode = "en-us"
-                        },
-                        new
-                        {
-                            Id = new Guid("afcc1664-b026-4eec-92c5-5a25b26a9bb7"),
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000002"),
-                            Label = "Hippo",
-                            LanguageCode = "en-us"
-                        },
-                        new
-                        {
-                            Id = new Guid("0abf406a-0dd7-4310-baf3-80eff206a879"),
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000003"),
-                            Label = "Giraffe",
-                            LanguageCode = "en-us"
-                        },
-                        new
-                        {
-                            Id = new Guid("5fdbd7d2-d8d7-4758-93aa-23aff9740cfb"),
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000004"),
-                            Label = "Dog",
-                            LanguageCode = "en-us"
-                        },
-                        new
-                        {
-                            Id = new Guid("59bfa96d-3739-486e-9f06-4f9d1c2160d3"),
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000005"),
-                            Label = "Fox",
-                            LanguageCode = "en-us"
-                        },
-                        new
-                        {
-                            Id = new Guid("9a519ce6-9b80-4d0f-9830-65815451d93c"),
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000006"),
-                            Label = "Cat",
-                            LanguageCode = "en-us"
-                        },
-                        new
-                        {
-                            Id = new Guid("826fcdf4-4ac5-4619-b1be-a54d3bdd7513"),
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000007"),
-                            Label = "Monkey",
-                            LanguageCode = "en-us"
-                        },
-                        new
-                        {
-                            Id = new Guid("2f194465-3e7e-4df3-8ada-f3eef714762a"),
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000008"),
-                            Label = "Camel",
-                            LanguageCode = "en-us"
-                        },
-                        new
-                        {
-                            Id = new Guid("ad8ea5b4-b3ca-41ef-8af5-a08ef0c9e6c1"),
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000009"),
-                            Label = "Deer",
-                            LanguageCode = "en-us"
-                        },
-                        new
-                        {
-                            Id = new Guid("2ff01efe-f322-457c-a93a-ca67b88cfced"),
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000a"),
-                            Label = "Duck",
-                            LanguageCode = "en-us"
-                        },
-                        new
-                        {
-                            Id = new Guid("7d95f51f-5d2d-42e6-8df4-f35a0dcfe4fb"),
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000b"),
-                            Label = "Eagle",
-                            LanguageCode = "en-us"
-                        },
-                        new
-                        {
-                            Id = new Guid("33bf19be-1d72-49b3-b3c1-e9bb329f4316"),
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000c"),
-                            Label = "Elephant",
-                            LanguageCode = "en-us"
-                        },
-                        new
-                        {
-                            Id = new Guid("fd4a9bea-32ad-4a14-9c61-7c5632a8724c"),
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000d"),
-                            Label = "Ostrich",
-                            LanguageCode = "en-us"
-                        },
-                        new
-                        {
-                            Id = new Guid("f1f0ac42-5fac-4a99-aa34-86cfb2f0a818"),
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000e"),
-                            Label = "Parrot",
-                            LanguageCode = "en-us"
-                        },
-                        new
-                        {
-                            Id = new Guid("2f8fc3a2-3aec-4512-974d-17ecba506217"),
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000000f"),
-                            Label = "Jaguar",
-                            LanguageCode = "en-us"
-                        },
-                        new
-                        {
-                            Id = new Guid("a7e519df-5e82-4d56-a760-87e5fb1c11bc"),
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000010"),
-                            Label = "Toucan",
-                            LanguageCode = "en-us"
-                        },
-                        new
-                        {
-                            Id = new Guid("fe6fc993-4542-443b-a6b1-84ff2e228455"),
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000011"),
-                            Label = "Anaconda",
-                            LanguageCode = "en-us"
-                        },
-                        new
-                        {
-                            Id = new Guid("8473a1b9-5b1c-4377-9e6d-b6d6692b59a1"),
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000012"),
-                            Label = "Capuchin Monkey",
-                            LanguageCode = "en-us"
-                        },
-                        new
-                        {
-                            Id = new Guid("514a3b0f-b005-4821-b7a8-d8286495950b"),
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000013"),
-                            Label = "Poison Dart Frog",
-                            LanguageCode = "en-us"
-                        },
-                        new
-                        {
-                            Id = new Guid("72d3368c-de7d-4a00-a738-f5ab2fd1487a"),
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000014"),
-                            Label = "Lion",
-                            LanguageCode = "en-us"
-                        },
-                        new
-                        {
-                            Id = new Guid("bc3d333d-669d-4be8-ae49-6882833af8be"),
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000015"),
-                            Label = "African Elephant",
-                            LanguageCode = "en-us"
-                        },
-                        new
-                        {
-                            Id = new Guid("6d8f580f-92ae-44cf-8114-e6b4676e97dd"),
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000016"),
-                            Label = "Giraffe",
-                            LanguageCode = "en-us"
-                        },
-                        new
-                        {
-                            Id = new Guid("0bae418c-cd02-4fe0-8cae-ba0709b27843"),
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000017"),
-                            Label = "Zebra",
-                            LanguageCode = "en-us"
-                        },
-                        new
-                        {
-                            Id = new Guid("36d80ca6-8f78-42ad-b970-e2caa6d865a8"),
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000018"),
-                            Label = "Rhinoceros",
-                            LanguageCode = "en-us"
-                        },
-                        new
-                        {
-                            Id = new Guid("15a3d6f3-3d5d-484c-b5a0-c2b3e3598c44"),
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000019"),
-                            Label = "Bison",
-                            LanguageCode = "en-us"
-                        },
-                        new
-                        {
-                            Id = new Guid("003614ca-880e-4c87-9497-ba00bb755633"),
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001a"),
-                            Label = "Saiga Antelope",
-                            LanguageCode = "en-us"
-                        },
-                        new
-                        {
-                            Id = new Guid("231d5136-a8bd-4e1c-a5ed-6a46156db1f4"),
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001b"),
-                            Label = "Gray Wolf",
-                            LanguageCode = "en-us"
-                        },
-                        new
-                        {
-                            Id = new Guid("414d0a9d-70e6-42b5-a45e-42cef178d372"),
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001c"),
-                            Label = "Przewalski's Horse",
-                            LanguageCode = "en-us"
-                        },
-                        new
-                        {
-                            Id = new Guid("82f383c1-7caa-4c12-88e6-7099bfd4e6a9"),
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001d"),
-                            Label = "Steppe Eagle",
-                            LanguageCode = "en-us"
-                        },
-                        new
-                        {
-                            Id = new Guid("8490cf98-c482-4ed2-9219-030af6962ec1"),
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001e"),
-                            Label = "Cow",
-                            LanguageCode = "en-us"
-                        },
-                        new
-                        {
-                            Id = new Guid("714399e4-8272-4bd1-92bc-b0e2569214ad"),
-                            AnimalId = new Guid("00000000-0000-0000-0000-00000000001f"),
-                            Label = "Sheep",
-                            LanguageCode = "en-us"
-                        },
-                        new
-                        {
-                            Id = new Guid("b42320d3-0800-49f3-95e7-34d8926b77b0"),
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000020"),
-                            Label = "Horse",
-                            LanguageCode = "en-us"
-                        },
-                        new
-                        {
-                            Id = new Guid("727e2e83-2957-47ec-945a-155d080c08e9"),
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000021"),
-                            Label = "Chicken",
-                            LanguageCode = "en-us"
-                        },
-                        new
-                        {
-                            Id = new Guid("de2fd098-ff21-4592-a8ad-2a56c0d1390d"),
-                            AnimalId = new Guid("00000000-0000-0000-0000-000000000022"),
-                            Label = "Pig",
-                            LanguageCode = "en-us"
-                        });
+            modelBuilder.Entity("XooCreator.BA.Data.AnimalVersion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AnimalId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("SnapshotJson")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AnimalId", "Version")
+                        .IsUnique();
+
+                    b.ToTable("AnimalVersions", "alchimalia_schema");
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.BestiaryItem", b =>
@@ -1482,64 +615,6 @@ namespace XooCreator.BA.Migrations
                     b.HasKey("Key");
 
                     b.ToTable("BodyParts", "alchimalia_schema");
-
-                    b.HasData(
-                        new
-                        {
-                            Key = "head",
-                            Image = "images/bodyparts/face.webp",
-                            IsBaseLocked = false,
-                            Name = "Head"
-                        },
-                        new
-                        {
-                            Key = "body",
-                            Image = "images/bodyparts/body.webp",
-                            IsBaseLocked = false,
-                            Name = "Body"
-                        },
-                        new
-                        {
-                            Key = "arms",
-                            Image = "images/bodyparts/hands.webp",
-                            IsBaseLocked = false,
-                            Name = "Arms"
-                        },
-                        new
-                        {
-                            Key = "legs",
-                            Image = "images/bodyparts/legs.webp",
-                            IsBaseLocked = true,
-                            Name = "Legs"
-                        },
-                        new
-                        {
-                            Key = "tail",
-                            Image = "images/bodyparts/tail.webp",
-                            IsBaseLocked = true,
-                            Name = "Tail"
-                        },
-                        new
-                        {
-                            Key = "wings",
-                            Image = "images/bodyparts/wings.webp",
-                            IsBaseLocked = true,
-                            Name = "Wings"
-                        },
-                        new
-                        {
-                            Key = "horn",
-                            Image = "images/bodyparts/horn.webp",
-                            IsBaseLocked = true,
-                            Name = "Horn"
-                        },
-                        new
-                        {
-                            Key = "horns",
-                            Image = "images/bodyparts/horns.webp",
-                            IsBaseLocked = true,
-                            Name = "Horns"
-                        });
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.BodyPartTranslation", b =>
@@ -1567,64 +642,6 @@ namespace XooCreator.BA.Migrations
                         .IsUnique();
 
                     b.ToTable("BodyPartTranslations", "alchimalia_schema");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("d6422238-61dc-43e2-89e7-e80e0b7ed26b"),
-                            BodyPartKey = "head",
-                            LanguageCode = "en-us",
-                            Name = "Head"
-                        },
-                        new
-                        {
-                            Id = new Guid("8087c412-bbf8-4101-8823-9df83c8da0dc"),
-                            BodyPartKey = "body",
-                            LanguageCode = "en-us",
-                            Name = "Body"
-                        },
-                        new
-                        {
-                            Id = new Guid("6c36036c-86b4-4dd7-aed3-bcd915d059f2"),
-                            BodyPartKey = "arms",
-                            LanguageCode = "en-us",
-                            Name = "Arms"
-                        },
-                        new
-                        {
-                            Id = new Guid("d0fcca76-457f-46ad-a4c9-2fc620e6ad82"),
-                            BodyPartKey = "legs",
-                            LanguageCode = "en-us",
-                            Name = "Legs"
-                        },
-                        new
-                        {
-                            Id = new Guid("274952ca-a936-4639-ab67-1aecbb85bc5b"),
-                            BodyPartKey = "tail",
-                            LanguageCode = "en-us",
-                            Name = "Tail"
-                        },
-                        new
-                        {
-                            Id = new Guid("9cfcfe92-8082-4951-8d45-7dd52809a26f"),
-                            BodyPartKey = "wings",
-                            LanguageCode = "en-us",
-                            Name = "Wings"
-                        },
-                        new
-                        {
-                            Id = new Guid("7f7e9e04-b282-4d5b-839b-bdebdf262f31"),
-                            BodyPartKey = "horn",
-                            LanguageCode = "en-us",
-                            Name = "Horn"
-                        },
-                        new
-                        {
-                            Id = new Guid("07deeccd-b677-4f0e-9d5b-58e937ea6006"),
-                            BodyPartKey = "horns",
-                            LanguageCode = "en-us",
-                            Name = "Horns"
-                        });
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.BuilderConfig", b =>
@@ -1761,8 +778,178 @@ namespace XooCreator.BA.Migrations
                             UserId = new Guid("33333333-3333-3333-3333-333333333333"),
                             Balance = 1000.0,
                             DiscoveryBalance = 0.0,
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 382, DateTimeKind.Utc).AddTicks(8950)
+                            UpdatedAt = new DateTime(2026, 1, 19, 13, 6, 55, 276, DateTimeKind.Utc).AddTicks(9659)
                         });
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.Entities.AnimalPublishChangeLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AnimalId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AssetDraftPath")
+                        .HasMaxLength(1024)
+                        .HasColumnType("character varying(1024)");
+
+                    b.Property<string>("AssetPublishedPath")
+                        .HasMaxLength(1024)
+                        .HasColumnType("character varying(1024)");
+
+                    b.Property<string>("ChangeType")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("DraftVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("EntityId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<string>("Hash")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<string>("LanguageCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("PayloadJson")
+                        .HasColumnType("jsonb");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AnimalId");
+
+                    b.HasIndex("AnimalId", "DraftVersion");
+
+                    b.ToTable("AnimalPublishChangeLogs", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.Entities.AnimalPublishJob", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AnimalId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime?>("CompletedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DequeueCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<bool>("ForceFull")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("LangTag")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<Guid>("OwnerUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("QueuedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("RequestedByEmail")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<DateTime?>("StartedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QueuedAtUtc");
+
+                    b.HasIndex("AnimalId", "Status");
+
+                    b.ToTable("AnimalPublishJobs", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.Entities.AnimalVersionJob", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AnimalId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("BaseVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("CompletedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DequeueCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<Guid>("OwnerUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("QueuedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("RequestedByEmail")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<DateTime?>("StartedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerUserId");
+
+                    b.HasIndex("QueuedAtUtc");
+
+                    b.HasIndex("AnimalId", "Status");
+
+                    b.ToTable("AnimalVersionJobs", "alchimalia_schema");
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.Entities.ClassicAuthor", b =>
@@ -1806,6 +993,764 @@ namespace XooCreator.BA.Migrations
                     b.HasIndex("LanguageCode", "SortOrder");
 
                     b.ToTable("ClassicAuthors", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.Entities.EpicAssetLink", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AssetType")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<string>("ContentHash")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DraftPath")
+                        .IsRequired()
+                        .HasMaxLength(1024)
+                        .HasColumnType("character varying(1024)");
+
+                    b.Property<int>("DraftVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("EntityId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("EpicId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("LanguageCode")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<DateTime?>("LastSyncedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PublishedPath")
+                        .HasMaxLength(1024)
+                        .HasColumnType("character varying(1024)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DraftPath")
+                        .IsUnique();
+
+                    b.HasIndex("EpicId", "DraftVersion");
+
+                    b.ToTable("EpicAssetLinks", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.Entities.EpicPublishChangeLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AssetDraftPath")
+                        .HasMaxLength(1024)
+                        .HasColumnType("character varying(1024)");
+
+                    b.Property<string>("AssetPublishedPath")
+                        .HasMaxLength(1024)
+                        .HasColumnType("character varying(1024)");
+
+                    b.Property<string>("ChangeType")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("DraftVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("EntityId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<string>("EpicId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Hash")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<string>("LanguageCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("PayloadJson")
+                        .HasColumnType("jsonb");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EpicId", "DraftVersion");
+
+                    b.ToTable("EpicPublishChangeLogs", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.Entities.EpicPublishJob", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("CompletedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DequeueCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DraftVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("EpicId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<bool>("ForceFull")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("LangTag")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<Guid>("OwnerUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("QueuedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("RequestedByEmail")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<DateTime?>("StartedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QueuedAtUtc");
+
+                    b.HasIndex("EpicId", "Status");
+
+                    b.ToTable("EpicPublishJobs", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.Entities.EpicVersionJob", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("BaseVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("CompletedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DequeueCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("EpicId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<Guid>("OwnerUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("QueuedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("RequestedByEmail")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<DateTime?>("StartedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QueuedAtUtc");
+
+                    b.HasIndex("EpicId", "Status");
+
+                    b.ToTable("EpicVersionJobs", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.Entities.HeroAssetLink", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AssetType")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<string>("ContentHash")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DraftPath")
+                        .IsRequired()
+                        .HasMaxLength(1024)
+                        .HasColumnType("character varying(1024)");
+
+                    b.Property<int>("DraftVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("EntityId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("HeroId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("LanguageCode")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<DateTime?>("LastSyncedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PublishedPath")
+                        .HasMaxLength(1024)
+                        .HasColumnType("character varying(1024)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DraftPath")
+                        .IsUnique();
+
+                    b.HasIndex("HeroId");
+
+                    b.HasIndex("HeroId", "DraftVersion");
+
+                    b.ToTable("HeroAssetLinks", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.Entities.HeroDefinitionPublishChangeLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AssetDraftPath")
+                        .HasMaxLength(1024)
+                        .HasColumnType("character varying(1024)");
+
+                    b.Property<string>("AssetPublishedPath")
+                        .HasMaxLength(1024)
+                        .HasColumnType("character varying(1024)");
+
+                    b.Property<string>("ChangeType")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("DraftVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("EntityId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<string>("Hash")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<string>("HeroId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("LanguageCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("PayloadJson")
+                        .HasColumnType("jsonb");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HeroId");
+
+                    b.HasIndex("HeroId", "DraftVersion");
+
+                    b.ToTable("HeroDefinitionPublishChangeLogs", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.Entities.HeroDefinitionVersionJob", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("BaseVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("CompletedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DequeueCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<string>("HeroId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid>("OwnerUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("QueuedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("RequestedByEmail")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<DateTime?>("StartedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerUserId");
+
+                    b.HasIndex("QueuedAtUtc");
+
+                    b.HasIndex("HeroId", "Status");
+
+                    b.ToTable("HeroDefinitionVersionJobs", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.Entities.HeroPublishChangeLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AssetDraftPath")
+                        .HasMaxLength(1024)
+                        .HasColumnType("character varying(1024)");
+
+                    b.Property<string>("AssetPublishedPath")
+                        .HasMaxLength(1024)
+                        .HasColumnType("character varying(1024)");
+
+                    b.Property<string>("ChangeType")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("DraftVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("EntityId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<string>("Hash")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<string>("HeroId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("LanguageCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("PayloadJson")
+                        .HasColumnType("jsonb");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HeroId");
+
+                    b.HasIndex("HeroId", "DraftVersion");
+
+                    b.ToTable("HeroPublishChangeLogs", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.Entities.HeroPublishJob", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("CompletedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DequeueCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<bool>("ForceFull")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("HeroId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("LangTag")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<Guid>("OwnerUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("QueuedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("RequestedByEmail")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<DateTime?>("StartedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QueuedAtUtc");
+
+                    b.HasIndex("HeroId", "Status");
+
+                    b.ToTable("HeroPublishJobs", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.Entities.HeroVersionJob", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("BaseVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("CompletedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DequeueCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<string>("HeroId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid>("OwnerUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("QueuedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("RequestedByEmail")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<DateTime?>("StartedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QueuedAtUtc");
+
+                    b.HasIndex("HeroId", "Status");
+
+                    b.ToTable("HeroVersionJobs", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.Entities.RegionAssetLink", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AssetType")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<string>("ContentHash")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DraftPath")
+                        .IsRequired()
+                        .HasMaxLength(1024)
+                        .HasColumnType("character varying(1024)");
+
+                    b.Property<int>("DraftVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("EntityId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("LanguageCode")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<DateTime?>("LastSyncedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PublishedPath")
+                        .HasMaxLength(1024)
+                        .HasColumnType("character varying(1024)");
+
+                    b.Property<string>("RegionId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DraftPath")
+                        .IsUnique();
+
+                    b.HasIndex("RegionId");
+
+                    b.HasIndex("RegionId", "DraftVersion");
+
+                    b.ToTable("RegionAssetLinks", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.Entities.RegionPublishChangeLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AssetDraftPath")
+                        .HasMaxLength(1024)
+                        .HasColumnType("character varying(1024)");
+
+                    b.Property<string>("AssetPublishedPath")
+                        .HasMaxLength(1024)
+                        .HasColumnType("character varying(1024)");
+
+                    b.Property<string>("ChangeType")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("DraftVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("EntityId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<string>("Hash")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<string>("LanguageCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("PayloadJson")
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("RegionId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RegionId");
+
+                    b.HasIndex("RegionId", "DraftVersion");
+
+                    b.ToTable("RegionPublishChangeLogs", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.Entities.RegionVersionJob", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("BaseVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("CompletedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DequeueCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<Guid>("OwnerUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("QueuedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("RegionId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("RequestedByEmail")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<DateTime?>("StartedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QueuedAtUtc");
+
+                    b.HasIndex("RegionId", "Status");
+
+                    b.ToTable("RegionVersionJobs", "alchimalia_schema");
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.Entities.StoryAgeGroup", b =>
@@ -1874,6 +1819,65 @@ namespace XooCreator.BA.Migrations
                     b.ToTable("StoryAgeGroupTranslations", "alchimalia_schema");
                 });
 
+            modelBuilder.Entity("XooCreator.BA.Data.Entities.StoryAssetLink", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AssetType")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<string>("ContentHash")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DraftPath")
+                        .IsRequired()
+                        .HasMaxLength(1024)
+                        .HasColumnType("character varying(1024)");
+
+                    b.Property<int>("DraftVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("EntityId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("LanguageCode")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<DateTime?>("LastSyncedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PublishedPath")
+                        .HasMaxLength(1024)
+                        .HasColumnType("character varying(1024)");
+
+                    b.Property<string>("StoryId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DraftPath")
+                        .IsUnique();
+
+                    b.HasIndex("StoryId", "DraftVersion");
+
+                    b.ToTable("StoryAssetLinks", "alchimalia_schema");
+                });
+
             modelBuilder.Entity("XooCreator.BA.Data.Entities.StoryCraft", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1901,6 +1905,17 @@ namespace XooCreator.BA.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsEvaluative")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsPartOfEpic")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("LastDraftVersion")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
 
                     b.Property<Guid>("OwnerUserId")
                         .HasColumnType("uuid");
@@ -1979,6 +1994,9 @@ namespace XooCreator.BA.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsCorrect")
+                        .HasColumnType("boolean");
 
                     b.Property<int>("SortOrder")
                         .HasColumnType("integer");
@@ -2170,6 +2188,23 @@ namespace XooCreator.BA.Migrations
                     b.ToTable("StoryCraftTranslations", "alchimalia_schema");
                 });
 
+            modelBuilder.Entity("XooCreator.BA.Data.Entities.StoryCraftUnlockedHero", b =>
+                {
+                    b.Property<Guid>("StoryCraftId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("HeroId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("StoryCraftId", "HeroId");
+
+                    b.ToTable("StoryCraftUnlockedHeroes", "alchimalia_schema");
+                });
+
             modelBuilder.Entity("XooCreator.BA.Data.Entities.StoryDefinitionAgeGroup", b =>
                 {
                     b.Property<Guid>("StoryDefinitionId")
@@ -2204,6 +2239,464 @@ namespace XooCreator.BA.Migrations
                     b.HasIndex("StoryTopicId");
 
                     b.ToTable("StoryDefinitionTopics", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.Entities.StoryDocumentExportJob", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("CompletedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DequeueCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Format")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IncludeCover")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IncludeQuizAnswers")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDraft")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Locale")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("OutputBlobPath")
+                        .HasColumnType("text");
+
+                    b.Property<string>("OutputFileName")
+                        .HasColumnType("text");
+
+                    b.Property<long?>("OutputSizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("PaperSize")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("QueuedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("RequestedByEmail")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("RequestedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("StartedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("StoryId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("StoryOwnerUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("UseMobileImageLayout")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("StoryDocumentExportJobs", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.Entities.StoryEpicCraftAgeGroup", b =>
+                {
+                    b.Property<string>("StoryEpicCraftId")
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid>("StoryAgeGroupId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("StoryEpicCraftId", "StoryAgeGroupId");
+
+                    b.HasIndex("StoryAgeGroupId");
+
+                    b.ToTable("StoryEpicCraftAgeGroup", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.Entities.StoryEpicCraftTopic", b =>
+                {
+                    b.Property<string>("StoryEpicCraftId")
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid>("StoryTopicId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("StoryEpicCraftId", "StoryTopicId");
+
+                    b.HasIndex("StoryTopicId");
+
+                    b.ToTable("StoryEpicCraftTopic", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.Entities.StoryEpicDefinitionAgeGroup", b =>
+                {
+                    b.Property<string>("StoryEpicDefinitionId")
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid>("StoryAgeGroupId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("StoryEpicDefinitionId", "StoryAgeGroupId");
+
+                    b.HasIndex("StoryAgeGroupId");
+
+                    b.ToTable("StoryEpicDefinitionAgeGroup", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.Entities.StoryEpicDefinitionTopic", b =>
+                {
+                    b.Property<string>("StoryEpicDefinitionId")
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid>("StoryTopicId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("StoryEpicDefinitionId", "StoryTopicId");
+
+                    b.HasIndex("StoryTopicId");
+
+                    b.ToTable("StoryEpicDefinitionTopic", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.Entities.StoryExportJob", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("CompletedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DequeueCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsDraft")
+                        .HasColumnType("boolean");
+
+                    b.Property<int?>("LanguageCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Locale")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("MediaCount")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("OwnerUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("QueuedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("RequestedByEmail")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("StartedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("StoryId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ZipBlobPath")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ZipFileName")
+                        .HasColumnType("text");
+
+                    b.Property<long?>("ZipSizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("StoryExportJobs", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.Entities.StoryForkAssetJob", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("AttemptedAssets")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("CompletedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("CopiedAssets")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DequeueCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("QueuedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("RequestedByEmail")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("SourceOwnerEmail")
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("SourceOwnerUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("SourceStoryId")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("SourceType")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<DateTime?>("StartedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<string>("TargetOwnerEmail")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<Guid>("TargetOwnerUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("TargetStoryId")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("WarningSummary")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TargetStoryId", "Status");
+
+                    b.ToTable("StoryForkAssetJobs", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.Entities.StoryForkJob", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AssetJobId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AssetJobStatus")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("CompletedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("CopyAssets")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("DequeueCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("QueuedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("RequestedByEmail")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<Guid>("RequestedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("SourceStoryId")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<int>("SourceTiles")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("SourceTranslations")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("SourceType")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<DateTime?>("StartedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<string>("TargetOwnerEmail")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<Guid>("TargetOwnerUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("TargetStoryId")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("WarningSummary")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TargetStoryId", "Status");
+
+                    b.ToTable("StoryForkJobs", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.Entities.StoryImportJob", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("CompletedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DequeueCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasColumnType("text");
+
+                    b.Property<int>("ImportedAssets")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ImportedLanguagesCount")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IncludeAudio")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IncludeImages")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IncludeVideo")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Locale")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<string>("OriginalStoryId")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<Guid>("OwnerUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("QueuedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("RequestedByEmail")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("StartedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<string>("StoryId")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<int>("TotalAssets")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("WarningSummary")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ZipBlobPath")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)");
+
+                    b.Property<string>("ZipFileName")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<long>("ZipSizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerUserId");
+
+                    b.HasIndex("StoryId", "Status");
+
+                    b.ToTable("StoryImportJobs", "alchimalia_schema");
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.Entities.StoryPublicationAudit", b =>
@@ -2245,6 +2738,127 @@ namespace XooCreator.BA.Migrations
                     b.HasIndex("StoryId");
 
                     b.ToTable("StoryPublicationAudits", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.Entities.StoryPublishChangeLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AssetDraftPath")
+                        .HasMaxLength(1024)
+                        .HasColumnType("character varying(1024)");
+
+                    b.Property<string>("AssetPublishedPath")
+                        .HasMaxLength(1024)
+                        .HasColumnType("character varying(1024)");
+
+                    b.Property<string>("ChangeType")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("DraftVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("EntityId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<string>("Hash")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<string>("LanguageCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("PayloadJson")
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("StoryId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StoryId", "DraftVersion");
+
+                    b.ToTable("StoryPublishChangeLogs", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.Entities.StoryPublishJob", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("CompletedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DequeueCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DraftVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<bool>("ForceFull")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("LangTag")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<Guid>("OwnerUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("QueuedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("RequestedByEmail")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<DateTime?>("StartedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<string>("StoryId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QueuedAtUtc");
+
+                    b.HasIndex("StoryId", "Status");
+
+                    b.ToTable("StoryPublishJobs", "alchimalia_schema");
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.Entities.StoryTopic", b =>
@@ -2309,6 +2923,505 @@ namespace XooCreator.BA.Migrations
                     b.ToTable("StoryTopicTranslations", "alchimalia_schema");
                 });
 
+            modelBuilder.Entity("XooCreator.BA.Data.Entities.StoryVersionJob", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("BaseVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("CompletedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DequeueCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<Guid>("OwnerUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("QueuedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("RequestedByEmail")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<DateTime?>("StartedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<string>("StoryId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QueuedAtUtc");
+
+                    b.HasIndex("StoryId", "Status");
+
+                    b.ToTable("StoryVersionJobs", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.EpicHero", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid?>("ApprovedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AssignedReviewerUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("GreetingAudioUrl")
+                        .HasColumnType("text");
+
+                    b.Property<string>("GreetingText")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid>("OwnerUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("PublishedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("ReviewEndedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ReviewNotes")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ReviewStartedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ReviewedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerUserId", "Id")
+                        .IsUnique();
+
+                    b.ToTable("EpicHero", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.EpicHeroCraft", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid?>("ApprovedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AssignedReviewerUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("BaseVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("text");
+
+                    b.Property<int>("LastDraftVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid>("OwnerUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("ReviewEndedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ReviewNotes")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ReviewStartedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ReviewedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApprovedByUserId");
+
+                    b.HasIndex("AssignedReviewerUserId")
+                        .HasFilter("[AssignedReviewerUserId] IS NOT NULL");
+
+                    b.HasIndex("ReviewedByUserId");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("Id", "Status");
+
+                    b.HasIndex("OwnerUserId", "Id")
+                        .IsUnique();
+
+                    b.ToTable("EpicHeroCrafts", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.EpicHeroCraftTranslation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<string>("EpicHeroCraftId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("GreetingAudioUrl")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("GreetingText")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("LanguageCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EpicHeroCraftId");
+
+                    b.HasIndex("EpicHeroCraftId", "LanguageCode")
+                        .IsUnique();
+
+                    b.ToTable("EpicHeroCraftTranslations", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.EpicHeroDefinition", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("BaseVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("LastPublishedVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid>("OwnerUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("PublishedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("Id", "Version");
+
+                    b.HasIndex("OwnerUserId", "Id")
+                        .IsUnique();
+
+                    b.ToTable("EpicHeroDefinitions", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.EpicHeroDefinitionTranslation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<string>("EpicHeroDefinitionId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("GreetingAudioUrl")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("GreetingText")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("LanguageCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EpicHeroDefinitionId");
+
+                    b.HasIndex("EpicHeroDefinitionId", "LanguageCode")
+                        .IsUnique();
+
+                    b.ToTable("EpicHeroDefinitionTranslations", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.EpicHeroTranslation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("EpicHeroId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("GreetingText")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("LanguageCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EpicHeroId", "LanguageCode")
+                        .IsUnique();
+
+                    b.ToTable("EpicHeroTranslation", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.EpicProgress", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("EpicId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsUnlocked")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("RegionId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UnlockedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "RegionId", "EpicId")
+                        .IsUnique();
+
+                    b.ToTable("EpicProgress", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.EpicReader", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("AcquiredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("AcquisitionSource")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("EpicId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EpicId");
+
+                    b.HasIndex("UserId", "EpicId")
+                        .IsUnique();
+
+                    b.ToTable("EpicReaders", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.EpicReview", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Comment")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("EpicId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EpicId");
+
+                    b.HasIndex("UserId", "EpicId")
+                        .IsUnique();
+
+                    b.ToTable("EpicReviews", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.EpicStoryProgress", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("EpicId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SelectedAnswer")
+                        .HasColumnType("text");
+
+                    b.Property<string>("StoryId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("TokensJson")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "StoryId", "EpicId")
+                        .IsUnique();
+
+                    b.ToTable("EpicStoryProgress", "alchimalia_schema");
+                });
+
             modelBuilder.Entity("XooCreator.BA.Data.HeroClickMessage", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2343,38 +3456,6 @@ namespace XooCreator.BA.Migrations
                         .IsUnique();
 
                     b.ToTable("HeroClickMessages", "alchimalia_schema");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("3e089534-9de3-49a2-a543-449f90ccf8a8"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_click_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(3879),
-                            HeroId = "puf-puf",
-                            IsActive = true,
-                            MessageKey = "hero_puf-puf_click_message",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(3879)
-                        },
-                        new
-                        {
-                            Id = new Guid("b2c18476-7fa8-4ad0-9fb7-494ccf51637f"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_click_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(3883),
-                            HeroId = "linkaro",
-                            IsActive = true,
-                            MessageKey = "hero_linkaro_click_message",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(3883)
-                        },
-                        new
-                        {
-                            Id = new Guid("f371c87e-6f7c-4d70-89cd-77461832b974"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_click_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(3885),
-                            HeroId = "grubot",
-                            IsActive = true,
-                            MessageKey = "hero_grubot_click_message",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(3886)
-                        });
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.HeroDefinition", b =>
@@ -2382,6 +3463,237 @@ namespace XooCreator.BA.Migrations
                     b.Property<string>("Id")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
+
+                    b.Property<int>("CourageCost")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("CreativityCost")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CuriosityCost")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Image")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsUnlocked")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("ParentVersionId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<double>("PositionX")
+                        .HasColumnType("decimal(10,6)");
+
+                    b.Property<double>("PositionY")
+                        .HasColumnType("decimal(10,6)");
+
+                    b.Property<string>("PrerequisitesJson")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<string>("ReviewNotes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<Guid?>("ReviewedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("RewardsJson")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<int>("SafetyCost")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasDefaultValue("draft");
+
+                    b.Property<int>("ThinkingCost")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Version")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Id")
+                        .IsUnique();
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("Id", "Status");
+
+                    b.ToTable("HeroDefinitions", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.HeroDefinitionCraft", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid?>("ApprovedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AssignedReviewerUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("BaseVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CourageCost")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("CreativityCost")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CuriosityCost")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Image")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<bool>("IsUnlocked")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("LastDraftVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<double>("PositionX")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("PositionY")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("PrerequisitesJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("PublishedDefinitionId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime?>("ReviewEndedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ReviewNotes")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ReviewStartedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ReviewedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("RewardsJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("SafetyCost")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<int>("ThinkingCost")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId")
+                        .HasFilter("[CreatedByUserId] IS NOT NULL");
+
+                    b.HasIndex("ReviewedByUserId");
+
+                    b.HasIndex("Status");
+
+                    b.ToTable("HeroDefinitionCrafts", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.HeroDefinitionCraftTranslation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AudioUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("HeroDefinitionCraftId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("LanguageCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("Story")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HeroDefinitionCraftId");
+
+                    b.HasIndex("HeroDefinitionCraftId", "LanguageCode")
+                        .IsUnique();
+
+                    b.ToTable("HeroDefinitionCraftTranslations", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.HeroDefinitionDefinition", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("BaseVersion")
+                        .HasColumnType("integer");
 
                     b.Property<int>("CourageCost")
                         .HasColumnType("integer");
@@ -2397,103 +3709,103 @@ namespace XooCreator.BA.Migrations
 
                     b.Property<string>("Image")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<bool>("IsUnlocked")
                         .HasColumnType("boolean");
 
+                    b.Property<int>("LastPublishedVersion")
+                        .HasColumnType("integer");
+
                     b.Property<double>("PositionX")
-                        .HasColumnType("decimal(10,6)");
+                        .HasColumnType("double precision");
 
                     b.Property<double>("PositionY")
-                        .HasColumnType("decimal(10,6)");
+                        .HasColumnType("double precision");
 
                     b.Property<string>("PrerequisitesJson")
                         .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)");
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTime?>("PublishedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("PublishedByUserId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("RewardsJson")
                         .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)");
+                        .HasColumnType("jsonb");
 
                     b.Property<int>("SafetyCost")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
                     b.Property<int>("ThinkingCost")
                         .HasColumnType("integer");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("Version")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("Id")
-                        .IsUnique();
+                    b.HasIndex("PublishedByUserId");
 
-                    b.ToTable("HeroDefinitions", "alchimalia_schema");
+                    b.HasIndex("Status");
 
-                    b.HasData(
-                        new
-                        {
-                            Id = "puf-puf",
-                            CourageCost = 0,
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(4112),
-                            CreativityCost = 0,
-                            CuriosityCost = 0,
-                            Image = "images/heroes/pufpufblink.gif",
-                            IsUnlocked = false,
-                            PositionX = 0.0,
-                            PositionY = 0.0,
-                            PrerequisitesJson = "[]",
-                            RewardsJson = "[]",
-                            SafetyCost = 0,
-                            ThinkingCost = 0,
-                            Type = "STORY_HERO",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(4113)
-                        },
-                        new
-                        {
-                            Id = "linkaro",
-                            CourageCost = 0,
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(4117),
-                            CreativityCost = 0,
-                            CuriosityCost = 0,
-                            Image = "images/heroes/linkaro.png",
-                            IsUnlocked = false,
-                            PositionX = 0.0,
-                            PositionY = 0.0,
-                            PrerequisitesJson = "[]",
-                            RewardsJson = "[]",
-                            SafetyCost = 0,
-                            ThinkingCost = 0,
-                            Type = "STORY_HERO",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(4117)
-                        },
-                        new
-                        {
-                            Id = "grubot",
-                            CourageCost = 0,
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(4120),
-                            CreativityCost = 0,
-                            CuriosityCost = 0,
-                            Image = "images/heroes/grubot.png",
-                            IsUnlocked = false,
-                            PositionX = 0.0,
-                            PositionY = 0.0,
-                            PrerequisitesJson = "[]",
-                            RewardsJson = "[]",
-                            SafetyCost = 0,
-                            ThinkingCost = 0,
-                            Type = "STORY_HERO",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(4120)
-                        });
+                    b.ToTable("HeroDefinitionDefinitions", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.HeroDefinitionDefinitionTranslation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AudioUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("HeroDefinitionDefinitionId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("LanguageCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("Story")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HeroDefinitionDefinitionId");
+
+                    b.HasIndex("HeroDefinitionDefinitionId", "LanguageCode")
+                        .IsUnique()
+                        .HasDatabaseName("IX_HeroDefinitionDefinitionTranslations_HeroDefinitionDefinit~1");
+
+                    b.ToTable("HeroDefinitionDefinitionTranslations", "alchimalia_schema");
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.HeroDefinitionTranslation", b =>
@@ -2501,6 +3813,10 @@ namespace XooCreator.BA.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<string>("AudioUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -2529,6 +3845,42 @@ namespace XooCreator.BA.Migrations
                         .IsUnique();
 
                     b.ToTable("HeroDefinitionTranslations", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.HeroDefinitionVersion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("HeroDefinitionId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("SnapshotJson")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HeroDefinitionId", "Version")
+                        .IsUnique();
+
+                    b.ToTable("HeroDefinitionVersions", "alchimalia_schema");
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.HeroMessage", b =>
@@ -2570,393 +3922,6 @@ namespace XooCreator.BA.Migrations
                         .IsUnique();
 
                     b.ToTable("HeroMessages", "alchimalia_schema");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("c5670208-640d-43bd-9eb5-ec39f8032f24"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_gateway_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(198),
-                            HeroId = "puf-puf",
-                            IsActive = true,
-                            MessageKey = "hero_puf-puf_region_gateway_message",
-                            RegionId = "gateway",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(199)
-                        },
-                        new
-                        {
-                            Id = new Guid("464b15f2-f2f1-4052-82df-b3bc4e4410ea"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_terra_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(201),
-                            HeroId = "puf-puf",
-                            IsActive = true,
-                            MessageKey = "hero_puf-puf_region_terra_message",
-                            RegionId = "terra",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(201)
-                        },
-                        new
-                        {
-                            Id = new Guid("d4de0633-61c4-47f3-b755-0e523af02ed8"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_lunaria_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(203),
-                            HeroId = "puf-puf",
-                            IsActive = true,
-                            MessageKey = "hero_puf-puf_region_lunaria_message",
-                            RegionId = "lunaria",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(203)
-                        },
-                        new
-                        {
-                            Id = new Guid("10841b71-ecb0-42a0-b4f1-6424cf753186"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_oceanica_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(205),
-                            HeroId = "puf-puf",
-                            IsActive = true,
-                            MessageKey = "hero_puf-puf_region_oceanica_message",
-                            RegionId = "oceanica",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(205)
-                        },
-                        new
-                        {
-                            Id = new Guid("05130a8f-d16d-4efd-bb72-bbd81e0ba497"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_sylvaria_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(206),
-                            HeroId = "puf-puf",
-                            IsActive = true,
-                            MessageKey = "hero_puf-puf_region_sylvaria_message",
-                            RegionId = "sylvaria",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(206)
-                        },
-                        new
-                        {
-                            Id = new Guid("55d7d48a-f52f-41c8-9a9c-bc1f5ebae449"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_crystalia_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(248),
-                            HeroId = "puf-puf",
-                            IsActive = true,
-                            MessageKey = "hero_puf-puf_region_crystalia_message",
-                            RegionId = "crystalia",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(248)
-                        },
-                        new
-                        {
-                            Id = new Guid("5e61f8ed-352c-4181-98a7-1f1c4ba14552"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_zephyra_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(249),
-                            HeroId = "puf-puf",
-                            IsActive = true,
-                            MessageKey = "hero_puf-puf_region_zephyra_message",
-                            RegionId = "zephyra",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(250)
-                        },
-                        new
-                        {
-                            Id = new Guid("1eb45cb0-1aba-43b4-9537-13866e55821b"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_pyron_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(251),
-                            HeroId = "puf-puf",
-                            IsActive = true,
-                            MessageKey = "hero_puf-puf_region_pyron_message",
-                            RegionId = "pyron",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(251)
-                        },
-                        new
-                        {
-                            Id = new Guid("d9f9f339-43eb-4958-80ec-418b12025177"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_neptunia_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(252),
-                            HeroId = "puf-puf",
-                            IsActive = true,
-                            MessageKey = "hero_puf-puf_region_neptunia_message",
-                            RegionId = "neptunia",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(252)
-                        },
-                        new
-                        {
-                            Id = new Guid("fe6d4822-e85e-43fa-854e-f2c8c4a67511"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_aetherion_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(254),
-                            HeroId = "puf-puf",
-                            IsActive = true,
-                            MessageKey = "hero_puf-puf_region_aetherion_message",
-                            RegionId = "aetherion",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(255)
-                        },
-                        new
-                        {
-                            Id = new Guid("c480afe9-adbf-40d7-8513-5772872178e0"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/puf-puf/hero_puf-puf_region_kelo_ketis_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(256),
-                            HeroId = "puf-puf",
-                            IsActive = true,
-                            MessageKey = "hero_puf-puf_region_kelo_ketis_message",
-                            RegionId = "kelo-ketis",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(256)
-                        },
-                        new
-                        {
-                            Id = new Guid("efd682b9-07e3-485e-bea7-a01f68999dae"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_gateway_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(258),
-                            HeroId = "linkaro",
-                            IsActive = true,
-                            MessageKey = "hero_linkaro_region_gateway_message",
-                            RegionId = "gateway",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(258)
-                        },
-                        new
-                        {
-                            Id = new Guid("91b8cfe3-b057-4022-a950-b8f04990a9dc"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_terra_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(260),
-                            HeroId = "linkaro",
-                            IsActive = true,
-                            MessageKey = "hero_linkaro_region_terra_message",
-                            RegionId = "terra",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(260)
-                        },
-                        new
-                        {
-                            Id = new Guid("150e8f7e-2907-4f32-a890-89572085c4d8"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_lunaria_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(262),
-                            HeroId = "linkaro",
-                            IsActive = true,
-                            MessageKey = "hero_linkaro_region_lunaria_message",
-                            RegionId = "lunaria",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(263)
-                        },
-                        new
-                        {
-                            Id = new Guid("32882744-ec76-46e8-bdb7-a28edc668939"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_mechanika_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(264),
-                            HeroId = "linkaro",
-                            IsActive = true,
-                            MessageKey = "hero_linkaro_region_mechanika_message",
-                            RegionId = "mechanika",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(264)
-                        },
-                        new
-                        {
-                            Id = new Guid("3d9c4c13-8706-4e7d-aa03-dbbed5ee255c"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_oceanica_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(266),
-                            HeroId = "linkaro",
-                            IsActive = true,
-                            MessageKey = "hero_linkaro_region_oceanica_message",
-                            RegionId = "oceanica",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(266)
-                        },
-                        new
-                        {
-                            Id = new Guid("095ac8b2-1425-45ad-919d-0b4d770935b1"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_sylvaria_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(267),
-                            HeroId = "linkaro",
-                            IsActive = true,
-                            MessageKey = "hero_linkaro_region_sylvaria_message",
-                            RegionId = "sylvaria",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(267)
-                        },
-                        new
-                        {
-                            Id = new Guid("a7344331-f07f-45e5-8adc-dc8fe46713bb"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_crystalia_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(269),
-                            HeroId = "linkaro",
-                            IsActive = true,
-                            MessageKey = "hero_linkaro_region_crystalia_message",
-                            RegionId = "crystalia",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(269)
-                        },
-                        new
-                        {
-                            Id = new Guid("569c3eed-aeee-4c00-9413-20097458a66d"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_zephyra_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(271),
-                            HeroId = "linkaro",
-                            IsActive = true,
-                            MessageKey = "hero_linkaro_region_zephyra_message",
-                            RegionId = "zephyra",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(271)
-                        },
-                        new
-                        {
-                            Id = new Guid("cd670e6c-4474-4c36-b0fe-f74aaacc50a5"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_pyron_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(272),
-                            HeroId = "linkaro",
-                            IsActive = true,
-                            MessageKey = "hero_linkaro_region_pyron_message",
-                            RegionId = "pyron",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(272)
-                        },
-                        new
-                        {
-                            Id = new Guid("0331af85-a296-40bd-a68b-839c9a8966ee"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_neptunia_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(273),
-                            HeroId = "linkaro",
-                            IsActive = true,
-                            MessageKey = "hero_linkaro_region_neptunia_message",
-                            RegionId = "neptunia",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(273)
-                        },
-                        new
-                        {
-                            Id = new Guid("053133ad-b99d-448a-b740-9109bb1b299d"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_aetherion_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(276),
-                            HeroId = "linkaro",
-                            IsActive = true,
-                            MessageKey = "hero_linkaro_region_aetherion_message",
-                            RegionId = "aetherion",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(276)
-                        },
-                        new
-                        {
-                            Id = new Guid("e19aa3c2-440d-46df-b2dd-a9660ad8cb35"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/linkaro/hero_linkaro_region_kelo_ketis_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(277),
-                            HeroId = "linkaro",
-                            IsActive = true,
-                            MessageKey = "hero_linkaro_region_kelo_ketis_message",
-                            RegionId = "kelo-ketis",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(278)
-                        },
-                        new
-                        {
-                            Id = new Guid("aacdc921-26ab-48d5-a95a-628bb7fe446a"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_gateway_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(279),
-                            HeroId = "grubot",
-                            IsActive = true,
-                            MessageKey = "hero_grubot_region_gateway_message",
-                            RegionId = "gateway",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(279)
-                        },
-                        new
-                        {
-                            Id = new Guid("b054b29a-f492-4e60-a07a-9297a11c4344"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_terra_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(280),
-                            HeroId = "grubot",
-                            IsActive = true,
-                            MessageKey = "hero_grubot_region_terra_message",
-                            RegionId = "terra",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(281)
-                        },
-                        new
-                        {
-                            Id = new Guid("d47fc9b2-7595-4433-a8d5-558333e911e9"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_lunaria_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(282),
-                            HeroId = "grubot",
-                            IsActive = true,
-                            MessageKey = "hero_grubot_region_lunaria_message",
-                            RegionId = "lunaria",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(282)
-                        },
-                        new
-                        {
-                            Id = new Guid("bdc34441-9442-466c-b2b7-ad4f8ba0cf58"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_mechanika_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(283),
-                            HeroId = "grubot",
-                            IsActive = true,
-                            MessageKey = "hero_grubot_region_mechanika_message",
-                            RegionId = "mechanika",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(284)
-                        },
-                        new
-                        {
-                            Id = new Guid("8d9cb436-ce1a-4553-877f-414d832cc078"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_oceanica_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(285),
-                            HeroId = "grubot",
-                            IsActive = true,
-                            MessageKey = "hero_grubot_region_oceanica_message",
-                            RegionId = "oceanica",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(285)
-                        },
-                        new
-                        {
-                            Id = new Guid("15228aa7-6688-4b49-bb80-7ba9a19ec0f9"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_sylvaria_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(286),
-                            HeroId = "grubot",
-                            IsActive = true,
-                            MessageKey = "hero_grubot_region_sylvaria_message",
-                            RegionId = "sylvaria",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(286)
-                        },
-                        new
-                        {
-                            Id = new Guid("715613a7-4a7c-4810-9e79-4893abd4979d"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_crystalia_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(289),
-                            HeroId = "grubot",
-                            IsActive = true,
-                            MessageKey = "hero_grubot_region_crystalia_message",
-                            RegionId = "crystalia",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(289)
-                        },
-                        new
-                        {
-                            Id = new Guid("ef3dd111-bfc1-41aa-8f2a-be75c4e135e5"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_zephyra_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(290),
-                            HeroId = "grubot",
-                            IsActive = true,
-                            MessageKey = "hero_grubot_region_zephyra_message",
-                            RegionId = "zephyra",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(291)
-                        },
-                        new
-                        {
-                            Id = new Guid("b17263bf-e10b-44ba-9d2d-ef06fc75297a"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_pyron_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(292),
-                            HeroId = "grubot",
-                            IsActive = true,
-                            MessageKey = "hero_grubot_region_pyron_message",
-                            RegionId = "pyron",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(292)
-                        },
-                        new
-                        {
-                            Id = new Guid("befceaf3-b75b-4f99-8bce-e2e9d426aa54"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_neptunia_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(293),
-                            HeroId = "grubot",
-                            IsActive = true,
-                            MessageKey = "hero_grubot_region_neptunia_message",
-                            RegionId = "neptunia",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(293)
-                        },
-                        new
-                        {
-                            Id = new Guid("216bbbc1-6392-4776-a3ee-59b75a6e1590"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_aetherion_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(296),
-                            HeroId = "grubot",
-                            IsActive = true,
-                            MessageKey = "hero_grubot_region_aetherion_message",
-                            RegionId = "aetherion",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(296)
-                        },
-                        new
-                        {
-                            Id = new Guid("898eceb1-87ae-4ba4-bcd0-60d036f111df"),
-                            AudioUrl = "audio/ro-ro/tol/hero-speach/grubot/hero_grubot_region_kelo_ketis_message.wav",
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(297),
-                            HeroId = "grubot",
-                            IsActive = true,
-                            MessageKey = "hero_grubot_region_kelo_ketis_message",
-                            RegionId = "kelo-ketis",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 378, DateTimeKind.Utc).AddTicks(297)
-                        });
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.HeroProgress", b =>
@@ -3070,6 +4035,30 @@ namespace XooCreator.BA.Migrations
                     b.ToTable("Jobs", "alchimalia_schema");
                 });
 
+            modelBuilder.Entity("XooCreator.BA.Data.PlatformSetting", b =>
+                {
+                    b.Property<string>("Key")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<bool>("BoolValue")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("StringValue")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.HasKey("Key");
+
+                    b.ToTable("PlatformSettings", "alchimalia_schema");
+                });
+
             modelBuilder.Entity("XooCreator.BA.Data.Region", b =>
                 {
                     b.Property<Guid>("Id")
@@ -3087,43 +4076,6 @@ namespace XooCreator.BA.Migrations
                         .IsUnique();
 
                     b.ToTable("Regions", "alchimalia_schema");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("10000000-0000-0000-0000-000000000001"),
-                            Name = "Sahara"
-                        },
-                        new
-                        {
-                            Id = new Guid("10000000-0000-0000-0000-000000000002"),
-                            Name = "Jungle"
-                        },
-                        new
-                        {
-                            Id = new Guid("10000000-0000-0000-0000-000000000003"),
-                            Name = "Farm"
-                        },
-                        new
-                        {
-                            Id = new Guid("10000000-0000-0000-0000-000000000004"),
-                            Name = "Savanna"
-                        },
-                        new
-                        {
-                            Id = new Guid("10000000-0000-0000-0000-000000000005"),
-                            Name = "Forest"
-                        },
-                        new
-                        {
-                            Id = new Guid("10000000-0000-0000-0000-000000000006"),
-                            Name = "Wetlands"
-                        },
-                        new
-                        {
-                            Id = new Guid("10000000-0000-0000-0000-000000000007"),
-                            Name = "Mountains"
-                        });
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.StoryAnswer", b =>
@@ -3138,6 +4090,9 @@ namespace XooCreator.BA.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsCorrect")
+                        .HasColumnType("boolean");
 
                     b.Property<int>("SortOrder")
                         .HasColumnType("integer");
@@ -3239,6 +4194,17 @@ namespace XooCreator.BA.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsEvaluative")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsPartOfEpic")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("LastPublishedVersion")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
+
                     b.Property<double>("PriceInCredits")
                         .HasColumnType("double precision");
 
@@ -3308,6 +4274,702 @@ namespace XooCreator.BA.Migrations
                         .IsUnique();
 
                     b.ToTable("StoryDefinitionTranslations", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryDefinitionUnlockedHero", b =>
+                {
+                    b.Property<Guid>("StoryDefinitionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("HeroId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("StoryDefinitionId", "HeroId");
+
+                    b.ToTable("StoryDefinitionUnlockedHeroes", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryEpicCraft", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid?>("ApprovedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AssignedReviewerUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("BaseVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("CoverImageUrl")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("LastDraftVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid>("OwnerUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("ReviewEndedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ReviewNotes")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ReviewStartedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ReviewedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApprovedByUserId");
+
+                    b.HasIndex("AssignedReviewerUserId")
+                        .HasFilter("[AssignedReviewerUserId] IS NOT NULL");
+
+                    b.HasIndex("ReviewedByUserId");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("OwnerUserId", "Id")
+                        .IsUnique();
+
+                    b.ToTable("StoryEpicCrafts", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryEpicCraftHeroReference", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("EpicId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("HeroId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("StoryId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EpicId");
+
+                    b.HasIndex("HeroId");
+
+                    b.HasIndex("EpicId", "HeroId")
+                        .IsUnique();
+
+                    b.ToTable("StoryEpicCraftHeroReferences", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryEpicCraftRegion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("EpicId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsLocked")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsStartupRegion")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("RegionId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<double?>("X")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("Y")
+                        .HasColumnType("double precision");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EpicId", "RegionId")
+                        .IsUnique();
+
+                    b.ToTable("StoryEpicCraftRegions", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryEpicCraftStoryNode", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("EpicId")
+                        .IsRequired()
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("RegionId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("RewardImageUrl")
+                        .HasColumnType("text");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("StoryId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<double?>("X")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("Y")
+                        .HasColumnType("double precision");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StoryId");
+
+                    b.HasIndex("EpicId", "RegionId");
+
+                    b.HasIndex("EpicId", "StoryId", "RegionId")
+                        .IsUnique();
+
+                    b.ToTable("StoryEpicCraftStoryNodes", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryEpicCraftTranslation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("LanguageCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("StoryEpicCraftId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StoryEpicCraftId", "LanguageCode")
+                        .IsUnique();
+
+                    b.ToTable("StoryEpicCraftTranslations", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryEpicCraftUnlockRule", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("EpicId")
+                        .IsRequired()
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("FromId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int?>("MinCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("RequiredStoriesCsv")
+                        .HasColumnType("text");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("StoryId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ToRegionId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("ToStoryId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EpicId");
+
+                    b.ToTable("StoryEpicCraftUnlockRules", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryEpicDefinition", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("BaseVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("CoverImageUrl")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("LastPublishedVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid>("OwnerUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("PublishedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("OwnerUserId", "Id")
+                        .IsUnique();
+
+                    b.ToTable("StoryEpicDefinitions", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryEpicDefinitionRegion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("EpicId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsLocked")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsStartupRegion")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("RegionId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<double?>("X")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("Y")
+                        .HasColumnType("double precision");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EpicId", "RegionId")
+                        .IsUnique();
+
+                    b.ToTable("StoryEpicDefinitionRegions", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryEpicDefinitionStoryNode", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("EpicId")
+                        .IsRequired()
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("RegionId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("RewardImageUrl")
+                        .HasColumnType("text");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("StoryId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<double?>("X")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("Y")
+                        .HasColumnType("double precision");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StoryId");
+
+                    b.HasIndex("EpicId", "RegionId");
+
+                    b.HasIndex("EpicId", "StoryId", "RegionId")
+                        .IsUnique();
+
+                    b.ToTable("StoryEpicDefinitionStoryNodes", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryEpicDefinitionTranslation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("LanguageCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("StoryEpicDefinitionId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StoryEpicDefinitionId", "LanguageCode")
+                        .IsUnique();
+
+                    b.ToTable("StoryEpicDefinitionTranslations", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryEpicDefinitionUnlockRule", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("EpicId")
+                        .IsRequired()
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("FromId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int?>("MinCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("RequiredStoriesCsv")
+                        .HasColumnType("text");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("StoryId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ToRegionId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("ToStoryId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EpicId");
+
+                    b.ToTable("StoryEpicDefinitionUnlockRules", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryEpicHeroReference", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("EpicId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("HeroId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("StoryId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HeroId");
+
+                    b.HasIndex("EpicId", "HeroId")
+                        .IsUnique();
+
+                    b.ToTable("StoryEpicHeroReferences", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryEpicRegionReference", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("EpicId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<bool>("IsLocked")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("RegionId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<double?>("X")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("Y")
+                        .HasColumnType("double precision");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RegionId");
+
+                    b.HasIndex("EpicId", "RegionId")
+                        .IsUnique();
+
+                    b.ToTable("StoryEpicRegionReferences", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryEvaluationResult", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("CorrectAnswers")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ScorePercentage")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("SessionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("StoryId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("TotalQuizzes")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "StoryId", "CompletedAt");
+
+                    b.HasIndex("UserId", "StoryId", "SessionId")
+                        .IsUnique();
+
+                    b.ToTable("StoryEvaluationResults", "alchimalia_schema");
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.StoryFeedback", b =>
@@ -3397,6 +5059,9 @@ namespace XooCreator.BA.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("HeroId")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -3407,10 +5072,21 @@ namespace XooCreator.BA.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
+                    b.Property<string>("ReviewNotes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
 
-                    b.Property<string>("UnlockConditionJson")
+                    b.Property<Guid?>("ReviewedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasDefaultValue("draft");
+
+                    b.Property<string>("UnlockConditionsJson")
                         .IsRequired()
                         .HasMaxLength(2000)
                         .HasColumnType("character varying(2000)");
@@ -3418,44 +5094,58 @@ namespace XooCreator.BA.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("Version")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1);
+
                     b.HasKey("Id");
 
                     b.HasIndex("HeroId")
                         .IsUnique();
 
-                    b.ToTable("StoryHeroes", "alchimalia_schema");
+                    b.HasIndex("Status");
 
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000100"),
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 377, DateTimeKind.Utc).AddTicks(3522),
-                            HeroId = "puf-puf",
-                            ImageUrl = "images/tol/stories/seed@alchimalia.com/intro-pufpuf/heroes/pufpufblink.gif",
-                            IsActive = true,
-                            UnlockConditionJson = "{\"Type\":\"story_completion\",\"RequiredStories\":[\"intro-pufpuf\"],\"MinProgress\":100}",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 377, DateTimeKind.Utc).AddTicks(3523)
-                        },
-                        new
-                        {
-                            Id = new Guid("11111111-1111-1111-1111-111111111100"),
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 377, DateTimeKind.Utc).AddTicks(3539),
-                            HeroId = "linkaro",
-                            ImageUrl = "images/tol/stories/seed@alchimalia.com/lunaria-s1/heroes/linkaro.png",
-                            IsActive = true,
-                            UnlockConditionJson = "{\"Type\":\"story_completion\",\"RequiredStories\":[\"lunaria-s1\"],\"MinProgress\":100}",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 377, DateTimeKind.Utc).AddTicks(3539)
-                        },
-                        new
-                        {
-                            Id = new Guid("22222222-2222-2222-2222-222222222200"),
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 377, DateTimeKind.Utc).AddTicks(3548),
-                            HeroId = "grubot",
-                            ImageUrl = "images/tol/stories/seed@alchimalia.com/mechanika-s1/heroes/grubot.png",
-                            IsActive = true,
-                            UnlockConditionJson = "{\"Type\":\"story_completion\",\"RequiredStories\":[\"mechanika-s1\"],\"MinProgress\":100}",
-                            UpdatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 377, DateTimeKind.Utc).AddTicks(3548)
-                        });
+                    b.HasIndex("Id", "Status");
+
+                    b.ToTable("StoryHeroes", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryHeroTranslation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<string>("GreetingAudioUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("GreetingText")
+                        .HasColumnType("text");
+
+                    b.Property<string>("LanguageCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<Guid>("StoryHeroId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StoryHeroId", "LanguageCode")
+                        .IsUnique();
+
+                    b.ToTable("StoryHeroTranslations", "alchimalia_schema");
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.StoryHeroUnlock", b =>
@@ -3484,32 +5174,69 @@ namespace XooCreator.BA.Migrations
                         .IsUnique();
 
                     b.ToTable("StoryHeroUnlocks", "alchimalia_schema");
+                });
 
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("60660482-e7c8-4811-a62b-ff8b8aef94e5"),
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 377, DateTimeKind.Utc).AddTicks(6283),
-                            StoryHeroId = new Guid("00000000-0000-0000-0000-000000000100"),
-                            StoryId = "intro-pufpuf",
-                            UnlockOrder = 1
-                        },
-                        new
-                        {
-                            Id = new Guid("c418d02b-db18-4065-b910-b922a20a454e"),
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 377, DateTimeKind.Utc).AddTicks(6314),
-                            StoryHeroId = new Guid("11111111-1111-1111-1111-111111111100"),
-                            StoryId = "lunaria-s1",
-                            UnlockOrder = 1
-                        },
-                        new
-                        {
-                            Id = new Guid("f27a146c-37ce-425b-8ece-ec9d1b3f42eb"),
-                            CreatedAt = new DateTime(2025, 11, 26, 18, 40, 47, 377, DateTimeKind.Utc).AddTicks(6339),
-                            StoryHeroId = new Guid("22222222-2222-2222-2222-222222222200"),
-                            StoryId = "mechanika-s1",
-                            UnlockOrder = 1
-                        });
+            modelBuilder.Entity("XooCreator.BA.Data.StoryHeroVersion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("SnapshotJson")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<Guid>("StoryHeroId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StoryHeroId", "Version")
+                        .IsUnique();
+
+                    b.ToTable("StoryHeroVersions", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryLike", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("LikedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("StoryId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StoryId")
+                        .HasDatabaseName("IX_StoryLikes_StoryId");
+
+                    b.HasIndex("UserId", "StoryId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_StoryLikes_UserId_StoryId");
+
+                    b.ToTable("StoryLikes", "alchimalia_schema");
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.StoryProgress", b =>
@@ -3577,6 +5304,50 @@ namespace XooCreator.BA.Migrations
                     b.ToTable("StoryPurchases", "alchimalia_schema");
                 });
 
+            modelBuilder.Entity("XooCreator.BA.Data.StoryQuizAnswer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("AnsweredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsCorrect")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("SelectedAnswerId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<Guid?>("SessionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("StoryId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("TileId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SessionId");
+
+                    b.HasIndex("UserId", "StoryId");
+
+                    b.HasIndex("UserId", "StoryId", "TileId", "SessionId");
+
+                    b.ToTable("StoryQuizAnswers", "alchimalia_schema");
+                });
+
             modelBuilder.Entity("XooCreator.BA.Data.StoryReader", b =>
                 {
                     b.Property<Guid>("Id")
@@ -3605,6 +5376,289 @@ namespace XooCreator.BA.Migrations
                         .IsUnique();
 
                     b.ToTable("StoryReaders", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryRegion", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid?>("ApprovedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AssignedReviewerUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid>("OwnerUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("PublishedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("ReviewEndedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ReviewNotes")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ReviewStartedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ReviewedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerUserId", "Id")
+                        .IsUnique();
+
+                    b.ToTable("StoryRegion", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryRegionCraft", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid?>("ApprovedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AssignedReviewerUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("BaseVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("text");
+
+                    b.Property<int>("LastDraftVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid>("OwnerUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("ReviewEndedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ReviewNotes")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ReviewStartedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ReviewedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApprovedByUserId");
+
+                    b.HasIndex("AssignedReviewerUserId")
+                        .HasFilter("[AssignedReviewerUserId] IS NOT NULL");
+
+                    b.HasIndex("ReviewedByUserId");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("Id", "Status");
+
+                    b.HasIndex("OwnerUserId", "Id")
+                        .IsUnique();
+
+                    b.ToTable("StoryRegionCrafts", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryRegionCraftTranslation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<string>("LanguageCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("StoryRegionCraftId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StoryRegionCraftId");
+
+                    b.HasIndex("StoryRegionCraftId", "LanguageCode")
+                        .IsUnique();
+
+                    b.ToTable("StoryRegionCraftTranslations", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryRegionDefinition", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("BaseVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("LastPublishedVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid>("OwnerUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("PublishedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("Id", "Version");
+
+                    b.HasIndex("OwnerUserId", "Id")
+                        .IsUnique();
+
+                    b.ToTable("StoryRegionDefinitions", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryRegionDefinitionTranslation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<string>("LanguageCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("StoryRegionDefinitionId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StoryRegionDefinitionId");
+
+                    b.HasIndex("StoryRegionDefinitionId", "LanguageCode")
+                        .IsUnique();
+
+                    b.ToTable("StoryRegionDefinitionTranslations", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryRegionTranslation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<string>("LanguageCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("StoryRegionId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StoryRegionId", "LanguageCode")
+                        .IsUnique();
+
+                    b.ToTable("StoryRegionTranslation", "alchimalia_schema");
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.StoryReview", b =>
@@ -3656,6 +5710,10 @@ namespace XooCreator.BA.Migrations
                     b.Property<string>("Caption")
                         .HasColumnType("text");
 
+                    b.Property<string>("ContentHash")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -3704,6 +5762,10 @@ namespace XooCreator.BA.Migrations
 
                     b.Property<string>("Caption")
                         .HasColumnType("text");
+
+                    b.Property<string>("ContentHash")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
 
                     b.Property<string>("LanguageCode")
                         .IsRequired()
@@ -3805,6 +5867,254 @@ namespace XooCreator.BA.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("TreeConfigurations", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.TreeOfHeroesConfigCraft", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<Guid?>("PublishedDefinitionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ReviewNotes")
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("ReviewedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("ReviewedByUserId");
+
+                    b.HasIndex("Status");
+
+                    b.ToTable("TreeOfHeroesConfigCrafts", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.TreeOfHeroesConfigCraftEdge", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ConfigCraftId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("FromHeroId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("ToHeroId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FromHeroId");
+
+                    b.HasIndex("ToHeroId");
+
+                    b.HasIndex("ConfigCraftId", "FromHeroId", "ToHeroId")
+                        .IsUnique();
+
+                    b.ToTable("TreeOfHeroesConfigCraftEdges", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.TreeOfHeroesConfigCraftNode", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ConfigCraftId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("CourageCost")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CreativityCost")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CuriosityCost")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("HeroDefinitionId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<bool>("IsStartup")
+                        .HasColumnType("boolean");
+
+                    b.Property<double>("PositionX")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("PositionY")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("PrerequisitesJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("SafetyCost")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ThinkingCost")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HeroDefinitionId");
+
+                    b.HasIndex("ConfigCraftId", "HeroDefinitionId")
+                        .IsUnique();
+
+                    b.ToTable("TreeOfHeroesConfigCraftNodes", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.TreeOfHeroesConfigDefinition", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<DateTime?>("PublishedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("PublishedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PublishedByUserId");
+
+                    b.HasIndex("Status");
+
+                    b.ToTable("TreeOfHeroesConfigDefinitions", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.TreeOfHeroesConfigDefinitionEdge", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ConfigDefinitionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("FromHeroId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("ToHeroId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FromHeroId");
+
+                    b.HasIndex("ToHeroId");
+
+                    b.HasIndex("ConfigDefinitionId", "FromHeroId", "ToHeroId")
+                        .IsUnique();
+
+                    b.ToTable("TreeOfHeroesConfigDefinitionEdges", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.TreeOfHeroesConfigDefinitionNode", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ConfigDefinitionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("CourageCost")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CreativityCost")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CuriosityCost")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("HeroDefinitionId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<bool>("IsStartup")
+                        .HasColumnType("boolean");
+
+                    b.Property<double>("PositionX")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("PositionY")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("PrerequisitesJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("SafetyCost")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ThinkingCost")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HeroDefinitionId");
+
+                    b.HasIndex("ConfigDefinitionId", "HeroDefinitionId")
+                        .IsUnique();
+
+                    b.ToTable("TreeOfHeroesConfigDefinitionNodes", "alchimalia_schema");
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.TreeProgress", b =>
@@ -4052,6 +6362,33 @@ namespace XooCreator.BA.Migrations
                     b.ToTable("UserCreatedStories", "alchimalia_schema");
                 });
 
+            modelBuilder.Entity("XooCreator.BA.Data.UserFavoriteEpics", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("AddedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("EpicId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EpicId");
+
+                    b.HasIndex("UserId", "EpicId")
+                        .IsUnique();
+
+                    b.ToTable("UserFavoriteEpics", "alchimalia_schema");
+                });
+
             modelBuilder.Entity("XooCreator.BA.Data.UserFavoriteStories", b =>
                 {
                     b.Property<Guid>("Id")
@@ -4107,6 +6444,42 @@ namespace XooCreator.BA.Migrations
                         .IsUnique();
 
                     b.ToTable("UserOwnedStories", "alchimalia_schema");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.UserStoryReadHistory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("LastReadAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("StoryId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("TotalTiles")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TotalTilesRead")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompletedAt");
+
+                    b.HasIndex("UserId", "StoryId")
+                        .IsUnique();
+
+                    b.ToTable("UserStoryReadHistory", "alchimalia_schema");
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.UserStoryReadProgress", b =>
@@ -4177,11 +6550,158 @@ namespace XooCreator.BA.Migrations
                 {
                     b.HasOne("XooCreator.BA.Data.Region", "Region")
                         .WithMany("Animals")
+                        .HasForeignKey("RegionId");
+
+                    b.Navigation("Region");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.AnimalCraft", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("XooCreator.BA.Data.Region", "Region")
+                        .WithMany()
                         .HasForeignKey("RegionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", null)
+                        .WithMany()
+                        .HasForeignKey("ReviewedByUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Region");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.AnimalCraftPartSupport", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.AnimalCraft", "AnimalCraft")
+                        .WithMany("SupportedParts")
+                        .HasForeignKey("AnimalCraftId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("XooCreator.BA.Data.BodyPart", "BodyPart")
+                        .WithMany()
+                        .HasForeignKey("BodyPartKey")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AnimalCraft");
+
+                    b.Navigation("BodyPart");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.AnimalCraftTranslation", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.AnimalCraft", "AnimalCraft")
+                        .WithMany("Translations")
+                        .HasForeignKey("AnimalCraftId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AnimalCraft");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.AnimalDefinition", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", null)
+                        .WithMany()
+                        .HasForeignKey("PublishedByUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("XooCreator.BA.Data.Region", "Region")
+                        .WithMany()
+                        .HasForeignKey("RegionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Region");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.AnimalDefinitionPartSupport", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.AnimalDefinition", "AnimalDefinition")
+                        .WithMany("SupportedParts")
+                        .HasForeignKey("AnimalDefinitionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("XooCreator.BA.Data.BodyPart", "BodyPart")
+                        .WithMany()
+                        .HasForeignKey("BodyPartKey")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AnimalDefinition");
+
+                    b.Navigation("BodyPart");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.AnimalDefinitionTranslation", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.AnimalDefinition", "AnimalDefinition")
+                        .WithMany("Translations")
+                        .HasForeignKey("AnimalDefinitionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AnimalDefinition");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.AnimalHybridCraftPart", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.AnimalCraft", "AnimalCraft")
+                        .WithMany("HybridParts")
+                        .HasForeignKey("AnimalCraftId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("XooCreator.BA.Data.BodyPart", "BodyPart")
+                        .WithMany()
+                        .HasForeignKey("BodyPartKey")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("XooCreator.BA.Data.AnimalDefinition", "SourceAnimal")
+                        .WithMany()
+                        .HasForeignKey("SourceAnimalId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("AnimalCraft");
+
+                    b.Navigation("BodyPart");
+
+                    b.Navigation("SourceAnimal");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.AnimalHybridDefinitionPart", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.AnimalDefinition", "AnimalDefinition")
+                        .WithMany("HybridParts")
+                        .HasForeignKey("AnimalDefinitionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("XooCreator.BA.Data.BodyPart", "BodyPart")
+                        .WithMany()
+                        .HasForeignKey("BodyPartKey")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("XooCreator.BA.Data.AnimalDefinition", "SourceAnimal")
+                        .WithMany()
+                        .HasForeignKey("SourceAnimalId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("AnimalDefinition");
+
+                    b.Navigation("BodyPart");
+
+                    b.Navigation("SourceAnimal");
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.AnimalPartSupport", b =>
@@ -4207,6 +6727,17 @@ namespace XooCreator.BA.Migrations
                 {
                     b.HasOne("XooCreator.BA.Data.Animal", "Animal")
                         .WithMany("Translations")
+                        .HasForeignKey("AnimalId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Animal");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.AnimalVersion", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.Animal", "Animal")
+                        .WithMany()
                         .HasForeignKey("AnimalId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -4262,6 +6793,24 @@ namespace XooCreator.BA.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.Entities.AnimalVersionJob", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.Entities.HeroDefinitionVersionJob", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.Entities.StoryAgeGroupTranslation", b =>
@@ -4389,6 +6938,17 @@ namespace XooCreator.BA.Migrations
                     b.Navigation("StoryCraft");
                 });
 
+            modelBuilder.Entity("XooCreator.BA.Data.Entities.StoryCraftUnlockedHero", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.Entities.StoryCraft", "StoryCraft")
+                        .WithMany("UnlockedHeroes")
+                        .HasForeignKey("StoryCraftId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("StoryCraft");
+                });
+
             modelBuilder.Entity("XooCreator.BA.Data.Entities.StoryDefinitionAgeGroup", b =>
                 {
                     b.HasOne("XooCreator.BA.Data.Entities.StoryAgeGroup", "StoryAgeGroup")
@@ -4427,6 +6987,82 @@ namespace XooCreator.BA.Migrations
                     b.Navigation("StoryTopic");
                 });
 
+            modelBuilder.Entity("XooCreator.BA.Data.Entities.StoryEpicCraftAgeGroup", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.Entities.StoryAgeGroup", "StoryAgeGroup")
+                        .WithMany()
+                        .HasForeignKey("StoryAgeGroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("XooCreator.BA.Data.StoryEpicCraft", "StoryEpicCraft")
+                        .WithMany("AgeGroups")
+                        .HasForeignKey("StoryEpicCraftId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("StoryAgeGroup");
+
+                    b.Navigation("StoryEpicCraft");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.Entities.StoryEpicCraftTopic", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.StoryEpicCraft", "StoryEpicCraft")
+                        .WithMany("Topics")
+                        .HasForeignKey("StoryEpicCraftId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("XooCreator.BA.Data.Entities.StoryTopic", "StoryTopic")
+                        .WithMany()
+                        .HasForeignKey("StoryTopicId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("StoryEpicCraft");
+
+                    b.Navigation("StoryTopic");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.Entities.StoryEpicDefinitionAgeGroup", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.Entities.StoryAgeGroup", "StoryAgeGroup")
+                        .WithMany()
+                        .HasForeignKey("StoryAgeGroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("XooCreator.BA.Data.StoryEpicDefinition", "StoryEpicDefinition")
+                        .WithMany("AgeGroups")
+                        .HasForeignKey("StoryEpicDefinitionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("StoryAgeGroup");
+
+                    b.Navigation("StoryEpicDefinition");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.Entities.StoryEpicDefinitionTopic", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.StoryEpicDefinition", "StoryEpicDefinition")
+                        .WithMany("Topics")
+                        .HasForeignKey("StoryEpicDefinitionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("XooCreator.BA.Data.Entities.StoryTopic", "StoryTopic")
+                        .WithMany()
+                        .HasForeignKey("StoryTopicId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("StoryEpicDefinition");
+
+                    b.Navigation("StoryTopic");
+                });
+
             modelBuilder.Entity("XooCreator.BA.Data.Entities.StoryPublicationAudit", b =>
                 {
                     b.HasOne("XooCreator.BA.Data.StoryDefinition", "StoryDefinition")
@@ -4449,10 +7085,205 @@ namespace XooCreator.BA.Migrations
                     b.Navigation("StoryTopic");
                 });
 
+            modelBuilder.Entity("XooCreator.BA.Data.EpicHero", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.EpicHeroCraft", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", null)
+                        .WithMany()
+                        .HasForeignKey("ApprovedByUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", null)
+                        .WithMany()
+                        .HasForeignKey("AssignedReviewerUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", null)
+                        .WithMany()
+                        .HasForeignKey("ReviewedByUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.EpicHeroCraftTranslation", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.EpicHeroCraft", "EpicHeroCraft")
+                        .WithMany("Translations")
+                        .HasForeignKey("EpicHeroCraftId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("EpicHeroCraft");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.EpicHeroDefinition", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.EpicHeroDefinitionTranslation", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.EpicHeroDefinition", "EpicHeroDefinition")
+                        .WithMany("Translations")
+                        .HasForeignKey("EpicHeroDefinitionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("EpicHeroDefinition");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.EpicHeroTranslation", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.EpicHero", "EpicHero")
+                        .WithMany("Translations")
+                        .HasForeignKey("EpicHeroId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("EpicHero");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.EpicProgress", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.EpicReader", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.StoryEpicDefinition", "Epic")
+                        .WithMany()
+                        .HasForeignKey("EpicId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Epic");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.EpicReview", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.StoryEpicDefinition", "Epic")
+                        .WithMany()
+                        .HasForeignKey("EpicId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Epic");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.EpicStoryProgress", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.HeroDefinitionCraft", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", null)
+                        .WithMany()
+                        .HasForeignKey("ReviewedByUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.HeroDefinitionCraftTranslation", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.HeroDefinitionCraft", "HeroDefinitionCraft")
+                        .WithMany("Translations")
+                        .HasForeignKey("HeroDefinitionCraftId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("HeroDefinitionCraft");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.HeroDefinitionDefinition", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", null)
+                        .WithMany()
+                        .HasForeignKey("PublishedByUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.HeroDefinitionDefinitionTranslation", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.HeroDefinitionDefinition", "HeroDefinitionDefinition")
+                        .WithMany("Translations")
+                        .HasForeignKey("HeroDefinitionDefinitionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("HeroDefinitionDefinition");
+                });
+
             modelBuilder.Entity("XooCreator.BA.Data.HeroDefinitionTranslation", b =>
                 {
                     b.HasOne("XooCreator.BA.Data.HeroDefinition", "HeroDefinition")
                         .WithMany("Translations")
+                        .HasForeignKey("HeroDefinitionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("HeroDefinition");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.HeroDefinitionVersion", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.HeroDefinition", "HeroDefinition")
+                        .WithMany()
                         .HasForeignKey("HeroDefinitionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -4547,6 +7378,253 @@ namespace XooCreator.BA.Migrations
                     b.Navigation("StoryDefinition");
                 });
 
+            modelBuilder.Entity("XooCreator.BA.Data.StoryDefinitionUnlockedHero", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.StoryDefinition", "StoryDefinition")
+                        .WithMany("UnlockedHeroes")
+                        .HasForeignKey("StoryDefinitionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("StoryDefinition");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryEpicCraft", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", null)
+                        .WithMany()
+                        .HasForeignKey("ApprovedByUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", null)
+                        .WithMany()
+                        .HasForeignKey("AssignedReviewerUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", null)
+                        .WithMany()
+                        .HasForeignKey("ReviewedByUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryEpicCraftHeroReference", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.StoryEpicCraft", "Epic")
+                        .WithMany("HeroReferences")
+                        .HasForeignKey("EpicId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("XooCreator.BA.Data.EpicHeroCraft", "Hero")
+                        .WithMany()
+                        .HasForeignKey("HeroId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Epic");
+
+                    b.Navigation("Hero");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryEpicCraftRegion", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.StoryEpicCraft", "Epic")
+                        .WithMany("Regions")
+                        .HasForeignKey("EpicId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Epic");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryEpicCraftStoryNode", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.StoryEpicCraft", "Epic")
+                        .WithMany("StoryNodes")
+                        .HasForeignKey("EpicId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("XooCreator.BA.Data.Entities.StoryCraft", "StoryCraft")
+                        .WithMany()
+                        .HasForeignKey("StoryId")
+                        .HasPrincipalKey("StoryId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("XooCreator.BA.Data.StoryDefinition", "StoryDefinition")
+                        .WithMany()
+                        .HasForeignKey("StoryId")
+                        .HasPrincipalKey("StoryId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("XooCreator.BA.Data.StoryEpicCraftRegion", "Region")
+                        .WithMany("Stories")
+                        .HasForeignKey("EpicId", "RegionId")
+                        .HasPrincipalKey("EpicId", "RegionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Epic");
+
+                    b.Navigation("Region");
+
+                    b.Navigation("StoryCraft");
+
+                    b.Navigation("StoryDefinition");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryEpicCraftTranslation", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.StoryEpicCraft", "StoryEpicCraft")
+                        .WithMany("Translations")
+                        .HasForeignKey("StoryEpicCraftId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("StoryEpicCraft");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryEpicCraftUnlockRule", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.StoryEpicCraft", "Epic")
+                        .WithMany("UnlockRules")
+                        .HasForeignKey("EpicId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Epic");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryEpicDefinition", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryEpicDefinitionRegion", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.StoryEpicDefinition", "Epic")
+                        .WithMany("Regions")
+                        .HasForeignKey("EpicId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Epic");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryEpicDefinitionStoryNode", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.StoryEpicDefinition", "Epic")
+                        .WithMany("StoryNodes")
+                        .HasForeignKey("EpicId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("XooCreator.BA.Data.StoryDefinition", "StoryDefinition")
+                        .WithMany()
+                        .HasForeignKey("StoryId")
+                        .HasPrincipalKey("StoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("XooCreator.BA.Data.StoryEpicDefinitionRegion", "Region")
+                        .WithMany("Stories")
+                        .HasForeignKey("EpicId", "RegionId")
+                        .HasPrincipalKey("EpicId", "RegionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Epic");
+
+                    b.Navigation("Region");
+
+                    b.Navigation("StoryDefinition");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryEpicDefinitionTranslation", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.StoryEpicDefinition", "StoryEpicDefinition")
+                        .WithMany("Translations")
+                        .HasForeignKey("StoryEpicDefinitionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("StoryEpicDefinition");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryEpicDefinitionUnlockRule", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.StoryEpicDefinition", "Epic")
+                        .WithMany("UnlockRules")
+                        .HasForeignKey("EpicId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Epic");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryEpicHeroReference", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.StoryEpicDefinition", "Epic")
+                        .WithMany()
+                        .HasForeignKey("EpicId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("XooCreator.BA.Data.EpicHeroDefinition", "Hero")
+                        .WithMany()
+                        .HasForeignKey("HeroId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Epic");
+
+                    b.Navigation("Hero");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryEpicRegionReference", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.StoryEpicDefinition", "Epic")
+                        .WithMany()
+                        .HasForeignKey("EpicId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("XooCreator.BA.Data.StoryRegionDefinition", "Region")
+                        .WithMany()
+                        .HasForeignKey("RegionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Epic");
+
+                    b.Navigation("Region");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryEvaluationResult", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("XooCreator.BA.Data.StoryFeedback", b =>
                 {
                     b.HasOne("XooCreator.BA.Data.AlchimaliaUser", "User")
@@ -4569,15 +7647,48 @@ namespace XooCreator.BA.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("XooCreator.BA.Data.StoryHeroUnlock", b =>
+            modelBuilder.Entity("XooCreator.BA.Data.StoryHeroTranslation", b =>
                 {
                     b.HasOne("XooCreator.BA.Data.StoryHero", "StoryHero")
-                        .WithMany("StoryUnlocks")
+                        .WithMany("Translations")
                         .HasForeignKey("StoryHeroId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("StoryHero");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryHeroUnlock", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.StoryHero", "StoryHero")
+                        .WithMany()
+                        .HasForeignKey("StoryHeroId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("StoryHero");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryHeroVersion", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.StoryHero", "StoryHero")
+                        .WithMany()
+                        .HasForeignKey("StoryHeroId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("StoryHero");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryLike", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.StoryProgress", b =>
@@ -4619,6 +7730,17 @@ namespace XooCreator.BA.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("XooCreator.BA.Data.StoryQuizAnswer", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("XooCreator.BA.Data.StoryReader", b =>
                 {
                     b.HasOne("XooCreator.BA.Data.AlchimaliaUser", "User")
@@ -4628,6 +7750,87 @@ namespace XooCreator.BA.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryRegion", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryRegionCraft", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", null)
+                        .WithMany()
+                        .HasForeignKey("ApprovedByUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", null)
+                        .WithMany()
+                        .HasForeignKey("AssignedReviewerUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", null)
+                        .WithMany()
+                        .HasForeignKey("ReviewedByUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryRegionCraftTranslation", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.StoryRegionCraft", "StoryRegionCraft")
+                        .WithMany("Translations")
+                        .HasForeignKey("StoryRegionCraftId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("StoryRegionCraft");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryRegionDefinition", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryRegionDefinitionTranslation", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.StoryRegionDefinition", "StoryRegionDefinition")
+                        .WithMany("Translations")
+                        .HasForeignKey("StoryRegionDefinitionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("StoryRegionDefinition");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryRegionTranslation", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.StoryRegion", "StoryRegion")
+                        .WithMany("Translations")
+                        .HasForeignKey("StoryRegionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("StoryRegion");
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.StoryReview", b =>
@@ -4692,6 +7895,120 @@ namespace XooCreator.BA.Migrations
                         .IsRequired();
 
                     b.Navigation("Tree");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.TreeOfHeroesConfigCraft", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", null)
+                        .WithMany()
+                        .HasForeignKey("ReviewedByUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.TreeOfHeroesConfigCraftEdge", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.TreeOfHeroesConfigCraft", "Config")
+                        .WithMany("Edges")
+                        .HasForeignKey("ConfigCraftId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("XooCreator.BA.Data.HeroDefinitionDefinition", "FromHero")
+                        .WithMany()
+                        .HasForeignKey("FromHeroId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("XooCreator.BA.Data.HeroDefinitionDefinition", "ToHero")
+                        .WithMany()
+                        .HasForeignKey("ToHeroId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Config");
+
+                    b.Navigation("FromHero");
+
+                    b.Navigation("ToHero");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.TreeOfHeroesConfigCraftNode", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.TreeOfHeroesConfigCraft", "Config")
+                        .WithMany("Nodes")
+                        .HasForeignKey("ConfigCraftId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("XooCreator.BA.Data.HeroDefinitionDefinition", "HeroDefinition")
+                        .WithMany()
+                        .HasForeignKey("HeroDefinitionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Config");
+
+                    b.Navigation("HeroDefinition");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.TreeOfHeroesConfigDefinition", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", null)
+                        .WithMany()
+                        .HasForeignKey("PublishedByUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.TreeOfHeroesConfigDefinitionEdge", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.TreeOfHeroesConfigDefinition", "Config")
+                        .WithMany("Edges")
+                        .HasForeignKey("ConfigDefinitionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("XooCreator.BA.Data.HeroDefinitionDefinition", "FromHero")
+                        .WithMany()
+                        .HasForeignKey("FromHeroId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("XooCreator.BA.Data.HeroDefinitionDefinition", "ToHero")
+                        .WithMany()
+                        .HasForeignKey("ToHeroId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_TreeOfHeroesConfigDefinitionEdges_HeroDefinitionDefinition~1");
+
+                    b.Navigation("Config");
+
+                    b.Navigation("FromHero");
+
+                    b.Navigation("ToHero");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.TreeOfHeroesConfigDefinitionNode", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.TreeOfHeroesConfigDefinition", "Config")
+                        .WithMany("Nodes")
+                        .HasForeignKey("ConfigDefinitionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("XooCreator.BA.Data.HeroDefinitionDefinition", "HeroDefinition")
+                        .WithMany()
+                        .HasForeignKey("HeroDefinitionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Config");
+
+                    b.Navigation("HeroDefinition");
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.TreeProgress", b =>
@@ -4801,6 +8118,25 @@ namespace XooCreator.BA.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("XooCreator.BA.Data.UserFavoriteEpics", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.StoryEpicDefinition", "Epic")
+                        .WithMany()
+                        .HasForeignKey("EpicId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Epic");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("XooCreator.BA.Data.UserFavoriteStories", b =>
                 {
                     b.HasOne("XooCreator.BA.Data.StoryDefinition", "StoryDefinition")
@@ -4839,6 +8175,17 @@ namespace XooCreator.BA.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("XooCreator.BA.Data.UserStoryReadHistory", b =>
+                {
+                    b.HasOne("XooCreator.BA.Data.AlchimaliaUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("XooCreator.BA.Data.UserStoryReadProgress", b =>
                 {
                     b.HasOne("XooCreator.BA.Data.AlchimaliaUser", "User")
@@ -4863,6 +8210,24 @@ namespace XooCreator.BA.Migrations
 
             modelBuilder.Entity("XooCreator.BA.Data.Animal", b =>
                 {
+                    b.Navigation("SupportedParts");
+
+                    b.Navigation("Translations");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.AnimalCraft", b =>
+                {
+                    b.Navigation("HybridParts");
+
+                    b.Navigation("SupportedParts");
+
+                    b.Navigation("Translations");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.AnimalDefinition", b =>
+                {
+                    b.Navigation("HybridParts");
+
                     b.Navigation("SupportedParts");
 
                     b.Navigation("Translations");
@@ -4896,6 +8261,8 @@ namespace XooCreator.BA.Migrations
                     b.Navigation("Topics");
 
                     b.Navigation("Translations");
+
+                    b.Navigation("UnlockedHeroes");
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.Entities.StoryCraftAnswer", b =>
@@ -4921,7 +8288,32 @@ namespace XooCreator.BA.Migrations
                     b.Navigation("Translations");
                 });
 
+            modelBuilder.Entity("XooCreator.BA.Data.EpicHero", b =>
+                {
+                    b.Navigation("Translations");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.EpicHeroCraft", b =>
+                {
+                    b.Navigation("Translations");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.EpicHeroDefinition", b =>
+                {
+                    b.Navigation("Translations");
+                });
+
             modelBuilder.Entity("XooCreator.BA.Data.HeroDefinition", b =>
+                {
+                    b.Navigation("Translations");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.HeroDefinitionCraft", b =>
+                {
+                    b.Navigation("Translations");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.HeroDefinitionDefinition", b =>
                 {
                     b.Navigation("Translations");
                 });
@@ -4947,11 +8339,70 @@ namespace XooCreator.BA.Migrations
                     b.Navigation("Topics");
 
                     b.Navigation("Translations");
+
+                    b.Navigation("UnlockedHeroes");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryEpicCraft", b =>
+                {
+                    b.Navigation("AgeGroups");
+
+                    b.Navigation("HeroReferences");
+
+                    b.Navigation("Regions");
+
+                    b.Navigation("StoryNodes");
+
+                    b.Navigation("Topics");
+
+                    b.Navigation("Translations");
+
+                    b.Navigation("UnlockRules");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryEpicCraftRegion", b =>
+                {
+                    b.Navigation("Stories");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryEpicDefinition", b =>
+                {
+                    b.Navigation("AgeGroups");
+
+                    b.Navigation("Regions");
+
+                    b.Navigation("StoryNodes");
+
+                    b.Navigation("Topics");
+
+                    b.Navigation("Translations");
+
+                    b.Navigation("UnlockRules");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryEpicDefinitionRegion", b =>
+                {
+                    b.Navigation("Stories");
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.StoryHero", b =>
                 {
-                    b.Navigation("StoryUnlocks");
+                    b.Navigation("Translations");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryRegion", b =>
+                {
+                    b.Navigation("Translations");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryRegionCraft", b =>
+                {
+                    b.Navigation("Translations");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.StoryRegionDefinition", b =>
+                {
+                    b.Navigation("Translations");
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.StoryTile", b =>
@@ -4964,6 +8415,20 @@ namespace XooCreator.BA.Migrations
             modelBuilder.Entity("XooCreator.BA.Data.Tree", b =>
                 {
                     b.Navigation("Choices");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.TreeOfHeroesConfigCraft", b =>
+                {
+                    b.Navigation("Edges");
+
+                    b.Navigation("Nodes");
+                });
+
+            modelBuilder.Entity("XooCreator.BA.Data.TreeOfHeroesConfigDefinition", b =>
+                {
+                    b.Navigation("Edges");
+
+                    b.Navigation("Nodes");
                 });
 
             modelBuilder.Entity("XooCreator.BA.Data.TreeRegion", b =>

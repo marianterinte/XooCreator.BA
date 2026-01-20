@@ -173,7 +173,7 @@ public class EpicPublishQueueJob : BackgroundService
                             
                             try
                             {
-                                await publisher.PublishFromCraftAsync(craft, job.RequestedByEmail, langTag, job.ForceFull, stoppingToken);
+                                await publisher.PublishFromCraftAsync(craft, job.RequestedByEmail, langTag, job.ForceFull, job.IsAdminPublish, stoppingToken);
                                 _logger.LogInformation("PublishFromCraftAsync completed successfully: jobId={JobId} epicId={EpicId}", job.Id, job.EpicId);
                             }
                             catch (Exception publishEx)
