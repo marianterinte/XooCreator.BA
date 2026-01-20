@@ -6,6 +6,7 @@ namespace XooCreator.DbScriptRunner;
 
 public sealed class ScriptRunnerService
 {
+    private const string LockKeyPrefix = "XooCreator.DbScriptRunner";
     private readonly RunnerOptions _options;
     private readonly ILogger<ScriptRunnerService> _logger;
     private readonly SchemaVersionStore _schemaVersionStore;
@@ -29,35 +30,50 @@ public sealed class ScriptRunnerService
         await using var connection = new NpgsqlConnection(_options.ConnectionString);
         await connection.OpenAsync(cancellationToken);
 
-        var tableExists = await _schemaVersionStore.EnsureTableAsync(connection, createIfMissing: !_options.DryRun, cancellationToken);
-        if (!tableExists && _options.DryRun)
+        var lockKey = $"{LockKeyPrefix}:{_options.Schema}";
+        var lockAcquired = false;
+        try
         {
-            _logger.LogWarning("Versions table '{VersionsTable}' does not exist. Dry-run will assume no scripts have been applied.", _options.VersionsTable);
-        }
+            await AcquireAdvisoryLockAsync(connection, lockKey, cancellationToken);
+            lockAcquired = true;
 
-        foreach (var script in scripts)
-        {
-            if (_options.DryRun)
+            var tableExists = await _schemaVersionStore.EnsureTableAsync(connection, createIfMissing: !_options.DryRun, cancellationToken);
+            if (!tableExists && _options.DryRun)
             {
-                await ReportDryRunAsync(connection, script, tableExists, cancellationToken);
-                continue;
+                _logger.LogWarning("Versions table '{VersionsTable}' does not exist. Dry-run will assume no scripts have been applied.", _options.VersionsTable);
             }
 
-            if (!script.IsRollback && tableExists)
+            foreach (var script in scripts)
             {
-                var entry = await _schemaVersionStore.GetEntryAsync(connection, script.Name, cancellationToken);
-                if (entry is not null && entry.Checksum == script.Checksum)
+                if (_options.DryRun)
                 {
-                    _logger.LogInformation("Skipping {Script} (already applied).", script.Name);
+                    await ReportDryRunAsync(connection, script, tableExists, cancellationToken);
                     continue;
                 }
+
+                if (!script.IsRollback && tableExists)
+                {
+                    var entry = await _schemaVersionStore.GetEntryAsync(connection, script.Name, cancellationToken);
+                    if (entry is not null && entry.Checksum == script.Checksum)
+                    {
+                        _logger.LogInformation("Skipping {Script} (already applied).", script.Name);
+                        continue;
+                    }
+                }
+
+                await ExecuteScriptAsync(connection, script, cancellationToken);
+                tableExists = true;
             }
 
-            await ExecuteScriptAsync(connection, script, cancellationToken);
-            tableExists = true;
+            return 0;
         }
-
-        return 0;
+        finally
+        {
+            if (lockAcquired)
+            {
+                await ReleaseAdvisoryLockAsync(connection, lockKey, cancellationToken);
+            }
+        }
     }
 
     private IReadOnlyList<SqlScript> ResolveScripts()
@@ -100,6 +116,7 @@ public sealed class ScriptRunnerService
     {
         var stopwatch = Stopwatch.StartNew();
         var status = script.IsRollback ? "RolledBack" : "Succeeded";
+        _logger.LogInformation("Executing {Script}.", script.Name);
 
         await using var transaction = script.ManagesOwnTransaction ? null : await connection.BeginTransactionAsync(cancellationToken);
         try
@@ -134,6 +151,32 @@ public sealed class ScriptRunnerService
 
         await _schemaVersionStore.UpsertAsync(connection, script, stopwatch.ElapsedMilliseconds, status, cancellationToken);
         _logger.LogInformation("Applied {Script} in {Elapsed:hh\\:mm\\:ss\\.fff}.", script.Name, stopwatch.Elapsed);
+    }
+
+    private async Task AcquireAdvisoryLockAsync(NpgsqlConnection connection, string lockKey, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Acquiring advisory lock for database scripts.");
+        const string sql = "SELECT pg_advisory_lock(hashtext(@lockKey));";
+        await using var cmd = new NpgsqlCommand(sql, connection);
+        cmd.Parameters.AddWithValue("lockKey", lockKey);
+        await cmd.ExecuteNonQueryAsync(cancellationToken);
+        _logger.LogInformation("Advisory lock acquired.");
+    }
+
+    private async Task ReleaseAdvisoryLockAsync(NpgsqlConnection connection, string lockKey, CancellationToken cancellationToken)
+    {
+        try
+        {
+            const string sql = "SELECT pg_advisory_unlock(hashtext(@lockKey));";
+            await using var cmd = new NpgsqlCommand(sql, connection);
+            cmd.Parameters.AddWithValue("lockKey", lockKey);
+            await cmd.ExecuteNonQueryAsync(cancellationToken);
+            _logger.LogInformation("Advisory lock released.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to release advisory lock.");
+        }
     }
 }
 
