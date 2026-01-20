@@ -36,7 +36,9 @@ public class UserAdministrationService : IUserAdministrationService
                 LastName = u.LastName,
                 Email = u.Email,
                 Role = u.Role,  // Backward compatibility
-                Roles = u.Roles ?? (u.Role != 0 ? new List<UserRole> { u.Role } : new List<UserRole> { UserRole.Reader })
+                Roles = u.Roles ?? (u.Role != 0 ? new List<UserRole> { u.Role } : new List<UserRole> { UserRole.Reader }),
+                LastLoginDateUtc = u.LastLoginAt.ToString("O"),  // ISO 8601 format
+                CreatedAtUtc = u.CreatedAt.ToString("O")  // ISO 8601 format
             }).ToList();
 
             return new GetAllUsersResponse
