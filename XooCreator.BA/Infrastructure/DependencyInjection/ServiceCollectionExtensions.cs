@@ -25,6 +25,7 @@ using XooCreator.BA.Features.StoryFeedback.Repositories;
 using XooCreator.BA.Features.StoryFeedback.Services;
 using XooCreator.BA.Features.AlchimaliaUniverse.Repositories;
 using XooCreator.BA.Features.AlchimaliaUniverse.Services;
+using XooCreator.BA.Features.StoryCreatorsChallenge.Services;
 using XooCreator.BA.Infrastructure.Services.Images;
 using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Data;
@@ -71,6 +72,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserProfileService, UserProfileService>();
         services.AddScoped<IUserAdministrationRepository, UserAdministrationRepository>();
         services.AddScoped<IUserAdministrationService, UserAdministrationService>();
+        services.AddScoped<XooCreator.BA.Features.User.Services.ICreatorTokenService, XooCreator.BA.Features.User.Services.CreatorTokenService>();
         
         return services;
     }
@@ -300,6 +302,17 @@ public static class ServiceCollectionExtensions
         services.AddPaymentServices();
         services.AddFeedbackServices();
         services.AddAlchimaliaUniverseServices();
+        services.AddStoryCreatorsChallengeServices();
+        
+        return services;
+    }
+
+    /// <summary>
+    /// Registers Story Creators Challenge (CCC) services
+    /// </summary>
+    public static IServiceCollection AddStoryCreatorsChallengeServices(this IServiceCollection services)
+    {
+        services.AddScoped<IStoryCreatorsChallengeService, StoryCreatorsChallengeService>();
         
         return services;
     }
