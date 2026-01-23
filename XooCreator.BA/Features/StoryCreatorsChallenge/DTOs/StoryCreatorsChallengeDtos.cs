@@ -97,6 +97,8 @@ public record ChallengeSubmissionDto
     public Guid UserId { get; init; }
     public string? StoryTitle { get; init; } // From StoryDefinition
     public string? StoryCoverImageUrl { get; init; } // From StoryDefinition
+    public string? AuthorFirstName { get; init; } // From AlchimaliaUser
+    public string? AuthorLastName { get; init; } // From AlchimaliaUser
     public DateTime SubmittedAt { get; init; }
     public int LikesCount { get; init; }
     public bool IsWinner { get; init; }
@@ -124,6 +126,8 @@ public record PublicSubmissionDto
     public required string StoryId { get; init; }
     public required string StoryTitle { get; init; }
     public string? StoryCoverImageUrl { get; init; }
+    public string? AuthorFirstName { get; init; } // From AlchimaliaUser
+    public string? AuthorLastName { get; init; } // From AlchimaliaUser
     public int LikesCount { get; init; }
     public bool IsWinner { get; init; }
 }

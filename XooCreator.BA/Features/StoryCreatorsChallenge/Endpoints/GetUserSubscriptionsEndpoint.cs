@@ -21,9 +21,10 @@ public class GetUserSubscriptionsEndpoint
         _auth0 = auth0;
     }
 
-    [Route("/api/ccc/my-subscriptions")]
+    [Route("/api/{locale}/ccc/my-subscriptions")]
     [Authorize]
     public static async Task<Results<Ok<List<ChallengeSubscriptionDto>>, UnauthorizedHttpResult>> HandleGet(
+        [FromRoute] string locale,
         [FromServices] GetUserSubscriptionsEndpoint ep,
         CancellationToken ct)
     {

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Features.StoryCreatorsChallenge.DTOs;
+using XooCreator.BA.Features.User.Services;
 
 namespace XooCreator.BA.Features.StoryCreatorsChallenge.Services;
 
@@ -9,13 +10,16 @@ public class StoryCreatorsChallengeService : IStoryCreatorsChallengeService
 {
     private readonly XooDbContext _context;
     private readonly ILogger<StoryCreatorsChallengeService> _logger;
+    private readonly ICreatorTokenService _creatorTokenService;
 
     public StoryCreatorsChallengeService(
         XooDbContext context,
-        ILogger<StoryCreatorsChallengeService> logger)
+        ILogger<StoryCreatorsChallengeService> logger,
+        ICreatorTokenService creatorTokenService)
     {
         _context = context;
         _logger = logger;
+        _creatorTokenService = creatorTokenService;
     }
 
     public async Task<List<StoryCreatorsChallengeListItemDto>> GetAllChallengesAsync(string? languageCode, CancellationToken ct)
@@ -538,7 +542,7 @@ public class StoryCreatorsChallengeService : IStoryCreatorsChallengeService
             throw new InvalidOperationException("Story already submitted to this challenge");
         
         var likesCount = await _context.StoryLikes
-            .CountAsync(l => EF.Functions.ILike(l.StoryId, storyId), ct);
+            .CountAsync(l => l.StoryId == storyId, ct);
         
         var submission = new Data.Entities.StoryCreatorsChallengeSubmission
         {
@@ -553,6 +557,9 @@ public class StoryCreatorsChallengeService : IStoryCreatorsChallengeService
         _context.StoryCreatorsChallengeSubmissions.Add(submission);
         await _context.SaveChangesAsync(ct);
         
+        var user = await _context.AlchimaliaUsers
+            .FirstOrDefaultAsync(u => u.Id == userId, ct);
+
         return new ChallengeSubmissionDto
         {
             ChallengeId = challengeId,
@@ -560,6 +567,8 @@ public class StoryCreatorsChallengeService : IStoryCreatorsChallengeService
             UserId = userId,
             StoryTitle = story.Title,
             StoryCoverImageUrl = story.CoverImageUrl,
+            AuthorFirstName = user?.FirstName,
+            AuthorLastName = user?.LastName,
             SubmittedAt = submission.SubmittedAt,
             LikesCount = submission.LikesCount,
             IsWinner = false,
@@ -593,6 +602,9 @@ public class StoryCreatorsChallengeService : IStoryCreatorsChallengeService
             .Where(s => storyIds.Contains(s.StoryId))
             .ToDictionaryAsync(s => s.StoryId, s => s, ct);
 
+        var user = await _context.AlchimaliaUsers
+            .FirstOrDefaultAsync(u => u.Id == userId, ct);
+
         return submissions.Select(s => new ChallengeSubmissionDto
         {
             ChallengeId = s.ChallengeId,
@@ -600,6 +612,8 @@ public class StoryCreatorsChallengeService : IStoryCreatorsChallengeService
             UserId = s.UserId,
             StoryTitle = stories.GetValueOrDefault(s.StoryId)?.Title ?? s.StoryId,
             StoryCoverImageUrl = stories.GetValueOrDefault(s.StoryId)?.CoverImageUrl,
+            AuthorFirstName = user?.FirstName,
+            AuthorLastName = user?.LastName,
             SubmittedAt = s.SubmittedAt,
             LikesCount = s.LikesCount,
             IsWinner = s.IsWinner,
@@ -609,6 +623,12 @@ public class StoryCreatorsChallengeService : IStoryCreatorsChallengeService
 
     public async Task<ChallengeLeaderboardDto> GetChallengeLeaderboardAsync(string challengeId, Guid? currentUserId, CancellationToken ct)
     {
+        // Get challenge to check if it's expired
+        var challenge = await _context.StoryCreatorsChallenges
+            .FirstOrDefaultAsync(c => c.ChallengeId == challengeId, ct);
+        
+        var isExpired = challenge?.EndDate.HasValue == true && challenge.EndDate.Value < DateTime.UtcNow;
+
         var submissions = await _context.StoryCreatorsChallengeSubmissions
             .Where(s => s.ChallengeId == challengeId)
             .OrderByDescending(s => s.LikesCount)
@@ -620,10 +640,16 @@ public class StoryCreatorsChallengeService : IStoryCreatorsChallengeService
             .Where(s => storyIds.Contains(s.StoryId))
             .ToDictionaryAsync(s => s.StoryId, s => s, ct);
 
+        var userIds = submissions.Select(s => s.UserId).Distinct().ToList();
+        var users = await _context.AlchimaliaUsers
+            .Where(u => userIds.Contains(u.Id))
+            .ToDictionaryAsync(u => u.Id, u => u, ct);
+
         bool changes = false;
         foreach (var sub in submissions)
         {
-             var actualLikes = await _context.StoryLikes.CountAsync(l => EF.Functions.ILike(l.StoryId, sub.StoryId), ct);
+             // Use exact match instead of ILike pattern matching
+             var actualLikes = await _context.StoryLikes.CountAsync(l => l.StoryId == sub.StoryId, ct);
              if (sub.LikesCount != actualLikes) {
                  sub.LikesCount = actualLikes;
                  changes = true;
@@ -634,24 +660,44 @@ public class StoryCreatorsChallengeService : IStoryCreatorsChallengeService
         
         submissions = submissions.OrderByDescending(s => s.LikesCount).ThenBy(s => s.SubmittedAt).ToList();
 
-        var dtos = submissions.Select(s => new ChallengeSubmissionDto
+        var dtos = submissions.Select(s => 
         {
-            ChallengeId = s.ChallengeId,
-            StoryId = s.StoryId,
-            UserId = s.UserId,
-            StoryTitle = stories.GetValueOrDefault(s.StoryId)?.Title ?? s.StoryId,
-            StoryCoverImageUrl = stories.GetValueOrDefault(s.StoryId)?.CoverImageUrl,
-            SubmittedAt = s.SubmittedAt,
-            LikesCount = s.LikesCount,
-            IsWinner = s.IsWinner,
-            IsCurrentUserSubmission = currentUserId.HasValue && s.UserId == currentUserId.Value
+            var user = users.GetValueOrDefault(s.UserId);
+            return new ChallengeSubmissionDto
+            {
+                ChallengeId = s.ChallengeId,
+                StoryId = s.StoryId,
+                UserId = s.UserId,
+                StoryTitle = stories.GetValueOrDefault(s.StoryId)?.Title ?? s.StoryId,
+                StoryCoverImageUrl = stories.GetValueOrDefault(s.StoryId)?.CoverImageUrl,
+                AuthorFirstName = user?.FirstName,
+                AuthorLastName = user?.LastName,
+                SubmittedAt = s.SubmittedAt,
+                LikesCount = s.LikesCount,
+                IsWinner = s.IsWinner,
+                IsCurrentUserSubmission = currentUserId.HasValue && s.UserId == currentUserId.Value
+            };
         }).ToList();
+        
+        // Winner logic: Only show winner if challenge is expired AND it's the first submission (highest likes)
+        // OR if IsWinner flag is explicitly set (for manually determined winners)
+        ChallengeSubmissionDto? winner = null;
+        if (isExpired && dtos.Any())
+        {
+            // If expired, winner is the first one (highest likes) OR one with IsWinner flag
+            winner = dtos.FirstOrDefault(d => d.IsWinner) ?? dtos.FirstOrDefault();
+        }
+        else if (!isExpired)
+        {
+            // If not expired, only show winner if IsWinner flag is explicitly set
+            winner = dtos.FirstOrDefault(d => d.IsWinner);
+        }
         
         return new ChallengeLeaderboardDto
         {
             ChallengeId = challengeId,
             Submissions = dtos,
-            Winner = dtos.FirstOrDefault(d => d.IsWinner) ?? dtos.FirstOrDefault()
+            Winner = winner
         };
     }
 
@@ -667,6 +713,8 @@ public class StoryCreatorsChallengeService : IStoryCreatorsChallengeService
                 StoryId = s.StoryId,
                 StoryTitle = s.StoryTitle ?? "",
                 StoryCoverImageUrl = s.StoryCoverImageUrl,
+                AuthorFirstName = s.AuthorFirstName,
+                AuthorLastName = s.AuthorLastName,
                 LikesCount = s.LikesCount,
                 IsWinner = s.IsWinner
             }).ToList(),
@@ -675,6 +723,8 @@ public class StoryCreatorsChallengeService : IStoryCreatorsChallengeService
                 StoryId = leaderboard.Winner.StoryId,
                 StoryTitle = leaderboard.Winner.StoryTitle ?? "",
                 StoryCoverImageUrl = leaderboard.Winner.StoryCoverImageUrl,
+                AuthorFirstName = leaderboard.Winner.AuthorFirstName,
+                AuthorLastName = leaderboard.Winner.AuthorLastName,
                 LikesCount = leaderboard.Winner.LikesCount,
                 IsWinner = leaderboard.Winner.IsWinner
             }
@@ -683,6 +733,20 @@ public class StoryCreatorsChallengeService : IStoryCreatorsChallengeService
 
     public async Task<ChallengeSubmissionDto?> DetermineWinnerAsync(string challengeId, CancellationToken ct)
     {
+        // Get challenge to check if expired and get rewards
+        var challenge = await _context.StoryCreatorsChallenges
+            .Include(c => c.Items)
+                .ThenInclude(i => i.Rewards)
+            .FirstOrDefaultAsync(c => c.ChallengeId == challengeId, ct);
+        
+        if (challenge == null) return null;
+        
+        var isExpired = challenge.EndDate.HasValue && challenge.EndDate.Value < DateTime.UtcNow;
+        if (!isExpired)
+        {
+            throw new InvalidOperationException("Cannot determine winner before challenge end date");
+        }
+        
         var leaderboard = await GetChallengeLeaderboardAsync(challengeId, null, ct);
         if (!leaderboard.Submissions.Any()) return null;
         
@@ -699,6 +763,22 @@ public class StoryCreatorsChallengeService : IStoryCreatorsChallengeService
         {
             submission.IsWinner = true;
             await _context.SaveChangesAsync(ct);
+            
+            // Award tokens to winner from all challenge items
+            var allRewards = challenge.Items
+                .SelectMany(i => i.Rewards)
+                .ToList();
+            
+            foreach (var reward in allRewards)
+            {
+                await _creatorTokenService.AwardTokenAsync(
+                    winnerDto.UserId,
+                    reward.TokenType,
+                    reward.TokenValue,
+                    reward.Quantity,
+                    ct);
+            }
+            
             return winnerDto with { IsWinner = true };
         }
         

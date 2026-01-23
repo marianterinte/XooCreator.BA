@@ -21,11 +21,12 @@ public class GetUserSubmissionsEndpoint
         _auth0 = auth0;
     }
 
-    [Route("/api/ccc/my-submissions/{challengeId}")]
+    [Route("/api/{locale}/ccc/my-submissions/{challengeId}")]
     [Authorize]
     public static async Task<Results<Ok<List<ChallengeSubmissionDto>>, UnauthorizedHttpResult>> HandleGet(
-        [FromServices] GetUserSubmissionsEndpoint ep,
+        [FromRoute] string locale,
         [FromRoute] string challengeId,
+        [FromServices] GetUserSubmissionsEndpoint ep,
         CancellationToken ct)
     {
         var user = await ep._auth0.GetCurrentUserAsync(ct);

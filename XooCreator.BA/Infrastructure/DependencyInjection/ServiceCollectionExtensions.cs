@@ -72,6 +72,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserProfileService, UserProfileService>();
         services.AddScoped<IUserAdministrationRepository, UserAdministrationRepository>();
         services.AddScoped<IUserAdministrationService, UserAdministrationService>();
+        services.AddScoped<XooCreator.BA.Features.User.Services.ICreatorTokenService, XooCreator.BA.Features.User.Services.CreatorTokenService>();
         
         return services;
     }

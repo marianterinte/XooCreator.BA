@@ -204,6 +204,7 @@ public class XooDbContext : DbContext
     public DbSet<StoryCreatorsChallengeItemReward> StoryCreatorsChallengeItemRewards => Set<StoryCreatorsChallengeItemReward>();
     public DbSet<StoryCreatorsChallengeSubscription> StoryCreatorsChallengeSubscriptions => Set<StoryCreatorsChallengeSubscription>();
     public DbSet<StoryCreatorsChallengeSubmission> StoryCreatorsChallengeSubmissions => Set<StoryCreatorsChallengeSubmission>();
+    public DbSet<CreatorTokenBalance> CreatorTokenBalances => Set<CreatorTokenBalance>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
