@@ -64,3 +64,6 @@ publish/
 
 # Local testing scripts (keeping test-railway-config.sh as it's referenced in documentation)
 package-lock.json
+/XooCreator.BA/build_error.txt
+/XooCreator.BA/build_log.txt
+/XooCreator.BA/build_log_2.txt

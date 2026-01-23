@@ -97,7 +97,8 @@ public class EpicsMarketplaceRepository
                     StoryCount = epic.StoryCount,
                     RegionCount = epic.RegionCount,
                     ReadersCount = st.ReadersCount,
-                    AverageRating = st.AverageRating
+                    AverageRating = st.AverageRating,
+                    AvailableLanguages = epic.AvailableLanguages
                 };
             }).ToList();
 
