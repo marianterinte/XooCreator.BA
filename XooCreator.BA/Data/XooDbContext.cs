@@ -196,6 +196,15 @@ public class XooDbContext : DbContext
     public DbSet<StoryFeedback> StoryFeedbacks => Set<StoryFeedback>();
     public DbSet<StoryFeedbackPreference> StoryFeedbackPreferences => Set<StoryFeedbackPreference>();
 
+    // Story Creators Challenge (CCC)
+    public DbSet<StoryCreatorsChallenge> StoryCreatorsChallenges => Set<StoryCreatorsChallenge>();
+    public DbSet<StoryCreatorsChallengeTranslation> StoryCreatorsChallengeTranslations => Set<StoryCreatorsChallengeTranslation>();
+    public DbSet<StoryCreatorsChallengeItem> StoryCreatorsChallengeItems => Set<StoryCreatorsChallengeItem>();
+    public DbSet<StoryCreatorsChallengeItemTranslation> StoryCreatorsChallengeItemTranslations => Set<StoryCreatorsChallengeItemTranslation>();
+    public DbSet<StoryCreatorsChallengeItemReward> StoryCreatorsChallengeItemRewards => Set<StoryCreatorsChallengeItemReward>();
+    public DbSet<StoryCreatorsChallengeSubscription> StoryCreatorsChallengeSubscriptions => Set<StoryCreatorsChallengeSubscription>();
+    public DbSet<StoryCreatorsChallengeSubmission> StoryCreatorsChallengeSubmissions => Set<StoryCreatorsChallengeSubmission>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(_defaultSchema);
