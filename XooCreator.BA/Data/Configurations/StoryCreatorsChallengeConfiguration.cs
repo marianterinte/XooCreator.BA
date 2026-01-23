@@ -15,6 +15,8 @@ public class StoryCreatorsChallengeConfiguration : IEntityTypeConfiguration<Stor
         builder.Property(x => x.Status).HasMaxLength(20).IsRequired().HasDefaultValue("active");
         builder.Property(x => x.SortOrder).IsRequired().HasDefaultValue(0);
         builder.Property(x => x.EndDate); // Optional
+        builder.Property(x => x.CoverImageUrl).HasMaxLength(500); // Optional
+        builder.Property(x => x.CoverImageRelPath).HasMaxLength(500); // Optional
         builder.Property(x => x.CreatedAt).IsRequired();
         builder.Property(x => x.UpdatedAt).IsRequired();
         

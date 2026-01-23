@@ -19,6 +19,12 @@ public class StoryCreatorsChallenge
     
     public DateTime? EndDate { get; set; } // End date of the challenge
     
+    [MaxLength(500)]
+    public string? CoverImageUrl { get; set; } // Challenge cover image URL (Azure Blob Storage)
+    
+    [MaxLength(500)]
+    public string? CoverImageRelPath { get; set; } // Relative path in blob storage
+    
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     

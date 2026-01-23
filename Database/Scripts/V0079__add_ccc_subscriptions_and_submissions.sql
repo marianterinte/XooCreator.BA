@@ -24,7 +24,13 @@ CREATE INDEX IF NOT EXISTS "IX_StoryCreatorsChallengeSubscriptions_UserId"
 
 
 -- Create StoryCreatorsChallengeSubmissions table
-CREATE TABLE IF NOT EXISTS "alchimalia_schema"."StoryCreatorsChallengeSubmissions" (
+-- Add CoverImageUrl and CoverImageRelPath columns to StoryCreatorsChallenges table
+ALTER TABLE "alchimalia_schema"."StoryCreatorsChallenges"
+    ADD COLUMN IF NOT EXISTS "CoverImageUrl" character varying(500),
+    ADD COLUMN IF NOT EXISTS "CoverImageRelPath" character varying(500);
+
+-- Create StoryCreatorsChallengeSubscriptions table
+CREATE TABLE IF NOT EXISTS "alchimalia_schema"."StoryCreatorsChallengeSubscriptions" (
     "Id" uuid NOT NULL DEFAULT gen_random_uuid(),
     "ChallengeId" character varying(100) NOT NULL,
     "StoryId" character varying(200) NOT NULL,

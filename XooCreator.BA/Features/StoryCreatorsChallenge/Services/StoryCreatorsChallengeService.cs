@@ -31,6 +31,23 @@ public class StoryCreatorsChallengeService : IStoryCreatorsChallengeService
 
         var defaultLang = languageCode ?? "ro-ro";
         
+        // Get all challenge IDs for batch query
+        var challengeIds = challenges.Select(c => c.ChallengeId).ToList();
+        
+        // Get subscription counts for all challenges in one query
+        var subscriptionCounts = await _context.StoryCreatorsChallengeSubscriptions
+            .Where(s => challengeIds.Contains(s.ChallengeId))
+            .GroupBy(s => s.ChallengeId)
+            .Select(g => new { ChallengeId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.ChallengeId, x => x.Count, ct);
+        
+        // Get submission counts for all challenges in one query
+        var submissionCounts = await _context.StoryCreatorsChallengeSubmissions
+            .Where(s => challengeIds.Contains(s.ChallengeId))
+            .GroupBy(s => s.ChallengeId)
+            .Select(g => new { ChallengeId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.ChallengeId, x => x.Count, ct);
+        
         return challenges.Select(c => new StoryCreatorsChallengeListItemDto
         {
             ChallengeId = c.ChallengeId,
@@ -44,7 +61,9 @@ public class StoryCreatorsChallengeService : IStoryCreatorsChallengeService
                 ?? c.Translations.FirstOrDefault()?.Topic
                 ?? string.Empty,
             ItemsCount = c.Items.Count,
-            IsExpired = c.EndDate.HasValue && c.EndDate.Value < DateTime.UtcNow
+            IsExpired = c.EndDate.HasValue && c.EndDate.Value < DateTime.UtcNow,
+            SubscriptionsCount = subscriptionCounts.GetValueOrDefault(c.ChallengeId, 0),
+            SubmissionsCount = submissionCounts.GetValueOrDefault(c.ChallengeId, 0)
         }).ToList();
     }
 
@@ -66,6 +85,8 @@ public class StoryCreatorsChallengeService : IStoryCreatorsChallengeService
             Status = challenge.Status,
             SortOrder = challenge.SortOrder,
             EndDate = challenge.EndDate,
+            CoverImageUrl = challenge.CoverImageUrl,
+            CoverImageRelPath = challenge.CoverImageRelPath,
             CreatedAt = challenge.CreatedAt,
             UpdatedAt = challenge.UpdatedAt,
             Translations = challenge.Translations.Select(t => new StoryCreatorsChallengeTranslationDto
@@ -107,6 +128,8 @@ public class StoryCreatorsChallengeService : IStoryCreatorsChallengeService
             Status = dto.Status,
             SortOrder = dto.SortOrder,
             EndDate = dto.EndDate,
+            CoverImageUrl = dto.CoverImageUrl,
+            CoverImageRelPath = dto.CoverImageRelPath,
             CreatedByUserId = userId,
             UpdatedByUserId = userId,
             CreatedAt = DateTime.UtcNow,
@@ -182,6 +205,8 @@ public class StoryCreatorsChallengeService : IStoryCreatorsChallengeService
         challenge.Status = dto.Status;
         challenge.SortOrder = dto.SortOrder;
         challenge.EndDate = dto.EndDate;
+        challenge.CoverImageUrl = dto.CoverImageUrl;
+        challenge.CoverImageRelPath = dto.CoverImageRelPath;
         challenge.UpdatedByUserId = userId;
         challenge.UpdatedAt = DateTime.UtcNow;
 
@@ -370,6 +395,7 @@ public class StoryCreatorsChallengeService : IStoryCreatorsChallengeService
         {
             ChallengeId = challenge.ChallengeId,
             Topic = translation.Topic,
+            CoverImageUrl = challenge.CoverImageUrl,
             Description = translation.Description,
             EndDate = challenge.EndDate,
             IsExpired = challenge.EndDate.HasValue && challenge.EndDate.Value < DateTime.UtcNow,

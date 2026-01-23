@@ -36,6 +36,8 @@ public record StoryCreatorsChallengeDto
     public string Status { get; init; } = "active";
     public int SortOrder { get; init; } = 0;
     public DateTime? EndDate { get; init; } // End date (optional)
+    public string? CoverImageUrl { get; init; } // Challenge cover image URL
+    public string? CoverImageRelPath { get; init; } // Relative path in blob storage
     public DateTime CreatedAt { get; init; }
     public DateTime UpdatedAt { get; init; }
     public List<StoryCreatorsChallengeTranslationDto> Translations { get; init; } = new();
@@ -54,6 +56,8 @@ public record StoryCreatorsChallengeListItemDto
     public string Topic { get; init; } = string.Empty; // Topic in current language
     public int ItemsCount { get; init; } = 0;
     public bool IsExpired { get; init; } // Helper - computed from EndDate
+    public int SubscriptionsCount { get; init; } = 0; // Number of users subscribed
+    public int SubmissionsCount { get; init; } = 0; // Number of story submissions
 }
 
 // For public API (CCC page)
@@ -64,6 +68,7 @@ public record PublicChallengeDto
     public string? Description { get; init; } // General description
     public DateTime? EndDate { get; init; } // End date (visible on public page)
     public bool IsExpired { get; init; } // Helper - computed from EndDate
+    public string? CoverImageUrl { get; init; } // Challenge cover image URL
     public List<PublicChallengeItemDto> Items { get; init; } = new();
 }
 
