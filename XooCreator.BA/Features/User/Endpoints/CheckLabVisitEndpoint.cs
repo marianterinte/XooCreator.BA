@@ -38,8 +38,8 @@ public class CheckLabVisitEndpoint
             return Results.NotFound("User not found.");
         }
 
-        // Check if user has completed the loi-intro story
-        const string introStoryId = "loi-intro";
+        // Check if user has completed the intro story
+        const string introStoryId = "marianterinte-s260124120317";
         var completionInfo = await storiesRepository.GetStoryCompletionStatusAsync(userId.Value, introStoryId);
         var hasCompletedIntroStory = completionInfo.IsCompleted;
 
