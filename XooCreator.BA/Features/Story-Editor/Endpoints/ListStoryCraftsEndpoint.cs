@@ -68,12 +68,16 @@ public class ListStoryCraftsEndpoint
             .ToDictionaryAsync(u => u.Id, u => u.Email ?? "", ct);
 
         var items = new List<StoryCraftListItemDto>(list.Count);
+        var requestedLocale = locale.ToLowerInvariant();
         foreach (var c in list)
         {
-            var firstTranslation = c.Translations
-                .FirstOrDefault(t => !string.IsNullOrWhiteSpace(t.Title))
+            // Try to get translation for requested locale, fallback to first available
+            var translation = c.Translations
+                .FirstOrDefault(t => t.LanguageCode == requestedLocale && !string.IsNullOrWhiteSpace(t.Title))
+                ?? c.Translations.FirstOrDefault(t => t.LanguageCode == requestedLocale)
+                ?? c.Translations.FirstOrDefault(t => !string.IsNullOrWhiteSpace(t.Title))
                 ?? c.Translations.FirstOrDefault();
-            string title = string.IsNullOrWhiteSpace(firstTranslation?.Title) ? c.StoryId : firstTranslation!.Title!;
+            string title = string.IsNullOrWhiteSpace(translation?.Title) ? c.StoryId : translation!.Title!;
             string? cover = c.CoverImageUrl;
             
             // Get available languages
