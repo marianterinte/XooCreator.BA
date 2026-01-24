@@ -107,6 +107,7 @@ public record SearchStoriesRequest
     public List<string> Categories { get; init; } = new();
     public List<string> Difficulties { get; init; } = new();
     public List<string> Topics { get; init; } = new(); // Filter by topic IDs (e.g., ["alchimalia_universe", "classic_author"])
+    public List<string> AvailableLanguages { get; init; } = new(); // Filter by available languages (e.g., ["ro-ro", "en-us", "hu-hu"])
     public bool? IsEvaluative { get; init; } // Filter by evaluative flag
     public string CompletionStatus { get; init; } = "all";
     public string SortBy { get; init; } = "sortOrder";
@@ -231,6 +232,7 @@ public record EpicMarketplaceItemDto
     public int RegionCount { get; init; } // Number of regions in this epic
     public int ReadersCount { get; init; } // Total readers across all stories in epic
     public double AverageRating { get; init; } // Average rating across all stories in epic
+    public List<string> AvailableLanguages { get; init; } = new(); // e.g., ["ro-ro", "en-us", "hu-hu"]
 }
 
 public record EpicDetailsDto

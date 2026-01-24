@@ -3,6 +3,7 @@ using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Features.StoryCreatorsChallenge.DTOs;
 using XooCreator.BA.Features.User.Services;
+using XooCreator.BA.Infrastructure.Services.Blob;
 
 namespace XooCreator.BA.Features.StoryCreatorsChallenge.Services;
 
@@ -11,15 +12,18 @@ public class StoryCreatorsChallengeService : IStoryCreatorsChallengeService
     private readonly XooDbContext _context;
     private readonly ILogger<StoryCreatorsChallengeService> _logger;
     private readonly ICreatorTokenService _creatorTokenService;
+    private readonly IBlobSasService _blobSas;
 
     public StoryCreatorsChallengeService(
         XooDbContext context,
         ILogger<StoryCreatorsChallengeService> logger,
-        ICreatorTokenService creatorTokenService)
+        ICreatorTokenService creatorTokenService,
+        IBlobSasService blobSas)
     {
         _context = context;
         _logger = logger;
         _creatorTokenService = creatorTokenService;
+        _blobSas = blobSas;
     }
 
     public async Task<List<StoryCreatorsChallengeListItemDto>> GetAllChallengesAsync(string? languageCode, CancellationToken ct)
@@ -83,13 +87,15 @@ public class StoryCreatorsChallengeService : IStoryCreatorsChallengeService
 
         if (challenge == null) return null;
 
+        var coverImageUrl = await ResolveCoverImageUrlAsync(challenge.CoverImageRelPath, challenge.CoverImageUrl, ct);
+
         return new StoryCreatorsChallengeDto
         {
             ChallengeId = challenge.ChallengeId,
             Status = challenge.Status,
             SortOrder = challenge.SortOrder,
             EndDate = challenge.EndDate,
-            CoverImageUrl = challenge.CoverImageUrl,
+            CoverImageUrl = coverImageUrl,
             CoverImageRelPath = challenge.CoverImageRelPath,
             CreatedAt = challenge.CreatedAt,
             UpdatedAt = challenge.UpdatedAt,
@@ -360,6 +366,27 @@ public class StoryCreatorsChallengeService : IStoryCreatorsChallengeService
         }
     }
 
+    /// <summary>
+    /// Resolves cover image URL using the environment-specific DraftContainer (from config).
+    /// When CoverImageRelPath (blob path) is present, generates a fresh read SAS; otherwise returns stored URL.
+    /// </summary>
+    private async Task<string?> ResolveCoverImageUrlAsync(string? coverImageRelPath, string? storedCoverImageUrl, CancellationToken ct)
+    {
+        if (!string.IsNullOrWhiteSpace(coverImageRelPath))
+        {
+            try
+            {
+                var readUri = await _blobSas.GetReadSasAsync(_blobSas.DraftContainer, coverImageRelPath, TimeSpan.FromHours(1), ct);
+                return readUri.ToString();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to resolve CCC cover image SAS for blob path {BlobPath}, falling back to stored URL", coverImageRelPath);
+            }
+        }
+        return storedCoverImageUrl;
+    }
+
     public async Task<bool> DeleteChallengeAsync(string challengeId, CancellationToken ct)
     {
         var challenge = await _context.StoryCreatorsChallenges
@@ -395,11 +422,13 @@ public class StoryCreatorsChallengeService : IStoryCreatorsChallengeService
                           
         if (translation == null) return null; // Should have at least one translation
 
+        var coverImageUrl = await ResolveCoverImageUrlAsync(challenge.CoverImageRelPath, challenge.CoverImageUrl, ct);
+
         return new PublicChallengeDto
         {
             ChallengeId = challenge.ChallengeId,
             Topic = translation.Topic,
-            CoverImageUrl = challenge.CoverImageUrl,
+            CoverImageUrl = coverImageUrl,
             Description = translation.Description,
             EndDate = challenge.EndDate,
             IsExpired = challenge.EndDate.HasValue && challenge.EndDate.Value < DateTime.UtcNow,

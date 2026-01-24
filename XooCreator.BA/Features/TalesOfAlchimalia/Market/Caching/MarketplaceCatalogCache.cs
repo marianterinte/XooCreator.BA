@@ -333,6 +333,14 @@ public sealed class MarketplaceCatalogCache : IMarketplaceCatalogCache, IMarketp
             var name = translation?.Name ?? epic.Translations?.FirstOrDefault()?.Name ?? epic.Name ?? epic.Id;
             var description = translation?.Description ?? epic.Translations?.FirstOrDefault()?.Description ?? epic.Description;
 
+            // Extract available languages from translations
+            var availableLanguages = epic.Translations?
+                .Select(t => t.LanguageCode)
+                .Where(l => !string.IsNullOrWhiteSpace(l))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(l => l)
+                .ToList() ?? new List<string>();
+
             var searchTexts = new List<string>();
             if (!string.IsNullOrWhiteSpace(epic.Name)) searchTexts.Add(epic.Name!);
             if (!string.IsNullOrWhiteSpace(epic.Description)) searchTexts.Add(epic.Description!);
@@ -363,6 +371,7 @@ public sealed class MarketplaceCatalogCache : IMarketplaceCatalogCache, IMarketp
                 PublishedAtUtc = epic.PublishedAtUtc,
                 StoryCount = epic.StoryNodes?.Count ?? 0,
                 RegionCount = epic.Regions?.Count ?? 0,
+                AvailableLanguages = availableLanguages,
                 SearchTexts = searchTexts,
                 SearchAuthors = searchAuthors
             });

@@ -112,6 +112,13 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
                 q = q.Where(s => s.IsEvaluative == request.IsEvaluative.Value);
             }
 
+            // Filter by available languages
+            if (request.AvailableLanguages?.Any() == true)
+            {
+                var selectedLanguages = new HashSet<string>(request.AvailableLanguages, StringComparer.OrdinalIgnoreCase);
+                q = q.Where(s => s.AvailableLanguages.Any(lang => selectedLanguages.Contains(lang)));
+            }
+
             // Auto-filter by age groups if enabled in parent dashboard
             if (user != null && user.AutoFilterStoriesByAge && user.SelectedAgeGroupIds != null && user.SelectedAgeGroupIds.Count > 0)
             {
