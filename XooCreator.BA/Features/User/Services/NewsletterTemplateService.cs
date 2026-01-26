@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using System.Text;
 
 namespace XooCreator.BA.Features.User.Services;
 
@@ -365,7 +366,7 @@ Nu mai dorești să primești aceste email-uri? Vizitează {{unsubscribe_url}} p
             ? GetRomanianIntroText(stories?.Count ?? 0, epics?.Count ?? 0)
             : GetEnglishIntroText(stories?.Count ?? 0, epics?.Count ?? 0);
 
-        var content = new System.Text.StringBuilder();
+        var content = new StringBuilder();
         content.AppendLine("Noutăți Alchimalia");
         content.AppendLine();
         content.AppendLine(introText);

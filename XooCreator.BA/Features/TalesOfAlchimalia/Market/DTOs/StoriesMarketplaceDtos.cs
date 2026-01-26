@@ -68,6 +68,7 @@ public record StoryMarketplaceItemDto
     public string StoryType { get; init; } = string.Empty;
     public string Status { get; init; } = string.Empty;
     public List<string> AvailableLanguages { get; init; } = new(); // e.g., ["ro-ro", "en-us", "hu-hu"]
+    public List<string> AgeGroupIds { get; init; } = new(); // Age group IDs (e.g., ["preschool_3_5", "early_school_6_8"])
     // Note: IsPurchased and IsOwned removed from list DTO for 100% global cache.
     // These properties remain in StoryDetailsDto (loaded per request when viewing story details).
     public int ReadersCount { get; init; }

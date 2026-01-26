@@ -165,7 +165,7 @@ public class GetSubscribedUsersEndpoint
 
     [Route("/api/{locale}/user/newsletter/subscribers")]
     [Authorize]
-    public static async Task<Results<Ok<GetSubscribedUsersResponse>, UnauthorizedHttpResult, ForbiddenHttpResult>> HandleGet(
+    public static async Task<Results<Ok<GetSubscribedUsersResponse>, UnauthorizedHttpResult, ForbidHttpResult>> HandleGet(
         [FromRoute] string locale,
         [FromServices] GetSubscribedUsersEndpoint ep,
         [FromServices] IAuth0UserService auth0UserService,

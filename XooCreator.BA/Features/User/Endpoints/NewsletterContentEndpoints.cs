@@ -23,7 +23,7 @@ public class GetNewsletterStoriesEndpoint
 
     [Route("/api/{locale}/user/newsletter/stories")]
     [Authorize]
-    public static async Task<Results<Ok<GetNewsletterStoriesResponse>, UnauthorizedHttpResult, ForbiddenHttpResult>> HandleGet(
+    public static async Task<Results<Ok<GetNewsletterStoriesResponse>, UnauthorizedHttpResult, ForbidHttpResult>> HandleGet(
         [FromRoute] string locale,
         [FromServices] GetNewsletterStoriesEndpoint ep,
         [FromServices] IAuth0UserService auth0UserService,
@@ -78,7 +78,7 @@ public class GetNewsletterEpicsEndpoint
 
     [Route("/api/{locale}/user/newsletter/epics")]
     [Authorize]
-    public static async Task<Results<Ok<GetNewsletterEpicsResponse>, UnauthorizedHttpResult, ForbiddenHttpResult>> HandleGet(
+    public static async Task<Results<Ok<GetNewsletterEpicsResponse>, UnauthorizedHttpResult, ForbidHttpResult>> HandleGet(
         [FromRoute] string locale,
         [FromServices] GetNewsletterEpicsEndpoint ep,
         [FromServices] IAuth0UserService auth0UserService,
