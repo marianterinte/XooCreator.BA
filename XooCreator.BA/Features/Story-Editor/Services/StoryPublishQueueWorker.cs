@@ -209,6 +209,17 @@ public class StoryPublishQueueWorker : BackgroundService
                             {
                                 _logger.LogWarning(cleanupEx, "Failed to cleanup draft after publish: storyId={StoryId}", job.StoryId);
                             }
+
+                            // Send newsletter for new stories (best-effort, don't affect job completion)
+                            try
+                            {
+                                var newsletterService = scope.ServiceProvider.GetRequiredService<XooCreator.BA.Features.User.Services.INewsletterAutoSendService>();
+                                await newsletterService.TrySendNewsletterForNewStoryAsync(job.StoryId, langTag, stoppingToken);
+                            }
+                            catch (Exception newsletterEx)
+                            {
+                                _logger.LogWarning(newsletterEx, "Failed to send newsletter for new story: storyId={StoryId}", job.StoryId);
+                            }
                         }
 
                         await db.SaveChangesAsync(stoppingToken);

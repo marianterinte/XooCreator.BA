@@ -27,4 +27,19 @@ public class AlchimaliaUser
     /// If true, marketplace will automatically filter stories to show only those matching selected age groups
     /// </summary>
     public bool AutoFilterStoriesByAge { get; set; } = false;
+    
+    /// <summary>
+    /// Newsletter subscription status - users are automatically subscribed by default
+    /// </summary>
+    public bool IsNewsletterSubscribed { get; set; } = true;
+    
+    /// <summary>
+    /// Date when user subscribed to newsletter (null if never subscribed)
+    /// </summary>
+    public DateTime? NewsletterSubscribedAt { get; set; }
+    
+    /// <summary>
+    /// Date when user unsubscribed from newsletter (null if currently subscribed)
+    /// </summary>
+    public DateTime? NewsletterUnsubscribedAt { get; set; }
 }
