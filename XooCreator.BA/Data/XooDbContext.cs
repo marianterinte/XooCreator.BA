@@ -222,6 +222,7 @@ public class XooDbContext : DbContext
         // Seed data for AlchimaliaUser and related entities
         var systemAdminUserId = Guid.Parse("33333333-3333-3333-3333-333333333333");
         
+        var seedDate = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         modelBuilder.Entity<AlchimaliaUser>().HasData(
             new AlchimaliaUser
             {
@@ -233,9 +234,11 @@ public class XooDbContext : DbContext
                 Email = "alchimalia@admin.com",
                 Role = Enums.UserRole.Admin,
                 Roles = new List<UserRole> { Enums.UserRole.Admin },
-                CreatedAt = DateTime.UtcNow,
-                LastLoginAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                CreatedAt = seedDate,
+                LastLoginAt = seedDate,
+                UpdatedAt = seedDate,
+                IsNewsletterSubscribed = true,
+                NewsletterSubscribedAt = seedDate
             }
         );
 

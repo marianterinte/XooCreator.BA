@@ -201,6 +201,17 @@ public class EpicPublishQueueJob : BackgroundService
                                 _logger.LogWarning(cacheEx, "Failed to reset marketplace cache after epic publish. epicId={EpicId} jobId={JobId}", job.EpicId, job.Id);
                             }
 
+                            // Send newsletter for new epics (best-effort, don't affect job completion)
+                            try
+                            {
+                                var newsletterService = scope.ServiceProvider.GetRequiredService<XooCreator.BA.Features.User.Services.INewsletterAutoSendService>();
+                                await newsletterService.TrySendNewsletterForNewEpicAsync(craft.Id, langTag, stoppingToken);
+                            }
+                            catch (Exception newsletterEx)
+                            {
+                                _logger.LogWarning(newsletterEx, "Failed to send newsletter for new epic: epicId={EpicId}", craft.Id);
+                            }
+
                             // Cleanup: Delete StoryEpicCraft and draft assets after successful publish
                             // This is done in a separate try-catch to not affect the job status
                             try
