@@ -28,11 +28,20 @@ public class GetPublicWelcomeStoryEndpoint
         // Hardcoded welcome story ID
         const string welcomeStoryId = "ionelbacosca-s251209175610";
         
+        Console.WriteLine($"[GetPublicWelcomeStory] Request received - locale: {locale}, storyId: {welcomeStoryId}");
+        
         // Use empty Guid since user is not authenticated - this will return story without progress
         var effectiveUserId = Guid.Empty;
         
         var result = await ep._storiesService.GetStoryByIdAsync(effectiveUserId, welcomeStoryId, locale);
-        if (result.Story == null) return TypedResults.NotFound();
+        
+        if (result.Story == null)
+        {
+            Console.WriteLine($"[GetPublicWelcomeStory] Story not found: {welcomeStoryId}");
+            return TypedResults.NotFound();
+        }
+        
+        Console.WriteLine($"[GetPublicWelcomeStory] Story found - Title: {result.Story.Title}, Tiles count: {result.Story.Tiles?.Count ?? 0}");
         
         // Ensure progress is empty for public access
         result = result with 
