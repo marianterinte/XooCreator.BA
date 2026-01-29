@@ -3,8 +3,9 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
+using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.DTOs;
-using XooCreator.BA.Infrastructure;
+using XooCreator.BA.Infrastructure.Services;
 using XooCreator.BA.Infrastructure.Endpoints;
 
 namespace XooCreator.BA.Features.StoryEditor.StoryEpic.Endpoints;
@@ -13,12 +14,12 @@ namespace XooCreator.BA.Features.StoryEditor.StoryEpic.Endpoints;
 public class GetStoryEpicStoryOptionsEndpoint
 {
     private readonly XooDbContext _context;
-    private readonly IUserContextService _userContext;
+    private readonly IAuth0UserService _auth0;
 
-    public GetStoryEpicStoryOptionsEndpoint(XooDbContext context, IUserContextService userContext)
+    public GetStoryEpicStoryOptionsEndpoint(XooDbContext context, IAuth0UserService auth0)
     {
         _context = context;
-        _userContext = userContext;
+        _auth0 = auth0;
     }
 
     /// <summary>
@@ -36,20 +37,22 @@ public class GetStoryEpicStoryOptionsEndpoint
         [FromServices] GetStoryEpicStoryOptionsEndpoint ep,
         CancellationToken ct)
     {
-        var userId = ep._userContext.GetCurrentUserId();
-        if (userId == null)
+        var user = await ep._auth0.GetCurrentUserAsync(ct);
+        if (user == null)
         {
             return TypedResults.Unauthorized();
         }
+        var userId = user.Id;
+        var isAdmin = ep._auth0.HasRole(user, UserRole.Admin);
 
         var normalizedLocale = (locale ?? "ro-ro").ToLowerInvariant();
 
-        // Base query: published stories created by current user
+        // Base query: published stories (current user unless admin)
         var storiesQuery = ep._context.UserCreatedStories
             .Include(ucs => ucs.StoryDefinition)
                 .ThenInclude(sd => sd.Translations)
             .Where(ucs =>
-                ucs.UserId == userId &&
+                (isAdmin || ucs.UserId == userId) &&
                 ucs.IsPublished &&
                 ucs.StoryDefinition.IsActive);
 

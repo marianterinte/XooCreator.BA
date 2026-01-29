@@ -271,6 +271,14 @@ public class EpicPublishQueueJob : BackgroundService
                             PublishStatus();
                             await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                         }
+                        else
+                        {
+                            // Preserve the last error for visibility while retrying
+                            job.Status = EpicPublishJobStatus.Queued;
+                            job.ErrorMessage = ex.Message;
+                            await db.SaveChangesAsync(stoppingToken);
+                            PublishStatus();
+                        }
                         // If DequeueCount < 3, don't delete message - queue will re-deliver it
                     }
                 } // Scope disposed here - DbContext and all scoped services are cleaned up

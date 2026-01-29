@@ -9,7 +9,7 @@ public interface IStoryEpicService
     Task EnsureEpicAsync(Guid ownerUserId, string epicId, string name, CancellationToken ct = default);
     
     // Save epic from DTO
-    Task SaveEpicAsync(Guid ownerUserId, string epicId, StoryEpicDto dto, CancellationToken ct = default);
+    Task SaveEpicAsync(Guid ownerUserId, string epicId, StoryEpicDto dto, bool isAdmin = false, CancellationToken ct = default);
     
     // Get epic as DTO
     Task<StoryEpicDto?> GetEpicAsync(string epicId, CancellationToken ct = default);
