@@ -59,7 +59,7 @@ public class StoryEpicService : IStoryEpicService
         }
     }
 
-    public async Task SaveEpicAsync(Guid ownerUserId, string epicId, StoryEpicDto dto, CancellationToken ct = default)
+    public async Task SaveEpicAsync(Guid ownerUserId, string epicId, StoryEpicDto dto, bool isAdmin = false, CancellationToken ct = default)
     {
         // Load or create StoryEpicCraft (always work with draft)
         var craft = await _context.StoryEpicCrafts
@@ -73,7 +73,8 @@ public class StoryEpicService : IStoryEpicService
             .AsSplitQuery()
             .FirstOrDefaultAsync(c => c.Id == epicId, ct);
         
-        if (craft != null && craft.OwnerUserId != ownerUserId)
+        // Check ownership only if user is not admin
+        if (craft != null && craft.OwnerUserId != ownerUserId && !isAdmin)
         {
             throw new UnauthorizedAccessException($"User does not own epic '{epicId}'");
         }
