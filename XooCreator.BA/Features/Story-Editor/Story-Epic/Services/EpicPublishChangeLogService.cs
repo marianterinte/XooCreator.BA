@@ -80,6 +80,8 @@ public class EpicPublishChangeLogService : IEpicPublishChangeLogService
             .Include(x => x.StoryNodes)
             .Include(x => x.UnlockRules)
             .Include(x => x.HeroReferences)
+            .Include(x => x.Topics).ThenInclude(t => t.StoryTopic)
+            .Include(x => x.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
             .FirstOrDefaultAsync(x => x.Id == epicId, ct);
     }
 
@@ -322,7 +324,9 @@ public sealed class EpicDraftSnapshot
         var header = HeaderState.Create(
             craft.Name,
             craft.Description,
-            craft.CoverImageUrl);
+            craft.CoverImageUrl,
+            craft.Topics.Select(t => t.StoryTopic?.TopicId ?? t.StoryTopicId.ToString()),
+            craft.AgeGroups.Select(ag => ag.StoryAgeGroup?.AgeGroupId ?? ag.StoryAgeGroupId.ToString()));
 
         var regionReferences = new Dictionary<string, RegionReferenceState>(StringComparer.OrdinalIgnoreCase);
         foreach (var region in craft.Regions.OrderBy(r => r.SortOrder))
@@ -403,17 +407,21 @@ public sealed class EpicDraftSnapshot
 
     public sealed class HeaderState
     {
-        private HeaderState(string name, string? description, string? coverImageUrl)
+        private HeaderState(string name, string? description, string? coverImageUrl, IReadOnlyList<string> topicIds, IReadOnlyList<string> ageGroupIds)
         {
             Name = name;
             Description = description;
             CoverImageUrl = coverImageUrl;
-            Hash = HashHelper.ComputeHash(new { Name, Description, CoverImageUrl });
+            TopicIds = topicIds;
+            AgeGroupIds = ageGroupIds;
+            Hash = HashHelper.ComputeHash(new { Name, Description, CoverImageUrl, TopicIds, AgeGroupIds });
         }
 
         public string Name { get; }
         public string? Description { get; }
         public string? CoverImageUrl { get; }
+        public IReadOnlyList<string> TopicIds { get; }
+        public IReadOnlyList<string> AgeGroupIds { get; }
         public string Hash { get; }
         public bool HasContent => !string.IsNullOrEmpty(Name) || !string.IsNullOrEmpty(Description) || !string.IsNullOrEmpty(CoverImageUrl);
 
@@ -421,13 +429,30 @@ public sealed class EpicDraftSnapshot
         {
             name = Name,
             description = Description,
-            coverImageUrl = CoverImageUrl
+            coverImageUrl = CoverImageUrl,
+            topicIds = TopicIds,
+            ageGroupIds = AgeGroupIds
         };
 
-        public static HeaderState Create(string name, string? description, string? coverImageUrl)
-            => new(name, description, coverImageUrl);
+        public static HeaderState Create(string name, string? description, string? coverImageUrl, IEnumerable<string> topicIds, IEnumerable<string> ageGroupIds)
+        {
+            var normalizedTopicIds = topicIds
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Select(id => id.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(id => id, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            var normalizedAgeGroupIds = ageGroupIds
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Select(id => id.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(id => id, StringComparer.OrdinalIgnoreCase)
+                .ToList();
 
-        public static HeaderState Empty() => new(string.Empty, null, null);
+            return new HeaderState(name, description, coverImageUrl, normalizedTopicIds, normalizedAgeGroupIds);
+        }
+
+        public static HeaderState Empty() => new(string.Empty, null, null, Array.Empty<string>(), Array.Empty<string>());
     }
 
     public sealed class RegionReferenceState

@@ -289,6 +289,8 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
             .Include(c => c.UnlockRules)
             .Include(c => c.Translations)
             .Include(c => c.HeroReferences)
+            .Include(c => c.Topics).ThenInclude(t => t.StoryTopic)
+            .Include(c => c.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
             .AsSplitQuery()
             .FirstOrDefaultAsync(c => c.Id == craft.Id, ct) ?? craft;
 
@@ -311,6 +313,8 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
             .Include(d => d.StoryNodes)
             .Include(d => d.UnlockRules)
             .Include(d => d.Translations)
+            .Include(d => d.Topics).ThenInclude(t => t.StoryTopic)
+            .Include(d => d.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
             .AsSplitQuery()
             .FirstOrDefaultAsync(d => d.Id == craft.Id, ct);
 
@@ -432,6 +436,10 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
             definition.UnlockRules.Clear();
             _context.StoryEpicDefinitionTranslations.RemoveRange(definition.Translations);
             definition.Translations.Clear();
+            _context.Set<StoryEpicDefinitionTopic>().RemoveRange(definition.Topics);
+            definition.Topics.Clear();
+            _context.Set<StoryEpicDefinitionAgeGroup>().RemoveRange(definition.AgeGroups);
+            definition.AgeGroups.Clear();
 
             var existingHeroReferences = await _context.StoryEpicHeroReferences
                 .Where(h => h.EpicId == definition.Id)
@@ -543,6 +551,28 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
                 EpicId = definition.Id,
                 HeroId = craftHeroRef.HeroId,
                 StoryId = craftHeroRef.StoryId
+            });
+        }
+
+        // Copy Topics
+        foreach (var craftTopic in craft.Topics)
+        {
+            definition.Topics.Add(new StoryEpicDefinitionTopic
+            {
+                StoryEpicDefinitionId = definition.Id,
+                StoryTopicId = craftTopic.StoryTopicId,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+
+        // Copy Age Groups
+        foreach (var craftAgeGroup in craft.AgeGroups)
+        {
+            definition.AgeGroups.Add(new StoryEpicDefinitionAgeGroup
+            {
+                StoryEpicDefinitionId = definition.Id,
+                StoryAgeGroupId = craftAgeGroup.StoryAgeGroupId,
+                CreatedAt = DateTime.UtcNow
             });
         }
 
@@ -730,6 +760,41 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
         {
             definition.CoverImageUrl = null;
             await _assetLinkService.RemoveCoverImageAsync(craft.Id, ct);
+        }
+
+        SyncDefinitionTopics(definition, craft);
+        SyncDefinitionAgeGroups(definition, craft);
+    }
+
+    private void SyncDefinitionTopics(StoryEpicDefinition definition, StoryEpicCraft craft)
+    {
+        _context.Set<StoryEpicDefinitionTopic>().RemoveRange(definition.Topics);
+        definition.Topics.Clear();
+
+        foreach (var craftTopic in craft.Topics)
+        {
+            definition.Topics.Add(new StoryEpicDefinitionTopic
+            {
+                StoryEpicDefinitionId = definition.Id,
+                StoryTopicId = craftTopic.StoryTopicId,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+    }
+
+    private void SyncDefinitionAgeGroups(StoryEpicDefinition definition, StoryEpicCraft craft)
+    {
+        _context.Set<StoryEpicDefinitionAgeGroup>().RemoveRange(definition.AgeGroups);
+        definition.AgeGroups.Clear();
+
+        foreach (var craftAgeGroup in craft.AgeGroups)
+        {
+            definition.AgeGroups.Add(new StoryEpicDefinitionAgeGroup
+            {
+                StoryEpicDefinitionId = definition.Id,
+                StoryAgeGroupId = craftAgeGroup.StoryAgeGroupId,
+                CreatedAt = DateTime.UtcNow
+            });
         }
     }
 

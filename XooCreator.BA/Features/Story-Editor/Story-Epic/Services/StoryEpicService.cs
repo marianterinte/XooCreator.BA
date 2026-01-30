@@ -68,8 +68,8 @@ public class StoryEpicService : IStoryEpicService
             .Include(c => c.UnlockRules)
             .Include(c => c.Translations)
             .Include(c => c.HeroReferences)
-            .Include(c => c.Topics)
-            .Include(c => c.AgeGroups)
+            .Include(c => c.Topics).ThenInclude(t => t.StoryTopic)
+            .Include(c => c.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
             .AsSplitQuery()
             .FirstOrDefaultAsync(c => c.Id == epicId, ct);
         
@@ -131,8 +131,8 @@ public class StoryEpicService : IStoryEpicService
                 .Include(c => c.StoryNodes)
                 .Include(c => c.UnlockRules)
                 .Include(c => c.Translations)
-                .Include(c => c.Topics)
-                .Include(c => c.AgeGroups)
+                .Include(c => c.Topics).ThenInclude(t => t.StoryTopic)
+                .Include(c => c.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(c => c.Id == epicId, ct);
             
@@ -192,8 +192,8 @@ public class StoryEpicService : IStoryEpicService
             .Include(c => c.UnlockRules)
             .Include(c => c.Translations)
             .Include(c => c.HeroReferences)
-            .Include(c => c.Topics)
-            .Include(c => c.AgeGroups)
+            .Include(c => c.Topics).ThenInclude(t => t.StoryTopic)
+            .Include(c => c.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
             .AsSplitQuery()
             .FirstOrDefaultAsync(c => c.Id == epicId, ct);
 
@@ -209,8 +209,8 @@ public class StoryEpicService : IStoryEpicService
             .Include(d => d.StoryNodes)
             .Include(d => d.UnlockRules)
             .Include(d => d.Translations)
-            .Include(d => d.Topics)
-            .Include(d => d.AgeGroups)
+            .Include(d => d.Topics).ThenInclude(t => t.StoryTopic)
+            .Include(d => d.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
             .AsSplitQuery()
             .FirstOrDefaultAsync(d => d.Id == epicId, ct);
 
@@ -723,8 +723,12 @@ public class StoryEpicService : IStoryEpicService
                 HeroId = h.HeroId,
                 StoryId = h.StoryId
             }).ToList(),
-            TopicIds = craft.Topics.Select(t => t.StoryTopicId.ToString()).ToList(),
-            AgeGroupIds = craft.AgeGroups.Select(ag => ag.StoryAgeGroupId.ToString()).ToList()
+            TopicIds = craft.Topics
+                .Select(t => t.StoryTopic?.TopicId ?? t.StoryTopicId.ToString())
+                .ToList(),
+            AgeGroupIds = craft.AgeGroups
+                .Select(ag => ag.StoryAgeGroup?.AgeGroupId ?? ag.StoryAgeGroupId.ToString())
+                .ToList()
         };
     }
 
@@ -813,8 +817,12 @@ public class StoryEpicService : IStoryEpicService
                 HeroId = h.HeroId,
                 StoryId = h.StoryId
             }).ToList(),
-            TopicIds = definition.Topics.Select(t => t.StoryTopicId.ToString()).ToList(),
-            AgeGroupIds = definition.AgeGroups.Select(ag => ag.StoryAgeGroupId.ToString()).ToList()
+            TopicIds = definition.Topics
+                .Select(t => t.StoryTopic?.TopicId ?? t.StoryTopicId.ToString())
+                .ToList(),
+            AgeGroupIds = definition.AgeGroups
+                .Select(ag => ag.StoryAgeGroup?.AgeGroupId ?? ag.StoryAgeGroupId.ToString())
+                .ToList()
         };
     }
 
@@ -846,6 +854,8 @@ public class StoryEpicService : IStoryEpicService
             .Include(d => d.StoryNodes)
             .Include(d => d.UnlockRules)
             .Include(d => d.Translations)
+            .Include(d => d.Topics).ThenInclude(t => t.StoryTopic)
+            .Include(d => d.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
             .Include(d => d.Owner)
             .AsSplitQuery()
             .FirstOrDefaultAsync(d => d.Id == epicId, ct);
@@ -858,6 +868,8 @@ public class StoryEpicService : IStoryEpicService
             .Include(d => d.StoryNodes)
             .Include(d => d.UnlockRules)
             .Include(d => d.Translations)
+            .Include(d => d.Topics).ThenInclude(t => t.StoryTopic)
+            .Include(d => d.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
             .AsSplitQuery()
             .Where(d => d.Status == "published" && d.IsActive && d.PublishedAtUtc != null)
             .ToListAsync(ct);
@@ -1274,85 +1286,55 @@ public class StoryEpicService : IStoryEpicService
 
     private async Task UpdateCraftTopicsAsync(StoryEpicCraft craft, List<string> topicIds, CancellationToken ct)
     {
-        // Get existing topics
-        var currentTopicIds = craft.Topics.Select(t => t.StoryTopicId.ToString()).ToList();
+        var existingTopics = await _context.Set<StoryEpicCraftTopic>()
+            .Where(t => t.StoryEpicCraftId == craft.Id)
+            .ToListAsync(ct);
+        _context.RemoveRange(existingTopics);
 
-        // Calculate changes
-        var toAdd = topicIds.Except(currentTopicIds).ToList();
-        var toRemove = currentTopicIds.Except(topicIds).ToList();
-
-        if (!toAdd.Any() && !toRemove.Any()) return;
-
-        // Remove
-        if (toRemove.Any())
+        if (topicIds == null || topicIds.Count == 0)
         {
-            var removeIds = toRemove.Select(Guid.Parse).ToList();
-            var linksToRemove = craft.Topics.Where(t => removeIds.Contains(t.StoryTopicId)).ToList();
-            foreach (var link in linksToRemove)
-            {
-                craft.Topics.Remove(link); // Cascading delete or just remove from collection
-                // _context.StoryEpicCraftTopics.Remove(link); // If explicit removal needed, but navigation property removal usually suffices if configured
-            }
+            return;
         }
 
-        // Add
-        foreach (var idStr in toAdd)
+        var topics = await _context.StoryTopics
+            .Where(t => topicIds.Contains(t.TopicId))
+            .ToListAsync(ct);
+
+        foreach (var topic in topics)
         {
-            if (Guid.TryParse(idStr, out var id))
+            _context.Set<StoryEpicCraftTopic>().Add(new StoryEpicCraftTopic
             {
-                // Verify topic exists (optional, but safer)
-                var exists = await _context.StoryTopics.AnyAsync(t => t.Id == id, ct);
-                if (exists)
-                {
-                    craft.Topics.Add(new StoryEpicCraftTopic
-                    {
-                        StoryEpicCraftId = craft.Id,
-                        StoryTopicId = id,
-                        CreatedAt = DateTime.UtcNow
-                    });
-                }
-            }
+                StoryEpicCraftId = craft.Id,
+                StoryTopicId = topic.Id,
+                CreatedAt = DateTime.UtcNow
+            });
         }
     }
 
     private async Task UpdateCraftAgeGroupsAsync(StoryEpicCraft craft, List<string> ageGroupIds, CancellationToken ct)
     {
-        // Get existing age groups
-        var currentAgeGroupIds = craft.AgeGroups.Select(ag => ag.StoryAgeGroupId.ToString()).ToList();
+        var existingAgeGroups = await _context.Set<StoryEpicCraftAgeGroup>()
+            .Where(ag => ag.StoryEpicCraftId == craft.Id)
+            .ToListAsync(ct);
+        _context.RemoveRange(existingAgeGroups);
 
-        // Calculate changes
-        var toAdd = ageGroupIds.Except(currentAgeGroupIds).ToList();
-        var toRemove = currentAgeGroupIds.Except(ageGroupIds).ToList();
-
-        if (!toAdd.Any() && !toRemove.Any()) return;
-
-        // Remove
-        if (toRemove.Any())
+        if (ageGroupIds == null || ageGroupIds.Count == 0)
         {
-            var removeIds = toRemove.Select(Guid.Parse).ToList();
-            var linksToRemove = craft.AgeGroups.Where(ag => removeIds.Contains(ag.StoryAgeGroupId)).ToList();
-            foreach (var link in linksToRemove)
-            {
-                craft.AgeGroups.Remove(link);
-            }
+            return;
         }
 
-        // Add
-        foreach (var idStr in toAdd)
+        var ageGroups = await _context.StoryAgeGroups
+            .Where(ag => ageGroupIds.Contains(ag.AgeGroupId))
+            .ToListAsync(ct);
+
+        foreach (var ageGroup in ageGroups)
         {
-            if (Guid.TryParse(idStr, out var id))
+            _context.Set<StoryEpicCraftAgeGroup>().Add(new StoryEpicCraftAgeGroup
             {
-                var exists = await _context.StoryAgeGroups.AnyAsync(ag => ag.Id == id, ct);
-                if (exists)
-                {
-                    craft.AgeGroups.Add(new StoryEpicCraftAgeGroup
-                    {
-                        StoryEpicCraftId = craft.Id,
-                        StoryAgeGroupId = id,
-                        CreatedAt = DateTime.UtcNow
-                    });
-                }
-            }
+                StoryEpicCraftId = craft.Id,
+                StoryAgeGroupId = ageGroup.Id,
+                CreatedAt = DateTime.UtcNow
+            });
         }
     }
 }
