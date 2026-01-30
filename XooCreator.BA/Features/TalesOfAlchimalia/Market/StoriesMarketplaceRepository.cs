@@ -165,8 +165,8 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
                 // Special sorting for "all" stories (no filters):
                 // 1. Alchimalia (alchimalia_universe topic)
                 // 2. Grădiniță (preschool_3_5 age group, but not Alchimalia)
-                // 3. Evaluative (isEvaluative == true, but not in previous categories)
-                // 4. Clasice (classic_author topic, but not in previous categories)
+                // 3. Clasice (classic_author topic, but not in previous categories)
+                // 4. Evaluative (isEvaluative == true, but not in previous categories)
                 // 5. Restul (everything else)
                 q = q.OrderBy(s =>
                 {
@@ -181,11 +181,11 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
                     // Priority 2: Grădiniță (preschool_3_5, but not Alchimalia)
                     if (isGradinita)
                         return 2;
-                    // Priority 3: Evaluative (but not in previous categories)
-                    if (isEvaluative)
-                        return 3;
-                    // Priority 4: Clasice (classic_author, but not in previous categories)
+                    // Priority 3: Clasice (classic_author, but not in previous categories)
                     if (isClasice)
+                        return 3;
+                    // Priority 4: Evaluative (but not in previous categories)
+                    if (isEvaluative)
                         return 4;
                     // Priority 5: Restul
                     return 5;
@@ -212,8 +212,9 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
 
             var page = request.Page <= 0 ? 1 : request.Page;
             var pageSize = request.PageSize <= 0 ? 20 : request.PageSize;
+            var skip = request.Skip.HasValue ? Math.Max(0, request.Skip.Value) : (page - 1) * pageSize;
             var pageItems = filtered
-                .Skip((page - 1) * pageSize)
+                .Skip(skip)
                 .Take(pageSize)
                 .ToList();
 
@@ -263,7 +264,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
                 };
             }).ToList();
 
-            var hasMore = (page * pageSize) < totalCount;
+            var hasMore = (skip + pageSize) < totalCount;
             return (dtoList, totalCount, hasMore);
         }
         finally
