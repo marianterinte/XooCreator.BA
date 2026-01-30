@@ -41,10 +41,19 @@ public class GetMarketplaceEpicsEndpoint
         [FromQuery] string sortBy = "publishedAt",
         [FromQuery] string sortOrder = "desc",
         [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 20)
+        [FromQuery] int pageSize = 20,
+        [FromQuery] string? topics = null,
+        [FromQuery] string? ageGroupIds = null)
     {
         var endpointStopwatch = Stopwatch.StartNew();
-        
+
+        var topicsList = string.IsNullOrWhiteSpace(topics)
+            ? new List<string>()
+            : topics!.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+        var ageGroupIdsList = string.IsNullOrWhiteSpace(ageGroupIds)
+            ? new List<string>()
+            : ageGroupIds!.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+
         try
         {
             var userId = await ep._userContext.GetUserIdAsync();
@@ -57,7 +66,9 @@ public class GetMarketplaceEpicsEndpoint
                 SortBy = sortBy,
                 SortOrder = sortOrder,
                 Page = page,
-                PageSize = pageSize
+                PageSize = pageSize,
+                Topics = topicsList,
+                AgeGroupIds = ageGroupIdsList
             };
 
             var result = await ep._epicsMarketplaceService.GetMarketplaceEpicsAsync(userId.Value, locale, request);

@@ -55,6 +55,26 @@ public class EpicsMarketplaceRepository
                 }
             }
 
+            // Filter by topics (epic must have at least one of the selected topics)
+            if (request.Topics != null && request.Topics.Count > 0)
+            {
+                var topicSet = request.Topics.Where(t => !string.IsNullOrWhiteSpace(t)).Select(t => t!.Trim()).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                if (topicSet.Count > 0)
+                {
+                    q = q.Where(e => e.TopicIds.Any(t => topicSet.Contains(t)));
+                }
+            }
+
+            // Filter by age groups (epic must have at least one of the selected age groups)
+            if (request.AgeGroupIds != null && request.AgeGroupIds.Count > 0)
+            {
+                var ageGroupSet = request.AgeGroupIds.Where(a => !string.IsNullOrWhiteSpace(a)).Select(a => a!.Trim()).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                if (ageGroupSet.Count > 0)
+                {
+                    q = q.Where(e => e.AgeGroupIds.Any(ag => ageGroupSet.Contains(ag)));
+                }
+            }
+
             var sortBy = (request.SortBy ?? "publishedAt").ToLowerInvariant();
             var sortDesc = string.Equals(request.SortOrder, "desc", StringComparison.OrdinalIgnoreCase);
 
