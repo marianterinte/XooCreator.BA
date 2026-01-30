@@ -333,7 +333,7 @@ public class StoryRegionService : IStoryRegionService
             .ToList();
     }
 
-    public async Task DeleteRegionAsync(Guid ownerUserId, string regionId, CancellationToken ct = default)
+    public async Task DeleteRegionAsync(Guid requestingUserId, string regionId, bool allowAdminOverride = false, CancellationToken ct = default)
     {
         var regionCraft = await _repository.GetCraftAsync(regionId, ct);
         if (regionCraft == null)
@@ -341,7 +341,7 @@ public class StoryRegionService : IStoryRegionService
             throw new InvalidOperationException($"Region craft '{regionId}' not found");
         }
 
-        if (regionCraft.OwnerUserId != ownerUserId)
+        if (!allowAdminOverride && regionCraft.OwnerUserId != requestingUserId)
         {
             throw new UnauthorizedAccessException($"User does not own region '{regionId}'");
         }

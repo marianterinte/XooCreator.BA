@@ -36,14 +36,16 @@ public class DeleteStoryRegionEndpoint
         var user = await ep._auth0.GetCurrentUserAsync(ct);
         if (user == null) return TypedResults.Unauthorized();
 
-        if (!ep._auth0.HasRole(user, UserRole.Creator))
+        var isCreator = ep._auth0.HasRole(user, UserRole.Creator);
+        var isAdmin = ep._auth0.HasRole(user, UserRole.Admin);
+        if (!isCreator && !isAdmin)
         {
             return TypedResults.Forbid();
         }
 
         try
         {
-            await ep._regionService.DeleteRegionAsync(user.Id, regionId, ct);
+            await ep._regionService.DeleteRegionAsync(user.Id, regionId, allowAdminOverride: isAdmin, ct);
             ep._logger.LogInformation("DeleteStoryRegion: userId={UserId} regionId={RegionId}", user.Id, regionId);
             return TypedResults.Ok();
         }

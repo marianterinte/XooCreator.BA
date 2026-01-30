@@ -36,14 +36,16 @@ public class DeleteEpicHeroEndpoint
         var user = await ep._auth0.GetCurrentUserAsync(ct);
         if (user == null) return TypedResults.Unauthorized();
 
-        if (!ep._auth0.HasRole(user, UserRole.Creator))
+        var isCreator = ep._auth0.HasRole(user, UserRole.Creator);
+        var isAdmin = ep._auth0.HasRole(user, UserRole.Admin);
+        if (!isCreator && !isAdmin)
         {
             return TypedResults.Forbid();
         }
 
         try
         {
-            await ep._heroService.DeleteHeroAsync(user.Id, heroId, ct);
+            await ep._heroService.DeleteHeroAsync(user.Id, heroId, allowAdminOverride: isAdmin, ct);
             ep._logger.LogInformation("DeleteEpicHero: userId={UserId} heroId={HeroId}", user.Id, heroId);
             return TypedResults.Ok();
         }

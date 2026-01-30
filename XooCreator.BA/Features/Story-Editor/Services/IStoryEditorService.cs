@@ -18,6 +18,6 @@ public interface IStoryEditorService
     // Delete a translation (removes StoryCraftTranslation and related data for that language)
     Task DeleteTranslationAsync(Guid ownerUserId, string storyId, string languageCode, CancellationToken ct = default);
     
-    // Delete entire draft (removes StoryCraft and all translations)
-    Task DeleteDraftAsync(Guid ownerUserId, string storyId, CancellationToken ct = default);
+    // Delete entire draft (removes StoryCraft and all translations). allowAdminOverride: when true, requesting user may delete any draft e.g. admin
+    Task DeleteDraftAsync(Guid requestingUserId, string storyId, bool allowAdminOverride = false, CancellationToken ct = default);
 }
