@@ -449,13 +449,13 @@ public class StoryEpicService : IStoryEpicService
         return result.OrderByDescending(e => e.UpdatedAt).ToList();
     }
 
-    public async Task DeleteEpicAsync(Guid ownerUserId, string epicId, CancellationToken ct = default)
+    public async Task DeleteEpicAsync(Guid requestingUserId, string epicId, bool allowAdminOverride = false, CancellationToken ct = default)
     {
         // Delete craft if exists
         var craft = await _context.StoryEpicCrafts.FirstOrDefaultAsync(c => c.Id == epicId, ct);
         if (craft != null)
         {
-            if (craft.OwnerUserId != ownerUserId)
+            if (!allowAdminOverride && craft.OwnerUserId != requestingUserId)
             {
                 throw new UnauthorizedAccessException($"User does not own epic '{epicId}'");
             }
@@ -466,7 +466,7 @@ public class StoryEpicService : IStoryEpicService
         var definition = await _context.StoryEpicDefinitions.FirstOrDefaultAsync(d => d.Id == epicId, ct);
         if (definition != null)
         {
-            if (definition.OwnerUserId != ownerUserId)
+            if (!allowAdminOverride && definition.OwnerUserId != requestingUserId)
             {
                 throw new UnauthorizedAccessException($"User does not own epic '{epicId}'");
             }

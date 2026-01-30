@@ -37,8 +37,10 @@ public class DeleteStoryEpicEndpoint
         var user = await ep._auth0.GetCurrentUserAsync(ct);
         if (user == null) return TypedResults.Unauthorized();
 
-        // Creator-only guard
-        if (!ep._auth0.HasRole(user, UserRole.Creator))
+        // Creator or Admin (admin may delete any user's epic e.g. drafts)
+        var isCreator = ep._auth0.HasRole(user, UserRole.Creator);
+        var isAdmin = ep._auth0.HasRole(user, UserRole.Admin);
+        if (!isCreator && !isAdmin)
         {
             ep._logger.LogWarning("DeleteStoryEpic forbidden: userId={UserId} roles={Roles}", 
                 user?.Id, string.Join(",", user?.Roles ?? new List<UserRole> { user?.Role ?? UserRole.Reader }));
@@ -47,7 +49,7 @@ public class DeleteStoryEpicEndpoint
 
         try
         {
-            await ep._epicService.DeleteEpicAsync(user.Id, epicId, ct);
+            await ep._epicService.DeleteEpicAsync(user.Id, epicId, allowAdminOverride: isAdmin, ct);
             ep._logger.LogInformation("DeleteStoryEpic: userId={UserId} epicId={EpicId}", user.Id, epicId);
             return TypedResults.Ok();
         }

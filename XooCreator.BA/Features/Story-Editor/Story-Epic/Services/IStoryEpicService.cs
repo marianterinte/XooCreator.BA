@@ -26,8 +26,8 @@ public interface IStoryEpicService
     // List all epics (for admin)
     Task<List<StoryEpicListItemDto>> ListAllEpicsAsync(Guid currentUserId, CancellationToken ct = default);
     
-    // Delete epic
-    Task DeleteEpicAsync(Guid ownerUserId, string epicId, CancellationToken ct = default);
+    // Delete epic (allowAdminOverride: when true, requesting user may delete any epic e.g. admin)
+    Task DeleteEpicAsync(Guid requestingUserId, string epicId, bool allowAdminOverride = false, CancellationToken ct = default);
     
     // Create new version from published epic
     Task<int> CreateVersionFromPublishedAsync(Guid ownerUserId, string epicId, CancellationToken ct = default);
