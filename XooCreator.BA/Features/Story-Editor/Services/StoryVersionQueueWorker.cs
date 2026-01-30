@@ -215,18 +215,35 @@ public class StoryVersionQueueWorker : BackgroundService
                         var newCraft = await storyCopyService.CreateCopyFromDefinitionAsync(definition, job.OwnerUserId, job.StoryId, stoppingToken);
                         _logger.LogInformation("Draft created from definition for StoryVersionJob: jobId={JobId} storyId={StoryId}", job.Id, job.StoryId);
 
-                        // Copy assets from published to draft storage
+                        // Copy assets from published to draft storage.
+                        // Source: published content is under the story author (job.OwnerUserId = definition.CreatedBy).
+                        // Target: draft is under the user who requested the version (admin/creator editing the draft).
                         try
                         {
-                            var assets = storyAssetCopyService.CollectFromDefinition(definition);
-                            await storyAssetCopyService.CopyPublishedToDraftAsync(
-                                assets,
-                                job.RequestedByEmail,
-                                definition.StoryId,
-                                job.RequestedByEmail,
-                                job.StoryId,
-                                stoppingToken);
-                            _logger.LogInformation("Asset copy completed for StoryVersionJob: jobId={JobId} storyId={StoryId}", job.Id, job.StoryId);
+                            var publishedOwnerEmail = await db.AlchimaliaUsers
+                                .AsNoTracking()
+                                .Where(u => u.Id == job.OwnerUserId)
+                                .Select(u => u.Email)
+                                .FirstOrDefaultAsync(stoppingToken);
+
+                            if (string.IsNullOrWhiteSpace(publishedOwnerEmail))
+                            {
+                                _logger.LogWarning(
+                                    "Skipping asset copy for StoryVersionJob: jobId={JobId} storyId={StoryId} — cannot resolve published owner email for OwnerUserId={OwnerUserId}",
+                                    job.Id, job.StoryId, job.OwnerUserId);
+                            }
+                            else
+                            {
+                                var assets = storyAssetCopyService.CollectFromDefinition(definition);
+                                await storyAssetCopyService.CopyPublishedToDraftAsync(
+                                    assets,
+                                    publishedOwnerEmail,
+                                    definition.StoryId,
+                                    job.RequestedByEmail,
+                                    job.StoryId,
+                                    stoppingToken);
+                                _logger.LogInformation("Asset copy completed for StoryVersionJob: jobId={JobId} storyId={StoryId}", job.Id, job.StoryId);
+                            }
                         }
                         catch (Exception assetEx)
                         {
