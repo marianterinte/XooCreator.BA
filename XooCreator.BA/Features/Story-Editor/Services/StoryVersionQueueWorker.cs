@@ -216,15 +216,20 @@ public class StoryVersionQueueWorker : BackgroundService
                         _logger.LogInformation("Draft created from definition for StoryVersionJob: jobId={JobId} storyId={StoryId}", job.Id, job.StoryId);
 
                         // Copy assets from published to draft storage.
-                        // Source: published content is under the story author (job.OwnerUserId = definition.CreatedBy).
+                        // Source: published content is under the owner folder encoded in published paths.
                         // Target: draft is under the user who requested the version (admin/creator editing the draft).
                         try
                         {
-                            var publishedOwnerEmail = await db.AlchimaliaUsers
-                                .AsNoTracking()
-                                .Where(u => u.Id == job.OwnerUserId)
-                                .Select(u => u.Email)
-                                .FirstOrDefaultAsync(stoppingToken);
+                            var publishedOwnerEmail =
+                                TryExtractOwnerFolderFromPublishedPath(definition.CoverImageUrl, definition.StoryId)
+                                ?? TryExtractOwnerFolderFromPublishedPath(
+                                    definition.Tiles.FirstOrDefault(t => !string.IsNullOrWhiteSpace(t.ImageUrl))?.ImageUrl,
+                                    definition.StoryId)
+                                ?? await db.AlchimaliaUsers
+                                    .AsNoTracking()
+                                    .Where(u => u.Id == job.OwnerUserId)
+                                    .Select(u => u.Email)
+                                    .FirstOrDefaultAsync(stoppingToken);
 
                             if (string.IsNullOrWhiteSpace(publishedOwnerEmail))
                             {
@@ -310,5 +315,49 @@ public class StoryVersionQueueWorker : BackgroundService
     // No explicit cleanup needed. Scoped services (DbContext, etc.) are disposed via 'using var scope'.
 
     private sealed record StoryVersionQueuePayload(Guid JobId, string StoryId, int BaseVersion);
+
+    private static string? TryExtractOwnerFolderFromPublishedPath(string? path, string storyId)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return null;
+        }
+
+        var clean = path.Trim();
+        if (Uri.TryCreate(clean, UriKind.Absolute, out var uri))
+        {
+            clean = uri.AbsolutePath.TrimStart('/');
+        }
+        else
+        {
+            clean = clean.TrimStart('/');
+        }
+
+        const string marker = "/stories/";
+        var idx = clean.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+        if (idx < 0)
+        {
+            return null;
+        }
+
+        var after = clean[(idx + marker.Length)..];
+        var parts = after.Split('/', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length < 1)
+        {
+            return null;
+        }
+
+        var owner = parts[0];
+        if (parts.Length >= 2 && !string.IsNullOrWhiteSpace(storyId))
+        {
+            var storySegment = parts[1];
+            if (!storySegment.Equals(storyId, StringComparison.OrdinalIgnoreCase))
+            {
+                return owner;
+            }
+        }
+
+        return owner;
+    }
 }
 
