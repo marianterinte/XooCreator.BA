@@ -271,6 +271,8 @@ public record SearchEpicsRequest
     public string SortOrder { get; init; } = "desc"; // asc, desc
     public int Page { get; init; } = 1;
     public int PageSize { get; init; } = 20;
+    public List<string> Topics { get; init; } = new(); // TopicIds (e.g. alchimalia_universe, classic_author)
+    public List<string> AgeGroupIds { get; init; } = new(); // Age group IDs for filtering
 }
 
 // Epic Review DTOs
