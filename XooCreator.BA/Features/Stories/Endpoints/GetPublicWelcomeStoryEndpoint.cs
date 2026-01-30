@@ -8,7 +8,7 @@ namespace XooCreator.BA.Features.Stories.Endpoints;
 
 /// <summary>
 /// Public endpoint for the welcome story (no authentication required)
-/// Only works for the hardcoded welcome story ID: ionelbacosca-s251209175610
+/// Only works for the hardcoded welcome story ID: ionelbacosca-s251212183034
 /// </summary>
 [Endpoint]
 public class GetPublicWelcomeStoryEndpoint
@@ -26,7 +26,7 @@ public class GetPublicWelcomeStoryEndpoint
         [FromServices] GetPublicWelcomeStoryEndpoint ep)
     {
         // Hardcoded welcome story ID
-        const string welcomeStoryId = "ionelbacosca-s251209175610";
+        const string welcomeStoryId = "ionelbacosca-s251212183034";
         
         Console.WriteLine($"[GetPublicWelcomeStory] Request received - locale: {locale}, storyId: {welcomeStoryId}");
         

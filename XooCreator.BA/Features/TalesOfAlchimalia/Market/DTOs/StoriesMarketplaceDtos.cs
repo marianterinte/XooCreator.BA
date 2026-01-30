@@ -115,6 +115,7 @@ public record SearchStoriesRequest
     public string SortOrder { get; init; } = "asc";
     public int Page { get; init; } = 1;
     public int PageSize { get; init; } = 20;
+    public int? Skip { get; init; }
     public string SearchType { get; init; } = "title"; // "title", "author"
 }
 
