@@ -59,7 +59,7 @@ public class StoryEpicService : IStoryEpicService
         }
     }
 
-    public async Task SaveEpicAsync(Guid ownerUserId, string epicId, StoryEpicDto dto, CancellationToken ct = default)
+    public async Task SaveEpicAsync(Guid ownerUserId, string epicId, StoryEpicDto dto, bool isAdmin = false, CancellationToken ct = default)
     {
         // Load or create StoryEpicCraft (always work with draft)
         var craft = await _context.StoryEpicCrafts
@@ -68,12 +68,13 @@ public class StoryEpicService : IStoryEpicService
             .Include(c => c.UnlockRules)
             .Include(c => c.Translations)
             .Include(c => c.HeroReferences)
-            .Include(c => c.Topics)
-            .Include(c => c.AgeGroups)
+            .Include(c => c.Topics).ThenInclude(t => t.StoryTopic)
+            .Include(c => c.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
             .AsSplitQuery()
             .FirstOrDefaultAsync(c => c.Id == epicId, ct);
         
-        if (craft != null && craft.OwnerUserId != ownerUserId)
+        // Check ownership only if user is not admin
+        if (craft != null && craft.OwnerUserId != ownerUserId && !isAdmin)
         {
             throw new UnauthorizedAccessException($"User does not own epic '{epicId}'");
         }
@@ -130,8 +131,8 @@ public class StoryEpicService : IStoryEpicService
                 .Include(c => c.StoryNodes)
                 .Include(c => c.UnlockRules)
                 .Include(c => c.Translations)
-                .Include(c => c.Topics)
-                .Include(c => c.AgeGroups)
+                .Include(c => c.Topics).ThenInclude(t => t.StoryTopic)
+                .Include(c => c.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(c => c.Id == epicId, ct);
             
@@ -191,8 +192,8 @@ public class StoryEpicService : IStoryEpicService
             .Include(c => c.UnlockRules)
             .Include(c => c.Translations)
             .Include(c => c.HeroReferences)
-            .Include(c => c.Topics)
-            .Include(c => c.AgeGroups)
+            .Include(c => c.Topics).ThenInclude(t => t.StoryTopic)
+            .Include(c => c.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
             .AsSplitQuery()
             .FirstOrDefaultAsync(c => c.Id == epicId, ct);
 
@@ -208,8 +209,8 @@ public class StoryEpicService : IStoryEpicService
             .Include(d => d.StoryNodes)
             .Include(d => d.UnlockRules)
             .Include(d => d.Translations)
-            .Include(d => d.Topics)
-            .Include(d => d.AgeGroups)
+            .Include(d => d.Topics).ThenInclude(t => t.StoryTopic)
+            .Include(d => d.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
             .AsSplitQuery()
             .FirstOrDefaultAsync(d => d.Id == epicId, ct);
 
@@ -448,36 +449,30 @@ public class StoryEpicService : IStoryEpicService
         return result.OrderByDescending(e => e.UpdatedAt).ToList();
     }
 
-    public async Task DeleteEpicAsync(Guid ownerUserId, string epicId, CancellationToken ct = default)
+    /// <summary>
+    /// Deletes only the draft (StoryEpicCraft). Published version is never touched; use Retract/Unpublish for that.
+    /// </summary>
+    public async Task DeleteEpicDraftAsync(Guid requestingUserId, string epicId, bool allowAdminOverride = false, CancellationToken ct = default)
     {
-        // Delete craft if exists
         var craft = await _context.StoryEpicCrafts.FirstOrDefaultAsync(c => c.Id == epicId, ct);
-        if (craft != null)
+        if (craft == null)
         {
-            if (craft.OwnerUserId != ownerUserId)
-            {
-                throw new UnauthorizedAccessException($"User does not own epic '{epicId}'");
-            }
-            _context.StoryEpicCrafts.Remove(craft);
+            throw new InvalidOperationException($"Draft for epic '{epicId}' not found.");
         }
-        
-        // Delete definition if exists
-        var definition = await _context.StoryEpicDefinitions.FirstOrDefaultAsync(d => d.Id == epicId, ct);
-        if (definition != null)
+
+        if (!allowAdminOverride && craft.OwnerUserId != requestingUserId)
         {
-            if (definition.OwnerUserId != ownerUserId)
-            {
-                throw new UnauthorizedAccessException($"User does not own epic '{epicId}'");
-            }
-            _context.StoryEpicDefinitions.Remove(definition);
+            throw new UnauthorizedAccessException($"User does not own epic '{epicId}'");
         }
-        
-        if (craft == null && definition == null)
-        {
-            throw new InvalidOperationException($"Epic '{epicId}' not found");
-        }
-        
+
+        _context.StoryEpicCrafts.Remove(craft);
         await _context.SaveChangesAsync(ct);
+    }
+
+    /// <summary>Same as DeleteEpicDraftAsync. Kept for backward compatibility.</summary>
+    public async Task DeleteEpicAsync(Guid requestingUserId, string epicId, bool allowAdminOverride = false, CancellationToken ct = default)
+    {
+        await DeleteEpicDraftAsync(requestingUserId, epicId, allowAdminOverride, ct);
     }
 
     public async Task<int> CreateVersionFromPublishedAsync(Guid ownerUserId, string epicId, CancellationToken ct = default)
@@ -722,8 +717,12 @@ public class StoryEpicService : IStoryEpicService
                 HeroId = h.HeroId,
                 StoryId = h.StoryId
             }).ToList(),
-            TopicIds = craft.Topics.Select(t => t.StoryTopicId.ToString()).ToList(),
-            AgeGroupIds = craft.AgeGroups.Select(ag => ag.StoryAgeGroupId.ToString()).ToList()
+            TopicIds = craft.Topics
+                .Select(t => t.StoryTopic?.TopicId ?? t.StoryTopicId.ToString())
+                .ToList(),
+            AgeGroupIds = craft.AgeGroups
+                .Select(ag => ag.StoryAgeGroup?.AgeGroupId ?? ag.StoryAgeGroupId.ToString())
+                .ToList()
         };
     }
 
@@ -812,8 +811,12 @@ public class StoryEpicService : IStoryEpicService
                 HeroId = h.HeroId,
                 StoryId = h.StoryId
             }).ToList(),
-            TopicIds = definition.Topics.Select(t => t.StoryTopicId.ToString()).ToList(),
-            AgeGroupIds = definition.AgeGroups.Select(ag => ag.StoryAgeGroupId.ToString()).ToList()
+            TopicIds = definition.Topics
+                .Select(t => t.StoryTopic?.TopicId ?? t.StoryTopicId.ToString())
+                .ToList(),
+            AgeGroupIds = definition.AgeGroups
+                .Select(ag => ag.StoryAgeGroup?.AgeGroupId ?? ag.StoryAgeGroupId.ToString())
+                .ToList()
         };
     }
 
@@ -845,6 +848,8 @@ public class StoryEpicService : IStoryEpicService
             .Include(d => d.StoryNodes)
             .Include(d => d.UnlockRules)
             .Include(d => d.Translations)
+            .Include(d => d.Topics).ThenInclude(t => t.StoryTopic)
+            .Include(d => d.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
             .Include(d => d.Owner)
             .AsSplitQuery()
             .FirstOrDefaultAsync(d => d.Id == epicId, ct);
@@ -857,6 +862,8 @@ public class StoryEpicService : IStoryEpicService
             .Include(d => d.StoryNodes)
             .Include(d => d.UnlockRules)
             .Include(d => d.Translations)
+            .Include(d => d.Topics).ThenInclude(t => t.StoryTopic)
+            .Include(d => d.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
             .AsSplitQuery()
             .Where(d => d.Status == "published" && d.IsActive && d.PublishedAtUtc != null)
             .ToListAsync(ct);
@@ -1273,85 +1280,55 @@ public class StoryEpicService : IStoryEpicService
 
     private async Task UpdateCraftTopicsAsync(StoryEpicCraft craft, List<string> topicIds, CancellationToken ct)
     {
-        // Get existing topics
-        var currentTopicIds = craft.Topics.Select(t => t.StoryTopicId.ToString()).ToList();
+        var existingTopics = await _context.Set<StoryEpicCraftTopic>()
+            .Where(t => t.StoryEpicCraftId == craft.Id)
+            .ToListAsync(ct);
+        _context.RemoveRange(existingTopics);
 
-        // Calculate changes
-        var toAdd = topicIds.Except(currentTopicIds).ToList();
-        var toRemove = currentTopicIds.Except(topicIds).ToList();
-
-        if (!toAdd.Any() && !toRemove.Any()) return;
-
-        // Remove
-        if (toRemove.Any())
+        if (topicIds == null || topicIds.Count == 0)
         {
-            var removeIds = toRemove.Select(Guid.Parse).ToList();
-            var linksToRemove = craft.Topics.Where(t => removeIds.Contains(t.StoryTopicId)).ToList();
-            foreach (var link in linksToRemove)
-            {
-                craft.Topics.Remove(link); // Cascading delete or just remove from collection
-                // _context.StoryEpicCraftTopics.Remove(link); // If explicit removal needed, but navigation property removal usually suffices if configured
-            }
+            return;
         }
 
-        // Add
-        foreach (var idStr in toAdd)
+        var topics = await _context.StoryTopics
+            .Where(t => topicIds.Contains(t.TopicId))
+            .ToListAsync(ct);
+
+        foreach (var topic in topics)
         {
-            if (Guid.TryParse(idStr, out var id))
+            _context.Set<StoryEpicCraftTopic>().Add(new StoryEpicCraftTopic
             {
-                // Verify topic exists (optional, but safer)
-                var exists = await _context.StoryTopics.AnyAsync(t => t.Id == id, ct);
-                if (exists)
-                {
-                    craft.Topics.Add(new StoryEpicCraftTopic
-                    {
-                        StoryEpicCraftId = craft.Id,
-                        StoryTopicId = id,
-                        CreatedAt = DateTime.UtcNow
-                    });
-                }
-            }
+                StoryEpicCraftId = craft.Id,
+                StoryTopicId = topic.Id,
+                CreatedAt = DateTime.UtcNow
+            });
         }
     }
 
     private async Task UpdateCraftAgeGroupsAsync(StoryEpicCraft craft, List<string> ageGroupIds, CancellationToken ct)
     {
-        // Get existing age groups
-        var currentAgeGroupIds = craft.AgeGroups.Select(ag => ag.StoryAgeGroupId.ToString()).ToList();
+        var existingAgeGroups = await _context.Set<StoryEpicCraftAgeGroup>()
+            .Where(ag => ag.StoryEpicCraftId == craft.Id)
+            .ToListAsync(ct);
+        _context.RemoveRange(existingAgeGroups);
 
-        // Calculate changes
-        var toAdd = ageGroupIds.Except(currentAgeGroupIds).ToList();
-        var toRemove = currentAgeGroupIds.Except(ageGroupIds).ToList();
-
-        if (!toAdd.Any() && !toRemove.Any()) return;
-
-        // Remove
-        if (toRemove.Any())
+        if (ageGroupIds == null || ageGroupIds.Count == 0)
         {
-            var removeIds = toRemove.Select(Guid.Parse).ToList();
-            var linksToRemove = craft.AgeGroups.Where(ag => removeIds.Contains(ag.StoryAgeGroupId)).ToList();
-            foreach (var link in linksToRemove)
-            {
-                craft.AgeGroups.Remove(link);
-            }
+            return;
         }
 
-        // Add
-        foreach (var idStr in toAdd)
+        var ageGroups = await _context.StoryAgeGroups
+            .Where(ag => ageGroupIds.Contains(ag.AgeGroupId))
+            .ToListAsync(ct);
+
+        foreach (var ageGroup in ageGroups)
         {
-            if (Guid.TryParse(idStr, out var id))
+            _context.Set<StoryEpicCraftAgeGroup>().Add(new StoryEpicCraftAgeGroup
             {
-                var exists = await _context.StoryAgeGroups.AnyAsync(ag => ag.Id == id, ct);
-                if (exists)
-                {
-                    craft.AgeGroups.Add(new StoryEpicCraftAgeGroup
-                    {
-                        StoryEpicCraftId = craft.Id,
-                        StoryAgeGroupId = id,
-                        CreatedAt = DateTime.UtcNow
-                    });
-                }
-            }
+                StoryEpicCraftId = craft.Id,
+                StoryAgeGroupId = ageGroup.Id,
+                CreatedAt = DateTime.UtcNow
+            });
         }
     }
 }

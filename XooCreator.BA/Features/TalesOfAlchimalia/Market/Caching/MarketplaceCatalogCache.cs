@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using XooCreator.BA.Data;
+using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Data.SeedData.DTOs;
 
@@ -322,6 +323,8 @@ public sealed class MarketplaceCatalogCache : IMarketplaceCatalogCache, IMarketp
             .Include(e => e.StoryNodes)
             .Include(e => e.Regions)
             .Include(e => e.Translations)
+            .Include(e => e.Topics).ThenInclude(t => t.StoryTopic)
+            .Include(e => e.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
             .Where(e => e.Status == "published" && e.PublishedAtUtc != null)
             .AsSplitQuery()
             .ToListAsync(ct);
@@ -359,6 +362,17 @@ public sealed class MarketplaceCatalogCache : IMarketplaceCatalogCache, IMarketp
             if (!string.IsNullOrWhiteSpace(authorName)) searchAuthors.Add(authorName!);
             searchAuthors = searchAuthors.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
 
+            var topicIds = (epic.Topics ?? Array.Empty<StoryEpicDefinitionTopic>())
+                .Select(t => t.StoryTopic?.TopicId ?? t.StoryTopicId.ToString())
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            var ageGroupIds = (epic.AgeGroups ?? Array.Empty<StoryEpicDefinitionAgeGroup>())
+                .Select(ag => ag.StoryAgeGroup?.AgeGroupId ?? ag.StoryAgeGroupId.ToString())
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
             result.Add(new EpicMarketplaceBaseItem
             {
                 EpicId = epic.Id,
@@ -373,7 +387,9 @@ public sealed class MarketplaceCatalogCache : IMarketplaceCatalogCache, IMarketp
                 RegionCount = epic.Regions?.Count ?? 0,
                 AvailableLanguages = availableLanguages,
                 SearchTexts = searchTexts,
-                SearchAuthors = searchAuthors
+                SearchAuthors = searchAuthors,
+                TopicIds = topicIds,
+                AgeGroupIds = ageGroupIds
             });
         }
 
@@ -424,7 +440,7 @@ public sealed class MarketplaceCatalogCache : IMarketplaceCatalogCache, IMarketp
     }
 
     private static string GetStoriesBaseKey(string locale) => $"marketplace:stories:base:{locale}";
-    private static string GetEpicsBaseKey(string locale) => $"marketplace:epics:base:{locale}";
+    private static string GetEpicsBaseKey(string locale) => $"marketplace:epics:base:v2:{locale}";
 
     private static string NormalizeLocale(string? locale) =>
         string.IsNullOrWhiteSpace(locale) ? "ro-ro" : locale.Trim().ToLowerInvariant();

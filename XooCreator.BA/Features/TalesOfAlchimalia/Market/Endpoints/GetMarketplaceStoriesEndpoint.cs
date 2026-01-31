@@ -51,6 +51,7 @@ public class GetMarketplaceStoriesEndpoint
         [FromQuery] string sortOrder = "asc",
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 5,
+        [FromQuery] int? skip = null,
         [FromQuery] string searchType = "title")
     {
         var endpointStopwatch = Stopwatch.StartNew();
@@ -78,7 +79,8 @@ public class GetMarketplaceStoriesEndpoint
                 SortBy = sortBy,
                 SortOrder = sortOrder,
                 Page = page,
-                PageSize = pageSize
+                PageSize = pageSize,
+                Skip = skip
             };
 
             var result = await ep._marketplaceService.GetMarketplaceStoriesAsync(userId.Value, locale, request);

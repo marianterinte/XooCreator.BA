@@ -9,7 +9,7 @@ public interface IStoryEpicService
     Task EnsureEpicAsync(Guid ownerUserId, string epicId, string name, CancellationToken ct = default);
     
     // Save epic from DTO
-    Task SaveEpicAsync(Guid ownerUserId, string epicId, StoryEpicDto dto, CancellationToken ct = default);
+    Task SaveEpicAsync(Guid ownerUserId, string epicId, StoryEpicDto dto, bool isAdmin = false, CancellationToken ct = default);
     
     // Get epic as DTO
     Task<StoryEpicDto?> GetEpicAsync(string epicId, CancellationToken ct = default);
@@ -26,8 +26,11 @@ public interface IStoryEpicService
     // List all epics (for admin)
     Task<List<StoryEpicListItemDto>> ListAllEpicsAsync(Guid currentUserId, CancellationToken ct = default);
     
-    // Delete epic
-    Task DeleteEpicAsync(Guid ownerUserId, string epicId, CancellationToken ct = default);
+    /// <summary>Deletes only the draft (StoryEpicCraft). Throws if no draft. Published version is never touched.</summary>
+    Task DeleteEpicDraftAsync(Guid requestingUserId, string epicId, bool allowAdminOverride = false, CancellationToken ct = default);
+
+    /// <summary>Deletes the draft (same as DeleteEpicDraftAsync). Kept for backward compatibility.</summary>
+    Task DeleteEpicAsync(Guid requestingUserId, string epicId, bool allowAdminOverride = false, CancellationToken ct = default);
     
     // Create new version from published epic
     Task<int> CreateVersionFromPublishedAsync(Guid ownerUserId, string epicId, CancellationToken ct = default);

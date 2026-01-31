@@ -424,7 +424,7 @@ public class EpicHeroService : IEpicHeroService
         };
     }
 
-    public async Task DeleteHeroAsync(Guid ownerUserId, string heroId, CancellationToken ct = default)
+    public async Task DeleteHeroAsync(Guid requestingUserId, string heroId, bool allowAdminOverride = false, CancellationToken ct = default)
     {
         var heroCraft = await _repository.GetCraftAsync(heroId, ct);
         if (heroCraft == null)
@@ -432,7 +432,7 @@ public class EpicHeroService : IEpicHeroService
             throw new InvalidOperationException($"Hero craft '{heroId}' not found");
         }
 
-        if (heroCraft.OwnerUserId != ownerUserId)
+        if (!allowAdminOverride && heroCraft.OwnerUserId != requestingUserId)
         {
             throw new UnauthorizedAccessException($"User does not own hero '{heroId}'");
         }

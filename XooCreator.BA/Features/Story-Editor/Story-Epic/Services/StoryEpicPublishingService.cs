@@ -224,6 +224,62 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
         return path.StartsWith("images/", StringComparison.OrdinalIgnoreCase);
     }
 
+    /// <summary>
+    /// Validates that all regions and stories referenced in unlock rules exist in the craft.
+    /// Throws <see cref="InvalidOperationException"/> with a clear message if any reference is invalid.
+    /// </summary>
+    private static void ValidateUnlockRulesReferences(StoryEpicCraft craft)
+    {
+        var regionIds = new HashSet<string>(craft.Regions.Select(r => r.RegionId), StringComparer.OrdinalIgnoreCase);
+        var storyIds = new HashSet<string>(craft.StoryNodes.Select(n => n.StoryId), StringComparer.OrdinalIgnoreCase);
+        var invalidRefs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var rule in craft.UnlockRules)
+        {
+            // FromId can be a region or story (source of the unlock)
+            if (!string.IsNullOrWhiteSpace(rule.FromId) && !regionIds.Contains(rule.FromId) && !storyIds.Contains(rule.FromId))
+            {
+                invalidRefs.Add(rule.FromId);
+            }
+
+            if (!string.IsNullOrWhiteSpace(rule.ToRegionId) && !regionIds.Contains(rule.ToRegionId))
+            {
+                invalidRefs.Add($"region:{rule.ToRegionId}");
+            }
+
+            if (!string.IsNullOrWhiteSpace(rule.ToStoryId) && !storyIds.Contains(rule.ToStoryId))
+            {
+                invalidRefs.Add($"story:{rule.ToStoryId}");
+            }
+
+            if (!string.IsNullOrWhiteSpace(rule.RequiredStoriesCsv))
+            {
+                foreach (var id in rule.RequiredStoriesCsv.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                {
+                    if (!string.IsNullOrWhiteSpace(id) && !storyIds.Contains(id))
+                    {
+                        invalidRefs.Add($"story:{id}");
+                    }
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(rule.StoryId) && !storyIds.Contains(rule.StoryId))
+            {
+                invalidRefs.Add($"story:{rule.StoryId}");
+            }
+        }
+
+        if (invalidRefs.Count == 0)
+        {
+            return;
+        }
+
+        throw new InvalidOperationException(
+            "Unlock rules reference regions or stories that are not in this epic. Invalid: " +
+            string.Join(", ", invalidRefs.OrderBy(x => x)) +
+            ". Ensure every region and story used in unlock rules exists in the epic tree.");
+    }
+
     public async Task PublishFromCraftAsync(StoryEpicCraft craft, string requestedByEmail, string langTag, bool forceFull, bool isAdmin = false, CancellationToken ct = default)
     {
         // Load craft with all related data
@@ -233,6 +289,8 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
             .Include(c => c.UnlockRules)
             .Include(c => c.Translations)
             .Include(c => c.HeroReferences)
+            .Include(c => c.Topics).ThenInclude(t => t.StoryTopic)
+            .Include(c => c.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
             .AsSplitQuery()
             .FirstOrDefaultAsync(c => c.Id == craft.Id, ct) ?? craft;
 
@@ -246,12 +304,17 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
             throw new InvalidOperationException($"Admin cannot publish epic in status '{craft.Status}'. Expected Draft, ChangesRequested, or Approved.");
         }
 
+        // Validate unlock rules: all referenced regions and stories must exist in this epic
+        ValidateUnlockRulesReferences(craft);
+
         // Load or create StoryEpicDefinition
         var definition = await _context.StoryEpicDefinitions
             .Include(d => d.Regions)
             .Include(d => d.StoryNodes)
             .Include(d => d.UnlockRules)
             .Include(d => d.Translations)
+            .Include(d => d.Topics).ThenInclude(t => t.StoryTopic)
+            .Include(d => d.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
             .AsSplitQuery()
             .FirstOrDefaultAsync(d => d.Id == craft.Id, ct);
 
@@ -373,6 +436,10 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
             definition.UnlockRules.Clear();
             _context.StoryEpicDefinitionTranslations.RemoveRange(definition.Translations);
             definition.Translations.Clear();
+            _context.Set<StoryEpicDefinitionTopic>().RemoveRange(definition.Topics);
+            definition.Topics.Clear();
+            _context.Set<StoryEpicDefinitionAgeGroup>().RemoveRange(definition.AgeGroups);
+            definition.AgeGroups.Clear();
 
             var existingHeroReferences = await _context.StoryEpicHeroReferences
                 .Where(h => h.EpicId == definition.Id)
@@ -484,6 +551,28 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
                 EpicId = definition.Id,
                 HeroId = craftHeroRef.HeroId,
                 StoryId = craftHeroRef.StoryId
+            });
+        }
+
+        // Copy Topics
+        foreach (var craftTopic in craft.Topics)
+        {
+            definition.Topics.Add(new StoryEpicDefinitionTopic
+            {
+                StoryEpicDefinitionId = definition.Id,
+                StoryTopicId = craftTopic.StoryTopicId,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+
+        // Copy Age Groups
+        foreach (var craftAgeGroup in craft.AgeGroups)
+        {
+            definition.AgeGroups.Add(new StoryEpicDefinitionAgeGroup
+            {
+                StoryEpicDefinitionId = definition.Id,
+                StoryAgeGroupId = craftAgeGroup.StoryAgeGroupId,
+                CreatedAt = DateTime.UtcNow
             });
         }
 
@@ -671,6 +760,41 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
         {
             definition.CoverImageUrl = null;
             await _assetLinkService.RemoveCoverImageAsync(craft.Id, ct);
+        }
+
+        SyncDefinitionTopics(definition, craft);
+        SyncDefinitionAgeGroups(definition, craft);
+    }
+
+    private void SyncDefinitionTopics(StoryEpicDefinition definition, StoryEpicCraft craft)
+    {
+        _context.Set<StoryEpicDefinitionTopic>().RemoveRange(definition.Topics);
+        definition.Topics.Clear();
+
+        foreach (var craftTopic in craft.Topics)
+        {
+            definition.Topics.Add(new StoryEpicDefinitionTopic
+            {
+                StoryEpicDefinitionId = definition.Id,
+                StoryTopicId = craftTopic.StoryTopicId,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+    }
+
+    private void SyncDefinitionAgeGroups(StoryEpicDefinition definition, StoryEpicCraft craft)
+    {
+        _context.Set<StoryEpicDefinitionAgeGroup>().RemoveRange(definition.AgeGroups);
+        definition.AgeGroups.Clear();
+
+        foreach (var craftAgeGroup in craft.AgeGroups)
+        {
+            definition.AgeGroups.Add(new StoryEpicDefinitionAgeGroup
+            {
+                StoryEpicDefinitionId = definition.Id,
+                StoryAgeGroupId = craftAgeGroup.StoryAgeGroupId,
+                CreatedAt = DateTime.UtcNow
+            });
         }
     }
 

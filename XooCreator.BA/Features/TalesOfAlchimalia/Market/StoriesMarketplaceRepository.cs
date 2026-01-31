@@ -148,28 +148,73 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
                 }
             }
 
-            // Sorting (keep same keys)
+            // Check if no filters are active (showing "all" stories)
+            // No filters means: no topics, no ageGroupIds, no isEvaluative, no search term
+            var hasNoFilters = (request.Topics == null || !request.Topics.Any()) &&
+                               (request.AgeGroupIds == null || !request.AgeGroupIds.Any()) &&
+                               !request.IsEvaluative.HasValue &&
+                               string.IsNullOrWhiteSpace(request.SearchTerm) &&
+                               (request.AvailableLanguages == null || !request.AvailableLanguages.Any());
+
+            // Sorting
             var sortBy = (request.SortBy ?? "sortOrder").ToLowerInvariant();
             var sortDesc = string.Equals(request.SortOrder, "desc", StringComparison.OrdinalIgnoreCase);
 
-            q = sortBy switch
+            if (hasNoFilters && sortBy == "sortOrder")
             {
-                "title" => sortDesc ? q.OrderByDescending(s => s.Title) : q.OrderBy(s => s.Title),
-                "date" => sortDesc ? q.OrderByDescending(s => s.CreatedAt) : q.OrderBy(s => s.CreatedAt),
-                "price" => sortDesc ? q.OrderByDescending(s => s.PriceInCredits) : q.OrderBy(s => s.PriceInCredits),
-                "readers" => sortDesc
-                    ? q.OrderByDescending(s => stats.TryGetValue(s.StoryId, out var st) ? st.ReadersCount : 0)
-                    : q.OrderBy(s => stats.TryGetValue(s.StoryId, out var st) ? st.ReadersCount : 0),
-                _ => sortDesc ? q.OrderByDescending(s => s.SortOrder) : q.OrderBy(s => s.SortOrder)
-            };
+                // Special sorting for "all" stories (no filters):
+                // 1. Alchimalia (alchimalia_universe topic)
+                // 2. Grădiniță (preschool_3_5 age group, but not Alchimalia)
+                // 3. Clasice (classic_author topic, but not in previous categories)
+                // 4. Evaluative (isEvaluative == true, but not in previous categories)
+                // 5. Restul (everything else)
+                q = q.OrderBy(s =>
+                {
+                    var isAlchimalia = s.TopicIds.Any(t => string.Equals(t, "alchimalia_universe", StringComparison.OrdinalIgnoreCase));
+                    var isGradinita = s.AgeGroupIds.Any(id => string.Equals(id, "preschool_3_5", StringComparison.OrdinalIgnoreCase));
+                    var isEvaluative = s.IsEvaluative;
+                    var isClasice = s.TopicIds.Any(t => string.Equals(t, "classic_author", StringComparison.OrdinalIgnoreCase));
+
+                    // Priority 1: Alchimalia
+                    if (isAlchimalia)
+                        return 1;
+                    // Priority 2: Grădiniță (preschool_3_5, but not Alchimalia)
+                    if (isGradinita)
+                        return 2;
+                    // Priority 3: Clasice (classic_author, but not in previous categories)
+                    if (isClasice)
+                        return 3;
+                    // Priority 4: Evaluative (but not in previous categories)
+                    if (isEvaluative)
+                        return 4;
+                    // Priority 5: Restul
+                    return 5;
+                })
+                .ThenBy(s => s.SortOrder); // Within each category, sort by SortOrder
+            }
+            else
+            {
+                // Standard sorting when filters are active or different sortBy is requested
+                q = sortBy switch
+                {
+                    "title" => sortDesc ? q.OrderByDescending(s => s.Title) : q.OrderBy(s => s.Title),
+                    "date" => sortDesc ? q.OrderByDescending(s => s.CreatedAt) : q.OrderBy(s => s.CreatedAt),
+                    "price" => sortDesc ? q.OrderByDescending(s => s.PriceInCredits) : q.OrderBy(s => s.PriceInCredits),
+                    "readers" => sortDesc
+                        ? q.OrderByDescending(s => stats.TryGetValue(s.StoryId, out var st) ? st.ReadersCount : 0)
+                        : q.OrderBy(s => stats.TryGetValue(s.StoryId, out var st) ? st.ReadersCount : 0),
+                    _ => sortDesc ? q.OrderByDescending(s => s.SortOrder) : q.OrderBy(s => s.SortOrder)
+                };
+            }
 
             var filtered = q.ToList();
             var totalCount = filtered.Count;
 
             var page = request.Page <= 0 ? 1 : request.Page;
             var pageSize = request.PageSize <= 0 ? 20 : request.PageSize;
+            var skip = request.Skip.HasValue ? Math.Max(0, request.Skip.Value) : (page - 1) * pageSize;
             var pageItems = filtered
-                .Skip((page - 1) * pageSize)
+                .Skip(skip)
                 .Take(pageSize)
                 .ToList();
 
@@ -210,6 +255,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
                     StoryType = p.StoryType.ToString(),
                     Status = p.Status.ToString(),
                     AvailableLanguages = p.AvailableLanguages,
+                    AgeGroupIds = p.AgeGroupIds,
                     ReadersCount = st.ReadersCount,
                     LikesCount = likesCount,
                     AverageRating = st.AverageRating,
@@ -218,7 +264,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
                 };
             }).ToList();
 
-            var hasMore = (page * pageSize) < totalCount;
+            var hasMore = (skip + pageSize) < totalCount;
             return (dtoList, totalCount, hasMore);
         }
         finally
@@ -323,35 +369,36 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             }
         }
 
-        return featured.Select(p =>
-        {
-            stats.TryGetValue(p.StoryId, out var st);
-            var likesCount = likesCounts.TryGetValue(p.StoryId, out var likes) ? likes : 0;
-
-            return new StoryMarketplaceItemDto
+            return featured.Select(p =>
             {
-                Id = p.StoryId,
-                Title = p.Title,
-                CoverImageUrl = p.CoverImageUrl,
-                CreatedBy = p.CreatedBy,
-                CreatedByName = p.CreatedByName,
-                Summary = p.Summary,
-                PriceInCredits = p.PriceInCredits,
-                AgeRating = p.AgeRating,
-                Characters = p.Characters,
-                Tags = p.TopicIds,
-                CreatedAt = p.CreatedAt,
-                StoryTopic = p.StoryTopic,
-                StoryType = p.StoryType.ToString(),
-                Status = p.Status.ToString(),
-                AvailableLanguages = p.AvailableLanguages,
-                ReadersCount = st.ReadersCount,
-                LikesCount = likesCount,
-                AverageRating = st.AverageRating,
-                TotalReviews = st.TotalReviews,
-                IsEvaluative = p.IsEvaluative
-            };
-        }).ToList();
+                stats.TryGetValue(p.StoryId, out var st);
+                var likesCount = likesCounts.TryGetValue(p.StoryId, out var likes) ? likes : 0;
+
+                return new StoryMarketplaceItemDto
+                {
+                    Id = p.StoryId,
+                    Title = p.Title,
+                    CoverImageUrl = p.CoverImageUrl,
+                    CreatedBy = p.CreatedBy,
+                    CreatedByName = p.CreatedByName,
+                    Summary = p.Summary,
+                    PriceInCredits = p.PriceInCredits,
+                    AgeRating = p.AgeRating,
+                    Characters = p.Characters,
+                    Tags = p.TopicIds,
+                    CreatedAt = p.CreatedAt,
+                    StoryTopic = p.StoryTopic,
+                    StoryType = p.StoryType.ToString(),
+                    Status = p.Status.ToString(),
+                    AvailableLanguages = p.AvailableLanguages,
+                    AgeGroupIds = p.AgeGroupIds,
+                    ReadersCount = st.ReadersCount,
+                    LikesCount = likesCount,
+                    AverageRating = st.AverageRating,
+                    TotalReviews = st.TotalReviews,
+                    IsEvaluative = p.IsEvaluative
+                };
+            }).ToList();
     }
 
     public async Task<List<string>> GetAvailableRegionsAsync()

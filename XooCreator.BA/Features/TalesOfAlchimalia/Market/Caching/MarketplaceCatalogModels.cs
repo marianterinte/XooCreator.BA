@@ -47,6 +47,8 @@ public sealed record EpicMarketplaceBaseItem
     public List<string> AvailableLanguages { get; init; } = new();
     public List<string> SearchTexts { get; init; } = new();
     public List<string> SearchAuthors { get; init; } = new();
+    public List<string> TopicIds { get; init; } = new();
+    public List<string> AgeGroupIds { get; init; } = new();
 }
 
 

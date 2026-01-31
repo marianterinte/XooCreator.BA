@@ -204,13 +204,12 @@ public class StoryEditorService : IStoryEditorService
         await _translationManager.DeleteTranslationAsync(ownerUserId, storyId, languageCode, ct);
     }
 
-    public async Task DeleteDraftAsync(Guid ownerUserId, string storyId, CancellationToken ct = default)
+    public async Task DeleteDraftAsync(Guid requestingUserId, string storyId, bool allowAdminOverride = false, CancellationToken ct = default)
     {
         var craft = await _crafts.GetAsync(storyId, ct);
-        if (craft != null && craft.OwnerUserId == ownerUserId)
-        {
-            await _crafts.DeleteAsync(storyId, ct);
-        }
+        if (craft == null) return;
+        if (!allowAdminOverride && craft.OwnerUserId != requestingUserId) return;
+        await _crafts.DeleteAsync(storyId, ct);
     }
 
     /// <summary>
