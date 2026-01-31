@@ -449,36 +449,30 @@ public class StoryEpicService : IStoryEpicService
         return result.OrderByDescending(e => e.UpdatedAt).ToList();
     }
 
+    /// <summary>
+    /// Deletes only the draft (StoryEpicCraft). Published version is never touched; use Retract/Unpublish for that.
+    /// </summary>
+    public async Task DeleteEpicDraftAsync(Guid requestingUserId, string epicId, bool allowAdminOverride = false, CancellationToken ct = default)
+    {
+        var craft = await _context.StoryEpicCrafts.FirstOrDefaultAsync(c => c.Id == epicId, ct);
+        if (craft == null)
+        {
+            throw new InvalidOperationException($"Draft for epic '{epicId}' not found.");
+        }
+
+        if (!allowAdminOverride && craft.OwnerUserId != requestingUserId)
+        {
+            throw new UnauthorizedAccessException($"User does not own epic '{epicId}'");
+        }
+
+        _context.StoryEpicCrafts.Remove(craft);
+        await _context.SaveChangesAsync(ct);
+    }
+
+    /// <summary>Same as DeleteEpicDraftAsync. Kept for backward compatibility.</summary>
     public async Task DeleteEpicAsync(Guid requestingUserId, string epicId, bool allowAdminOverride = false, CancellationToken ct = default)
     {
-        // Delete craft if exists
-        var craft = await _context.StoryEpicCrafts.FirstOrDefaultAsync(c => c.Id == epicId, ct);
-        if (craft != null)
-        {
-            if (!allowAdminOverride && craft.OwnerUserId != requestingUserId)
-            {
-                throw new UnauthorizedAccessException($"User does not own epic '{epicId}'");
-            }
-            _context.StoryEpicCrafts.Remove(craft);
-        }
-        
-        // Delete definition if exists
-        var definition = await _context.StoryEpicDefinitions.FirstOrDefaultAsync(d => d.Id == epicId, ct);
-        if (definition != null)
-        {
-            if (!allowAdminOverride && definition.OwnerUserId != requestingUserId)
-            {
-                throw new UnauthorizedAccessException($"User does not own epic '{epicId}'");
-            }
-            _context.StoryEpicDefinitions.Remove(definition);
-        }
-        
-        if (craft == null && definition == null)
-        {
-            throw new InvalidOperationException($"Epic '{epicId}' not found");
-        }
-        
-        await _context.SaveChangesAsync(ct);
+        await DeleteEpicDraftAsync(requestingUserId, epicId, allowAdminOverride, ct);
     }
 
     public async Task<int> CreateVersionFromPublishedAsync(Guid ownerUserId, string epicId, CancellationToken ct = default)
