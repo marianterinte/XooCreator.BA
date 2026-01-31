@@ -47,7 +47,7 @@ Features/
         │   ├── SaveStoryEpicEndpoint.cs
         │   ├── GetStoryEpicStateEndpoint.cs
         │   ├── ListStoryEpicsEndpoint.cs
-        │   └── DeleteStoryEpicEndpoint.cs
+        │   └── DeleteStoryEpicDraftEndpoint.cs
         ├── Repositories/
         │   ├── IStoryEpicRepository.cs
         │   └── StoryEpicRepository.cs
