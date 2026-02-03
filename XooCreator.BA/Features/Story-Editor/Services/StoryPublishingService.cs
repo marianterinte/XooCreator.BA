@@ -41,9 +41,10 @@ public class StoryPublishingService : IStoryPublishingService
             .Include(d => d.Translations)
             .Include(d => d.Topics)
             .Include(d => d.AgeGroups)
+            .Include(d => d.CoAuthors)
             .FirstOrDefaultAsync(d => d.StoryId == storyId, ct);
         
-        // Load craft with topics and age groups
+        // Load craft with topics, age groups, and co-authors
         craft = await _db.StoryCrafts
             .Include(c => c.Translations)
             .Include(c => c.Tiles).ThenInclude(t => t.Translations)
@@ -51,6 +52,7 @@ public class StoryPublishingService : IStoryPublishingService
             .Include(c => c.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Tokens)
             .Include(c => c.Topics).ThenInclude(t => t.StoryTopic)
             .Include(c => c.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
+            .Include(c => c.CoAuthors).ThenInclude(ca => ca.User)
             .FirstOrDefaultAsync(c => c.Id == craft.Id, ct) ?? craft;
 
         var requiresFullPublish = forceFullPublish || def == null;
@@ -173,6 +175,7 @@ public class StoryPublishingService : IStoryPublishingService
 
         await ReplaceDefinitionTopicsAsync(def, craft, ct);
         await ReplaceDefinitionAgeGroupsAsync(def, craft, ct);
+        await ReplaceDefinitionCoAuthorsAsync(def, craft, ct);
         await ReplaceDefinitionUnlockedHeroesAsync(def, craft, ct);
 
         def.LastPublishedVersion = craft.LastDraftVersion;
@@ -268,6 +271,7 @@ public class StoryPublishingService : IStoryPublishingService
         await ReplaceDefinitionTranslationsAsync(def, craft, ct);
         await ReplaceDefinitionTopicsAsync(def, craft, ct);
         await ReplaceDefinitionAgeGroupsAsync(def, craft, ct);
+        await ReplaceDefinitionCoAuthorsAsync(def, craft, ct);
         await ReplaceDefinitionUnlockedHeroesAsync(def, craft, ct);
         await _assetLinks.SyncCoverAsync(craft, ownerEmail, ct);
     }
@@ -374,6 +378,33 @@ public class StoryPublishingService : IStoryPublishingService
                 StoryDefinitionId = def.Id,
                 StoryAgeGroupId = craftAgeGroup.StoryAgeGroupId,
                 CreatedAt = DateTime.UtcNow
+            });
+        }
+    }
+
+    private async Task ReplaceDefinitionCoAuthorsAsync(StoryDefinition def, StoryCraft craft, CancellationToken ct)
+    {
+        var existing = await _db.StoryDefinitionCoAuthors
+            .Where(c => c.StoryDefinitionId == def.Id)
+            .ToListAsync(ct);
+        if (existing.Count > 0)
+        {
+            _db.StoryDefinitionCoAuthors.RemoveRange(existing);
+        }
+
+        if (craft.CoAuthors == null || craft.CoAuthors.Count == 0)
+            return;
+
+        var sortOrder = 0;
+        foreach (var craftCoAuthor in craft.CoAuthors.OrderBy(c => c.SortOrder))
+        {
+            _db.StoryDefinitionCoAuthors.Add(new StoryDefinitionCoAuthor
+            {
+                Id = Guid.NewGuid(),
+                StoryDefinitionId = def.Id,
+                UserId = craftCoAuthor.UserId,
+                DisplayName = craftCoAuthor.UserId.HasValue ? null : craftCoAuthor.DisplayName,
+                SortOrder = sortOrder++
             });
         }
     }

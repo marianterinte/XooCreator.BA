@@ -14,6 +14,9 @@ public interface IEpicHeroService
     // Save hero
     Task SaveHeroAsync(Guid ownerUserId, string heroId, EpicHeroDto dto, CancellationToken ct = default);
     
+    // Save only hero topics (optional; does not change the rest of the hero)
+    Task SaveHeroTopicsAsync(Guid ownerUserId, string heroId, IReadOnlyList<string> topicIds, CancellationToken ct = default);
+    
     // List heroes by owner
     Task<List<EpicHeroListItemDto>> ListHeroesByOwnerAsync(Guid ownerUserId, string? status = null, Guid? currentUserId = null, CancellationToken ct = default);
     

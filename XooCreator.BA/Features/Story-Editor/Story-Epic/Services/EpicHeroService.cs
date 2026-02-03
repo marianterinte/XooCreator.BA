@@ -59,6 +59,7 @@ public class EpicHeroService : IEpicHeroService
                 CreatedAt = craft.CreatedAt,
                 UpdatedAt = craft.UpdatedAt,
                 PublishedAtUtc = null,
+                TopicIds = new List<string>(),
                 AssignedReviewerUserId = craft.AssignedReviewerUserId,
                 ReviewedByUserId = craft.ReviewedByUserId,
                 ApprovedByUserId = craft.ApprovedByUserId,
@@ -89,6 +90,7 @@ public class EpicHeroService : IEpicHeroService
                 CreatedAt = definition.CreatedAt,
                 UpdatedAt = definition.UpdatedAt,
                 PublishedAtUtc = definition.PublishedAtUtc,
+                TopicIds = new List<string>(),
                 AssignedReviewerUserId = null,
                 ReviewedByUserId = null,
                 ApprovedByUserId = null,
@@ -142,6 +144,7 @@ public class EpicHeroService : IEpicHeroService
             CreatedAt = heroCraft.CreatedAt,
             UpdatedAt = heroCraft.UpdatedAt,
             PublishedAtUtc = null,
+            TopicIds = new List<string>(),
             AssignedReviewerUserId = heroCraft.AssignedReviewerUserId,
             ReviewedByUserId = heroCraft.ReviewedByUserId,
             ApprovedByUserId = heroCraft.ApprovedByUserId,
@@ -220,6 +223,43 @@ public class EpicHeroService : IEpicHeroService
         await _changeLogService.AppendChangesAsync(heroCraft, snapshotBeforeChanges, langForTracking, ownerUserId, ct);
     }
 
+    public async Task SaveHeroTopicsAsync(Guid ownerUserId, string heroId, IReadOnlyList<string> topicIds, CancellationToken ct = default)
+    {
+        var heroCraft = await _repository.GetCraftAsync(heroId, ct);
+        if (heroCraft == null)
+            throw new InvalidOperationException($"Hero craft '{heroId}' not found");
+        if (heroCraft.OwnerUserId != ownerUserId)
+            throw new UnauthorizedAccessException($"User does not own hero '{heroId}'");
+        await UpdateHeroTopicsAsync(heroCraft, topicIds?.ToList() ?? new List<string>(), ct);
+        heroCraft.UpdatedAt = DateTime.UtcNow;
+        await _repository.SaveCraftAsync(heroCraft, ct);
+    }
+
+    private async Task UpdateHeroTopicsAsync(EpicHeroCraft craft, List<string> topicIds, CancellationToken ct)
+    {
+        var existing = await _context.EpicHeroCraftTopics
+            .Where(t => t.EpicHeroCraftId == craft.Id)
+            .ToListAsync(ct);
+        _context.EpicHeroCraftTopics.RemoveRange(existing);
+
+        if (topicIds == null || topicIds.Count == 0)
+            return;
+
+        var topics = await _context.StoryTopics
+            .Where(t => topicIds.Contains(t.TopicId))
+            .ToListAsync(ct);
+
+        foreach (var topic in topics)
+        {
+            _context.EpicHeroCraftTopics.Add(new EpicHeroCraftTopic
+            {
+                EpicHeroCraftId = craft.Id,
+                StoryTopicId = topic.Id,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+    }
+
     public async Task<List<EpicHeroListItemDto>> ListHeroesByOwnerAsync(Guid ownerUserId, string? status = null, Guid? currentUserId = null, CancellationToken ct = default)
     {
         var heroCrafts = await _repository.ListCraftsByOwnerAsync(ownerUserId, status, ct);
@@ -247,6 +287,7 @@ public class EpicHeroService : IEpicHeroService
                 CreatedAt = h.CreatedAt,
                 UpdatedAt = h.UpdatedAt,
                 PublishedAtUtc = null,
+                TopicIds = new List<string>(),
                 AssignedReviewerUserId = h.AssignedReviewerUserId,
                 IsAssignedToCurrentUser = isAssignedToCurrentUser,
                 IsOwnedByCurrentUser = isOwnedByCurrentUser
@@ -391,6 +432,7 @@ public class EpicHeroService : IEpicHeroService
             CreatedAt = craft.CreatedAt,
             UpdatedAt = craft.UpdatedAt,
             PublishedAtUtc = null,
+            TopicIds = new List<string>(),
             AssignedReviewerUserId = craft.AssignedReviewerUserId,
             IsAssignedToCurrentUser = isAssignedToCurrentUser,
             IsOwnedByCurrentUser = isOwnedByCurrentUser,
@@ -417,6 +459,7 @@ public class EpicHeroService : IEpicHeroService
             CreatedAt = definition.CreatedAt,
             UpdatedAt = definition.UpdatedAt,
             PublishedAtUtc = definition.PublishedAtUtc,
+            TopicIds = new List<string>(),
             AssignedReviewerUserId = null,
             IsAssignedToCurrentUser = false,
             IsOwnedByCurrentUser = isOwnedByCurrentUser,

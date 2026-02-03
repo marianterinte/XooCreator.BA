@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
+using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.DTOs;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories;
 
@@ -92,6 +93,16 @@ public class StoryDetailsMapper
             }
         }
 
+        // Map co-authors
+        var coAuthors = (def.CoAuthors ?? Enumerable.Empty<StoryDefinitionCoAuthor>())
+            .OrderBy(c => c.SortOrder)
+            .Select(c => new DTOs.StoryCoAuthorDto
+            {
+                UserId = c.UserId,
+                DisplayName = c.UserId.HasValue && c.User != null ? c.User.Name : (c.DisplayName ?? string.Empty)
+            })
+            .ToList();
+
         return new StoryDetailsDto
         {
             Id = def.StoryId,
@@ -131,7 +142,8 @@ public class StoryDetailsMapper
             LikesCount = likesCount,
             IsLiked = isLiked,
             IsEvaluative = def.IsEvaluative,
-            IsPartOfEpic = def.IsPartOfEpic
+            IsPartOfEpic = def.IsPartOfEpic,
+            CoAuthors = coAuthors
         };
     }
 

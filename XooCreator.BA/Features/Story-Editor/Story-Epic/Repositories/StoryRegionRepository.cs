@@ -20,6 +20,7 @@ public class StoryRegionRepository : IStoryRegionRepository
         return await _context.StoryRegionCrafts
             .Include(x => x.Owner)
             .Include(x => x.Translations)
+            .Include(x => x.Topics).ThenInclude(t => t.StoryTopic)
             .FirstOrDefaultAsync(x => x.Id == id, ct);
     }
 
@@ -31,6 +32,7 @@ public class StoryRegionRepository : IStoryRegionRepository
         return await _context.StoryRegionDefinitions
             .Include(x => x.Owner)
             .Include(x => x.Translations)
+            .Include(x => x.Topics).ThenInclude(t => t.StoryTopic)
             .FirstOrDefaultAsync(x => x.Id == id, ct);
     }
 

@@ -10,6 +10,16 @@ public record StoryEpicTranslationDto
     public string? Description { get; init; }
 }
 
+/// <summary>
+/// Co-author of an epic or story. Either UserId (Alchimalia user) or DisplayName (free text).
+/// </summary>
+public record EpicCoAuthorDto
+{
+    public Guid? Id { get; init; } // Optional for new items when saving
+    public Guid? UserId { get; init; } // Set when co-author is an Alchimalia user
+    public string DisplayName { get; init; } = string.Empty; // From User when UserId set; free text when UserId null
+}
+
 public record StoryEpicDto
 {
     public required string Id { get; init; }
@@ -25,6 +35,7 @@ public record StoryEpicDto
     public List<StoryEpicTranslationDto> Translations { get; init; } = new(); // All translations
     public List<string> TopicIds { get; init; } = new(); // Topic IDs
     public List<string> AgeGroupIds { get; init; } = new(); // Age Group IDs
+    public List<EpicCoAuthorDto> CoAuthors { get; init; } = new(); // Co-authors (user or free text)
     
     // Helper: Get name in a specific language (falls back to first available)
     public string GetName(string languageCode)

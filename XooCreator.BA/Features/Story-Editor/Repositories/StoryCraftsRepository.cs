@@ -31,6 +31,7 @@ public class StoryCraftsRepository : IStoryCraftsRepository
                 .ThenInclude(t => t.StoryTopic)
             .Include(x => x.AgeGroups)
                 .ThenInclude(ag => ag.StoryAgeGroup)
+            .Include(x => x.CoAuthors).ThenInclude(c => c.User)
             .Include(x => x.UnlockedHeroes)
             .FirstOrDefaultAsync(x => x.StoryId == id, ct);
     }
@@ -54,6 +55,7 @@ public class StoryCraftsRepository : IStoryCraftsRepository
                 .ThenInclude(t => t.StoryTopic)
             .Include(x => x.AgeGroups)
                 .ThenInclude(ag => ag.StoryAgeGroup)
+            .Include(x => x.CoAuthors).ThenInclude(c => c.User)
             .Include(x => x.UnlockedHeroes)
             .FirstOrDefaultAsync(x => x.StoryId == id, ct);
     }

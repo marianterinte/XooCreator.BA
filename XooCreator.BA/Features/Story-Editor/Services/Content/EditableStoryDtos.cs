@@ -1,5 +1,11 @@
 namespace XooCreator.BA.Features.StoryEditor.Services.Content;
 
+public record StoryCoAuthorDto
+{
+    public Guid? UserId { get; init; }
+    public string DisplayName { get; init; } = string.Empty;
+}
+
 public class EditableStoryDto
 {
     public string Id { get; set; } = string.Empty;
@@ -19,6 +25,7 @@ public class EditableStoryDto
     public string? Language { get; set; } // Language code for the story (standardized: use "language" instead of "languageCode")
     public List<string>? AvailableLanguages { get; set; } // Available language codes for this story
     public List<string>? UnlockedStoryHeroes { get; set; } // List of hero IDs that are unlocked when this story is completed
+    public List<StoryCoAuthorDto>? CoAuthors { get; set; } // Co-authors (user or free text)
     public List<EditableTileDto> Tiles { get; set; } = new();
 
     // Reviewer/Audit fields (optional)

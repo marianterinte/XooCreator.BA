@@ -21,7 +21,10 @@ public record StoryRegionDto
     public DateTime CreatedAt { get; init; }
     public DateTime UpdatedAt { get; init; }
     public DateTime? PublishedAtUtc { get; init; }
-    
+
+    /// <summary>Topic IDs (e.g. alchimalia_universe, classic_author) for tagging.</summary>
+    public List<string> TopicIds { get; init; } = new();
+
     // Review workflow fields (similar to StoryCraft/EditableStoryDto)
     public Guid? AssignedReviewerUserId { get; init; }
     public Guid? ReviewedByUserId { get; init; }
@@ -29,7 +32,7 @@ public record StoryRegionDto
     public string? ReviewNotes { get; init; }
     public DateTime? ReviewStartedAt { get; init; }
     public DateTime? ReviewEndedAt { get; init; }
-    
+
     // Translations per language
     public List<StoryRegionTranslationDto> Translations { get; init; } = new();
     
@@ -60,7 +63,9 @@ public record StoryRegionListItemDto
     public DateTime CreatedAt { get; init; }
     public DateTime UpdatedAt { get; init; }
     public DateTime? PublishedAtUtc { get; init; }
-    
+
+    public List<string> TopicIds { get; init; } = new();
+
     // Review workflow fields for list display
     public Guid? AssignedReviewerUserId { get; init; }
     public bool IsAssignedToCurrentUser { get; init; } // Computed in service based on current user

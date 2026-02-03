@@ -55,12 +55,14 @@ public class XooDbContext : DbContext
     public DbSet<StoryEpicCraftStoryNode> StoryEpicCraftStoryNodes => Set<StoryEpicCraftStoryNode>();
     public DbSet<StoryEpicCraftUnlockRule> StoryEpicCraftUnlockRules => Set<StoryEpicCraftUnlockRule>();
     public DbSet<StoryEpicCraftHeroReference> StoryEpicCraftHeroReferences => Set<StoryEpicCraftHeroReference>();
+    public DbSet<StoryEpicCraftCoAuthor> StoryEpicCraftCoAuthors => Set<StoryEpicCraftCoAuthor>();
     
     public DbSet<StoryEpicDefinition> StoryEpicDefinitions => Set<StoryEpicDefinition>();
     public DbSet<StoryEpicDefinitionTranslation> StoryEpicDefinitionTranslations => Set<StoryEpicDefinitionTranslation>();
     public DbSet<StoryEpicDefinitionRegion> StoryEpicDefinitionRegions => Set<StoryEpicDefinitionRegion>();
     public DbSet<StoryEpicDefinitionStoryNode> StoryEpicDefinitionStoryNodes => Set<StoryEpicDefinitionStoryNode>();
     public DbSet<StoryEpicDefinitionUnlockRule> StoryEpicDefinitionUnlockRules => Set<StoryEpicDefinitionUnlockRule>();
+    public DbSet<StoryEpicDefinitionCoAuthor> StoryEpicDefinitionCoAuthors => Set<StoryEpicDefinitionCoAuthor>();
     
     // Story Epic - Independent Regions and Heroes (Craft/Definition pattern)
     public DbSet<StoryRegionCraft> StoryRegionCrafts => Set<StoryRegionCraft>();
@@ -73,7 +75,11 @@ public class XooDbContext : DbContext
     public DbSet<EpicHeroDefinitionTranslation> EpicHeroDefinitionTranslations => Set<EpicHeroDefinitionTranslation>();
     public DbSet<StoryEpicRegionReference> StoryEpicRegionReferences => Set<StoryEpicRegionReference>();
     public DbSet<StoryEpicHeroReference> StoryEpicHeroReferences => Set<StoryEpicHeroReference>();
-    
+    public DbSet<StoryRegionCraftTopic> StoryRegionCraftTopics => Set<StoryRegionCraftTopic>();
+    public DbSet<StoryRegionDefinitionTopic> StoryRegionDefinitionTopics => Set<StoryRegionDefinitionTopic>();
+    public DbSet<EpicHeroCraftTopic> EpicHeroCraftTopics => Set<EpicHeroCraftTopic>();
+    public DbSet<EpicHeroDefinitionTopic> EpicHeroDefinitionTopics => Set<EpicHeroDefinitionTopic>();
+
     // Version Jobs
     public DbSet<HeroVersionJob> HeroVersionJobs => Set<HeroVersionJob>();
     public DbSet<RegionVersionJob> RegionVersionJobs => Set<RegionVersionJob>();
@@ -188,6 +194,8 @@ public class XooDbContext : DbContext
     public DbSet<StoryAgeGroupTranslation> StoryAgeGroupTranslations => Set<StoryAgeGroupTranslation>();
     public DbSet<StoryCraftAgeGroup> StoryCraftAgeGroups => Set<StoryCraftAgeGroup>();
     public DbSet<StoryDefinitionAgeGroup> StoryDefinitionAgeGroups => Set<StoryDefinitionAgeGroup>();
+    public DbSet<StoryCraftCoAuthor> StoryCraftCoAuthors => Set<StoryCraftCoAuthor>();
+    public DbSet<StoryDefinitionCoAuthor> StoryDefinitionCoAuthors => Set<StoryDefinitionCoAuthor>();
     
     // Classic Authors
     public DbSet<ClassicAuthor> ClassicAuthors => Set<ClassicAuthor>();

@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using XooCreator.BA.Data.Entities;
 
 namespace XooCreator.BA.Data;
 
@@ -35,5 +36,6 @@ public class EpicHeroDefinition
     // Navigation properties
     public AlchimaliaUser Owner { get; set; } = null!;
     public ICollection<EpicHeroDefinitionTranslation> Translations { get; set; } = new List<EpicHeroDefinitionTranslation>();
+    public ICollection<EpicHeroDefinitionTopic> Topics { get; set; } = new List<EpicHeroDefinitionTopic>();
 }
 

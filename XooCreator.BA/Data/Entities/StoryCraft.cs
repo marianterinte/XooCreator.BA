@@ -57,6 +57,7 @@ public class StoryCraft
     public List<StoryCraftTile> Tiles { get; set; } = new();
     public List<StoryCraftTopic> Topics { get; set; } = new();
     public List<StoryCraftAgeGroup> AgeGroups { get; set; } = new();
+    public List<StoryCraftCoAuthor> CoAuthors { get; set; } = new();
     public List<StoryCraftUnlockedHero> UnlockedHeroes { get; set; } = new();
     public ClassicAuthor? ClassicAuthor { get; set; }
 }
