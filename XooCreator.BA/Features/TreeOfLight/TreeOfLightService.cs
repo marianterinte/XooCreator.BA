@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Caching.Memory;
 using XooCreator.BA.Features.Stories;
 using XooCreator.BA.Features.TreeOfHeroes.DTOs;
 using XooCreator.BA.Features.TreeOfHeroes.Repositories;
@@ -32,8 +33,9 @@ public class TreeOfLightService : ITreeOfLightService
     private readonly IUserContextService _userContext;
     private readonly XooDbContext _dbContext;
     private readonly ITreeOfLightTranslationService _translationService;
+    private readonly IMemoryCache _cache;
 
-    public TreeOfLightService(ITreeOfLightRepository repository, IStoriesRepository storiesRepository, ITreeOfHeroesRepository treeOfHeroesRepository, IUserContextService userContext, XooDbContext dbContext, ITreeOfLightTranslationService translationService)
+    public TreeOfLightService(ITreeOfLightRepository repository, IStoriesRepository storiesRepository, ITreeOfHeroesRepository treeOfHeroesRepository, IUserContextService userContext, XooDbContext dbContext, ITreeOfLightTranslationService translationService, IMemoryCache cache)
     {
         _repository = repository;
         _storiesRepository = storiesRepository;
@@ -41,12 +43,18 @@ public class TreeOfLightService : ITreeOfLightService
         _userContext = userContext;
         _dbContext = dbContext;
         _translationService = translationService;
+        _cache = cache;
     }
 
     public async Task<List<TreeConfigurationDto>> GetAllConfigurationsAsync()
     {
-        var configs = await _repository.GetAllConfigurationsAsync();
-        return configs.Select(c => new TreeConfigurationDto { Id = c.Id, Name = c.Name, IsDefault = c.IsDefault }).ToList();
+        const string key = "tree_of_light:configurations";
+        return await _cache.GetOrCreateAsync(key, async entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(24);
+            var configs = await _repository.GetAllConfigurationsAsync();
+            return configs.Select(c => new TreeConfigurationDto { Id = c.Id, Name = c.Name, IsDefault = c.IsDefault }).ToList();
+        }) ?? new List<TreeConfigurationDto>();
     }
 
     public Task<List<TreeProgressDto>> GetTreeProgressAsync(Guid userId, string configId)
