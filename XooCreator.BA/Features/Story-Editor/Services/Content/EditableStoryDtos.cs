@@ -31,6 +31,9 @@ public class EditableStoryDto
 
     // Version reference
     public int? BaseVersion { get; set; }
+    
+    // Owner email (for admin editing another user's draft)
+    public string? OwnerEmail { get; set; }
 }
 
 public class EditableTileDto
