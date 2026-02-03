@@ -170,10 +170,30 @@ public class StoryPublishQueueWorker : BackgroundService
 
                             var langTag = job.LangTag?.ToLowerInvariant() ?? "ro-ro";
 
+                            // Get owner email from craft.OwnerUserId (for admin publishing another user's draft)
+                            // This ensures assets are copied from/to the correct owner's folder
+                            string ownerEmail = job.RequestedByEmail;
+                            if (craft.OwnerUserId != Guid.Empty)
+                            {
+                                var ownerUser = await db.Set<AlchimaliaUser>()
+                                    .AsNoTracking()
+                                    .Where(u => u.Id == craft.OwnerUserId)
+                                    .Select(u => u.Email)
+                                    .FirstOrDefaultAsync(stoppingToken);
+                                
+                                if (!string.IsNullOrWhiteSpace(ownerUser))
+                                {
+                                    ownerEmail = ownerUser;
+                                    _logger.LogInformation("Using owner email for publish: storyId={StoryId} ownerEmail={OwnerEmail} requestedBy={RequestedBy}", 
+                                        job.StoryId, ownerEmail, job.RequestedByEmail);
+                                }
+                            }
+
                             try
                             {
-                                await publisher.UpsertFromCraftAsync(craft, job.RequestedByEmail, langTag, job.ForceFull, stoppingToken);
-                                _logger.LogInformation("UpsertFromCraftAsync completed successfully: jobId={JobId} storyId={StoryId}", job.Id, job.StoryId);
+                                await publisher.UpsertFromCraftAsync(craft, ownerEmail, langTag, job.ForceFull, stoppingToken);
+                                _logger.LogInformation("UpsertFromCraftAsync completed successfully: jobId={JobId} storyId={StoryId} ownerEmail={OwnerEmail}", 
+                                    job.Id, job.StoryId, ownerEmail);
                             }
                             catch (Exception publishEx)
                             {
@@ -200,8 +220,9 @@ public class StoryPublishQueueWorker : BackgroundService
 
                             try
                             {
-                                _logger.LogInformation("Cleaning up draft after successful publish: storyId={StoryId}", job.StoryId);
-                                await cleanupService.DeleteDraftAssetsAsync(job.RequestedByEmail, job.StoryId, stoppingToken);
+                                _logger.LogInformation("Cleaning up draft after successful publish: storyId={StoryId} ownerEmail={OwnerEmail}", 
+                                    job.StoryId, ownerEmail);
+                                await cleanupService.DeleteDraftAssetsAsync(ownerEmail, job.StoryId, stoppingToken);
                                 await crafts.DeleteAsync(job.StoryId, stoppingToken);
                                 _logger.LogInformation("Draft cleanup completed: storyId={StoryId}", job.StoryId);
                             }

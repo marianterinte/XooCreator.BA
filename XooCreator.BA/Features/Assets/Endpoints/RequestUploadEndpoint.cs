@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
 using XooCreator.BA.Infrastructure.Services.Blob;
@@ -94,9 +95,17 @@ public class RequestUploadEndpoint
             ? dto.Lang
             : null;
         
+        // Determine which email to use for asset path:
+        // - If user is admin AND OwnerEmail is provided, use OwnerEmail (admin editing another user's draft)
+        // - Otherwise, use current user's email (normal behavior)
+        var isAdmin = ep._auth0.HasRole(user, UserRole.Admin);
+        var emailToUse = (isAdmin && !string.IsNullOrWhiteSpace(dto.OwnerEmail))
+            ? dto.OwnerEmail!.Trim()
+            : user.Email;
+        
         // Delete old asset if it exists and update DB with new filename
         await ep._assetReplacementService.ReplaceAssetAsync(
-            user.Email, 
+            emailToUse, 
             dto.StoryId, 
             dto.TileId, 
             dto.Kind, 
@@ -105,7 +114,7 @@ public class RequestUploadEndpoint
             ct);
         
         var asset = new StoryAssetPathMapper.AssetInfo(dto.FileName, assetType, lang);
-        var blobPath = StoryAssetPathMapper.BuildDraftPath(asset, user.Email, dto.StoryId);
+        var blobPath = StoryAssetPathMapper.BuildDraftPath(asset, emailToUse, dto.StoryId);
 
         var putUri = await ep._sas.GetPutSasAsync(ep._sas.DraftContainer, blobPath, contentType!, TimeSpan.FromMinutes(10), ct);
         var blobClient = ep._sas.GetBlobClient(ep._sas.DraftContainer, blobPath);

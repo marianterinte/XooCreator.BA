@@ -9,6 +9,7 @@ public record RequestUploadDto
     public long ExpectedSize { get; init; }
     public string? ContentType { get; init; }
     public string? TileId { get; init; } // optional
+    public string? OwnerEmail { get; init; } // optional: for admin editing another user's draft
 }
 
 public record RequestUploadResponse
