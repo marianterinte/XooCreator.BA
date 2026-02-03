@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Features.Stories.DTOs;
 using XooCreator.BA.Features.Stories.Repositories;
 using XooCreator.BA.Features.StoryEditor.Repositories;
@@ -21,11 +22,13 @@ public class StoriesService : IStoriesService
 {
     private readonly IStoriesRepository _repository;
     private readonly IStoryCraftsRepository _crafts;
+    private readonly XooDbContext _context;
 
-    public StoriesService(IStoriesRepository repository, IStoryCraftsRepository crafts)
+    public StoriesService(IStoriesRepository repository, IStoryCraftsRepository crafts, XooDbContext context)
     {
         _repository = repository;
         _crafts = crafts;
+        _context = context;
     }
 
     public async Task<GetStoriesResponse> GetAllStoriesAsync(string locale)
@@ -159,6 +162,16 @@ public class StoriesService : IStoriesService
             // Load UnlockedStoryHeroes from many-to-many table
             var unlockedHeroes = craft.UnlockedHeroes.Select(h => h.HeroId).ToList();
             
+            // Get owner email from OwnerUserId
+            string? ownerEmail = null;
+            if (craft.OwnerUserId != Guid.Empty)
+            {
+                ownerEmail = await _context.Set<AlchimaliaUser>()
+                    .Where(u => u.Id == craft.OwnerUserId)
+                    .Select(u => u.Email)
+                    .FirstOrDefaultAsync();
+            }
+            
             return new EditableStoryDto
             {
                 Id = craft.StoryId,
@@ -184,6 +197,7 @@ public class StoriesService : IStoriesService
                 ReviewStartedAt = craft.ReviewStartedAt,
                 ReviewEndedAt = craft.ReviewEndedAt,
                 BaseVersion = craft.BaseVersion,
+                OwnerEmail = ownerEmail,
                 Tiles = craft.Tiles.OrderBy(t => t.SortOrder).Select(t =>
                 {
                     var tileTranslation = t.Translations.FirstOrDefault(tr => tr.LanguageCode == lang);
@@ -235,6 +249,16 @@ public class StoriesService : IStoriesService
         // Load UnlockedStoryHeroes from published definition (DB)
         var unlockedHeroesFromJson = story.UnlockedHeroes?.Select(h => h.HeroId).ToList() ?? new List<string>();
 
+        // Get owner email from CreatedBy (for published stories)
+        string? ownerEmailFromDefinition = null;
+        if (story.CreatedBy.HasValue)
+        {
+            ownerEmailFromDefinition = await _context.Set<AlchimaliaUser>()
+                .Where(u => u.Id == story.CreatedBy.Value)
+                .Select(u => u.Email)
+                .FirstOrDefaultAsync();
+        }
+
         return new EditableStoryDto
         {
             Id = story.StoryId,
@@ -253,6 +277,7 @@ public class StoriesService : IStoriesService
             UnlockedStoryHeroes = unlockedHeroesFromJson,
             Status = MapStatusForFrontend(story.Status), // story.Status is already StoryStatus enum
             AvailableLanguages = availableLangs,
+            OwnerEmail = ownerEmailFromDefinition,
             Tiles = story.Tiles.OrderBy(t => t.SortOrder).Select(t =>
             {
                 var tileTranslation = t.Translations.FirstOrDefault(tr => tr.LanguageCode == locale)
