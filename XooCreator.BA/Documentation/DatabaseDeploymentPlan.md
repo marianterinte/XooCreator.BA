@@ -8,7 +8,7 @@ Asigurăm un flux determinist de provisionare și migrare pentru baza de date `a
 
 ## Observații cheie
 
-- `ConnectionStrings__Postgres` trebuie să conțină `SearchPath=alchimalia_schema` și este populat în App Service din secretul `AZURE_POSTGRES_CONNSTRING_<ENV>`.
+- `ConnectionStrings__Postgres` trebuie să conțină `SearchPath=alchimalia_schema` și este populat în App Service din secretul `AZURE_PG_CONNSTRING_DEV_EUROPA_EUROPA / AZURE_PG_CONNSTRING_PROD_EUROPA`.
 - `Program.cs` nu mai rulează `DatabaseMigrationService` / `MigrateAsync`; aplicația doar testează conectivitatea și afișează o pagină de eroare dacă DB-ul nu este pregătit.
 - Structura DB este controlată 100% de scripturile incremental numerotate (`Database/Scripts/V0001__*.sql`) rulate prin `XooCreator.DbScriptRunner` și urmărite în `alchimalia_schema.schema_versions`.
 
@@ -16,7 +16,7 @@ Asigurăm un flux determinist de provisionare și migrare pentru baza de date `a
 
 1. **Config App Service (Dev)**
    - Setează explicit `ASPNETCORE_ENVIRONMENT=Development`.
-   - Stochează conexiunea Azure PostgreSQL în secretul `AZURE_POSTGRES_CONNSTRING_DEV` (folosit de pipeline) sau direct în `ConnectionStrings__Postgres` și include `SearchPath=alchimalia_schema`.
+   - Stochează conexiunea Azure PostgreSQL în secretul `AZURE_PG_CONNSTRING_DEV_EUROPA` (folosit de pipeline) sau direct în `ConnectionStrings__Postgres` și include `SearchPath=alchimalia_schema`.
 2. **Cod**
    - Schema implicită rămâne `alchimalia_schema`; aplicația doar verifică conectivitatea la startup, iar migrarea este responsabilitatea scripturilor SQL.
    - `DatabaseConfiguration` continue să seteze `SearchPath` și să folosească `alchimalia_schema` drept schemă implicită.
@@ -32,7 +32,7 @@ Asigurăm un flux determinist de provisionare și migrare pentru baza de date `a
 
 ## Checklist la fiecare deploy
 
-- [ ] Environment-ul dev are connection string-ul corect (`AZURE_POSTGRES_CONNSTRING_DEV` / `ConnectionStrings__Postgres`) și include `SearchPath=alchimalia_schema`.
+- [ ] Environment-ul dev are connection string-ul corect (`AZURE_PG_CONNSTRING_DEV_EUROPA` / `ConnectionStrings__Postgres`) și include `SearchPath=alchimalia_schema`.
 - [ ] Pentru schimbări de schemă s-au generat scripturi noi `VXXXX__*.sql` + eventual generator PowerShell.
 - [ ] Pipeline-ul finalizează fără erori și App Service pornește fără `startupException`.
 - [ ] În schema `alchimalia_schema` apar tabelele/coloanele noi.

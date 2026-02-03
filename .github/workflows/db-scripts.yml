@@ -39,10 +39,10 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: Dry-run scripts (DEV)
-        run: dotnet run --project XooCreator.DbScriptRunner -- --connection "${{ secrets.AZURE_POSTGRES_CONNSTRING_DEV }}" --dry-run
+        run: dotnet run --project XooCreator.DbScriptRunner -- --connection "${{ secrets.AZURE_PG_CONNSTRING_DEV_EUROPA }}" --dry-run
 
       - name: Apply scripts (DEV)
-        run: dotnet run --project XooCreator.DbScriptRunner -- --connection "${{ secrets.AZURE_POSTGRES_CONNSTRING_DEV }}"
+        run: dotnet run --project XooCreator.DbScriptRunner -- --connection "${{ secrets.AZURE_PG_CONNSTRING_DEV_EUROPA }}"
 
   db-prod:
     name: Apply scripts (PROD)
@@ -63,8 +63,8 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: Dry-run scripts (PROD)
-        run: dotnet run --project XooCreator.DbScriptRunner -- --connection "${{ secrets.AZURE_POSTGRES_CONNSTRING_PROD }}" --dry-run
+        run: dotnet run --project XooCreator.DbScriptRunner -- --connection "${{ secrets.AZURE_PG_CONNSTRING_PROD_EUROPA }}" --dry-run
 
       - name: Apply scripts (PROD)
-        run: dotnet run --project XooCreator.DbScriptRunner -- --connection "${{ secrets.AZURE_POSTGRES_CONNSTRING_PROD }}"
+        run: dotnet run --project XooCreator.DbScriptRunner -- --connection "${{ secrets.AZURE_PG_CONNSTRING_PROD_EUROPA }}"
 

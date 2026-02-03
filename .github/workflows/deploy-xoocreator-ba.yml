@@ -27,10 +27,10 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Dry-run database scripts (PROD)
-        run: dotnet run --project XooCreator.DbScriptRunner -- --connection "${{ secrets.AZURE_POSTGRES_CONNSTRING_PROD }}" --dry-run
+        run: dotnet run --project XooCreator.DbScriptRunner -- --connection "${{ secrets.AZURE_PG_CONNSTRING_PROD_EUROPA }}" --dry-run
 
       - name: Apply database scripts (PROD)
-        run: dotnet run --project XooCreator.DbScriptRunner -- --connection "${{ secrets.AZURE_POSTGRES_CONNSTRING_PROD }}"
+        run: dotnet run --project XooCreator.DbScriptRunner -- --connection "${{ secrets.AZURE_PG_CONNSTRING_PROD_EUROPA }}"
 
       - name: Restore
         run: dotnet restore XooCreator.BA.csproj
@@ -73,7 +73,7 @@ jobs:
               --name ${{ secrets.AZURE_WEBAPP_NAME }} \
               --settings \
                 ASPNETCORE_ENVIRONMENT=Production \
-                ConnectionStrings__Postgres="${{ secrets.AZURE_POSTGRES_CONNSTRING_PROD }}"
+                ConnectionStrings__Postgres="${{ secrets.AZURE_PG_CONNSTRING_PROD_EUROPA }}"
           else
             # Method 2: Auto-discover resource group
             echo "Auto-discovering resource group..."
@@ -84,7 +84,7 @@ jobs:
               --name ${{ secrets.AZURE_WEBAPP_NAME }} \
               --settings \
                 ASPNETCORE_ENVIRONMENT=Production \
-                ConnectionStrings__Postgres="${{ secrets.AZURE_POSTGRES_CONNSTRING_PROD }}"
+                ConnectionStrings__Postgres="${{ secrets.AZURE_PG_CONNSTRING_PROD_EUROPA }}"
           fi
 
       - name: Deploy to Azure Web App
