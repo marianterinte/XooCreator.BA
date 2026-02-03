@@ -121,9 +121,16 @@ public class SaveStoryEditEndpoint
         }
 
         // Save using the new structure
+        // If admin is editing another user's draft, use the craft owner's ID instead of admin's ID
+        // This ensures the draft is saved "as if" the owner is saving it
         var isAdmin = ep._auth0.HasRole(user, UserRole.Admin);
-        await ep._editorService.SaveDraftAsync(user.Id, finalStoryId, langTag, dto, isAdmin, ct);
-        ep._logger.LogInformation("Save story draft: storyId={StoryId} lang={Lang}", finalStoryId, langTag);
+        var ownerUserIdToUse = (craft != null && isAdmin && craft.OwnerUserId != user.Id)
+            ? craft.OwnerUserId
+            : user.Id;
+        
+        await ep._editorService.SaveDraftAsync(ownerUserIdToUse, finalStoryId, langTag, dto, isAdmin, ct);
+        ep._logger.LogInformation("Save story draft: storyId={StoryId} lang={Lang} ownerUserId={OwnerUserId} isAdmin={IsAdmin}", 
+            finalStoryId, langTag, ownerUserIdToUse, isAdmin);
 
         return TypedResults.Ok(new SaveResponse { StoryId = finalStoryId });
     }
