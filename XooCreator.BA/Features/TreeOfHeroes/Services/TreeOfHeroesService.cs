@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
 using XooCreator.BA.Features.TreeOfHeroes.DTOs;
@@ -20,11 +21,13 @@ public class TreeOfHeroesService : ITreeOfHeroesService
 {
     private readonly ITreeOfHeroesRepository _repository;
     private readonly XooDbContext _db;
+    private readonly IMemoryCache _cache;
 
-    public TreeOfHeroesService(ITreeOfHeroesRepository repository, XooDbContext db)
+    public TreeOfHeroesService(ITreeOfHeroesRepository repository, XooDbContext db, IMemoryCache cache)
     {
         _repository = repository;
         _db = db;
+        _cache = cache;
     }
 
     public Task<UserTokensDto> GetUserTokensAsync(Guid userId)
@@ -42,14 +45,26 @@ public class TreeOfHeroesService : ITreeOfHeroesService
         return _repository.GetHeroTreeProgressAsync(userId);
     }
 
-    public Task<List<HeroDefinitionDto>> GetHeroDefinitionsAsync(string locale)
+    public async Task<List<HeroDefinitionDto>> GetHeroDefinitionsAsync(string locale)
     {
-        return _repository.GetHeroDefinitionsAsync(locale);
+        var key = $"tree_of_heroes:definitions:{locale.ToLower()}";
+        return await _cache.GetOrCreateAsync(key, async entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(24);
+            return await _repository.GetHeroDefinitionsAsync(locale);
+        }) ?? new List<HeroDefinitionDto>();
     }
 
-    public Task<HeroDefinitionDto?> GetHeroDefinitionByIdAsync(string heroId, string locale)
+    public async Task<HeroDefinitionDto?> GetHeroDefinitionByIdAsync(string heroId, string locale)
     {
-        return _repository.GetHeroDefinitionByIdAsync(heroId, locale);
+        // Optimization: Try to find it in the full list cache first to avoid a separate DB call/cache entry if possible
+        var allDefinitions = await GetHeroDefinitionsAsync(locale);
+        var definition = allDefinitions.FirstOrDefault(d => d.Id == heroId);
+        
+        if (definition != null) return definition;
+
+        // Fallback to repo if not found immediately (though it should be there if the list is complete)
+        return await _repository.GetHeroDefinitionByIdAsync(heroId, locale);
     }
 
     public Task<TreeOfHeroesConfigDto> GetTreeOfHeroesConfigAsync()

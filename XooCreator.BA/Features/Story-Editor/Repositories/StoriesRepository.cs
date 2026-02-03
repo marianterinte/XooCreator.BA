@@ -10,13 +10,17 @@ using XooCreator.BA.Features.Stories.SeedEntities;
 
 namespace XooCreator.BA.Features.StoryEditor.Repositories;
 
+using Microsoft.Extensions.Caching.Memory;
+
 public class StoriesRepository : IStoriesRepository
 {
     private readonly XooDbContext _context;
+    private readonly IMemoryCache _cache;
 
-    public StoriesRepository(XooDbContext context)
+    public StoriesRepository(XooDbContext context, IMemoryCache cache)
     {
         _context = context;
+        _cache = cache;
     }
 
     public async Task<List<StoryContentDto>> GetAllStoriesAsync(string locale)
@@ -44,32 +48,40 @@ public class StoriesRepository : IStoriesRepository
 
     public async Task<StoryContentDto?> GetStoryByIdAsync(string storyId, string locale)
     {
-        storyId = NormalizeStoryId(storyId);
-        var story = await _context.StoryDefinitions
-                .Include(s => s.Translations)
-                .Include(s => s.Tiles)
-                    .ThenInclude(t => t.Translations)
-                .Include(s => s.Tiles)
-                    .ThenInclude(t => t.Answers)
-                        .ThenInclude(a => a.Tokens)
-                .Include(s => s.Tiles)
-                    .ThenInclude(t => t.Answers)
-                        .ThenInclude(a => a.Translations)
-                .FirstOrDefaultAsync(s => s.StoryId == storyId && s.IsActive);
+        var normalizedId = NormalizeStoryId(storyId);
+        var key = $"story_content:{normalizedId}:{locale.ToLower()}";
 
-        if (story == null) return null;
-
-        // Get owner email from CreatedBy
-        string? ownerEmail = null;
-        if (story.CreatedBy.HasValue)
+        return await _cache.GetOrCreateAsync(key, async entry => 
         {
-            ownerEmail = await _context.Set<AlchimaliaUser>()
-                .Where(u => u.Id == story.CreatedBy.Value)
-                .Select(u => u.Email)
-                .FirstOrDefaultAsync();
-        }
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(24);
 
-        return StoryDefinitionMapper.MapToDtoWithLocale(story, locale, ownerEmail);
+            var story = await _context.StoryDefinitions
+                    .Include(s => s.Translations)
+                    .Include(s => s.Tiles)
+                        .ThenInclude(t => t.Translations)
+                    .Include(s => s.Tiles)
+                        .ThenInclude(t => t.Answers)
+                            .ThenInclude(a => a.Tokens)
+                    .Include(s => s.Tiles)
+                        .ThenInclude(t => t.Answers)
+                            .ThenInclude(a => a.Translations)
+                    .AsSplitQuery() // Optimization: Use split query for complex include chains
+                    .FirstOrDefaultAsync(s => s.StoryId == normalizedId && s.IsActive);
+
+            if (story == null) return null;
+
+            // Get owner email from CreatedBy
+            string? ownerEmail = null;
+            if (story.CreatedBy.HasValue)
+            {
+                ownerEmail = await _context.Set<AlchimaliaUser>()
+                    .Where(u => u.Id == story.CreatedBy.Value)
+                    .Select(u => u.Email)
+                    .FirstOrDefaultAsync();
+            }
+
+            return StoryDefinitionMapper.MapToDtoWithLocale(story, locale, ownerEmail);
+        });
     }
 
     public async Task<StoryDefinition?> GetStoryDefinitionByIdAsync(string storyId)
