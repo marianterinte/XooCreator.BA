@@ -79,6 +79,8 @@ public class XooDbContext : DbContext
     public DbSet<StoryRegionDefinitionTopic> StoryRegionDefinitionTopics => Set<StoryRegionDefinitionTopic>();
     public DbSet<EpicHeroCraftTopic> EpicHeroCraftTopics => Set<EpicHeroCraftTopic>();
     public DbSet<EpicHeroDefinitionTopic> EpicHeroDefinitionTopics => Set<EpicHeroDefinitionTopic>();
+    public DbSet<EpicHeroCraftRegion> EpicHeroCraftRegions => Set<EpicHeroCraftRegion>();
+    public DbSet<EpicHeroDefinitionRegion> EpicHeroDefinitionRegions => Set<EpicHeroDefinitionRegion>();
 
     // Version Jobs
     public DbSet<HeroVersionJob> HeroVersionJobs => Set<HeroVersionJob>();

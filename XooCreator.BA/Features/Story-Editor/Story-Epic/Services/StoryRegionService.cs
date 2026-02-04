@@ -228,6 +228,7 @@ public class StoryRegionService : IStoryRegionService
             .Where(t => t.StoryRegionCraftId == craft.Id)
             .ToListAsync(ct);
         _context.StoryRegionCraftTopics.RemoveRange(existing);
+        craft.Topics?.Clear();
 
         if (topicIds == null || topicIds.Count == 0)
             return;
@@ -238,12 +239,14 @@ public class StoryRegionService : IStoryRegionService
 
         foreach (var topic in topics)
         {
-            _context.StoryRegionCraftTopics.Add(new StoryRegionCraftTopic
+            var junction = new StoryRegionCraftTopic
             {
                 StoryRegionCraftId = craft.Id,
                 StoryTopicId = topic.Id,
                 CreatedAt = DateTime.UtcNow
-            });
+            };
+            _context.StoryRegionCraftTopics.Add(junction);
+            (craft.Topics ??= new List<StoryRegionCraftTopic>()).Add(junction);
         }
     }
 
@@ -483,9 +486,10 @@ public class StoryRegionService : IStoryRegionService
             throw new InvalidOperationException($"Admin cannot publish region in status '{currentStatus}'. Expected Draft, ChangesRequested, or Approved.");
         }
 
-        // Load craft with translations
+        // Load craft with translations and topics (for publish copy)
         regionCraft = await _context.StoryRegionCrafts
             .Include(c => c.Translations)
+            .Include(c => c.Topics)
             .FirstOrDefaultAsync(c => c.Id == regionId, ct) ?? regionCraft;
 
         // Check if definition already exists
@@ -607,7 +611,30 @@ public class StoryRegionService : IStoryRegionService
             _context.StoryRegionDefinitionTranslations.Add(definitionTranslation);
         }
 
+        // Copy topic associations from craft to definition
+        await SyncDefinitionTopicsFromCraftAsync(definition.Id, regionCraft, ct);
+
         await _context.SaveChangesAsync(ct);
+    }
+
+    /// <summary>
+    /// Replaces definition topic associations with the craft's topic associations.
+    /// </summary>
+    private async Task SyncDefinitionTopicsFromCraftAsync(string definitionId, StoryRegionCraft craft, CancellationToken ct)
+    {
+        var existing = await _context.StoryRegionDefinitionTopics
+            .Where(t => t.StoryRegionDefinitionId == definitionId)
+            .ToListAsync(ct);
+        _context.StoryRegionDefinitionTopics.RemoveRange(existing);
+        foreach (var craftTopic in craft.Topics ?? Enumerable.Empty<StoryRegionCraftTopic>())
+        {
+            _context.StoryRegionDefinitionTopics.Add(new StoryRegionDefinitionTopic
+            {
+                StoryRegionDefinitionId = definitionId,
+                StoryTopicId = craftTopic.StoryTopicId,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
     }
 
     private async Task<bool> TryApplyDeltaPublishAsync(
@@ -651,6 +678,8 @@ public class StoryRegionService : IStoryRegionService
                 return false;
             }
         }
+
+        await SyncDefinitionTopicsFromCraftAsync(definition.Id, craft, ct);
 
         definition.LastPublishedVersion = craft.LastDraftVersion;
         definition.Version = definition.Version <= 0 ? 1 : definition.Version + 1;

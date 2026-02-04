@@ -37,5 +37,6 @@ public class EpicHeroDefinition
     public AlchimaliaUser Owner { get; set; } = null!;
     public ICollection<EpicHeroDefinitionTranslation> Translations { get; set; } = new List<EpicHeroDefinitionTranslation>();
     public ICollection<EpicHeroDefinitionTopic> Topics { get; set; } = new List<EpicHeroDefinitionTopic>();
+    public ICollection<EpicHeroDefinitionRegion> Regions { get; set; } = new List<EpicHeroDefinitionRegion>();
 }
 
