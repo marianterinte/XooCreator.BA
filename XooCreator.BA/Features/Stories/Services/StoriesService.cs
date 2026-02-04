@@ -4,6 +4,7 @@ using XooCreator.BA.Features.Stories.Repositories;
 using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Features.StoryEditor.Services.Content;
 using XooCreator.BA.Data;
+using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.Enums;
 
 namespace XooCreator.BA.Features.Stories.Services;
@@ -172,6 +173,15 @@ public class StoriesService : IStoriesService
                     .FirstOrDefaultAsync();
             }
             
+            var coAuthors = (craft.CoAuthors ?? Enumerable.Empty<StoryCraftCoAuthor>())
+                .OrderBy(c => c.SortOrder)
+                .Select(c => new StoryCoAuthorDto
+                {
+                    UserId = c.UserId,
+                    DisplayName = c.UserId.HasValue && c.User != null ? c.User.Name : (c.DisplayName ?? string.Empty)
+                })
+                .ToList();
+
             return new EditableStoryDto
             {
                 Id = craft.StoryId,
@@ -183,6 +193,7 @@ public class StoriesService : IStoriesService
                 ClassicAuthorId = craft.ClassicAuthorId,
                 TopicIds = craft.Topics.Select(t => t.StoryTopic.TopicId).ToList(),
                 AgeGroupIds = craft.AgeGroups.Select(ag => ag.StoryAgeGroup.AgeGroupId).ToList(),
+                CoAuthors = coAuthors,
                 PriceInCredits = craft.PriceInCredits,
                 StoryType = (int)craft.StoryType,
                 IsEvaluative = craft.IsEvaluative,
@@ -259,6 +270,15 @@ public class StoriesService : IStoriesService
                 .FirstOrDefaultAsync();
         }
 
+        var coAuthorsFromDef = (story.CoAuthors ?? Enumerable.Empty<StoryDefinitionCoAuthor>())
+            .OrderBy(c => c.SortOrder)
+            .Select(c => new StoryCoAuthorDto
+            {
+                UserId = c.UserId,
+                DisplayName = c.UserId.HasValue && c.User != null ? c.User.Name : (c.DisplayName ?? string.Empty)
+            })
+            .ToList();
+
         return new EditableStoryDto
         {
             Id = story.StoryId,
@@ -270,6 +290,7 @@ public class StoriesService : IStoriesService
             ClassicAuthorId = story.ClassicAuthorId,
             TopicIds = story.Topics?.Select(t => t.StoryTopic.TopicId).ToList() ?? new List<string>(),
             AgeGroupIds = story.AgeGroups?.Select(ag => ag.StoryAgeGroup.AgeGroupId).ToList() ?? new List<string>(),
+            CoAuthors = coAuthorsFromDef,
             PriceInCredits = story.PriceInCredits,
             StoryType = (int)story.StoryType,
             IsEvaluative = story.IsEvaluative,

@@ -60,6 +60,7 @@ public class StoryRegionService : IStoryRegionService
                 CreatedAt = craft.CreatedAt,
                 UpdatedAt = craft.UpdatedAt,
                 PublishedAtUtc = null,
+                TopicIds = (craft.Topics ?? Enumerable.Empty<StoryRegionCraftTopic>()).Select(t => t.StoryTopic?.TopicId).Where(s => s != null).Cast<string>().ToList(),
                 AssignedReviewerUserId = craft.AssignedReviewerUserId,
                 ReviewedByUserId = craft.ReviewedByUserId,
                 ApprovedByUserId = craft.ApprovedByUserId,
@@ -87,6 +88,7 @@ public class StoryRegionService : IStoryRegionService
                 CreatedAt = definition.CreatedAt,
                 UpdatedAt = definition.UpdatedAt,
                 PublishedAtUtc = definition.PublishedAtUtc,
+                TopicIds = (definition.Topics ?? Enumerable.Empty<StoryRegionDefinitionTopic>()).Select(t => t.StoryTopic?.TopicId).Where(s => s != null).Cast<string>().ToList(),
                 AssignedReviewerUserId = null,
                 ReviewedByUserId = null,
                 ApprovedByUserId = null,
@@ -135,6 +137,7 @@ public class StoryRegionService : IStoryRegionService
             CreatedAt = regionCraft.CreatedAt,
             UpdatedAt = regionCraft.UpdatedAt,
             PublishedAtUtc = null,
+            TopicIds = new List<string>(),
             AssignedReviewerUserId = regionCraft.AssignedReviewerUserId,
             ReviewedByUserId = regionCraft.ReviewedByUserId,
             ApprovedByUserId = regionCraft.ApprovedByUserId,
@@ -205,6 +208,46 @@ public class StoryRegionService : IStoryRegionService
         
         // Append changes to change log for delta publish
         await _changeLogService.AppendChangesAsync(regionCraft, snapshotBeforeChanges, langForTracking, ownerUserId, ct);
+    }
+
+    public async Task SaveRegionTopicsAsync(Guid ownerUserId, string regionId, IReadOnlyList<string> topicIds, CancellationToken ct = default)
+    {
+        var regionCraft = await _repository.GetCraftAsync(regionId, ct);
+        if (regionCraft == null)
+            throw new InvalidOperationException($"Region craft '{regionId}' not found");
+        if (regionCraft.OwnerUserId != ownerUserId)
+            throw new UnauthorizedAccessException($"User does not own region '{regionId}'");
+        await UpdateRegionTopicsAsync(regionCraft, topicIds?.ToList() ?? new List<string>(), ct);
+        regionCraft.UpdatedAt = DateTime.UtcNow;
+        await _repository.SaveCraftAsync(regionCraft, ct);
+    }
+
+    private async Task UpdateRegionTopicsAsync(StoryRegionCraft craft, List<string> topicIds, CancellationToken ct)
+    {
+        var existing = await _context.StoryRegionCraftTopics
+            .Where(t => t.StoryRegionCraftId == craft.Id)
+            .ToListAsync(ct);
+        _context.StoryRegionCraftTopics.RemoveRange(existing);
+        craft.Topics?.Clear();
+
+        if (topicIds == null || topicIds.Count == 0)
+            return;
+
+        var topics = await _context.StoryTopics
+            .Where(t => topicIds.Contains(t.TopicId))
+            .ToListAsync(ct);
+
+        foreach (var topic in topics)
+        {
+            var junction = new StoryRegionCraftTopic
+            {
+                StoryRegionCraftId = craft.Id,
+                StoryTopicId = topic.Id,
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.StoryRegionCraftTopics.Add(junction);
+            (craft.Topics ??= new List<StoryRegionCraftTopic>()).Add(junction);
+        }
     }
 
     public async Task<List<StoryRegionListItemDto>> ListRegionsByOwnerAsync(Guid ownerUserId, string? status = null, Guid? currentUserId = null, CancellationToken ct = default)
@@ -333,6 +376,39 @@ public class StoryRegionService : IStoryRegionService
             .ToList();
     }
 
+    public async Task<List<StoryRegionListItemDto>> ListPublishedRegionsByTopicAsync(string? topicId, CancellationToken ct = default)
+    {
+        var query = _context.StoryRegionDefinitions
+            .AsNoTracking()
+            .Where(x => x.Status == "published")
+            .Include(x => x.Translations)
+            .Include(x => x.Topics!).ThenInclude(t => t.StoryTopic)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(topicId))
+        {
+            query = query.Where(x => x.Topics!.Any(t => t.StoryTopic!.TopicId == topicId));
+        }
+
+        var definitions = await query
+            .OrderByDescending(x => x.UpdatedAt)
+            .ToListAsync(ct);
+
+        // Get unique owner IDs for email lookup
+        var uniqueOwnerIds = definitions.Select(d => d.OwnerUserId).Distinct().ToList();
+        var ownerEmailMap = await _context.AlchimaliaUsers
+            .AsNoTracking()
+            .Where(u => uniqueOwnerIds.Contains(u.Id))
+            .Select(u => new { u.Id, u.Email })
+            .ToDictionaryAsync(u => u.Id, u => u.Email ?? "", ct);
+
+        return definitions.Select(d =>
+        {
+            var ownerEmail = ownerEmailMap.TryGetValue(d.OwnerUserId, out var email) ? email : "";
+            return MapDefinitionToListItem(d, null, ownerEmail);
+        }).ToList();
+    }
+
     public async Task DeleteRegionAsync(Guid requestingUserId, string regionId, bool allowAdminOverride = false, CancellationToken ct = default)
     {
         var regionCraft = await _repository.GetCraftAsync(regionId, ct);
@@ -443,9 +519,10 @@ public class StoryRegionService : IStoryRegionService
             throw new InvalidOperationException($"Admin cannot publish region in status '{currentStatus}'. Expected Draft, ChangesRequested, or Approved.");
         }
 
-        // Load craft with translations
+        // Load craft with translations and topics (for publish copy)
         regionCraft = await _context.StoryRegionCrafts
             .Include(c => c.Translations)
+            .Include(c => c.Topics)
             .FirstOrDefaultAsync(c => c.Id == regionId, ct) ?? regionCraft;
 
         // Check if definition already exists
@@ -567,7 +644,30 @@ public class StoryRegionService : IStoryRegionService
             _context.StoryRegionDefinitionTranslations.Add(definitionTranslation);
         }
 
+        // Copy topic associations from craft to definition
+        await SyncDefinitionTopicsFromCraftAsync(definition.Id, regionCraft, ct);
+
         await _context.SaveChangesAsync(ct);
+    }
+
+    /// <summary>
+    /// Replaces definition topic associations with the craft's topic associations.
+    /// </summary>
+    private async Task SyncDefinitionTopicsFromCraftAsync(string definitionId, StoryRegionCraft craft, CancellationToken ct)
+    {
+        var existing = await _context.StoryRegionDefinitionTopics
+            .Where(t => t.StoryRegionDefinitionId == definitionId)
+            .ToListAsync(ct);
+        _context.StoryRegionDefinitionTopics.RemoveRange(existing);
+        foreach (var craftTopic in craft.Topics ?? Enumerable.Empty<StoryRegionCraftTopic>())
+        {
+            _context.StoryRegionDefinitionTopics.Add(new StoryRegionDefinitionTopic
+            {
+                StoryRegionDefinitionId = definitionId,
+                StoryTopicId = craftTopic.StoryTopicId,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
     }
 
     private async Task<bool> TryApplyDeltaPublishAsync(
@@ -611,6 +711,8 @@ public class StoryRegionService : IStoryRegionService
                 return false;
             }
         }
+
+        await SyncDefinitionTopicsFromCraftAsync(definition.Id, craft, ct);
 
         definition.LastPublishedVersion = craft.LastDraftVersion;
         definition.Version = definition.Version <= 0 ? 1 : definition.Version + 1;
@@ -795,6 +897,7 @@ public class StoryRegionService : IStoryRegionService
             CreatedAt = craft.CreatedAt,
             UpdatedAt = craft.UpdatedAt,
             PublishedAtUtc = null,
+            TopicIds = new List<string>(),
             AssignedReviewerUserId = craft.AssignedReviewerUserId,
             IsAssignedToCurrentUser = isAssignedToCurrentUser,
             IsOwnedByCurrentUser = isOwnedByCurrentUser,
@@ -818,6 +921,7 @@ public class StoryRegionService : IStoryRegionService
             CreatedAt = definition.CreatedAt,
             UpdatedAt = definition.UpdatedAt,
             PublishedAtUtc = definition.PublishedAtUtc,
+            TopicIds = new List<string>(),
             AssignedReviewerUserId = null,
             IsAssignedToCurrentUser = false,
             IsOwnedByCurrentUser = isOwnedByCurrentUser,

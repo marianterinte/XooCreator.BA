@@ -170,6 +170,7 @@ public sealed class MarketplaceCatalogCache : IMarketplaceCatalogCache, IMarketp
             .Include(s => s.Topics).ThenInclude(t => t.StoryTopic)
             .Include(s => s.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
             .Include(s => s.ClassicAuthor)
+            .Include(s => s.CoAuthors).ThenInclude(c => c.User)
             .Where(s => s.IsActive && s.Status == StoryStatus.Published && !s.IsPartOfEpic)
             .AsSplitQuery()
             .ToListAsync(ct);
@@ -236,6 +237,14 @@ public sealed class MarketplaceCatalogCache : IMarketplaceCatalogCache, IMarketp
             if (!string.IsNullOrWhiteSpace(authorName)) searchAuthors.Add(authorName!);
             if (!string.IsNullOrWhiteSpace(def.AuthorName)) searchAuthors.Add(def.AuthorName!);
             if (!string.IsNullOrWhiteSpace(def.ClassicAuthor?.Name)) searchAuthors.Add(def.ClassicAuthor.Name!);
+            if (def.CoAuthors != null)
+            {
+                foreach (var co in def.CoAuthors)
+                {
+                    var coName = co.UserId.HasValue && co.User != null ? co.User.Name : co.DisplayName;
+                    if (!string.IsNullOrWhiteSpace(coName)) searchAuthors.Add(coName!);
+                }
+            }
             // Deduplicate
             searchAuthors = searchAuthors.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
 
@@ -325,6 +334,7 @@ public sealed class MarketplaceCatalogCache : IMarketplaceCatalogCache, IMarketp
             .Include(e => e.Translations)
             .Include(e => e.Topics).ThenInclude(t => t.StoryTopic)
             .Include(e => e.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
+            .Include(e => e.CoAuthors).ThenInclude(ca => ca.User)
             .Where(e => e.Status == "published" && e.PublishedAtUtc != null)
             .AsSplitQuery()
             .ToListAsync(ct);
@@ -356,10 +366,18 @@ public sealed class MarketplaceCatalogCache : IMarketplaceCatalogCache, IMarketp
                 }
             }
 
-            // Build search authors list from owner name/email
+            // Build search authors list from owner + co-authors (user name/email or free-text DisplayName)
             var searchAuthors = new List<string>();
             var authorName = epic.Owner?.Name ?? epic.Owner?.Email;
             if (!string.IsNullOrWhiteSpace(authorName)) searchAuthors.Add(authorName!);
+            if (epic.CoAuthors != null)
+            {
+                foreach (var ca in epic.CoAuthors)
+                {
+                    var coAuthorName = ca.UserId != null ? (ca.User?.Name ?? ca.User?.Email ?? ca.DisplayName) : ca.DisplayName;
+                    if (!string.IsNullOrWhiteSpace(coAuthorName)) searchAuthors.Add(coAuthorName!);
+                }
+            }
             searchAuthors = searchAuthors.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
 
             var topicIds = (epic.Topics ?? Array.Empty<StoryEpicDefinitionTopic>())

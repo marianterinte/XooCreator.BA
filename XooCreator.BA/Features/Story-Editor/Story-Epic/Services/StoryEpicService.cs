@@ -70,6 +70,7 @@ public class StoryEpicService : IStoryEpicService
             .Include(c => c.HeroReferences)
             .Include(c => c.Topics).ThenInclude(t => t.StoryTopic)
             .Include(c => c.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
+            .Include(c => c.CoAuthors).ThenInclude(ca => ca.User)
             .AsSplitQuery()
             .FirstOrDefaultAsync(c => c.Id == epicId, ct);
         
@@ -133,6 +134,7 @@ public class StoryEpicService : IStoryEpicService
                 .Include(c => c.Translations)
                 .Include(c => c.Topics).ThenInclude(t => t.StoryTopic)
                 .Include(c => c.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
+                .Include(c => c.CoAuthors).ThenInclude(ca => ca.User)
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(c => c.Id == epicId, ct);
             
@@ -176,6 +178,9 @@ public class StoryEpicService : IStoryEpicService
         // Update age group references
         await UpdateCraftAgeGroupsAsync(craft, dto.AgeGroupIds, ct);
 
+        // Update co-authors
+        await UpdateCraftCoAuthorsAsync(craft, dto.CoAuthors, ct);
+
         // Save changes
         await _context.SaveChangesAsync(ct);
 
@@ -194,6 +199,7 @@ public class StoryEpicService : IStoryEpicService
             .Include(c => c.HeroReferences)
             .Include(c => c.Topics).ThenInclude(t => t.StoryTopic)
             .Include(c => c.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
+            .Include(c => c.CoAuthors).ThenInclude(ca => ca.User)
             .AsSplitQuery()
             .FirstOrDefaultAsync(c => c.Id == epicId, ct);
 
@@ -722,7 +728,15 @@ public class StoryEpicService : IStoryEpicService
                 .ToList(),
             AgeGroupIds = craft.AgeGroups
                 .Select(ag => ag.StoryAgeGroup?.AgeGroupId ?? ag.StoryAgeGroupId.ToString())
-                .ToList()
+                .ToList(),
+            CoAuthors = (craft.CoAuthors ?? Array.Empty<StoryEpicCraftCoAuthor>())
+                .OrderBy(ca => ca.SortOrder)
+                .Select(ca => new EpicCoAuthorDto
+                {
+                    Id = ca.Id,
+                    UserId = ca.UserId,
+                    DisplayName = ca.UserId != null ? (ca.User?.Name ?? ca.User?.Email ?? ca.DisplayName ?? "") : (ca.DisplayName ?? "")
+                }).ToList()
         };
     }
 
@@ -816,7 +830,15 @@ public class StoryEpicService : IStoryEpicService
                 .ToList(),
             AgeGroupIds = definition.AgeGroups
                 .Select(ag => ag.StoryAgeGroup?.AgeGroupId ?? ag.StoryAgeGroupId.ToString())
-                .ToList()
+                .ToList(),
+            CoAuthors = (definition.CoAuthors ?? Array.Empty<StoryEpicDefinitionCoAuthor>())
+                .OrderBy(ca => ca.SortOrder)
+                .Select(ca => new EpicCoAuthorDto
+                {
+                    Id = ca.Id,
+                    UserId = ca.UserId,
+                    DisplayName = ca.UserId != null ? (ca.User?.Name ?? ca.User?.Email ?? ca.DisplayName ?? "") : (ca.DisplayName ?? "")
+                }).ToList()
         };
     }
 
@@ -850,6 +872,7 @@ public class StoryEpicService : IStoryEpicService
             .Include(d => d.Translations)
             .Include(d => d.Topics).ThenInclude(t => t.StoryTopic)
             .Include(d => d.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
+            .Include(d => d.CoAuthors).ThenInclude(ca => ca.User)
             .Include(d => d.Owner)
             .AsSplitQuery()
             .FirstOrDefaultAsync(d => d.Id == epicId, ct);
@@ -1329,6 +1352,45 @@ public class StoryEpicService : IStoryEpicService
                 StoryAgeGroupId = ageGroup.Id,
                 CreatedAt = DateTime.UtcNow
             });
+        }
+    }
+
+    private async Task UpdateCraftCoAuthorsAsync(StoryEpicCraft craft, List<EpicCoAuthorDto>? coAuthors, CancellationToken ct)
+    {
+        var existing = await _context.StoryEpicCraftCoAuthors
+            .Where(ca => ca.StoryEpicCraftId == craft.Id)
+            .ToListAsync(ct);
+        _context.StoryEpicCraftCoAuthors.RemoveRange(existing);
+
+        if (coAuthors == null || coAuthors.Count == 0)
+            return;
+
+        var sortOrder = 0;
+        foreach (var dto in coAuthors)
+        {
+            var displayName = dto.DisplayName?.Trim();
+            if (dto.UserId.HasValue)
+            {
+                _context.StoryEpicCraftCoAuthors.Add(new StoryEpicCraftCoAuthor
+                {
+                    Id = Guid.NewGuid(),
+                    StoryEpicCraftId = craft.Id,
+                    UserId = dto.UserId,
+                    DisplayName = displayName,
+                    SortOrder = sortOrder++
+                });
+            }
+            else if (!string.IsNullOrWhiteSpace(displayName))
+            {
+                _context.StoryEpicCraftCoAuthors.Add(new StoryEpicCraftCoAuthor
+                {
+                    Id = Guid.NewGuid(),
+                    StoryEpicCraftId = craft.Id,
+                    UserId = null,
+                    DisplayName = displayName,
+                    SortOrder = sortOrder++
+                });
+            }
         }
     }
 }

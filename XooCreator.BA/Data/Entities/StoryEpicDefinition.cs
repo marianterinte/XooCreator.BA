@@ -33,5 +33,6 @@ public class StoryEpicDefinition
     public ICollection<StoryEpicDefinitionTranslation> Translations { get; set; } = new List<StoryEpicDefinitionTranslation>();
     public ICollection<StoryEpicDefinitionTopic> Topics { get; set; } = new List<StoryEpicDefinitionTopic>();
     public ICollection<StoryEpicDefinitionAgeGroup> AgeGroups { get; set; } = new List<StoryEpicDefinitionAgeGroup>();
+    public ICollection<StoryEpicDefinitionCoAuthor> CoAuthors { get; set; } = new List<StoryEpicDefinitionCoAuthor>();
 }
 

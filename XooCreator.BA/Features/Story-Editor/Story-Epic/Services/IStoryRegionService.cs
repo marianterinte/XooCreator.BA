@@ -14,6 +14,9 @@ public interface IStoryRegionService
     // Save region
     Task SaveRegionAsync(Guid ownerUserId, string regionId, StoryRegionDto dto, CancellationToken ct = default);
     
+    // Save only region topics (optional; does not change the rest of the region)
+    Task SaveRegionTopicsAsync(Guid ownerUserId, string regionId, IReadOnlyList<string> topicIds, CancellationToken ct = default);
+    
     // List regions by owner
     Task<List<StoryRegionListItemDto>> ListRegionsByOwnerAsync(Guid ownerUserId, string? status = null, Guid? currentUserId = null, CancellationToken ct = default);
     
@@ -22,6 +25,9 @@ public interface IStoryRegionService
     
     // List all regions (for admin)
     Task<List<StoryRegionListItemDto>> ListAllRegionsAsync(Guid currentUserId, string? status = null, CancellationToken ct = default);
+
+    // List published regions filtered by topic
+    Task<List<StoryRegionListItemDto>> ListPublishedRegionsByTopicAsync(string? topicId, CancellationToken ct = default);
     
     // Delete region (allowAdminOverride: when true, requesting user may delete any region e.g. admin)
     Task DeleteRegionAsync(Guid requestingUserId, string regionId, bool allowAdminOverride = false, CancellationToken ct = default);

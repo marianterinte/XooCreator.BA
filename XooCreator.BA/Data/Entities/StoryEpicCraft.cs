@@ -41,5 +41,6 @@ public class StoryEpicCraft
     public ICollection<StoryEpicCraftHeroReference> HeroReferences { get; set; } = new List<StoryEpicCraftHeroReference>();
     public ICollection<StoryEpicCraftTopic> Topics { get; set; } = new List<StoryEpicCraftTopic>();
     public ICollection<StoryEpicCraftAgeGroup> AgeGroups { get; set; } = new List<StoryEpicCraftAgeGroup>();
+    public ICollection<StoryEpicCraftCoAuthor> CoAuthors { get; set; } = new List<StoryEpicCraftCoAuthor>();
 }
 

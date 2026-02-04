@@ -91,6 +91,7 @@ public class StoryPublishChangeLogService : IStoryPublishChangeLogService
                 .ThenInclude(t => t.StoryTopic)
             .Include(x => x.AgeGroups)
                 .ThenInclude(ag => ag.StoryAgeGroup)
+            .Include(x => x.CoAuthors)
             .FirstOrDefaultAsync(x => x.Id == craftId, ct);
     }
 
@@ -176,6 +177,10 @@ public sealed class StoryDraftSnapshot
         var lang = (languageCode ?? string.Empty).ToLowerInvariant();
         var translation = craft.Translations.FirstOrDefault(t => t.LanguageCode == lang);
 
+        var coAuthorsSnapshot = (craft.CoAuthors ?? Enumerable.Empty<StoryCraftCoAuthor>())
+            .OrderBy(c => c.SortOrder)
+            .Select(c => new HeaderState.CoAuthorSnapshot(c.UserId, c.DisplayName ?? string.Empty))
+            .ToList();
         var header = HeaderState.Create(
             translation?.Title ?? string.Empty,
             translation?.Summary,
@@ -188,7 +193,8 @@ public sealed class StoryDraftSnapshot
             craft.IsEvaluative,
             craft.IsPartOfEpic,
             craft.Topics.Select(t => t.StoryTopic.TopicId).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToList(),
-            craft.AgeGroups.Select(ag => ag.StoryAgeGroup.AgeGroupId).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToList());
+            craft.AgeGroups.Select(ag => ag.StoryAgeGroup.AgeGroupId).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToList(),
+            coAuthorsSnapshot);
 
         var tiles = new Dictionary<string, TileState>(StringComparer.OrdinalIgnoreCase);
         foreach (var tile in craft.Tiles.OrderBy(t => t.SortOrder))
@@ -237,7 +243,8 @@ public sealed class StoryDraftSnapshot
             bool isEvaluative,
             bool isPartOfEpic,
             IReadOnlyCollection<string> topicIds,
-            IReadOnlyCollection<string> ageGroupIds)
+            IReadOnlyCollection<string> ageGroupIds,
+            IReadOnlyCollection<CoAuthorSnapshot> coAuthors)
         {
             Title = title;
             Summary = summary;
@@ -251,6 +258,7 @@ public sealed class StoryDraftSnapshot
             IsPartOfEpic = isPartOfEpic;
             TopicIds = topicIds;
             AgeGroupIds = ageGroupIds;
+            CoAuthors = coAuthors;
             Hash = HashHelper.ComputeHash(new
             {
                 Title,
@@ -264,7 +272,8 @@ public sealed class StoryDraftSnapshot
                 IsEvaluative,
                 IsPartOfEpic,
                 TopicIds,
-                AgeGroupIds
+                AgeGroupIds,
+                CoAuthors = CoAuthors.Select(c => new { c.UserId, c.DisplayName }).ToList()
             });
         }
 
@@ -280,6 +289,7 @@ public sealed class StoryDraftSnapshot
         public bool IsPartOfEpic { get; }
         public IReadOnlyCollection<string> TopicIds { get; }
         public IReadOnlyCollection<string> AgeGroupIds { get; }
+        public IReadOnlyCollection<CoAuthorSnapshot> CoAuthors { get; }
         public string Hash { get; }
         public bool HasContent => !string.IsNullOrEmpty(Title) || !string.IsNullOrEmpty(Summary) || !string.IsNullOrEmpty(CoverImage);
 
@@ -296,7 +306,8 @@ public sealed class StoryDraftSnapshot
             isEvaluative = IsEvaluative,
             isPartOfEpic = IsPartOfEpic,
             topicIds = TopicIds,
-            ageGroupIds = AgeGroupIds
+            ageGroupIds = AgeGroupIds,
+            coAuthors = CoAuthors.Select(c => new { userId = c.UserId, displayName = c.DisplayName }).ToList()
         };
 
         public static HeaderState Create(
@@ -311,12 +322,16 @@ public sealed class StoryDraftSnapshot
             bool isEvaluative,
             bool isPartOfEpic,
             IReadOnlyCollection<string> topicIds,
-            IReadOnlyCollection<string> ageGroupIds)
-            => new(title, summary, coverImage, storyTopic, authorName, classicAuthorId, priceInCredits, storyType, isEvaluative, isPartOfEpic, topicIds, ageGroupIds);
+            IReadOnlyCollection<string> ageGroupIds,
+            IReadOnlyCollection<CoAuthorSnapshot>? coAuthors = null)
+            => new(title, summary, coverImage, storyTopic, authorName, classicAuthorId, priceInCredits, storyType, isEvaluative, isPartOfEpic, topicIds, ageGroupIds, coAuthors ?? Array.Empty<CoAuthorSnapshot>());
 
         public static HeaderState Empty()
-            => new(string.Empty, null, null, null, null, null, 0, StoryType.Indie, false, false, Array.Empty<string>(), Array.Empty<string>());
+            => new(string.Empty, null, null, null, null, null, 0, StoryType.Indie, false, false, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<CoAuthorSnapshot>());
+
+        public sealed record CoAuthorSnapshot(Guid? UserId, string DisplayName);
     }
+
 
     public sealed class TileState
     {

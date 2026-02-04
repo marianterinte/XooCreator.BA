@@ -12,31 +12,11 @@ public class StoryLikesRepository : IStoryLikesRepository
         _context = context;
     }
 
-    public async Task<bool> HasUserReadStoryAsync(Guid userId, string storyId)
-    {
-        // Check if user has read the story (has progress or history)
-        // Use case-insensitive comparison for consistency
-        var hasProgress = await _context.UserStoryReadProgress
-            .AnyAsync(p => p.UserId == userId && 
-                EF.Functions.ILike(p.StoryId, storyId));
 
-        if (hasProgress)
-            return true;
-
-        var hasHistory = await _context.UserStoryReadHistory
-            .AnyAsync(h => h.UserId == userId && 
-                EF.Functions.ILike(h.StoryId, storyId));
-
-        return hasHistory;
-    }
 
     public async Task<bool> ToggleLikeAsync(Guid userId, string storyId)
     {
-        // First check if user has read the story
-        if (!await HasUserReadStoryAsync(userId, storyId))
-        {
-            return false; // User hasn't read the story, cannot like
-        }
+
 
         // Check if already liked
         var existing = await _context.StoryLikes

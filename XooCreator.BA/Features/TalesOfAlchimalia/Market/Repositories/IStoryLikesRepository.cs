@@ -6,6 +6,5 @@ public interface IStoryLikesRepository
     Task<bool> IsLikedAsync(Guid userId, string storyId);
     Task<int> GetStoryLikesCountAsync(string storyId);
     Task<bool> RemoveLikeAsync(Guid userId, string storyId);
-    Task<bool> HasUserReadStoryAsync(Guid userId, string storyId);
 }
 

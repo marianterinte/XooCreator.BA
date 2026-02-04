@@ -36,6 +36,7 @@ public class StoryDefinition
     public List<StoryDefinitionTranslation> Translations { get; set; } = new();
     public List<StoryDefinitionTopic> Topics { get; set; } = new();
     public List<StoryDefinitionAgeGroup> AgeGroups { get; set; } = new();
+    public List<StoryDefinitionCoAuthor> CoAuthors { get; set; } = new();
     public List<StoryDefinitionUnlockedHero> UnlockedHeroes { get; set; } = new();
     public ClassicAuthor? ClassicAuthor { get; set; }
 }

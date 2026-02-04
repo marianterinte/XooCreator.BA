@@ -59,6 +59,8 @@ public class EpicHeroService : IEpicHeroService
                 CreatedAt = craft.CreatedAt,
                 UpdatedAt = craft.UpdatedAt,
                 PublishedAtUtc = null,
+                TopicIds = (craft.Topics ?? Enumerable.Empty<EpicHeroCraftTopic>()).Select(t => t.StoryTopic?.TopicId).Where(s => s != null).Cast<string>().ToList(),
+                RegionIds = (craft.Regions ?? Enumerable.Empty<EpicHeroCraftRegion>()).Select(r => r.RegionId).ToList(),
                 AssignedReviewerUserId = craft.AssignedReviewerUserId,
                 ReviewedByUserId = craft.ReviewedByUserId,
                 ApprovedByUserId = craft.ApprovedByUserId,
@@ -89,6 +91,8 @@ public class EpicHeroService : IEpicHeroService
                 CreatedAt = definition.CreatedAt,
                 UpdatedAt = definition.UpdatedAt,
                 PublishedAtUtc = definition.PublishedAtUtc,
+                TopicIds = (definition.Topics ?? Enumerable.Empty<EpicHeroDefinitionTopic>()).Select(t => t.StoryTopic?.TopicId).Where(s => s != null).Cast<string>().ToList(),
+                RegionIds = (definition.Regions ?? Enumerable.Empty<EpicHeroDefinitionRegion>()).Select(r => r.RegionId).ToList(),
                 AssignedReviewerUserId = null,
                 ReviewedByUserId = null,
                 ApprovedByUserId = null,
@@ -142,6 +146,8 @@ public class EpicHeroService : IEpicHeroService
             CreatedAt = heroCraft.CreatedAt,
             UpdatedAt = heroCraft.UpdatedAt,
             PublishedAtUtc = null,
+            TopicIds = new List<string>(),
+            RegionIds = new List<string>(),
             AssignedReviewerUserId = heroCraft.AssignedReviewerUserId,
             ReviewedByUserId = heroCraft.ReviewedByUserId,
             ApprovedByUserId = heroCraft.ApprovedByUserId,
@@ -220,6 +226,88 @@ public class EpicHeroService : IEpicHeroService
         await _changeLogService.AppendChangesAsync(heroCraft, snapshotBeforeChanges, langForTracking, ownerUserId, ct);
     }
 
+    public async Task SaveHeroTopicsAsync(Guid ownerUserId, string heroId, IReadOnlyList<string> topicIds, CancellationToken ct = default)
+    {
+        var heroCraft = await _repository.GetCraftAsync(heroId, ct);
+        if (heroCraft == null)
+            throw new InvalidOperationException($"Hero craft '{heroId}' not found");
+        if (heroCraft.OwnerUserId != ownerUserId)
+            throw new UnauthorizedAccessException($"User does not own hero '{heroId}'");
+        await UpdateHeroTopicsAsync(heroCraft, topicIds?.ToList() ?? new List<string>(), ct);
+        heroCraft.UpdatedAt = DateTime.UtcNow;
+        await _repository.SaveCraftAsync(heroCraft, ct);
+    }
+
+    private async Task UpdateHeroTopicsAsync(EpicHeroCraft craft, List<string> topicIds, CancellationToken ct)
+    {
+        var existing = await _context.EpicHeroCraftTopics
+            .Where(t => t.EpicHeroCraftId == craft.Id)
+            .ToListAsync(ct);
+        _context.EpicHeroCraftTopics.RemoveRange(existing);
+        craft.Topics?.Clear();
+
+        if (topicIds == null || topicIds.Count == 0)
+            return;
+
+        var topics = await _context.StoryTopics
+            .Where(t => topicIds.Contains(t.TopicId))
+            .ToListAsync(ct);
+
+        foreach (var topic in topics)
+        {
+            var junction = new EpicHeroCraftTopic
+            {
+                EpicHeroCraftId = craft.Id,
+                StoryTopicId = topic.Id,
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.EpicHeroCraftTopics.Add(junction);
+            (craft.Topics ??= new List<EpicHeroCraftTopic>()).Add(junction);
+        }
+    }
+
+    public async Task SaveHeroRegionsAsync(Guid ownerUserId, string heroId, IReadOnlyList<string> regionIds, CancellationToken ct = default)
+    {
+        var heroCraft = await _repository.GetCraftAsync(heroId, ct);
+        if (heroCraft == null)
+            throw new InvalidOperationException($"Hero craft '{heroId}' not found");
+        if (heroCraft.OwnerUserId != ownerUserId)
+            throw new UnauthorizedAccessException($"User does not own hero '{heroId}'");
+        await UpdateHeroRegionsAsync(heroCraft, regionIds?.ToList() ?? new List<string>(), ct);
+        heroCraft.UpdatedAt = DateTime.UtcNow;
+        await _repository.SaveCraftAsync(heroCraft, ct);
+    }
+
+    private async Task UpdateHeroRegionsAsync(EpicHeroCraft craft, List<string> regionIds, CancellationToken ct)
+    {
+        var existing = await _context.EpicHeroCraftRegions
+            .Where(r => r.EpicHeroCraftId == craft.Id)
+            .ToListAsync(ct);
+        _context.EpicHeroCraftRegions.RemoveRange(existing);
+        craft.Regions?.Clear();
+
+        if (regionIds == null || regionIds.Count == 0)
+            return;
+
+        // Only allow published regions
+        var validRegions = await _context.StoryRegionDefinitions
+            .Where(r => regionIds.Contains(r.Id) && r.Status == "published")
+            .Select(r => r.Id)
+            .ToListAsync(ct);
+
+        foreach (var regionId in validRegions)
+        {
+            var junction = new EpicHeroCraftRegion
+            {
+                EpicHeroCraftId = craft.Id,
+                RegionId = regionId,
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.EpicHeroCraftRegions.Add(junction);
+            (craft.Regions ??= new List<EpicHeroCraftRegion>()).Add(junction);
+        }
+    }
+
     public async Task<List<EpicHeroListItemDto>> ListHeroesByOwnerAsync(Guid ownerUserId, string? status = null, Guid? currentUserId = null, CancellationToken ct = default)
     {
         var heroCrafts = await _repository.ListCraftsByOwnerAsync(ownerUserId, status, ct);
@@ -247,6 +335,8 @@ public class EpicHeroService : IEpicHeroService
                 CreatedAt = h.CreatedAt,
                 UpdatedAt = h.UpdatedAt,
                 PublishedAtUtc = null,
+                TopicIds = new List<string>(),
+                RegionIds = (h.Regions ?? Enumerable.Empty<EpicHeroCraftRegion>()).Select(r => r.RegionId).ToList(),
                 AssignedReviewerUserId = h.AssignedReviewerUserId,
                 IsAssignedToCurrentUser = isAssignedToCurrentUser,
                 IsOwnedByCurrentUser = isOwnedByCurrentUser
@@ -325,6 +415,7 @@ public class EpicHeroService : IEpicHeroService
         }
         var allCrafts = await craftQuery
             .Include(x => x.Translations)
+            .Include(x => x.Regions)
             .OrderByDescending(x => x.UpdatedAt)
             .ToListAsync(ct);
 
@@ -332,6 +423,7 @@ public class EpicHeroService : IEpicHeroService
         var allDefinitions = await _context.EpicHeroDefinitions
             .Where(x => x.Status == "published")
             .Include(x => x.Translations)
+            .Include(x => x.Regions)
             .OrderByDescending(x => x.UpdatedAt)
             .ToListAsync(ct);
 
@@ -369,6 +461,43 @@ public class EpicHeroService : IEpicHeroService
             .ToList();
     }
 
+    public async Task<List<EpicHeroListItemDto>> ListPublishedHeroesByRegionAndTopicAsync(string regionId, string? topicId, CancellationToken ct = default)
+    {
+        var query = _context.EpicHeroDefinitions
+            .AsNoTracking()
+            .Where(x => x.Status == "published")
+            .Include(x => x.Translations)
+            .Include(x => x.Regions)
+            .Include(x => x.Topics!).ThenInclude(t => t.StoryTopic)
+            .AsQueryable();
+
+        // Filter by region (mandatory)
+        query = query.Where(x => x.Regions!.Any(r => r.RegionId == regionId));
+
+        if (!string.IsNullOrWhiteSpace(topicId))
+        {
+            query = query.Where(x => x.Topics!.Any(t => t.StoryTopic!.TopicId == topicId));
+        }
+
+        var definitions = await query
+            .OrderByDescending(x => x.UpdatedAt)
+            .ToListAsync(ct);
+
+        // Get unique owner IDs for email lookup
+        var uniqueOwnerIds = definitions.Select(d => d.OwnerUserId).Distinct().ToList();
+        var ownerEmailMap = await _context.AlchimaliaUsers
+            .AsNoTracking()
+            .Where(u => uniqueOwnerIds.Contains(u.Id))
+            .Select(u => new { u.Id, u.Email })
+            .ToDictionaryAsync(u => u.Id, u => u.Email ?? "", ct);
+
+        return definitions.Select(d =>
+        {
+            var ownerEmail = ownerEmailMap.TryGetValue(d.OwnerUserId, out var email) ? email : "";
+            return MapDefinitionToListItem(d, null, ownerEmail);
+        }).ToList();
+    }
+
     private EpicHeroListItemDto MapCraftToListItem(EpicHeroCraft craft, Guid? currentUserId, string? ownerEmail = null)
     {
         var firstTranslation = craft.Translations.FirstOrDefault();
@@ -391,6 +520,8 @@ public class EpicHeroService : IEpicHeroService
             CreatedAt = craft.CreatedAt,
             UpdatedAt = craft.UpdatedAt,
             PublishedAtUtc = null,
+            TopicIds = new List<string>(),
+            RegionIds = (craft.Regions ?? Enumerable.Empty<EpicHeroCraftRegion>()).Select(r => r.RegionId).ToList(),
             AssignedReviewerUserId = craft.AssignedReviewerUserId,
             IsAssignedToCurrentUser = isAssignedToCurrentUser,
             IsOwnedByCurrentUser = isOwnedByCurrentUser,
@@ -417,6 +548,8 @@ public class EpicHeroService : IEpicHeroService
             CreatedAt = definition.CreatedAt,
             UpdatedAt = definition.UpdatedAt,
             PublishedAtUtc = definition.PublishedAtUtc,
+            TopicIds = new List<string>(),
+            RegionIds = (definition.Regions ?? Enumerable.Empty<EpicHeroDefinitionRegion>()).Select(r => r.RegionId).ToList(),
             AssignedReviewerUserId = null,
             IsAssignedToCurrentUser = false,
             IsOwnedByCurrentUser = isOwnedByCurrentUser,
@@ -527,10 +660,17 @@ public class EpicHeroService : IEpicHeroService
             throw new InvalidOperationException($"Admin cannot publish hero in status '{currentStatus}'. Expected Draft, ChangesRequested, or Approved.");
         }
 
-        // Load craft with translations
-        heroCraft = await _context.EpicHeroCrafts
+        // Load craft with translations, regions and topics from DB (AsNoTracking = fresh read, ensures Regions/Topics are present for publish)
+        var craftForPublish = await _context.EpicHeroCrafts
+            .AsNoTracking()
             .Include(c => c.Translations)
-            .FirstOrDefaultAsync(c => c.Id == heroId, ct) ?? heroCraft;
+            .Include(c => c.Regions)
+            .Include(c => c.Topics)
+            .FirstOrDefaultAsync(c => c.Id == heroId, ct);
+        if (craftForPublish == null)
+        {
+            throw new InvalidOperationException($"Hero craft '{heroId}' not found for publish");
+        }
 
         // Check if definition already exists
         var existingDefinition = await _repository.GetDefinitionAsync(heroId, ct);
@@ -555,11 +695,11 @@ public class EpicHeroService : IEpicHeroService
 
         if (!requiresFullPublish && existingDefinition != null && pendingLogs != null)
         {
-            var deltaApplied = await TryApplyDeltaPublishAsync(existingDefinition, heroCraft, pendingLogs, ownerEmail, defaultLangTag, ct);
+            var deltaApplied = await TryApplyDeltaPublishAsync(existingDefinition, craftForPublish, pendingLogs, ownerEmail, defaultLangTag, ct);
             if (deltaApplied)
             {
                 await _context.SaveChangesAsync(ct);
-                await CleanupChangeLogsAsync(heroId, heroCraft.LastDraftVersion, ct);
+                await CleanupChangeLogsAsync(heroId, craftForPublish.LastDraftVersion, ct);
                 
                 // Cleanup craft after successful publish
                 await CleanupCraftAsync(heroId, ct);
@@ -570,8 +710,8 @@ public class EpicHeroService : IEpicHeroService
         }
 
         // Full publish
-        await ApplyFullPublishAsync(existingDefinition, heroCraft, ownerEmail, ct);
-        await CleanupChangeLogsAsync(heroId, heroCraft.LastDraftVersion, ct);
+        await ApplyFullPublishAsync(existingDefinition, craftForPublish, ownerEmail, ct);
+        await CleanupChangeLogsAsync(heroId, craftForPublish.LastDraftVersion, ct);
         
         // Cleanup craft after successful publish
         await CleanupCraftAsync(heroId, ct);
@@ -702,6 +842,10 @@ public class EpicHeroService : IEpicHeroService
             _context.EpicHeroDefinitionTranslations.Add(definitionTranslation);
         }
 
+        // Copy region and topic associations from craft to definition
+        await SyncDefinitionRegionsFromCraftAsync(definition.Id, heroCraft, ct);
+        await SyncDefinitionTopicsFromCraftAsync(definition.Id, heroCraft, ct);
+
         try
         {
             definition.IsActive = true;
@@ -712,6 +856,48 @@ public class EpicHeroService : IEpicHeroService
         {
             _logger.LogError(ex, "Failed to publish hero (DB update). heroId={HeroId}", heroCraft.Id);
             throw new InvalidOperationException("Failed to publish hero due to invalid/duplicate translation data. Please review the hero translations and try again.");
+        }
+    }
+
+    /// <summary>
+    /// Replaces definition region associations with the craft's region associations.
+    /// Used on both full and delta publish.
+    /// </summary>
+    private async Task SyncDefinitionRegionsFromCraftAsync(string definitionId, EpicHeroCraft craft, CancellationToken ct)
+    {
+        var existingDefRegions = await _context.EpicHeroDefinitionRegions
+            .Where(r => r.EpicHeroDefinitionId == definitionId)
+            .ToListAsync(ct);
+        _context.EpicHeroDefinitionRegions.RemoveRange(existingDefRegions);
+        foreach (var craftRegion in craft.Regions ?? Enumerable.Empty<EpicHeroCraftRegion>())
+        {
+            _context.EpicHeroDefinitionRegions.Add(new EpicHeroDefinitionRegion
+            {
+                EpicHeroDefinitionId = definitionId,
+                RegionId = craftRegion.RegionId,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+    }
+
+    /// <summary>
+    /// Replaces definition topic associations with the craft's topic associations.
+    /// Used on both full and delta publish.
+    /// </summary>
+    private async Task SyncDefinitionTopicsFromCraftAsync(string definitionId, EpicHeroCraft craft, CancellationToken ct)
+    {
+        var existingDefTopics = await _context.EpicHeroDefinitionTopics
+            .Where(t => t.EpicHeroDefinitionId == definitionId)
+            .ToListAsync(ct);
+        _context.EpicHeroDefinitionTopics.RemoveRange(existingDefTopics);
+        foreach (var craftTopic in craft.Topics ?? Enumerable.Empty<EpicHeroCraftTopic>())
+        {
+            _context.EpicHeroDefinitionTopics.Add(new EpicHeroDefinitionTopic
+            {
+                EpicHeroDefinitionId = definitionId,
+                StoryTopicId = craftTopic.StoryTopicId,
+                CreatedAt = DateTime.UtcNow
+            });
         }
     }
 
@@ -756,6 +942,10 @@ public class EpicHeroService : IEpicHeroService
                 return false;
             }
         }
+
+        // Sync region and topic associations from craft to definition
+        await SyncDefinitionRegionsFromCraftAsync(definition.Id, craft, ct);
+        await SyncDefinitionTopicsFromCraftAsync(definition.Id, craft, ct);
 
         definition.LastPublishedVersion = craft.LastDraftVersion;
         definition.Version = definition.Version <= 0 ? 1 : definition.Version + 1;
@@ -1115,15 +1305,51 @@ public class EpicHeroService : IEpicHeroService
 
     public async Task CreateVersionFromPublishedAsync(Guid ownerUserId, string heroId, CancellationToken ct = default)
     {
-        // Load published EpicHeroDefinition with all related data
+        // Load published EpicHeroDefinition with all related data (translations, topics, regions)
         var definition = await _context.EpicHeroDefinitions
             .Include(d => d.Translations)
+            .Include(d => d.Topics)
+            .Include(d => d.Regions)
             .AsSplitQuery()
             .FirstOrDefaultAsync(d => d.Id == heroId, ct);
 
         if (definition == null)
         {
             throw new InvalidOperationException($"Published hero '{heroId}' not found");
+        }
+
+        // Fallback: if Topics/Regions were not populated by Include (e.g. split query), load from junction tables
+        if (definition.Topics.Count == 0)
+        {
+            var topicIds = await _context.EpicHeroDefinitionTopics
+                .Where(t => t.EpicHeroDefinitionId == heroId)
+                .Select(t => t.StoryTopicId)
+                .ToListAsync(ct);
+            foreach (var topicId in topicIds)
+            {
+                definition.Topics.Add(new EpicHeroDefinitionTopic
+                {
+                    EpicHeroDefinitionId = heroId,
+                    StoryTopicId = topicId,
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
+        }
+        if (definition.Regions.Count == 0)
+        {
+            var regionIds = await _context.EpicHeroDefinitionRegions
+                .Where(r => r.EpicHeroDefinitionId == heroId)
+                .Select(r => r.RegionId)
+                .ToListAsync(ct);
+            foreach (var regionId in regionIds)
+            {
+                definition.Regions.Add(new EpicHeroDefinitionRegion
+                {
+                    EpicHeroDefinitionId = heroId,
+                    RegionId = regionId,
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
         }
 
         // Verify ownership
@@ -1190,6 +1416,31 @@ public class EpicHeroService : IEpicHeroService
         }
 
         _context.EpicHeroCrafts.Add(craft);
+        await _context.SaveChangesAsync(ct);
+
+        // Copy Topics and Regions from definition to new craft (add to both context and craft navigation so EF persists them)
+        foreach (var defTopic in definition.Topics ?? Enumerable.Empty<EpicHeroDefinitionTopic>())
+        {
+            var craftTopic = new EpicHeroCraftTopic
+            {
+                EpicHeroCraftId = craft.Id,
+                StoryTopicId = defTopic.StoryTopicId,
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.EpicHeroCraftTopics.Add(craftTopic);
+            craft.Topics.Add(craftTopic);
+        }
+        foreach (var defRegion in definition.Regions ?? Enumerable.Empty<EpicHeroDefinitionRegion>())
+        {
+            var craftRegion = new EpicHeroCraftRegion
+            {
+                EpicHeroCraftId = craft.Id,
+                RegionId = defRegion.RegionId,
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.EpicHeroCraftRegions.Add(craftRegion);
+            craft.Regions.Add(craftRegion);
+        }
         await _context.SaveChangesAsync(ct);
 
         _logger.LogInformation("Created new version from published hero: heroId={HeroId} baseVersion={BaseVersion}", heroId, definition.Version);

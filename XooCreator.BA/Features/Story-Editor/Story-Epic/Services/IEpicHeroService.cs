@@ -14,6 +14,12 @@ public interface IEpicHeroService
     // Save hero
     Task SaveHeroAsync(Guid ownerUserId, string heroId, EpicHeroDto dto, CancellationToken ct = default);
     
+    // Save only hero topics (optional; does not change the rest of the hero)
+    Task SaveHeroTopicsAsync(Guid ownerUserId, string heroId, IReadOnlyList<string> topicIds, CancellationToken ct = default);
+
+    // Save only hero regions (optional; does not change the rest of the hero)
+    Task SaveHeroRegionsAsync(Guid ownerUserId, string heroId, IReadOnlyList<string> regionIds, CancellationToken ct = default);
+
     // List heroes by owner
     Task<List<EpicHeroListItemDto>> ListHeroesByOwnerAsync(Guid ownerUserId, string? status = null, Guid? currentUserId = null, CancellationToken ct = default);
     
@@ -22,6 +28,9 @@ public interface IEpicHeroService
     
     // List all heroes (for admin)
     Task<List<EpicHeroListItemDto>> ListAllHeroesAsync(Guid currentUserId, string? status = null, CancellationToken ct = default);
+
+    // List published heroes filtered by region and topic
+    Task<List<EpicHeroListItemDto>> ListPublishedHeroesByRegionAndTopicAsync(string regionId, string? topicId, CancellationToken ct = default);
     
     // Delete hero (allowAdminOverride: when true, requesting user may delete any hero e.g. admin)
     Task DeleteHeroAsync(Guid requestingUserId, string heroId, bool allowAdminOverride = false, CancellationToken ct = default);

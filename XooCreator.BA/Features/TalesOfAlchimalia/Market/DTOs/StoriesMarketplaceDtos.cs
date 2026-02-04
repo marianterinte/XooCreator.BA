@@ -41,6 +41,13 @@ public record StoryDetailsDto
     public bool IsLiked { get; init; } // Whether current user has liked this story
     public bool IsEvaluative { get; init; } = false; // If true, this story contains quizzes that should be evaluated
     public bool IsPartOfEpic { get; init; } = false; // If true, this story is part of an epic (draft or published) and should not appear as independent story
+    public List<StoryCoAuthorDto> CoAuthors { get; init; } = new(); // Co-authors (user or free text)
+}
+
+public record StoryCoAuthorDto
+{
+    public Guid? UserId { get; init; }
+    public string DisplayName { get; init; } = string.Empty;
 }
 
 public record AgeGroupInfoDto
@@ -237,6 +244,12 @@ public record EpicMarketplaceItemDto
     public List<string> AvailableLanguages { get; init; } = new(); // e.g., ["ro-ro", "en-us", "hu-hu"]
 }
 
+public record EpicCoAuthorDto
+{
+    public Guid? UserId { get; init; }
+    public string DisplayName { get; init; } = string.Empty; // From User when UserId set; free text otherwise
+}
+
 public record EpicDetailsDto
 {
     public required string Id { get; init; }
@@ -254,6 +267,7 @@ public record EpicDetailsDto
     public int TotalReviews { get; init; } // From epic reviews, not story reviews
     public EpicReviewDto? UserReview { get; init; } // Current user's review if exists
     public List<string> AvailableLanguages { get; init; } = new(); // e.g., ["ro-ro", "en-us", "hu-hu"]
+    public List<EpicCoAuthorDto> CoAuthors { get; init; } = new();
 }
 
 public record GetMarketplaceEpicsResponse
