@@ -25,6 +25,9 @@ public interface IStoryRegionService
     
     // List all regions (for admin)
     Task<List<StoryRegionListItemDto>> ListAllRegionsAsync(Guid currentUserId, string? status = null, CancellationToken ct = default);
+
+    // List published regions filtered by topic
+    Task<List<StoryRegionListItemDto>> ListPublishedRegionsByTopicAsync(string? topicId, CancellationToken ct = default);
     
     // Delete region (allowAdminOverride: when true, requesting user may delete any region e.g. admin)
     Task DeleteRegionAsync(Guid requestingUserId, string regionId, bool allowAdminOverride = false, CancellationToken ct = default);

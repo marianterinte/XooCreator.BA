@@ -461,6 +461,43 @@ public class EpicHeroService : IEpicHeroService
             .ToList();
     }
 
+    public async Task<List<EpicHeroListItemDto>> ListPublishedHeroesByRegionAndTopicAsync(string regionId, string? topicId, CancellationToken ct = default)
+    {
+        var query = _context.EpicHeroDefinitions
+            .AsNoTracking()
+            .Where(x => x.Status == "published")
+            .Include(x => x.Translations)
+            .Include(x => x.Regions)
+            .Include(x => x.Topics!).ThenInclude(t => t.StoryTopic)
+            .AsQueryable();
+
+        // Filter by region (mandatory)
+        query = query.Where(x => x.Regions!.Any(r => r.RegionId == regionId));
+
+        if (!string.IsNullOrWhiteSpace(topicId))
+        {
+            query = query.Where(x => x.Topics!.Any(t => t.StoryTopic!.TopicId == topicId));
+        }
+
+        var definitions = await query
+            .OrderByDescending(x => x.UpdatedAt)
+            .ToListAsync(ct);
+
+        // Get unique owner IDs for email lookup
+        var uniqueOwnerIds = definitions.Select(d => d.OwnerUserId).Distinct().ToList();
+        var ownerEmailMap = await _context.AlchimaliaUsers
+            .AsNoTracking()
+            .Where(u => uniqueOwnerIds.Contains(u.Id))
+            .Select(u => new { u.Id, u.Email })
+            .ToDictionaryAsync(u => u.Id, u => u.Email ?? "", ct);
+
+        return definitions.Select(d =>
+        {
+            var ownerEmail = ownerEmailMap.TryGetValue(d.OwnerUserId, out var email) ? email : "";
+            return MapDefinitionToListItem(d, null, ownerEmail);
+        }).ToList();
+    }
+
     private EpicHeroListItemDto MapCraftToListItem(EpicHeroCraft craft, Guid? currentUserId, string? ownerEmail = null)
     {
         var firstTranslation = craft.Translations.FirstOrDefault();

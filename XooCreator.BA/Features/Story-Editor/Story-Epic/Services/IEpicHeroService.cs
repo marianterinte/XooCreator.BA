@@ -28,6 +28,9 @@ public interface IEpicHeroService
     
     // List all heroes (for admin)
     Task<List<EpicHeroListItemDto>> ListAllHeroesAsync(Guid currentUserId, string? status = null, CancellationToken ct = default);
+
+    // List published heroes filtered by region and topic
+    Task<List<EpicHeroListItemDto>> ListPublishedHeroesByRegionAndTopicAsync(string regionId, string? topicId, CancellationToken ct = default);
     
     // Delete hero (allowAdminOverride: when true, requesting user may delete any hero e.g. admin)
     Task DeleteHeroAsync(Guid requestingUserId, string heroId, bool allowAdminOverride = false, CancellationToken ct = default);
