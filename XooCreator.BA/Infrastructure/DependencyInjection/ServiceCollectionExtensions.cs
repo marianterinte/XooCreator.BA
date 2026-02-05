@@ -29,6 +29,7 @@ using XooCreator.BA.Features.StoryCreatorsChallenge.Services;
 using XooCreator.BA.Infrastructure.Services.Images;
 using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Data;
+using XooCreator.BA.Infrastructure.Caching;
 
 namespace XooCreator.BA.Infrastructure.DependencyInjection;
 
@@ -39,7 +40,7 @@ public static class ServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
     {
-        services.AddMemoryCache(); // Add memory cache for user caching
+        services.AddMemoryCache(); // Shared in-process cache (users, marketplace, universe, etc.)
         services.AddHttpContextAccessor();
         services.AddScoped<IAuth0UserService, Auth0UserService>();
         services.AddScoped<IUserContextService, UserContextService>();
@@ -59,6 +60,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IEpicAggregatesQueue, EpicAggregatesQueue>();
         services.AddSingleton<IHeroPublishQueue, HeroPublishQueue>();
         services.AddSingleton<IAnimalPublishQueue, AnimalPublishQueue>();
+        services.AddSingleton<IAppCache, MemoryAppCache>();
         
         return services;
     }
