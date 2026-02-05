@@ -8,6 +8,8 @@ using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.DTOs;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.Repositories;
+using Microsoft.Extensions.Options;
+using XooCreator.BA.Infrastructure.Caching;
 using XooCreator.BA.Infrastructure.Services.Blob;
 using XooCreator.BA.Infrastructure.Services.Images;
 using Azure.Storage.Blobs;
@@ -25,6 +27,7 @@ public class StoryRegionService : IStoryRegionService
     private readonly IRegionPublishChangeLogService _changeLogService;
     private readonly IRegionAssetLinkService _assetLinkService;
     private readonly ILogger<StoryRegionService> _logger;
+    private readonly IAppCache _cache; // used only for cache invalidation on publish
 
     public StoryRegionService(
         IStoryRegionRepository repository,
@@ -34,7 +37,8 @@ public class StoryRegionService : IStoryRegionService
         IImageCompressionService imageCompression,
         IRegionPublishChangeLogService changeLogService,
         IRegionAssetLinkService assetLinkService,
-        ILogger<StoryRegionService> logger)
+        ILogger<StoryRegionService> logger,
+        IAppCache cache)
     {
         _repository = repository;
         _context = context;
@@ -44,6 +48,7 @@ public class StoryRegionService : IStoryRegionService
         _changeLogService = changeLogService;
         _assetLinkService = assetLinkService;
         _logger = logger;
+        _cache = cache;
     }
 
     public async Task<StoryRegionDto?> GetRegionAsync(string regionId, CancellationToken ct = default)
@@ -556,6 +561,11 @@ public class StoryRegionService : IStoryRegionService
                 
                 // Cleanup craft after successful publish
                 await CleanupCraftAsync(regionId, ct);
+                
+                // Invalidate cached region + universe lists for this region.
+                _cache.Remove(UniverseCachingOptions.GetStoryRegionKey(regionId));
+                _cache.Remove(UniverseCachingOptions.GetUniverseRegionsKey());
+                _cache.Remove(UniverseCachingOptions.GetUniverseRegionHeroesKey(regionId));
                 return;
             }
 
@@ -568,6 +578,11 @@ public class StoryRegionService : IStoryRegionService
         
         // Cleanup craft after successful publish
         await CleanupCraftAsync(regionId, ct);
+
+        // Invalidate cached region + universe lists for this region after full publish.
+        _cache.Remove(UniverseCachingOptions.GetStoryRegionKey(regionId));
+        _cache.Remove(UniverseCachingOptions.GetUniverseRegionsKey());
+        _cache.Remove(UniverseCachingOptions.GetUniverseRegionHeroesKey(regionId));
     }
 
     private async Task ApplyFullPublishAsync(StoryRegionDefinition? existingDefinition, StoryRegionCraft regionCraft, string ownerEmail, CancellationToken ct)

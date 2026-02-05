@@ -10,6 +10,8 @@ using XooCreator.BA.Infrastructure.Services.Images;
 using Azure.Storage.Blobs;
 using Azure.Storage.Sas;
 using System.IO;
+using Microsoft.Extensions.Options;
+using XooCreator.BA.Infrastructure.Caching;
 
 namespace XooCreator.BA.Features.StoryEditor.StoryEpic.Services;
 
@@ -23,6 +25,7 @@ public class EpicHeroService : IEpicHeroService
     private readonly IHeroPublishChangeLogService _changeLogService;
     private readonly IHeroAssetLinkService _assetLinkService;
     private readonly ILogger<EpicHeroService> _logger;
+    private readonly IAppCache _cache; // used only for cache invalidation on publish
 
     public EpicHeroService(
         IEpicHeroRepository repository,
@@ -32,7 +35,8 @@ public class EpicHeroService : IEpicHeroService
         IImageCompressionService imageCompression,
         IHeroPublishChangeLogService changeLogService,
         IHeroAssetLinkService assetLinkService,
-        ILogger<EpicHeroService> logger)
+        ILogger<EpicHeroService> logger,
+        IAppCache cache)
     {
         _repository = repository;
         _context = context;
@@ -42,6 +46,7 @@ public class EpicHeroService : IEpicHeroService
         _changeLogService = changeLogService;
         _assetLinkService = assetLinkService;
         _logger = logger;
+        _cache = cache;
     }
 
     public async Task<EpicHeroDto?> GetHeroAsync(string heroId, CancellationToken ct = default)
@@ -703,6 +708,13 @@ public class EpicHeroService : IEpicHeroService
                 
                 // Cleanup craft after successful publish
                 await CleanupCraftAsync(heroId, ct);
+
+                // Invalidate cached hero + heroes list for all its regions.
+                _cache.Remove(UniverseCachingOptions.GetStoryHeroKey(heroId));
+                foreach (var regionId in craftForPublish.Regions.Select(r => r.RegionId))
+                {
+                    _cache.Remove(UniverseCachingOptions.GetUniverseRegionHeroesKey(regionId));
+                }
                 return;
             }
 
@@ -715,6 +727,13 @@ public class EpicHeroService : IEpicHeroService
         
         // Cleanup craft after successful publish
         await CleanupCraftAsync(heroId, ct);
+
+        // Invalidate cached hero + heroes list for all its regions after full publish.
+        _cache.Remove(UniverseCachingOptions.GetStoryHeroKey(heroId));
+        foreach (var regionId in craftForPublish.Regions.Select(r => r.RegionId))
+        {
+            _cache.Remove(UniverseCachingOptions.GetUniverseRegionHeroesKey(regionId));
+        }
     }
 
     private async Task ApplyFullPublishAsync(EpicHeroDefinition? existingDefinition, EpicHeroCraft heroCraft, string ownerEmail, CancellationToken ct)

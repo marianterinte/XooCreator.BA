@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.Services;
 using XooCreator.BA.Infrastructure.Endpoints;
+using Microsoft.Extensions.Options;
+using XooCreator.BA.Infrastructure.Caching;
 
 namespace XooCreator.BA.Features.AlchimaliaUniverse.Endpoints;
 
@@ -10,10 +12,17 @@ namespace XooCreator.BA.Features.AlchimaliaUniverse.Endpoints;
 public class GetUniverseRegionHeroesEndpoint
 {
     private readonly IEpicHeroService _service;
+    private readonly IAppCache _cache;
+    private readonly IOptionsMonitor<UniverseCachingOptions> _cachingOptions;
 
-    public GetUniverseRegionHeroesEndpoint(IEpicHeroService service)
+    public GetUniverseRegionHeroesEndpoint(
+        IEpicHeroService service,
+        IAppCache cache,
+        IOptionsMonitor<UniverseCachingOptions> cachingOptions)
     {
         _service = service;
+        _cache = cache;
+        _cachingOptions = cachingOptions;
     }
 
     [Route("/api/alchimalia-universe/regions/{regionId}/heroes")]
@@ -24,8 +33,16 @@ public class GetUniverseRegionHeroesEndpoint
         CancellationToken ct)
     {
         // Hardcoded filtering for "alchimalia_universe" topic as required for this page
-        var heroes = await ep._service.ListPublishedHeroesByRegionAndTopicAsync(regionId, "alchimalia_universe", ct);
-        
+        var cfg = ep._cachingOptions.CurrentValue;
+        var ttlMinutes = cfg.Enabled ? cfg.UniverseRegionHeroesMinutes : 0;
+        var cacheKey = UniverseCachingOptions.GetUniverseRegionHeroesKey(regionId);
+
+        var heroes = await ep._cache.GetOrCreateAsync(
+            cacheKey,
+            TimeSpan.FromMinutes(ttlMinutes),
+            () => ep._service.ListPublishedHeroesByRegionAndTopicAsync(regionId, "alchimalia_universe", ct),
+            ct);
+
         // Map to DTO that is compatible with frontend expectation (which expects heroId property)
         var mapped = heroes.Select(h => new UniverseHeroListItemDto
         {
