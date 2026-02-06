@@ -21,7 +21,7 @@ namespace XooCreator.BA.Features.StoryEditor.Services;
 public class StoryAudioExportQueueWorker : BackgroundService
 {
     private const int MaxChunkLength = 5000;
-    private const int MaxConcurrency = 5;
+    private const int MaxConcurrency = 30;
     private const int SampleRate = 24000;
     private const short BitsPerSample = 16;
     private const short Channels = 1;
