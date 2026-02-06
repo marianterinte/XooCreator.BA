@@ -160,7 +160,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             var sortBy = (request.SortBy ?? "sortOrder").ToLowerInvariant();
             var sortDesc = string.Equals(request.SortOrder, "desc", StringComparison.OrdinalIgnoreCase);
 
-            if (hasNoFilters && sortBy == "sortOrder")
+            if (hasNoFilters && sortBy == "sortorder")
             {
                 // Special sorting for "all" stories (no filters):
                 // 1. Alchimalia (alchimalia_universe topic)
@@ -238,6 +238,11 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
                 stats.TryGetValue(p.StoryId, out var st);
                 var likesCount = likesCounts.TryGetValue(p.StoryId, out var likes) ? likes : 0;
 
+                // When legacy StoryTopic is empty, derive from first topic id so API returns a meaningful value
+                var storyTopic = !string.IsNullOrWhiteSpace(p.StoryTopic)
+                    ? p.StoryTopic
+                    : (p.TopicIds?.FirstOrDefault());
+
                 return new StoryMarketplaceItemDto
                 {
                     Id = p.StoryId,
@@ -251,7 +256,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
                     Characters = p.Characters,
                     Tags = p.TopicIds,
                     CreatedAt = p.CreatedAt,
-                    StoryTopic = p.StoryTopic,
+                    StoryTopic = storyTopic,
                     StoryType = p.StoryType.ToString(),
                     Status = p.Status.ToString(),
                     AvailableLanguages = p.AvailableLanguages,
@@ -373,6 +378,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             {
                 stats.TryGetValue(p.StoryId, out var st);
                 var likesCount = likesCounts.TryGetValue(p.StoryId, out var likes) ? likes : 0;
+                var storyTopic = !string.IsNullOrWhiteSpace(p.StoryTopic) ? p.StoryTopic : p.TopicIds?.FirstOrDefault();
 
                 return new StoryMarketplaceItemDto
                 {
@@ -387,7 +393,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
                     Characters = p.Characters,
                     Tags = p.TopicIds,
                     CreatedAt = p.CreatedAt,
-                    StoryTopic = p.StoryTopic,
+                    StoryTopic = storyTopic,
                     StoryType = p.StoryType.ToString(),
                     Status = p.Status.ToString(),
                     AvailableLanguages = p.AvailableLanguages,
@@ -535,6 +541,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             .Include(s => s.AgeGroups)
                 .ThenInclude(ag => ag.StoryAgeGroup)
                     .ThenInclude(ag => ag.Translations)
+            .Include(s => s.CoAuthors).ThenInclude(c => c.User)
             .FirstOrDefaultAsync(s => s.StoryId == storyId && s.IsActive && s.Status == StoryStatus.Published);
 
         if (def == null)
@@ -951,6 +958,9 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             .Where(topicId => !string.IsNullOrEmpty(topicId))
             .ToList() ?? new List<string?>();
         
+        var topicIdList = topicIds.Where(t => t != null).Select(t => t!).ToList();
+        var storyTopic = !string.IsNullOrWhiteSpace(def.StoryTopic) ? def.StoryTopic : topicIdList.FirstOrDefault();
+
         return new StoryMarketplaceItemDto
         {
             Id = def.StoryId,
@@ -962,9 +972,9 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             PriceInCredits = def.PriceInCredits,
             AgeRating = DetermineAgeRating(def.StoryId),
             Characters = ExtractCharactersFromStoryId(def.StoryId),
-            Tags = topicIds.Where(t => t != null).Select(t => t!).ToList(),
+            Tags = topicIdList,
             CreatedAt = def.CreatedAt,
-            StoryTopic = def.StoryTopic,
+            StoryTopic = storyTopic,
             StoryType = def.StoryType.ToString(),
             Status = def.Status.ToString(),
             AvailableLanguages = availableLanguages,

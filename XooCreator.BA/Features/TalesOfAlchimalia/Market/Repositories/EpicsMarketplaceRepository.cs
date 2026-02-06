@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using XooCreator.BA.Data;
+using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Caching;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.DTOs;
@@ -141,6 +142,7 @@ public class EpicsMarketplaceRepository
                 .Include(e => e.StoryNodes)
                 .Include(e => e.Regions)
                 .Include(e => e.Translations)
+                .Include(e => e.CoAuthors).ThenInclude(ca => ca.User)
                 .FirstOrDefaultAsync(e => e.Id == epicId && e.Status == "published");
 
             if (epic == null)
@@ -194,6 +196,14 @@ public class EpicsMarketplaceRepository
             // Get available languages from translations
             var availableLanguages = epic.Translations?.Select(t => t.LanguageCode).OrderBy(l => l).ToList() ?? new List<string>();
 
+            var coAuthors = (epic.CoAuthors ?? Array.Empty<StoryEpicDefinitionCoAuthor>())
+                .OrderBy(ca => ca.SortOrder)
+                .Select(ca => new EpicCoAuthorDto
+                {
+                    UserId = ca.UserId,
+                    DisplayName = ca.UserId != null ? (ca.User?.Name ?? ca.User?.Email ?? ca.DisplayName ?? "") : (ca.DisplayName ?? "")
+                }).ToList();
+
             return new EpicDetailsDto
             {
                 Id = epic.Id,
@@ -210,7 +220,8 @@ public class EpicsMarketplaceRepository
                 AverageRating = avgRating,
                 TotalReviews = totalReviews,
                 UserReview = userReview,
-                AvailableLanguages = availableLanguages
+                AvailableLanguages = availableLanguages,
+                CoAuthors = coAuthors
             };
         }
         catch (Exception ex)

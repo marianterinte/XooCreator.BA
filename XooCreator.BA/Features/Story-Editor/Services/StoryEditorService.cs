@@ -101,6 +101,9 @@ public class StoryEditorService : IStoryEditorService
         // Update age groups (many-to-many)
         await UpdateAgeGroupsAsync(craft, dto.AgeGroupIds ?? new(), ct);
         
+        // Update co-authors
+        await UpdateCoAuthorsAsync(craft, dto.CoAuthors ?? new(), ct);
+        
         // Update unlocked heroes (many-to-many)
         await UpdateUnlockedHeroesAsync(craft, dto.UnlockedStoryHeroes ?? new(), ct);
         
@@ -167,6 +170,34 @@ public class StoryEditorService : IStoryEditorService
                 StoryCraftId = craft.Id,
                 StoryAgeGroupId = ageGroup.Id,
                 CreatedAt = DateTime.UtcNow
+            });
+        }
+    }
+
+    private async Task UpdateCoAuthorsAsync(StoryCraft craft, List<StoryCoAuthorDto> coAuthors, CancellationToken ct)
+    {
+        var existing = await _context.StoryCraftCoAuthors
+            .Where(c => c.StoryCraftId == craft.Id)
+            .ToListAsync(ct);
+        _context.StoryCraftCoAuthors.RemoveRange(existing);
+
+        if (coAuthors == null || coAuthors.Count == 0)
+            return;
+
+        var sortOrder = 0;
+        foreach (var dto in coAuthors)
+        {
+            var displayName = (dto.DisplayName ?? string.Empty).Trim();
+            if (string.IsNullOrEmpty(displayName) && !dto.UserId.HasValue)
+                continue;
+
+            _context.StoryCraftCoAuthors.Add(new StoryCraftCoAuthor
+            {
+                Id = Guid.NewGuid(),
+                StoryCraftId = craft.Id,
+                UserId = dto.UserId,
+                DisplayName = dto.UserId.HasValue ? null : displayName,
+                SortOrder = sortOrder++
             });
         }
     }

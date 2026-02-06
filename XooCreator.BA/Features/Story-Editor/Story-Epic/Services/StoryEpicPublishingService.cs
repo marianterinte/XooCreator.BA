@@ -291,6 +291,7 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
             .Include(c => c.HeroReferences)
             .Include(c => c.Topics).ThenInclude(t => t.StoryTopic)
             .Include(c => c.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
+            .Include(c => c.CoAuthors)
             .AsSplitQuery()
             .FirstOrDefaultAsync(c => c.Id == craft.Id, ct) ?? craft;
 
@@ -315,6 +316,7 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
             .Include(d => d.Translations)
             .Include(d => d.Topics).ThenInclude(t => t.StoryTopic)
             .Include(d => d.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
+            .Include(d => d.CoAuthors)
             .AsSplitQuery()
             .FirstOrDefaultAsync(d => d.Id == craft.Id, ct);
 
@@ -440,6 +442,8 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
             definition.Topics.Clear();
             _context.Set<StoryEpicDefinitionAgeGroup>().RemoveRange(definition.AgeGroups);
             definition.AgeGroups.Clear();
+            _context.StoryEpicDefinitionCoAuthors.RemoveRange(definition.CoAuthors);
+            definition.CoAuthors.Clear();
 
             var existingHeroReferences = await _context.StoryEpicHeroReferences
                 .Where(h => h.EpicId == definition.Id)
@@ -573,6 +577,20 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
                 StoryEpicDefinitionId = definition.Id,
                 StoryAgeGroupId = craftAgeGroup.StoryAgeGroupId,
                 CreatedAt = DateTime.UtcNow
+            });
+        }
+
+        // Copy Co-authors
+        var sortOrder = 0;
+        foreach (var craftCoAuthor in craft.CoAuthors.OrderBy(ca => ca.SortOrder))
+        {
+            definition.CoAuthors.Add(new StoryEpicDefinitionCoAuthor
+            {
+                Id = Guid.NewGuid(),
+                StoryEpicDefinitionId = definition.Id,
+                UserId = craftCoAuthor.UserId,
+                DisplayName = craftCoAuthor.DisplayName,
+                SortOrder = sortOrder++
             });
         }
 
@@ -764,6 +782,7 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
 
         SyncDefinitionTopics(definition, craft);
         SyncDefinitionAgeGroups(definition, craft);
+        SyncDefinitionCoAuthors(definition, craft);
     }
 
     private void SyncDefinitionTopics(StoryEpicDefinition definition, StoryEpicCraft craft)
@@ -794,6 +813,25 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
                 StoryEpicDefinitionId = definition.Id,
                 StoryAgeGroupId = craftAgeGroup.StoryAgeGroupId,
                 CreatedAt = DateTime.UtcNow
+            });
+        }
+    }
+
+    private void SyncDefinitionCoAuthors(StoryEpicDefinition definition, StoryEpicCraft craft)
+    {
+        _context.StoryEpicDefinitionCoAuthors.RemoveRange(definition.CoAuthors);
+        definition.CoAuthors.Clear();
+
+        var sortOrder = 0;
+        foreach (var craftCoAuthor in craft.CoAuthors.OrderBy(ca => ca.SortOrder))
+        {
+            definition.CoAuthors.Add(new StoryEpicDefinitionCoAuthor
+            {
+                Id = Guid.NewGuid(),
+                StoryEpicDefinitionId = definition.Id,
+                UserId = craftCoAuthor.UserId,
+                DisplayName = craftCoAuthor.DisplayName,
+                SortOrder = sortOrder++
             });
         }
     }

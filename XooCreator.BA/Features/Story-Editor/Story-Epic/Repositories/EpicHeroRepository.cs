@@ -20,6 +20,8 @@ public class EpicHeroRepository : IEpicHeroRepository
         return await _context.EpicHeroCrafts
             .Include(x => x.Owner)
             .Include(x => x.Translations)
+            .Include(x => x.Regions)
+            .Include(x => x.Topics).ThenInclude(t => t.StoryTopic)
             .FirstOrDefaultAsync(x => x.Id == id, ct);
     }
 
@@ -31,6 +33,8 @@ public class EpicHeroRepository : IEpicHeroRepository
         return await _context.EpicHeroDefinitions
             .Include(x => x.Owner)
             .Include(x => x.Translations)
+            .Include(x => x.Regions)
+            .Include(x => x.Topics).ThenInclude(t => t.StoryTopic)
             .FirstOrDefaultAsync(x => x.Id == id, ct);
     }
 
@@ -116,6 +120,7 @@ public class EpicHeroRepository : IEpicHeroRepository
 
         return await query
             .Include(x => x.Translations)
+            .Include(x => x.Regions)
             .OrderByDescending(x => x.UpdatedAt)
             .ToListAsync(ct);
     }
@@ -134,6 +139,7 @@ public class EpicHeroRepository : IEpicHeroRepository
 
         return await query
             .Include(x => x.Translations)
+            .Include(x => x.Regions)
             .OrderByDescending(x => x.UpdatedAt)
             .ToListAsync(ct);
     }
@@ -143,6 +149,7 @@ public class EpicHeroRepository : IEpicHeroRepository
         return await _context.EpicHeroCrafts
             .Where(x => x.Status == "sent_for_approval" || x.Status == "in_review")
             .Include(x => x.Translations)
+            .Include(x => x.Regions)
             .OrderByDescending(x => x.UpdatedAt)
             .ToListAsync(ct);
     }

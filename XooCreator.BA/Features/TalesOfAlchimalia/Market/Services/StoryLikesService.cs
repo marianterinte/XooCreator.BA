@@ -33,18 +33,8 @@ public class StoryLikesService : IStoryLikesService
 
     public async Task<ToggleStoryLikeResponse> ToggleLikeAsync(Guid userId, string storyId)
     {
-        // Check if user has read the story
-        var hasRead = await _repository.HasUserReadStoryAsync(userId, storyId);
-        if (!hasRead)
-        {
-            return new ToggleStoryLikeResponse
-            {
-                Success = false,
-                ErrorMessage = "User must read the story before liking it",
-                IsLiked = false,
-                LikesCount = await _repository.GetStoryLikesCountAsync(storyId)
-            };
-        }
+        // Check removed: Users can now like stories without reading them first
+
 
         var isLiked = await _repository.ToggleLikeAsync(userId, storyId);
         var likesCount = await _repository.GetStoryLikesCountAsync(storyId);

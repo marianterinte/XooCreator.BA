@@ -51,6 +51,8 @@ builder.Services.AddDatabaseConfiguration(builder.Configuration);
 
 // Register all application services using extension methods
 builder.Services.AddApplicationServices();
+builder.Services.Configure<XooCreator.BA.Infrastructure.Caching.UniverseCachingOptions>(
+    builder.Configuration.GetSection(XooCreator.BA.Infrastructure.Caching.UniverseCachingOptions.SectionName));
 builder.Services.Configure<ImageCompressionOptions>(builder.Configuration.GetSection(ImageCompressionOptions.SectionName));
 builder.Services.Configure<MarketplaceCacheOptions>(builder.Configuration.GetSection(MarketplaceCacheOptions.SectionName));
 builder.Services.AddHostedService<StoryPublishQueueWorker>();

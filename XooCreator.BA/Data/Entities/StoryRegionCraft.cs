@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using XooCreator.BA.Data.Entities;
 
 namespace XooCreator.BA.Data;
 
@@ -41,5 +42,6 @@ public class StoryRegionCraft
     // Navigation properties
     public AlchimaliaUser Owner { get; set; } = null!;
     public ICollection<StoryRegionCraftTranslation> Translations { get; set; } = new List<StoryRegionCraftTranslation>();
+    public ICollection<StoryRegionCraftTopic> Topics { get; set; } = new List<StoryRegionCraftTopic>();
 }
 
