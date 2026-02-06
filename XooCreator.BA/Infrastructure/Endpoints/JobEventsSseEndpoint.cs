@@ -26,6 +26,7 @@ public sealed class JobEventsSseEndpoint
         JobTypes.StoryFork,
         JobTypes.StoryForkAssets,
         JobTypes.StoryDocumentExport,
+        JobTypes.StoryAudioExport,
         JobTypes.EpicVersion,
         JobTypes.EpicPublish,
         JobTypes.HeroVersion,
@@ -367,6 +368,33 @@ public sealed class JobEventsSseEndpoint
                     downloadUrl = (string?)null, // fetch via existing GET /api/stories/{storyId}/pdf-jobs/{jobId}
                     outputFileName = job.OutputFileName,
                     outputSizeBytes = job.OutputSizeBytes
+                };
+
+                return new Snapshot(payload.status?.ToString() ?? string.Empty, JsonSerializer.Serialize(payload, Json));
+            }
+            case JobTypes.StoryAudioExport:
+            {
+                var job = await db.StoryAudioExportJobs.AsNoTracking().FirstOrDefaultAsync(j => j.Id == jobId, ct);
+                if (job == null) return null;
+
+                if (!auth0.HasRole(user, UserRole.Admin) && job.OwnerUserId != user.Id)
+                {
+                    return null;
+                }
+
+                var payload = new
+                {
+                    jobId = job.Id,
+                    storyId = job.StoryId,
+                    status = job.Status,
+                    queuedAtUtc = job.QueuedAtUtc,
+                    startedAtUtc = job.StartedAtUtc,
+                    completedAtUtc = job.CompletedAtUtc,
+                    errorMessage = job.ErrorMessage,
+                    zipDownloadUrl = (string?)null, // fetch via GET /api/stories/{storyId}/audio-export-jobs/{jobId}
+                    zipFileName = job.ZipFileName,
+                    zipSizeBytes = job.ZipSizeBytes,
+                    audioCount = job.AudioCount
                 };
 
                 return new Snapshot(payload.status?.ToString() ?? string.Empty, JsonSerializer.Serialize(payload, Json));

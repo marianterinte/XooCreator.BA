@@ -33,6 +33,7 @@ public class GenerateAudioEndpoint
         string TileId,
         string LanguageCode,
         string? VoiceName = null,
+        string? StyleInstructions = null,  // Optional: style instructions for tone
         string? Provider = null  // Optional: "Google" or "OpenAI"
     );
 
@@ -100,6 +101,8 @@ public class GenerateAudioEndpoint
                     request.Text,
                     request.LanguageCode,
                     request.VoiceName,
+                    request.StyleInstructions,
+                    apiKeyOverride: null, // Use default from config
                     ct);
             }
 

@@ -9,6 +9,7 @@ public static class JobTypes
     public const string StoryFork = "story-fork";
     public const string StoryForkAssets = "story-fork-assets";
     public const string StoryDocumentExport = "story-document-export";
+    public const string StoryAudioExport = "story-audio-export";
     public const string EpicVersion = "epic-version";
     public const string EpicPublish = "epic-publish";
     public const string HeroVersion = "hero-version";

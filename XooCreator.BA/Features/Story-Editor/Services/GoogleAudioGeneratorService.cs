@@ -1,4 +1,5 @@
-﻿using System.Text;
+using System.Net;
+using System.Text;
 using System.Text.Json;
 
 namespace XooCreator.BA.Features.StoryEditor.Services;
@@ -21,12 +22,21 @@ public interface IGoogleAudioGeneratorService
     /// Optional Gemini TTS voice name (e.g., "Sulafat", "Zephyr").
     /// If not provided, defaults based on language, with "Sulafat" as fallback.
     /// </param>
+    /// <param name="styleInstructions">
+    /// Optional style instructions for tone (e.g., "Read aloud in a warm and friendly tone, like telling stories to children").
+    /// If not provided, uses default from configuration.
+    /// </param>
+    /// <param name="apiKeyOverride">
+    /// Optional API key override. If provided, uses this instead of the configured API key.
+    /// </param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>Audio bytes and format ("wav").</returns>
     Task<(byte[] AudioData, string Format)> GenerateAudioAsync(
         string text,
         string languageCode,
         string? voiceName = null,
+        string? styleInstructions = null,
+        string? apiKeyOverride = null,
         CancellationToken ct = default);
 }
 
@@ -35,6 +45,8 @@ public class GoogleAudioGeneratorService : IGoogleAudioGeneratorService
     private readonly HttpClient _httpClient;
     private readonly string _apiKey;
     private readonly string _ttsEndpoint;
+    private readonly string _defaultVoice;
+    private readonly string? _defaultStyleInstructions;
     private readonly ILogger<GoogleAudioGeneratorService> _logger;
 
     public GoogleAudioGeneratorService(
@@ -47,6 +59,8 @@ public class GoogleAudioGeneratorService : IGoogleAudioGeneratorService
             ?? throw new InvalidOperationException("GoogleAI:ApiKey is not configured in appsettings.json");
         _ttsEndpoint = configuration["GoogleAI:Tts:Endpoint"]
             ?? throw new InvalidOperationException("GoogleAI:Tts:Endpoint is not configured in appsettings.json");
+        _defaultVoice = configuration["GoogleAI:Tts:DefaultVoice"] ?? "Sulafat";
+        _defaultStyleInstructions = configuration["GoogleAI:Tts:StyleInstructions"];
         _logger = logger;
     }
 
@@ -54,6 +68,8 @@ public class GoogleAudioGeneratorService : IGoogleAudioGeneratorService
         string text,
         string languageCode,
         string? voiceName = null,
+        string? styleInstructions = null,
+        string? apiKeyOverride = null,
         CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(text))
@@ -65,17 +81,25 @@ public class GoogleAudioGeneratorService : IGoogleAudioGeneratorService
 
         // Default: Sulafat, sau altceva în funcție de limbă dacă vrei
         voiceName ??= GetDefaultVoiceForLanguage(languageCode);
+        
+        // Folosește style instructions din parametru sau din configurație
+        var finalStyleInstructions = styleInstructions ?? _defaultStyleInstructions;
+
+        // Construiește textul final: dacă avem style instructions, le adăugăm înainte de text
+        var finalText = string.IsNullOrWhiteSpace(finalStyleInstructions)
+            ? text
+            : $"{finalStyleInstructions}\n\n{text}";
 
         var requestBody = new
         {
-            // Textul de sintetizat
+            // Textul de sintetizat (cu style instructions incluse dacă există)
             contents = new[]
             {
                 new
                 {
                     parts = new[]
                     {
-                        new { text = text }
+                        new { text = finalText }
                     }
                 }
             },
@@ -109,14 +133,15 @@ public class GoogleAudioGeneratorService : IGoogleAudioGeneratorService
             Content = content
         };
 
-        // API key de la aistudio.google.com
-        request.Headers.Add("x-goog-api-key", _apiKey);
+        // API key de la aistudio.google.com - folosește override dacă este furnizat, altfel default din config
+        var apiKeyToUse = !string.IsNullOrWhiteSpace(apiKeyOverride) ? apiKeyOverride : _apiKey;
+        request.Headers.Add("x-goog-api-key", apiKeyToUse);
 
         try
         {
             _logger.LogInformation(
-                "Calling Gemini TTS with language: {LanguageCode}, voice: {VoiceName}",
-                languageCode, voiceName);
+                "Calling Gemini TTS with language: {LanguageCode}, voice: {VoiceName}, hasStyleInstructions: {HasStyle}",
+                languageCode, voiceName, !string.IsNullOrWhiteSpace(finalStyleInstructions));
 
             using var response = await _httpClient.SendAsync(request, ct);
             var responseContent = await response.Content.ReadAsStringAsync(ct);
@@ -125,6 +150,53 @@ public class GoogleAudioGeneratorService : IGoogleAudioGeneratorService
             {
                 _logger.LogError("Gemini TTS returned {StatusCode}: {ErrorContent}",
                     response.StatusCode, responseContent);
+
+                // Check for quota/rate limit errors
+                if (response.StatusCode == HttpStatusCode.TooManyRequests || 
+                    response.StatusCode == HttpStatusCode.ServiceUnavailable)
+                {
+                    var quotaError = ExtractQuotaErrorMessage(responseContent);
+                    throw new InvalidOperationException(quotaError);
+                }
+
+                // Check response body for quota-related errors
+                if (!string.IsNullOrWhiteSpace(responseContent))
+                {
+                    try
+                    {
+                        using var errorDoc = JsonDocument.Parse(responseContent);
+                        if (errorDoc.RootElement.TryGetProperty("error", out var errorObj))
+                        {
+                            if (errorObj.TryGetProperty("status", out var status))
+                            {
+                                var statusStr = status.GetString() ?? "";
+                                if (statusStr.Contains("RESOURCE_EXHAUSTED") || 
+                                    statusStr.Contains("RATE_LIMIT_EXCEEDED") ||
+                                    statusStr.Contains("QUOTA_EXCEEDED"))
+                                {
+                                    var quotaError = ExtractQuotaErrorMessage(responseContent);
+                                    throw new InvalidOperationException(quotaError);
+                                }
+                            }
+                            
+                            if (errorObj.TryGetProperty("message", out var message))
+                            {
+                                var messageStr = message.GetString() ?? "";
+                                if (messageStr.Contains("quota", StringComparison.OrdinalIgnoreCase) ||
+                                    messageStr.Contains("rate limit", StringComparison.OrdinalIgnoreCase) ||
+                                    messageStr.Contains("resource exhausted", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    var quotaError = ExtractQuotaErrorMessage(responseContent);
+                                    throw new InvalidOperationException(quotaError);
+                                }
+                            }
+                        }
+                    }
+                    catch (JsonException)
+                    {
+                        // If JSON parsing fails, continue with normal error handling
+                    }
+                }
 
                 response.EnsureSuccessStatusCode();
             }
@@ -176,16 +248,43 @@ public class GoogleAudioGeneratorService : IGoogleAudioGeneratorService
     }
 
     /// <summary>
-    /// Default voice mapping. Right now we just return "Sulafat" for all,
-    /// but you can tweak per-language later (e.g., children's voice for ro-RO).
+    /// Extracts a user-friendly quota error message from the API response.
     /// </summary>
-    private static string GetDefaultVoiceForLanguage(string languageCode)
+    private static string ExtractQuotaErrorMessage(string responseContent)
     {
-        // Deocamdată totul pe Sulafat, așa cum ai cerut.
-        // Poți personaliza pe viitor, ex:
+        try
+        {
+            using var doc = JsonDocument.Parse(responseContent);
+            if (doc.RootElement.TryGetProperty("error", out var errorObj))
+            {
+                if (errorObj.TryGetProperty("message", out var message))
+                {
+                    var messageStr = message.GetString() ?? "";
+                    if (!string.IsNullOrWhiteSpace(messageStr))
+                    {
+                        return $"Google API quota limit reached: {messageStr}. Please try again later or use a different API key.";
+                    }
+                }
+            }
+        }
+        catch (JsonException)
+        {
+            // If JSON parsing fails, return generic message
+        }
+
+        return "Google API quota limit has been reached. Please try again later or use a different API key in the modal.";
+    }
+
+    /// <summary>
+    /// Default voice mapping. Uses configured default voice, but can be customized per-language.
+    /// </summary>
+    private string GetDefaultVoiceForLanguage(string languageCode)
+    {
+        // Folosește voice-ul default din configurație
+        // Poți personaliza pe viitor pe limbă, ex:
         // "ro-ro" => "Sulafat", "en-us" => "Zephyr", etc.
         _ = languageCode; // silence unused param warning if you don't change mapping yet
-        return "Sulafat";
+        return _defaultVoice;
     }
 
     /// <summary>
