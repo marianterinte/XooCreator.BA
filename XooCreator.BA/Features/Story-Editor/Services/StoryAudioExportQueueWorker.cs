@@ -245,9 +245,10 @@ public class StoryAudioExportQueueWorker : BackgroundService
             }
         }
 
-        // Get all pages ordered by SortOrder
+        // Get all page and quiz tiles ordered by SortOrder (quiz are treated as pages for audio)
+        var pageOrQuizTypes = new[] { "page", "quiz" };
         var allPages = craft.Tiles
-            .Where(t => t.Type.Equals("page", StringComparison.OrdinalIgnoreCase))
+            .Where(t => pageOrQuizTypes.Contains(t.Type, StringComparer.OrdinalIgnoreCase))
             .OrderBy(t => t.SortOrder)
             .Select((tile, index) => new AudioPage(tile, index + 1, ResolveTileText(tile, job.Locale)))
             .ToList();
@@ -391,7 +392,27 @@ public class StoryAudioExportQueueWorker : BackgroundService
         var lang = (locale ?? string.Empty).Trim().ToLowerInvariant();
         var translation = tile.Translations.FirstOrDefault(tr => tr.LanguageCode == lang)
                           ?? tile.Translations.FirstOrDefault();
-        return (translation?.Text ?? translation?.Caption ?? string.Empty).Trim();
+        return ResolveDisplayText(translation?.Text, translation?.Question, translation?.Caption);
+    }
+
+    private static string ResolveDisplayText(string? text, string? question, string? caption)
+    {
+        if (!string.IsNullOrWhiteSpace(text))
+        {
+            return text.Trim();
+        }
+
+        if (!string.IsNullOrWhiteSpace(question))
+        {
+            return question.Trim();
+        }
+
+        if (!string.IsNullOrWhiteSpace(caption))
+        {
+            return caption.Trim();
+        }
+
+        return string.Empty;
     }
 
     private static async Task<byte[]> GenerateAudioBytesAsync(

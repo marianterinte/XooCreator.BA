@@ -51,14 +51,15 @@ public class StoryAudioImportProcessor : IStoryAudioImportProcessor
             return new ImportAudioResult(false, errors, warnings, 0, 0);
         }
 
+        var pageOrQuizTypes = new[] { "page", "quiz" };
         var pageTiles = craft.Tiles
-            .Where(t => t.Type.Equals("page", StringComparison.OrdinalIgnoreCase))
+            .Where(t => pageOrQuizTypes.Contains(t.Type, StringComparer.OrdinalIgnoreCase))
             .OrderBy(t => t.SortOrder)
             .ToList();
 
         if (pageTiles.Count == 0)
         {
-            errors.Add("Story has no page tiles");
+            errors.Add("Story has no page or quiz tiles");
             return new ImportAudioResult(false, errors, warnings, 0, 0);
         }
 

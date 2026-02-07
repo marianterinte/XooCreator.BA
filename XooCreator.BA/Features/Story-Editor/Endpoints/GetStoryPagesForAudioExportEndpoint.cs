@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.Enums;
+using XooCreator.BA.Features.Stories.Services;
 using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Endpoints;
@@ -14,15 +14,18 @@ namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 public class GetStoryPagesForAudioExportEndpoint
 {
     private readonly IStoryCraftsRepository _crafts;
+    private readonly IStoriesService _storiesService;
     private readonly IAuth0UserService _auth0;
     private readonly ILogger<GetStoryPagesForAudioExportEndpoint> _logger;
 
     public GetStoryPagesForAudioExportEndpoint(
         IStoryCraftsRepository crafts,
+        IStoriesService storiesService,
         IAuth0UserService auth0,
         ILogger<GetStoryPagesForAudioExportEndpoint> logger)
     {
         _crafts = crafts;
+        _storiesService = storiesService;
         _auth0 = auth0;
         _logger = logger;
     }
@@ -62,23 +65,47 @@ public class GetStoryPagesForAudioExportEndpoint
             return TypedResults.Forbid();
         }
 
-        var craft = await ep._crafts.GetWithLanguageAsync(storyId, locale, ct);
+        // Use the same endpoint flow as the story editor: GetStoryForEditAsync returns tiles with
+        // Text, Question, Caption (and Answers) exactly as the editor sees them.
+        var normalizedLocale = (locale ?? string.Empty).Trim().ToLowerInvariant();
+        var editable = await ep._storiesService.GetStoryForEditAsync(storyId, normalizedLocale);
+        if (editable == null)
+        {
+            return TypedResults.NotFound();
+        }
+
+        // We need tile Guid for export job; editor DTO only has tile Id (string). Load craft to map Id -> Guid.
+        var craft = await ep._crafts.GetAsync(storyId, ct);
         if (craft == null)
         {
             return TypedResults.NotFound();
         }
 
-        var pages = craft.Tiles
-            .Where(t => t.Type.Equals("page", StringComparison.OrdinalIgnoreCase))
+        var pageOrQuizTypes = new[] { "page", "quiz" };
+        var tileById = craft.Tiles
+            .Where(t => pageOrQuizTypes.Contains(t.Type, StringComparer.OrdinalIgnoreCase))
             .OrderBy(t => t.SortOrder)
-            .Select((tile, index) => new PageInfo
+            .ToDictionary(t => t.TileId, t => t, StringComparer.OrdinalIgnoreCase);
+
+        var pageNumber = 0;
+        var pages = new List<PageInfo>();
+        foreach (var tile in editable.Tiles)
+        {
+            if (!pageOrQuizTypes.Contains(tile.Type ?? "page", StringComparer.OrdinalIgnoreCase))
+                continue;
+            if (!tileById.TryGetValue(tile.Id ?? string.Empty, out var craftTile))
+                continue;
+
+            pageNumber++;
+            var text = ResolveDisplayText(tile.Text, tile.Question, tile.Caption);
+            pages.Add(new PageInfo
             {
-                TileId = tile.Id,
-                PageNumber = index + 1,
-                Text = ResolveTileText(tile, locale),
-                SortOrder = tile.SortOrder
-            })
-            .ToList();
+                TileId = craftTile.Id,
+                PageNumber = pageNumber,
+                Text = text,
+                SortOrder = craftTile.SortOrder
+            });
+        }
 
         return TypedResults.Ok(new StoryPagesResponse
         {
@@ -86,11 +113,23 @@ public class GetStoryPagesForAudioExportEndpoint
         });
     }
 
-    private static string ResolveTileText(StoryCraftTile tile, string locale)
+    private static string ResolveDisplayText(string? text, string? question, string? caption)
     {
-        var lang = (locale ?? string.Empty).Trim().ToLowerInvariant();
-        var translation = tile.Translations.FirstOrDefault(tr => tr.LanguageCode == lang)
-                          ?? tile.Translations.FirstOrDefault();
-        return (translation?.Text ?? translation?.Caption ?? string.Empty).Trim();
+        if (!string.IsNullOrWhiteSpace(text))
+        {
+            return text.Trim();
+        }
+
+        if (!string.IsNullOrWhiteSpace(question))
+        {
+            return question.Trim();
+        }
+
+        if (!string.IsNullOrWhiteSpace(caption))
+        {
+            return caption.Trim();
+        }
+
+        return string.Empty;
     }
 }
