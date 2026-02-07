@@ -115,13 +115,7 @@ public class HeroDefinitionVersionQueueWorker : BackgroundService
 
                     void PublishStatus()
                     {
-                         // Using JobTypes.StoryVersion temporarily or define new one? 
-                         // Assuming JobTypes is string constants class.
-                         // Let's assume there isn't a const for HeroVersion yet, but I can pass string?
-                         // Ideally I should add to JobTypes, but I cannot modify it easily without knowing where it is.
-                         // It is in XooCreator.BA.Infrastructure.Services.Jobs.
-                         // I will use "HeroDefinitionVersion" as type string.
-                        _jobEvents.Publish("HeroDefinitionVersion", job.Id, new
+                        _jobEvents.Publish(JobTypes.HeroDefinitionVersion, job.Id, new
                         {
                             jobId = job.Id,
                             heroId = job.HeroId,

@@ -11,6 +11,8 @@ using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
 using XooCreator.BA.Infrastructure.Services.Blob;
+using XooCreator.BA.Infrastructure.Services.Jobs;
+using XooCreator.BA.Infrastructure.Services.Queue;
 using static XooCreator.BA.Features.StoryEditor.Mappers.StoryAssetPathMapper;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
@@ -22,6 +24,8 @@ public partial class ImportAudioEndpoint
     private readonly IAuth0UserService _auth0;
     private readonly IBlobSasService _sas;
     private readonly IStoryCraftsRepository _crafts;
+    private readonly IStoryAudioImportQueue _importQueue;
+    private readonly IJobEventsHub _jobEvents;
     private readonly ILogger<ImportAudioEndpoint> _logger;
     private const long MaxZipSizeBytes = 100 * 1024 * 1024; // 100MB
     private const long MaxAudioFileSizeBytes = 10 * 1024 * 1024; // 10MB per audio file
@@ -35,14 +39,20 @@ public partial class ImportAudioEndpoint
         IAuth0UserService auth0,
         IBlobSasService sas,
         IStoryCraftsRepository crafts,
+        IStoryAudioImportQueue importQueue,
+        IJobEventsHub jobEvents,
         ILogger<ImportAudioEndpoint> logger)
     {
         _db = db;
         _auth0 = auth0;
         _sas = sas;
         _crafts = crafts;
+        _importQueue = importQueue;
+        _jobEvents = jobEvents;
         _logger = logger;
     }
+
+    public record AudioImportJobResponse(Guid JobId);
 
     public record ImportAudioResponse
     {
@@ -56,7 +66,7 @@ public partial class ImportAudioEndpoint
     [Route("/api/{locale}/stories/{storyId}/import-audio")]
     [Authorize]
     [DisableRequestSizeLimit]
-    public static async Task<Results<Ok<ImportAudioResponse>, BadRequest<ImportAudioResponse>, UnauthorizedHttpResult, ForbidHttpResult, NotFound>> HandlePost(
+    public static async Task<Results<Accepted<AudioImportJobResponse>, BadRequest<ImportAudioResponse>, UnauthorizedHttpResult, ForbidHttpResult, NotFound>> HandlePost(
         [FromRoute] string locale,
         [FromRoute] string storyId,
         [FromServices] ImportAudioEndpoint ep,
@@ -130,46 +140,60 @@ public partial class ImportAudioEndpoint
             return TypedResults.BadRequest(new ImportAudioResponse { Success = false, Errors = errors });
         }
 
-        await using var zipStream = file.OpenReadStream();
-        if (!zipStream.CanSeek)
-        {
-            errors.Add("Unable to process file stream for import.");
-            return TypedResults.BadRequest(new ImportAudioResponse { Success = false, Errors = errors });
-        }
-
-        // Determine which email to use for asset path:
-        // - Admin can import audio for any story, so use owner's email (preserve original author)
-        // - This ensures assets are stored in the correct owner's folder
+        // Determine which email to use for asset path (owner or current user)
         string emailToUse = user.Email ?? string.Empty;
         if (isAdmin && craft.OwnerUserId != Guid.Empty && craft.OwnerUserId != user.Id)
         {
-            // Admin importing for another user - use owner's email
             var ownerEmail = await ep._db.AlchimaliaUsers
                 .AsNoTracking()
                 .Where(u => u.Id == craft.OwnerUserId)
                 .Select(u => u.Email)
                 .FirstOrDefaultAsync(ct);
-            
             if (!string.IsNullOrWhiteSpace(ownerEmail))
             {
                 emailToUse = ownerEmail;
-                ep._logger.LogInformation("Admin importing audio for another user: storyId={StoryId} ownerEmail={OwnerEmail} adminEmail={AdminEmail}",
-                    storyId, emailToUse, user.Email);
+                ep._logger.LogInformation("Admin importing audio for another user: storyId={StoryId} ownerEmail={OwnerEmail}", storyId, emailToUse);
             }
         }
-        else if (isAdmin && craft.OwnerUserId == user.Id)
-        {
-            // Admin importing for their own story - use their own email
-            ep._logger.LogInformation("Admin importing audio for their own story: storyId={StoryId} email={Email}",
-                storyId, emailToUse);
-        }
 
-        // Normalize locale to lowercase to match manual uploads (e.g., "ro-RO" -> "ro-ro")
         var normalizedLocale = locale?.ToLowerInvariant() ?? locale;
-        
-        var result = await ep.ProcessAudioImportAsync(zipStream, craft, pageTiles, normalizedLocale, emailToUse, ct);
 
-        return TypedResults.Ok(result);
+        // Create job and upload ZIP to blob, then enqueue
+        var jobId = Guid.NewGuid();
+        var zipBlobPath = $"draft/audio-import/{jobId}.zip";
+
+        var job = new StoryAudioImportJob
+        {
+            Id = jobId,
+            StoryId = storyId,
+            OwnerUserId = craft.OwnerUserId,
+            RequestedByEmail = user.Email ?? string.Empty,
+            OwnerEmail = emailToUse,
+            Locale = normalizedLocale,
+            ZipBlobPath = zipBlobPath,
+            Status = StoryAudioImportJobStatus.Queued,
+            QueuedAtUtc = DateTime.UtcNow
+        };
+
+        ep._db.StoryAudioImportJobs.Add(job);
+        await ep._db.SaveChangesAsync(ct);
+
+        // Upload ZIP to blob
+        await using var zipStream = file.OpenReadStream();
+        var blobClient = ep._sas.GetBlobClient(ep._sas.DraftContainer, zipBlobPath);
+        await blobClient.UploadAsync(zipStream, overwrite: true, cancellationToken: ct);
+
+        ep._jobEvents.Publish(JobTypes.StoryAudioImport, job.Id, new
+        {
+            jobId = job.Id,
+            storyId = job.StoryId,
+            status = job.Status,
+            queuedAtUtc = job.QueuedAtUtc
+        });
+
+        await ep._importQueue.EnqueueAsync(job, ct);
+
+        return TypedResults.Accepted($"/api/stories/{storyId}/audio-import-jobs/{job.Id}", new AudioImportJobResponse(job.Id));
     }
 
     private async Task<ImportAudioResponse> ProcessAudioImportAsync(

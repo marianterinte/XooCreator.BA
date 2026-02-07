@@ -10,50 +10,54 @@ using Microsoft.Extensions.Logging;
 namespace XooCreator.BA.Features.AlchimaliaUniverse.Endpoints;
 
 [Endpoint]
-public class PublishTreeOfHeroesConfigCraftEndpoint
+public class RetractTreeOfHeroesConfigCraftEndpoint
 {
     private readonly ITreeOfHeroesConfigCraftService _service;
     private readonly IAuth0UserService _auth0;
-    private readonly ILogger<PublishTreeOfHeroesConfigCraftEndpoint> _logger;
+    private readonly ILogger<RetractTreeOfHeroesConfigCraftEndpoint> _logger;
 
-    public PublishTreeOfHeroesConfigCraftEndpoint(
+    public RetractTreeOfHeroesConfigCraftEndpoint(
         ITreeOfHeroesConfigCraftService service,
         IAuth0UserService auth0,
-        ILogger<PublishTreeOfHeroesConfigCraftEndpoint> logger)
+        ILogger<RetractTreeOfHeroesConfigCraftEndpoint> logger)
     {
         _service = service;
         _auth0 = auth0;
         _logger = logger;
     }
 
-    [Route("/api/alchimalia-universe/tree-configs/crafts/{id}/publish")]
+    [Route("/api/alchimalia-universe/tree-configs/crafts/{id}/retract")]
     [Authorize]
-    public static async Task<Results<Ok, BadRequest<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
+    public static async Task<Results<Ok, NotFound, BadRequest<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
         [FromRoute] Guid id,
-        [FromServices] PublishTreeOfHeroesConfigCraftEndpoint ep,
+        [FromServices] RetractTreeOfHeroesConfigCraftEndpoint ep,
         CancellationToken ct)
     {
         var user = await ep._auth0.GetCurrentUserAsync(ct);
         if (user == null) return TypedResults.Unauthorized();
 
-        var isCreator = ep._auth0.HasRole(user, UserRole.Creator);
-        var isAdmin = ep._auth0.HasRole(user, UserRole.Admin);
-        if (!isCreator && !isAdmin)
+        if (!ep._auth0.HasRole(user, UserRole.Creator))
         {
-            ep._logger.LogWarning("PublishTreeOfHeroesConfigCraft forbidden: userId={UserId}", user?.Id);
+            ep._logger.LogWarning("RetractTreeOfHeroesConfigCraft forbidden: userId={UserId}", user?.Id);
             return TypedResults.Forbid();
         }
 
-        var allowAdminOverride = isAdmin;
-
         try
         {
-            await ep._service.PublishAsync(user.Id, id, allowAdminOverride, ct);
+            await ep._service.RetractAsync(user.Id, id, ct);
             return TypedResults.Ok();
         }
-        catch (Exception ex)
+        catch (KeyNotFoundException)
+        {
+            return TypedResults.NotFound();
+        }
+        catch (InvalidOperationException ex)
         {
             return TypedResults.BadRequest(ex.Message);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return TypedResults.Forbid();
         }
     }
 }

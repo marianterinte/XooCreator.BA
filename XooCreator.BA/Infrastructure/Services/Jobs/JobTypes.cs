@@ -10,12 +10,14 @@ public static class JobTypes
     public const string StoryForkAssets = "story-fork-assets";
     public const string StoryDocumentExport = "story-document-export";
     public const string StoryAudioExport = "story-audio-export";
+    public const string StoryAudioImport = "story-audio-import";
     public const string EpicVersion = "epic-version";
     public const string EpicPublish = "epic-publish";
     public const string HeroVersion = "hero-version";
     public const string RegionVersion = "region-version";
     public const string HeroPublish = "hero-publish";
     public const string AnimalPublish = "animal-publish";
+    public const string HeroDefinitionVersion = "hero-definition-version";
 }
 
 
