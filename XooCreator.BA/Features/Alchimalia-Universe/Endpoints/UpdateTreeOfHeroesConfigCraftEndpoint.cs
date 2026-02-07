@@ -29,7 +29,7 @@ public class UpdateTreeOfHeroesConfigCraftEndpoint
 
     [Route("/api/alchimalia-universe/tree-configs/crafts/{id}")]
     [Authorize]
-    public static async Task<Results<Ok<TreeOfHeroesConfigCraftDto>, BadRequest<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePut(
+    public static async Task<Results<Ok<TreeOfHeroesConfigCraftDto>, BadRequest<string>, NotFound, UnauthorizedHttpResult, ForbidHttpResult>> HandlePut(
         [FromRoute] Guid id,
         [FromServices] UpdateTreeOfHeroesConfigCraftEndpoint ep,
         [FromBody] UpdateTreeOfHeroesConfigCraftRequest req,
@@ -38,7 +38,7 @@ public class UpdateTreeOfHeroesConfigCraftEndpoint
         var user = await ep._auth0.GetCurrentUserAsync(ct);
         if (user == null) return TypedResults.Unauthorized();
 
-        if (!ep._auth0.HasRole(user, UserRole.Creator))
+        if (!ep._auth0.HasRole(user, UserRole.Creator) && !ep._auth0.HasRole(user, UserRole.Admin))
         {
             ep._logger.LogWarning("UpdateTreeOfHeroesConfigCraft forbidden: userId={UserId}", user?.Id);
             return TypedResults.Forbid();
@@ -50,6 +50,18 @@ public class UpdateTreeOfHeroesConfigCraftEndpoint
         {
             var config = await ep._service.UpdateCraftAsync(user.Id, id, req, allowAdminOverride: isAdmin, ct);
             return TypedResults.Ok(config);
+        }
+        catch (KeyNotFoundException)
+        {
+            return TypedResults.NotFound();
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return TypedResults.Forbid();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return TypedResults.BadRequest(ex.Message);
         }
         catch (Exception ex)
         {

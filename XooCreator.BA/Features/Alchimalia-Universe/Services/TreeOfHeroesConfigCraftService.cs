@@ -92,7 +92,7 @@ public class TreeOfHeroesConfigCraftService : ITreeOfHeroesConfigCraftService
 
     public async Task<TreeOfHeroesConfigCraftDto> CreateCraftAsync(Guid userId, CreateTreeOfHeroesConfigCraftRequest request, CancellationToken ct = default)
     {
-        await ValidateNodesAsync(request.Nodes, request.Edges, ct);
+        await ValidateNodesAsync(request.Nodes, request.Edges, requirePublished: true, ct);
 
         var config = new TreeOfHeroesConfigCraft
         {
@@ -211,12 +211,13 @@ public class TreeOfHeroesConfigCraftService : ITreeOfHeroesConfigCraftService
         {
             var nodes = request.Nodes ?? new List<TreeOfHeroesConfigNodeDto>();
             var edges = request.Edges ?? new List<TreeOfHeroesConfigEdgeDto>();
-            await ValidateNodesAsync(nodes, edges, ct);
+            // Draft update: only require hero definitions to exist (any status). Published is enforced on submit/publish.
+            await ValidateNodesAsync(nodes, edges, requirePublished: false, ct);
 
             _db.TreeOfHeroesConfigCraftNodes.RemoveRange(config.Nodes);
             _db.TreeOfHeroesConfigCraftEdges.RemoveRange(config.Edges);
 
-            config.Nodes = nodes.Select(n => new TreeOfHeroesConfigCraftNode
+            var newNodes = nodes.Select(n => new TreeOfHeroesConfigCraftNode
             {
                 Id = n.Id == Guid.Empty ? Guid.NewGuid() : n.Id,
                 ConfigCraftId = config.Id,
@@ -234,16 +235,23 @@ public class TreeOfHeroesConfigCraftService : ITreeOfHeroesConfigCraftService
                     : "[]"
             }).ToList();
 
-            config.Edges = edges.Select(e => new TreeOfHeroesConfigCraftEdge
+            var newEdges = edges.Select(e => new TreeOfHeroesConfigCraftEdge
             {
                 Id = e.Id == Guid.Empty ? Guid.NewGuid() : e.Id,
                 ConfigCraftId = config.Id,
                 FromHeroId = e.FromHeroId,
                 ToHeroId = e.ToHeroId
             }).ToList();
+
+            config.Nodes = newNodes;
+            config.Edges = newEdges;
+            // Ensure EF tracks new children as Added (same pattern as AnimalCraftService / region draft save).
+            _db.TreeOfHeroesConfigCraftNodes.AddRange(newNodes);
+            _db.TreeOfHeroesConfigCraftEdges.AddRange(newEdges);
         }
 
-        await _repository.SaveAsync(config, ct);
+        config.UpdatedAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync(ct);
         return MapToDto(config);
     }
 
@@ -416,20 +424,23 @@ public class TreeOfHeroesConfigCraftService : ITreeOfHeroesConfigCraftService
         _logger.LogInformation("TreeOfHeroesConfigCraft {ConfigId} published by {UserId}", configId, publisherId);
     }
 
-    private async Task ValidateNodesAsync(List<TreeOfHeroesConfigNodeDto> nodes, List<TreeOfHeroesConfigEdgeDto> edges, CancellationToken ct)
+    /// <param name="requirePublished">If true, all hero definitions must be published (e.g. for create/publish). If false, they only need to exist (e.g. for draft update).</param>
+    private async Task ValidateNodesAsync(List<TreeOfHeroesConfigNodeDto> nodes, List<TreeOfHeroesConfigEdgeDto> edges, bool requirePublished = true, CancellationToken ct = default)
     {
         var heroIds = nodes.Select(n => n.HeroDefinitionId).Distinct().ToList();
         if (heroIds.Count == 0)
             return;
 
-        var existingHeroIds = await _db.HeroDefinitionDefinitions
-            .Where(h => heroIds.Contains(h.Id) && h.Status == AlchimaliaUniverseStatus.Published.ToDb())
-            .Select(h => h.Id)
-            .ToListAsync(ct);
+        var query = _db.HeroDefinitionDefinitions.Where(h => heroIds.Contains(h.Id));
+        if (requirePublished)
+            query = query.Where(h => h.Status == AlchimaliaUniverseStatus.Published.ToDb());
+        var existingHeroIds = await query.Select(h => h.Id).ToListAsync(ct);
 
         var missing = heroIds.Except(existingHeroIds).ToList();
         if (missing.Count > 0)
-            throw new InvalidOperationException($"Tree config contains unpublished or missing heroes: {string.Join(", ", missing)}");
+            throw new InvalidOperationException(requirePublished
+                ? $"Tree config contains unpublished or missing heroes: {string.Join(", ", missing)}"
+                : $"Tree config contains unknown hero definition IDs: {string.Join(", ", missing)}");
 
         if (edges.Count > 0)
         {
