@@ -130,6 +130,68 @@ public class TreeOfHeroesConfigCraftService : ITreeOfHeroesConfigCraftService
         return MapToDto(config);
     }
 
+    public async Task<TreeOfHeroesConfigCraftDto> CreateCraftFromDefinitionAsync(Guid userId, Guid definitionId, bool allowAdminOverride = false, CancellationToken ct = default)
+    {
+        var definition = await _db.TreeOfHeroesConfigDefinitions
+            .Include(d => d.Nodes)
+            .Include(d => d.Edges)
+            .FirstOrDefaultAsync(d => d.Id == definitionId, ct);
+
+        if (definition == null)
+            throw new KeyNotFoundException($"TreeOfHeroesConfigDefinition with Id '{definitionId}' not found");
+
+        var existingCraft = await _db.TreeOfHeroesConfigCrafts
+            .FirstOrDefaultAsync(c => c.PublishedDefinitionId == definitionId &&
+                (c.Status == AlchimaliaUniverseStatus.Draft.ToDb() ||
+                 c.Status == AlchimaliaUniverseStatus.ChangesRequested.ToDb()), ct);
+
+        if (existingCraft != null && !allowAdminOverride)
+        {
+            var withDetails = await _repository.GetWithDetailsAsync(existingCraft.Id, ct);
+            if (withDetails == null)
+                throw new KeyNotFoundException($"TreeOfHeroesConfigCraft with Id '{existingCraft.Id}' not found");
+            return MapToDto(withDetails);
+        }
+
+        var craftId = Guid.NewGuid();
+        var config = new TreeOfHeroesConfigCraft
+        {
+            Id = craftId,
+            PublishedDefinitionId = definitionId,
+            Label = definition.Label,
+            Status = AlchimaliaUniverseStatus.Draft.ToDb(),
+            CreatedByUserId = userId,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+            Nodes = definition.Nodes.Select(n => new TreeOfHeroesConfigCraftNode
+            {
+                Id = Guid.NewGuid(),
+                ConfigCraftId = craftId,
+                HeroDefinitionId = n.HeroDefinitionId,
+                PositionX = n.PositionX,
+                PositionY = n.PositionY,
+                CourageCost = n.CourageCost,
+                CuriosityCost = n.CuriosityCost,
+                ThinkingCost = n.ThinkingCost,
+                CreativityCost = n.CreativityCost,
+                SafetyCost = n.SafetyCost,
+                IsStartup = n.IsStartup,
+                PrerequisitesJson = n.PrerequisitesJson ?? "[]"
+            }).ToList(),
+            Edges = definition.Edges.Select(e => new TreeOfHeroesConfigCraftEdge
+            {
+                Id = Guid.NewGuid(),
+                ConfigCraftId = craftId,
+                FromHeroId = e.FromHeroId,
+                ToHeroId = e.ToHeroId
+            }).ToList()
+        };
+
+        await _repository.CreateAsync(config, ct);
+        _logger.LogInformation("TreeOfHeroesConfigCraft created from definition {DefinitionId} by {UserId}", definitionId, userId);
+        return MapToDto(config);
+    }
+
     public async Task<TreeOfHeroesConfigCraftDto> UpdateCraftAsync(Guid userId, Guid configId, UpdateTreeOfHeroesConfigCraftRequest request, bool allowAdminOverride = false, CancellationToken ct = default)
     {
         var config = await _repository.GetWithDetailsAsync(configId, ct);
@@ -203,6 +265,41 @@ public class TreeOfHeroesConfigCraftService : ITreeOfHeroesConfigCraftService
         _logger.LogInformation("TreeOfHeroesConfigCraft {ConfigId} submitted for review by {UserId}", configId, userId);
     }
 
+    public async Task ClaimAsync(Guid reviewerId, Guid configId, CancellationToken ct = default)
+    {
+        var config = await _repository.GetAsync(configId, ct);
+        if (config == null)
+            throw new KeyNotFoundException($"TreeOfHeroesConfigCraft with Id '{configId}' not found");
+
+        var currentStatus = AlchimaliaUniverseStatusExtensions.FromDb(config.Status);
+        if (currentStatus != AlchimaliaUniverseStatus.SentForApproval)
+            throw new InvalidOperationException($"Cannot claim TreeOfHeroesConfigCraft in status '{currentStatus}'. Must be SentForApproval.");
+
+        config.Status = AlchimaliaUniverseStatus.InReview.ToDb();
+        await _repository.SaveAsync(config, ct);
+        _logger.LogInformation("TreeOfHeroesConfigCraft {ConfigId} claimed for review by {ReviewerId}", configId, reviewerId);
+    }
+
+    public async Task RetractAsync(Guid userId, Guid configId, CancellationToken ct = default)
+    {
+        var config = await _repository.GetAsync(configId, ct);
+        if (config == null)
+            throw new KeyNotFoundException($"TreeOfHeroesConfigCraft with Id '{configId}' not found");
+
+        if (config.CreatedByUserId != userId)
+            throw new UnauthorizedAccessException("Only the creator can retract this TreeOfHeroesConfigCraft");
+
+        var currentStatus = AlchimaliaUniverseStatusExtensions.FromDb(config.Status);
+        if (currentStatus != AlchimaliaUniverseStatus.SentForApproval &&
+            currentStatus != AlchimaliaUniverseStatus.InReview &&
+            currentStatus != AlchimaliaUniverseStatus.Approved)
+            throw new InvalidOperationException($"Cannot retract TreeOfHeroesConfigCraft in status '{currentStatus}'");
+
+        config.Status = AlchimaliaUniverseStatus.Draft.ToDb();
+        await _repository.SaveAsync(config, ct);
+        _logger.LogInformation("TreeOfHeroesConfigCraft {ConfigId} retracted to draft by {UserId}", configId, userId);
+    }
+
     public async Task ReviewAsync(Guid reviewerId, Guid configId, ReviewTreeOfHeroesConfigCraftRequest request, CancellationToken ct = default)
     {
         var config = await _repository.GetAsync(configId, ct);
@@ -221,14 +318,16 @@ public class TreeOfHeroesConfigCraftService : ITreeOfHeroesConfigCraftService
         await _repository.SaveAsync(config, ct);
     }
 
-    public async Task PublishAsync(Guid publisherId, Guid configId, CancellationToken ct = default)
+    public async Task PublishAsync(Guid publisherId, Guid configId, bool allowAdminOverride = false, CancellationToken ct = default)
     {
         var config = await _repository.GetWithDetailsAsync(configId, ct);
         if (config == null)
             throw new KeyNotFoundException($"TreeOfHeroesConfigCraft with Id '{configId}' not found");
 
         var currentStatus = AlchimaliaUniverseStatusExtensions.FromDb(config.Status);
-        if (currentStatus != AlchimaliaUniverseStatus.Approved)
+        if (currentStatus == AlchimaliaUniverseStatus.Published)
+            throw new InvalidOperationException("TreeOfHeroesConfigCraft is already published.");
+        if (currentStatus != AlchimaliaUniverseStatus.Approved && !allowAdminOverride)
             throw new InvalidOperationException($"Cannot publish TreeOfHeroesConfigCraft in status '{currentStatus}'. Must be Approved.");
 
         var definitionId = config.PublishedDefinitionId ?? config.Id;
@@ -270,6 +369,8 @@ public class TreeOfHeroesConfigCraftService : ITreeOfHeroesConfigCraftService
                 }).ToList()
             };
             _db.TreeOfHeroesConfigDefinitions.Add(definition);
+            // Save definition (and its nodes/edges) first so FK from craft to definition is valid when we update the craft.
+            await _db.SaveChangesAsync(ct);
         }
         else
         {
@@ -309,6 +410,7 @@ public class TreeOfHeroesConfigCraftService : ITreeOfHeroesConfigCraftService
 
         config.PublishedDefinitionId = definitionId;
         config.Status = AlchimaliaUniverseStatus.Published.ToDb();
+        // When definition was new we already saved it above; this saves the craft update (and any definition update in the else branch).
         await _db.SaveChangesAsync(ct);
 
         _logger.LogInformation("TreeOfHeroesConfigCraft {ConfigId} published by {UserId}", configId, publisherId);

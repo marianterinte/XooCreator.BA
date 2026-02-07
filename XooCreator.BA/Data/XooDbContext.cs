@@ -178,6 +178,7 @@ public class XooDbContext : DbContext
     public DbSet<StoryExportJob> StoryExportJobs => Set<StoryExportJob>();
     public DbSet<StoryDocumentExportJob> StoryDocumentExportJobs => Set<StoryDocumentExportJob>();
     public DbSet<StoryAudioExportJob> StoryAudioExportJobs => Set<StoryAudioExportJob>();
+    public DbSet<StoryAudioImportJob> StoryAudioImportJobs => Set<StoryAudioImportJob>();
     public DbSet<StoryCraft> StoryCrafts => Set<StoryCraft>();
     public DbSet<StoryCraftTranslation> StoryCraftTranslations => Set<StoryCraftTranslation>();
     public DbSet<StoryCraftTile> StoryCraftTiles => Set<StoryCraftTile>();

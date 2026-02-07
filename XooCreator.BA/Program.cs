@@ -63,6 +63,7 @@ builder.Services.AddHostedService<StoryForkAssetsQueueWorker>();
 builder.Services.AddHostedService<StoryExportQueueWorker>();
 builder.Services.AddHostedService<StoryDocumentExportQueueWorker>();
 builder.Services.AddHostedService<StoryAudioExportQueueWorker>();
+builder.Services.AddHostedService<StoryAudioImportQueueWorker>();
 builder.Services.AddHostedService<ExportCleanupService>();
 builder.Services.AddHostedService<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.EpicPublishQueueJob>();
 builder.Services.AddHostedService<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.EpicVersionQueueJob>();

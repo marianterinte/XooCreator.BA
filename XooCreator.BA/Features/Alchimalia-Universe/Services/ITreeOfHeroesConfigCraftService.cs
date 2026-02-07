@@ -9,8 +9,11 @@ public interface ITreeOfHeroesConfigCraftService
     Task<ListTreeOfHeroesConfigCraftsResponse> ListCraftsAsync(string? status = null, CancellationToken ct = default);
     Task<ListTreeOfHeroesConfigDefinitionsResponse> ListDefinitionsAsync(string? status = null, CancellationToken ct = default);
     Task<TreeOfHeroesConfigCraftDto> CreateCraftAsync(Guid userId, CreateTreeOfHeroesConfigCraftRequest request, CancellationToken ct = default);
+    Task<TreeOfHeroesConfigCraftDto> CreateCraftFromDefinitionAsync(Guid userId, Guid definitionId, bool allowAdminOverride = false, CancellationToken ct = default);
     Task<TreeOfHeroesConfigCraftDto> UpdateCraftAsync(Guid userId, Guid configId, UpdateTreeOfHeroesConfigCraftRequest request, bool allowAdminOverride = false, CancellationToken ct = default);
     Task SubmitForReviewAsync(Guid userId, Guid configId, CancellationToken ct = default);
+    Task ClaimAsync(Guid reviewerId, Guid configId, CancellationToken ct = default);
+    Task RetractAsync(Guid userId, Guid configId, CancellationToken ct = default);
     Task ReviewAsync(Guid reviewerId, Guid configId, ReviewTreeOfHeroesConfigCraftRequest request, CancellationToken ct = default);
-    Task PublishAsync(Guid publisherId, Guid configId, CancellationToken ct = default);
+    Task PublishAsync(Guid publisherId, Guid configId, bool allowAdminOverride = false, CancellationToken ct = default);
 }
