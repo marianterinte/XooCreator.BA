@@ -175,6 +175,8 @@ public class GoogleFullStoryService : IGoogleFullStoryService
                         pageText,
                         languageCode,
                         null, // Use default voice
+                        null, // Use default style instructions from config
+                        apiKeyOverride: null, // Use default from config
                         ct);
 
                     audioData = audData;

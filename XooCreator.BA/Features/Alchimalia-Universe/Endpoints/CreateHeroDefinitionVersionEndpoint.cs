@@ -139,7 +139,7 @@ public class CreateHeroDefinitionVersionEndpoint
         ep._db.HeroDefinitionVersionJobs.Add(job);
         await ep._db.SaveChangesAsync(ct);
 
-        ep._jobEvents.Publish("HeroDefinitionVersion", job.Id, new
+        ep._jobEvents.Publish(JobTypes.HeroDefinitionVersion, job.Id, new
         {
             jobId = job.Id,
             heroId = job.HeroId,

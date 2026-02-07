@@ -26,12 +26,15 @@ public sealed class JobEventsSseEndpoint
         JobTypes.StoryFork,
         JobTypes.StoryForkAssets,
         JobTypes.StoryDocumentExport,
+        JobTypes.StoryAudioExport,
+        JobTypes.StoryAudioImport,
         JobTypes.EpicVersion,
         JobTypes.EpicPublish,
         JobTypes.HeroVersion,
         JobTypes.RegionVersion,
         JobTypes.HeroPublish,
-        JobTypes.AnimalPublish
+        JobTypes.AnimalPublish,
+        JobTypes.HeroDefinitionVersion
     };
 
     [Route("/api/jobs/{jobType}/{jobId}/events")]
@@ -371,6 +374,61 @@ public sealed class JobEventsSseEndpoint
 
                 return new Snapshot(payload.status?.ToString() ?? string.Empty, JsonSerializer.Serialize(payload, Json));
             }
+            case JobTypes.StoryAudioExport:
+            {
+                var job = await db.StoryAudioExportJobs.AsNoTracking().FirstOrDefaultAsync(j => j.Id == jobId, ct);
+                if (job == null) return null;
+
+                if (!auth0.HasRole(user, UserRole.Admin) && job.OwnerUserId != user.Id)
+                {
+                    return null;
+                }
+
+                var payload = new
+                {
+                    jobId = job.Id,
+                    storyId = job.StoryId,
+                    status = job.Status,
+                    queuedAtUtc = job.QueuedAtUtc,
+                    startedAtUtc = job.StartedAtUtc,
+                    completedAtUtc = job.CompletedAtUtc,
+                    errorMessage = job.ErrorMessage,
+                    zipDownloadUrl = (string?)null, // fetch via GET /api/stories/{storyId}/audio-export-jobs/{jobId}
+                    zipFileName = job.ZipFileName,
+                    zipSizeBytes = job.ZipSizeBytes,
+                    audioCount = job.AudioCount
+                };
+
+                return new Snapshot(payload.status?.ToString() ?? string.Empty, JsonSerializer.Serialize(payload, Json));
+            }
+            case JobTypes.StoryAudioImport:
+            {
+                var job = await db.StoryAudioImportJobs.AsNoTracking().FirstOrDefaultAsync(j => j.Id == jobId, ct);
+                if (job == null) return null;
+
+                if (!auth0.HasRole(user, UserRole.Admin) && job.OwnerUserId != user.Id)
+                {
+                    return null;
+                }
+
+                var importPayload = new
+                {
+                    jobId = job.Id,
+                    storyId = job.StoryId,
+                    status = job.Status,
+                    queuedAtUtc = job.QueuedAtUtc,
+                    startedAtUtc = job.StartedAtUtc,
+                    completedAtUtc = job.CompletedAtUtc,
+                    errorMessage = job.ErrorMessage,
+                    success = job.Success,
+                    importedCount = job.ImportedCount,
+                    totalPages = job.TotalPages,
+                    errorsJson = job.ErrorsJson,
+                    warningsJson = job.WarningsJson
+                };
+
+                return new Snapshot(importPayload.status?.ToString() ?? string.Empty, JsonSerializer.Serialize(importPayload, Json));
+            }
             case JobTypes.EpicVersion:
             {
                 var job = await db.EpicVersionJobs.AsNoTracking().FirstOrDefaultAsync(j => j.Id == jobId, ct);
@@ -506,6 +564,31 @@ public sealed class JobEventsSseEndpoint
                     completedAtUtc = job.CompletedAtUtc,
                     errorMessage = job.ErrorMessage,
                     dequeueCount = job.DequeueCount
+                };
+
+                return new Snapshot(payload.status?.ToString() ?? string.Empty, JsonSerializer.Serialize(payload, Json));
+            }
+            case JobTypes.HeroDefinitionVersion:
+            {
+                var job = await db.HeroDefinitionVersionJobs.AsNoTracking().FirstOrDefaultAsync(j => j.Id == jobId, ct);
+                if (job == null) return null;
+
+                if (!auth0.HasRole(user, UserRole.Admin) && job.OwnerUserId != user.Id)
+                {
+                    return null;
+                }
+
+                var payload = new
+                {
+                    jobId = job.Id,
+                    heroId = job.HeroId,
+                    status = job.Status,
+                    queuedAtUtc = job.QueuedAtUtc,
+                    startedAtUtc = job.StartedAtUtc,
+                    completedAtUtc = job.CompletedAtUtc,
+                    errorMessage = job.ErrorMessage,
+                    dequeueCount = job.DequeueCount,
+                    baseVersion = job.BaseVersion
                 };
 
                 return new Snapshot(payload.status?.ToString() ?? string.Empty, JsonSerializer.Serialize(payload, Json));

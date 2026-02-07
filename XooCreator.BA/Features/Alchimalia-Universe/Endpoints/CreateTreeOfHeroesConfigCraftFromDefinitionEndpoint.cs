@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using XooCreator.BA.Data.Enums;
-using XooCreator.BA.Features.AlchimaliaUniverse.DTOs;
 using XooCreator.BA.Features.AlchimaliaUniverse.Services;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
@@ -11,28 +10,29 @@ using Microsoft.Extensions.Logging;
 namespace XooCreator.BA.Features.AlchimaliaUniverse.Endpoints;
 
 [Endpoint]
-public class UpdateTreeOfHeroesConfigCraftEndpoint
+public class CreateTreeOfHeroesConfigCraftFromDefinitionEndpoint
 {
     private readonly ITreeOfHeroesConfigCraftService _service;
     private readonly IAuth0UserService _auth0;
-    private readonly ILogger<UpdateTreeOfHeroesConfigCraftEndpoint> _logger;
+    private readonly ILogger<CreateTreeOfHeroesConfigCraftFromDefinitionEndpoint> _logger;
 
-    public UpdateTreeOfHeroesConfigCraftEndpoint(
+    public CreateTreeOfHeroesConfigCraftFromDefinitionEndpoint(
         ITreeOfHeroesConfigCraftService service,
         IAuth0UserService auth0,
-        ILogger<UpdateTreeOfHeroesConfigCraftEndpoint> logger)
+        ILogger<CreateTreeOfHeroesConfigCraftFromDefinitionEndpoint> logger)
     {
         _service = service;
         _auth0 = auth0;
         _logger = logger;
     }
 
-    [Route("/api/alchimalia-universe/tree-configs/crafts/{id}")]
+    public record CreateCraftFromDefinitionResponse(string Id);
+
+    [Route("/api/alchimalia-universe/tree-configs/from-definition/{definitionId}")]
     [Authorize]
-    public static async Task<Results<Ok<TreeOfHeroesConfigCraftDto>, BadRequest<string>, NotFound, UnauthorizedHttpResult, ForbidHttpResult>> HandlePut(
-        [FromRoute] Guid id,
-        [FromServices] UpdateTreeOfHeroesConfigCraftEndpoint ep,
-        [FromBody] UpdateTreeOfHeroesConfigCraftRequest req,
+    public static async Task<Results<Ok<CreateCraftFromDefinitionResponse>, NotFound, BadRequest<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
+        [FromRoute] Guid definitionId,
+        [FromServices] CreateTreeOfHeroesConfigCraftFromDefinitionEndpoint ep,
         CancellationToken ct)
     {
         var user = await ep._auth0.GetCurrentUserAsync(ct);
@@ -40,28 +40,19 @@ public class UpdateTreeOfHeroesConfigCraftEndpoint
 
         if (!ep._auth0.HasRole(user, UserRole.Creator) && !ep._auth0.HasRole(user, UserRole.Admin))
         {
-            ep._logger.LogWarning("UpdateTreeOfHeroesConfigCraft forbidden: userId={UserId}", user?.Id);
+            ep._logger.LogWarning("CreateTreeOfHeroesConfigCraftFromDefinition forbidden: userId={UserId}", user?.Id);
             return TypedResults.Forbid();
         }
 
-        var isAdmin = ep._auth0.HasRole(user, UserRole.Admin);
-
         try
         {
-            var config = await ep._service.UpdateCraftAsync(user.Id, id, req, allowAdminOverride: isAdmin, ct);
-            return TypedResults.Ok(config);
+            var allowAdminOverride = ep._auth0.HasRole(user, UserRole.Admin);
+            var craft = await ep._service.CreateCraftFromDefinitionAsync(user.Id, definitionId, allowAdminOverride, ct);
+            return TypedResults.Ok(new CreateCraftFromDefinitionResponse(craft.Id.ToString()));
         }
         catch (KeyNotFoundException)
         {
             return TypedResults.NotFound();
-        }
-        catch (UnauthorizedAccessException)
-        {
-            return TypedResults.Forbid();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return TypedResults.BadRequest(ex.Message);
         }
         catch (Exception ex)
         {
