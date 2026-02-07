@@ -1,4 +1,5 @@
 using XooCreator.BA.Data.Enums;
+using XooCreator.BA.Features.User.Services;
 using XooCreator.BA.Features.UserAdministration.DTOs;
 using XooCreator.BA.Features.UserAdministration.Repositories;
 using XooCreator.BA.Infrastructure.Services;
@@ -17,11 +18,16 @@ public class UserAdministrationService : IUserAdministrationService
 {
     private readonly IUserAdministrationRepository _repository;
     private readonly IAuth0UserService _auth0UserService;
+    private readonly ICreatorTokenService _creatorTokenService;
 
-    public UserAdministrationService(IUserAdministrationRepository repository, IAuth0UserService auth0UserService)
+    public UserAdministrationService(
+        IUserAdministrationRepository repository,
+        IAuth0UserService auth0UserService,
+        ICreatorTokenService creatorTokenService)
     {
         _repository = repository;
         _auth0UserService = auth0UserService;
+        _creatorTokenService = creatorTokenService;
     }
 
     public async Task<GetAllUsersResponse> GetAllUsersAsync(CancellationToken ct = default)
@@ -29,6 +35,9 @@ public class UserAdministrationService : IUserAdministrationService
         try
         {
             var users = await _repository.GetAllUsersAsync(ct);
+            var userIds = users.Select(u => u.Id).ToList();
+            var tokenQuantities = await _creatorTokenService.GetAlchimaliaTokenQuantitiesAsync(userIds, ct);
+
             var userDtos = users.Select(u => new UserDto
             {
                 Id = u.Id,
@@ -38,7 +47,8 @@ public class UserAdministrationService : IUserAdministrationService
                 Role = u.Role,  // Backward compatibility
                 Roles = u.Roles ?? (u.Role != 0 ? new List<UserRole> { u.Role } : new List<UserRole> { UserRole.Reader }),
                 LastLoginDateUtc = u.LastLoginAt.ToString("O"),  // ISO 8601 format
-                CreatedAtUtc = u.CreatedAt.ToString("O")  // ISO 8601 format
+                CreatedAtUtc = u.CreatedAt.ToString("O"),  // ISO 8601 format
+                AlchimaliaTokenQuantity = tokenQuantities.TryGetValue(u.Id, out var qty) ? qty : 0
             }).ToList();
 
             return new GetAllUsersResponse

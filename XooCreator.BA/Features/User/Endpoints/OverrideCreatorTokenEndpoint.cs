@@ -13,17 +13,19 @@ namespace XooCreator.BA.Features.User.Endpoints;
 public class OverrideCreatorTokenEndpoint
 {
     private readonly ICreatorTokenService _tokenService;
-    private readonly Auth0UserService _auth0UserService;
+    private readonly IAuth0UserService _auth0UserService;
 
-    public OverrideCreatorTokenEndpoint(ICreatorTokenService tokenService, Auth0UserService auth0UserService)
+    public OverrideCreatorTokenEndpoint(ICreatorTokenService tokenService, IAuth0UserService auth0UserService)
     {
         _tokenService = tokenService;
         _auth0UserService = auth0UserService;
     }
 
+    private const string SuperAdminEmail = "marian.terinte@gmail.com";
+
     [Route("/api/admin/creator-tokens/{userId}/override")]
     [Authorize]
-    public static async Task<Ok<CreatorTokenBalanceDto>> HandleOverride(
+    public static async Task<Results<Ok<CreatorTokenBalanceDto>, ForbidHttpResult>> HandlePut(
         [FromRoute] Guid userId,
         [FromBody] OverrideCreatorTokenRequest request,
         [FromServices] OverrideCreatorTokenEndpoint ep,
@@ -33,6 +35,13 @@ public class OverrideCreatorTokenEndpoint
         if (admin == null || !admin.Roles.Contains(UserRole.Admin))
         {
             throw new UnauthorizedAccessException("Admin access required");
+        }
+
+        // Only super admin (this email) can override Alchimalia tokens
+        if (string.IsNullOrWhiteSpace(admin.Email) ||
+            !admin.Email.Trim().Equals(SuperAdminEmail, StringComparison.OrdinalIgnoreCase))
+        {
+            return TypedResults.Forbid();
         }
 
         var result = await ep._tokenService.OverrideTokenAsync(userId, request, admin.Id, ct);
