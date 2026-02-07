@@ -12,6 +12,8 @@ public class UserDto
     public List<UserRole> Roles { get; set; } = new();  // Multiple roles support
     public string? LastLoginDateUtc { get; set; }  // ISO 8601 format
     public string? CreatedAtUtc { get; set; }  // ISO 8601 format
+    /// <summary>Alchimalia token balance (from CreatorTokenBalances).</summary>
+    public int AlchimaliaTokenQuantity { get; set; }
 }
 
 public class GetAllUsersResponse

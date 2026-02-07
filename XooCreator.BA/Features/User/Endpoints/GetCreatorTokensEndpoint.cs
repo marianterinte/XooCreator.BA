@@ -12,9 +12,9 @@ namespace XooCreator.BA.Features.User.Endpoints;
 public class GetCreatorTokensEndpoint
 {
     private readonly ICreatorTokenService _tokenService;
-    private readonly Auth0UserService _auth0UserService;
+    private readonly IAuth0UserService _auth0UserService;
 
-    public GetCreatorTokensEndpoint(ICreatorTokenService tokenService, Auth0UserService auth0UserService)
+    public GetCreatorTokensEndpoint(ICreatorTokenService tokenService, IAuth0UserService auth0UserService)
     {
         _tokenService = tokenService;
         _auth0UserService = auth0UserService;
