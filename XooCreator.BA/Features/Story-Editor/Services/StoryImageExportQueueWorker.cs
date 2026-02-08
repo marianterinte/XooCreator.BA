@@ -278,7 +278,7 @@ public class StoryImageExportQueueWorker : BackgroundService
             var testPage = pages[0];
             await imageService.GenerateStoryImageAsync(
                 storyContextJson, testPage.Text, job.Locale,
-                extraInstructions, referenceImageBytes, job.ReferenceImageMimeType, ct, job.ApiKeyOverride);
+                extraInstructions, referenceImageBytes, job.ReferenceImageMimeType, ct, job.ApiKeyOverride, job.ImageModel);
         }
         catch (Exception ex)
         {
@@ -303,7 +303,7 @@ public class StoryImageExportQueueWorker : BackgroundService
             {
                 var (imageData, mimeType) = await imageService.GenerateStoryImageAsync(
                     storyContextJson, page.Text, job.Locale,
-                    extraInstructions, referenceImageBytes, job.ReferenceImageMimeType, ct, job.ApiKeyOverride);
+                    extraInstructions, referenceImageBytes, job.ReferenceImageMimeType, ct, job.ApiKeyOverride, job.ImageModel);
                 var ext = mimeType?.Contains("png", StringComparison.OrdinalIgnoreCase) == true ? "png" : "jpg";
                 lock (results)
                 {

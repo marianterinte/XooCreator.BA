@@ -40,6 +40,7 @@ public interface IGoogleImageService
     /// </param>
     /// <param name="ct">Cancellation token.</param>
     /// <param name="apiKeyOverride">Optional API key (e.g. from job). When set, used instead of config key.</param>
+    /// <param name="modelOverride">Optional model id (e.g. from job). When set and BaseUrl is configured, used to build the API URL.</param>
     /// <returns>
     /// Generated image bytes and MIME type (usually "image/png").
     /// </returns>
@@ -51,7 +52,8 @@ public interface IGoogleImageService
         byte[]? referenceImage = null,
         string? referenceImageMimeType = null,
         CancellationToken ct = default,
-        string? apiKeyOverride = null);
+        string? apiKeyOverride = null,
+        string? modelOverride = null);
 }
 
 /// <summary>
@@ -63,6 +65,8 @@ public class GoogleImageService : IGoogleImageService
     private readonly HttpClient _httpClient;
     private readonly string _apiKey;
     private readonly string _imageEndpoint;
+    private readonly string? _imageBaseUrl;
+    private readonly string? _imageDefaultModel;
     private readonly ILogger<GoogleImageService> _logger;
 
     public GoogleImageService(
@@ -75,6 +79,8 @@ public class GoogleImageService : IGoogleImageService
             ?? throw new InvalidOperationException("GoogleAI:ApiKey is not configured in appsettings.json");
         _imageEndpoint = configuration["GoogleAI:Image:Endpoint"]
             ?? throw new InvalidOperationException("GoogleAI:Image:Endpoint is not configured in appsettings.json");
+        _imageBaseUrl = configuration["GoogleAI:Image:BaseUrl"];
+        _imageDefaultModel = configuration["GoogleAI:Image:DefaultModel"];
         _logger = logger;
     }
 
@@ -86,7 +92,8 @@ public class GoogleImageService : IGoogleImageService
         byte[]? referenceImage = null,
         string? referenceImageMimeType = null,
         CancellationToken ct = default,
-        string? apiKeyOverride = null)
+        string? apiKeyOverride = null,
+        string? modelOverride = null)
     {
         if (string.IsNullOrWhiteSpace(storyJson))
             throw new ArgumentException("Story JSON cannot be empty", nameof(storyJson));
@@ -123,6 +130,7 @@ public class GoogleImageService : IGoogleImageService
             });
         }
 
+        // generationConfig.responseModalities is required for image generation (see https://ai.google.dev/gemini-api/docs/image-generation)
         var requestBody = new
         {
             contents = new[]
@@ -131,13 +139,24 @@ public class GoogleImageService : IGoogleImageService
                 {
                     parts = parts.ToArray()
                 }
+            },
+            generationConfig = new
+            {
+                responseModalities = new[] { "TEXT", "IMAGE" }
             }
         };
 
         var json = JsonSerializer.Serialize(requestBody);
         using var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        using var request = new HttpRequestMessage(HttpMethod.Post, _imageEndpoint)
+        var requestUrl = _imageEndpoint;
+        if (!string.IsNullOrWhiteSpace(_imageBaseUrl) && !string.IsNullOrWhiteSpace(_imageDefaultModel))
+        {
+            var modelId = !string.IsNullOrWhiteSpace(modelOverride) ? modelOverride : _imageDefaultModel;
+            requestUrl = $"{_imageBaseUrl.TrimEnd('/')}/{modelId}:generateContent";
+        }
+
+        using var request = new HttpRequestMessage(HttpMethod.Post, requestUrl)
         {
             Content = content
         };
@@ -147,7 +166,8 @@ public class GoogleImageService : IGoogleImageService
         try
         {
             _logger.LogInformation(
-                "Calling Gemini 2.5 Flash Image for story illustration. Language: {LanguageCode}, HasReferenceImage: {HasRef}",
+                "Calling Gemini Image for story illustration. URL: {RequestUrl}, Language: {LanguageCode}, HasReferenceImage: {HasRef}",
+                requestUrl,
                 languageCode,
                 referenceImage != null);
 
@@ -161,12 +181,17 @@ public class GoogleImageService : IGoogleImageService
                     (int)response.StatusCode,
                     responseContent);
 
-                // Check for quota/availability errors
+                // Map known status codes to clearer messages (model is gemini-2.5-flash-image, free tier has limits)
                 if (response.StatusCode == HttpStatusCode.TooManyRequests)
                 {
-                    var errorMessage = "Image generation model is not available in your current plan. " +
-                                     "The model may require a paid plan or may not be available in your region. " +
-                                     "Please check your Google AI Studio plan and quotas.";
+                    var errorMessage = "Image generation rate limit exceeded (429). " +
+                                     "Free tier has limited requests per minute. Try again in a minute or check aistudio.google.com/usage.";
+                    throw new InvalidOperationException(errorMessage);
+                }
+                if (response.StatusCode == HttpStatusCode.Forbidden)
+                {
+                    var errorMessage = "Image generation not allowed (403). " +
+                                     "Ensure the Generative Language API is enabled and your API key has access to gemini-2.5-flash-image (see aistudio.google.com).";
                     throw new InvalidOperationException(errorMessage);
                 }
 
