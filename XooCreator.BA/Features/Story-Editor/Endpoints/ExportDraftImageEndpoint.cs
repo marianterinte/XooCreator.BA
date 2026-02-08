@@ -15,21 +15,21 @@ using XooCreator.BA.Infrastructure.Services.Queue;
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 
 [Endpoint]
-public class ExportDraftAudioEndpoint
+public class ExportDraftImageEndpoint
 {
     private readonly XooDbContext _db;
     private readonly IAuth0UserService _auth0;
     private readonly IStoryCraftsRepository _crafts;
-    private readonly ILogger<ExportDraftAudioEndpoint> _logger;
-    private readonly IStoryAudioExportQueue _queue;
+    private readonly ILogger<ExportDraftImageEndpoint> _logger;
+    private readonly IStoryImageExportQueue _queue;
     private readonly IJobEventsHub _jobEvents;
 
-    public ExportDraftAudioEndpoint(
+    public ExportDraftImageEndpoint(
         XooDbContext db,
         IAuth0UserService auth0,
         IStoryCraftsRepository crafts,
-        ILogger<ExportDraftAudioEndpoint> logger,
-        IStoryAudioExportQueue queue,
+        ILogger<ExportDraftImageEndpoint> logger,
+        IStoryImageExportQueue queue,
         IJobEventsHub jobEvents)
     {
         _db = db;
@@ -40,27 +40,25 @@ public class ExportDraftAudioEndpoint
         _jobEvents = jobEvents;
     }
 
-    public record AudioExportRequest
+    public record ImageExportRequest
     {
         public List<Guid>? SelectedTileIds { get; init; }
-        /// <summary>Google API key (required). Must be provided by the user for audio generation.</summary>
+        /// <summary>Google API key (required). Must be provided by the user for image generation.</summary>
         public string? ApiKey { get; init; }
-        /// <summary>Optional TTS model (e.g. gemini-2.5-flash-preview-tts, gemini-2.5-pro-tts). When null, uses server default.</summary>
-        public string? TtsModel { get; init; }
     }
 
-    public record AudioExportResponse
+    public record ImageExportResponse
     {
         public Guid JobId { get; init; }
     }
 
-    [Route("/api/{locale}/stories/{storyId}/audio-export-draft")]
+    [Route("/api/{locale}/stories/{storyId}/image-export-draft")]
     [Authorize]
-    public static async Task<Results<Accepted<AudioExportResponse>, NotFound, UnauthorizedHttpResult, ForbidHttpResult, BadRequest<string>>> HandlePost(
+    public static async Task<Results<Accepted<ImageExportResponse>, NotFound, UnauthorizedHttpResult, ForbidHttpResult, BadRequest<string>>> HandlePost(
         [FromRoute] string locale,
         [FromRoute] string storyId,
-        [FromBody] AudioExportRequest? request,
-        [FromServices] ExportDraftAudioEndpoint ep,
+        [FromBody] ImageExportRequest? request,
+        [FromServices] ExportDraftImageEndpoint ep,
         CancellationToken ct)
     {
         var user = await ep._auth0.GetCurrentUserAsync(ct);
@@ -73,7 +71,7 @@ public class ExportDraftAudioEndpoint
 
         if (!isAdmin)
         {
-            ep._logger.LogWarning("Audio export forbidden: userId={UserId} storyId={StoryId} not admin", user.Id, storyId);
+            ep._logger.LogWarning("Image export forbidden: userId={UserId} storyId={StoryId} not admin", user.Id, storyId);
             return TypedResults.Forbid();
         }
 
@@ -85,7 +83,7 @@ public class ExportDraftAudioEndpoint
 
         if (string.IsNullOrWhiteSpace(request?.ApiKey))
         {
-            return TypedResults.BadRequest("ApiKey is required for audio export. Please provide your Google API key in the Generate Audio modal.");
+            return TypedResults.BadRequest("ApiKey is required for image export. Please provide your Google API key in the Generate Images modal.");
         }
 
         string? selectedTileIdsJson = null;
@@ -94,24 +92,24 @@ public class ExportDraftAudioEndpoint
             selectedTileIdsJson = JsonSerializer.Serialize(request.SelectedTileIds);
         }
 
-        var job = new StoryAudioExportJob
+        var job = new StoryImageExportJob
         {
             Id = Guid.NewGuid(),
             StoryId = storyId,
             OwnerUserId = craft.OwnerUserId,
             RequestedByEmail = user.Email ?? string.Empty,
             Locale = locale,
-            Status = StoryAudioExportJobStatus.Queued,
+            Provider = "Google",
+            Status = StoryImageExportJobStatus.Queued,
             QueuedAtUtc = DateTime.UtcNow,
             SelectedTileIdsJson = selectedTileIdsJson,
-            ApiKeyOverride = request!.ApiKey!.Trim(),
-            TtsModel = string.IsNullOrWhiteSpace(request.TtsModel) ? null : request.TtsModel.Trim()
+            ApiKeyOverride = request!.ApiKey!.Trim()
         };
 
-        ep._db.StoryAudioExportJobs.Add(job);
+        ep._db.StoryImageExportJobs.Add(job);
         await ep._db.SaveChangesAsync(ct);
 
-        ep._jobEvents.Publish(JobTypes.StoryAudioExport, job.Id, new
+        ep._jobEvents.Publish(JobTypes.StoryImageExport, job.Id, new
         {
             jobId = job.Id,
             storyId = job.StoryId,
@@ -123,11 +121,11 @@ public class ExportDraftAudioEndpoint
             zipDownloadUrl = (string?)null,
             zipFileName = job.ZipFileName,
             zipSizeBytes = job.ZipSizeBytes,
-            audioCount = job.AudioCount
+            imageCount = job.ImageCount
         });
 
         await ep._queue.EnqueueAsync(job, ct);
 
-        return TypedResults.Accepted($"/api/stories/{storyId}/audio-export-jobs/{job.Id}", new AudioExportResponse { JobId = job.Id });
+        return TypedResults.Accepted($"/api/stories/{storyId}/image-export-jobs/{job.Id}", new ImageExportResponse { JobId = job.Id });
     }
 }

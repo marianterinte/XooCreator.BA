@@ -1,13 +1,15 @@
 namespace XooCreator.BA.Data.Entities;
 
-public class StoryAudioExportJob
+public class StoryImageExportJob
 {
     public Guid Id { get; set; }
     public string StoryId { get; set; } = string.Empty;
     public Guid OwnerUserId { get; set; }
     public string RequestedByEmail { get; set; } = string.Empty;
     public string Locale { get; set; } = "ro-ro";
-    public string Status { get; set; } = StoryAudioExportJobStatus.Queued;
+    /// <summary>Image generation provider: "Google" (Nano Banana) or "OpenAI". Default Google for now.</summary>
+    public string Provider { get; set; } = "Google";
+    public string Status { get; set; } = StoryImageExportJobStatus.Queued;
     public int DequeueCount { get; set; }
     public DateTime QueuedAtUtc { get; set; } = DateTime.UtcNow;
     public DateTime? StartedAtUtc { get; set; }
@@ -16,14 +18,12 @@ public class StoryAudioExportJob
     public string? ZipBlobPath { get; set; }
     public string? ZipFileName { get; set; }
     public long? ZipSizeBytes { get; set; }
-    public int? AudioCount { get; set; }
-    public string? SelectedTileIdsJson { get; set; } // JSON array of selected tile GUIDs, null = all pages
-    public string? ApiKeyOverride { get; set; } // Google API key provided by user in Generate Audio modal (required for audio export)
-    /// <summary>Optional TTS model override (e.g. gemini-2.5-flash-preview-tts, gemini-2.5-pro-tts). When null, uses server default from config.</summary>
-    public string? TtsModel { get; set; }
+    public int? ImageCount { get; set; }
+    public string? SelectedTileIdsJson { get; set; }
+    public string? ApiKeyOverride { get; set; }
 }
 
-public static class StoryAudioExportJobStatus
+public static class StoryImageExportJobStatus
 {
     public const string Queued = "Queued";
     public const string Running = "Running";

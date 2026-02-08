@@ -162,6 +162,39 @@ public class ExportCleanupService : BackgroundService
             }
         }
 
+        // Cleanup StoryImageExportJob exports
+        var oldImageExportJobs = await db.StoryImageExportJobs
+            .Where(j => j.Status == StoryImageExportJobStatus.Completed
+                     && j.CompletedAtUtc.HasValue
+                     && j.CompletedAtUtc.Value < cutoffDate
+                     && !string.IsNullOrEmpty(j.ZipBlobPath))
+            .Select(j => new { j.Id, j.ZipBlobPath, j.StoryId })
+            .ToListAsync(ct);
+
+        foreach (var job in oldImageExportJobs)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(job.ZipBlobPath))
+                {
+                    var blobClient = containerClient.GetBlobClient(job.ZipBlobPath);
+                    var deleted = await blobClient.DeleteIfExistsAsync(cancellationToken: ct);
+                    if (deleted.Value)
+                    {
+                        deletedCount++;
+                        _logger.LogDebug("Deleted image export ZIP: jobId={JobId} storyId={StoryId} path={Path}",
+                            job.Id, job.StoryId, job.ZipBlobPath);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                errorCount++;
+                _logger.LogWarning(ex, "Failed to delete image export ZIP: jobId={JobId} path={Path}",
+                    job.Id, job.ZipBlobPath);
+            }
+        }
+
         // Cleanup StoryDocumentExportJob exports
         var oldDocumentExportJobs = await db.StoryDocumentExportJobs
             .Where(j => j.Status == StoryDocumentExportJobStatus.Completed

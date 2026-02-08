@@ -269,7 +269,7 @@ public class StoryAudioExportQueueWorker : BackgroundService
         try
         {
             var testPage = pages[0];
-            await GenerateAudioBytesAsync(testPage.Text, job.Locale, audioService, job.ApiKeyOverride, ct);
+            await GenerateAudioBytesAsync(testPage.Text, job.Locale, audioService, job.ApiKeyOverride, job.TtsModel, ct);
         }
         catch (Exception ex)
         {
@@ -294,7 +294,7 @@ public class StoryAudioExportQueueWorker : BackgroundService
             await semaphore.WaitAsync(ct);
             try
             {
-                var audioBytes = await GenerateAudioBytesAsync(page.Text, job.Locale, audioService, job.ApiKeyOverride, ct);
+                var audioBytes = await GenerateAudioBytesAsync(page.Text, job.Locale, audioService, job.ApiKeyOverride, job.TtsModel, ct);
                 lock (results)
                 {
                     // Keep original page number (not sequential from 1)
@@ -420,6 +420,7 @@ public class StoryAudioExportQueueWorker : BackgroundService
         string locale,
         IGoogleAudioGeneratorService audioService,
         string? apiKeyOverride,
+        string? ttsModelOverride,
         CancellationToken ct)
     {
         // Paginile goale sunt deja filtrate în ProcessAudioExportAsync, dar verificăm din nou pentru siguranță
@@ -432,7 +433,7 @@ public class StoryAudioExportQueueWorker : BackgroundService
         if (chunks.Count == 1)
         {
             // Folosește style instructions null pentru a folosi default-ul din configurație
-            var (audioData, _) = await audioService.GenerateAudioAsync(chunks[0], locale, null, null, apiKeyOverride, ct);
+            var (audioData, _) = await audioService.GenerateAudioAsync(chunks[0], locale, null, null, apiKeyOverride, ttsModelOverride, ct);
             return audioData;
         }
 
@@ -442,7 +443,7 @@ public class StoryAudioExportQueueWorker : BackgroundService
             // Pentru primul chunk, include style instructions; pentru restul, nu (pentru a evita repetarea)
             // Folosim null pentru toate chunk-urile pentru a folosi default-ul din configurație
             string? styleInstructions = null;
-            var (audioData, _) = await audioService.GenerateAudioAsync(chunk, locale, null, styleInstructions, apiKeyOverride, ct);
+            var (audioData, _) = await audioService.GenerateAudioAsync(chunk, locale, null, styleInstructions, apiKeyOverride, ttsModelOverride, ct);
             var chunkPcm = ExtractPcmData(audioData);
             pcmData.AddRange(chunkPcm);
         }

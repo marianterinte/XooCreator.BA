@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.Json;
@@ -39,6 +39,7 @@ public interface IGoogleImageService
     /// If null and reference image is provided, defaults to "image/png".
     /// </param>
     /// <param name="ct">Cancellation token.</param>
+    /// <param name="apiKeyOverride">Optional API key (e.g. from job). When set, used instead of config key.</param>
     /// <returns>
     /// Generated image bytes and MIME type (usually "image/png").
     /// </returns>
@@ -49,7 +50,8 @@ public interface IGoogleImageService
         string? extraInstructions = null,
         byte[]? referenceImage = null,
         string? referenceImageMimeType = null,
-        CancellationToken ct = default);
+        CancellationToken ct = default,
+        string? apiKeyOverride = null);
 }
 
 /// <summary>
@@ -83,7 +85,8 @@ public class GoogleImageService : IGoogleImageService
         string? extraInstructions = null,
         byte[]? referenceImage = null,
         string? referenceImageMimeType = null,
-        CancellationToken ct = default)
+        CancellationToken ct = default,
+        string? apiKeyOverride = null)
     {
         if (string.IsNullOrWhiteSpace(storyJson))
             throw new ArgumentException("Story JSON cannot be empty", nameof(storyJson));
@@ -138,7 +141,8 @@ public class GoogleImageService : IGoogleImageService
         {
             Content = content
         };
-        request.Headers.Add("x-goog-api-key", _apiKey);
+        var apiKey = !string.IsNullOrWhiteSpace(apiKeyOverride) ? apiKeyOverride : _apiKey;
+        request.Headers.Add("x-goog-api-key", apiKey);
 
         try
         {
