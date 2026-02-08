@@ -21,6 +21,14 @@ public class StoryImageExportJob
     public int? ImageCount { get; set; }
     public string? SelectedTileIdsJson { get; set; }
     public string? ApiKeyOverride { get; set; }
+    /// <summary>Optional base64 reference image for style consistency.</summary>
+    public string? ReferenceImageBase64 { get; set; }
+    /// <summary>MIME type for reference image (e.g. image/png).</summary>
+    public string? ReferenceImageMimeType { get; set; }
+    /// <summary>Optional extra instructions appended to the image prompt.</summary>
+    public string? ExtraInstructions { get; set; }
+    /// <summary>Optional image model identifier (for future model selection).</summary>
+    public string? ImageModel { get; set; }
 }
 
 public static class StoryImageExportJobStatus

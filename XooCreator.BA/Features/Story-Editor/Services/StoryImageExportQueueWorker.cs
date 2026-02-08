@@ -254,13 +254,31 @@ public class StoryImageExportQueueWorker : BackgroundService
         }
 
         var storyContextJson = BuildStoryContextJson(craft, job.Locale);
+        var extraInstructions = job.ExtraInstructions;
+        byte[]? referenceImageBytes = null;
+        if (!string.IsNullOrWhiteSpace(job.ReferenceImageBase64))
+        {
+            try
+            {
+                referenceImageBytes = Convert.FromBase64String(job.ReferenceImageBase64);
+            }
+            catch
+            {
+                throw new InvalidOperationException("Reference image data is invalid. Please re-upload the image and try again.");
+            }
+        }
+
+        if (referenceImageBytes != null && referenceImageBytes.Length > 0 && string.IsNullOrWhiteSpace(extraInstructions))
+        {
+            extraInstructions = "Use the reference image as a style guide and keep characters consistent. Generate each page as a scene from the story.";
+        }
 
         try
         {
             var testPage = pages[0];
             await imageService.GenerateStoryImageAsync(
                 storyContextJson, testPage.Text, job.Locale,
-                null, null, null, ct, job.ApiKeyOverride);
+                extraInstructions, referenceImageBytes, job.ReferenceImageMimeType, ct, job.ApiKeyOverride);
         }
         catch (Exception ex)
         {
@@ -285,7 +303,7 @@ public class StoryImageExportQueueWorker : BackgroundService
             {
                 var (imageData, mimeType) = await imageService.GenerateStoryImageAsync(
                     storyContextJson, page.Text, job.Locale,
-                    null, null, null, ct, job.ApiKeyOverride);
+                    extraInstructions, referenceImageBytes, job.ReferenceImageMimeType, ct, job.ApiKeyOverride);
                 var ext = mimeType?.Contains("png", StringComparison.OrdinalIgnoreCase) == true ? "png" : "jpg";
                 lock (results)
                 {

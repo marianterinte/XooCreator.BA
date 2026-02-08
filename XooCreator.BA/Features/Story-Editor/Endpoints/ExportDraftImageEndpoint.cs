@@ -45,6 +45,14 @@ public class ExportDraftImageEndpoint
         public List<Guid>? SelectedTileIds { get; init; }
         /// <summary>Google API key (required). Must be provided by the user for image generation.</summary>
         public string? ApiKey { get; init; }
+        /// <summary>Optional reference image (base64) for style consistency.</summary>
+        public string? ReferenceImageBase64 { get; init; }
+        /// <summary>MIME type for reference image (e.g. image/png).</summary>
+        public string? ReferenceImageMimeType { get; init; }
+        /// <summary>Optional extra instructions for image generation.</summary>
+        public string? ExtraInstructions { get; init; }
+        /// <summary>Optional image model identifier (for future selection).</summary>
+        public string? ImageModel { get; init; }
     }
 
     public record ImageExportResponse
@@ -86,6 +94,19 @@ public class ExportDraftImageEndpoint
             return TypedResults.BadRequest("ApiKey is required for image export. Please provide your Google API key in the Generate Images modal.");
         }
 
+        var referenceImageBase64 = request?.ReferenceImageBase64?.Trim();
+        if (!string.IsNullOrWhiteSpace(referenceImageBase64))
+        {
+            try
+            {
+                _ = Convert.FromBase64String(referenceImageBase64);
+            }
+            catch
+            {
+                return TypedResults.BadRequest("Invalid base64 reference image data.");
+            }
+        }
+
         string? selectedTileIdsJson = null;
         if (request?.SelectedTileIds != null && request.SelectedTileIds.Count > 0)
         {
@@ -103,7 +124,11 @@ public class ExportDraftImageEndpoint
             Status = StoryImageExportJobStatus.Queued,
             QueuedAtUtc = DateTime.UtcNow,
             SelectedTileIdsJson = selectedTileIdsJson,
-            ApiKeyOverride = request!.ApiKey!.Trim()
+            ApiKeyOverride = request!.ApiKey!.Trim(),
+            ReferenceImageBase64 = referenceImageBase64,
+            ReferenceImageMimeType = request?.ReferenceImageMimeType?.Trim(),
+            ExtraInstructions = request?.ExtraInstructions?.Trim(),
+            ImageModel = request?.ImageModel?.Trim()
         };
 
         ep._db.StoryImageExportJobs.Add(job);
