@@ -55,8 +55,8 @@ public class GoogleAudioGeneratorService : IGoogleAudioGeneratorService
         ILogger<GoogleAudioGeneratorService> logger)
     {
         _httpClient = httpClientFactory.CreateClient();
-        _apiKey = configuration["GoogleAI:ApiKey"]
-            ?? throw new InvalidOperationException("GoogleAI:ApiKey is not configured in appsettings.json");
+        // ApiKey is no longer read from config; audio export requires the user to provide it in the Generate Audio modal.
+        _apiKey = configuration["GoogleAI:ApiKey"] ?? string.Empty;
         _ttsEndpoint = configuration["GoogleAI:Tts:Endpoint"]
             ?? throw new InvalidOperationException("GoogleAI:Tts:Endpoint is not configured in appsettings.json");
         _defaultVoice = configuration["GoogleAI:Tts:DefaultVoice"] ?? "Sulafat";
@@ -133,8 +133,13 @@ public class GoogleAudioGeneratorService : IGoogleAudioGeneratorService
             Content = content
         };
 
-        // API key de la aistudio.google.com - folosește override dacă este furnizat, altfel default din config
+        // API key: must be provided via apiKeyOverride (from Generate Audio modal). No longer uses config.
         var apiKeyToUse = !string.IsNullOrWhiteSpace(apiKeyOverride) ? apiKeyOverride : _apiKey;
+        if (string.IsNullOrWhiteSpace(apiKeyToUse))
+        {
+            throw new InvalidOperationException(
+                "Google API key is required for audio generation. Please provide it in the Generate Audio modal (required for full audio export).");
+        }
         request.Headers.Add("x-goog-api-key", apiKeyToUse);
 
         try

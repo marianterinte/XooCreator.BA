@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
 
@@ -31,6 +31,17 @@ public interface IGoogleTextService
         string languageCode,
         string? extraInstructions = null,
         CancellationToken ct = default);
+
+    /// <summary>
+    /// Generates content using a custom system instruction and user content.
+    /// Intended for translation or structured responses.
+    /// </summary>
+    Task<string> GenerateContentAsync(
+        string systemInstruction,
+        string userContent,
+        string? apiKeyOverride = null,
+        string? modelOverride = null,
+        CancellationToken ct = default);
 }
  
 /// <summary>
@@ -50,8 +61,7 @@ public class GoogleTextService : IGoogleTextService
         ILogger<GoogleTextService> logger)
     {
         _httpClient = httpClientFactory.CreateClient();
-        _apiKey = configuration["GoogleAI:ApiKey"]
-            ?? throw new InvalidOperationException("GoogleAI:ApiKey is not configured in appsettings.json");
+        _apiKey = configuration["GoogleAI:ApiKey"] ?? string.Empty;
         _textEndpoint = configuration["GoogleAI:Text:Endpoint"]
             ?? throw new InvalidOperationException("GoogleAI:Text:Endpoint is not configured in appsettings.json");
         _logger = logger;
@@ -65,6 +75,9 @@ public class GoogleTextService : IGoogleTextService
     {
         if (string.IsNullOrWhiteSpace(storyJson))
             throw new ArgumentException("Story JSON cannot be empty", nameof(storyJson));
+
+        if (string.IsNullOrWhiteSpace(_apiKey))
+            throw new InvalidOperationException("GoogleAI:ApiKey is not configured in appsettings.json");
 
         // Optimizare: extragem doar ultimele 3 pagini + summary pentru a reduce tokenii
         var optimizedJson = ExtractOptimizedStoryContext(storyJson);
@@ -147,6 +160,105 @@ public class GoogleTextService : IGoogleTextService
             _logger.LogError(ex, "Error while generating next story page.");
             throw;
         }
+    }
+
+    public async Task<string> GenerateContentAsync(
+        string systemInstruction,
+        string userContent,
+        string? apiKeyOverride = null,
+        string? modelOverride = null,
+        CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(systemInstruction))
+            throw new ArgumentException("System instruction cannot be empty", nameof(systemInstruction));
+        if (string.IsNullOrWhiteSpace(userContent))
+            throw new ArgumentException("User content cannot be empty", nameof(userContent));
+
+        var requestBody = new
+        {
+            system_instruction = new
+            {
+                parts = new[]
+                {
+                    new { text = systemInstruction }
+                }
+            },
+            contents = new[]
+            {
+                new
+                {
+                    parts = new[]
+                    {
+                        new { text = userContent }
+                    }
+                }
+            },
+            generationConfig = new
+            {
+                temperature = 0.2,
+                topP = 0.9,
+                topK = 40,
+                maxOutputTokens = 4096,
+                response_mime_type = "application/json"
+            },
+            model = modelOverride ?? "gemini-1.5-flash-latest"
+        };
+
+        var json = JsonSerializer.Serialize(requestBody);
+        using var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        var endpoint = ApplyModelOverride(_textEndpoint, modelOverride);
+        using var request = new HttpRequestMessage(HttpMethod.Post, endpoint)
+        {
+            Content = content
+        };
+
+        var apiKeyToUse = !string.IsNullOrWhiteSpace(apiKeyOverride) ? apiKeyOverride : _apiKey;
+        if (string.IsNullOrWhiteSpace(apiKeyToUse))
+            throw new InvalidOperationException("Google API key is required for text generation.");
+
+        request.Headers.Add("x-goog-api-key", apiKeyToUse);
+
+        try
+        {
+            _logger.LogInformation("Calling Gemini Text API with custom instruction.");
+
+            using var response = await _httpClient.SendAsync(request, ct);
+            var responseContent = await response.Content.ReadAsStringAsync(ct);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogError(
+                    "Gemini Text API returned {StatusCode}: {Body}",
+                    (int)response.StatusCode,
+                    responseContent);
+
+                response.EnsureSuccessStatusCode();
+            }
+
+            return ExtractTextFromResponse(responseContent);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error while generating custom content.");
+            throw;
+        }
+    }
+
+    private static string ApplyModelOverride(string endpoint, string? modelOverride)
+    {
+        if (string.IsNullOrWhiteSpace(modelOverride) || string.IsNullOrWhiteSpace(endpoint))
+            return endpoint;
+
+        const string marker = "/models/";
+        var idx = endpoint.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+        if (idx < 0) return endpoint;
+
+        var start = idx + marker.Length;
+        var end = endpoint.IndexOf(':', start);
+        if (end < 0) return endpoint;
+
+        return endpoint.Substring(0, start) + modelOverride + endpoint.Substring(end);
     }
 
     /// <summary>

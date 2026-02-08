@@ -59,6 +59,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IStoryDocumentExportQueue, StoryDocumentExportQueue>();
         services.AddSingleton<IStoryAudioExportQueue, StoryAudioExportQueue>();
         services.AddSingleton<IStoryAudioImportQueue, StoryAudioImportQueue>();
+        services.AddSingleton<IStoryTranslationQueue, StoryTranslationQueue>();
         services.AddSingleton<IStoryImageImportQueue, StoryImageImportQueue>();
         services.AddSingleton<IEpicAggregatesQueue, EpicAggregatesQueue>();
         services.AddSingleton<IHeroPublishQueue, HeroPublishQueue>();
@@ -137,6 +138,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IStoryTileUpdater, StoryTileUpdater>();
         services.AddScoped<IStoryAssetLinkService, StoryAssetLinkService>();
         services.AddScoped<IStoryPublishChangeLogService, StoryPublishChangeLogService>();
+        services.AddScoped<IStoryTranslationService, StoryTranslationService>();
         
         // Cloning Services (unified logic for Copy/Fork/New Version)
         services.AddScoped<IStorySourceMapper, StorySourceMapper>();

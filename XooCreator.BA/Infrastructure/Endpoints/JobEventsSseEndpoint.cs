@@ -28,6 +28,7 @@ public sealed class JobEventsSseEndpoint
         JobTypes.StoryDocumentExport,
         JobTypes.StoryAudioExport,
         JobTypes.StoryAudioImport,
+        JobTypes.StoryTranslation,
         JobTypes.StoryImageImport,
         JobTypes.EpicVersion,
         JobTypes.EpicPublish,
@@ -398,6 +399,31 @@ public sealed class JobEventsSseEndpoint
                     zipFileName = job.ZipFileName,
                     zipSizeBytes = job.ZipSizeBytes,
                     audioCount = job.AudioCount
+                };
+
+                return new Snapshot(payload.status?.ToString() ?? string.Empty, JsonSerializer.Serialize(payload, Json));
+            }
+            case JobTypes.StoryTranslation:
+            {
+                var job = await db.StoryTranslationJobs.AsNoTracking().FirstOrDefaultAsync(j => j.Id == jobId, ct);
+                if (job == null) return null;
+
+                if (!auth0.HasRole(user, UserRole.Admin) && job.OwnerUserId != user.Id)
+                {
+                    return null;
+                }
+
+                var payload = new
+                {
+                    jobId = job.Id,
+                    storyId = job.StoryId,
+                    status = job.Status,
+                    queuedAtUtc = job.QueuedAtUtc,
+                    startedAtUtc = job.StartedAtUtc,
+                    completedAtUtc = job.CompletedAtUtc,
+                    errorMessage = job.ErrorMessage,
+                    fieldsTranslated = job.FieldsTranslated,
+                    updatedLanguagesJson = job.UpdatedLanguagesJson
                 };
 
                 return new Snapshot(payload.status?.ToString() ?? string.Empty, JsonSerializer.Serialize(payload, Json));
