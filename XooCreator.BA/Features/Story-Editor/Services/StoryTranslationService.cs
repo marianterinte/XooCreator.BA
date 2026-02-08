@@ -164,11 +164,13 @@ public class StoryTranslationService : IStoryTranslationService
             """;
 
         var userContent = JsonSerializer.Serialize(sourceMap);
+        // Use default model from config (gemini-2.5-flash) so the same endpoint works as for "Generate next page".
+        // Passing modelOverride: null avoids 404 from gemini-1.5-flash when key or project only has access to 2.5-flash.
         var responseText = await _googleTextService.GenerateContentAsync(
             systemInstruction,
             userContent,
             apiKeyOverride: apiKey,
-            modelOverride: "gemini-1.5-flash",
+            modelOverride: null,
             ct: ct);
 
         var json = ExtractJson(responseText);
