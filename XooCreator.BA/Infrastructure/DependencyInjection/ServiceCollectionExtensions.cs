@@ -59,6 +59,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IStoryDocumentExportQueue, StoryDocumentExportQueue>();
         services.AddSingleton<IStoryAudioExportQueue, StoryAudioExportQueue>();
         services.AddSingleton<IStoryAudioImportQueue, StoryAudioImportQueue>();
+        services.AddSingleton<IStoryTranslationQueue, StoryTranslationQueue>();
         services.AddSingleton<IStoryImageImportQueue, StoryImageImportQueue>();
         services.AddSingleton<IEpicAggregatesQueue, EpicAggregatesQueue>();
         services.AddSingleton<IHeroPublishQueue, HeroPublishQueue>();

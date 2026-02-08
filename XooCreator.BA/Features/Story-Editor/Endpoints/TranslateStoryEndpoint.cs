@@ -1,34 +1,44 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authorization;
-using System.Linq;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using XooCreator.BA.Data;
+using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Features.StoryEditor.Repositories;
-using XooCreator.BA.Features.StoryEditor.Services;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
+using XooCreator.BA.Infrastructure.Services.Jobs;
+using XooCreator.BA.Infrastructure.Services.Queue;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 
 [Endpoint]
 public class TranslateStoryEndpoint
 {
+    private readonly XooDbContext _db;
     private readonly IStoryCraftsRepository _crafts;
-    private readonly IStoryTranslationService _translationService;
     private readonly IAuth0UserService _auth0;
     private readonly ILogger<TranslateStoryEndpoint> _logger;
+    private readonly IStoryTranslationQueue _queue;
+    private readonly IJobEventsHub _jobEvents;
 
     public TranslateStoryEndpoint(
+        XooDbContext db,
         IStoryCraftsRepository crafts,
-        IStoryTranslationService translationService,
         IAuth0UserService auth0,
-        ILogger<TranslateStoryEndpoint> logger)
+        ILogger<TranslateStoryEndpoint> logger,
+        IStoryTranslationQueue queue,
+        IJobEventsHub jobEvents)
     {
+        _db = db;
         _crafts = crafts;
-        _translationService = translationService;
         _auth0 = auth0;
         _logger = logger;
+        _queue = queue;
+        _jobEvents = jobEvents;
     }
 
     public record TranslateStoryRequest
@@ -37,19 +47,20 @@ public class TranslateStoryEndpoint
         public List<string>? TargetLanguages { get; init; }
         public string? ApiKey { get; init; }
         public string? Provider { get; init; }
+        /// <summary>Optional. When set, only these tiles (by Guid from pages-for-audio-export) are translated; story title/summary are always translated.</summary>
+        public List<string>? SelectedTileIds { get; init; }
     }
 
-    public record TranslateStoryResponse
+    /// <summary>Response when translation is started as a background job (202 Accepted).</summary>
+    public record TranslateStoryJobResponse
     {
-        public bool Ok { get; init; } = true;
-        public List<string> UpdatedLanguages { get; init; } = new();
-        public int FieldsTranslated { get; init; }
-        public int FieldsSkipped { get; init; }
+        [JsonPropertyName("jobId")]
+        public Guid JobId { get; init; }
     }
 
     [Route("/api/{locale}/stories/{storyId}/translate")]
     [Authorize]
-    public static async Task<Results<Ok<TranslateStoryResponse>, BadRequest<string>, NotFound, UnauthorizedHttpResult, ForbidHttpResult, Conflict<string>>> HandlePost(
+    public static async Task<Results<Accepted<TranslateStoryJobResponse>, BadRequest<string>, NotFound, UnauthorizedHttpResult, ForbidHttpResult, Conflict<string>>> HandlePost(
         [FromRoute] string locale,
         [FromRoute] string storyId,
         [FromBody] TranslateStoryRequest request,
@@ -88,14 +99,12 @@ public class TranslateStoryEndpoint
         if (craft == null)
             return TypedResults.NotFound();
 
-        // Only owner can edit (unless Admin)
         if (craft.OwnerUserId != user.Id && !isAdmin)
         {
             ep._logger.LogWarning("Translate forbidden: userId={UserId} storyId={StoryId} not owner", user.Id, storyId);
             return TypedResults.Forbid();
         }
 
-        // Disallow edits in read-only states
         var status = (craft.Status ?? "draft").ToLowerInvariant();
         if (status is "sent_for_approval" or "in_review" or "approved" or "published")
         {
@@ -103,29 +112,44 @@ public class TranslateStoryEndpoint
             return TypedResults.Conflict("Story is read-only in the current status.");
         }
 
-        try
-        {
-            var result = await ep._translationService.TranslateStoryAsync(
-                storyId,
-                request.ReferenceLanguage!,
-                request.TargetLanguages!,
-                request.ApiKey!,
-                ct);
+        var targetLanguagesJson = JsonSerializer.Serialize(request.TargetLanguages);
+        string? selectedTileIdsJson = null;
+        if (request.SelectedTileIds != null && request.SelectedTileIds.Count > 0)
+            selectedTileIdsJson = JsonSerializer.Serialize(request.SelectedTileIds);
 
-            return TypedResults.Ok(new TranslateStoryResponse
-            {
-                UpdatedLanguages = result.UpdatedLanguages.ToList(),
-                FieldsTranslated = result.FieldsTranslated,
-                FieldsSkipped = result.FieldsSkipped
-            });
-        }
-        catch (ArgumentException ex)
+        var job = new StoryTranslationJob
         {
-            return TypedResults.BadRequest(ex.Message);
-        }
-        catch (InvalidOperationException ex)
+            Id = Guid.NewGuid(),
+            StoryId = storyId,
+            OwnerUserId = craft.OwnerUserId,
+            ReferenceLanguage = request.ReferenceLanguage!.Trim(),
+            TargetLanguagesJson = targetLanguagesJson,
+            SelectedTileIdsJson = selectedTileIdsJson,
+            ApiKeyOverride = request.ApiKey!.Trim(),
+            Status = StoryTranslationJobStatus.Queued,
+            QueuedAtUtc = DateTime.UtcNow
+        };
+
+        ep._db.StoryTranslationJobs.Add(job);
+        await ep._db.SaveChangesAsync(ct);
+
+        ep._jobEvents.Publish(JobTypes.StoryTranslation, job.Id, new
         {
-            return TypedResults.BadRequest($"Failed to translate: {ex.Message}");
-        }
+            jobId = job.Id,
+            storyId = job.StoryId,
+            status = job.Status,
+            queuedAtUtc = job.QueuedAtUtc,
+            startedAtUtc = job.StartedAtUtc,
+            completedAtUtc = job.CompletedAtUtc,
+            errorMessage = job.ErrorMessage,
+            fieldsTranslated = job.FieldsTranslated,
+            updatedLanguagesJson = job.UpdatedLanguagesJson
+        });
+
+        await ep._queue.EnqueueAsync(job, ct);
+
+        return TypedResults.Accepted(
+            $"/api/stories/{storyId}/translation-jobs/{job.Id}",
+            new TranslateStoryJobResponse { JobId = job.Id });
     }
 }

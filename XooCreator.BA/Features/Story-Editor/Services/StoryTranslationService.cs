@@ -14,6 +14,7 @@ public interface IStoryTranslationService
         string referenceLanguage,
         IReadOnlyList<string> targetLanguages,
         string apiKey,
+        IReadOnlyList<string>? selectedTileIds = null,
         CancellationToken ct = default);
 }
 
@@ -43,6 +44,7 @@ public class StoryTranslationService : IStoryTranslationService
         string referenceLanguage,
         IReadOnlyList<string> targetLanguages,
         string apiKey,
+        IReadOnlyList<string>? selectedTileIds = null,
         CancellationToken ct = default)
     {
         var refLang = (referenceLanguage ?? string.Empty).Trim().ToLowerInvariant();
@@ -83,9 +85,13 @@ public class StoryTranslationService : IStoryTranslationService
             await _translationManager.EnsureTranslationAsync(craft.OwnerUserId, storyId, lang, ct: ct);
         }
 
-        // Ensure answer translations exist for targets (StoryTranslationManager doesn't handle answers)
+        var selectedTileIdSet = ParseSelectedTileIds(selectedTileIds, craft);
+
+        // Ensure answer translations exist for targets (only for tiles we will translate)
         foreach (var tile in craft.Tiles)
         {
+            if (selectedTileIdSet != null && !selectedTileIdSet.Contains(tile.Id))
+                continue;
             foreach (var answer in tile.Answers)
             {
                 foreach (var lang in targets)
@@ -104,7 +110,7 @@ public class StoryTranslationService : IStoryTranslationService
             }
         }
 
-        var sourceMap = BuildSourceMap(craft, refLang);
+        var sourceMap = BuildSourceMap(craft, refLang, selectedTileIdSet);
         var updatedLanguages = new List<string>();
         var fieldsTranslated = 0;
         var fieldsSkipped = sourceMap.Count(kv => string.IsNullOrWhiteSpace(kv.Value));
@@ -122,7 +128,32 @@ public class StoryTranslationService : IStoryTranslationService
         return new TranslateStoryResult(updatedLanguages, fieldsTranslated, fieldsSkipped);
     }
 
-    private Dictionary<string, string> BuildSourceMap(StoryCraft craft, string refLang)
+    private static HashSet<Guid>? ParseSelectedTileIds(IReadOnlyList<string>? selectedTileIds, StoryCraft craft)
+    {
+        if (selectedTileIds == null || selectedTileIds.Count == 0)
+            return null;
+
+        var set = new HashSet<Guid>();
+        var tileIdsByString = craft.Tiles.ToDictionary(t => t.TileId, t => t.Id, StringComparer.OrdinalIgnoreCase);
+
+        foreach (var id in selectedTileIds)
+        {
+            if (string.IsNullOrWhiteSpace(id)) continue;
+            var s = id.Trim();
+            if (Guid.TryParse(s, out var guid) && craft.Tiles.Any(t => t.Id == guid))
+            {
+                set.Add(guid);
+            }
+            else if (tileIdsByString.TryGetValue(s, out var tileGuid))
+            {
+                set.Add(tileGuid);
+            }
+        }
+
+        return set.Count == 0 ? null : set;
+    }
+
+    private Dictionary<string, string> BuildSourceMap(StoryCraft craft, string refLang, HashSet<Guid>? selectedTileIds)
     {
         var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
@@ -132,6 +163,8 @@ public class StoryTranslationService : IStoryTranslationService
 
         foreach (var tile in craft.Tiles)
         {
+            if (selectedTileIds != null && !selectedTileIds.Contains(tile.Id))
+                continue;
             var tileTranslation = tile.Translations.FirstOrDefault(t => t.LanguageCode == refLang);
             var tileId = tile.TileId;
             map[$"tile.{tileId}.caption"] = tileTranslation?.Caption ?? string.Empty;
@@ -215,6 +248,11 @@ public class StoryTranslationService : IStoryTranslationService
 
         foreach (var tile in craft.Tiles)
         {
+            // Only apply if this tile was in the source map (i.e. was selected for translation)
+            var tileId = tile.TileId;
+            if (!sourceMap.ContainsKey($"tile.{tileId}.caption") && !sourceMap.ContainsKey($"tile.{tileId}.text") && !sourceMap.ContainsKey($"tile.{tileId}.question"))
+                continue;
+
             var tileTranslation = tile.Translations.FirstOrDefault(t => t.LanguageCode == targetLang);
             if (tileTranslation == null)
             {
@@ -226,8 +264,6 @@ public class StoryTranslationService : IStoryTranslationService
                 };
                 tile.Translations.Add(tileTranslation);
             }
-
-            var tileId = tile.TileId;
 
             if (ShouldTranslate(sourceMap, $"tile.{tileId}.caption") &&
                 TryGetTranslated(translatedMap, $"tile.{tileId}.caption", out var caption))
