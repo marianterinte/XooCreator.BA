@@ -18,7 +18,7 @@ public class StoryAudioExportJob
     public long? ZipSizeBytes { get; set; }
     public int? AudioCount { get; set; }
     public string? SelectedTileIdsJson { get; set; } // JSON array of selected tile GUIDs, null = all pages
-    public string? ApiKeyOverride { get; set; } // Optional API key from UI, null = use default from config
+    public string? ApiKeyOverride { get; set; } // Google API key provided by user in Generate Audio modal (required for audio export)
 }
 
 public static class StoryAudioExportJobStatus

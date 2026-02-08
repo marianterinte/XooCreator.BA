@@ -43,7 +43,8 @@ public class ExportDraftAudioEndpoint
     public record AudioExportRequest
     {
         public List<Guid>? SelectedTileIds { get; init; }
-        public string? ApiKey { get; init; } // Optional API key from UI
+        /// <summary>Google API key (required). Must be provided by the user for audio generation.</summary>
+        public string? ApiKey { get; init; }
     }
 
     public record AudioExportResponse
@@ -80,6 +81,11 @@ public class ExportDraftAudioEndpoint
             return TypedResults.NotFound();
         }
 
+        if (string.IsNullOrWhiteSpace(request?.ApiKey))
+        {
+            return TypedResults.BadRequest("ApiKey is required for audio export. Please provide your Google API key in the Generate Audio modal.");
+        }
+
         string? selectedTileIdsJson = null;
         if (request?.SelectedTileIds != null && request.SelectedTileIds.Count > 0)
         {
@@ -96,7 +102,7 @@ public class ExportDraftAudioEndpoint
             Status = StoryAudioExportJobStatus.Queued,
             QueuedAtUtc = DateTime.UtcNow,
             SelectedTileIdsJson = selectedTileIdsJson,
-            ApiKeyOverride = !string.IsNullOrWhiteSpace(request?.ApiKey) ? request.ApiKey : null
+            ApiKeyOverride = request!.ApiKey!.Trim()
         };
 
         ep._db.StoryAudioExportJobs.Add(job);
