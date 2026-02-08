@@ -59,6 +59,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IStoryDocumentExportQueue, StoryDocumentExportQueue>();
         services.AddSingleton<IStoryAudioExportQueue, StoryAudioExportQueue>();
         services.AddSingleton<IStoryAudioImportQueue, StoryAudioImportQueue>();
+        services.AddSingleton<IStoryImageImportQueue, StoryImageImportQueue>();
         services.AddSingleton<IEpicAggregatesQueue, EpicAggregatesQueue>();
         services.AddSingleton<IHeroPublishQueue, HeroPublishQueue>();
         services.AddSingleton<IAnimalPublishQueue, AnimalPublishQueue>();
@@ -156,6 +157,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IStoryExportService, StoryExportService>();
         services.AddScoped<IStoryDocumentExportService, StoryDocumentExportService>();
         services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IStoryAudioImportProcessor, XooCreator.BA.Features.StoryEditor.Services.StoryAudioImportProcessor>();
+        services.AddScoped<XooCreator.BA.Features.StoryEditor.Services.IStoryImageImportProcessor, XooCreator.BA.Features.StoryEditor.Services.StoryImageImportProcessor>();
         
         // Story Epic Services
         services.AddScoped<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.IStoryEpicService, XooCreator.BA.Features.StoryEditor.StoryEpic.Services.StoryEpicService>();

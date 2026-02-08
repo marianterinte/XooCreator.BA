@@ -28,6 +28,7 @@ public sealed class JobEventsSseEndpoint
         JobTypes.StoryDocumentExport,
         JobTypes.StoryAudioExport,
         JobTypes.StoryAudioImport,
+        JobTypes.StoryImageImport,
         JobTypes.EpicVersion,
         JobTypes.EpicPublish,
         JobTypes.HeroVersion,
@@ -404,6 +405,34 @@ public sealed class JobEventsSseEndpoint
             case JobTypes.StoryAudioImport:
             {
                 var job = await db.StoryAudioImportJobs.AsNoTracking().FirstOrDefaultAsync(j => j.Id == jobId, ct);
+                if (job == null) return null;
+
+                if (!auth0.HasRole(user, UserRole.Admin) && job.OwnerUserId != user.Id)
+                {
+                    return null;
+                }
+
+                var importPayload = new
+                {
+                    jobId = job.Id,
+                    storyId = job.StoryId,
+                    status = job.Status,
+                    queuedAtUtc = job.QueuedAtUtc,
+                    startedAtUtc = job.StartedAtUtc,
+                    completedAtUtc = job.CompletedAtUtc,
+                    errorMessage = job.ErrorMessage,
+                    success = job.Success,
+                    importedCount = job.ImportedCount,
+                    totalPages = job.TotalPages,
+                    errorsJson = job.ErrorsJson,
+                    warningsJson = job.WarningsJson
+                };
+
+                return new Snapshot(importPayload.status?.ToString() ?? string.Empty, JsonSerializer.Serialize(importPayload, Json));
+            }
+            case JobTypes.StoryImageImport:
+            {
+                var job = await db.StoryImageImportJobs.AsNoTracking().FirstOrDefaultAsync(j => j.Id == jobId, ct);
                 if (job == null) return null;
 
                 if (!auth0.HasRole(user, UserRole.Admin) && job.OwnerUserId != user.Id)
