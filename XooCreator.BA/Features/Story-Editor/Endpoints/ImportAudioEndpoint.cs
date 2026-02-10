@@ -128,15 +128,16 @@ public partial class ImportAudioEndpoint
             return TypedResults.NotFound();
         }
 
-        // Get page tiles ordered by SortOrder
+        // Get page and quiz tiles ordered by SortOrder (quiz treated as pages for audio)
+        var pageOrQuizTypes = new[] { "page", "quiz" };
         var pageTiles = craft.Tiles
-            .Where(t => t.Type.Equals("page", StringComparison.OrdinalIgnoreCase))
+            .Where(t => pageOrQuizTypes.Contains(t.Type, StringComparer.OrdinalIgnoreCase))
             .OrderBy(t => t.SortOrder)
             .ToList();
 
         if (pageTiles.Count == 0)
         {
-            errors.Add("Story has no page tiles");
+            errors.Add("Story has no page or quiz tiles");
             return TypedResults.BadRequest(new ImportAudioResponse { Success = false, Errors = errors });
         }
 

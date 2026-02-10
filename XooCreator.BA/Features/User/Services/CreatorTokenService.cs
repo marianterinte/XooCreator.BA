@@ -37,6 +37,26 @@ public class CreatorTokenService : ICreatorTokenService
         };
     }
 
+    private const string AlchimaliaTokenType = "Alchimalia";
+    private const string AlchimaliaTokenValue = "Alchimalia Token";
+
+    public async Task<IReadOnlyDictionary<Guid, int>> GetAlchimaliaTokenQuantitiesAsync(IReadOnlyList<Guid> userIds, CancellationToken ct)
+    {
+        if (userIds == null || userIds.Count == 0)
+            return new Dictionary<Guid, int>();
+
+        var list = userIds.Distinct().ToList();
+        var balances = await _context.CreatorTokenBalances
+            .Where(b => list.Contains(b.UserId) && b.TokenType == AlchimaliaTokenType && b.TokenValue == AlchimaliaTokenValue)
+            .Select(b => new { b.UserId, b.Quantity })
+            .ToListAsync(ct);
+
+        var dict = list.ToDictionary(id => id, _ => 0);
+        foreach (var b in balances)
+            dict[b.UserId] = b.Quantity;
+        return dict;
+    }
+
     public async Task<CreatorTokenBalanceDto> OverrideTokenAsync(Guid userId, OverrideCreatorTokenRequest request, Guid adminUserId, CancellationToken ct)
     {
         var balance = await _context.CreatorTokenBalances

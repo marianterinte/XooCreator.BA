@@ -32,7 +32,7 @@ public class GetMarketplaceEpicsEndpoint
     }
 
     [Route("/api/{locale}/tales-of-alchimalia/market/epics")]
-    [Authorize]
+    [AllowAnonymous]
     public static async Task<Ok<GetMarketplaceEpicsResponse>> HandleGet(
         [FromRoute] string locale,
         [FromServices] GetMarketplaceEpicsEndpoint ep,
@@ -57,7 +57,6 @@ public class GetMarketplaceEpicsEndpoint
         try
         {
             var userId = await ep._userContext.GetUserIdAsync();
-            if (userId == null) throw new UnauthorizedAccessException("User not found");
 
             var request = new SearchEpicsRequest
             {
@@ -71,7 +70,10 @@ public class GetMarketplaceEpicsEndpoint
                 AgeGroupIds = ageGroupIdsList
             };
 
-            var result = await ep._epicsMarketplaceService.GetMarketplaceEpicsAsync(userId.Value, locale, request);
+            // For anonymous users, pass an empty userId to get a generic marketplace view
+            var effectiveUserId = userId ?? Guid.Empty;
+
+            var result = await ep._epicsMarketplaceService.GetMarketplaceEpicsAsync(effectiveUserId, locale, request);
             
             return TypedResults.Ok(result);
         }

@@ -103,6 +103,7 @@ public class GenerateAudioEndpoint
                     request.VoiceName,
                     request.StyleInstructions,
                     apiKeyOverride: null, // Use default from config
+                    ttsModelOverride: null,
                     ct);
             }
 

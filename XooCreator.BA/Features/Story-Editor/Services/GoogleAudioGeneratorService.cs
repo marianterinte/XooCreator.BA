@@ -29,6 +29,9 @@ public interface IGoogleAudioGeneratorService
     /// <param name="apiKeyOverride">
     /// Optional API key override. If provided, uses this instead of the configured API key.
     /// </param>
+    /// <param name="ttsModelOverride">
+    /// Optional TTS model override (e.g. gemini-2.5-flash-preview-tts, gemini-2.5-pro-tts). When null, uses configured endpoint.
+    /// </param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>Audio bytes and format ("wav").</returns>
     Task<(byte[] AudioData, string Format)> GenerateAudioAsync(
@@ -37,6 +40,7 @@ public interface IGoogleAudioGeneratorService
         string? voiceName = null,
         string? styleInstructions = null,
         string? apiKeyOverride = null,
+        string? ttsModelOverride = null,
         CancellationToken ct = default);
 }
 
@@ -55,8 +59,8 @@ public class GoogleAudioGeneratorService : IGoogleAudioGeneratorService
         ILogger<GoogleAudioGeneratorService> logger)
     {
         _httpClient = httpClientFactory.CreateClient();
-        _apiKey = configuration["GoogleAI:ApiKey"]
-            ?? throw new InvalidOperationException("GoogleAI:ApiKey is not configured in appsettings.json");
+        // ApiKey is no longer read from config; audio export requires the user to provide it in the Generate Audio modal.
+        _apiKey = configuration["GoogleAI:ApiKey"] ?? string.Empty;
         _ttsEndpoint = configuration["GoogleAI:Tts:Endpoint"]
             ?? throw new InvalidOperationException("GoogleAI:Tts:Endpoint is not configured in appsettings.json");
         _defaultVoice = configuration["GoogleAI:Tts:DefaultVoice"] ?? "Sulafat";
@@ -70,6 +74,7 @@ public class GoogleAudioGeneratorService : IGoogleAudioGeneratorService
         string? voiceName = null,
         string? styleInstructions = null,
         string? apiKeyOverride = null,
+        string? ttsModelOverride = null,
         CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(text))
@@ -128,20 +133,26 @@ public class GoogleAudioGeneratorService : IGoogleAudioGeneratorService
         var json = JsonSerializer.Serialize(requestBody);
         using var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        using var request = new HttpRequestMessage(HttpMethod.Post, _ttsEndpoint)
+        var endpoint = ApplyModelOverride(_ttsEndpoint, ttsModelOverride);
+        using var request = new HttpRequestMessage(HttpMethod.Post, endpoint)
         {
             Content = content
         };
 
-        // API key de la aistudio.google.com - folosește override dacă este furnizat, altfel default din config
+        // API key: must be provided via apiKeyOverride (from Generate Audio modal). No longer uses config.
         var apiKeyToUse = !string.IsNullOrWhiteSpace(apiKeyOverride) ? apiKeyOverride : _apiKey;
+        if (string.IsNullOrWhiteSpace(apiKeyToUse))
+        {
+            throw new InvalidOperationException(
+                "Google API key is required for audio generation. Please provide it in the Generate Audio modal (required for full audio export).");
+        }
         request.Headers.Add("x-goog-api-key", apiKeyToUse);
 
         try
         {
             _logger.LogInformation(
-                "Calling Gemini TTS with language: {LanguageCode}, voice: {VoiceName}, hasStyleInstructions: {HasStyle}",
-                languageCode, voiceName, !string.IsNullOrWhiteSpace(finalStyleInstructions));
+                "Calling Gemini TTS with language: {LanguageCode}, voice: {VoiceName}, hasStyleInstructions: {HasStyle}, model: {Model}",
+                languageCode, voiceName, !string.IsNullOrWhiteSpace(finalStyleInstructions), ttsModelOverride ?? "default");
 
             using var response = await _httpClient.SendAsync(request, ct);
             var responseContent = await response.Content.ReadAsStringAsync(ct);
@@ -323,5 +334,21 @@ public class GoogleAudioGeneratorService : IGoogleAudioGeneratorService
 
         writer.Flush();
         return ms.ToArray();
+    }
+
+    private static string ApplyModelOverride(string endpoint, string? modelOverride)
+    {
+        if (string.IsNullOrWhiteSpace(modelOverride) || string.IsNullOrWhiteSpace(endpoint))
+            return endpoint;
+
+        const string marker = "/models/";
+        var idx = endpoint.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+        if (idx < 0) return endpoint;
+
+        var start = idx + marker.Length;
+        var end = endpoint.IndexOf(':', start);
+        if (end < 0) return endpoint;
+
+        return endpoint.Substring(0, start) + modelOverride + endpoint.Substring(end);
     }
 }

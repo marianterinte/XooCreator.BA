@@ -11,6 +11,9 @@ public static class JobTypes
     public const string StoryDocumentExport = "story-document-export";
     public const string StoryAudioExport = "story-audio-export";
     public const string StoryAudioImport = "story-audio-import";
+    public const string StoryTranslation = "story-translation";
+    public const string StoryImageImport = "story-image-import";
+    public const string StoryImageExport = "story-image-export";
     public const string EpicVersion = "epic-version";
     public const string EpicPublish = "epic-publish";
     public const string HeroVersion = "hero-version";
