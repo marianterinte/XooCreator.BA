@@ -122,7 +122,7 @@ public partial class ImportImagesEndpoint
         }
 
         // Get page and quiz tiles ordered by SortOrder (quiz treated as pages for images)
-        var pageOrQuizTypes = new[] { "page", "quiz" };
+        var pageOrQuizTypes = new[] { "page", "quiz", "dialog" };
         var pageTiles = craft.Tiles
             .Where(t => pageOrQuizTypes.Contains(t.Type, StringComparer.OrdinalIgnoreCase))
             .OrderBy(t => t.SortOrder)
@@ -130,7 +130,7 @@ public partial class ImportImagesEndpoint
 
         if (pageTiles.Count == 0)
         {
-            errors.Add("Story has no page or quiz tiles");
+            errors.Add("Story has no page, quiz, or dialog tiles");
             return TypedResults.BadRequest(new ImportImagesResponse { Success = false, Errors = errors });
         }
 

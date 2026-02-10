@@ -156,9 +156,12 @@ public class StoryVersionQueueWorker : BackgroundService
                             .Include(d => d.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Tokens)
                             .Include(d => d.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Translations)
                             .Include(d => d.Tiles).ThenInclude(t => t.Translations)
+                            .Include(d => d.Tiles).ThenInclude(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.Translations)
+                            .Include(d => d.Tiles).ThenInclude(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.OutgoingEdges).ThenInclude(e => e.Translations)
                             .Include(d => d.Translations)
                             .Include(d => d.Topics).ThenInclude(t => t.StoryTopic)
                             .Include(d => d.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
+                            .Include(d => d.DialogParticipants)
                             .AsSplitQuery()
                             .FirstOrDefaultAsync(d => d.StoryId == job.StoryId, stoppingToken);
 

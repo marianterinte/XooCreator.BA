@@ -208,7 +208,14 @@ public static class StoryDefinitionMapper
             StoryTopic = story.StoryTopic,
             StoryType = story.StoryType.ToString(),
             IsEvaluative = story.IsEvaluative,
-            UnlockedStoryHeroes = GetUnlockedHeroesFromSeed(story.StoryId),
+            UnlockedStoryHeroes = story.UnlockedHeroes
+                .OrderBy(h => h.HeroId)
+                .Select(h => h.HeroId)
+                .ToList(),
+            DialogParticipants = story.DialogParticipants
+                .OrderBy(h => h.SortOrder)
+                .Select(h => h.HeroId)
+                .ToList(),
             Tiles = story.Tiles
                 .OrderBy(t => t.SortOrder)
                 .Select(t => new StoryTileDto
@@ -222,6 +229,26 @@ public static class StoryDefinitionMapper
                     AudioUrl = TryGetAudioUrl(t, lc),
                     VideoUrl = TryGetVideoUrl(t, lc),
                     Question = TryGetQuestion(t, lc) ?? t.Question,
+                    DialogRootNodeId = t.DialogTile?.RootNodeId,
+                    DialogNodes = t.DialogTile?.Nodes
+                        .OrderBy(n => n.SortOrder)
+                        .Select(n => new StoryDialogNodeDto
+                        {
+                            NodeId = n.NodeId,
+                            SpeakerType = n.SpeakerType,
+                            SpeakerHeroId = n.SpeakerHeroId,
+                            Text = n.Translations.FirstOrDefault(nt => nt.LanguageCode == lc)?.Text ?? string.Empty,
+                            Options = n.OutgoingEdges
+                                .OrderBy(e => e.OptionOrder)
+                                .Select(e => new StoryDialogOptionDto
+                                {
+                                    Id = e.EdgeId,
+                                    NextNodeId = e.ToNodeId,
+                                    Text = e.Translations.FirstOrDefault(et => et.LanguageCode == lc)?.OptionText ?? string.Empty
+                                })
+                                .ToList()
+                        })
+                        .ToList(),
                     Answers = t.Answers
                         .OrderBy(a => a.SortOrder)
                         .Select(a => new StoryAnswerDto

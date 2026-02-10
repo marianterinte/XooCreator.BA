@@ -38,6 +38,7 @@ public class StoryDefinition
     public List<StoryDefinitionAgeGroup> AgeGroups { get; set; } = new();
     public List<StoryDefinitionCoAuthor> CoAuthors { get; set; } = new();
     public List<StoryDefinitionUnlockedHero> UnlockedHeroes { get; set; } = new();
+    public List<StoryDialogParticipant> DialogParticipants { get; set; } = new();
     public ClassicAuthor? ClassicAuthor { get; set; }
 }
 

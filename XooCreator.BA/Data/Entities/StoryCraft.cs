@@ -59,6 +59,7 @@ public class StoryCraft
     public List<StoryCraftAgeGroup> AgeGroups { get; set; } = new();
     public List<StoryCraftCoAuthor> CoAuthors { get; set; } = new();
     public List<StoryCraftUnlockedHero> UnlockedHeroes { get; set; } = new();
+    public List<StoryCraftDialogParticipant> DialogParticipants { get; set; } = new();
     public ClassicAuthor? ClassicAuthor { get; set; }
 }
 
@@ -114,6 +115,7 @@ public class StoryCraftTile
     public StoryCraft StoryCraft { get; set; } = null!;
     public List<StoryCraftAnswer> Answers { get; set; } = new();
     public List<StoryCraftTileTranslation> Translations { get; set; } = new();
+    public StoryCraftDialogTile? DialogTile { get; set; }
 }
 
 /// <summary>

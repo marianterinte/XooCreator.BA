@@ -199,6 +199,10 @@ public class StoriesService : IStoriesService
                 IsEvaluative = craft.IsEvaluative,
                 IsPartOfEpic = craft.IsPartOfEpic,
                 UnlockedStoryHeroes = unlockedHeroes,
+                DialogParticipants = craft.DialogParticipants
+                    .OrderBy(p => p.SortOrder)
+                    .Select(p => p.HeroId)
+                    .ToList(),
                 Status = MapStatusForFrontend(StoryStatusExtensions.FromDb(craft.Status)),
                 AvailableLanguages = availableLangs,
                 AssignedReviewerUserId = craft.AssignedReviewerUserId,
@@ -218,12 +222,37 @@ public class StoriesService : IStoriesService
                         Type = t.Type,
                         Id = t.TileId,
                         Caption = tileTranslation?.Caption,
-                        Text = tileTranslation?.Text,
+                        Text = string.Equals(t.Type, "dialog", StringComparison.OrdinalIgnoreCase)
+                            ? t.DialogTile?.Nodes
+                                .OrderBy(n => n.SortOrder)
+                                .Select(n => n.Translations.FirstOrDefault(nt => nt.LanguageCode == lang)?.Text)
+                                .FirstOrDefault(text => !string.IsNullOrWhiteSpace(text))
+                            : tileTranslation?.Text,
                         ImageUrl = t.ImageUrl ?? string.Empty,
                         // Audio and Video are now language-specific (from translation)
                         AudioUrl = tileTranslation?.AudioUrl ?? string.Empty,
                         VideoUrl = tileTranslation?.VideoUrl ?? string.Empty,
                         Question = tileTranslation?.Question,
+                        DialogRootNodeId = t.DialogTile?.RootNodeId,
+                        DialogNodes = t.DialogTile?.Nodes
+                            .OrderBy(n => n.SortOrder)
+                            .Select(n => new EditableDialogNodeDto
+                            {
+                                NodeId = n.NodeId,
+                                SpeakerType = n.SpeakerType,
+                                SpeakerHeroId = n.SpeakerHeroId,
+                                Text = n.Translations.FirstOrDefault(nt => nt.LanguageCode == lang)?.Text ?? string.Empty,
+                                Options = n.OutgoingEdges
+                                    .OrderBy(e => e.OptionOrder)
+                                    .Select(e => new EditableDialogOptionDto
+                                    {
+                                        Id = e.EdgeId,
+                                        NextNodeId = e.ToNodeId,
+                                        Text = e.Translations.FirstOrDefault(et => et.LanguageCode == lang)?.OptionText ?? string.Empty
+                                    })
+                                    .ToList()
+                            })
+                            .ToList() ?? new List<EditableDialogNodeDto>(),
                         Answers = t.Answers.OrderBy(a => a.SortOrder).Select(a =>
                         {
                             var answerTranslation = a.Translations.FirstOrDefault(at => at.LanguageCode == lang);
@@ -296,6 +325,10 @@ public class StoriesService : IStoriesService
             IsEvaluative = story.IsEvaluative,
             IsPartOfEpic = story.IsPartOfEpic,
             UnlockedStoryHeroes = unlockedHeroesFromJson,
+            DialogParticipants = story.DialogParticipants
+                .OrderBy(p => p.SortOrder)
+                .Select(p => p.HeroId)
+                .ToList(),
             Status = MapStatusForFrontend(story.Status), // story.Status is already StoryStatus enum
             AvailableLanguages = availableLangs,
             OwnerEmail = ownerEmailFromDefinition,
@@ -310,12 +343,38 @@ public class StoriesService : IStoriesService
                     Type = t.Type,
                     Id = t.TileId,
                     Caption = tileTranslation?.Caption ?? t.Caption ?? string.Empty,
-                    Text = tileTranslation?.Text ?? t.Text ?? string.Empty,
+                    Text = string.Equals(t.Type, "dialog", StringComparison.OrdinalIgnoreCase)
+                        ? t.DialogTile?.Nodes
+                            .OrderBy(n => n.SortOrder)
+                            .Select(n => n.Translations.FirstOrDefault(nt => nt.LanguageCode == locale)?.Text)
+                            .FirstOrDefault(text => !string.IsNullOrWhiteSpace(text))
+                            ?? string.Empty
+                        : tileTranslation?.Text ?? t.Text ?? string.Empty,
                     ImageUrl = t.ImageUrl ?? string.Empty,
                     // Audio and Video are now language-specific (from translation)
                     AudioUrl = tileTranslation?.AudioUrl ?? string.Empty,
                     VideoUrl = tileTranslation?.VideoUrl ?? string.Empty,
                     Question = tileTranslation?.Question ?? t.Question ?? string.Empty,
+                    DialogRootNodeId = t.DialogTile?.RootNodeId,
+                    DialogNodes = t.DialogTile?.Nodes
+                        .OrderBy(n => n.SortOrder)
+                        .Select(n => new EditableDialogNodeDto
+                        {
+                            NodeId = n.NodeId,
+                            SpeakerType = n.SpeakerType,
+                            SpeakerHeroId = n.SpeakerHeroId,
+                            Text = n.Translations.FirstOrDefault(nt => nt.LanguageCode == locale)?.Text ?? string.Empty,
+                            Options = n.OutgoingEdges
+                                .OrderBy(e => e.OptionOrder)
+                                .Select(e => new EditableDialogOptionDto
+                                {
+                                    Id = e.EdgeId,
+                                    NextNodeId = e.ToNodeId,
+                                    Text = e.Translations.FirstOrDefault(et => et.LanguageCode == locale)?.OptionText ?? string.Empty
+                                })
+                                .ToList()
+                        })
+                        .ToList() ?? new List<EditableDialogNodeDto>(),
                     Answers = (t.Answers ?? new()).OrderBy(a => a.SortOrder).Select(a =>
                     {
                         var answerTranslation = a.Translations.FirstOrDefault(at => at.LanguageCode == locale)

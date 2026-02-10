@@ -15,6 +15,7 @@ public class StoryDefinitionConfiguration : IEntityTypeConfiguration<StoryDefini
         builder.HasMany(x => x.Tiles).WithOne(x => x.StoryDefinition).HasForeignKey(x => x.StoryDefinitionId).OnDelete(DeleteBehavior.Cascade);
         builder.HasMany(x => x.Topics).WithOne(x => x.StoryDefinition).HasForeignKey(x => x.StoryDefinitionId).OnDelete(DeleteBehavior.Cascade);
         builder.HasMany(x => x.AgeGroups).WithOne(x => x.StoryDefinition).HasForeignKey(x => x.StoryDefinitionId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasMany(x => x.DialogParticipants).WithOne(x => x.StoryDefinition).HasForeignKey(x => x.StoryDefinitionId).OnDelete(DeleteBehavior.Cascade);
         builder.HasOne(x => x.ClassicAuthor)
             .WithMany(x => x.StoryDefinitions)
             .HasForeignKey(x => x.ClassicAuthorId)

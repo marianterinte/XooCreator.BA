@@ -1,3 +1,5 @@
+using XooCreator.BA.Data.Entities;
+
 namespace XooCreator.BA.Data;
 
 /// <summary>
@@ -29,6 +31,7 @@ public class StoryTile
     public StoryDefinition StoryDefinition { get; set; } = null!;
     public List<StoryAnswer> Answers { get; set; } = new();
     public List<StoryTileTranslation> Translations { get; set; } = new();
+    public StoryDialogTile? DialogTile { get; set; }
 }
 
 public class StoryTileTranslation

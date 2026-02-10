@@ -236,7 +236,7 @@ public class StoryImageExportQueueWorker : BackgroundService
             }
         }
 
-        var pageOrQuizTypes = new[] { "page", "quiz" };
+        var pageOrQuizTypes = new[] { "page", "quiz", "dialog" };
         var allPages = craft.Tiles
             .Where(t => pageOrQuizTypes.Contains(t.Type, StringComparer.OrdinalIgnoreCase))
             .OrderBy(t => t.SortOrder)
@@ -377,7 +377,7 @@ public class StoryImageExportQueueWorker : BackgroundService
         var summary = translation?.Summary ?? string.Empty;
 
         var pageTiles = craft.Tiles
-            .Where(t => "page".Equals(t.Type, StringComparison.OrdinalIgnoreCase))
+            .Where(t => "page".Equals(t.Type, StringComparison.OrdinalIgnoreCase) || "dialog".Equals(t.Type, StringComparison.OrdinalIgnoreCase))
             .OrderBy(t => t.SortOrder)
             .ToList();
 

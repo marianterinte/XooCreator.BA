@@ -25,6 +25,7 @@ public class EditableStoryDto
     public string? Language { get; set; } // Language code for the story (standardized: use "language" instead of "languageCode")
     public List<string>? AvailableLanguages { get; set; } // Available language codes for this story
     public List<string>? UnlockedStoryHeroes { get; set; } // List of hero IDs that are unlocked when this story is completed
+    public List<string>? DialogParticipants { get; set; } // Hero IDs available as story dialog participants
     public List<StoryCoAuthorDto>? CoAuthors { get; set; } // Co-authors (user or free text)
     public List<EditableTileDto> Tiles { get; set; } = new();
 
@@ -54,6 +55,24 @@ public class EditableTileDto
     public string? VideoUrl { get; set; }
     public string? Question { get; set; }
     public List<EditableAnswerDto> Answers { get; set; } = new();
+    public string? DialogRootNodeId { get; set; }
+    public List<EditableDialogNodeDto> DialogNodes { get; set; } = new();
+}
+
+public class EditableDialogNodeDto
+{
+    public string NodeId { get; set; } = string.Empty;
+    public string SpeakerType { get; set; } = "reader"; // reader | hero
+    public string? SpeakerHeroId { get; set; }
+    public string Text { get; set; } = string.Empty;
+    public List<EditableDialogOptionDto> Options { get; set; } = new();
+}
+
+public class EditableDialogOptionDto
+{
+    public string Id { get; set; } = string.Empty;
+    public string Text { get; set; } = string.Empty;
+    public string NextNodeId { get; set; } = string.Empty;
 }
 
 public class EditableAnswerDto

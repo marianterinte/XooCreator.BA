@@ -13,6 +13,7 @@ public record StoryContentDto
     public string? StoryType { get; init; }
     public bool IsEvaluative { get; init; } = false; // If true, this story contains quizzes that should be evaluated
     public List<string> UnlockedStoryHeroes { get; init; } = new();
+    public List<string> DialogParticipants { get; init; } = new();
     public List<StoryTileDto> Tiles { get; init; } = new();
     public string? OwnerEmail { get; init; }
     public List<string>? AvailableLanguages { get; init; } // Available language codes for this story (e.g., ["ro-ro", "en-us", "de-de"])
@@ -33,6 +34,26 @@ public record StoryTileDto
     // Quiz fields
     public string? Question { get; init; }
     public List<StoryAnswerDto> Answers { get; init; } = new();
+
+    // Dialog fields
+    public string? DialogRootNodeId { get; init; }
+    public List<StoryDialogNodeDto> DialogNodes { get; init; } = new();
+}
+
+public record StoryDialogNodeDto
+{
+    public required string NodeId { get; init; }
+    public required string SpeakerType { get; init; }
+    public string? SpeakerHeroId { get; init; }
+    public string? Text { get; init; }
+    public List<StoryDialogOptionDto> Options { get; init; } = new();
+}
+
+public record StoryDialogOptionDto
+{
+    public required string Id { get; init; }
+    public required string NextNodeId { get; init; }
+    public string? Text { get; init; }
 }
 
 public record StoryAnswerDto

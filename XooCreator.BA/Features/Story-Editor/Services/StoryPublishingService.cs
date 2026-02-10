@@ -38,10 +38,13 @@ public class StoryPublishingService : IStoryPublishingService
             .Include(d => d.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Tokens)
             .Include(d => d.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Translations)
             .Include(d => d.Tiles).ThenInclude(t => t.Translations)
+            .Include(d => d.Tiles).ThenInclude(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.Translations)
+            .Include(d => d.Tiles).ThenInclude(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.OutgoingEdges).ThenInclude(e => e.Translations)
             .Include(d => d.Translations)
             .Include(d => d.Topics)
             .Include(d => d.AgeGroups)
             .Include(d => d.CoAuthors)
+            .Include(d => d.DialogParticipants)
             .FirstOrDefaultAsync(d => d.StoryId == storyId, ct);
         
         // Load craft with topics, age groups, and co-authors
@@ -50,9 +53,12 @@ public class StoryPublishingService : IStoryPublishingService
             .Include(c => c.Tiles).ThenInclude(t => t.Translations)
             .Include(c => c.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Translations)
             .Include(c => c.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Tokens)
+            .Include(c => c.Tiles).ThenInclude(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.Translations)
+            .Include(c => c.Tiles).ThenInclude(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.OutgoingEdges).ThenInclude(e => e.Translations)
             .Include(c => c.Topics).ThenInclude(t => t.StoryTopic)
             .Include(c => c.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
             .Include(c => c.CoAuthors).ThenInclude(ca => ca.User)
+            .Include(c => c.DialogParticipants)
             .FirstOrDefaultAsync(c => c.Id == craft.Id, ct) ?? craft;
 
         var requiresFullPublish = forceFullPublish || def == null;
@@ -177,6 +183,7 @@ public class StoryPublishingService : IStoryPublishingService
         await ReplaceDefinitionAgeGroupsAsync(def, craft, ct);
         await ReplaceDefinitionCoAuthorsAsync(def, craft, ct);
         await ReplaceDefinitionUnlockedHeroesAsync(def, craft, ct);
+        await ReplaceDefinitionDialogParticipantsAsync(def, craft, ct);
 
         def.LastPublishedVersion = craft.LastDraftVersion;
 
@@ -273,6 +280,7 @@ public class StoryPublishingService : IStoryPublishingService
         await ReplaceDefinitionAgeGroupsAsync(def, craft, ct);
         await ReplaceDefinitionCoAuthorsAsync(def, craft, ct);
         await ReplaceDefinitionUnlockedHeroesAsync(def, craft, ct);
+        await ReplaceDefinitionDialogParticipantsAsync(def, craft, ct);
         await _assetLinks.SyncCoverAsync(craft, ownerEmail, ct);
     }
 
@@ -317,6 +325,14 @@ public class StoryPublishingService : IStoryPublishingService
         }
 
         await _assetLinks.RemoveCoverAsync(def.StoryId, ct);
+
+        var existingDialogParticipants = await _db.StoryDialogParticipants
+            .Where(p => p.StoryDefinitionId == def.Id)
+            .ToListAsync(ct);
+        if (existingDialogParticipants.Count > 0)
+        {
+            _db.StoryDialogParticipants.RemoveRange(existingDialogParticipants);
+        }
     }
 
     private async Task ReplaceDefinitionTranslationsAsync(StoryDefinition def, StoryCraft craft, CancellationToken ct)
@@ -438,6 +454,33 @@ public class StoryPublishingService : IStoryPublishingService
         }
     }
 
+    private async Task ReplaceDefinitionDialogParticipantsAsync(StoryDefinition def, StoryCraft craft, CancellationToken ct)
+    {
+        var existing = await _db.StoryDialogParticipants
+            .Where(h => h.StoryDefinitionId == def.Id)
+            .ToListAsync(ct);
+        if (existing.Count > 0)
+        {
+            _db.StoryDialogParticipants.RemoveRange(existing);
+        }
+
+        var participants = craft.DialogParticipants
+            .OrderBy(p => p.SortOrder)
+            .ToList();
+
+        for (var i = 0; i < participants.Count; i++)
+        {
+            _db.StoryDialogParticipants.Add(new StoryDialogParticipant
+            {
+                Id = Guid.NewGuid(),
+                StoryDefinitionId = def.Id,
+                HeroId = participants[i].HeroId,
+                SortOrder = i,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+    }
+
     private async Task<bool> ApplyTileChangeAsync(
         StoryDefinition def,
         StoryCraft craft,
@@ -529,6 +572,69 @@ public class StoryPublishingService : IStoryPublishingService
             });
         }
 
+        if (string.Equals(craftTile.Type, "dialog", StringComparison.OrdinalIgnoreCase) && craftTile.DialogTile != null)
+        {
+            var dialogTile = new StoryDialogTile
+            {
+                Id = Guid.NewGuid(),
+                StoryDefinitionId = def.Id,
+                StoryTile = tile,
+                RootNodeId = craftTile.DialogTile.RootNodeId,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+            _db.StoryDialogTiles.Add(dialogTile);
+
+            foreach (var craftNode in craftTile.DialogTile.Nodes.OrderBy(n => n.SortOrder))
+            {
+                var node = new StoryDialogNode
+                {
+                    Id = Guid.NewGuid(),
+                    StoryDialogTile = dialogTile,
+                    NodeId = craftNode.NodeId,
+                    SpeakerType = craftNode.SpeakerType,
+                    SpeakerHeroId = craftNode.SpeakerHeroId,
+                    SortOrder = craftNode.SortOrder
+                };
+                _db.StoryDialogNodes.Add(node);
+
+                foreach (var nodeTranslation in craftNode.Translations)
+                {
+                    _db.StoryDialogNodeTranslations.Add(new StoryDialogNodeTranslation
+                    {
+                        Id = Guid.NewGuid(),
+                        StoryDialogNode = node,
+                        LanguageCode = nodeTranslation.LanguageCode.ToLowerInvariant(),
+                        Text = nodeTranslation.Text ?? string.Empty
+                    });
+                }
+
+                foreach (var craftEdge in craftNode.OutgoingEdges.OrderBy(e => e.OptionOrder))
+                {
+                    var edge = new StoryDialogEdge
+                    {
+                        Id = Guid.NewGuid(),
+                        StoryDialogNode = node,
+                        EdgeId = craftEdge.EdgeId,
+                        ToNodeId = craftEdge.ToNodeId,
+                        OptionOrder = craftEdge.OptionOrder
+                    };
+                    _db.StoryDialogEdges.Add(edge);
+
+                    foreach (var edgeTranslation in craftEdge.Translations)
+                    {
+                        _db.StoryDialogEdgeTranslations.Add(new StoryDialogEdgeTranslation
+                        {
+                            Id = Guid.NewGuid(),
+                            StoryDialogEdge = edge,
+                            LanguageCode = edgeTranslation.LanguageCode.ToLowerInvariant(),
+                            OptionText = edgeTranslation.OptionText ?? string.Empty
+                        });
+                    }
+                }
+            }
+        }
+
         await _assetLinks.SyncTileAssetsAsync(craft, craftTile, ownerEmail, ct);
 
         var answers = craftTile.Answers.OrderBy(a => a.SortOrder).ToList();
@@ -573,6 +679,8 @@ public class StoryPublishingService : IStoryPublishingService
             .Include(t => t.Translations)
             .Include(t => t.Answers).ThenInclude(a => a.Translations)
             .Include(t => t.Answers).ThenInclude(a => a.Tokens)
+            .Include(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.Translations)
+            .Include(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.OutgoingEdges).ThenInclude(e => e.Translations)
             .FirstOrDefaultAsync(t => t.StoryDefinitionId == def.Id && t.TileId == tileId, ct);
 
         if (tile == null)
@@ -587,6 +695,20 @@ public class StoryPublishingService : IStoryPublishingService
         {
             _db.StoryAnswerTranslations.RemoveRange(answer.Translations);
             _db.StoryAnswerTokens.RemoveRange(answer.Tokens);
+        }
+        if (tile.DialogTile != null)
+        {
+            foreach (var node in tile.DialogTile.Nodes)
+            {
+                _db.StoryDialogNodeTranslations.RemoveRange(node.Translations);
+                foreach (var edge in node.OutgoingEdges)
+                {
+                    _db.StoryDialogEdgeTranslations.RemoveRange(edge.Translations);
+                }
+                _db.StoryDialogEdges.RemoveRange(node.OutgoingEdges);
+            }
+            _db.StoryDialogNodes.RemoveRange(tile.DialogTile.Nodes);
+            _db.StoryDialogTiles.Remove(tile.DialogTile);
         }
         _db.StoryAnswers.RemoveRange(tile.Answers);
         _db.StoryTiles.Remove(tile);
