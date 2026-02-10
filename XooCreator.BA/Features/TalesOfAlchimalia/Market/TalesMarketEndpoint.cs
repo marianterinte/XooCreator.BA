@@ -21,7 +21,7 @@ public class TalesMarketEndpoint
     }
 
     [Route("/api/{locale}/tales-of-alchimalia/market")]
-    [Authorize]
+    [AllowAnonymous]
     public static async Task<Ok<GetMarketplaceStoriesResponse>> HandleGet(
         [FromRoute] string locale,
         [FromServices] TalesMarketEndpoint ep,
@@ -42,7 +42,6 @@ public class TalesMarketEndpoint
         [FromQuery] int pageSize = 5)
     {
         var userId = await ep._userContext.GetUserIdAsync();
-        if (userId == null) throw new UnauthorizedAccessException("User not found");
 
         var request = new SearchStoriesRequest
         {
@@ -63,7 +62,10 @@ public class TalesMarketEndpoint
             PageSize = pageSize
         };
 
-        var result = await ep._marketplaceService.GetMarketplaceStoriesAsync(userId.Value, locale, request);
+        // For anonymous users, pass an empty userId to get a generic marketplace view
+        var effectiveUserId = userId ?? Guid.Empty;
+
+        var result = await ep._marketplaceService.GetMarketplaceStoriesAsync(effectiveUserId, locale, request);
         return TypedResults.Ok(result);
     }
 }
