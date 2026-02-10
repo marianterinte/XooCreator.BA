@@ -21,17 +21,18 @@ public class GetStoryDetailsEndpoint
     }
 
     [Route("/api/{locale}/tales-of-alchimalia/market/details/{storyId}")]
-    [Authorize]
-    public static async Task<Results<Ok<StoryDetailsDto>, NotFound, UnauthorizedHttpResult>> HandleGet(
+    [AllowAnonymous]
+    public static async Task<Results<Ok<StoryDetailsDto>, NotFound>> HandleGet(
         [FromRoute] string storyId,
         [FromRoute] string locale,
         [FromServices] GetStoryDetailsEndpoint ep)
     {
         var userId = await ep._userContext.GetUserIdAsync();
-        if (userId == null)
-            return TypedResults.Unauthorized();
 
-        var result = await ep._marketplaceService.GetStoryDetailsAsync(storyId, userId.Value, locale);
+        // For anonymous users, pass an empty userId to get a generic story view
+        var effectiveUserId = userId ?? Guid.Empty;
+
+        var result = await ep._marketplaceService.GetStoryDetailsAsync(storyId, effectiveUserId, locale);
         if (result == null)
             return TypedResults.NotFound();
 

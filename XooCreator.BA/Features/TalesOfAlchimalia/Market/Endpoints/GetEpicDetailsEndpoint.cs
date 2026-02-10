@@ -26,7 +26,7 @@ public class GetEpicDetailsEndpoint
     }
 
     [Route("/api/{locale}/tales-of-alchimalia/market/epics/{epicId}")]
-    [Authorize]
+    [AllowAnonymous]
     public static async Task<Results<Ok<EpicDetailsDto>, NotFound>> HandleGet(
         [FromRoute] string locale,
         [FromRoute] string epicId,
@@ -35,9 +35,11 @@ public class GetEpicDetailsEndpoint
         try
         {
             var userId = await ep._userContext.GetUserIdAsync();
-            if (userId == null) throw new UnauthorizedAccessException("User not found");
 
-            var epicDetails = await ep._epicsMarketplaceService.GetEpicDetailsAsync(epicId, userId.Value, locale);
+            // For anonymous users, pass an empty userId to get a generic epic view
+            var effectiveUserId = userId ?? Guid.Empty;
+
+            var epicDetails = await ep._epicsMarketplaceService.GetEpicDetailsAsync(epicId, effectiveUserId, locale);
             
             if (epicDetails == null)
             {

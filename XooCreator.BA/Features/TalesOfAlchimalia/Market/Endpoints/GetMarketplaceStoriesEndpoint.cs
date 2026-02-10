@@ -33,7 +33,7 @@ public class GetMarketplaceStoriesEndpoint
     }
 
     [Route("/api/{locale}/tales-of-alchimalia/market")]
-    [Authorize]
+    [AllowAnonymous]
     public static async Task<Ok<GetMarketplaceStoriesResponse>> HandleGetMarketplace(
         [FromRoute] string locale,
         [FromServices] GetMarketplaceStoriesEndpoint ep,
@@ -59,7 +59,6 @@ public class GetMarketplaceStoriesEndpoint
         try
         {
             var userId = await ep._userContext.GetUserIdAsync();
-            if (userId == null) throw new UnauthorizedAccessException("User not found");
 
             ep._logger?.LogInformation("Marketplace Request: searchType={SearchType}, searchTerm={SearchTerm}", searchType, searchTerm);
 
@@ -83,7 +82,10 @@ public class GetMarketplaceStoriesEndpoint
                 Skip = skip
             };
 
-            var result = await ep._marketplaceService.GetMarketplaceStoriesAsync(userId.Value, locale, request);
+            // For anonymous users, pass an empty userId to get a generic marketplace view
+            var effectiveUserId = userId ?? Guid.Empty;
+
+            var result = await ep._marketplaceService.GetMarketplaceStoriesAsync(effectiveUserId, locale, request);
             
             return TypedResults.Ok(result);
         }

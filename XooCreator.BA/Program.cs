@@ -66,6 +66,7 @@ builder.Services.AddHostedService<StoryAudioExportQueueWorker>();
 builder.Services.AddHostedService<StoryAudioImportQueueWorker>();
 builder.Services.AddHostedService<StoryTranslationQueueWorker>();
 builder.Services.AddHostedService<StoryImageImportQueueWorker>();
+builder.Services.AddHostedService<StoryImageExportQueueWorker>();
 builder.Services.AddHostedService<ExportCleanupService>();
 builder.Services.AddHostedService<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.EpicPublishQueueJob>();
 builder.Services.AddHostedService<XooCreator.BA.Features.StoryEditor.StoryEpic.Services.EpicVersionQueueJob>();

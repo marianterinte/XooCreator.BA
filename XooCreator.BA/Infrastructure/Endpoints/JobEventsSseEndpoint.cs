@@ -30,6 +30,7 @@ public sealed class JobEventsSseEndpoint
         JobTypes.StoryAudioImport,
         JobTypes.StoryTranslation,
         JobTypes.StoryImageImport,
+        JobTypes.StoryImageExport,
         JobTypes.EpicVersion,
         JobTypes.EpicPublish,
         JobTypes.HeroVersion,
@@ -399,6 +400,33 @@ public sealed class JobEventsSseEndpoint
                     zipFileName = job.ZipFileName,
                     zipSizeBytes = job.ZipSizeBytes,
                     audioCount = job.AudioCount
+                };
+
+                return new Snapshot(payload.status?.ToString() ?? string.Empty, JsonSerializer.Serialize(payload, Json));
+            }
+            case JobTypes.StoryImageExport:
+            {
+                var job = await db.StoryImageExportJobs.AsNoTracking().FirstOrDefaultAsync(j => j.Id == jobId, ct);
+                if (job == null) return null;
+
+                if (!auth0.HasRole(user, UserRole.Admin) && job.OwnerUserId != user.Id)
+                {
+                    return null;
+                }
+
+                var payload = new
+                {
+                    jobId = job.Id,
+                    storyId = job.StoryId,
+                    status = job.Status,
+                    queuedAtUtc = job.QueuedAtUtc,
+                    startedAtUtc = job.StartedAtUtc,
+                    completedAtUtc = job.CompletedAtUtc,
+                    errorMessage = job.ErrorMessage,
+                    zipDownloadUrl = (string?)null,
+                    zipFileName = job.ZipFileName,
+                    zipSizeBytes = job.ZipSizeBytes,
+                    imageCount = job.ImageCount
                 };
 
                 return new Snapshot(payload.status?.ToString() ?? string.Empty, JsonSerializer.Serialize(payload, Json));
