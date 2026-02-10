@@ -38,6 +38,9 @@ public record StoryTileDto
     // Dialog fields
     public string? DialogRootNodeId { get; init; }
     public List<StoryDialogNodeDto> DialogNodes { get; init; } = new();
+    
+    // Character selection specific: selected heroes for this tile (subset of dialogParticipants)
+    public List<string>? AvailableHeroIds { get; init; }
 }
 
 public record StoryDialogNodeDto

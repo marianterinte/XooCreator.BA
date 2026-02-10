@@ -57,6 +57,8 @@ public class EditableTileDto
     public List<EditableAnswerDto> Answers { get; set; } = new();
     public string? DialogRootNodeId { get; set; }
     public List<EditableDialogNodeDto> DialogNodes { get; set; } = new();
+    // Character selection specific: selected heroes for this tile (subset of dialogParticipants)
+    public List<string>? AvailableHeroIds { get; set; }
 }
 
 public class EditableDialogNodeDto
