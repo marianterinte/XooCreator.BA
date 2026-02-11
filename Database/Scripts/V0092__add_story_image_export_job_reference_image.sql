@@ -1,13 +1,13 @@
--- Add reference image and prompt columns to StoryImageExportJobs (same schema as V0091)
+-- Add reference image and prompt columns to StoryImageExportJobs (idempotent)
 
 ALTER TABLE alchimalia_schema."StoryImageExportJobs"
-    ADD "ReferenceImageBase64" TEXT NULL;
+    ADD COLUMN IF NOT EXISTS "ReferenceImageBase64" TEXT NULL;
 
 ALTER TABLE alchimalia_schema."StoryImageExportJobs"
-    ADD "ReferenceImageMimeType" VARCHAR(128) NULL;
+    ADD COLUMN IF NOT EXISTS "ReferenceImageMimeType" VARCHAR(128) NULL;
 
 ALTER TABLE alchimalia_schema."StoryImageExportJobs"
-    ADD "ExtraInstructions" TEXT NULL;
+    ADD COLUMN IF NOT EXISTS "ExtraInstructions" TEXT NULL;
 
 ALTER TABLE alchimalia_schema."StoryImageExportJobs"
-    ADD "ImageModel" VARCHAR(128) NULL;
+    ADD COLUMN IF NOT EXISTS "ImageModel" VARCHAR(128) NULL;
