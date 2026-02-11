@@ -139,6 +139,16 @@ public class StoryCraftsRepository : IStoryCraftsRepository
                 {
                     tile.StoryCraftId = craft.Id;
                 }
+                // Dialog tile must reference the craft and tile (required for FK when copying from definition / new version).
+                if (tile.DialogTile != null)
+                {
+                    if (tile.DialogTile.StoryCraftId == Guid.Empty)
+                        tile.DialogTile.StoryCraftId = craft.Id;
+                    if (tile.DialogTile.StoryCraftTileId == Guid.Empty)
+                        tile.DialogTile.StoryCraftTileId = tile.Id;
+                    if (tile.DialogTile.Id == Guid.Empty)
+                        tile.DialogTile.Id = Guid.NewGuid();
+                }
                 _context.StoryCraftTiles.Add(tile);
                 
                 // Add tile translations
@@ -216,6 +226,15 @@ public class StoryCraftsRepository : IStoryCraftsRepository
                     ageGroup.StoryCraftId = craft.Id;
                 }
                 _context.StoryCraftAgeGroups.Add(ageGroup);
+            }
+            
+            // Dialog participants must reference the craft (FK); set when saving new craft from copy/definition.
+            foreach (var participant in craft.DialogParticipants)
+            {
+                if (participant.Id == Guid.Empty)
+                    participant.Id = Guid.NewGuid();
+                if (participant.StoryCraftId == Guid.Empty)
+                    participant.StoryCraftId = craft.Id;
             }
         }
         else
