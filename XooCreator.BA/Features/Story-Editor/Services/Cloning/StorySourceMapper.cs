@@ -40,6 +40,7 @@ public class StorySourceMapper : IStorySourceMapper
             {
                 TileId = tile.TileId,
                 Type = tile.Type,
+                BranchId = tile.BranchId,
                 ImageUrl = tile.ImageUrl,
                 Translations = tile.Translations.Select(tt => new TileTranslationCloneData
                 {
@@ -85,11 +86,19 @@ public class StorySourceMapper : IStorySourceMapper
                             {
                                 EdgeId = e.EdgeId,
                                 ToNodeId = e.ToNodeId,
+                                JumpToTileId = e.JumpToTileId,
+                                SetBranchId = e.SetBranchId,
                                 OptionOrder = e.OptionOrder,
                                 Translations = e.Translations.Select(et => new DialogEdgeTranslationCloneData
                                 {
                                     LanguageCode = et.LanguageCode,
                                     OptionText = et.OptionText
+                                }).ToList(),
+                                Tokens = e.Tokens.Select(tok => new TokenCloneData
+                                {
+                                    Type = tok.Type,
+                                    Value = tok.Value,
+                                    Quantity = tok.Quantity
                                 }).ToList()
                             }).ToList()
                     }).ToList() ?? new List<DialogNodeCloneData>()
@@ -132,6 +141,7 @@ public class StorySourceMapper : IStorySourceMapper
                 {
                     TileId = tile.TileId,
                     Type = tile.Type,
+                    BranchId = tile.BranchId,
                     ImageUrl = imageFilename,
                     Translations = tile.Translations.Select(tt =>
                     {
@@ -186,11 +196,19 @@ public class StorySourceMapper : IStorySourceMapper
                             {
                                 EdgeId = e.EdgeId,
                                 ToNodeId = e.ToNodeId,
+                                JumpToTileId = e.JumpToTileId,
+                                SetBranchId = e.SetBranchId,
                                 OptionOrder = e.OptionOrder,
                                 Translations = e.Translations.Select(et => new DialogEdgeTranslationCloneData
                                 {
                                     LanguageCode = et.LanguageCode,
                                     OptionText = et.OptionText
+                                }).ToList(),
+                                Tokens = e.Tokens.Select(tok => new TokenCloneData
+                                {
+                                    Type = tok.Type,
+                                    Value = tok.Value,
+                                    Quantity = tok.Quantity
                                 }).ToList()
                             }).ToList()
                     }).ToList() ?? new List<DialogNodeCloneData>()
@@ -268,6 +286,7 @@ public class TileCloneData
 {
     public string TileId { get; set; } = string.Empty;
     public string Type { get; set; } = "page";
+    public string? BranchId { get; set; }
     public string? ImageUrl { get; set; }
     public List<TileTranslationCloneData> Translations { get; set; } = new();
     public List<AnswerCloneData> Answers { get; set; } = new();
@@ -325,8 +344,11 @@ public class DialogEdgeCloneData
 {
     public string EdgeId { get; set; } = string.Empty;
     public string ToNodeId { get; set; } = string.Empty;
+    public string? JumpToTileId { get; set; }
+    public string? SetBranchId { get; set; }
     public int OptionOrder { get; set; }
     public List<DialogEdgeTranslationCloneData> Translations { get; set; } = new();
+    public List<TokenCloneData> Tokens { get; set; } = new();
 }
 
 public class DialogEdgeTranslationCloneData

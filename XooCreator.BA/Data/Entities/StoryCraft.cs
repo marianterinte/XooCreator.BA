@@ -102,6 +102,8 @@ public class StoryCraftTile
     public string TileId { get; set; } = string.Empty; // e.g., "p1", "q1"
     public string Type { get; set; } = string.Empty; // "page", "quiz", or "video"
     public int SortOrder { get; set; }
+    [MaxLength(100)]
+    public string? BranchId { get; set; }
     
     // Non-translatable fields (same for all languages)
     // Image is common for all languages

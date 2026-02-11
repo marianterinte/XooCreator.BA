@@ -41,6 +41,7 @@ public class StoryTileUpdater : IStoryTileUpdater
                     TileId = tileDto.Id,
                     Type = tileDto.Type ?? "page",
                     SortOrder = i,
+                    BranchId = string.IsNullOrWhiteSpace(tileDto.BranchId) ? null : tileDto.BranchId.Trim(),
                     // Image is common for all languages
                     ImageUrl = ExtractFileName(tileDto.ImageUrl),
                     // Audio and Video are now language-specific (stored in translation)
@@ -55,6 +56,7 @@ public class StoryTileUpdater : IStoryTileUpdater
                 // Update existing tile
                 tile.Type = tileDto.Type ?? tile.Type;
                 tile.SortOrder = i;
+                tile.BranchId = string.IsNullOrWhiteSpace(tileDto.BranchId) ? null : tileDto.BranchId.Trim();
                 // Image is common for all languages
                 tile.ImageUrl = ExtractFileName(tileDto.ImageUrl);
                 // Audio and Video are now language-specific (stored in translation)
@@ -167,6 +169,8 @@ public class StoryTileUpdater : IStoryTileUpdater
             .Include(n => n.Translations)
             .Include(n => n.OutgoingEdges)
                 .ThenInclude(e => e.Translations)
+            .Include(n => n.OutgoingEdges)
+                .ThenInclude(e => e.Tokens)
             .Where(n => n.StoryCraftDialogTileId == dialogTile.Id)
             .ToListAsync(ct);
 
@@ -248,6 +252,8 @@ public class StoryTileUpdater : IStoryTileUpdater
                 }
 
                 edge.ToNodeId = optionDto.NextNodeId?.Trim() ?? string.Empty;
+                edge.JumpToTileId = string.IsNullOrWhiteSpace(optionDto.JumpToTileId) ? null : optionDto.JumpToTileId.Trim();
+                edge.SetBranchId = string.IsNullOrWhiteSpace(optionDto.SetBranchId) ? null : optionDto.SetBranchId.Trim();
                 edge.OptionOrder = optionIndex;
 
                 var edgeTranslation = edge.Translations.FirstOrDefault(t => t.LanguageCode == languageCode);
@@ -264,6 +270,45 @@ public class StoryTileUpdater : IStoryTileUpdater
                 }
 
                 edgeTranslation.OptionText = optionDto.Text ?? string.Empty;
+
+                var optionTokens = optionDto.Tokens ?? new List<EditableTokenDto>();
+                edge.Tokens ??= new List<StoryCraftDialogEdgeToken>();
+                var existingTokens = edge.Tokens;
+                var tokensByIndex = existingTokens
+                    .OrderBy(t => t.Id)
+                    .ToList();
+
+                for (var tokenIndex = 0; tokenIndex < optionTokens.Count; tokenIndex++)
+                {
+                    var tokenDto = optionTokens[tokenIndex];
+                    StoryCraftDialogEdgeToken token;
+                    if (tokenIndex < tokensByIndex.Count)
+                    {
+                        token = tokensByIndex[tokenIndex];
+                    }
+                    else
+                    {
+                        token = new StoryCraftDialogEdgeToken
+                        {
+                            Id = Guid.NewGuid(),
+                            StoryCraftDialogEdgeId = edge.Id
+                        };
+                        _context.StoryCraftDialogEdgeTokens.Add(token);
+                        edge.Tokens.Add(token);
+                        tokensByIndex.Add(token);
+                    }
+
+                    token.Type = tokenDto.Type?.Trim() ?? string.Empty;
+                    token.Value = tokenDto.Value?.Trim() ?? string.Empty;
+                    token.Quantity = Math.Max(1, tokenDto.Quantity);
+                }
+
+                for (var tokenIndex = tokensByIndex.Count - 1; tokenIndex >= optionTokens.Count; tokenIndex--)
+                {
+                    var tokenToRemove = tokensByIndex[tokenIndex];
+                    edge.Tokens.Remove(tokenToRemove);
+                    _context.StoryCraftDialogEdgeTokens.Remove(tokenToRemove);
+                }
             }
 
             foreach (var edgeToRemove in node.OutgoingEdges.Where(e => !optionIds.Contains(e.EdgeId)).ToList())

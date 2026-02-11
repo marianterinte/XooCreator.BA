@@ -47,6 +47,11 @@ public class StoriesRepository : IStoriesRepository
                     .ThenInclude(dt => dt.Nodes)
                         .ThenInclude(n => n.OutgoingEdges)
                             .ThenInclude(e => e.Translations)
+            .Include(s => s.Tiles)
+                .ThenInclude(t => t.DialogTile!)
+                    .ThenInclude(dt => dt.Nodes)
+                        .ThenInclude(n => n.OutgoingEdges)
+                            .ThenInclude(e => e.Tokens)
             .Where(s => s.IsActive)
             .OrderBy(s => s.SortOrder)
             .AsSplitQuery() // Use split query to reduce memory pressure
@@ -83,6 +88,11 @@ public class StoriesRepository : IStoriesRepository
                             .ThenInclude(dt => dt.Nodes)
                                 .ThenInclude(n => n.OutgoingEdges)
                                     .ThenInclude(e => e.Translations)
+                    .Include(s => s.Tiles)
+                        .ThenInclude(t => t.DialogTile!)
+                            .ThenInclude(dt => dt.Nodes)
+                                .ThenInclude(n => n.OutgoingEdges)
+                                    .ThenInclude(e => e.Tokens)
                     .AsSplitQuery() // Optimization: Use split query for complex include chains
                     .FirstOrDefaultAsync(s => s.StoryId == normalizedId && s.IsActive);
 
@@ -124,6 +134,11 @@ public class StoriesRepository : IStoriesRepository
                         .ThenInclude(dt => dt.Nodes)
                             .ThenInclude(n => n.OutgoingEdges)
                                 .ThenInclude(e => e.Translations)
+                .Include(s => s.Tiles)
+                    .ThenInclude(t => t.DialogTile!)
+                        .ThenInclude(dt => dt.Nodes)
+                            .ThenInclude(n => n.OutgoingEdges)
+                                .ThenInclude(e => e.Tokens)
                 .Include(s => s.Topics).ThenInclude(t => t.StoryTopic)
                 .Include(s => s.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
                 .Include(s => s.CoAuthors).ThenInclude(c => c.User)

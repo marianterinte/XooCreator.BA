@@ -221,6 +221,7 @@ public class StoriesService : IStoriesService
                     {
                         Type = t.Type,
                         Id = t.TileId,
+                        BranchId = t.BranchId,
                         Caption = tileTranslation?.Caption,
                         Text = string.Equals(t.Type, "dialog", StringComparison.OrdinalIgnoreCase)
                             ? t.DialogTile?.Nodes
@@ -248,7 +249,15 @@ public class StoriesService : IStoriesService
                                     {
                                         Id = e.EdgeId,
                                         NextNodeId = e.ToNodeId,
-                                        Text = e.Translations.FirstOrDefault(et => et.LanguageCode == lang)?.OptionText ?? string.Empty
+                                        Text = e.Translations.FirstOrDefault(et => et.LanguageCode == lang)?.OptionText ?? string.Empty,
+                                        JumpToTileId = e.JumpToTileId,
+                                        SetBranchId = e.SetBranchId,
+                                        Tokens = (e.Tokens ?? new()).Select(tok => new EditableTokenDto
+                                        {
+                                            Type = tok.Type,
+                                            Value = tok.Value,
+                                            Quantity = tok.Quantity
+                                        }).ToList()
                                     })
                                     .ToList()
                             })
@@ -342,6 +351,7 @@ public class StoriesService : IStoriesService
                 {
                     Type = t.Type,
                     Id = t.TileId,
+                    BranchId = t.BranchId,
                     Caption = tileTranslation?.Caption ?? t.Caption ?? string.Empty,
                     Text = string.Equals(t.Type, "dialog", StringComparison.OrdinalIgnoreCase)
                         ? t.DialogTile?.Nodes
@@ -370,7 +380,15 @@ public class StoriesService : IStoriesService
                                 {
                                     Id = e.EdgeId,
                                     NextNodeId = e.ToNodeId,
-                                    Text = e.Translations.FirstOrDefault(et => et.LanguageCode == locale)?.OptionText ?? string.Empty
+                                    Text = e.Translations.FirstOrDefault(et => et.LanguageCode == locale)?.OptionText ?? string.Empty,
+                                    JumpToTileId = e.JumpToTileId,
+                                    SetBranchId = e.SetBranchId,
+                                    Tokens = (e.Tokens ?? new()).Select(tok => new EditableTokenDto
+                                    {
+                                        Type = tok.Type ?? string.Empty,
+                                        Value = tok.Value ?? string.Empty,
+                                        Quantity = tok.Quantity
+                                    }).ToList()
                                 })
                                 .ToList()
                         })

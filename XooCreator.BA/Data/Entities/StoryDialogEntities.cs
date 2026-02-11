@@ -75,11 +75,16 @@ public class StoryCraftDialogEdge
 
     [MaxLength(100)]
     public string ToNodeId { get; set; } = string.Empty;
+    [MaxLength(100)]
+    public string? JumpToTileId { get; set; }
+    [MaxLength(100)]
+    public string? SetBranchId { get; set; }
 
     public int OptionOrder { get; set; }
 
     public StoryCraftDialogNode StoryCraftDialogNode { get; set; } = null!;
     public List<StoryCraftDialogEdgeTranslation> Translations { get; set; } = new();
+    public List<StoryCraftDialogEdgeToken> Tokens { get; set; } = new();
 }
 
 public class StoryCraftDialogEdgeTranslation
@@ -91,6 +96,22 @@ public class StoryCraftDialogEdgeTranslation
     public string LanguageCode { get; set; } = "ro-ro";
 
     public string OptionText { get; set; } = string.Empty;
+
+    public StoryCraftDialogEdge StoryCraftDialogEdge { get; set; } = null!;
+}
+
+public class StoryCraftDialogEdgeToken
+{
+    public Guid Id { get; set; }
+    public Guid StoryCraftDialogEdgeId { get; set; }
+
+    [MaxLength(100)]
+    public string Type { get; set; } = string.Empty;
+
+    [MaxLength(200)]
+    public string Value { get; set; } = string.Empty;
+
+    public int Quantity { get; set; } = 1;
 
     public StoryCraftDialogEdge StoryCraftDialogEdge { get; set; } = null!;
 }
@@ -167,11 +188,16 @@ public class StoryDialogEdge
 
     [MaxLength(100)]
     public string ToNodeId { get; set; } = string.Empty;
+    [MaxLength(100)]
+    public string? JumpToTileId { get; set; }
+    [MaxLength(100)]
+    public string? SetBranchId { get; set; }
 
     public int OptionOrder { get; set; }
 
     public StoryDialogNode StoryDialogNode { get; set; } = null!;
     public List<StoryDialogEdgeTranslation> Translations { get; set; } = new();
+    public List<StoryDialogEdgeToken> Tokens { get; set; } = new();
 }
 
 public class StoryDialogEdgeTranslation
@@ -183,6 +209,22 @@ public class StoryDialogEdgeTranslation
     public string LanguageCode { get; set; } = "ro-ro";
 
     public string OptionText { get; set; } = string.Empty;
+
+    public StoryDialogEdge StoryDialogEdge { get; set; } = null!;
+}
+
+public class StoryDialogEdgeToken
+{
+    public Guid Id { get; set; }
+    public Guid StoryDialogEdgeId { get; set; }
+
+    [MaxLength(100)]
+    public string Type { get; set; } = string.Empty;
+
+    [MaxLength(200)]
+    public string Value { get; set; } = string.Empty;
+
+    public int Quantity { get; set; } = 1;
 
     public StoryDialogEdge StoryDialogEdge { get; set; } = null!;
 }

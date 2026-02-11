@@ -23,6 +23,7 @@ public record StoryTileDto
 {
     public required string Type { get; init; } // "page" or "quiz"
     public required string Id { get; init; }
+    public string? BranchId { get; init; }
     
     // Page fields
     public string? Caption { get; init; }
@@ -59,6 +60,9 @@ public record StoryDialogOptionDto
     public required string Id { get; init; }
     public required string NextNodeId { get; init; }
     public string? Text { get; init; }
+    public string? JumpToTileId { get; init; }
+    public string? SetBranchId { get; init; }
+    public List<TokenReward> Tokens { get; init; } = new();
 }
 
 public record StoryAnswerDto

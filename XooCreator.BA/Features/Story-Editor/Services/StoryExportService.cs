@@ -212,6 +212,7 @@ public class StoryExportService : IStoryExportService
                 {
                     id = t.TileId,
                     type = t.Type,
+                    branchId = t.BranchId,
                     sortOrder = t.SortOrder,
                     imageUrl = t.ImageUrl,
                     translations = t.Translations.Select(tr => new
@@ -234,7 +235,10 @@ public class StoryExportService : IStoryExportService
                         {
                             id = e.EdgeId,
                             nextNodeId = e.ToNodeId,
+                            jumpToTileId = e.JumpToTileId,
+                            setBranchId = e.SetBranchId,
                             sortOrder = e.OptionOrder,
+                            tokens = (e.Tokens ?? new()).Select(tok => new { type = tok.Type, value = tok.Value, quantity = tok.Quantity }).ToList(),
                             translations = e.Translations.Select(et => new { lang = et.LanguageCode, text = et.OptionText }).ToList()
                         }).ToList()
                     }).ToList(),
@@ -311,6 +315,7 @@ public class StoryExportService : IStoryExportService
                 {
                     id = t.TileId,
                     type = t.Type,
+                    branchId = t.BranchId,
                     sortOrder = t.SortOrder,
                     imageUrl = t.ImageUrl,
                     translations = t.Translations.Select(tr => new
@@ -333,7 +338,10 @@ public class StoryExportService : IStoryExportService
                         {
                             id = e.EdgeId,
                             nextNodeId = e.ToNodeId,
+                            jumpToTileId = e.JumpToTileId,
+                            setBranchId = e.SetBranchId,
                             sortOrder = e.OptionOrder,
+                            tokens = (e.Tokens ?? new()).Select(tok => new { type = tok.Type, value = tok.Value, quantity = tok.Quantity }).ToList(),
                             translations = e.Translations.Select(et => new { lang = et.LanguageCode, text = et.OptionText }).ToList()
                         }).ToList()
                     }).ToList(),

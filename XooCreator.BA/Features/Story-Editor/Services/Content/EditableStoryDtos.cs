@@ -48,6 +48,7 @@ public class EditableTileDto
 {
     public string Type { get; set; } = "page";
     public string Id { get; set; } = string.Empty;
+    public string? BranchId { get; set; }
     public string? Caption { get; set; }
     public string? Text { get; set; }
     public string? ImageUrl { get; set; }
@@ -79,6 +80,9 @@ public class EditableDialogOptionDto
     public string Id { get; set; } = string.Empty;
     public string Text { get; set; } = string.Empty;
     public string NextNodeId { get; set; } = string.Empty;
+    public string? JumpToTileId { get; set; }
+    public string? SetBranchId { get; set; }
+    public List<EditableTokenDto> Tokens { get; set; } = new();
 }
 
 public class EditableAnswerDto

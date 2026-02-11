@@ -77,6 +77,8 @@ public class StoryCraftDialogEdgeConfiguration : IEntityTypeConfiguration<StoryC
             .WithMany(x => x.OutgoingEdges)
             .HasForeignKey(x => x.StoryCraftDialogNodeId)
             .OnDelete(DeleteBehavior.Cascade);
+        builder.Property(x => x.JumpToTileId).HasMaxLength(100);
+        builder.Property(x => x.SetBranchId).HasMaxLength(100);
     }
 }
 
@@ -167,6 +169,8 @@ public class StoryDialogEdgeConfiguration : IEntityTypeConfiguration<StoryDialog
             .WithMany(x => x.OutgoingEdges)
             .HasForeignKey(x => x.StoryDialogNodeId)
             .OnDelete(DeleteBehavior.Cascade);
+        builder.Property(x => x.JumpToTileId).HasMaxLength(100);
+        builder.Property(x => x.SetBranchId).HasMaxLength(100);
     }
 }
 
@@ -179,6 +183,38 @@ public class StoryDialogEdgeTranslationConfiguration : IEntityTypeConfiguration<
         builder.HasIndex(x => new { x.StoryDialogEdgeId, x.LanguageCode }).IsUnique();
         builder.HasOne(x => x.StoryDialogEdge)
             .WithMany(x => x.Translations)
+            .HasForeignKey(x => x.StoryDialogEdgeId)
+            .OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
+public class StoryCraftDialogEdgeTokenConfiguration : IEntityTypeConfiguration<StoryCraftDialogEdgeToken>
+{
+    public void Configure(EntityTypeBuilder<StoryCraftDialogEdgeToken> builder)
+    {
+        builder.HasKey(x => x.Id);
+        builder.Property(x => x.Id).ValueGeneratedOnAdd();
+        builder.Property(x => x.Type).HasMaxLength(100);
+        builder.Property(x => x.Value).HasMaxLength(200);
+        builder.HasIndex(x => x.StoryCraftDialogEdgeId);
+        builder.HasOne(x => x.StoryCraftDialogEdge)
+            .WithMany(x => x.Tokens)
+            .HasForeignKey(x => x.StoryCraftDialogEdgeId)
+            .OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
+public class StoryDialogEdgeTokenConfiguration : IEntityTypeConfiguration<StoryDialogEdgeToken>
+{
+    public void Configure(EntityTypeBuilder<StoryDialogEdgeToken> builder)
+    {
+        builder.HasKey(x => x.Id);
+        builder.Property(x => x.Id).ValueGeneratedOnAdd();
+        builder.Property(x => x.Type).HasMaxLength(100);
+        builder.Property(x => x.Value).HasMaxLength(200);
+        builder.HasIndex(x => x.StoryDialogEdgeId);
+        builder.HasOne(x => x.StoryDialogEdge)
+            .WithMany(x => x.Tokens)
             .HasForeignKey(x => x.StoryDialogEdgeId)
             .OnDelete(DeleteBehavior.Cascade);
     }

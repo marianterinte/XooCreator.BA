@@ -53,6 +53,7 @@ public class StoryCloner : IStoryCloner
                 TileId = tileData.TileId,
                 Type = tileData.Type,
                 SortOrder = sortOrder++,
+                BranchId = tileData.BranchId,
                 ImageUrl = tileData.ImageUrl
             };
 
@@ -137,6 +138,8 @@ public class StoryCloner : IStoryCloner
                         {
                             EdgeId = optionData.EdgeId,
                             ToNodeId = optionData.ToNodeId,
+                            JumpToTileId = optionData.JumpToTileId,
+                            SetBranchId = optionData.SetBranchId,
                             OptionOrder = optionData.OptionOrder
                         };
                         foreach (var edgeTr in optionData.Translations)
@@ -145,6 +148,15 @@ public class StoryCloner : IStoryCloner
                             {
                                 LanguageCode = edgeTr.LanguageCode,
                                 OptionText = edgeTr.OptionText
+                            });
+                        }
+                        foreach (var token in optionData.Tokens)
+                        {
+                            edge.Tokens.Add(new StoryCraftDialogEdgeToken
+                            {
+                                Type = token.Type,
+                                Value = token.Value,
+                                Quantity = token.Quantity
                             });
                         }
                         node.OutgoingEdges.Add(edge);

@@ -40,6 +40,7 @@ public class StoryPublishingService : IStoryPublishingService
             .Include(d => d.Tiles).ThenInclude(t => t.Translations)
             .Include(d => d.Tiles).ThenInclude(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.Translations)
             .Include(d => d.Tiles).ThenInclude(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.OutgoingEdges).ThenInclude(e => e.Translations)
+            .Include(d => d.Tiles).ThenInclude(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.OutgoingEdges).ThenInclude(e => e.Tokens)
             .Include(d => d.Translations)
             .Include(d => d.Topics)
             .Include(d => d.AgeGroups)
@@ -55,6 +56,7 @@ public class StoryPublishingService : IStoryPublishingService
             .Include(c => c.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Tokens)
             .Include(c => c.Tiles).ThenInclude(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.Translations)
             .Include(c => c.Tiles).ThenInclude(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.OutgoingEdges).ThenInclude(e => e.Translations)
+            .Include(c => c.Tiles).ThenInclude(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.OutgoingEdges).ThenInclude(e => e.Tokens)
             .Include(c => c.Topics).ThenInclude(t => t.StoryTopic)
             .Include(c => c.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
             .Include(c => c.CoAuthors).ThenInclude(ca => ca.User)
@@ -531,7 +533,8 @@ public class StoryPublishingService : IStoryPublishingService
             StoryDefinitionId = def.Id,
             TileId = craftTile.TileId,
             Type = craftTile.Type,
-            SortOrder = craftTile.SortOrder
+            SortOrder = craftTile.SortOrder,
+            BranchId = craftTile.BranchId
         };
 
         if (!string.IsNullOrWhiteSpace(craftTile.ImageUrl))
@@ -617,6 +620,8 @@ public class StoryPublishingService : IStoryPublishingService
                         StoryDialogNode = node,
                         EdgeId = craftEdge.EdgeId,
                         ToNodeId = craftEdge.ToNodeId,
+                        JumpToTileId = craftEdge.JumpToTileId,
+                        SetBranchId = craftEdge.SetBranchId,
                         OptionOrder = craftEdge.OptionOrder
                     };
                     _db.StoryDialogEdges.Add(edge);
@@ -629,6 +634,18 @@ public class StoryPublishingService : IStoryPublishingService
                             StoryDialogEdge = edge,
                             LanguageCode = edgeTranslation.LanguageCode.ToLowerInvariant(),
                             OptionText = edgeTranslation.OptionText ?? string.Empty
+                        });
+                    }
+
+                    foreach (var edgeToken in craftEdge.Tokens)
+                    {
+                        _db.StoryDialogEdgeTokens.Add(new StoryDialogEdgeToken
+                        {
+                            Id = Guid.NewGuid(),
+                            StoryDialogEdge = edge,
+                            Type = edgeToken.Type,
+                            Value = edgeToken.Value,
+                            Quantity = edgeToken.Quantity
                         });
                     }
                 }
@@ -681,6 +698,7 @@ public class StoryPublishingService : IStoryPublishingService
             .Include(t => t.Answers).ThenInclude(a => a.Tokens)
             .Include(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.Translations)
             .Include(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.OutgoingEdges).ThenInclude(e => e.Translations)
+            .Include(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.OutgoingEdges).ThenInclude(e => e.Tokens)
             .FirstOrDefaultAsync(t => t.StoryDefinitionId == def.Id && t.TileId == tileId, ct);
 
         if (tile == null)
@@ -704,6 +722,7 @@ public class StoryPublishingService : IStoryPublishingService
                 foreach (var edge in node.OutgoingEdges)
                 {
                     _db.StoryDialogEdgeTranslations.RemoveRange(edge.Translations);
+                    _db.StoryDialogEdgeTokens.RemoveRange(edge.Tokens);
                 }
                 _db.StoryDialogEdges.RemoveRange(node.OutgoingEdges);
             }

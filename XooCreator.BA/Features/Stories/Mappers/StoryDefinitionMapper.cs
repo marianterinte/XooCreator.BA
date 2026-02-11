@@ -222,6 +222,7 @@ public static class StoryDefinitionMapper
                 {
                     Type = t.Type,
                     Id = t.TileId,
+                    BranchId = t.BranchId,
                     Caption = TryGetCaption(t, lc) ?? t.Caption,
                     Text = TryGetText(t, lc) ?? t.Text,
                     ImageUrl = t.ImageUrl,
@@ -244,7 +245,15 @@ public static class StoryDefinitionMapper
                                 {
                                     Id = e.EdgeId,
                                     NextNodeId = e.ToNodeId,
-                                    Text = e.Translations.FirstOrDefault(et => et.LanguageCode == lc)?.OptionText ?? string.Empty
+                                    Text = e.Translations.FirstOrDefault(et => et.LanguageCode == lc)?.OptionText ?? string.Empty,
+                                    JumpToTileId = e.JumpToTileId,
+                                    SetBranchId = e.SetBranchId,
+                                    Tokens = (e.Tokens ?? new()).Select(tok => new TokenReward
+                                    {
+                                        Type = MapFamily(tok.Type),
+                                        Value = tok.Value,
+                                        Quantity = tok.Quantity
+                                    }).ToList()
                                 })
                                 .ToList()
                         })
