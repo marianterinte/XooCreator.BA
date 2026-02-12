@@ -237,6 +237,9 @@ public class StoryPublishingService : IStoryPublishingService
             }
         }
 
+        // Sync dialog participants from craft on every delta publish (not only on header change)
+        await ReplaceDefinitionDialogParticipantsAsync(def, craft, ct);
+
         def.LastPublishedVersion = craft.LastDraftVersion;
         def.Version = def.Version <= 0 ? 1 : def.Version + 1;
         def.Status = StoryStatus.Published;
