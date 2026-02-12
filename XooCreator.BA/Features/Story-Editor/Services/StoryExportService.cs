@@ -86,7 +86,7 @@ public class StoryExportService : IStoryExportService
         var fileName = $"{craft.StoryId}-draft-export.zip";
 
         // Collect all assets for all languages with metadata
-        var allAssets = new List<(AssetInfo Asset, string BlobPath, bool IsCoverImage)>();
+        var allAssets = new List<(AssetInfo Asset, string BlobPath, bool IsCover)>();
 
         // Important: languages may exist in tile/answer translations even if story-level translation is missing.
         var availableLanguages = craft.Translations.Select(t => t.LanguageCode)
@@ -104,11 +104,10 @@ public class StoryExportService : IStoryExportService
             foreach (var asset in assets)
             {
                 var blobPath = StoryAssetPathMapper.BuildDraftPath(asset, ownerEmail, craft.StoryId);
-                // Check if this is the cover image
-                var isCoverImage = asset.Type == StoryAssetPathMapper.AssetType.Image &&
-                                   !string.IsNullOrWhiteSpace(craft.CoverImageUrl) &&
-                                   asset.Filename.Equals(craft.CoverImageUrl, StringComparison.OrdinalIgnoreCase);
-                allAssets.Add((asset, blobPath, isCoverImage));
+                // Cover can be image or video (language-agnostic)
+                var isCover = !string.IsNullOrWhiteSpace(craft.CoverImageUrl) &&
+                              asset.Filename.Equals(craft.CoverImageUrl, StringComparison.OrdinalIgnoreCase);
+                allAssets.Add((asset, blobPath, isCover));
             }
         }
 
@@ -130,7 +129,7 @@ public class StoryExportService : IStoryExportService
             }
 
             // Download and add media files from draft container
-            foreach (var (asset, blobPath, isCoverImage) in uniqueAssets)
+            foreach (var (asset, blobPath, isCover) in uniqueAssets)
             {
                 try
                 {
@@ -144,7 +143,7 @@ public class StoryExportService : IStoryExportService
                     }
 
                     // Build ZIP entry path using asset metadata
-                    var zipEntryPath = BuildZipEntryPath(asset, isCoverImage);
+                    var zipEntryPath = BuildZipEntryPath(asset, isCover);
                     var entry = zip.CreateEntry(zipEntryPath, CompressionLevel.Fastest);
 
                     await using var entryStream = entry.Open();
@@ -390,7 +389,7 @@ public class StoryExportService : IStoryExportService
         return path.TrimStart('/').Replace('\\', '/');
     }
 
-    private static string BuildZipEntryPath(AssetInfo asset, bool isCoverImage)
+    private static string BuildZipEntryPath(AssetInfo asset, bool isCover)
     {
         var mediaType = asset.Type switch
         {
@@ -400,13 +399,15 @@ public class StoryExportService : IStoryExportService
             _ => "images"
         };
 
-        // Images are language-agnostic
+        // Cover (image or video) is language-agnostic
+        if (isCover)
+        {
+            return $"media/{mediaType}/cover/{asset.Filename}";
+        }
+
+        // Tile images are language-agnostic
         if (asset.Type == StoryAssetPathMapper.AssetType.Image)
         {
-            if (isCoverImage)
-            {
-                return $"media/{mediaType}/cover/{asset.Filename}";
-            }
             return $"media/{mediaType}/tiles/{asset.Filename}";
         }
 

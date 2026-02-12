@@ -55,7 +55,8 @@ public class StoryAssetCopyService : IStoryAssetCopyService
 
         if (!string.IsNullOrWhiteSpace(craft.CoverImageUrl))
         {
-            results.Add(new StoryAssetPathMapper.AssetInfo(craft.CoverImageUrl, StoryAssetPathMapper.AssetType.Image, null));
+            var coverType = StoryAssetPathMapper.GetCoverAssetType(craft.CoverImageUrl);
+            results.Add(new StoryAssetPathMapper.AssetInfo(craft.CoverImageUrl, coverType, null));
         }
 
         foreach (var tile in craft.Tiles)
@@ -94,8 +95,10 @@ public class StoryAssetCopyService : IStoryAssetCopyService
 
         if (!string.IsNullOrWhiteSpace(definition.CoverImageUrl))
         {
-            results.Add(new StoryAssetPathMapper.AssetInfo(Path.GetFileName(definition.CoverImageUrl), StoryAssetPathMapper.AssetType.Image, null));
-            _logger.LogInformation("Collected cover image: {Filename}", Path.GetFileName(definition.CoverImageUrl));
+            var coverFilename = Path.GetFileName(definition.CoverImageUrl);
+            var coverType = StoryAssetPathMapper.GetCoverAssetType(definition.CoverImageUrl);
+            results.Add(new StoryAssetPathMapper.AssetInfo(coverFilename, coverType, null));
+            _logger.LogInformation("Collected cover: {Filename} type={Type}", coverFilename, coverType);
         }
 
         foreach (var tile in definition.Tiles)
