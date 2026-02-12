@@ -27,12 +27,27 @@ public class StoryCraftsRepository : IStoryCraftsRepository
             .Include(x => x.Tiles)
                 .ThenInclude(t => t.Answers)
                     .ThenInclude(a => a.Tokens)
+            .Include(x => x.Tiles)
+                .ThenInclude(t => t.DialogTile!)
+                    .ThenInclude(dt => dt.Nodes)
+                        .ThenInclude(n => n.Translations)
+            .Include(x => x.Tiles)
+                .ThenInclude(t => t.DialogTile!)
+                    .ThenInclude(dt => dt.Nodes)
+                        .ThenInclude(n => n.OutgoingEdges)
+                            .ThenInclude(e => e.Translations)
+            .Include(x => x.Tiles)
+                .ThenInclude(t => t.DialogTile!)
+                    .ThenInclude(dt => dt.Nodes)
+                        .ThenInclude(n => n.OutgoingEdges)
+                            .ThenInclude(e => e.Tokens)
             .Include(x => x.Topics)
                 .ThenInclude(t => t.StoryTopic)
             .Include(x => x.AgeGroups)
                 .ThenInclude(ag => ag.StoryAgeGroup)
             .Include(x => x.CoAuthors).ThenInclude(c => c.User)
             .Include(x => x.UnlockedHeroes)
+            .Include(x => x.DialogParticipants)
             .FirstOrDefaultAsync(x => x.StoryId == id, ct);
     }
 
@@ -51,12 +66,27 @@ public class StoryCraftsRepository : IStoryCraftsRepository
             .Include(x => x.Tiles)
                 .ThenInclude(t => t.Answers)
                     .ThenInclude(a => a.Tokens)
+            .Include(x => x.Tiles)
+                .ThenInclude(t => t.DialogTile!)
+                    .ThenInclude(dt => dt.Nodes)
+                        .ThenInclude(n => n.Translations.Where(nt => nt.LanguageCode == lang))
+            .Include(x => x.Tiles)
+                .ThenInclude(t => t.DialogTile!)
+                    .ThenInclude(dt => dt.Nodes)
+                        .ThenInclude(n => n.OutgoingEdges)
+                            .ThenInclude(e => e.Translations.Where(et => et.LanguageCode == lang))
+            .Include(x => x.Tiles)
+                .ThenInclude(t => t.DialogTile!)
+                    .ThenInclude(dt => dt.Nodes)
+                        .ThenInclude(n => n.OutgoingEdges)
+                            .ThenInclude(e => e.Tokens)
             .Include(x => x.Topics)
                 .ThenInclude(t => t.StoryTopic)
             .Include(x => x.AgeGroups)
                 .ThenInclude(ag => ag.StoryAgeGroup)
             .Include(x => x.CoAuthors).ThenInclude(c => c.User)
             .Include(x => x.UnlockedHeroes)
+            .Include(x => x.DialogParticipants)
             .FirstOrDefaultAsync(x => x.StoryId == id, ct);
     }
 
@@ -118,6 +148,16 @@ public class StoryCraftsRepository : IStoryCraftsRepository
                 if (tile.StoryCraftId == Guid.Empty)
                 {
                     tile.StoryCraftId = craft.Id;
+                }
+                // Dialog tile must reference the craft and tile (required for FK when copying from definition / new version).
+                if (tile.DialogTile != null)
+                {
+                    if (tile.DialogTile.StoryCraftId == Guid.Empty)
+                        tile.DialogTile.StoryCraftId = craft.Id;
+                    if (tile.DialogTile.StoryCraftTileId == Guid.Empty)
+                        tile.DialogTile.StoryCraftTileId = tile.Id;
+                    if (tile.DialogTile.Id == Guid.Empty)
+                        tile.DialogTile.Id = Guid.NewGuid();
                 }
                 _context.StoryCraftTiles.Add(tile);
                 
@@ -197,6 +237,15 @@ public class StoryCraftsRepository : IStoryCraftsRepository
                 }
                 _context.StoryCraftAgeGroups.Add(ageGroup);
             }
+            
+            // Dialog participants must reference the craft (FK); set when saving new craft from copy/definition.
+            foreach (var participant in craft.DialogParticipants)
+            {
+                if (participant.Id == Guid.Empty)
+                    participant.Id = Guid.NewGuid();
+                if (participant.StoryCraftId == Guid.Empty)
+                    participant.StoryCraftId = craft.Id;
+            }
         }
         else
         {
@@ -240,9 +289,13 @@ public class StoryCraftsRepository : IStoryCraftsRepository
             .Include(c => c.Tiles).ThenInclude(t => t.Translations)
             .Include(c => c.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Translations)
             .Include(c => c.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Tokens)
+            .Include(c => c.Tiles).ThenInclude(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.Translations)
+            .Include(c => c.Tiles).ThenInclude(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.OutgoingEdges).ThenInclude(e => e.Translations)
+            .Include(c => c.Tiles).ThenInclude(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.OutgoingEdges).ThenInclude(e => e.Tokens)
             .Include(c => c.Topics)
             .Include(c => c.AgeGroups)
             .Include(c => c.UnlockedHeroes)
+            .Include(c => c.DialogParticipants)
             .FirstOrDefaultAsync(x => x.StoryId == id, ct);
 
         if (craft == null)

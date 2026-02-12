@@ -40,6 +40,7 @@ public class StorySourceMapper : IStorySourceMapper
             {
                 TileId = tile.TileId,
                 Type = tile.Type,
+                BranchId = tile.BranchId,
                 ImageUrl = tile.ImageUrl,
                 Translations = tile.Translations.Select(tt => new TileTranslationCloneData
                 {
@@ -65,11 +66,47 @@ public class StorySourceMapper : IStorySourceMapper
                         Value = token.Value ?? string.Empty,
                         Quantity = token.Quantity
                     }).ToList()
-                }).ToList()
+                }).ToList(),
+                DialogRootNodeId = tile.DialogTile?.RootNodeId,
+                DialogNodes = tile.DialogTile?.Nodes
+                    .OrderBy(n => n.SortOrder)
+                    .Select(n => new DialogNodeCloneData
+                    {
+                        NodeId = n.NodeId,
+                        SpeakerType = n.SpeakerType,
+                        SpeakerHeroId = n.SpeakerHeroId,
+                        Translations = n.Translations.Select(t => new DialogNodeTranslationCloneData
+                        {
+                            LanguageCode = t.LanguageCode,
+                            Text = t.Text
+                        }).ToList(),
+                        Options = n.OutgoingEdges
+                            .OrderBy(e => e.OptionOrder)
+                            .Select(e => new DialogEdgeCloneData
+                            {
+                                EdgeId = e.EdgeId,
+                                ToNodeId = e.ToNodeId,
+                                JumpToTileId = e.JumpToTileId,
+                                SetBranchId = e.SetBranchId,
+                                OptionOrder = e.OptionOrder,
+                                Translations = e.Translations.Select(et => new DialogEdgeTranslationCloneData
+                                {
+                                    LanguageCode = et.LanguageCode,
+                                    OptionText = et.OptionText
+                                }).ToList(),
+                                Tokens = e.Tokens.Select(tok => new TokenCloneData
+                                {
+                                    Type = tok.Type,
+                                    Value = tok.Value,
+                                    Quantity = tok.Quantity
+                                }).ToList()
+                            }).ToList()
+                    }).ToList() ?? new List<DialogNodeCloneData>()
             }).ToList(),
             Topics = source.Topics.Select(t => t.StoryTopicId).ToList(),
             AgeGroups = source.AgeGroups.Select(ag => ag.StoryAgeGroupId).ToList(),
-            UnlockedStoryHeroes = GetUnlockedHeroesFromCraft(source)
+            UnlockedStoryHeroes = GetUnlockedHeroesFromCraft(source),
+            DialogParticipants = source.DialogParticipants.OrderBy(p => p.SortOrder).Select(p => p.HeroId).ToList()
         };
     }
 
@@ -104,6 +141,7 @@ public class StorySourceMapper : IStorySourceMapper
                 {
                     TileId = tile.TileId,
                     Type = tile.Type,
+                    BranchId = tile.BranchId,
                     ImageUrl = imageFilename,
                     Translations = tile.Translations.Select(tt =>
                     {
@@ -138,12 +176,48 @@ public class StorySourceMapper : IStorySourceMapper
                         Value = token.Value ?? string.Empty,
                         Quantity = token.Quantity
                     }).ToList()
-                }).ToList()
+                }).ToList(),
+                DialogRootNodeId = tile.DialogTile?.RootNodeId,
+                DialogNodes = tile.DialogTile?.Nodes
+                    .OrderBy(n => n.SortOrder)
+                    .Select(n => new DialogNodeCloneData
+                    {
+                        NodeId = n.NodeId,
+                        SpeakerType = n.SpeakerType,
+                        SpeakerHeroId = n.SpeakerHeroId,
+                        Translations = n.Translations.Select(t => new DialogNodeTranslationCloneData
+                        {
+                            LanguageCode = t.LanguageCode,
+                            Text = t.Text
+                        }).ToList(),
+                        Options = n.OutgoingEdges
+                            .OrderBy(e => e.OptionOrder)
+                            .Select(e => new DialogEdgeCloneData
+                            {
+                                EdgeId = e.EdgeId,
+                                ToNodeId = e.ToNodeId,
+                                JumpToTileId = e.JumpToTileId,
+                                SetBranchId = e.SetBranchId,
+                                OptionOrder = e.OptionOrder,
+                                Translations = e.Translations.Select(et => new DialogEdgeTranslationCloneData
+                                {
+                                    LanguageCode = et.LanguageCode,
+                                    OptionText = et.OptionText
+                                }).ToList(),
+                                Tokens = e.Tokens.Select(tok => new TokenCloneData
+                                {
+                                    Type = tok.Type,
+                                    Value = tok.Value,
+                                    Quantity = tok.Quantity
+                                }).ToList()
+                            }).ToList()
+                    }).ToList() ?? new List<DialogNodeCloneData>()
             };
             }).ToList(),
             Topics = definition.Topics.Select(t => t.StoryTopicId).ToList(),
             AgeGroups = definition.AgeGroups.Select(ag => ag.StoryAgeGroupId).ToList(),
-            UnlockedStoryHeroes = definition.UnlockedHeroes.Select(h => h.HeroId).ToList()
+            UnlockedStoryHeroes = definition.UnlockedHeroes.Select(h => h.HeroId).ToList(),
+            DialogParticipants = definition.DialogParticipants.OrderBy(p => p.SortOrder).Select(p => p.HeroId).ToList()
         };
     }
 
@@ -198,6 +272,7 @@ public class StoryCloneData
     public List<Guid> Topics { get; set; } = new();
     public List<Guid> AgeGroups { get; set; } = new();
     public List<string> UnlockedStoryHeroes { get; set; } = new();
+    public List<string> DialogParticipants { get; set; } = new();
 }
 
 public class TranslationCloneData
@@ -211,9 +286,12 @@ public class TileCloneData
 {
     public string TileId { get; set; } = string.Empty;
     public string Type { get; set; } = "page";
+    public string? BranchId { get; set; }
     public string? ImageUrl { get; set; }
     public List<TileTranslationCloneData> Translations { get; set; } = new();
     public List<AnswerCloneData> Answers { get; set; } = new();
+    public string? DialogRootNodeId { get; set; }
+    public List<DialogNodeCloneData> DialogNodes { get; set; } = new();
 }
 
 public class TileTranslationCloneData
@@ -245,4 +323,36 @@ public class TokenCloneData
     public string Type { get; set; } = string.Empty;
     public string Value { get; set; } = string.Empty;
     public int Quantity { get; set; }
+}
+
+public class DialogNodeCloneData
+{
+    public string NodeId { get; set; } = string.Empty;
+    public string SpeakerType { get; set; } = "reader";
+    public string? SpeakerHeroId { get; set; }
+    public List<DialogNodeTranslationCloneData> Translations { get; set; } = new();
+    public List<DialogEdgeCloneData> Options { get; set; } = new();
+}
+
+public class DialogNodeTranslationCloneData
+{
+    public string LanguageCode { get; set; } = string.Empty;
+    public string Text { get; set; } = string.Empty;
+}
+
+public class DialogEdgeCloneData
+{
+    public string EdgeId { get; set; } = string.Empty;
+    public string ToNodeId { get; set; } = string.Empty;
+    public string? JumpToTileId { get; set; }
+    public string? SetBranchId { get; set; }
+    public int OptionOrder { get; set; }
+    public List<DialogEdgeTranslationCloneData> Translations { get; set; } = new();
+    public List<TokenCloneData> Tokens { get; set; } = new();
+}
+
+public class DialogEdgeTranslationCloneData
+{
+    public string LanguageCode { get; set; } = string.Empty;
+    public string OptionText { get; set; } = string.Empty;
 }

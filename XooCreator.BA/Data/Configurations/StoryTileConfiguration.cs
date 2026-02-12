@@ -11,6 +11,7 @@ public class StoryTileConfiguration : IEntityTypeConfiguration<StoryTile>
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Id).ValueGeneratedOnAdd();
         builder.Property(x => x.ContentHash).HasMaxLength(128);
+        builder.Property(x => x.BranchId).HasMaxLength(100);
         builder.HasIndex(x => new { x.StoryDefinitionId, x.TileId }).IsUnique();
         builder.HasOne(x => x.StoryDefinition).WithMany(x => x.Tiles).HasForeignKey(x => x.StoryDefinitionId);
         builder.HasMany(x => x.Answers).WithOne(x => x.StoryTile).HasForeignKey(x => x.StoryTileId).OnDelete(DeleteBehavior.Cascade);

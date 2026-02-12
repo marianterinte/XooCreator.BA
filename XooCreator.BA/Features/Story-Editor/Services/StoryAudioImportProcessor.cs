@@ -51,7 +51,7 @@ public class StoryAudioImportProcessor : IStoryAudioImportProcessor
             return new ImportAudioResult(false, errors, warnings, 0, 0);
         }
 
-        var pageOrQuizTypes = new[] { "page", "quiz" };
+        var pageOrQuizTypes = new[] { "page", "quiz", "dialog" };
         var pageTiles = craft.Tiles
             .Where(t => pageOrQuizTypes.Contains(t.Type, StringComparer.OrdinalIgnoreCase))
             .OrderBy(t => t.SortOrder)
@@ -59,7 +59,7 @@ public class StoryAudioImportProcessor : IStoryAudioImportProcessor
 
         if (pageTiles.Count == 0)
         {
-            errors.Add("Story has no page or quiz tiles");
+            errors.Add("Story has no page, quiz, or dialog tiles");
             return new ImportAudioResult(false, errors, warnings, 0, 0);
         }
 

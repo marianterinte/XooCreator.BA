@@ -200,6 +200,7 @@ public class StoryExportService : IStoryExportService
             classicAuthorId = def.ClassicAuthorId,
             priceInCredits = def.PriceInCredits,
             isEvaluative = def.IsEvaluative,
+            dialogParticipants = def.DialogParticipants.OrderBy(p => p.SortOrder).Select(p => p.HeroId).ToList(),
             translations = def.Translations.Select(t => new
             {
                 lang = t.LanguageCode,
@@ -211,6 +212,7 @@ public class StoryExportService : IStoryExportService
                 {
                     id = t.TileId,
                     type = t.Type,
+                    branchId = t.BranchId,
                     sortOrder = t.SortOrder,
                     imageUrl = t.ImageUrl,
                     translations = t.Translations.Select(tr => new
@@ -221,6 +223,24 @@ public class StoryExportService : IStoryExportService
                         question = tr.Question,
                         audioUrl = tr.AudioUrl,
                         videoUrl = tr.VideoUrl
+                    }).ToList(),
+                    dialogRootNodeId = t.DialogTile?.RootNodeId,
+                    dialogNodes = t.DialogTile?.Nodes.OrderBy(n => n.SortOrder).Select(n => new
+                    {
+                        nodeId = n.NodeId,
+                        speakerType = n.SpeakerType,
+                        speakerHeroId = n.SpeakerHeroId,
+                        translations = n.Translations.Select(nt => new { lang = nt.LanguageCode, text = nt.Text }).ToList(),
+                        options = n.OutgoingEdges.OrderBy(e => e.OptionOrder).Select(e => new
+                        {
+                            id = e.EdgeId,
+                            nextNodeId = e.ToNodeId,
+                            jumpToTileId = e.JumpToTileId,
+                            setBranchId = e.SetBranchId,
+                            sortOrder = e.OptionOrder,
+                            tokens = (e.Tokens ?? new()).Select(tok => new { type = tok.Type, value = tok.Value, quantity = tok.Quantity }).ToList(),
+                            translations = e.Translations.Select(et => new { lang = et.LanguageCode, text = et.OptionText }).ToList()
+                        }).ToList()
                     }).ToList(),
                     answers = (t.Answers ?? new()).OrderBy(a => a.SortOrder).Select(a => new
                     {
@@ -282,6 +302,7 @@ public class StoryExportService : IStoryExportService
             priceInCredits = craft.PriceInCredits,
             isEvaluative = craft.IsEvaluative,
             unlockedStoryHeroes = unlockedHeroes,
+            dialogParticipants = craft.DialogParticipants.OrderBy(p => p.SortOrder).Select(p => p.HeroId).ToList(),
             translations = craft.Translations.Select(t => new
             {
                 lang = t.LanguageCode,
@@ -294,6 +315,7 @@ public class StoryExportService : IStoryExportService
                 {
                     id = t.TileId,
                     type = t.Type,
+                    branchId = t.BranchId,
                     sortOrder = t.SortOrder,
                     imageUrl = t.ImageUrl,
                     translations = t.Translations.Select(tr => new
@@ -304,6 +326,24 @@ public class StoryExportService : IStoryExportService
                         question = tr.Question,
                         audioUrl = tr.AudioUrl,
                         videoUrl = tr.VideoUrl
+                    }).ToList(),
+                    dialogRootNodeId = t.DialogTile?.RootNodeId,
+                    dialogNodes = t.DialogTile?.Nodes.OrderBy(n => n.SortOrder).Select(n => new
+                    {
+                        nodeId = n.NodeId,
+                        speakerType = n.SpeakerType,
+                        speakerHeroId = n.SpeakerHeroId,
+                        translations = n.Translations.Select(nt => new { lang = nt.LanguageCode, text = nt.Text }).ToList(),
+                        options = n.OutgoingEdges.OrderBy(e => e.OptionOrder).Select(e => new
+                        {
+                            id = e.EdgeId,
+                            nextNodeId = e.ToNodeId,
+                            jumpToTileId = e.JumpToTileId,
+                            setBranchId = e.SetBranchId,
+                            sortOrder = e.OptionOrder,
+                            tokens = (e.Tokens ?? new()).Select(tok => new { type = tok.Type, value = tok.Value, quantity = tok.Quantity }).ToList(),
+                            translations = e.Translations.Select(et => new { lang = et.LanguageCode, text = et.OptionText }).ToList()
+                        }).ToList()
                     }).ToList(),
                     answers = (t.Answers ?? new()).OrderBy(a => a.SortOrder).Select(a => new
                     {

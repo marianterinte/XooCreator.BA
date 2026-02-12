@@ -81,7 +81,7 @@ public class GetStoryPagesForAudioExportEndpoint
             return TypedResults.NotFound();
         }
 
-        var pageOrQuizTypes = new[] { "page", "quiz" };
+        var pageOrQuizTypes = new[] { "page", "quiz", "dialog" };
         var tileById = craft.Tiles
             .Where(t => pageOrQuizTypes.Contains(t.Type, StringComparer.OrdinalIgnoreCase))
             .OrderBy(t => t.SortOrder)

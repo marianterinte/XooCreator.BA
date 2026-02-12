@@ -189,6 +189,13 @@ public class XooDbContext : DbContext
     public DbSet<StoryCraftAnswer> StoryCraftAnswers => Set<StoryCraftAnswer>();
     public DbSet<StoryCraftAnswerTranslation> StoryCraftAnswerTranslations => Set<StoryCraftAnswerTranslation>();
     public DbSet<StoryCraftAnswerToken> StoryCraftAnswerTokens => Set<StoryCraftAnswerToken>();
+    public DbSet<StoryCraftDialogParticipant> StoryCraftDialogParticipants => Set<StoryCraftDialogParticipant>();
+    public DbSet<StoryCraftDialogTile> StoryCraftDialogTiles => Set<StoryCraftDialogTile>();
+    public DbSet<StoryCraftDialogNode> StoryCraftDialogNodes => Set<StoryCraftDialogNode>();
+    public DbSet<StoryCraftDialogNodeTranslation> StoryCraftDialogNodeTranslations => Set<StoryCraftDialogNodeTranslation>();
+    public DbSet<StoryCraftDialogEdge> StoryCraftDialogEdges => Set<StoryCraftDialogEdge>();
+    public DbSet<StoryCraftDialogEdgeTranslation> StoryCraftDialogEdgeTranslations => Set<StoryCraftDialogEdgeTranslation>();
+    public DbSet<StoryCraftDialogEdgeToken> StoryCraftDialogEdgeTokens => Set<StoryCraftDialogEdgeToken>();
     
     // Story Topics and Age Groups
     public DbSet<StoryTopic> StoryTopics => Set<StoryTopic>();
@@ -197,6 +204,13 @@ public class XooDbContext : DbContext
     public DbSet<StoryDefinitionTopic> StoryDefinitionTopics => Set<StoryDefinitionTopic>();
     public DbSet<StoryCraftUnlockedHero> StoryCraftUnlockedHeroes => Set<StoryCraftUnlockedHero>();
     public DbSet<StoryDefinitionUnlockedHero> StoryDefinitionUnlockedHeroes => Set<StoryDefinitionUnlockedHero>();
+    public DbSet<StoryDialogParticipant> StoryDialogParticipants => Set<StoryDialogParticipant>();
+    public DbSet<StoryDialogTile> StoryDialogTiles => Set<StoryDialogTile>();
+    public DbSet<StoryDialogNode> StoryDialogNodes => Set<StoryDialogNode>();
+    public DbSet<StoryDialogNodeTranslation> StoryDialogNodeTranslations => Set<StoryDialogNodeTranslation>();
+    public DbSet<StoryDialogEdge> StoryDialogEdges => Set<StoryDialogEdge>();
+    public DbSet<StoryDialogEdgeTranslation> StoryDialogEdgeTranslations => Set<StoryDialogEdgeTranslation>();
+    public DbSet<StoryDialogEdgeToken> StoryDialogEdgeTokens => Set<StoryDialogEdgeToken>();
     public DbSet<StoryAgeGroup> StoryAgeGroups => Set<StoryAgeGroup>();
     public DbSet<StoryAgeGroupTranslation> StoryAgeGroupTranslations => Set<StoryAgeGroupTranslation>();
     public DbSet<StoryCraftAgeGroup> StoryCraftAgeGroups => Set<StoryCraftAgeGroup>();

@@ -1,3 +1,6 @@
+using System.ComponentModel.DataAnnotations;
+using XooCreator.BA.Data.Entities;
+
 namespace XooCreator.BA.Data;
 
 /// <summary>
@@ -10,6 +13,8 @@ public class StoryTile
     public string TileId { get; set; } = string.Empty; // e.g., "p1", "q1"
     public string Type { get; set; } = string.Empty; // "page" or "quiz"
     public int SortOrder { get; set; }
+    [MaxLength(100)]
+    public string? BranchId { get; set; }
     
     // Page-specific fields
     public string? Caption { get; set; }
@@ -29,6 +34,7 @@ public class StoryTile
     public StoryDefinition StoryDefinition { get; set; } = null!;
     public List<StoryAnswer> Answers { get; set; } = new();
     public List<StoryTileTranslation> Translations { get; set; } = new();
+    public StoryDialogTile? DialogTile { get; set; }
 }
 
 public class StoryTileTranslation
