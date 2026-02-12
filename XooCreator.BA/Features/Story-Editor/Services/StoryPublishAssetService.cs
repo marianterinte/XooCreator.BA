@@ -52,10 +52,11 @@ public class StoryPublishAssetService : IStoryPublishAssetService
         var allAssets = new List<StoryAssetPathMapper.AssetInfo>();
         var processedImages = new HashSet<string>(); // Deduplicate images (they're common)
         
-        // Extract images once (they're common for all languages)
+        // Cover (image or video, language-agnostic)
         if (!string.IsNullOrWhiteSpace(craft.CoverImageUrl) && !processedImages.Contains(craft.CoverImageUrl))
         {
-            allAssets.Add(new StoryAssetPathMapper.AssetInfo(craft.CoverImageUrl, StoryAssetPathMapper.AssetType.Image, null));
+            var coverType = StoryAssetPathMapper.GetCoverAssetType(craft.CoverImageUrl);
+            allAssets.Add(new StoryAssetPathMapper.AssetInfo(craft.CoverImageUrl, coverType, null));
             processedImages.Add(craft.CoverImageUrl);
         }
 
@@ -238,7 +239,7 @@ public class StoryPublishAssetService : IStoryPublishAssetService
                 await Task.Delay(250, ct);
             }
 
-            // After original is published, generate s/m variants (non-blocking) for images.
+            // After original is published, generate s/m variants (non-blocking) for images only (not video).
             if (asset.Type == StoryAssetPathMapper.AssetType.Image)
             {
                 try

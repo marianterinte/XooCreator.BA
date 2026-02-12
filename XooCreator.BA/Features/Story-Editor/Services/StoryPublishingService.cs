@@ -152,7 +152,8 @@ public class StoryPublishingService : IStoryPublishingService
 
         if (!string.IsNullOrWhiteSpace(craft.CoverImageUrl))
         {
-            var asset = new StoryAssetPathMapper.AssetInfo(craft.CoverImageUrl, StoryAssetPathMapper.AssetType.Image, null);
+            var coverType = StoryAssetPathMapper.GetCoverAssetType(craft.CoverImageUrl);
+            var asset = new StoryAssetPathMapper.AssetInfo(craft.CoverImageUrl, coverType, null);
             def.CoverImageUrl = StoryAssetPathMapper.BuildPublishedPath(asset, ownerEmail, storyId);
         }
         else
@@ -272,7 +273,8 @@ public class StoryPublishingService : IStoryPublishingService
 
         if (!string.IsNullOrWhiteSpace(craft.CoverImageUrl))
         {
-            var asset = new StoryAssetPathMapper.AssetInfo(craft.CoverImageUrl, StoryAssetPathMapper.AssetType.Image, null);
+            var coverType = StoryAssetPathMapper.GetCoverAssetType(craft.CoverImageUrl);
+            var asset = new StoryAssetPathMapper.AssetInfo(craft.CoverImageUrl, coverType, null);
             def.CoverImageUrl = StoryAssetPathMapper.BuildPublishedPath(asset, ownerEmail, craft.StoryId);
         }
         else

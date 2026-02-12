@@ -24,9 +24,48 @@ public static class StoryAssetPathMapper
     }
 
     /// <summary>
+    /// Kind of story cover media (image or video). Use this instead of string checks.
+    /// </summary>
+    public enum CoverKind
+    {
+        Image,
+        Video
+    }
+
+    /// <summary>
+    /// Returns the kind of cover from a filename or URL. Single place for video/image detection (extensions, path).
+    /// </summary>
+    public static CoverKind GetCoverKind(string? fileNameOrUrl)
+    {
+        if (string.IsNullOrWhiteSpace(fileNameOrUrl)) return CoverKind.Image;
+        var path = fileNameOrUrl.Trim();
+        if (path.Contains("video/", StringComparison.OrdinalIgnoreCase)) return CoverKind.Video;
+        var ext = Path.GetExtension(path).ToLowerInvariant();
+        return ext is ".mp4" or ".webm" ? CoverKind.Video : CoverKind.Image;
+    }
+
+    /// <summary>
+    /// Returns true if the given filename or URL represents a video cover.
+    /// </summary>
+    public static bool IsVideoCover(string? fileNameOrUrl)
+    {
+        return GetCoverKind(fileNameOrUrl) == CoverKind.Video;
+    }
+
+    /// <summary>
+    /// Returns the asset type for a story cover (Image or Video) based on filename or URL.
+    /// Used for published path construction and asset collection; draft path for cover is always built as Image (no lang segment).
+    /// </summary>
+    public static AssetType GetCoverAssetType(string? fileNameOrUrl)
+    {
+        return GetCoverKind(fileNameOrUrl) == CoverKind.Video ? AssetType.Video : AssetType.Image;
+    }
+
+    /// <summary>
     /// Extracts all asset filenames from a StoryCraft.
     /// Returns only the filename (not full paths) as stored in the database.
     /// Audio and Video are now language-specific and read from tile translations.
+    /// Cover can be image or video (language-agnostic).
     /// </summary>
     /// <param name="craft">The story craft to extract assets from</param>
     /// <param name="langTag">Language tag for audio/video assets (language-specific)</param>
@@ -36,10 +75,11 @@ public static class StoryAssetPathMapper
         var results = new List<AssetInfo>();
         var lang = (langTag ?? string.Empty).Trim().ToLowerInvariant();
 
-        // Cover image (language-agnostic)
+        // Cover (image or video, language-agnostic)
         if (!string.IsNullOrWhiteSpace(craft.CoverImageUrl))
         {
-            results.Add(new AssetInfo(craft.CoverImageUrl, AssetType.Image, null));
+            var coverType = GetCoverAssetType(craft.CoverImageUrl);
+            results.Add(new AssetInfo(craft.CoverImageUrl, coverType, null));
         }
 
         // Tile assets

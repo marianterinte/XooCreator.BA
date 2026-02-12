@@ -514,8 +514,8 @@ public partial class ImportFullStoryEndpoint
     {
         var assets = new List<(string, AssetInfo)>();
 
-        // Cover image
-        if (includeImages && root.TryGetProperty("coverImageUrl", out var coverElement) && coverElement.ValueKind == JsonValueKind.String)
+        // Cover (image or video)
+        if (root.TryGetProperty("coverImageUrl", out var coverElement) && coverElement.ValueKind == JsonValueKind.String)
         {
             var coverPath = coverElement.GetString();
             if (!string.IsNullOrWhiteSpace(coverPath))
@@ -523,7 +523,12 @@ public partial class ImportFullStoryEndpoint
                 var filename = ExtractFilename(coverPath);
                 if (!string.IsNullOrWhiteSpace(filename))
                 {
-                    assets.Add(CreateAssetEntry(coverPath, new AssetInfo(filename, AssetType.Image, null), isCoverImage: true));
+                    var coverType = GetCoverAssetType(coverPath);
+                    var includeCover = (coverType == AssetType.Image && includeImages) || (coverType == AssetType.Video && includeVideo);
+                    if (includeCover)
+                    {
+                        assets.Add(CreateAssetEntry(coverPath, new AssetInfo(filename, coverType, null), isCoverImage: true));
+                    }
                 }
             }
         }
@@ -653,11 +658,14 @@ public partial class ImportFullStoryEndpoint
             _ => "images"
         };
 
+        if (isCoverImage)
+        {
+            return $"media/{mediaType}/cover/{asset.Filename}";
+        }
+
         if (asset.Type == AssetType.Image)
         {
-            return isCoverImage
-                ? $"media/{mediaType}/cover/{asset.Filename}"
-                : $"media/{mediaType}/tiles/{asset.Filename}";
+            return $"media/{mediaType}/tiles/{asset.Filename}";
         }
 
         if (!string.IsNullOrWhiteSpace(asset.Lang))
