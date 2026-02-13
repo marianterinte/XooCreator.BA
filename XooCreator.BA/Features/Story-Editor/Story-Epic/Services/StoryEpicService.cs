@@ -319,6 +319,8 @@ public class StoryEpicService : IStoryEpicService
                 PublishedAtUtc = null, // Crafts are not published
                 StoryCount = craft.StoryNodes.Count,
                 RegionCount = craft.Regions.Count,
+                AvailableLanguages = craft.Translations?.Select(t => t.LanguageCode).OrderBy(l => l).ToList() ?? new List<string>(),
+                AudioLanguages = craft.AudioLanguages ?? new List<string>(),
                 AssignedReviewerUserId = craft.AssignedReviewerUserId,
                 IsAssignedToCurrentUser = isAssignedToCurrentUser,
                 IsOwnedByCurrentUser = isOwnedByCurrentUser,
@@ -350,6 +352,8 @@ public class StoryEpicService : IStoryEpicService
                 PublishedAtUtc = definition.PublishedAtUtc,
                 StoryCount = definition.StoryNodes.Count,
                 RegionCount = definition.Regions.Count,
+                AvailableLanguages = definition.Translations?.Select(t => t.LanguageCode).OrderBy(l => l).ToList() ?? new List<string>(),
+                AudioLanguages = definition.AudioLanguages ?? new List<string>(),
                 AssignedReviewerUserId = null, // Definitions don't have reviewers
                 IsAssignedToCurrentUser = false,
                 IsOwnedByCurrentUser = isOwnedByCurrentUser,
@@ -416,6 +420,8 @@ public class StoryEpicService : IStoryEpicService
                 PublishedAtUtc = null, // Crafts are not published
                 StoryCount = craft.StoryNodes.Count,
                 RegionCount = craft.Regions.Count,
+                AvailableLanguages = craft.Translations?.Select(t => t.LanguageCode).OrderBy(l => l).ToList() ?? new List<string>(),
+                AudioLanguages = craft.AudioLanguages ?? new List<string>(),
                 AssignedReviewerUserId = craft.AssignedReviewerUserId,
                 IsAssignedToCurrentUser = isAssignedToCurrentUser,
                 IsOwnedByCurrentUser = isOwnedByCurrentUser,
@@ -447,6 +453,8 @@ public class StoryEpicService : IStoryEpicService
                 PublishedAtUtc = definition.PublishedAtUtc,
                 StoryCount = definition.StoryNodes.Count,
                 RegionCount = definition.Regions.Count,
+                AvailableLanguages = definition.Translations?.Select(t => t.LanguageCode).OrderBy(l => l).ToList() ?? new List<string>(),
+                AudioLanguages = definition.AudioLanguages ?? new List<string>(),
                 AssignedReviewerUserId = null, // Definitions don't have reviewers
                 IsAssignedToCurrentUser = false,
                 IsOwnedByCurrentUser = isOwnedByCurrentUser,
