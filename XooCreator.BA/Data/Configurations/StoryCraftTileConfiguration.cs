@@ -10,6 +10,7 @@ public class StoryCraftTileConfiguration : IEntityTypeConfiguration<StoryCraftTi
     {
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Id).ValueGeneratedOnAdd();
+        builder.Property(x => x.BranchId).HasMaxLength(100);
         builder.HasIndex(x => new { x.StoryCraftId, x.TileId }).IsUnique();
         builder.HasOne(x => x.StoryCraft).WithMany(x => x.Tiles).HasForeignKey(x => x.StoryCraftId);
         builder.HasMany(x => x.Answers).WithOne(x => x.StoryCraftTile).HasForeignKey(x => x.StoryCraftTileId).OnDelete(DeleteBehavior.Cascade);

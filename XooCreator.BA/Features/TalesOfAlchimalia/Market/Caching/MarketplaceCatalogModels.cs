@@ -22,6 +22,7 @@ public sealed record StoryMarketplaceBaseItem
     public required StoryStatus Status { get; init; }
     public bool IsEvaluative { get; init; }
     public List<string> AvailableLanguages { get; init; } = new();
+    public List<string> AudioLanguages { get; init; } = new();
     public List<string> TopicIds { get; init; } = new();
     public List<string> AgeGroupIds { get; init; } = new();
     public List<string> SearchTitles { get; init; } = new();

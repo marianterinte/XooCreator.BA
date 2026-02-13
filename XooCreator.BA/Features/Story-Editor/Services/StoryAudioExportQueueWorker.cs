@@ -246,7 +246,7 @@ public class StoryAudioExportQueueWorker : BackgroundService
         }
 
         // Get all page and quiz tiles ordered by SortOrder (quiz are treated as pages for audio)
-        var pageOrQuizTypes = new[] { "page", "quiz" };
+        var pageOrQuizTypes = new[] { "page", "quiz", "dialog" };
         var allPages = craft.Tiles
             .Where(t => pageOrQuizTypes.Contains(t.Type, StringComparer.OrdinalIgnoreCase))
             .OrderBy(t => t.SortOrder)

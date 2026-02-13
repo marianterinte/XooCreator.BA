@@ -62,8 +62,23 @@ public class RequestUploadEndpoint
         // Ensure ExpectedSize is non-negative
         var expectedSize = dto.ExpectedSize < 0 ? 0 : dto.ExpectedSize;
 
-        if (string.Equals(dto.Kind, "cover", StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(dto.Kind, "tile-image", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(dto.Kind, "cover", StringComparison.OrdinalIgnoreCase))
+        {
+            // Cover can be image or video; draft path is always built as Image (no lang segment)
+            if (allowedImage.Contains(ext) && contentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+            {
+                if (expectedSize > maxImage) return TypedResults.BadRequest("Image too large.");
+            }
+            else if (allowedVideo.Contains(ext) && contentType.StartsWith("video/", StringComparison.OrdinalIgnoreCase))
+            {
+                if (expectedSize > maxVideo) return TypedResults.BadRequest("Video too large.");
+            }
+            else
+            {
+                return TypedResults.BadRequest("Cover must be an image (.png, .jpg, .jpeg, .webp) or video (.mp4, .webm).");
+            }
+        }
+        else if (string.Equals(dto.Kind, "tile-image", StringComparison.OrdinalIgnoreCase))
         {
             if (!allowedImage.Contains(ext)) return TypedResults.BadRequest("Unsupported image extension.");
             if (!contentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase)) return TypedResults.BadRequest("Invalid image content-type.");

@@ -26,6 +26,7 @@ public class StoryDefinition
     public double PriceInCredits { get; set; } = 0; // Price in credits for purchasing the story
     public bool IsEvaluative { get; set; } = false; // If true, this story contains quizzes that should be evaluated
     public bool IsPartOfEpic { get; set; } = false; // If true, this story is part of an epic (draft or published) and should not appear as independent story
+    public List<string> AudioLanguages { get; set; } = new(); // Language codes that have audio support (e.g., ["ro-ro", "en-us"])
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     public Guid? CreatedBy { get; set; } // User who created the story
@@ -38,6 +39,7 @@ public class StoryDefinition
     public List<StoryDefinitionAgeGroup> AgeGroups { get; set; } = new();
     public List<StoryDefinitionCoAuthor> CoAuthors { get; set; } = new();
     public List<StoryDefinitionUnlockedHero> UnlockedHeroes { get; set; } = new();
+    public List<StoryDialogParticipant> DialogParticipants { get; set; } = new();
     public ClassicAuthor? ClassicAuthor { get; set; }
 }
 

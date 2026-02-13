@@ -24,7 +24,9 @@ public class EditableStoryDto
     public string? Status { get; set; } // 'draft' | 'in-review' | 'approved' | 'published' (FE semantic)
     public string? Language { get; set; } // Language code for the story (standardized: use "language" instead of "languageCode")
     public List<string>? AvailableLanguages { get; set; } // Available language codes for this story
+    public List<string>? AudioLanguages { get; set; } // Languages that have audio support
     public List<string>? UnlockedStoryHeroes { get; set; } // List of hero IDs that are unlocked when this story is completed
+    public List<string>? DialogParticipants { get; set; } // Hero IDs available as story dialog participants
     public List<StoryCoAuthorDto>? CoAuthors { get; set; } // Co-authors (user or free text)
     public List<EditableTileDto> Tiles { get; set; } = new();
 
@@ -47,6 +49,7 @@ public class EditableTileDto
 {
     public string Type { get; set; } = "page";
     public string Id { get; set; } = string.Empty;
+    public string? BranchId { get; set; }
     public string? Caption { get; set; }
     public string? Text { get; set; }
     public string? ImageUrl { get; set; }
@@ -54,6 +57,33 @@ public class EditableTileDto
     public string? VideoUrl { get; set; }
     public string? Question { get; set; }
     public List<EditableAnswerDto> Answers { get; set; } = new();
+    public string? DialogRootNodeId { get; set; }
+    public List<EditableDialogNodeDto> DialogNodes { get; set; } = new();
+    // Character selection specific: selected heroes for this tile (subset of dialogParticipants)
+    public List<string>? AvailableHeroIds { get; set; }
+}
+
+public class EditableDialogNodeDto
+{
+    public string NodeId { get; set; } = string.Empty;
+    public string SpeakerType { get; set; } = "reader"; // reader | hero
+    public string? SpeakerHeroId { get; set; }
+    public string Text { get; set; } = string.Empty;
+    public List<EditableDialogOptionDto> Options { get; set; } = new();
+    /// <summary>Saved X position for tree rendering in editor and reading mode.</summary>
+    public int? X { get; set; }
+    /// <summary>Saved Y position for tree rendering in editor and reading mode.</summary>
+    public int? Y { get; set; }
+}
+
+public class EditableDialogOptionDto
+{
+    public string Id { get; set; } = string.Empty;
+    public string Text { get; set; } = string.Empty;
+    public string NextNodeId { get; set; } = string.Empty;
+    public string? JumpToTileId { get; set; }
+    public string? SetBranchId { get; set; }
+    public List<EditableTokenDto> Tokens { get; set; } = new();
 }
 
 public class EditableAnswerDto

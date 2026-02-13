@@ -273,8 +273,9 @@ public class StoryDocumentExportService : IStoryDocumentExportService
         if (trimmed.StartsWith("draft/", StringComparison.OrdinalIgnoreCase))
             return trimmed;
 
-        // Otherwise treat it as a filename stored in DB.
-        var asset = new StoryAssetPathMapper.AssetInfo(trimmed, StoryAssetPathMapper.AssetType.Image, null);
+        // Otherwise treat it as a filename stored in DB. Cover can be image or video; draft path is always without lang.
+        var coverType = StoryAssetPathMapper.GetCoverAssetType(trimmed);
+        var asset = new StoryAssetPathMapper.AssetInfo(trimmed, coverType, null);
         return StoryAssetPathMapper.BuildDraftPath(asset, ownerEmail, storyId);
     }
 
@@ -287,12 +288,13 @@ public class StoryDocumentExportService : IStoryDocumentExportService
         if (trimmed.Contains('/'))
             return trimmed;
 
-        // Fallback: treat as filename and build published path if we have ownerEmail.
+        // Fallback: treat as filename and build published path if we have ownerEmail. Cover can be image or video.
         if (string.IsNullOrWhiteSpace(ownerEmail))
             return trimmed;
 
         var ownerFolder = StoryAssetPathMapper.SanitizeEmailForFolder(ownerEmail);
-        var asset = new StoryAssetPathMapper.AssetInfo(trimmed, StoryAssetPathMapper.AssetType.Image, null);
+        var coverType = StoryAssetPathMapper.GetCoverAssetType(trimmed);
+        var asset = new StoryAssetPathMapper.AssetInfo(trimmed, coverType, null);
         return StoryAssetPathMapper.BuildPublishedPath(asset, ownerFolder, storyId);
     }
 
@@ -327,7 +329,8 @@ public class StoryDocumentExportService : IStoryDocumentExportService
 
         var container = model.IsDraft ? _sas.DraftContainer : _sas.PublishedContainer;
 
-        var coverBytes = model.IncludeCover && !string.IsNullOrWhiteSpace(model.CoverImageBlobPath)
+        var isCoverVideo = !string.IsNullOrWhiteSpace(model.CoverImageBlobPath) && StoryAssetPathMapper.IsVideoCover(model.CoverImageBlobPath);
+        var coverBytes = model.IncludeCover && !string.IsNullOrWhiteSpace(model.CoverImageBlobPath) && !isCoverVideo
             ? await TryDownloadImageAsync(container, model.CoverImageBlobPath!, ct)
             : null;
 
@@ -363,6 +366,10 @@ public class StoryDocumentExportService : IStoryDocumentExportService
                         if (coverBytes != null)
                         {
                             col.Item().Image(coverBytes).FitWidth();
+                        }
+                        else if (isCoverVideo)
+                        {
+                            col.Item().Text("(Cover video – not included in document)").FontSize(10).FontColor(Colors.Grey.Darken2);
                         }
                         else if (!string.IsNullOrWhiteSpace(model.CoverImageBlobPath))
                         {
@@ -510,10 +517,18 @@ public class StoryDocumentExportService : IStoryDocumentExportService
 
             if (model.IncludeCover && !string.IsNullOrWhiteSpace(model.CoverImageBlobPath))
             {
-                var coverBytes = await TryDownloadImageAsync(container, model.CoverImageBlobPath!, ct);
-                if (coverBytes != null)
+                var isCoverVideo = StoryAssetPathMapper.IsVideoCover(model.CoverImageBlobPath);
+                if (!isCoverVideo)
                 {
-                    AppendImage(mainPart, body, coverBytes, model.CoverImageBlobPath!);
+                    var coverBytes = await TryDownloadImageAsync(container, model.CoverImageBlobPath!, ct);
+                    if (coverBytes != null)
+                    {
+                        AppendImage(mainPart, body, coverBytes, model.CoverImageBlobPath!);
+                    }
+                }
+                else
+                {
+                    body.AppendChild(new Paragraph(new Run(new Text("(Cover video – not included in document)"))));
                 }
             }
 

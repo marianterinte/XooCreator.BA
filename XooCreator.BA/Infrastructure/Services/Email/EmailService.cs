@@ -35,6 +35,15 @@ public class EmailService : IEmailService
 
     public async Task<bool> SendEmailAsync(string to, string subject, string htmlBody, string? textBody = null, CancellationToken ct = default)
     {
+        // Email sending is disabled until SMTP is configured (Email:SmtpUsername, Email:SmtpPassword).
+        // Uncomment the block below and remove this guard when ready to send.
+        if (string.IsNullOrEmpty(_settings.SmtpUsername) || string.IsNullOrEmpty(_settings.SmtpPassword))
+        {
+            _logger.LogDebug("Email send skipped (SMTP not configured): To={To}, Subject={Subject}", to, subject);
+            await Task.CompletedTask;
+            return false;
+        }
+
         try
         {
             var message = new MimeMessage();
@@ -50,19 +59,19 @@ public class EmailService : IEmailService
 
             message.Body = bodyBuilder.ToMessageBody();
 
-            using var client = new SmtpClient();
-            await client.ConnectAsync(_settings.SmtpHost, _settings.SmtpPort, SecureSocketOptions.StartTls, ct);
-            
-            if (!string.IsNullOrEmpty(_settings.SmtpUsername) && !string.IsNullOrEmpty(_settings.SmtpPassword))
-            {
-                await client.AuthenticateAsync(_settings.SmtpUsername, _settings.SmtpPassword, ct);
-            }
+            // --- SMTP send disabled until configured; uncomment to enable ---
+            // using var client = new SmtpClient();
+            // await client.ConnectAsync(_settings.SmtpHost, _settings.SmtpPort, SecureSocketOptions.StartTls, ct);
+            // await client.AuthenticateAsync(_settings.SmtpUsername, _settings.SmtpPassword, ct);
+            // await client.SendAsync(message, ct);
+            // await client.DisconnectAsync(true, ct);
+            _logger.LogDebug("Email send skipped (sending disabled): To={To}, Subject={Subject}", to, subject);
+            await Task.CompletedTask;
+            return false;
+            // --- end disabled block ---
 
-            await client.SendAsync(message, ct);
-            await client.DisconnectAsync(true, ct);
-
-            _logger.LogInformation("Email sent successfully to {To}", to);
-            return true;
+            // _logger.LogInformation("Email sent successfully to {To}", to);
+            // return true;
         }
         catch (Exception ex)
         {

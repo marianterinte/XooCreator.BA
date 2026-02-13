@@ -93,6 +93,7 @@ public class StoryEditorService : IStoryEditorService
         craft.IsEvaluative = dto.IsEvaluative;
         craft.IsPartOfEpic = dto.IsPartOfEpic;
         craft.PriceInCredits = dto.PriceInCredits;
+        craft.AudioLanguages = dto.AudioLanguages ?? new List<string>();
         craft.UpdatedAt = DateTime.UtcNow;
         
         // Update topics (many-to-many)
@@ -106,9 +107,18 @@ public class StoryEditorService : IStoryEditorService
         
         // Update unlocked heroes (many-to-many)
         await UpdateUnlockedHeroesAsync(craft, dto.UnlockedStoryHeroes ?? new(), ct);
+
+        // Update dialog participants (many-to-many)
+        await UpdateDialogParticipantsAsync(craft, dto.DialogParticipants ?? new(), ct);
         
         // Update tiles (delegated to TileUpdater)
-        await _tileUpdater.UpdateTilesAsync(craft, dto.Tiles ?? new(), lang, ct);
+        var allowedDialogHeroIds = new HashSet<string>(
+            (dto.DialogParticipants ?? new())
+                .Where(h => !string.IsNullOrWhiteSpace(h))
+                .Select(h => h.Trim()),
+            StringComparer.OrdinalIgnoreCase);
+
+        await _tileUpdater.UpdateTilesAsync(craft, dto.Tiles ?? new(), lang, allowedDialogHeroIds, ct);
         
         await _context.SaveChangesAsync(ct);
         await _changeLogService.AppendChangesAsync(craft, snapshotBeforeChanges, lang, ownerUserId, ct);
@@ -225,6 +235,37 @@ public class StoryEditorService : IStoryEditorService
             {
                 StoryCraftId = craft.Id,
                 HeroId = heroId.Trim(),
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+    }
+
+    private async Task UpdateDialogParticipantsAsync(StoryCraft craft, List<string> heroIds, CancellationToken ct)
+    {
+        var existing = await _context.StoryCraftDialogParticipants
+            .Where(h => h.StoryCraftId == craft.Id)
+            .ToListAsync(ct);
+        _context.StoryCraftDialogParticipants.RemoveRange(existing);
+
+        if (heroIds == null || heroIds.Count == 0)
+        {
+            return;
+        }
+
+        var distinct = heroIds
+            .Where(h => !string.IsNullOrWhiteSpace(h))
+            .Select(h => h.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        for (var i = 0; i < distinct.Count; i++)
+        {
+            _context.StoryCraftDialogParticipants.Add(new StoryCraftDialogParticipant
+            {
+                Id = Guid.NewGuid(),
+                StoryCraftId = craft.Id,
+                HeroId = distinct[i],
+                SortOrder = i,
                 CreatedAt = DateTime.UtcNow
             });
         }

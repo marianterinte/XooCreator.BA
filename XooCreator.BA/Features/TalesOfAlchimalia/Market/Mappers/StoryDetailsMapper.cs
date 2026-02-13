@@ -134,6 +134,7 @@ public class StoryDetailsMapper
             UpdatedAt = def.UpdatedAt,
             UpdatedBy = def.UpdatedBy,
             AvailableLanguages = def.Translations?.Select(t => t.LanguageCode).OrderBy(l => l).ToList() ?? new List<string>(),
+            AudioLanguages = def.AudioLanguages ?? new List<string>(),
             AgeGroups = ageGroups,
             AverageRating = averageRating,
             TotalReviews = totalReviews,

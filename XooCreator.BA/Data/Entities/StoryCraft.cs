@@ -34,6 +34,7 @@ public class StoryCraft
     public double PriceInCredits { get; set; } = 0; // Price in credits for purchasing the story
     public bool IsEvaluative { get; set; } = false; // If true, this story contains quizzes that should be evaluated
     public bool IsPartOfEpic { get; set; } = false; // If true, this story is part of an epic (draft or published) and should not appear as independent story
+    public List<string> AudioLanguages { get; set; } = new(); // Language codes that have audio support (e.g., ["ro-ro", "en-us"])
     
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
@@ -59,6 +60,7 @@ public class StoryCraft
     public List<StoryCraftAgeGroup> AgeGroups { get; set; } = new();
     public List<StoryCraftCoAuthor> CoAuthors { get; set; } = new();
     public List<StoryCraftUnlockedHero> UnlockedHeroes { get; set; } = new();
+    public List<StoryCraftDialogParticipant> DialogParticipants { get; set; } = new();
     public ClassicAuthor? ClassicAuthor { get; set; }
 }
 
@@ -101,6 +103,8 @@ public class StoryCraftTile
     public string TileId { get; set; } = string.Empty; // e.g., "p1", "q1"
     public string Type { get; set; } = string.Empty; // "page", "quiz", or "video"
     public int SortOrder { get; set; }
+    [MaxLength(100)]
+    public string? BranchId { get; set; }
     
     // Non-translatable fields (same for all languages)
     // Image is common for all languages
@@ -114,6 +118,7 @@ public class StoryCraftTile
     public StoryCraft StoryCraft { get; set; } = null!;
     public List<StoryCraftAnswer> Answers { get; set; } = new();
     public List<StoryCraftTileTranslation> Translations { get; set; } = new();
+    public StoryCraftDialogTile? DialogTile { get; set; }
 }
 
 /// <summary>

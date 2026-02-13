@@ -86,7 +86,7 @@ public class StoryExportService : IStoryExportService
         var fileName = $"{craft.StoryId}-draft-export.zip";
 
         // Collect all assets for all languages with metadata
-        var allAssets = new List<(AssetInfo Asset, string BlobPath, bool IsCoverImage)>();
+        var allAssets = new List<(AssetInfo Asset, string BlobPath, bool IsCover)>();
 
         // Important: languages may exist in tile/answer translations even if story-level translation is missing.
         var availableLanguages = craft.Translations.Select(t => t.LanguageCode)
@@ -104,11 +104,10 @@ public class StoryExportService : IStoryExportService
             foreach (var asset in assets)
             {
                 var blobPath = StoryAssetPathMapper.BuildDraftPath(asset, ownerEmail, craft.StoryId);
-                // Check if this is the cover image
-                var isCoverImage = asset.Type == StoryAssetPathMapper.AssetType.Image &&
-                                   !string.IsNullOrWhiteSpace(craft.CoverImageUrl) &&
-                                   asset.Filename.Equals(craft.CoverImageUrl, StringComparison.OrdinalIgnoreCase);
-                allAssets.Add((asset, blobPath, isCoverImage));
+                // Cover can be image or video (language-agnostic)
+                var isCover = !string.IsNullOrWhiteSpace(craft.CoverImageUrl) &&
+                              asset.Filename.Equals(craft.CoverImageUrl, StringComparison.OrdinalIgnoreCase);
+                allAssets.Add((asset, blobPath, isCover));
             }
         }
 
@@ -130,7 +129,7 @@ public class StoryExportService : IStoryExportService
             }
 
             // Download and add media files from draft container
-            foreach (var (asset, blobPath, isCoverImage) in uniqueAssets)
+            foreach (var (asset, blobPath, isCover) in uniqueAssets)
             {
                 try
                 {
@@ -144,7 +143,7 @@ public class StoryExportService : IStoryExportService
                     }
 
                     // Build ZIP entry path using asset metadata
-                    var zipEntryPath = BuildZipEntryPath(asset, isCoverImage);
+                    var zipEntryPath = BuildZipEntryPath(asset, isCover);
                     var entry = zip.CreateEntry(zipEntryPath, CompressionLevel.Fastest);
 
                     await using var entryStream = entry.Open();
@@ -200,6 +199,8 @@ public class StoryExportService : IStoryExportService
             classicAuthorId = def.ClassicAuthorId,
             priceInCredits = def.PriceInCredits,
             isEvaluative = def.IsEvaluative,
+            audioLanguages = def.AudioLanguages ?? new List<string>(),
+            dialogParticipants = def.DialogParticipants.OrderBy(p => p.SortOrder).Select(p => p.HeroId).ToList(),
             translations = def.Translations.Select(t => new
             {
                 lang = t.LanguageCode,
@@ -211,6 +212,7 @@ public class StoryExportService : IStoryExportService
                 {
                     id = t.TileId,
                     type = t.Type,
+                    branchId = t.BranchId,
                     sortOrder = t.SortOrder,
                     imageUrl = t.ImageUrl,
                     translations = t.Translations.Select(tr => new
@@ -221,6 +223,24 @@ public class StoryExportService : IStoryExportService
                         question = tr.Question,
                         audioUrl = tr.AudioUrl,
                         videoUrl = tr.VideoUrl
+                    }).ToList(),
+                    dialogRootNodeId = t.DialogTile?.RootNodeId,
+                    dialogNodes = t.DialogTile?.Nodes.OrderBy(n => n.SortOrder).Select(n => new
+                    {
+                        nodeId = n.NodeId,
+                        speakerType = n.SpeakerType,
+                        speakerHeroId = n.SpeakerHeroId,
+                        translations = n.Translations.Select(nt => new { lang = nt.LanguageCode, text = nt.Text }).ToList(),
+                        options = n.OutgoingEdges.OrderBy(e => e.OptionOrder).Select(e => new
+                        {
+                            id = e.EdgeId,
+                            nextNodeId = e.ToNodeId,
+                            jumpToTileId = e.JumpToTileId,
+                            setBranchId = e.SetBranchId,
+                            sortOrder = e.OptionOrder,
+                            tokens = (e.Tokens ?? new()).Select(tok => new { type = tok.Type, value = tok.Value, quantity = tok.Quantity }).ToList(),
+                            translations = e.Translations.Select(et => new { lang = et.LanguageCode, text = et.OptionText }).ToList()
+                        }).ToList()
                     }).ToList(),
                     answers = (t.Answers ?? new()).OrderBy(a => a.SortOrder).Select(a => new
                     {
@@ -281,7 +301,9 @@ public class StoryExportService : IStoryExportService
             classicAuthorId = craft.ClassicAuthorId,
             priceInCredits = craft.PriceInCredits,
             isEvaluative = craft.IsEvaluative,
+            audioLanguages = craft.AudioLanguages ?? new List<string>(),
             unlockedStoryHeroes = unlockedHeroes,
+            dialogParticipants = craft.DialogParticipants.OrderBy(p => p.SortOrder).Select(p => p.HeroId).ToList(),
             translations = craft.Translations.Select(t => new
             {
                 lang = t.LanguageCode,
@@ -294,6 +316,7 @@ public class StoryExportService : IStoryExportService
                 {
                     id = t.TileId,
                     type = t.Type,
+                    branchId = t.BranchId,
                     sortOrder = t.SortOrder,
                     imageUrl = t.ImageUrl,
                     translations = t.Translations.Select(tr => new
@@ -304,6 +327,24 @@ public class StoryExportService : IStoryExportService
                         question = tr.Question,
                         audioUrl = tr.AudioUrl,
                         videoUrl = tr.VideoUrl
+                    }).ToList(),
+                    dialogRootNodeId = t.DialogTile?.RootNodeId,
+                    dialogNodes = t.DialogTile?.Nodes.OrderBy(n => n.SortOrder).Select(n => new
+                    {
+                        nodeId = n.NodeId,
+                        speakerType = n.SpeakerType,
+                        speakerHeroId = n.SpeakerHeroId,
+                        translations = n.Translations.Select(nt => new { lang = nt.LanguageCode, text = nt.Text }).ToList(),
+                        options = n.OutgoingEdges.OrderBy(e => e.OptionOrder).Select(e => new
+                        {
+                            id = e.EdgeId,
+                            nextNodeId = e.ToNodeId,
+                            jumpToTileId = e.JumpToTileId,
+                            setBranchId = e.SetBranchId,
+                            sortOrder = e.OptionOrder,
+                            tokens = (e.Tokens ?? new()).Select(tok => new { type = tok.Type, value = tok.Value, quantity = tok.Quantity }).ToList(),
+                            translations = e.Translations.Select(et => new { lang = et.LanguageCode, text = et.OptionText }).ToList()
+                        }).ToList()
                     }).ToList(),
                     answers = (t.Answers ?? new()).OrderBy(a => a.SortOrder).Select(a => new
                     {
@@ -350,7 +391,7 @@ public class StoryExportService : IStoryExportService
         return path.TrimStart('/').Replace('\\', '/');
     }
 
-    private static string BuildZipEntryPath(AssetInfo asset, bool isCoverImage)
+    private static string BuildZipEntryPath(AssetInfo asset, bool isCover)
     {
         var mediaType = asset.Type switch
         {
@@ -360,13 +401,15 @@ public class StoryExportService : IStoryExportService
             _ => "images"
         };
 
-        // Images are language-agnostic
+        // Cover (image or video) is language-agnostic
+        if (isCover)
+        {
+            return $"media/{mediaType}/cover/{asset.Filename}";
+        }
+
+        // Tile images are language-agnostic
         if (asset.Type == StoryAssetPathMapper.AssetType.Image)
         {
-            if (isCoverImage)
-            {
-                return $"media/{mediaType}/cover/{asset.Filename}";
-            }
             return $"media/{mediaType}/tiles/{asset.Filename}";
         }
 

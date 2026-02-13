@@ -129,7 +129,7 @@ public partial class ImportAudioEndpoint
         }
 
         // Get page and quiz tiles ordered by SortOrder (quiz treated as pages for audio)
-        var pageOrQuizTypes = new[] { "page", "quiz" };
+        var pageOrQuizTypes = new[] { "page", "quiz", "dialog" };
         var pageTiles = craft.Tiles
             .Where(t => pageOrQuizTypes.Contains(t.Type, StringComparer.OrdinalIgnoreCase))
             .OrderBy(t => t.SortOrder)
@@ -137,7 +137,7 @@ public partial class ImportAudioEndpoint
 
         if (pageTiles.Count == 0)
         {
-            errors.Add("Story has no page or quiz tiles");
+            errors.Add("Story has no page, quiz, or dialog tiles");
             return TypedResults.BadRequest(new ImportAudioResponse { Success = false, Errors = errors });
         }
 

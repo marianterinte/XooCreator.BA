@@ -46,7 +46,8 @@ public class StoryAssetLinkService : IStoryAssetLinkService
             return;
         }
 
-        var asset = new StoryAssetPathMapper.AssetInfo(craft.CoverImageUrl, StoryAssetPathMapper.AssetType.Image, null);
+        var coverType = StoryAssetPathMapper.GetCoverAssetType(craft.CoverImageUrl);
+        var asset = new StoryAssetPathMapper.AssetInfo(craft.CoverImageUrl, coverType, null);
         var assets = new List<StoryAssetPathMapper.AssetInfo> { asset };
         var copyResult = await _assetService.CopyAssetsToPublishedAsync(assets, ownerEmail, craft.StoryId, ct);
         if (copyResult.HasError)

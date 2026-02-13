@@ -19,6 +19,7 @@ public class StoryCraftConfiguration : IEntityTypeConfiguration<StoryCraft>
         builder.HasMany(x => x.Tiles).WithOne(x => x.StoryCraft).HasForeignKey(x => x.StoryCraftId).OnDelete(DeleteBehavior.Cascade);
         builder.HasMany(x => x.Topics).WithOne(x => x.StoryCraft).HasForeignKey(x => x.StoryCraftId).OnDelete(DeleteBehavior.Cascade);
         builder.HasMany(x => x.AgeGroups).WithOne(x => x.StoryCraft).HasForeignKey(x => x.StoryCraftId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasMany(x => x.DialogParticipants).WithOne(x => x.StoryCraft).HasForeignKey(x => x.StoryCraftId).OnDelete(DeleteBehavior.Cascade);
         builder.HasOne(x => x.ClassicAuthor)
             .WithMany()
             .HasForeignKey(x => x.ClassicAuthorId)

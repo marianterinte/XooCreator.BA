@@ -46,7 +46,7 @@ public class GetUserCreatedStoriesEndpoint
         // For admin: get all published stories, for regular user: get only their own
         var publishedStoriesQuery = ep._context.UserCreatedStories
             .Include(ucs => ucs.StoryDefinition)
-            .ThenInclude(sd => sd.Translations.Where(t => t.LanguageCode == locale))
+            .ThenInclude(sd => sd.Translations)
             .Include(ucs => ucs.User)
             .Where(ucs => ucs.IsPublished && ucs.StoryDefinition.IsActive);
         
@@ -62,14 +62,14 @@ public class GetUserCreatedStoriesEndpoint
         foreach (var ucs in publishedStoriesData)
         {
             var ownerEmail = ucs.User?.Email ?? "";
+            var translations = ucs.StoryDefinition.Translations ?? new List<StoryDefinitionTranslation>();
+            var titleForLocale = translations.FirstOrDefault(t => t.LanguageCode == locale)?.Title ?? ucs.StoryDefinition.Title;
+            var availableLangs = translations.Select(t => t.LanguageCode).Distinct().ToList();
             publishedStories.Add(new CreatedStoryDto
             {
                 Id = ucs.StoryDefinition.Id,
                 StoryId = ucs.StoryDefinition.StoryId,
-                Title = ucs.StoryDefinition.Translations
-                    .Where(t => t.LanguageCode == locale)
-                    .Select(t => t.Title)
-                    .FirstOrDefault() ?? ucs.StoryDefinition.Title,
+                Title = titleForLocale,
                 CoverImageUrl = ucs.StoryDefinition.CoverImageUrl,
                 StoryTopic = ucs.StoryDefinition.StoryTopic,
                 StoryType = ucs.StoryDefinition.StoryType,
@@ -79,14 +79,16 @@ public class GetUserCreatedStoriesEndpoint
                 IsPublished = ucs.IsPublished,
                 CreationNotes = ucs.CreationNotes,
                 OwnerEmail = ownerEmail,
-                IsOwnedByCurrentUser = ucs.UserId == userId
+                IsOwnedByCurrentUser = ucs.UserId == userId,
+                AvailableLanguages = availableLangs,
+                AudioLanguages = ucs.StoryDefinition.AudioLanguages ?? new List<string>()
             });
         }
 
         // Get draft stories from StoryCrafts (for the requested language)
         // Only get drafts for current user (admins see all published, but drafts are still per-user)
         var drafts = await ep._context.StoryCrafts
-            .Include(sc => sc.Translations.Where(t => t.LanguageCode == locale))
+            .Include(sc => sc.Translations)
             .Where(sc => sc.OwnerUserId == userId)
             .ToListAsync(ct);
 
@@ -103,9 +105,11 @@ public class GetUserCreatedStoriesEndpoint
                 continue;
 
             // Get translation for the requested locale
-            var draftTranslation = draft.Translations.FirstOrDefault(t => t.LanguageCode == locale)
-                ?? draft.Translations.FirstOrDefault();
+            var draftTranslations = draft.Translations ?? new List<StoryCraftTranslation>();
+            var draftTranslation = draftTranslations.FirstOrDefault(t => t.LanguageCode == locale)
+                ?? draftTranslations.FirstOrDefault();
 
+            var draftLangs = draft.Translations?.Select(t => t.LanguageCode).Distinct().ToList() ?? new List<string>();
             var storyDto = new CreatedStoryDto
             {
                 Id = draft.Id, // Use StoryCraft ID
@@ -122,7 +126,9 @@ public class GetUserCreatedStoriesEndpoint
                 IsPublished = false,
                 CreationNotes = null,
                 OwnerEmail = currentUserEmail,
-                IsOwnedByCurrentUser = true // Drafts are always owned by current user
+                IsOwnedByCurrentUser = true, // Drafts are always owned by current user
+                AvailableLanguages = draftLangs,
+                AudioLanguages = draft.AudioLanguages ?? new List<string>()
             };
 
             draftStories.Add(storyDto);

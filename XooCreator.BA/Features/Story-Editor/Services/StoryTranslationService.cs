@@ -71,6 +71,15 @@ public class StoryTranslationService : IStoryTranslationService
             .Include(c => c.Tiles)
                 .ThenInclude(t => t.Answers)
                     .ThenInclude(a => a.Translations)
+            .Include(c => c.Tiles)
+                .ThenInclude(t => t.DialogTile!)
+                    .ThenInclude(dt => dt.Nodes)
+                        .ThenInclude(n => n.Translations)
+            .Include(c => c.Tiles)
+                .ThenInclude(t => t.DialogTile!)
+                    .ThenInclude(dt => dt.Nodes)
+                        .ThenInclude(n => n.OutgoingEdges)
+                            .ThenInclude(e => e.Translations)
             .FirstOrDefaultAsync(c => c.StoryId == storyId, ct);
 
         if (craft == null)
@@ -170,6 +179,21 @@ public class StoryTranslationService : IStoryTranslationService
             map[$"tile.{tileId}.caption"] = tileTranslation?.Caption ?? string.Empty;
             map[$"tile.{tileId}.text"] = tileTranslation?.Text ?? string.Empty;
             map[$"tile.{tileId}.question"] = tileTranslation?.Question ?? string.Empty;
+
+            if (string.Equals(tile.Type, "dialog", StringComparison.OrdinalIgnoreCase) && tile.DialogTile != null)
+            {
+                foreach (var node in tile.DialogTile.Nodes)
+                {
+                    var nodeText = node.Translations.FirstOrDefault(t => t.LanguageCode == refLang)?.Text ?? string.Empty;
+                    map[$"dialog.tile.{tileId}.node.{node.NodeId}.text"] = nodeText;
+
+                    foreach (var edge in node.OutgoingEdges)
+                    {
+                        var optionText = edge.Translations.FirstOrDefault(t => t.LanguageCode == refLang)?.OptionText ?? string.Empty;
+                        map[$"dialog.tile.{tileId}.edge.{edge.EdgeId}.optionText"] = optionText;
+                    }
+                }
+            }
 
             foreach (var answer in tile.Answers)
             {
@@ -304,6 +328,53 @@ public class StoryTranslationService : IStoryTranslationService
                 {
                     answerTranslation.Text = answerText;
                     translatedCount++;
+                }
+            }
+
+            if (string.Equals(tile.Type, "dialog", StringComparison.OrdinalIgnoreCase) && tile.DialogTile != null)
+            {
+                foreach (var node in tile.DialogTile.Nodes)
+                {
+                    var nodeKey = $"dialog.tile.{tileId}.node.{node.NodeId}.text";
+                    if (ShouldTranslate(sourceMap, nodeKey) && TryGetTranslated(translatedMap, nodeKey, out var nodeText))
+                    {
+                        var nodeTranslation = node.Translations.FirstOrDefault(t => t.LanguageCode == targetLang);
+                        if (nodeTranslation == null)
+                        {
+                            nodeTranslation = new StoryCraftDialogNodeTranslation
+                            {
+                                Id = Guid.NewGuid(),
+                                StoryCraftDialogNodeId = node.Id,
+                                LanguageCode = targetLang,
+                                Text = string.Empty
+                            };
+                            node.Translations.Add(nodeTranslation);
+                        }
+                        nodeTranslation.Text = nodeText;
+                        translatedCount++;
+                    }
+
+                    foreach (var edge in node.OutgoingEdges)
+                    {
+                        var edgeKey = $"dialog.tile.{tileId}.edge.{edge.EdgeId}.optionText";
+                        if (ShouldTranslate(sourceMap, edgeKey) && TryGetTranslated(translatedMap, edgeKey, out var optionText))
+                        {
+                            var edgeTranslation = edge.Translations.FirstOrDefault(t => t.LanguageCode == targetLang);
+                            if (edgeTranslation == null)
+                            {
+                                edgeTranslation = new StoryCraftDialogEdgeTranslation
+                                {
+                                    Id = Guid.NewGuid(),
+                                    StoryCraftDialogEdgeId = edge.Id,
+                                    LanguageCode = targetLang,
+                                    OptionText = string.Empty
+                                };
+                                edge.Translations.Add(edgeTranslation);
+                            }
+                            edgeTranslation.OptionText = optionText;
+                            translatedCount++;
+                        }
+                    }
                 }
             }
         }
