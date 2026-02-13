@@ -98,7 +98,8 @@ public class ListStoryCraftsEndpoint
                 OwnerEmail = ownerEmail,
                 IsOwnedByCurrentUser = c.OwnerUserId == user.Id,
                 AssignedReviewerUserId = c.AssignedReviewerUserId,
-                IsAssignedToCurrentUser = c.AssignedReviewerUserId == user.Id
+                IsAssignedToCurrentUser = c.AssignedReviewerUserId == user.Id,
+                AvailableLanguages = availableLangs
             });
         }
 
