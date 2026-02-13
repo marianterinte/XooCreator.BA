@@ -28,7 +28,7 @@ public partial class ImportAudioEndpoint
     private readonly IJobEventsHub _jobEvents;
     private readonly ILogger<ImportAudioEndpoint> _logger;
     private const long MaxZipSizeBytes = 100 * 1024 * 1024; // 100MB
-    private const long MaxAudioFileSizeBytes = 10 * 1024 * 1024; // 10MB per audio file
+    private const long MaxAudioFileSizeBytes = 100 * 1024 * 1024; // 100MB per audio file
     private static readonly HashSet<string> AllowedAudioExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
         ".wav", ".mp3", ".m4a"
