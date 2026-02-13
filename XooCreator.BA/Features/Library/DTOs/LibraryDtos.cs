@@ -45,6 +45,8 @@ public class CreatedStoryDto
     public string? CreationNotes { get; set; }
     public string? OwnerEmail { get; set; }
     public bool IsOwnedByCurrentUser { get; set; }
+    /// <summary>Available language codes for this story (e.g. ro-ro, en-us).</summary>
+    public List<string>? AvailableLanguages { get; set; }
 }
 
 
