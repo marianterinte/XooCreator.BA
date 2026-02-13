@@ -88,6 +88,7 @@ public class StoryCraftTranslation
     public string LanguageCode { get; set; } = "ro-ro"; // normalized lower-case
     public string Title { get; set; } = string.Empty;
     public string? Summary { get; set; }
+    public bool HasAudio { get; set; } = false;
 
     public StoryCraft StoryCraft { get; set; } = null!;
 }

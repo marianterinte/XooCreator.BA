@@ -24,6 +24,7 @@ public class EditableStoryDto
     public string? Status { get; set; } // 'draft' | 'in-review' | 'approved' | 'published' (FE semantic)
     public string? Language { get; set; } // Language code for the story (standardized: use "language" instead of "languageCode")
     public List<string>? AvailableLanguages { get; set; } // Available language codes for this story
+    public List<string>? AudioLanguages { get; set; } // Languages that have audio support
     public List<string>? UnlockedStoryHeroes { get; set; } // List of hero IDs that are unlocked when this story is completed
     public List<string>? DialogParticipants { get; set; } // Hero IDs available as story dialog participants
     public List<StoryCoAuthorDto>? CoAuthors { get; set; } // Co-authors (user or free text)

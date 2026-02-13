@@ -75,7 +75,8 @@ public class StoryEditorService : IStoryEditorService
                 StoryCraftId = craft.Id,
                 LanguageCode = lang,
                 Title = dto.Title ?? string.Empty,
-                Summary = dto.Summary
+                Summary = dto.Summary,
+                HasAudio = (dto.AudioLanguages ?? new List<string>()).Contains(lang)
             };
             _context.StoryCraftTranslations.Add(translation);
         }
@@ -83,6 +84,7 @@ public class StoryEditorService : IStoryEditorService
         {
             translation.Title = dto.Title ?? string.Empty;
             translation.Summary = dto.Summary;
+            translation.HasAudio = (dto.AudioLanguages ?? new List<string>()).Contains(lang);
         }
         
         craft.CoverImageUrl = ExtractFileName(dto.CoverImageUrl);

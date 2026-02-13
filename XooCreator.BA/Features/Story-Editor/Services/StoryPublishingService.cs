@@ -170,7 +170,8 @@ public class StoryPublishingService : IStoryPublishingService
             {
                 StoryDefinition = def,
                 LanguageCode = tr.LanguageCode.ToLowerInvariant(),
-                Title = tr.Title ?? string.Empty
+                Title = tr.Title ?? string.Empty,
+                HasAudio = tr.HasAudio
             });
         }
 
@@ -358,7 +359,8 @@ public class StoryPublishingService : IStoryPublishingService
             {
                 StoryDefinitionId = def.Id,
                 LanguageCode = tr.LanguageCode.ToLowerInvariant(),
-                Title = tr.Title ?? string.Empty
+                Title = tr.Title ?? string.Empty,
+                HasAudio = tr.HasAudio
             });
         }
     }

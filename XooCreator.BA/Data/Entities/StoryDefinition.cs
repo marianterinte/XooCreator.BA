@@ -48,6 +48,7 @@ public class StoryDefinitionTranslation
     public Guid StoryDefinitionId { get; set; }
     public string LanguageCode { get; set; } = "ro-ro"; // normalized lower-case
     public string Title { get; set; } = string.Empty;
+    public bool HasAudio { get; set; } = false;
 
     public StoryDefinition StoryDefinition { get; set; } = null!;
 }
