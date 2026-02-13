@@ -106,7 +106,8 @@ public class StorySourceMapper : IStorySourceMapper
             Topics = source.Topics.Select(t => t.StoryTopicId).ToList(),
             AgeGroups = source.AgeGroups.Select(ag => ag.StoryAgeGroupId).ToList(),
             UnlockedStoryHeroes = GetUnlockedHeroesFromCraft(source),
-            DialogParticipants = source.DialogParticipants.OrderBy(p => p.SortOrder).Select(p => p.HeroId).ToList()
+            DialogParticipants = source.DialogParticipants.OrderBy(p => p.SortOrder).Select(p => p.HeroId).ToList(),
+            AudioLanguages = source.AudioLanguages ?? new List<string>()
         };
     }
 
@@ -217,7 +218,8 @@ public class StorySourceMapper : IStorySourceMapper
             Topics = definition.Topics.Select(t => t.StoryTopicId).ToList(),
             AgeGroups = definition.AgeGroups.Select(ag => ag.StoryAgeGroupId).ToList(),
             UnlockedStoryHeroes = definition.UnlockedHeroes.Select(h => h.HeroId).ToList(),
-            DialogParticipants = definition.DialogParticipants.OrderBy(p => p.SortOrder).Select(p => p.HeroId).ToList()
+            DialogParticipants = definition.DialogParticipants.OrderBy(p => p.SortOrder).Select(p => p.HeroId).ToList(),
+            AudioLanguages = definition.AudioLanguages ?? new List<string>()
         };
     }
 
@@ -273,6 +275,7 @@ public class StoryCloneData
     public List<Guid> AgeGroups { get; set; } = new();
     public List<string> UnlockedStoryHeroes { get; set; } = new();
     public List<string> DialogParticipants { get; set; } = new();
+    public List<string> AudioLanguages { get; set; } = new();
 }
 
 public class TranslationCloneData

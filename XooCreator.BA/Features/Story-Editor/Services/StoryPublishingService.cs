@@ -137,6 +137,7 @@ public class StoryPublishingService : IStoryPublishingService
         def.IsEvaluative = craft.IsEvaluative;
         def.IsPartOfEpic = craft.IsPartOfEpic;
         def.PriceInCredits = craft.PriceInCredits;
+        def.AudioLanguages = craft.AudioLanguages ?? new List<string>();
         def.Status = StoryStatus.Published;
         def.IsActive = true;
         def.UpdatedAt = DateTime.UtcNow;
@@ -170,8 +171,7 @@ public class StoryPublishingService : IStoryPublishingService
             {
                 StoryDefinition = def,
                 LanguageCode = tr.LanguageCode.ToLowerInvariant(),
-                Title = tr.Title ?? string.Empty,
-                HasAudio = tr.HasAudio
+                Title = tr.Title ?? string.Empty
             });
         }
 
@@ -263,6 +263,7 @@ public class StoryPublishingService : IStoryPublishingService
         def.IsEvaluative = craft.IsEvaluative;
         def.IsPartOfEpic = craft.IsPartOfEpic;
         def.PriceInCredits = craft.PriceInCredits;
+        def.AudioLanguages = craft.AudioLanguages ?? new List<string>();
         def.Status = StoryStatus.Published;
         def.IsActive = true;
         def.UpdatedAt = DateTime.UtcNow;
@@ -359,8 +360,7 @@ public class StoryPublishingService : IStoryPublishingService
             {
                 StoryDefinitionId = def.Id,
                 LanguageCode = tr.LanguageCode.ToLowerInvariant(),
-                Title = tr.Title ?? string.Empty,
-                HasAudio = tr.HasAudio
+                Title = tr.Title ?? string.Empty
             });
         }
     }

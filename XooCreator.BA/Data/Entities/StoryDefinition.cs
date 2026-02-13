@@ -26,6 +26,7 @@ public class StoryDefinition
     public double PriceInCredits { get; set; } = 0; // Price in credits for purchasing the story
     public bool IsEvaluative { get; set; } = false; // If true, this story contains quizzes that should be evaluated
     public bool IsPartOfEpic { get; set; } = false; // If true, this story is part of an epic (draft or published) and should not appear as independent story
+    public List<string> AudioLanguages { get; set; } = new(); // Language codes that have audio support (e.g., ["ro-ro", "en-us"])
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     public Guid? CreatedBy { get; set; } // User who created the story
@@ -48,7 +49,6 @@ public class StoryDefinitionTranslation
     public Guid StoryDefinitionId { get; set; }
     public string LanguageCode { get; set; } = "ro-ro"; // normalized lower-case
     public string Title { get; set; } = string.Empty;
-    public bool HasAudio { get; set; } = false;
 
     public StoryDefinition StoryDefinition { get; set; } = null!;
 }

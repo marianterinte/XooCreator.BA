@@ -75,8 +75,7 @@ public class StoryEditorService : IStoryEditorService
                 StoryCraftId = craft.Id,
                 LanguageCode = lang,
                 Title = dto.Title ?? string.Empty,
-                Summary = dto.Summary,
-                HasAudio = (dto.AudioLanguages ?? new List<string>()).Contains(lang)
+                Summary = dto.Summary
             };
             _context.StoryCraftTranslations.Add(translation);
         }
@@ -84,7 +83,6 @@ public class StoryEditorService : IStoryEditorService
         {
             translation.Title = dto.Title ?? string.Empty;
             translation.Summary = dto.Summary;
-            translation.HasAudio = (dto.AudioLanguages ?? new List<string>()).Contains(lang);
         }
         
         craft.CoverImageUrl = ExtractFileName(dto.CoverImageUrl);
@@ -95,6 +93,7 @@ public class StoryEditorService : IStoryEditorService
         craft.IsEvaluative = dto.IsEvaluative;
         craft.IsPartOfEpic = dto.IsPartOfEpic;
         craft.PriceInCredits = dto.PriceInCredits;
+        craft.AudioLanguages = dto.AudioLanguages ?? new List<string>();
         craft.UpdatedAt = DateTime.UtcNow;
         
         // Update topics (many-to-many)
