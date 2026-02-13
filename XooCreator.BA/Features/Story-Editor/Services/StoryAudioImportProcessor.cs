@@ -23,7 +23,7 @@ public class StoryAudioImportProcessor : IStoryAudioImportProcessor
     private readonly IBlobSasService _sas;
     private readonly ILogger<StoryAudioImportProcessor> _logger;
 
-    private const long MaxAudioFileSizeBytes = 10 * 1024 * 1024; // 10MB per audio file
+    private const long MaxAudioFileSizeBytes = 100 * 1024 * 1024; // 100MB per audio file
     private static readonly HashSet<string> AllowedAudioExtensions = new(StringComparer.OrdinalIgnoreCase) { ".wav", ".mp3", ".m4a" };
 
     public StoryAudioImportProcessor(
