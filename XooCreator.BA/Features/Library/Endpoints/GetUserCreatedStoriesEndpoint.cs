@@ -80,7 +80,8 @@ public class GetUserCreatedStoriesEndpoint
                 CreationNotes = ucs.CreationNotes,
                 OwnerEmail = ownerEmail,
                 IsOwnedByCurrentUser = ucs.UserId == userId,
-                AvailableLanguages = availableLangs
+                AvailableLanguages = availableLangs,
+                AudioLanguages = ucs.StoryDefinition.AudioLanguages ?? new List<string>()
             });
         }
 
@@ -126,7 +127,8 @@ public class GetUserCreatedStoriesEndpoint
                 CreationNotes = null,
                 OwnerEmail = currentUserEmail,
                 IsOwnedByCurrentUser = true, // Drafts are always owned by current user
-                AvailableLanguages = draftLangs
+                AvailableLanguages = draftLangs,
+                AudioLanguages = draft.AudioLanguages ?? new List<string>()
             };
 
             draftStories.Add(storyDto);

@@ -199,6 +199,7 @@ public class StoryExportService : IStoryExportService
             classicAuthorId = def.ClassicAuthorId,
             priceInCredits = def.PriceInCredits,
             isEvaluative = def.IsEvaluative,
+            audioLanguages = def.AudioLanguages ?? new List<string>(),
             dialogParticipants = def.DialogParticipants.OrderBy(p => p.SortOrder).Select(p => p.HeroId).ToList(),
             translations = def.Translations.Select(t => new
             {
@@ -300,6 +301,7 @@ public class StoryExportService : IStoryExportService
             classicAuthorId = craft.ClassicAuthorId,
             priceInCredits = craft.PriceInCredits,
             isEvaluative = craft.IsEvaluative,
+            audioLanguages = craft.AudioLanguages ?? new List<string>(),
             unlockedStoryHeroes = unlockedHeroes,
             dialogParticipants = craft.DialogParticipants.OrderBy(p => p.SortOrder).Select(p => p.HeroId).ToList(),
             translations = craft.Translations.Select(t => new

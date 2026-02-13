@@ -47,6 +47,8 @@ public class CreatedStoryDto
     public bool IsOwnedByCurrentUser { get; set; }
     /// <summary>Available language codes for this story (e.g. ro-ro, en-us).</summary>
     public List<string>? AvailableLanguages { get; set; }
+    /// <summary>Language codes that have audio support (e.g. ro-ro, en-us).</summary>
+    public List<string>? AudioLanguages { get; set; }
 }
 
 

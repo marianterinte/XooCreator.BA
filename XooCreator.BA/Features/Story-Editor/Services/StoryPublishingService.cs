@@ -137,6 +137,7 @@ public class StoryPublishingService : IStoryPublishingService
         def.IsEvaluative = craft.IsEvaluative;
         def.IsPartOfEpic = craft.IsPartOfEpic;
         def.PriceInCredits = craft.PriceInCredits;
+        def.AudioLanguages = craft.AudioLanguages ?? new List<string>();
         def.Status = StoryStatus.Published;
         def.IsActive = true;
         def.UpdatedAt = DateTime.UtcNow;
@@ -262,6 +263,7 @@ public class StoryPublishingService : IStoryPublishingService
         def.IsEvaluative = craft.IsEvaluative;
         def.IsPartOfEpic = craft.IsPartOfEpic;
         def.PriceInCredits = craft.PriceInCredits;
+        def.AudioLanguages = craft.AudioLanguages ?? new List<string>();
         def.Status = StoryStatus.Published;
         def.IsActive = true;
         def.UpdatedAt = DateTime.UtcNow;

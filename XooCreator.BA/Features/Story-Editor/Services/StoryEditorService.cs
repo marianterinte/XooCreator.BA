@@ -93,6 +93,7 @@ public class StoryEditorService : IStoryEditorService
         craft.IsEvaluative = dto.IsEvaluative;
         craft.IsPartOfEpic = dto.IsPartOfEpic;
         craft.PriceInCredits = dto.PriceInCredits;
+        craft.AudioLanguages = dto.AudioLanguages ?? new List<string>();
         craft.UpdatedAt = DateTime.UtcNow;
         
         // Update topics (many-to-many)

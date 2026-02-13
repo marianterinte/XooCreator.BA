@@ -205,6 +205,7 @@ public class StoriesService : IStoriesService
                     .ToList(),
                 Status = MapStatusForFrontend(StoryStatusExtensions.FromDb(craft.Status)),
                 AvailableLanguages = availableLangs,
+                AudioLanguages = craft.AudioLanguages ?? new List<string>(),
                 AssignedReviewerUserId = craft.AssignedReviewerUserId,
                 ReviewedByUserId = craft.ReviewedByUserId,
                 ApprovedByUserId = craft.ApprovedByUserId,
@@ -340,6 +341,7 @@ public class StoriesService : IStoriesService
                 .ToList(),
             Status = MapStatusForFrontend(story.Status), // story.Status is already StoryStatus enum
             AvailableLanguages = availableLangs,
+            AudioLanguages = story.AudioLanguages ?? new List<string>(),
             OwnerEmail = ownerEmailFromDefinition,
             Tiles = story.Tiles.OrderBy(t => t.SortOrder).Select(t =>
             {
