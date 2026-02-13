@@ -244,6 +244,7 @@ public record EpicMarketplaceItemDto
     public int ReadersCount { get; init; } // Total readers across all stories in epic
     public double AverageRating { get; init; } // Average rating across all stories in epic
     public List<string> AvailableLanguages { get; init; } = new(); // e.g., ["ro-ro", "en-us", "hu-hu"]
+    public List<string> AudioLanguages { get; init; } = new(); // Language codes that have audio support
 }
 
 public record EpicCoAuthorDto
@@ -269,6 +270,7 @@ public record EpicDetailsDto
     public int TotalReviews { get; init; } // From epic reviews, not story reviews
     public EpicReviewDto? UserReview { get; init; } // Current user's review if exists
     public List<string> AvailableLanguages { get; init; } = new(); // e.g., ["ro-ro", "en-us", "hu-hu"]
+    public List<string> AudioLanguages { get; init; } = new(); // Language codes that have audio support
     public List<EpicCoAuthorDto> CoAuthors { get; init; } = new();
 }
 

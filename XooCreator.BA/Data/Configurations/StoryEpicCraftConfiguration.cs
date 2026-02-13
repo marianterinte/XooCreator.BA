@@ -21,5 +21,10 @@ public class StoryEpicCraftConfiguration : IEntityTypeConfiguration<StoryEpicCra
         builder.HasOne<AlchimaliaUser>().WithMany().HasForeignKey(x => x.AssignedReviewerUserId).OnDelete(DeleteBehavior.SetNull);
         builder.HasOne<AlchimaliaUser>().WithMany().HasForeignKey(x => x.ReviewedByUserId).OnDelete(DeleteBehavior.SetNull);
         builder.HasOne<AlchimaliaUser>().WithMany().HasForeignKey(x => x.ApprovedByUserId).OnDelete(DeleteBehavior.SetNull);
+        builder.Property(x => x.AudioLanguages)
+            .HasConversion(
+                v => v == null || v.Count == 0 ? Array.Empty<string>() : v.ToArray(),
+                v => v == null ? new List<string>() : v.ToList())
+            .HasColumnType("text[]");
     }
 }

@@ -24,7 +24,10 @@ public class StoryEpicDefinition
     public int Version { get; set; } = 1; // Global version, increments on publish
     public int BaseVersion { get; set; } = 0; // The published version from which this draft originated (for re-publish)
     public int LastPublishedVersion { get; set; } = 0; // Draft version that produced the current publish
-    
+
+    /// <summary>Language codes that have audio support for this epic (e.g. ["ro-ro", "en-us"]).</summary>
+    public List<string> AudioLanguages { get; set; } = new();
+
     // Navigation properties
     public AlchimaliaUser Owner { get; set; } = null!;
     public ICollection<StoryEpicDefinitionRegion> Regions { get; set; } = new List<StoryEpicDefinitionRegion>();

@@ -93,6 +93,7 @@ public class StoryEpicService : IStoryEpicService
                 OwnerUserId = ownerUserId,
                 Status = dto.Status ?? "draft",
                 CoverImageUrl = dto.CoverImageUrl,
+                AudioLanguages = dto.AudioLanguages ?? new List<string>(),
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -154,6 +155,7 @@ public class StoryEpicService : IStoryEpicService
         // Update basic properties
         craft.CoverImageUrl = dto.CoverImageUrl;
         craft.Status = dto.Status ?? craft.Status;
+        craft.AudioLanguages = dto.AudioLanguages ?? new List<string>();
         craft.UpdatedAt = DateTime.UtcNow;
         // Note: LastDraftVersion will be incremented in AppendChangesAsync
 
@@ -549,6 +551,7 @@ public class StoryEpicService : IStoryEpicService
             Status = "draft",
             CoverImageUrl = definition.CoverImageUrl,
             IsDefault = definition.IsDefault,
+            AudioLanguages = definition.AudioLanguages ?? new List<string>(),
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
             BaseVersion = definition.Version,
@@ -736,7 +739,8 @@ public class StoryEpicService : IStoryEpicService
                     Id = ca.Id,
                     UserId = ca.UserId,
                     DisplayName = ca.UserId != null ? (ca.User?.Name ?? ca.User?.Email ?? ca.DisplayName ?? "") : (ca.DisplayName ?? "")
-                }).ToList()
+                }).ToList(),
+            AudioLanguages = craft.AudioLanguages ?? new List<string>()
         };
     }
 
@@ -838,7 +842,8 @@ public class StoryEpicService : IStoryEpicService
                     Id = ca.Id,
                     UserId = ca.UserId,
                     DisplayName = ca.UserId != null ? (ca.User?.Name ?? ca.User?.Email ?? ca.DisplayName ?? "") : (ca.DisplayName ?? "")
-                }).ToList()
+                }).ToList(),
+            AudioLanguages = definition.AudioLanguages ?? new List<string>()
         };
     }
 
