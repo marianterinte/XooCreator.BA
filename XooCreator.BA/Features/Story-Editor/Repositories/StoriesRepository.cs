@@ -112,6 +112,18 @@ public class StoriesRepository : IStoriesRepository
         });
     }
 
+    /// <summary>Locales for which story content may be cached; used when invalidating after publish.</summary>
+    private static readonly string[] StoryContentCacheLocales = { "ro-ro", "en-us", "hu-hu" };
+
+    public void InvalidateStoryContentCache(string storyId)
+    {
+        var normalizedId = NormalizeStoryId(storyId ?? string.Empty);
+        foreach (var locale in StoryContentCacheLocales)
+        {
+            _cache.Remove($"story_content:{normalizedId}:{locale.ToLowerInvariant()}");
+        }
+    }
+
     public async Task<StoryDefinition?> GetStoryDefinitionByIdAsync(string storyId)
     {
         storyId = NormalizeStoryId(storyId);

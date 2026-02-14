@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
+using XooCreator.BA.Features.Stories.Repositories;
 using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Infrastructure.Services.Queue;
@@ -105,7 +106,8 @@ public class StoryPublishQueueWorker : BackgroundService
                     var publisher = scope.ServiceProvider.GetRequiredService<IStoryPublishingService>();
                     var crafts = scope.ServiceProvider.GetRequiredService<IStoryCraftsRepository>();
                     var cleanupService = scope.ServiceProvider.GetRequiredService<IStoryDraftAssetCleanupService>();
-                    var marketplaceCacheInvalidator = scope.ServiceProvider.GetService<IMarketplaceCacheInvalidator>();
+                    var marketplaceCacheInvalidator = scope.ServiceProvider.GetRequiredService<IMarketplaceCacheInvalidator>();
+                    var storiesRepository = scope.ServiceProvider.GetRequiredService<IStoriesRepository>();
 
                     var job = await db.StoryPublishJobs.FirstOrDefaultAsync(j => j.Id == payload.JobId, stoppingToken);
                     if (job == null || job.Status is StoryPublishJobStatus.Completed or StoryPublishJobStatus.Failed or StoryPublishJobStatus.Superseded)
@@ -206,16 +208,17 @@ public class StoryPublishQueueWorker : BackgroundService
                             job.ErrorMessage = null;
                             
                             await db.SaveChangesAsync(stoppingToken);
-                            
-                            // Reset marketplace cache after successful publish (safe: all locales).
-                            // Best-effort: do not affect job completion if cache reset fails.
+
+                            // Invalidate caches so readers see the new version: story content cache + marketplace catalog.
                             try
                             {
-                                marketplaceCacheInvalidator?.ResetAll();
+                                storiesRepository.InvalidateStoryContentCache(job.StoryId);
+                                marketplaceCacheInvalidator.ResetAll();
+                                _logger.LogInformation("Cache invalidated after story publish: storyId={StoryId} jobId={JobId}", job.StoryId, job.Id);
                             }
                             catch (Exception cacheEx)
                             {
-                                _logger.LogWarning(cacheEx, "Failed to reset marketplace cache after story publish. storyId={StoryId} jobId={JobId}", job.StoryId, job.Id);
+                                _logger.LogWarning(cacheEx, "Failed to invalidate cache after story publish. storyId={StoryId} jobId={JobId}", job.StoryId, job.Id);
                             }
 
                             try
