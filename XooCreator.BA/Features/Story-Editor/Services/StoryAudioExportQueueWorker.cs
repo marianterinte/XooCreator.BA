@@ -245,18 +245,41 @@ public class StoryAudioExportQueueWorker : BackgroundService
             }
         }
 
-        // Get all page and quiz tiles ordered by SortOrder (quiz are treated as pages for audio)
-        var pageOrQuizTypes = new[] { "page", "quiz", "dialog" };
-        var allPages = craft.Tiles
-            .Where(t => pageOrQuizTypes.Contains(t.Type, StringComparer.OrdinalIgnoreCase))
-            .OrderBy(t => t.SortOrder)
-            .Select((tile, index) => new AudioPage(tile, index + 1, ResolveTileText(tile, job.Locale)))
-            .ToList();
+        // Build audio items: one per page/quiz tile, one per dialog node (replica text) so full export includes dialogues
+        var pageOrQuizOrDialogTypes = new[] { "page", "quiz", "dialog" };
+        var locale = (job.Locale ?? string.Empty).Trim().ToLowerInvariant();
+        var allPages = new List<AudioPage>();
+        var runningIndex = 1;
+        foreach (var tile in craft.Tiles
+            .Where(t => pageOrQuizOrDialogTypes.Contains(t.Type, StringComparer.OrdinalIgnoreCase))
+            .OrderBy(t => t.SortOrder))
+        {
+            if (string.Equals(tile.Type, "dialog", StringComparison.OrdinalIgnoreCase) && tile.DialogTile != null)
+            {
+                foreach (var node in tile.DialogTile.Nodes.OrderBy(n => n.SortOrder))
+                {
+                    var nodeText = node.Translations
+                        .FirstOrDefault(nt => string.Equals(nt.LanguageCode, locale, StringComparison.OrdinalIgnoreCase))
+                        ?.Text?.Trim() ?? node.Translations.FirstOrDefault()?.Text?.Trim() ?? string.Empty;
+                    if (!string.IsNullOrWhiteSpace(nodeText))
+                    {
+                        allPages.Add(new AudioPage(tile, runningIndex++, nodeText));
+                    }
+                }
+            }
+            else
+            {
+                var tileText = ResolveTileText(tile, job.Locale);
+                if (!string.IsNullOrWhiteSpace(tileText))
+                {
+                    allPages.Add(new AudioPage(tile, runningIndex++, tileText));
+                }
+            }
+        }
 
-        // Filter by selected tile IDs if provided, and exclude empty pages
+        // Filter by selected tile IDs if provided (dialog tiles: include all their nodes if tile is selected)
         var pages = allPages
-            .Where(p => (selectedTileIds == null || selectedTileIds.Contains(p.Tile.Id)) // Include if no filter or tile is selected
-                     && !string.IsNullOrWhiteSpace(p.Text)) // Exclude paginile goale
+            .Where(p => selectedTileIds == null || selectedTileIds.Contains(p.Tile.Id))
             .ToList();
 
         if (pages.Count == 0)
