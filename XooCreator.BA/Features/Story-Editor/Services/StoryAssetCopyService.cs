@@ -77,6 +77,21 @@ public class StoryAssetCopyService : IStoryAssetCopyService
                     results.Add(new StoryAssetPathMapper.AssetInfo(translation.VideoUrl, StoryAssetPathMapper.AssetType.Video, translation.LanguageCode));
                 }
             }
+
+            if (tile.DialogTile != null)
+            {
+                foreach (var node in tile.DialogTile.Nodes)
+                {
+                    foreach (var nodeTr in node.Translations)
+                    {
+                        if (!string.IsNullOrWhiteSpace(nodeTr.AudioUrl))
+                        {
+                            results.Add(new StoryAssetPathMapper.AssetInfo(nodeTr.AudioUrl, StoryAssetPathMapper.AssetType.Audio, nodeTr.LanguageCode));
+                        }
+                    }
+                    // Option audio not used: only node (replica) audio
+                }
+            }
         }
 
         return results;
@@ -149,6 +164,22 @@ public class StoryAssetCopyService : IStoryAssetCopyService
                     _logger.LogInformation(
                         "Collected video: filename={Filename} lang={Lang} fullUrl={FullUrl}",
                         filename, translation.LanguageCode, translation.VideoUrl);
+                }
+            }
+
+            if (tile.DialogTile != null)
+            {
+                foreach (var node in tile.DialogTile.Nodes)
+                {
+                    foreach (var nodeTr in node.Translations)
+                    {
+                        if (!string.IsNullOrWhiteSpace(nodeTr.AudioUrl))
+                        {
+                            var dialogAudioFilename = Path.GetFileName(nodeTr.AudioUrl);
+                            results.Add(new StoryAssetPathMapper.AssetInfo(dialogAudioFilename, StoryAssetPathMapper.AssetType.Audio, nodeTr.LanguageCode));
+                        }
+                    }
+                    // Option audio not used: only node (replica) audio
                 }
             }
         }

@@ -93,6 +93,7 @@ public class StoryEpicService : IStoryEpicService
                 OwnerUserId = ownerUserId,
                 Status = dto.Status ?? "draft",
                 CoverImageUrl = dto.CoverImageUrl,
+                AudioLanguages = dto.AudioLanguages ?? new List<string>(),
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -154,6 +155,7 @@ public class StoryEpicService : IStoryEpicService
         // Update basic properties
         craft.CoverImageUrl = dto.CoverImageUrl;
         craft.Status = dto.Status ?? craft.Status;
+        craft.AudioLanguages = dto.AudioLanguages ?? new List<string>();
         craft.UpdatedAt = DateTime.UtcNow;
         // Note: LastDraftVersion will be incremented in AppendChangesAsync
 
@@ -317,6 +319,8 @@ public class StoryEpicService : IStoryEpicService
                 PublishedAtUtc = null, // Crafts are not published
                 StoryCount = craft.StoryNodes.Count,
                 RegionCount = craft.Regions.Count,
+                AvailableLanguages = craft.Translations?.Select(t => t.LanguageCode).OrderBy(l => l).ToList() ?? new List<string>(),
+                AudioLanguages = craft.AudioLanguages ?? new List<string>(),
                 AssignedReviewerUserId = craft.AssignedReviewerUserId,
                 IsAssignedToCurrentUser = isAssignedToCurrentUser,
                 IsOwnedByCurrentUser = isOwnedByCurrentUser,
@@ -348,6 +352,8 @@ public class StoryEpicService : IStoryEpicService
                 PublishedAtUtc = definition.PublishedAtUtc,
                 StoryCount = definition.StoryNodes.Count,
                 RegionCount = definition.Regions.Count,
+                AvailableLanguages = definition.Translations?.Select(t => t.LanguageCode).OrderBy(l => l).ToList() ?? new List<string>(),
+                AudioLanguages = definition.AudioLanguages ?? new List<string>(),
                 AssignedReviewerUserId = null, // Definitions don't have reviewers
                 IsAssignedToCurrentUser = false,
                 IsOwnedByCurrentUser = isOwnedByCurrentUser,
@@ -414,6 +420,8 @@ public class StoryEpicService : IStoryEpicService
                 PublishedAtUtc = null, // Crafts are not published
                 StoryCount = craft.StoryNodes.Count,
                 RegionCount = craft.Regions.Count,
+                AvailableLanguages = craft.Translations?.Select(t => t.LanguageCode).OrderBy(l => l).ToList() ?? new List<string>(),
+                AudioLanguages = craft.AudioLanguages ?? new List<string>(),
                 AssignedReviewerUserId = craft.AssignedReviewerUserId,
                 IsAssignedToCurrentUser = isAssignedToCurrentUser,
                 IsOwnedByCurrentUser = isOwnedByCurrentUser,
@@ -445,6 +453,8 @@ public class StoryEpicService : IStoryEpicService
                 PublishedAtUtc = definition.PublishedAtUtc,
                 StoryCount = definition.StoryNodes.Count,
                 RegionCount = definition.Regions.Count,
+                AvailableLanguages = definition.Translations?.Select(t => t.LanguageCode).OrderBy(l => l).ToList() ?? new List<string>(),
+                AudioLanguages = definition.AudioLanguages ?? new List<string>(),
                 AssignedReviewerUserId = null, // Definitions don't have reviewers
                 IsAssignedToCurrentUser = false,
                 IsOwnedByCurrentUser = isOwnedByCurrentUser,
@@ -549,6 +559,7 @@ public class StoryEpicService : IStoryEpicService
             Status = "draft",
             CoverImageUrl = definition.CoverImageUrl,
             IsDefault = definition.IsDefault,
+            AudioLanguages = definition.AudioLanguages ?? new List<string>(),
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
             BaseVersion = definition.Version,
@@ -736,7 +747,8 @@ public class StoryEpicService : IStoryEpicService
                     Id = ca.Id,
                     UserId = ca.UserId,
                     DisplayName = ca.UserId != null ? (ca.User?.Name ?? ca.User?.Email ?? ca.DisplayName ?? "") : (ca.DisplayName ?? "")
-                }).ToList()
+                }).ToList(),
+            AudioLanguages = craft.AudioLanguages ?? new List<string>()
         };
     }
 
@@ -838,7 +850,8 @@ public class StoryEpicService : IStoryEpicService
                     Id = ca.Id,
                     UserId = ca.UserId,
                     DisplayName = ca.UserId != null ? (ca.User?.Name ?? ca.User?.Email ?? ca.DisplayName ?? "") : (ca.DisplayName ?? "")
-                }).ToList()
+                }).ToList(),
+            AudioLanguages = definition.AudioLanguages ?? new List<string>()
         };
     }
 

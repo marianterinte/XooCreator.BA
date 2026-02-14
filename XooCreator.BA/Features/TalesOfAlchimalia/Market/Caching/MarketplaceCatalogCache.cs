@@ -405,6 +405,7 @@ public sealed class MarketplaceCatalogCache : IMarketplaceCatalogCache, IMarketp
                 StoryCount = epic.StoryNodes?.Count ?? 0,
                 RegionCount = epic.Regions?.Count ?? 0,
                 AvailableLanguages = availableLanguages,
+                AudioLanguages = epic.AudioLanguages ?? new List<string>(),
                 SearchTexts = searchTexts,
                 SearchAuthors = searchAuthors,
                 TopicIds = topicIds,

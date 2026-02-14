@@ -129,7 +129,8 @@ public class StoryCloner : IStoryCloner
                         node.Translations.Add(new StoryCraftDialogNodeTranslation
                         {
                             LanguageCode = tr.LanguageCode,
-                            Text = tr.Text
+                            Text = tr.Text,
+                            AudioUrl = tr.AudioUrl
                         });
                     }
 

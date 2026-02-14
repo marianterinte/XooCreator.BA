@@ -239,6 +239,7 @@ public static class StoryDefinitionMapper
                             SpeakerType = n.SpeakerType,
                             SpeakerHeroId = n.SpeakerHeroId,
                             Text = n.Translations.FirstOrDefault(nt => nt.LanguageCode == lc)?.Text ?? string.Empty,
+                            AudioUrl = n.Translations.FirstOrDefault(nt => nt.LanguageCode == lc)?.AudioUrl,
                             Options = n.OutgoingEdges
                                 .OrderBy(e => e.OptionOrder)
                                 .Select(e => new StoryDialogOptionDto

@@ -228,6 +228,7 @@ public class StoryTileUpdater : IStoryTileUpdater
                 node.Translations.Add(nodeTranslation);
             }
             nodeTranslation.Text = nodeDto.Text ?? string.Empty;
+            nodeTranslation.AudioUrl = string.IsNullOrWhiteSpace(nodeDto.AudioUrl) ? null : nodeDto.AudioUrl.Trim();
 
             var options = nodeDto.Options ?? new List<EditableDialogOptionDto>();
             var edgeDict = node.OutgoingEdges.ToDictionary(e => e.EdgeId, StringComparer.OrdinalIgnoreCase);
@@ -270,6 +271,7 @@ public class StoryTileUpdater : IStoryTileUpdater
                 }
 
                 edgeTranslation.OptionText = optionDto.Text ?? string.Empty;
+                edgeTranslation.AudioUrl = null; // Audio only on node (replica), not on options
 
                 var optionTokens = optionDto.Tokens ?? new List<EditableTokenDto>();
                 edge.Tokens ??= new List<StoryCraftDialogEdgeToken>();
