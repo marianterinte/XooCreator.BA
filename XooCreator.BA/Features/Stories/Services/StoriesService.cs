@@ -244,6 +244,7 @@ public class StoriesService : IStoriesService
                                 SpeakerType = n.SpeakerType,
                                 SpeakerHeroId = n.SpeakerHeroId,
                                 Text = n.Translations.FirstOrDefault(nt => nt.LanguageCode == lang)?.Text ?? string.Empty,
+                                AudioUrl = n.Translations.FirstOrDefault(nt => nt.LanguageCode == lang)?.AudioUrl,
                                 Options = n.OutgoingEdges
                                     .OrderBy(e => e.OptionOrder)
                                     .Select(e => new EditableDialogOptionDto
@@ -376,6 +377,7 @@ public class StoriesService : IStoriesService
                             SpeakerType = n.SpeakerType,
                             SpeakerHeroId = n.SpeakerHeroId,
                             Text = n.Translations.FirstOrDefault(nt => nt.LanguageCode == locale)?.Text ?? string.Empty,
+                            AudioUrl = n.Translations.FirstOrDefault(nt => nt.LanguageCode == locale)?.AudioUrl,
                             Options = n.OutgoingEdges
                                 .OrderBy(e => e.OptionOrder)
                                 .Select(e => new EditableDialogOptionDto

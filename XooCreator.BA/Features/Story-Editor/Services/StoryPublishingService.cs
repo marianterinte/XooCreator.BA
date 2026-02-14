@@ -595,7 +595,18 @@ public class StoryPublishingService : IStoryPublishingService
             };
             _db.StoryDialogTiles.Add(dialogTile);
 
-            foreach (var craftNode in craftTile.DialogTile.Nodes.OrderBy(n => n.SortOrder))
+            // Load dialog nodes with translations from DB so we never miss AudioUrl (craft in-memory may be stale or not fully loaded)
+            var craftDialogTileId = craftTile.DialogTile.Id;
+            var dialogNodesWithTranslations = await _db.StoryCraftDialogNodes
+                .AsNoTracking()
+                .Include(n => n.Translations)
+                .Include(n => n.OutgoingEdges).ThenInclude(e => e.Translations)
+                .Include(n => n.OutgoingEdges).ThenInclude(e => e.Tokens)
+                .Where(n => n.StoryCraftDialogTileId == craftDialogTileId)
+                .OrderBy(n => n.SortOrder)
+                .ToListAsync(ct);
+
+            foreach (var craftNode in dialogNodesWithTranslations)
             {
                 var node = new StoryDialogNode
                 {
@@ -610,12 +621,19 @@ public class StoryPublishingService : IStoryPublishingService
 
                 foreach (var nodeTranslation in craftNode.Translations)
                 {
+                    var nodeLang = nodeTranslation.LanguageCode.ToLowerInvariant();
+                    var publishedNodeAudioUrl = !string.IsNullOrWhiteSpace(nodeTranslation.AudioUrl)
+                        ? StoryAssetPathMapper.BuildPublishedPath(
+                            new StoryAssetPathMapper.AssetInfo(nodeTranslation.AudioUrl, StoryAssetPathMapper.AssetType.Audio, nodeLang),
+                            ownerEmail, def.StoryId)
+                        : null;
                     _db.StoryDialogNodeTranslations.Add(new StoryDialogNodeTranslation
                     {
                         Id = Guid.NewGuid(),
                         StoryDialogNode = node,
-                        LanguageCode = nodeTranslation.LanguageCode.ToLowerInvariant(),
-                        Text = nodeTranslation.Text ?? string.Empty
+                        LanguageCode = nodeLang,
+                        Text = nodeTranslation.Text ?? string.Empty,
+                        AudioUrl = publishedNodeAudioUrl
                     });
                 }
 
@@ -635,12 +653,14 @@ public class StoryPublishingService : IStoryPublishingService
 
                     foreach (var edgeTranslation in craftEdge.Translations)
                     {
+                        var edgeLang = edgeTranslation.LanguageCode.ToLowerInvariant();
                         _db.StoryDialogEdgeTranslations.Add(new StoryDialogEdgeTranslation
                         {
                             Id = Guid.NewGuid(),
                             StoryDialogEdge = edge,
-                            LanguageCode = edgeTranslation.LanguageCode.ToLowerInvariant(),
-                            OptionText = edgeTranslation.OptionText ?? string.Empty
+                            LanguageCode = edgeLang,
+                            OptionText = edgeTranslation.OptionText ?? string.Empty,
+                            AudioUrl = null // Audio only on node (replica), not on options
                         });
                     }
 

@@ -50,6 +50,7 @@ public record StoryDialogNodeDto
     public required string SpeakerType { get; init; }
     public string? SpeakerHeroId { get; init; }
     public string? Text { get; init; }
+    public string? AudioUrl { get; init; }
     public List<StoryDialogOptionDto> Options { get; init; } = new();
     public int? X { get; init; }
     public int? Y { get; init; }

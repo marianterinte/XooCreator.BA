@@ -69,6 +69,7 @@ public class EditableDialogNodeDto
     public string SpeakerType { get; set; } = "reader"; // reader | hero
     public string? SpeakerHeroId { get; set; }
     public string Text { get; set; } = string.Empty;
+    public string? AudioUrl { get; set; }
     public List<EditableDialogOptionDto> Options { get; set; } = new();
     /// <summary>Saved X position for tree rendering in editor and reading mode.</summary>
     public int? X { get; set; }

@@ -62,6 +62,9 @@ public class StoryCraftDialogNodeTranslation
 
     public string Text { get; set; } = string.Empty;
 
+    [MaxLength(500)]
+    public string? AudioUrl { get; set; }
+
     public StoryCraftDialogNode StoryCraftDialogNode { get; set; } = null!;
 }
 
@@ -96,6 +99,9 @@ public class StoryCraftDialogEdgeTranslation
     public string LanguageCode { get; set; } = "ro-ro";
 
     public string OptionText { get; set; } = string.Empty;
+
+    [MaxLength(500)]
+    public string? AudioUrl { get; set; }
 
     public StoryCraftDialogEdge StoryCraftDialogEdge { get; set; } = null!;
 }
@@ -175,6 +181,9 @@ public class StoryDialogNodeTranslation
 
     public string Text { get; set; } = string.Empty;
 
+    [MaxLength(500)]
+    public string? AudioUrl { get; set; }
+
     public StoryDialogNode StoryDialogNode { get; set; } = null!;
 }
 
@@ -209,6 +218,9 @@ public class StoryDialogEdgeTranslation
     public string LanguageCode { get; set; } = "ro-ro";
 
     public string OptionText { get; set; } = string.Empty;
+
+    [MaxLength(500)]
+    public string? AudioUrl { get; set; }
 
     public StoryDialogEdge StoryDialogEdge { get; set; } = null!;
 }

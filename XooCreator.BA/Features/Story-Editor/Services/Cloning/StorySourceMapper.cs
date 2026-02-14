@@ -78,7 +78,8 @@ public class StorySourceMapper : IStorySourceMapper
                         Translations = n.Translations.Select(t => new DialogNodeTranslationCloneData
                         {
                             LanguageCode = t.LanguageCode,
-                            Text = t.Text
+                            Text = t.Text,
+                            AudioUrl = t.AudioUrl
                         }).ToList(),
                         Options = n.OutgoingEdges
                             .OrderBy(e => e.OptionOrder)
@@ -189,7 +190,8 @@ public class StorySourceMapper : IStorySourceMapper
                         Translations = n.Translations.Select(t => new DialogNodeTranslationCloneData
                         {
                             LanguageCode = t.LanguageCode,
-                            Text = t.Text
+                            Text = t.Text,
+                            AudioUrl = t.AudioUrl
                         }).ToList(),
                         Options = n.OutgoingEdges
                             .OrderBy(e => e.OptionOrder)
@@ -341,6 +343,7 @@ public class DialogNodeTranslationCloneData
 {
     public string LanguageCode { get; set; } = string.Empty;
     public string Text { get; set; } = string.Empty;
+    public string? AudioUrl { get; set; }
 }
 
 public class DialogEdgeCloneData
@@ -358,4 +361,5 @@ public class DialogEdgeTranslationCloneData
 {
     public string LanguageCode { get; set; } = string.Empty;
     public string OptionText { get; set; } = string.Empty;
+    public string? AudioUrl { get; set; }
 }
