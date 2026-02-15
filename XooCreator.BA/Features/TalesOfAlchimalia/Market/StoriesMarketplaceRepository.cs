@@ -266,7 +266,8 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
                     LikesCount = likesCount,
                     AverageRating = st.AverageRating,
                     TotalReviews = st.TotalReviews,
-                    IsEvaluative = p.IsEvaluative
+                    IsEvaluative = p.IsEvaluative,
+                    IsFullyInteractive = p.IsFullyInteractive
                 };
             }).ToList();
 
@@ -404,7 +405,8 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
                     LikesCount = likesCount,
                     AverageRating = st.AverageRating,
                     TotalReviews = st.TotalReviews,
-                    IsEvaluative = p.IsEvaluative
+                    IsEvaluative = p.IsEvaluative,
+                    IsFullyInteractive = p.IsFullyInteractive
                 };
             }).ToList();
     }
@@ -985,7 +987,8 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             LikesCount = likesCount,
             AverageRating = Math.Round(averageRating, 2),
             TotalReviews = totalReviews,
-            IsEvaluative = def.IsEvaluative
+            IsEvaluative = def.IsEvaluative,
+            IsFullyInteractive = def.IsFullyInteractive
         };
     }
 

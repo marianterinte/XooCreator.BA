@@ -42,6 +42,7 @@ public record StoryDetailsDto
     public bool IsLiked { get; init; } // Whether current user has liked this story
     public bool IsEvaluative { get; init; } = false; // If true, this story contains quizzes that should be evaluated
     public bool IsPartOfEpic { get; init; } = false; // If true, this story is part of an epic (draft or published) and should not appear as independent story
+    public bool IsFullyInteractive { get; init; } = false; // If true, this story is full interactive
     public List<StoryCoAuthorDto> CoAuthors { get; init; } = new(); // Co-authors (user or free text)
 }
 
@@ -85,6 +86,7 @@ public record StoryMarketplaceItemDto
     public double AverageRating { get; init; }
     public int TotalReviews { get; init; }
     public bool IsEvaluative { get; init; } = false;
+    public bool IsFullyInteractive { get; init; } = false;
 }
 
 public record PurchaseStoryRequest

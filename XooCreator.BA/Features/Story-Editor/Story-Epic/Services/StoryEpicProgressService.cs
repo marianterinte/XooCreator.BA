@@ -1,9 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
+using XooCreator.BA.Features.HeroStoryRewards.DTOs;
+using XooCreator.BA.Features.HeroStoryRewards.Services;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.DTOs;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.Repositories;
-using XooCreator.BA.Features.TreeOfHeroes.Repositories;
 using TokenReward = XooCreator.BA.Features.TreeOfLight.DTOs.TokenReward;
+using TokenRewardDto = XooCreator.BA.Features.HeroStoryRewards.DTOs.TokenRewardDto;
 
 namespace XooCreator.BA.Features.StoryEditor.StoryEpic.Services;
 
@@ -12,20 +14,20 @@ public class StoryEpicProgressService : IStoryEpicProgressService
     private readonly IStoryEpicService _epicService;
     private readonly IEpicProgressRepository _progressRepository;
     private readonly IEpicHeroRepository _heroRepository;
-    private readonly ITreeOfHeroesRepository _treeOfHeroesRepository;
+    private readonly IHeroStoryRewardsService _heroStoryRewardsService;
     private readonly XooDbContext _context;
 
     public StoryEpicProgressService(
         IStoryEpicService epicService,
         IEpicProgressRepository progressRepository,
         IEpicHeroRepository heroRepository,
-        ITreeOfHeroesRepository treeOfHeroesRepository,
+        IHeroStoryRewardsService heroStoryRewardsService,
         XooDbContext context)
     {
         _epicService = epicService;
         _progressRepository = progressRepository;
         _heroRepository = heroRepository;
-        _treeOfHeroesRepository = treeOfHeroesRepository;
+        _heroStoryRewardsService = heroStoryRewardsService;
         _context = context;
     }
 
@@ -175,10 +177,23 @@ public class StoryEpicProgressService : IStoryEpicProgressService
         // This includes heroes from StoryEpicHeroReferences AND heroes unlocked by the story itself (from StoryDefinitionUnlockedHeroes)
         var newlyUnlockedHeroes = await EvaluateAndUnlockHeroesAsync(userId, epicId, storyId, epicState.Epic.Heroes, storyProgress.Select(sp => sp.StoryId).ToList(), ct);
 
-        // Award tokens if provided (similar to Tree of Light)
+        // Award tokens via generic Hero Story Rewards pipeline (same as indie; non-blocking)
         if (tokens != null && tokens.Count > 0)
         {
-            await _treeOfHeroesRepository.AwardTokensAsync(userId, tokens);
+            var rewardRequest = new CompleteStoryRewardRequest
+            {
+                StoryId = storyId,
+                Source = "epic",
+                EpicId = epicId,
+                SelectedAnswer = selectedAnswer,
+                Tokens = tokens.Select(t => new TokenRewardDto
+                {
+                    Type = t.Type.ToString(),
+                    Value = t.Value,
+                    Quantity = t.Quantity
+                }).ToList()
+            };
+            await _heroStoryRewardsService.AwardStoryRewardsAsync(userId, rewardRequest, ct);
         }
 
         return new CompleteEpicStoryResult

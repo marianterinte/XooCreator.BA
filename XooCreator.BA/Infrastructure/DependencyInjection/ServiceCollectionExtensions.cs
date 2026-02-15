@@ -8,6 +8,7 @@ using XooCreator.BA.Features.UserAdministration.Repositories;
 using XooCreator.BA.Features.UserAdministration.Services;
 using XooCreator.BA.Features.TreeOfHeroes.Services;
 using XooCreator.BA.Features.TreeOfHeroes.Repositories;
+using XooCreator.BA.Features.HeroStoryRewards.Services;
 using XooCreator.BA.Features.TreeOfLight.Services;
 using XooCreator.BA.Features.TreeOfLight.Repositories;
 using XooCreator.BA.Features.Stories.Services;
@@ -110,6 +111,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<ITreeOfHeroesRepository, TreeOfHeroesRepository>();
         services.AddScoped<ITreeOfHeroesService, TreeOfHeroesService>();
+        services.AddScoped<IHeroStoryRewardsService, HeroStoryRewardsService>();
         services.AddScoped<ITreeOfLightTranslationService, TreeOfLightTranslationService>();
         services.AddScoped<ITreeOfLightRepository, TreeOfLightRepository>();
         services.AddScoped<ITreeOfLightService, TreeOfLightService>();

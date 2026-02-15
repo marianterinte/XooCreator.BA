@@ -266,6 +266,7 @@ public sealed class MarketplaceCatalogCache : IMarketplaceCatalogCache, IMarketp
                 StoryType = def.StoryType,
                 Status = def.Status,
                 IsEvaluative = def.IsEvaluative,
+                IsFullyInteractive = def.IsFullyInteractive,
                 AvailableLanguages = availableLanguages,
                 AudioLanguages = def.AudioLanguages ?? new List<string>(),
                 TopicIds = topicIds,

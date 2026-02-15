@@ -20,17 +20,20 @@ public class CreateStoryDocumentExportPublishedEndpoint
     private readonly IAuth0UserService _auth0;
     private readonly IStoryDocumentExportQueue _queue;
     private readonly IJobEventsHub _jobEvents;
+    private readonly IConfiguration _config;
 
     public CreateStoryDocumentExportPublishedEndpoint(
         XooDbContext db,
         IAuth0UserService auth0,
         IStoryDocumentExportQueue queue,
-        IJobEventsHub jobEvents)
+        IJobEventsHub jobEvents,
+        IConfiguration config)
     {
         _db = db;
         _auth0 = auth0;
         _queue = queue;
         _jobEvents = jobEvents;
+        _config = config;
     }
 
     public record CreateStoryDocumentExportRequest(
@@ -45,7 +48,7 @@ public class CreateStoryDocumentExportPublishedEndpoint
 
     [Route("/api/{locale}/stories/{storyId}/pdf")]
     [Authorize]
-    public static async Task<Results<Accepted<CreateStoryDocumentExportResponse>, NotFound, UnauthorizedHttpResult, ForbidHttpResult, BadRequest<string>>> HandlePost(
+    public static async Task<Results<Accepted<CreateStoryDocumentExportResponse>, NotFound, UnauthorizedHttpResult, ForbidHttpResult, BadRequest<string>, ProblemHttpResult>> HandlePost(
         [FromRoute] string locale,
         [FromRoute] string storyId,
         [FromBody] CreateStoryDocumentExportRequest? body,
@@ -72,6 +75,36 @@ public class CreateStoryDocumentExportPublishedEndpoint
         if (!isAdmin && !isOwner && !canReaderDownload)
         {
             return TypedResults.Forbid();
+        }
+
+        // Print quota: Free users get limited prints; supporters (UserSubscriptions) get unlimited
+        var freePrintLimit = ep._config.GetValue("Subscription:FreePrintLimit", 1);
+        if (freePrintLimit >= 0 && !isAdmin)
+        {
+            var nowUtc = DateTime.UtcNow;
+            var isSupporter = await ep._db.UserSubscriptions
+                .AsNoTracking()
+                .AnyAsync(u => u.UserId == user.Id && (u.ExpiresAtUtc == null || u.ExpiresAtUtc > nowUtc), ct);
+            if (!isSupporter)
+            {
+                var printedIds = await ep._db.StoryPrintRecords
+                    .AsNoTracking()
+                    .Where(r => r.UserId == user.Id)
+                    .Select(r => r.StoryId)
+                    .Distinct()
+                    .ToListAsync(ct);
+                var exportedIds = await ep._db.StoryDocumentExportJobs
+                    .AsNoTracking()
+                    .Where(j => j.RequestedByUserId == user.Id && j.Status == StoryDocumentExportJobStatus.Completed)
+                    .Select(j => j.StoryId)
+                    .Distinct()
+                    .ToListAsync(ct);
+                var usedCount = printedIds.Union(exportedIds).Count();
+                var alreadyPrinted = printedIds.Contains(storyId) || exportedIds.Contains(storyId);
+                var canPrint = usedCount < freePrintLimit || alreadyPrinted;
+                if (!canPrint)
+                    return TypedResults.Problem(detail: "print_quota_api_limit_reached", statusCode: 402);
+            }
         }
 
         var request = body ?? new CreateStoryDocumentExportRequest(

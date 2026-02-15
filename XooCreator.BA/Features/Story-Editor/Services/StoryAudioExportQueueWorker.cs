@@ -245,18 +245,41 @@ public class StoryAudioExportQueueWorker : BackgroundService
             }
         }
 
-        // Get all page and quiz tiles ordered by SortOrder (quiz are treated as pages for audio)
-        var pageOrQuizTypes = new[] { "page", "quiz", "dialog" };
-        var allPages = craft.Tiles
-            .Where(t => pageOrQuizTypes.Contains(t.Type, StringComparer.OrdinalIgnoreCase))
-            .OrderBy(t => t.SortOrder)
-            .Select((tile, index) => new AudioPage(tile, index + 1, ResolveTileText(tile, job.Locale)))
-            .ToList();
+        // Build audio items: one per page/quiz tile, one per dialog node (replica text) so full export includes dialogues
+        var pageOrQuizOrDialogTypes = new[] { "page", "quiz", "dialog" };
+        var locale = (job.Locale ?? string.Empty).Trim().ToLowerInvariant();
+        var allPages = new List<AudioPage>();
+        var runningIndex = 1;
+        foreach (var tile in craft.Tiles
+            .Where(t => pageOrQuizOrDialogTypes.Contains(t.Type, StringComparer.OrdinalIgnoreCase))
+            .OrderBy(t => t.SortOrder))
+        {
+            if (string.Equals(tile.Type, "dialog", StringComparison.OrdinalIgnoreCase) && tile.DialogTile != null)
+            {
+                foreach (var node in tile.DialogTile.Nodes.OrderBy(n => n.SortOrder))
+                {
+                    var nodeText = node.Translations
+                        .FirstOrDefault(nt => string.Equals(nt.LanguageCode, locale, StringComparison.OrdinalIgnoreCase))
+                        ?.Text?.Trim() ?? node.Translations.FirstOrDefault()?.Text?.Trim() ?? string.Empty;
+                    if (!string.IsNullOrWhiteSpace(nodeText))
+                    {
+                        allPages.Add(new AudioPage(tile, runningIndex++, nodeText, node.NodeId, node.SpeakerType));
+                    }
+                }
+            }
+            else
+            {
+                var tileText = ResolveTileText(tile, job.Locale);
+                if (!string.IsNullOrWhiteSpace(tileText))
+                {
+                    allPages.Add(new AudioPage(tile, runningIndex++, tileText));
+                }
+            }
+        }
 
-        // Filter by selected tile IDs if provided, and exclude empty pages
+        // Filter by selected tile IDs if provided (dialog tiles: include all their nodes if tile is selected)
         var pages = allPages
-            .Where(p => (selectedTileIds == null || selectedTileIds.Contains(p.Tile.Id)) // Include if no filter or tile is selected
-                     && !string.IsNullOrWhiteSpace(p.Text)) // Exclude paginile goale
+            .Where(p => selectedTileIds == null || selectedTileIds.Contains(p.Tile.Id))
             .ToList();
 
         if (pages.Count == 0)
@@ -295,10 +318,10 @@ public class StoryAudioExportQueueWorker : BackgroundService
             try
             {
                 var audioBytes = await GenerateAudioBytesAsync(page.Text, job.Locale, audioService, job.ApiKeyOverride, job.TtsModel, ct);
+                var fileName = BuildExportFileName(page);
                 lock (results)
                 {
-                    // Keep original page number (not sequential from 1)
-                    results.Add(new AudioPageResult(page.Index, audioBytes, "wav"));
+                    results.Add(new AudioPageResult(page.Index, audioBytes, "wav", fileName));
                 }
             }
             catch (Exception ex)
@@ -366,11 +389,11 @@ public class StoryAudioExportQueueWorker : BackgroundService
         using var ms = new MemoryStream();
         using (var zip = new ZipArchive(ms, ZipArchiveMode.Create, leaveOpen: true))
         {
-            // Sort by original page index and use original page number as filename
+            // Sort by slot index; filename is descriptive for dialog (e.g. 04_n1_hero.wav), numeric for page/quiz (01.wav)
             var sortedResults = results.OrderBy(r => r.Index).ToList();
             foreach (var result in sortedResults)
             {
-                var entry = zip.CreateEntry($"{result.Index}.wav", CompressionLevel.Fastest);
+                var entry = zip.CreateEntry(result.FileName, CompressionLevel.Fastest);
                 await using var entryStream = entry.Open();
                 await entryStream.WriteAsync(result.AudioBytes, ct);
             }
@@ -385,6 +408,37 @@ public class StoryAudioExportQueueWorker : BackgroundService
             AudioCount = results.Count,
             ZipSizeBytes = zipBytes.Length
         };
+    }
+
+    /// <summary>Standardized ZIP name: {slot:D2}_{type}_{rest}.wav — e.g. 01_page.wav, 04_dialog_n1_hero.wav. Import uses leading digits only.</summary>
+    private static string BuildExportFileName(AudioPage page)
+    {
+        var slot = page.Index.ToString("D2");
+        var type = GetTileTypeSlug(page.Tile.Type);
+        if (!string.IsNullOrEmpty(page.NodeId) && !string.IsNullOrEmpty(page.SpeakerType))
+        {
+            var nodePart = SanitizeFileNamePart(page.NodeId);
+            var speakerPart = SanitizeFileNamePart(page.SpeakerType);
+            return $"{slot}_dialog_{nodePart}_{speakerPart}.wav";
+        }
+        return $"{slot}_{type}.wav";
+    }
+
+    private static string GetTileTypeSlug(string? tileType)
+    {
+        if (string.IsNullOrWhiteSpace(tileType)) return "page";
+        return tileType.Trim().ToLowerInvariant() switch
+        {
+            "quiz" => "quiz",
+            "dialog" => "dialog",
+            _ => "page"
+        };
+    }
+
+    private static string SanitizeFileNamePart(string s)
+    {
+        if (string.IsNullOrEmpty(s)) return string.Empty;
+        return Regex.Replace(s.Trim().ToLowerInvariant(), @"[^a-z0-9\-_]", "_");
     }
 
     private static string ResolveTileText(StoryCraftTile tile, string locale)
@@ -643,8 +697,8 @@ public class StoryAudioExportQueueWorker : BackgroundService
     }
 
     private sealed record StoryAudioExportQueuePayload(Guid JobId, string StoryId);
-    private sealed record AudioPage(StoryCraftTile Tile, int Index, string Text);
-    private sealed record AudioPageResult(int Index, byte[] AudioBytes, string Format);
+    private sealed record AudioPage(StoryCraftTile Tile, int Index, string Text, string? NodeId = null, string? SpeakerType = null);
+    private sealed record AudioPageResult(int Index, byte[] AudioBytes, string Format, string FileName);
 
     private sealed record AudioExportResult
     {
