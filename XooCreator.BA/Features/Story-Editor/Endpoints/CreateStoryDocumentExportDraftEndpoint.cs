@@ -91,16 +91,23 @@ public class CreateStoryDocumentExportDraftEndpoint
         if (request.IncludeQuizAnswers && !isAdmin && craft.OwnerUserId != user.Id)
             return TypedResults.Forbid();
 
-        // Print quota (same as published)
+        // Print quota (same as published) – supporters (UserSubscriptions) get unlimited
         var freePrintLimit = ep._config.GetValue("Subscription:FreePrintLimit", 1);
         if (freePrintLimit >= 0 && !isAdmin)
         {
-            var printedIds = await ep._db.StoryPrintRecords.AsNoTracking().Where(r => r.UserId == user.Id).Select(r => r.StoryId).Distinct().ToListAsync(ct);
-            var exportedIds = await ep._db.StoryDocumentExportJobs.AsNoTracking().Where(j => j.RequestedByUserId == user.Id && j.Status == StoryDocumentExportJobStatus.Completed).Select(j => j.StoryId).Distinct().ToListAsync(ct);
-            var usedCount = printedIds.Union(exportedIds).Count();
-            var alreadyPrinted = printedIds.Contains(storyId) || exportedIds.Contains(storyId);
-            if (usedCount >= freePrintLimit && !alreadyPrinted)
-                return TypedResults.Problem("Ai folosit limita de povești printabile (1). Pentru nelimitat, treci la Supporter Pack.", statusCode: 402);
+            var nowUtc = DateTime.UtcNow;
+            var isSupporter = await ep._db.UserSubscriptions
+                .AsNoTracking()
+                .AnyAsync(u => u.UserId == user.Id && (u.ExpiresAtUtc == null || u.ExpiresAtUtc > nowUtc), ct);
+            if (!isSupporter)
+            {
+                var printedIds = await ep._db.StoryPrintRecords.AsNoTracking().Where(r => r.UserId == user.Id).Select(r => r.StoryId).Distinct().ToListAsync(ct);
+                var exportedIds = await ep._db.StoryDocumentExportJobs.AsNoTracking().Where(j => j.RequestedByUserId == user.Id && j.Status == StoryDocumentExportJobStatus.Completed).Select(j => j.StoryId).Distinct().ToListAsync(ct);
+                var usedCount = printedIds.Union(exportedIds).Count();
+                var alreadyPrinted = printedIds.Contains(storyId) || exportedIds.Contains(storyId);
+                if (usedCount >= freePrintLimit && !alreadyPrinted)
+                    return TypedResults.Problem(detail: "print_quota_api_limit_reached", statusCode: 402);
+            }
         }
 
         var job = new StoryDocumentExportJob

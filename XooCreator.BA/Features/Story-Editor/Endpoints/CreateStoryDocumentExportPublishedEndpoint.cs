@@ -77,27 +77,34 @@ public class CreateStoryDocumentExportPublishedEndpoint
             return TypedResults.Forbid();
         }
 
-        // Print quota: Free users get limited prints; supporters get unlimited
+        // Print quota: Free users get limited prints; supporters (UserSubscriptions) get unlimited
         var freePrintLimit = ep._config.GetValue("Subscription:FreePrintLimit", 1);
         if (freePrintLimit >= 0 && !isAdmin)
         {
-            var printedIds = await ep._db.StoryPrintRecords
+            var nowUtc = DateTime.UtcNow;
+            var isSupporter = await ep._db.UserSubscriptions
                 .AsNoTracking()
-                .Where(r => r.UserId == user.Id)
-                .Select(r => r.StoryId)
-                .Distinct()
-                .ToListAsync(ct);
-            var exportedIds = await ep._db.StoryDocumentExportJobs
-                .AsNoTracking()
-                .Where(j => j.RequestedByUserId == user.Id && j.Status == StoryDocumentExportJobStatus.Completed)
-                .Select(j => j.StoryId)
-                .Distinct()
-                .ToListAsync(ct);
-            var usedCount = printedIds.Union(exportedIds).Count();
-            var alreadyPrinted = printedIds.Contains(storyId) || exportedIds.Contains(storyId);
-            var canPrint = usedCount < freePrintLimit || alreadyPrinted;
-            if (!canPrint)
-                return TypedResults.Problem("Ai folosit limita de povești printabile (1). Pentru nelimitat, treci la Supporter Pack.", statusCode: 402);
+                .AnyAsync(u => u.UserId == user.Id && (u.ExpiresAtUtc == null || u.ExpiresAtUtc > nowUtc), ct);
+            if (!isSupporter)
+            {
+                var printedIds = await ep._db.StoryPrintRecords
+                    .AsNoTracking()
+                    .Where(r => r.UserId == user.Id)
+                    .Select(r => r.StoryId)
+                    .Distinct()
+                    .ToListAsync(ct);
+                var exportedIds = await ep._db.StoryDocumentExportJobs
+                    .AsNoTracking()
+                    .Where(j => j.RequestedByUserId == user.Id && j.Status == StoryDocumentExportJobStatus.Completed)
+                    .Select(j => j.StoryId)
+                    .Distinct()
+                    .ToListAsync(ct);
+                var usedCount = printedIds.Union(exportedIds).Count();
+                var alreadyPrinted = printedIds.Contains(storyId) || exportedIds.Contains(storyId);
+                var canPrint = usedCount < freePrintLimit || alreadyPrinted;
+                if (!canPrint)
+                    return TypedResults.Problem(detail: "print_quota_api_limit_reached", statusCode: 402);
+            }
         }
 
         var request = body ?? new CreateStoryDocumentExportRequest(

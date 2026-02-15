@@ -37,6 +37,7 @@ public class UserAdministrationService : IUserAdministrationService
             var users = await _repository.GetAllUsersAsync(ct);
             var userIds = users.Select(u => u.Id).ToList();
             var tokenQuantities = await _creatorTokenService.GetAlchimaliaTokenQuantitiesAsync(userIds, ct);
+            var unlimitedPrintUserIds = await _repository.GetUserIdsWithUnlimitedPrintAsync(ct);
 
             var userDtos = users.Select(u => new UserDto
             {
@@ -48,7 +49,8 @@ public class UserAdministrationService : IUserAdministrationService
                 Roles = u.Roles ?? (u.Role != 0 ? new List<UserRole> { u.Role } : new List<UserRole> { UserRole.Reader }),
                 LastLoginDateUtc = u.LastLoginAt.ToString("O"),  // ISO 8601 format
                 CreatedAtUtc = u.CreatedAt.ToString("O"),  // ISO 8601 format
-                AlchimaliaTokenQuantity = tokenQuantities.TryGetValue(u.Id, out var qty) ? qty : 0
+                AlchimaliaTokenQuantity = tokenQuantities.TryGetValue(u.Id, out var qty) ? qty : 0,
+                HasUnlimitedPrint = unlimitedPrintUserIds.Contains(u.Id)
             }).ToList();
 
             return new GetAllUsersResponse
