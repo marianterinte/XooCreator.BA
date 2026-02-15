@@ -198,6 +198,7 @@ public class StoriesService : IStoriesService
                 StoryType = (int)craft.StoryType,
                 IsEvaluative = craft.IsEvaluative,
                 IsPartOfEpic = craft.IsPartOfEpic,
+                IsFullyInteractive = craft.IsFullyInteractive,
                 UnlockedStoryHeroes = unlockedHeroes,
                 DialogParticipants = craft.DialogParticipants
                     .OrderBy(p => p.SortOrder)
@@ -335,6 +336,7 @@ public class StoriesService : IStoriesService
             StoryType = (int)story.StoryType,
             IsEvaluative = story.IsEvaluative,
             IsPartOfEpic = story.IsPartOfEpic,
+            IsFullyInteractive = story.IsFullyInteractive,
             UnlockedStoryHeroes = unlockedHeroesFromJson,
             DialogParticipants = story.DialogParticipants
                 .OrderBy(p => p.SortOrder)

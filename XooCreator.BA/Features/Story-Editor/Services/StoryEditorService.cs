@@ -92,6 +92,7 @@ public class StoryEditorService : IStoryEditorService
         craft.StoryType = (StoryType)(dto.StoryType);
         craft.IsEvaluative = dto.IsEvaluative;
         craft.IsPartOfEpic = dto.IsPartOfEpic;
+        craft.IsFullyInteractive = dto.IsFullyInteractive;
         craft.PriceInCredits = dto.PriceInCredits;
         craft.AudioLanguages = dto.AudioLanguages ?? new List<string>();
         craft.UpdatedAt = DateTime.UtcNow;

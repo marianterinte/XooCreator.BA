@@ -21,6 +21,7 @@ public class EditableStoryDto
     public int StoryType { get; set; } = 0; // 0 = AlchimaliaEpic (Tree Of Light), 1 = Indie (Independent)
     public bool IsEvaluative { get; set; } = false; // If true, this story contains quizzes that should be evaluated
     public bool IsPartOfEpic { get; set; } = false; // If true, this story is part of an epic (draft or published) and should not appear as independent story
+    public bool IsFullyInteractive { get; set; } = false; // If true, this story is full interactive
     public string? Status { get; set; } // 'draft' | 'in-review' | 'approved' | 'published' (FE semantic)
     public string? Language { get; set; } // Language code for the story (standardized: use "language" instead of "languageCode")
     public List<string>? AvailableLanguages { get; set; } // Available language codes for this story

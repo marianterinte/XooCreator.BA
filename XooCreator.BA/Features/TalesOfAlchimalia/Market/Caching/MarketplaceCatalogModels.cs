@@ -21,6 +21,7 @@ public sealed record StoryMarketplaceBaseItem
     public required StoryType StoryType { get; init; }
     public required StoryStatus Status { get; init; }
     public bool IsEvaluative { get; init; }
+    public bool IsFullyInteractive { get; init; }
     public List<string> AvailableLanguages { get; init; } = new();
     public List<string> AudioLanguages { get; init; } = new();
     public List<string> TopicIds { get; init; } = new();

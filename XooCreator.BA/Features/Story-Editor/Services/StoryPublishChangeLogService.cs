@@ -192,6 +192,7 @@ public sealed class StoryDraftSnapshot
             craft.StoryType,
             craft.IsEvaluative,
             craft.IsPartOfEpic,
+            craft.IsFullyInteractive,
             craft.Topics.Select(t => t.StoryTopic.TopicId).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToList(),
             craft.AgeGroups.Select(ag => ag.StoryAgeGroup.AgeGroupId).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToList(),
             coAuthorsSnapshot);
@@ -242,6 +243,7 @@ public sealed class StoryDraftSnapshot
             StoryType storyType,
             bool isEvaluative,
             bool isPartOfEpic,
+            bool isFullyInteractive,
             IReadOnlyCollection<string> topicIds,
             IReadOnlyCollection<string> ageGroupIds,
             IReadOnlyCollection<CoAuthorSnapshot> coAuthors)
@@ -256,6 +258,7 @@ public sealed class StoryDraftSnapshot
             StoryType = storyType;
             IsEvaluative = isEvaluative;
             IsPartOfEpic = isPartOfEpic;
+            IsFullyInteractive = isFullyInteractive;
             TopicIds = topicIds;
             AgeGroupIds = ageGroupIds;
             CoAuthors = coAuthors;
@@ -271,6 +274,7 @@ public sealed class StoryDraftSnapshot
                 StoryType,
                 IsEvaluative,
                 IsPartOfEpic,
+                IsFullyInteractive,
                 TopicIds,
                 AgeGroupIds,
                 CoAuthors = CoAuthors.Select(c => new { c.UserId, c.DisplayName }).ToList()
@@ -287,6 +291,7 @@ public sealed class StoryDraftSnapshot
         public StoryType StoryType { get; }
         public bool IsEvaluative { get; }
         public bool IsPartOfEpic { get; }
+        public bool IsFullyInteractive { get; }
         public IReadOnlyCollection<string> TopicIds { get; }
         public IReadOnlyCollection<string> AgeGroupIds { get; }
         public IReadOnlyCollection<CoAuthorSnapshot> CoAuthors { get; }
@@ -305,6 +310,7 @@ public sealed class StoryDraftSnapshot
             storyType = StoryType,
             isEvaluative = IsEvaluative,
             isPartOfEpic = IsPartOfEpic,
+            isFullyInteractive = IsFullyInteractive,
             topicIds = TopicIds,
             ageGroupIds = AgeGroupIds,
             coAuthors = CoAuthors.Select(c => new { userId = c.UserId, displayName = c.DisplayName }).ToList()
@@ -321,13 +327,14 @@ public sealed class StoryDraftSnapshot
             StoryType storyType,
             bool isEvaluative,
             bool isPartOfEpic,
+            bool isFullyInteractive,
             IReadOnlyCollection<string> topicIds,
             IReadOnlyCollection<string> ageGroupIds,
             IReadOnlyCollection<CoAuthorSnapshot>? coAuthors = null)
-            => new(title, summary, coverImage, storyTopic, authorName, classicAuthorId, priceInCredits, storyType, isEvaluative, isPartOfEpic, topicIds, ageGroupIds, coAuthors ?? Array.Empty<CoAuthorSnapshot>());
+            => new(title, summary, coverImage, storyTopic, authorName, classicAuthorId, priceInCredits, storyType, isEvaluative, isPartOfEpic, isFullyInteractive, topicIds, ageGroupIds, coAuthors ?? Array.Empty<CoAuthorSnapshot>());
 
         public static HeaderState Empty()
-            => new(string.Empty, null, null, null, null, null, 0, StoryType.Indie, false, false, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<CoAuthorSnapshot>());
+            => new(string.Empty, null, null, null, null, null, 0, StoryType.Indie, false, false, false, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<CoAuthorSnapshot>());
 
         public sealed record CoAuthorSnapshot(Guid? UserId, string DisplayName);
     }

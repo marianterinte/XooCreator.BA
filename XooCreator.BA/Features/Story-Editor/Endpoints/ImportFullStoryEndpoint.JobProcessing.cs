@@ -44,6 +44,12 @@ public partial class ImportFullStoryEndpoint
                 jsonContent = await reader.ReadToEndAsync(ct);
             }
 
+            // Resolve dialogRef: load dialogs/*.json from ZIP and inline into manifest so CreateStoryCraft sees full dialogNodes
+            var manifestDir = manifestEntry.FullName.Replace('\\', '/');
+            var lastSlash = manifestDir.LastIndexOf('/');
+            var manifestDirPrefix = lastSlash >= 0 ? manifestDir[..(lastSlash + 1)] : string.Empty;
+            jsonContent = InflateManifestDialogRefs(zip, manifestDirPrefix, jsonContent);
+
             JsonDocument jsonDoc;
             try
             {

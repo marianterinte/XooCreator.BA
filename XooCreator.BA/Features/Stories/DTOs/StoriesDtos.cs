@@ -12,6 +12,7 @@ public record StoryContentDto
     public string? StoryTopic { get; init; }
     public string? StoryType { get; init; }
     public bool IsEvaluative { get; init; } = false; // If true, this story contains quizzes that should be evaluated
+    public bool IsFullyInteractive { get; init; } = false; // If true, this story is full interactive
     public List<string> UnlockedStoryHeroes { get; init; } = new();
     public List<string> DialogParticipants { get; init; } = new();
     public List<StoryTileDto> Tiles { get; init; } = new();

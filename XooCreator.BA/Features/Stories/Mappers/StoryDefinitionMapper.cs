@@ -208,6 +208,7 @@ public static class StoryDefinitionMapper
             StoryTopic = story.StoryTopic,
             StoryType = story.StoryType.ToString(),
             IsEvaluative = story.IsEvaluative,
+            IsFullyInteractive = story.IsFullyInteractive,
             UnlockedStoryHeroes = story.UnlockedHeroes
                 .OrderBy(h => h.HeroId)
                 .Select(h => h.HeroId)

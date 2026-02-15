@@ -1,6 +1,7 @@
 using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Features.StoryEditor.Mappers;
@@ -28,15 +29,17 @@ public class StoryExportService : IStoryExportService
         var exportObj = BuildExportJson(def, primaryLang);
         var exportJson = JsonSerializer.Serialize(exportObj, new JsonSerializerOptions { WriteIndented = true });
         var fileName = $"{def.StoryId}-v{def.Version}.zip";
+        var manifestPrefix = $"manifest/{def.StoryId}/v{def.Version}/";
 
         using var ms = new MemoryStream();
         using (var zip = new ZipArchive(ms, ZipArchiveMode.Create, leaveOpen: true))
         {
-            // Add manifest JSON
-            var manifestEntry = zip.CreateEntry($"manifest/{def.StoryId}/v{def.Version}/story.json", CompressionLevel.Fastest);
+            // Add manifest JSON (with optional split: dialogs/ when story has dialog tiles with nodes)
+            var manifestJson = ApplySplitFormatIfDialogsPresent(exportJson, zip, manifestPrefix);
+            var manifestEntry = zip.CreateEntry(manifestPrefix + "story.json", CompressionLevel.Fastest);
             await using (var writer = new StreamWriter(manifestEntry.Open(), new UTF8Encoding(false)))
             {
-                await writer.WriteAsync(exportJson);
+                await writer.WriteAsync(manifestJson);
             }
 
             // Collect media paths from definition (already in published layout)
@@ -118,14 +121,16 @@ public class StoryExportService : IStoryExportService
             .ToList();
 
         // Build ZIP
+        var manifestPrefix = $"manifest/{craft.StoryId}/";
         using var ms = new MemoryStream();
         using (var zip = new ZipArchive(ms, ZipArchiveMode.Create, leaveOpen: true))
         {
-            // Add manifest JSON
-            var manifestEntry = zip.CreateEntry($"manifest/{craft.StoryId}/story.json", CompressionLevel.Fastest);
+            // Add manifest JSON (with optional split: dialogs/ when story has dialog tiles with nodes)
+            var manifestJson = ApplySplitFormatIfDialogsPresent(exportJson, zip, manifestPrefix);
+            var manifestEntry = zip.CreateEntry(manifestPrefix + "story.json", CompressionLevel.Fastest);
             await using (var writer = new StreamWriter(manifestEntry.Open(), new UTF8Encoding(false)))
             {
-                await writer.WriteAsync(exportJson);
+                await writer.WriteAsync(manifestJson);
             }
 
             // Download and add media files from draft container
@@ -169,6 +174,68 @@ public class StoryExportService : IStoryExportService
         };
     }
 
+    /// <summary>
+    /// If the export JSON contains any dialog tile with nodes, writes split format: main manifest with
+    /// dialogRef + empty dialogNodes for those tiles, and separate dialogs/{tileId}.json files.
+    /// Returns the (possibly modified) manifest JSON string to write to story.json.
+    /// </summary>
+    private static string ApplySplitFormatIfDialogsPresent(string exportJson, ZipArchive zip, string manifestPrefix)
+    {
+        var root = JsonNode.Parse(exportJson);
+        if (root == null) return exportJson;
+
+        var tiles = root["tiles"] as JsonArray;
+        if (tiles == null || tiles.Count == 0) return exportJson;
+
+        var hasAnyDialogWithNodes = false;
+        foreach (var tile in tiles)
+        {
+            if (tile is not JsonObject tileObj) continue;
+            var type = tileObj["type"]?.GetValue<string>();
+            if (!string.Equals(type, "dialog", StringComparison.OrdinalIgnoreCase)) continue;
+            var dialogNodes = tileObj["dialogNodes"] as JsonArray;
+            if (dialogNodes == null || dialogNodes.Count == 0) continue;
+
+            hasAnyDialogWithNodes = true;
+            break;
+        }
+
+        if (!hasAnyDialogWithNodes) return exportJson;
+
+        var serializerOptions = new JsonSerializerOptions { WriteIndented = true };
+
+        foreach (var tile in tiles)
+        {
+            if (tile is not JsonObject tileObj) continue;
+            var type = tileObj["type"]?.GetValue<string>();
+            if (!string.Equals(type, "dialog", StringComparison.OrdinalIgnoreCase)) continue;
+            var dialogNodes = tileObj["dialogNodes"] as JsonArray;
+            if (dialogNodes == null || dialogNodes.Count == 0) continue;
+
+            var tileId = tileObj["id"]?.GetValue<string>() ?? "dialog";
+            var dialogRootNodeId = tileObj["dialogRootNodeId"]?.GetValue<string>() ?? string.Empty;
+
+            // Clone dialog nodes for the separate file (JsonNode allows only one parent)
+            var dialogNodesCopy = JsonNode.Parse(dialogNodes.ToJsonString());
+            var dialogPayload = new JsonObject
+            {
+                ["dialogRootNodeId"] = dialogRootNodeId,
+                ["dialogNodes"] = dialogNodesCopy
+            };
+            var dialogJson = dialogPayload.ToJsonString(serializerOptions);
+            var dialogEntry = zip.CreateEntry(manifestPrefix + "dialogs/" + tileId + ".json", CompressionLevel.Fastest);
+            using (var writer = new StreamWriter(dialogEntry.Open(), new UTF8Encoding(false)))
+            {
+                writer.Write(dialogJson);
+            }
+
+            tileObj["dialogRef"] = "dialogs/" + tileId + ".json";
+            tileObj["dialogNodes"] = new JsonArray();
+        }
+
+        return root.ToJsonString(serializerOptions);
+    }
+
     private static object BuildExportJson(StoryDefinition def, string primaryLang)
     {
         // Extract topic IDs
@@ -199,6 +266,7 @@ public class StoryExportService : IStoryExportService
             classicAuthorId = def.ClassicAuthorId,
             priceInCredits = def.PriceInCredits,
             isEvaluative = def.IsEvaluative,
+            isFullyInteractive = def.IsFullyInteractive,
             audioLanguages = def.AudioLanguages ?? new List<string>(),
             dialogParticipants = def.DialogParticipants.OrderBy(p => p.SortOrder).Select(p => p.HeroId).ToList(),
             translations = def.Translations.Select(t => new
@@ -301,6 +369,7 @@ public class StoryExportService : IStoryExportService
             classicAuthorId = craft.ClassicAuthorId,
             priceInCredits = craft.PriceInCredits,
             isEvaluative = craft.IsEvaluative,
+            isFullyInteractive = craft.IsFullyInteractive,
             audioLanguages = craft.AudioLanguages ?? new List<string>(),
             unlockedStoryHeroes = unlockedHeroes,
             dialogParticipants = craft.DialogParticipants.OrderBy(p => p.SortOrder).Select(p => p.HeroId).ToList(),
