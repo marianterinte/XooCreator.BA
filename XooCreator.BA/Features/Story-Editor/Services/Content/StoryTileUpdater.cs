@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
@@ -44,6 +45,7 @@ public class StoryTileUpdater : IStoryTileUpdater
                     BranchId = string.IsNullOrWhiteSpace(tileDto.BranchId) ? null : tileDto.BranchId.Trim(),
                     // Image is common for all languages
                     ImageUrl = ExtractFileName(tileDto.ImageUrl),
+                    AvailableHeroIdsJson = SerializeAvailableHeroIds(tileDto),
                     // Audio and Video are now language-specific (stored in translation)
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
@@ -59,6 +61,7 @@ public class StoryTileUpdater : IStoryTileUpdater
                 tile.BranchId = string.IsNullOrWhiteSpace(tileDto.BranchId) ? null : tileDto.BranchId.Trim();
                 // Image is common for all languages
                 tile.ImageUrl = ExtractFileName(tileDto.ImageUrl);
+                tile.AvailableHeroIdsJson = SerializeAvailableHeroIds(tileDto);
                 // Audio and Video are now language-specific (stored in translation)
                 tile.UpdatedAt = DateTime.UtcNow;
             }
@@ -120,6 +123,22 @@ public class StoryTileUpdater : IStoryTileUpdater
         
         // Extract filename from path
         return Path.GetFileName(path);
+    }
+
+    private static string? SerializeAvailableHeroIds(EditableTileDto tileDto)
+    {
+        if (!string.Equals(tileDto.Type, "character-selection", StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        var ids = (tileDto.AvailableHeroIds ?? new List<string>())
+            .Select(x => (x ?? string.Empty).Trim())
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        return ids.Count == 0 ? null : JsonSerializer.Serialize(ids);
     }
 
     private async Task UpdateDialogDataAsync(

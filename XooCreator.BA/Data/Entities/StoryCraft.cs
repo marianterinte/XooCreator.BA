@@ -110,6 +110,8 @@ public class StoryCraftTile
     // Non-translatable fields (same for all languages)
     // Image is common for all languages
     public string? ImageUrl { get; set; }
+    // Character-selection specific: selected hero IDs for this tile (JSON array)
+    public string? AvailableHeroIdsJson { get; set; }
     // Audio and Video are now language-specific (moved to StoryCraftTileTranslation)
     
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
