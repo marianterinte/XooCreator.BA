@@ -22,19 +22,22 @@ public class CreateStoryDocumentExportDraftEndpoint
     private readonly IStoryCraftsRepository _crafts;
     private readonly IStoryDocumentExportQueue _queue;
     private readonly IJobEventsHub _jobEvents;
+    private readonly IConfiguration _config;
 
     public CreateStoryDocumentExportDraftEndpoint(
         XooDbContext db,
         IAuth0UserService auth0,
         IStoryCraftsRepository crafts,
         IStoryDocumentExportQueue queue,
-        IJobEventsHub jobEvents)
+        IJobEventsHub jobEvents,
+        IConfiguration config)
     {
         _db = db;
         _auth0 = auth0;
         _crafts = crafts;
         _queue = queue;
         _jobEvents = jobEvents;
+        _config = config;
     }
 
     public record CreateStoryDocumentExportRequest(
@@ -49,7 +52,7 @@ public class CreateStoryDocumentExportDraftEndpoint
 
     [Route("/api/{locale}/stories/{storyId}/pdf-draft")]
     [Authorize]
-    public static async Task<Results<Accepted<CreateStoryDocumentExportResponse>, NotFound, UnauthorizedHttpResult, ForbidHttpResult, BadRequest<string>>> HandlePost(
+    public static async Task<Results<Accepted<CreateStoryDocumentExportResponse>, NotFound, UnauthorizedHttpResult, ForbidHttpResult, BadRequest<string>, ProblemHttpResult>> HandlePost(
         [FromRoute] string locale,
         [FromRoute] string storyId,
         [FromBody] CreateStoryDocumentExportRequest? body,
@@ -87,6 +90,18 @@ public class CreateStoryDocumentExportDraftEndpoint
         // Draft: IncludeQuizAnswers is owner/admin only; for draft owner is the requesting creator (or admin).
         if (request.IncludeQuizAnswers && !isAdmin && craft.OwnerUserId != user.Id)
             return TypedResults.Forbid();
+
+        // Print quota (same as published)
+        var freePrintLimit = ep._config.GetValue("Subscription:FreePrintLimit", 1);
+        if (freePrintLimit >= 0 && !isAdmin)
+        {
+            var printedIds = await ep._db.StoryPrintRecords.AsNoTracking().Where(r => r.UserId == user.Id).Select(r => r.StoryId).Distinct().ToListAsync(ct);
+            var exportedIds = await ep._db.StoryDocumentExportJobs.AsNoTracking().Where(j => j.RequestedByUserId == user.Id && j.Status == StoryDocumentExportJobStatus.Completed).Select(j => j.StoryId).Distinct().ToListAsync(ct);
+            var usedCount = printedIds.Union(exportedIds).Count();
+            var alreadyPrinted = printedIds.Contains(storyId) || exportedIds.Contains(storyId);
+            if (usedCount >= freePrintLimit && !alreadyPrinted)
+                return TypedResults.Problem("Ai folosit limita de povești printabile (1). Pentru nelimitat, treci la Supporter Pack.", statusCode: 402);
+        }
 
         var job = new StoryDocumentExportJob
         {
