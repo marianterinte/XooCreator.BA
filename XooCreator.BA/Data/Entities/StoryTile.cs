@@ -21,6 +21,8 @@ public class StoryTile
     public string? Text { get; set; }
     // Image is common for all languages
     public string? ImageUrl { get; set; }
+    // Character-selection specific: selected hero IDs for this tile (JSON array)
+    public string? AvailableHeroIdsJson { get; set; }
     // Audio and Video are now language-specific (moved to StoryTileTranslation)
     
     // Quiz-specific fields

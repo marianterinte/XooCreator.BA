@@ -544,7 +544,8 @@ public class StoryPublishingService : IStoryPublishingService
             TileId = craftTile.TileId,
             Type = craftTile.Type,
             SortOrder = craftTile.SortOrder,
-            BranchId = craftTile.BranchId
+            BranchId = craftTile.BranchId,
+            AvailableHeroIdsJson = craftTile.AvailableHeroIdsJson
         };
 
         if (!string.IsNullOrWhiteSpace(craftTile.ImageUrl))
