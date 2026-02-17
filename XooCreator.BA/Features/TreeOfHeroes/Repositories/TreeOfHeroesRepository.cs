@@ -25,6 +25,8 @@ public interface ITreeOfHeroesRepository
     Task<ResetPersonalityTokensResult> ResetPersonalityTokensAsync(Guid userId);
     Task<UserAlchimalianProfile?> GetUserAlchimalianProfileAsync(Guid userId);
     Task SaveUserAlchimalianProfileAsync(Guid userId, string? selectedHeroId);
+    /// <summary>Add heroId to discovered list; optionally set as selected. Returns true if updated.</summary>
+    Task<bool> DiscoverHeroAsync(Guid userId, string heroId, bool setAsSelected);
 }
 
 public class TreeOfHeroesRepository : ITreeOfHeroesRepository
@@ -528,6 +530,7 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
             {
                 UserId = userId,
                 SelectedHeroId = selectedHeroId,
+                DiscoveredHeroIdsJson = "[]",
                 UpdatedAt = now
             };
             _context.UserAlchimalianProfiles.Add(profile);
@@ -538,6 +541,50 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
             profile.UpdatedAt = now;
         }
         await _context.SaveChangesAsync();
+    }
+
+    public async Task<bool> DiscoverHeroAsync(Guid userId, string heroId, bool setAsSelected)
+    {
+        var profile = await _context.UserAlchimalianProfiles.FirstOrDefaultAsync(p => p.UserId == userId);
+        var list = SafeParseDiscoveredHeroIds(profile?.DiscoveredHeroIdsJson);
+        if (list.Contains(heroId, StringComparer.OrdinalIgnoreCase) && !setAsSelected)
+            return true; // already discovered, no change
+        if (!list.Contains(heroId, StringComparer.OrdinalIgnoreCase))
+            list.Add(heroId);
+        var now = DateTime.UtcNow;
+        if (profile == null)
+        {
+            profile = new UserAlchimalianProfile
+            {
+                UserId = userId,
+                SelectedHeroId = setAsSelected ? heroId : null,
+                DiscoveredHeroIdsJson = JsonSerializer.Serialize(list),
+                UpdatedAt = now
+            };
+            _context.UserAlchimalianProfiles.Add(profile);
+        }
+        else
+        {
+            profile.DiscoveredHeroIdsJson = JsonSerializer.Serialize(list);
+            if (setAsSelected)
+                profile.SelectedHeroId = heroId;
+            profile.UpdatedAt = now;
+        }
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    private static List<string> SafeParseDiscoveredHeroIds(string? json)
+    {
+        if (string.IsNullOrWhiteSpace(json)) return new List<string>();
+        try
+        {
+            return JsonSerializer.Deserialize<List<string>>(json!) ?? new List<string>();
+        }
+        catch
+        {
+            return new List<string>();
+        }
     }
 
     private static string? GetTraitFromCosts(int courage, int curiosity, int thinking, int creativity, int safety)

@@ -314,7 +314,7 @@ public partial class PublishStoryEndpoint
     /// </summary>
     [Route("/api/stories/{storyId}/publish-jobs/latest")]
     [Authorize]
-    public static async Task<Results<Ok<PublishJobStatusResponse>, NotFound, UnauthorizedHttpResult, ForbidHttpResult>> HandleGetLatest(
+    public static async Task<Results<Ok<PublishJobStatusResponse>, NotFound, UnauthorizedHttpResult, ForbidHttpResult>> HandleGet(
         [FromRoute] string storyId,
         [FromServices] PublishStoryEndpoint ep,
         CancellationToken ct)
@@ -325,14 +325,22 @@ public partial class PublishStoryEndpoint
         if (!ep._auth0.HasRole(user, Data.Enums.UserRole.Creator))
             return TypedResults.Forbid();
 
+        // Compare StoryId case-insensitively (frontend/URL may differ in casing from DB)
+        var storyIdLower = storyId.ToLowerInvariant();
         var job = await ep._db.StoryPublishJobs
             .AsNoTracking()
-            .Where(j => j.StoryId == storyId)
+            .Where(j => j.StoryId.ToLower() == storyIdLower)
             .OrderByDescending(j => j.QueuedAtUtc)
             .FirstOrDefaultAsync(ct);
 
         if (job == null)
+        {
+            var countAny = await ep._db.StoryPublishJobs.CountAsync(j => j.StoryId.ToLower() == storyIdLower, ct);
+            ep._logger.LogInformation(
+                "GetLatestPublishJob: no job for storyId={StoryId} (total jobs for this story in DB: {Count}). Check that the request URL is GET .../publish-jobs/latest and storyId matches.",
+                storyId, countAny);
             return TypedResults.NotFound();
+        }
 
         var response = new PublishJobStatusResponse
         {
@@ -349,7 +357,7 @@ public partial class PublishStoryEndpoint
         return TypedResults.Ok(response);
     }
 
-    [Route("/api/stories/{storyId}/publish-jobs/{jobId}")]
+    [Route("/api/stories/{storyId}/publish-jobs/{jobId:guid}")]
     [Authorize]
     public static async Task<Results<Ok<PublishJobStatusResponse>, NotFound, UnauthorizedHttpResult, ForbidHttpResult>> HandleGet(
         [FromRoute] string storyId,

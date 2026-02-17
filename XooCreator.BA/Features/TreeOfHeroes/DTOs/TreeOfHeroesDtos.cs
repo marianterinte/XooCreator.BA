@@ -113,11 +113,13 @@ public record ResetPersonalityTokensResult
     public int TokensReturned { get; init; }
 }
 
-/// <summary>Alchimalian Hero profile: selected hero for display and profile picture.</summary>
+/// <summary>Alchimalian Hero profile: selected hero for display and profile picture; discovered hero IDs for ??? UI.</summary>
 public record AlchimalianHeroProfileDto
 {
     public string? SelectedHeroId { get; init; }
     public string? SelectedHeroImageUrl { get; init; }
+    /// <summary>Hero IDs the user has discovered (tapped Descoperă / Vezi ce erou poți deveni).</summary>
+    public IReadOnlyList<string> DiscoveredHeroIds { get; init; } = Array.Empty<string>();
 }
 
 public record UpdateAlchimalianHeroProfileRequest
@@ -126,6 +128,20 @@ public record UpdateAlchimalianHeroProfileRequest
 }
 
 public record UpdateAlchimalianHeroProfileResponse
+{
+    public bool Success { get; init; }
+    public string? ErrorMessage { get; init; }
+    public AlchimalianHeroProfileDto? Profile { get; init; }
+}
+
+public record DiscoverAlchimalianHeroRequest
+{
+    public required string HeroId { get; init; }
+    /// <summary>If true, set this hero as the selected hero after discovering.</summary>
+    public bool SetAsSelected { get; init; } = true;
+}
+
+public record DiscoverAlchimalianHeroResponse
 {
     public bool Success { get; init; }
     public string? ErrorMessage { get; init; }

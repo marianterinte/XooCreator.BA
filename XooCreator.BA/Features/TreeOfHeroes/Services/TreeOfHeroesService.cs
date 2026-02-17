@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
 using XooCreator.BA.Features.TreeOfHeroes.DTOs;
 using XooCreator.BA.Features.TreeOfHeroes.Repositories;
+using System.Text.Json;
 
 namespace XooCreator.BA.Features.TreeOfHeroes.Services;
 
@@ -18,6 +19,7 @@ public interface ITreeOfHeroesService
     Task<AlchimalianHeroProfileDto> GetAlchimalianHeroProfileAsync(Guid userId, string locale);
     Task<UpdateAlchimalianHeroProfileResponse> UpdateAlchimalianHeroProfileAsync(Guid userId, UpdateAlchimalianHeroProfileRequest request, string locale);
     Task<AlchimalianHeroAvailableResponse> GetAlchimalianHeroAvailableAsync(Guid userId, string locale);
+    Task<DiscoverAlchimalianHeroResponse> DiscoverAlchimalianHeroAsync(Guid userId, DiscoverAlchimalianHeroRequest request, string locale);
 }
 
 public class TreeOfHeroesService : ITreeOfHeroesService
@@ -245,10 +247,15 @@ public class TreeOfHeroesService : ITreeOfHeroesService
             if (!string.IsNullOrEmpty(imageUrl) && !imageUrl.StartsWith("/"))
                 imageUrl = "/" + imageUrl;
         }
+        var discoveredIds = ParseDiscoveredHeroIds(profile?.DiscoveredHeroIdsJson);
+        // Legacy: if profile has selected hero but no discovered list yet, treat selected as discovered
+        if (discoveredIds.Count == 0 && !string.IsNullOrEmpty(profile?.SelectedHeroId))
+            discoveredIds = new List<string> { profile.SelectedHeroId };
         return new AlchimalianHeroProfileDto
         {
             SelectedHeroId = profile?.SelectedHeroId,
-            SelectedHeroImageUrl = imageUrl
+            SelectedHeroImageUrl = imageUrl,
+            DiscoveredHeroIds = discoveredIds
         };
     }
 
@@ -367,6 +374,32 @@ public class TreeOfHeroesService : ITreeOfHeroesService
             UpgradeOptionHeroIds = upgradeOptionHeroIds,
             Tokens = tokens
         };
+    }
+
+    public async Task<DiscoverAlchimalianHeroResponse> DiscoverAlchimalianHeroAsync(Guid userId, DiscoverAlchimalianHeroRequest request, string locale)
+    {
+        var heroId = string.IsNullOrWhiteSpace(request.HeroId) ? null : request.HeroId!.Trim();
+        if (heroId == null)
+            return new DiscoverAlchimalianHeroResponse { Success = false, ErrorMessage = "HeroId is required" };
+        var available = await GetAlchimalianHeroAvailableAsync(userId, locale);
+        if (!available.AvailableHeroIds.Contains(heroId, StringComparer.OrdinalIgnoreCase))
+            return new DiscoverAlchimalianHeroResponse { Success = false, ErrorMessage = "Hero is not eligible for your current tokens" };
+        await _repository.DiscoverHeroAsync(userId, heroId, request.SetAsSelected);
+        var profile = await GetAlchimalianHeroProfileAsync(userId, locale);
+        return new DiscoverAlchimalianHeroResponse { Success = true, Profile = profile };
+    }
+
+    private static IReadOnlyList<string> ParseDiscoveredHeroIds(string? json)
+    {
+        if (string.IsNullOrWhiteSpace(json)) return Array.Empty<string>();
+        try
+        {
+            return JsonSerializer.Deserialize<List<string>>(json!) ?? new List<string>();
+        }
+        catch
+        {
+            return Array.Empty<string>();
+        }
     }
 
 }
