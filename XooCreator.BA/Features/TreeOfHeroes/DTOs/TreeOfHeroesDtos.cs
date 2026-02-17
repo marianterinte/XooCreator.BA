@@ -100,6 +100,10 @@ public record TreeOfHeroesConfigDto
     public required List<HeroImageDto> HeroImages { get; init; }
     public required List<string> BaseHeroIds { get; init; }
     public required Dictionary<string, string> CanonicalHybridByPair { get; init; }
+    /// <summary>Maps personality trait to base hero ID (level 1), e.g. "thinking" -> "hero_wise_owl".</summary>
+    public required Dictionary<string, string> TraitToBaseHeroId { get; init; }
+    /// <summary>Maps trait to [level1HeroId, level2HeroId, level3HeroId].</summary>
+    public required Dictionary<string, List<string>> HeroIdsByTraitAndLevel { get; init; }
 }
 
 public record ResetPersonalityTokensResult
@@ -107,6 +111,34 @@ public record ResetPersonalityTokensResult
     public bool Success { get; init; }
     public string? ErrorMessage { get; init; }
     public int TokensReturned { get; init; }
+}
+
+/// <summary>Alchimalian Hero profile: selected hero for display and profile picture.</summary>
+public record AlchimalianHeroProfileDto
+{
+    public string? SelectedHeroId { get; init; }
+    public string? SelectedHeroImageUrl { get; init; }
+}
+
+public record UpdateAlchimalianHeroProfileRequest
+{
+    public string? SelectedHeroId { get; init; }
+}
+
+public record UpdateAlchimalianHeroProfileResponse
+{
+    public bool Success { get; init; }
+    public string? ErrorMessage { get; init; }
+    public AlchimalianHeroProfileDto? Profile { get; init; }
+}
+
+/// <summary>Response for GET alchimalian-hero/available: heroes the user can display (no token consumption).</summary>
+public record AlchimalianHeroAvailableResponse
+{
+    public required List<string> AvailableHeroIds { get; init; }
+    public string? RecommendedHeroId { get; init; }
+    public required List<string> UpgradeOptionHeroIds { get; init; }
+    public required UserTokensDto Tokens { get; init; }
 }
 
 

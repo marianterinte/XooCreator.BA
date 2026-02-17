@@ -15,6 +15,9 @@ public interface ITreeOfHeroesService
     Task<HeroDefinitionDto?> GetHeroDefinitionByIdAsync(string heroId, string locale);
     Task<TreeOfHeroesConfigDto> GetTreeOfHeroesConfigAsync();
     Task<TransformToHeroResponse> TransformToHeroAsync(Guid userId, TransformToHeroRequest request, string locale);
+    Task<AlchimalianHeroProfileDto> GetAlchimalianHeroProfileAsync(Guid userId, string locale);
+    Task<UpdateAlchimalianHeroProfileResponse> UpdateAlchimalianHeroProfileAsync(Guid userId, UpdateAlchimalianHeroProfileRequest request, string locale);
+    Task<AlchimalianHeroAvailableResponse> GetAlchimalianHeroAvailableAsync(Guid userId, string locale);
 }
 
 public class TreeOfHeroesService : ITreeOfHeroesService
@@ -229,6 +232,141 @@ public class TreeOfHeroesService : ITreeOfHeroesService
                 ErrorMessage = ex.Message
             };
         }
+    }
+
+    public async Task<AlchimalianHeroProfileDto> GetAlchimalianHeroProfileAsync(Guid userId, string locale)
+    {
+        var profile = await _repository.GetUserAlchimalianProfileAsync(userId);
+        string? imageUrl = null;
+        if (!string.IsNullOrEmpty(profile?.SelectedHeroId))
+        {
+            var def = await GetHeroDefinitionByIdAsync(profile.SelectedHeroId, locale);
+            imageUrl = def?.Image;
+            if (!string.IsNullOrEmpty(imageUrl) && !imageUrl.StartsWith("/"))
+                imageUrl = "/" + imageUrl;
+        }
+        return new AlchimalianHeroProfileDto
+        {
+            SelectedHeroId = profile?.SelectedHeroId,
+            SelectedHeroImageUrl = imageUrl
+        };
+    }
+
+    public async Task<UpdateAlchimalianHeroProfileResponse> UpdateAlchimalianHeroProfileAsync(Guid userId, UpdateAlchimalianHeroProfileRequest request, string locale)
+    {
+        var selectedHeroId = string.IsNullOrWhiteSpace(request.SelectedHeroId) ? null : request.SelectedHeroId!.Trim();
+        if (selectedHeroId != null)
+        {
+            var def = await _repository.GetHeroDefinitionByIdAsync(selectedHeroId, locale);
+            if (def == null)
+                return new UpdateAlchimalianHeroProfileResponse { Success = false, ErrorMessage = "Hero not found" };
+            var available = await GetAlchimalianHeroAvailableAsync(userId, locale);
+            if (!available.AvailableHeroIds.Contains(selectedHeroId, StringComparer.OrdinalIgnoreCase))
+                return new UpdateAlchimalianHeroProfileResponse { Success = false, ErrorMessage = "Hero is not available for your current tokens" };
+        }
+        await _repository.SaveUserAlchimalianProfileAsync(userId, selectedHeroId);
+        var profile = await GetAlchimalianHeroProfileAsync(userId, locale);
+        return new UpdateAlchimalianHeroProfileResponse { Success = true, Profile = profile };
+    }
+
+    private static readonly string[] PredominantOrder = { "courage", "curiosity", "thinking", "creativity", "safety" };
+    private const int MinTokensToUnlockBase = 2;
+    private static readonly int[] LevelThresholds = { 0, 10, 20 }; // 0-9 -> lvl1, 10-19 -> lvl2, 20+ -> lvl3
+
+    public async Task<AlchimalianHeroAvailableResponse> GetAlchimalianHeroAvailableAsync(Guid userId, string locale)
+    {
+        var tokens = await _repository.GetUserTokensAsync(userId);
+        var config = await _repository.GetTreeOfHeroesConfigAsync();
+
+        var traitCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["courage"] = tokens.Courage,
+            ["curiosity"] = tokens.Curiosity,
+            ["thinking"] = tokens.Thinking,
+            ["creativity"] = tokens.Creativity,
+            ["safety"] = tokens.Safety
+        };
+
+        var availableHeroIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        // Base heroes (by trait + level from token count)
+        foreach (var (trait, count) in traitCounts)
+        {
+            if (count < MinTokensToUnlockBase) continue;
+            if (!config.HeroIdsByTraitAndLevel.TryGetValue(trait, out var chain) || chain.Count == 0) continue;
+            var levelIndex = 0;
+            for (var i = LevelThresholds.Length - 1; i >= 0; i--)
+            {
+                if (count >= LevelThresholds[i])
+                {
+                    levelIndex = Math.Min(i, chain.Count - 1);
+                    break;
+                }
+            }
+            availableHeroIds.Add(chain[levelIndex]);
+        }
+
+        // Hybrids: both base traits unlocked (>= MinTokensToUnlockBase), then pair -> hybrid
+        var baseHeroIdsSet = new HashSet<string>(config.BaseHeroIds, StringComparer.OrdinalIgnoreCase);
+        var availableBaseIds = new List<string>();
+        foreach (var (trait, count) in traitCounts)
+        {
+            if (count < MinTokensToUnlockBase) continue;
+            if (config.TraitToBaseHeroId.TryGetValue(trait, out var baseId) && baseHeroIdsSet.Contains(baseId))
+                availableBaseIds.Add(baseId);
+        }
+        foreach (var a in availableBaseIds)
+        {
+            foreach (var b in availableBaseIds)
+            {
+                if (string.Equals(a, b, StringComparison.OrdinalIgnoreCase)) continue;
+                var key = string.Join("|", new[] { a, b }.OrderBy(x => x, StringComparer.Ordinal));
+                if (config.CanonicalHybridByPair.TryGetValue(key, out var hybridId))
+                    availableHeroIds.Add(hybridId);
+            }
+        }
+
+        var list = availableHeroIds.ToList();
+
+        // Recommended: predominant trait (by count, then PredominantOrder) + level
+        string? recommendedHeroId = null;
+        var maxCount = -1;
+        var predominantTrait = (string?)null;
+        foreach (var trait in PredominantOrder)
+        {
+            var c = traitCounts.GetValueOrDefault(trait, 0);
+            if (c > maxCount && c >= MinTokensToUnlockBase)
+            {
+                maxCount = c;
+                predominantTrait = trait;
+            }
+        }
+        if (predominantTrait != null && config.HeroIdsByTraitAndLevel.TryGetValue(predominantTrait, out var recChain) && recChain.Count > 0)
+        {
+            var levelIndex = 0;
+            for (var i = LevelThresholds.Length - 1; i >= 0; i--)
+            {
+                if (maxCount >= LevelThresholds[i])
+                {
+                    levelIndex = Math.Min(i, recChain.Count - 1);
+                    break;
+                }
+            }
+            recommendedHeroId = recChain[levelIndex];
+            if (!list.Contains(recommendedHeroId, StringComparer.OrdinalIgnoreCase))
+                list.Add(recommendedHeroId);
+        }
+
+        // Upgrade options: same as available (UI can show "?" for newly discoverable); no separate "discovered" state without token spend
+        var upgradeOptionHeroIds = list.ToList();
+
+        return new AlchimalianHeroAvailableResponse
+        {
+            AvailableHeroIds = list,
+            RecommendedHeroId = recommendedHeroId,
+            UpgradeOptionHeroIds = upgradeOptionHeroIds,
+            Tokens = tokens
+        };
     }
 
 }

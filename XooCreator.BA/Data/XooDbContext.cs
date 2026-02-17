@@ -34,6 +34,7 @@ public class XooDbContext : DbContext
     public DbSet<UserTokenBalance> UserTokenBalances => Set<UserTokenBalance>();
     public DbSet<HeroProgress> HeroProgress => Set<HeroProgress>();
     public DbSet<HeroTreeProgress> HeroTreeProgress => Set<HeroTreeProgress>();
+    public DbSet<UserAlchimalianProfile> UserAlchimalianProfiles => Set<UserAlchimalianProfile>();
     public DbSet<HeroDefinition> HeroDefinitions => Set<HeroDefinition>();
     public DbSet<HeroDefinitionTranslation> HeroDefinitionTranslations => Set<HeroDefinitionTranslation>();
     public DbSet<HeroDefinitionVersion> HeroDefinitionVersions => Set<HeroDefinitionVersion>();

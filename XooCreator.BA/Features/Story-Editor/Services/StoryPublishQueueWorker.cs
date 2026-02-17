@@ -21,6 +21,7 @@ public class StoryPublishQueueWorker : BackgroundService
     private readonly ILogger<StoryPublishQueueWorker> _logger;
     private readonly QueueClient _queueClient;
     private readonly IJobEventsHub _jobEvents;
+    private readonly TimeSpan _messageVisibilityTimeout;
 
     public StoryPublishQueueWorker(
         IServiceProvider services,
@@ -35,6 +36,11 @@ public class StoryPublishQueueWorker : BackgroundService
 
         var queueName = configuration.GetSection("AzureStorage:Queues")?["Publish"];
         _queueClient = queueClientFactory.CreateClient(queueName, "story-publish-queue");
+        var visibilityTimeoutSeconds = configuration.GetValue<int?>("AzureStorage:Queues:PublishVisibilityTimeoutSeconds");
+        _messageVisibilityTimeout = TimeSpan.FromSeconds(
+            visibilityTimeoutSeconds.HasValue && visibilityTimeoutSeconds.Value > 0
+                ? visibilityTimeoutSeconds.Value
+                : 600);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -57,7 +63,10 @@ public class StoryPublishQueueWorker : BackgroundService
         {
             try
             {
-                var messages = await _queueClient.ReceiveMessagesAsync(maxMessages: 1, visibilityTimeout: TimeSpan.FromSeconds(60), cancellationToken: stoppingToken);
+                var messages = await _queueClient.ReceiveMessagesAsync(
+                    maxMessages: 1,
+                    visibilityTimeout: _messageVisibilityTimeout,
+                    cancellationToken: stoppingToken);
                 if (messages?.Value == null || messages.Value.Length == 0)
                 {
                     // Log only every 10th check to avoid spam (every ~30 seconds)
