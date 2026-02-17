@@ -23,6 +23,10 @@ public interface ITreeOfHeroesRepository
     Task<bool> SaveHeroProgressAsync(Guid userId, string heroId);
     Task<List<string>> AutoUnlockNodesBasedOnPrerequisitesAsync(Guid userId);
     Task<ResetPersonalityTokensResult> ResetPersonalityTokensAsync(Guid userId);
+    Task<UserAlchimalianProfile?> GetUserAlchimalianProfileAsync(Guid userId);
+    Task SaveUserAlchimalianProfileAsync(Guid userId, string? selectedHeroId);
+    /// <summary>Add heroId to discovered list; optionally set as selected. Returns true if updated.</summary>
+    Task<bool> DiscoverHeroAsync(Guid userId, string heroId, bool setAsSelected);
 }
 
 public class TreeOfHeroesRepository : ITreeOfHeroesRepository
@@ -274,14 +278,44 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
         }
 
         var rootId = definitions.Any(d => d.Id == "alchimalia_hero") ? "alchimalia_hero" : "seed";
-        var baseHeroIds = definitions
+        var baseDefs = definitions
             .Where(d =>
             {
                 var prereqs = SafeParsePrerequisites(d.PrerequisitesJson);
                 return prereqs.Count == 1 && prereqs[0] == rootId;
             })
-            .Select(d => d.Id)
             .ToList();
+        var baseHeroIds = baseDefs.Select(d => d.Id).ToList();
+
+        // Trait -> base hero ID (level 1): base hero has exactly one cost = 1
+        var traitToBaseHeroId = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var d in baseDefs)
+        {
+            var trait = GetTraitFromCosts(d.CourageCost, d.CuriosityCost, d.ThinkingCost, d.CreativityCost, d.SafetyCost);
+            if (trait != null)
+                traitToBaseHeroId[trait] = d.Id;
+        }
+
+        // Trait -> [level1HeroId, level2HeroId, level3HeroId]
+        var heroIdsByTraitAndLevel = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+        var defById = definitions.ToDictionary(d => d.Id, StringComparer.OrdinalIgnoreCase);
+        foreach (var (trait, baseId) in traitToBaseHeroId)
+        {
+            var chain = new List<string> { baseId };
+            var currentId = baseId;
+            for (var level = 2; level <= 3; level++)
+            {
+                var next = definitions.FirstOrDefault(d =>
+                {
+                    var prereqs = SafeParsePrerequisites(d.PrerequisitesJson);
+                    return prereqs.Count == 1 && prereqs[0].Equals(currentId, StringComparison.OrdinalIgnoreCase);
+                });
+                if (next == null) break;
+                chain.Add(next.Id);
+                currentId = next.Id;
+            }
+            heroIdsByTraitAndLevel[trait] = chain;
+        }
 
         var config = new TreeOfHeroesConfigDto
         {
@@ -295,7 +329,9 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
             },
             HeroImages = heroImages,
             BaseHeroIds = baseHeroIds,
-            CanonicalHybridByPair = canonicalHybridByPair
+            CanonicalHybridByPair = canonicalHybridByPair,
+            TraitToBaseHeroId = traitToBaseHeroId,
+            HeroIdsByTraitAndLevel = heroIdsByTraitAndLevel
         };
 
         return config;
@@ -478,11 +514,106 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
         return newlyUnlockedNodes;
     }
 
-    private static List<string> SafeParsePrerequisites(string? json)
+    public async Task<UserAlchimalianProfile?> GetUserAlchimalianProfileAsync(Guid userId)
     {
+        return await _context.UserAlchimalianProfiles
+            .FirstOrDefaultAsync(p => p.UserId == userId);
+    }
+
+    public async Task SaveUserAlchimalianProfileAsync(Guid userId, string? selectedHeroId)
+    {
+        var profile = await _context.UserAlchimalianProfiles.FirstOrDefaultAsync(p => p.UserId == userId);
+        var now = DateTime.UtcNow;
+        if (profile == null)
+        {
+            profile = new UserAlchimalianProfile
+            {
+                UserId = userId,
+                SelectedHeroId = selectedHeroId,
+                DiscoveredHeroIdsJson = "[]",
+                UpdatedAt = now
+            };
+            _context.UserAlchimalianProfiles.Add(profile);
+        }
+        else
+        {
+            profile.SelectedHeroId = selectedHeroId;
+            profile.UpdatedAt = now;
+        }
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<bool> DiscoverHeroAsync(Guid userId, string heroId, bool setAsSelected)
+    {
+        var profile = await _context.UserAlchimalianProfiles.FirstOrDefaultAsync(p => p.UserId == userId);
+        var list = SafeParseDiscoveredHeroIds(profile?.DiscoveredHeroIdsJson);
+        if (list.Contains(heroId, StringComparer.OrdinalIgnoreCase) && !setAsSelected)
+            return true; // already discovered, no change
+        if (!list.Contains(heroId, StringComparer.OrdinalIgnoreCase))
+            list.Add(heroId);
+        var now = DateTime.UtcNow;
+        if (profile == null)
+        {
+            profile = new UserAlchimalianProfile
+            {
+                UserId = userId,
+                SelectedHeroId = setAsSelected ? heroId : null,
+                DiscoveredHeroIdsJson = JsonSerializer.Serialize(list),
+                UpdatedAt = now
+            };
+            _context.UserAlchimalianProfiles.Add(profile);
+        }
+        else
+        {
+            profile.DiscoveredHeroIdsJson = JsonSerializer.Serialize(list);
+            if (setAsSelected)
+                profile.SelectedHeroId = heroId;
+            profile.UpdatedAt = now;
+        }
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    private static List<string> SafeParseDiscoveredHeroIds(string? json)
+    {
+        if (string.IsNullOrWhiteSpace(json)) return new List<string>();
         try
         {
-            return JsonSerializer.Deserialize<List<string>>(json ?? "[]") ?? new List<string>();
+            return JsonSerializer.Deserialize<List<string>>(json!) ?? new List<string>();
+        }
+        catch
+        {
+            return new List<string>();
+        }
+    }
+
+    private static string? GetTraitFromCosts(int courage, int curiosity, int thinking, int creativity, int safety)
+    {
+        if (courage == 1 && curiosity == 0 && thinking == 0 && creativity == 0 && safety == 0) return "courage";
+        if (courage == 0 && curiosity == 1 && thinking == 0 && creativity == 0 && safety == 0) return "curiosity";
+        if (courage == 0 && curiosity == 0 && thinking == 1 && creativity == 0 && safety == 0) return "thinking";
+        if (courage == 0 && curiosity == 0 && thinking == 0 && creativity == 1 && safety == 0) return "creativity";
+        if (courage == 0 && curiosity == 0 && thinking == 0 && creativity == 0 && safety == 1) return "safety";
+        return null;
+    }
+
+    private static List<string> SafeParsePrerequisites(string? json)
+    {
+        if (string.IsNullOrWhiteSpace(json))
+            return new List<string>();
+        var s = json!.Trim();
+        try
+        {
+            // Accept JSON array: ["alchimalia_hero"] or ["hero_curious_cat","hero_wise_owl"]
+            if (s.StartsWith('['))
+                return JsonSerializer.Deserialize<List<string>>(s) ?? new List<string>();
+            // Accept single quoted string from seed: "alchimalia_hero" -> treat as single prereq
+            if (s.StartsWith('"') && s.EndsWith('"'))
+            {
+                var single = JsonSerializer.Deserialize<string>(s);
+                return string.IsNullOrEmpty(single) ? new List<string>() : new List<string> { single! };
+            }
+            return new List<string>();
         }
         catch
         {

@@ -22,6 +22,7 @@ public class StoryExportQueueWorker : BackgroundService
     private readonly ILogger<StoryExportQueueWorker> _logger;
     private readonly QueueClient _queueClient;
     private readonly IJobEventsHub _jobEvents;
+    private readonly TimeSpan _messageVisibilityTimeout;
 
     public StoryExportQueueWorker(
         IServiceProvider services,
@@ -36,6 +37,11 @@ public class StoryExportQueueWorker : BackgroundService
 
         var queueName = configuration.GetSection("AzureStorage:Queues")?["Export"];
         _queueClient = queueClientFactory.CreateClient(queueName, "story-export-full-export-queue");
+        var visibilityTimeoutSeconds = configuration.GetValue<int?>("AzureStorage:Queues:ExportVisibilityTimeoutSeconds");
+        _messageVisibilityTimeout = TimeSpan.FromSeconds(
+            visibilityTimeoutSeconds.HasValue && visibilityTimeoutSeconds.Value > 0
+                ? visibilityTimeoutSeconds.Value
+                : 900); // 15 minutes default for heavy dialog exports
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -60,7 +66,7 @@ public class StoryExportQueueWorker : BackgroundService
             {
                 var messages = await _queueClient.ReceiveMessagesAsync(
                     maxMessages: 1,
-                    visibilityTimeout: TimeSpan.FromSeconds(60),
+                    visibilityTimeout: _messageVisibilityTimeout,
                     cancellationToken: stoppingToken);
 
                 if (messages?.Value == null || messages.Value.Length == 0)
@@ -111,6 +117,16 @@ public class StoryExportQueueWorker : BackgroundService
                     if (job == null || job.Status is StoryExportJobStatus.Completed or StoryExportJobStatus.Failed)
                     {
                         await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
+                        continue;
+                    }
+
+                    // Another instance may already be processing this job when visibility timeout expires.
+                    // Keep message for retry later instead of processing the same job concurrently.
+                    if (job.Status == StoryExportJobStatus.Running)
+                    {
+                        _logger.LogInformation(
+                            "Skipping export message for already running job: jobId={JobId} storyId={StoryId} dequeueCount={DequeueCount}",
+                            job.Id, job.StoryId, job.DequeueCount);
                         continue;
                     }
 
@@ -258,6 +274,7 @@ public class StoryExportQueueWorker : BackgroundService
         CancellationToken ct)
     {
         var def = await db.StoryDefinitions
+            .AsNoTracking()
             .Include(d => d.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Tokens)
             .Include(d => d.Tiles).ThenInclude(t => t.Translations)
             .Include(d => d.Tiles).ThenInclude(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.Translations)
@@ -267,6 +284,7 @@ public class StoryExportQueueWorker : BackgroundService
             .Include(d => d.Translations)
             .Include(d => d.Topics).ThenInclude(t => t.StoryTopic)
             .Include(d => d.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(d => d.StoryId == job.StoryId, ct);
 
         if (def == null)
