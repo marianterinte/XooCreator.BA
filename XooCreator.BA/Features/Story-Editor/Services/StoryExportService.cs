@@ -30,12 +30,14 @@ public class StoryExportService : IStoryExportService
         var exportJson = JsonSerializer.Serialize(exportObj, new JsonSerializerOptions { WriteIndented = true });
         var fileName = $"{def.StoryId}-v{def.Version}.zip";
         var manifestPrefix = $"manifest/{def.StoryId}/v{def.Version}/";
+        var hasDialogTiles = def.Tiles.Any(t => t.DialogTile?.Nodes != null && t.DialogTile.Nodes.Count > 0);
+        var mediaPaths = CollectPublishedMediaPaths(def);
 
         using var ms = new MemoryStream();
         using (var zip = new ZipArchive(ms, ZipArchiveMode.Create, leaveOpen: true))
         {
             // Add manifest JSON (with optional split: dialogs/ when story has dialog tiles with nodes)
-            var manifestJson = ApplySplitFormatIfDialogsPresent(exportJson, zip, manifestPrefix);
+            var manifestJson = ApplySplitFormatIfDialogsPresent(exportJson, zip, manifestPrefix, hasDialogTiles);
             var manifestEntry = zip.CreateEntry(manifestPrefix + "story.json", CompressionLevel.Fastest);
             await using (var writer = new StreamWriter(manifestEntry.Open(), new UTF8Encoding(false)))
             {
@@ -43,7 +45,6 @@ public class StoryExportService : IStoryExportService
             }
 
             // Collect media paths from definition (already in published layout)
-            var mediaPaths = CollectPublishedMediaPaths(def);
             foreach (var path in mediaPaths)
             {
                 try
@@ -74,7 +75,7 @@ public class StoryExportService : IStoryExportService
         {
             ZipBytes = zipBytes,
             FileName = fileName,
-            MediaCount = CollectPublishedMediaPaths(def).Count,
+            MediaCount = mediaPaths.Count,
             LanguageCount = def.Translations.Select(t => t.LanguageCode).Distinct().Count(),
             ZipSizeBytes = zipBytes.Length
         };
@@ -122,11 +123,12 @@ public class StoryExportService : IStoryExportService
 
         // Build ZIP
         var manifestPrefix = $"manifest/{craft.StoryId}/";
+        var hasDialogTiles = craft.Tiles.Any(t => t.DialogTile?.Nodes != null && t.DialogTile.Nodes.Count > 0);
         using var ms = new MemoryStream();
         using (var zip = new ZipArchive(ms, ZipArchiveMode.Create, leaveOpen: true))
         {
             // Add manifest JSON (with optional split: dialogs/ when story has dialog tiles with nodes)
-            var manifestJson = ApplySplitFormatIfDialogsPresent(exportJson, zip, manifestPrefix);
+            var manifestJson = ApplySplitFormatIfDialogsPresent(exportJson, zip, manifestPrefix, hasDialogTiles);
             var manifestEntry = zip.CreateEntry(manifestPrefix + "story.json", CompressionLevel.Fastest);
             await using (var writer = new StreamWriter(manifestEntry.Open(), new UTF8Encoding(false)))
             {
@@ -179,8 +181,10 @@ public class StoryExportService : IStoryExportService
     /// dialogRef + empty dialogNodes for those tiles, and separate dialogs/{tileId}.json files.
     /// Returns the (possibly modified) manifest JSON string to write to story.json.
     /// </summary>
-    private static string ApplySplitFormatIfDialogsPresent(string exportJson, ZipArchive zip, string manifestPrefix)
+    private static string ApplySplitFormatIfDialogsPresent(string exportJson, ZipArchive zip, string manifestPrefix, bool hasDialogTiles)
     {
+        if (!hasDialogTiles) return exportJson;
+
         var root = JsonNode.Parse(exportJson);
         if (root == null) return exportJson;
 
@@ -215,14 +219,9 @@ public class StoryExportService : IStoryExportService
             var tileId = tileObj["id"]?.GetValue<string>() ?? "dialog";
             var dialogRootNodeId = tileObj["dialogRootNodeId"]?.GetValue<string>() ?? string.Empty;
 
-            // Clone dialog nodes for the separate file (JsonNode allows only one parent)
-            var dialogNodesCopy = JsonNode.Parse(dialogNodes.ToJsonString());
-            var dialogPayload = new JsonObject
-            {
-                ["dialogRootNodeId"] = dialogRootNodeId,
-                ["dialogNodes"] = dialogNodesCopy
-            };
-            var dialogJson = dialogPayload.ToJsonString(serializerOptions);
+            // Avoid deep cloning dialog nodes (high memory on large dialog trees).
+            var dialogJson =
+                $"{{\"dialogRootNodeId\":{JsonSerializer.Serialize(dialogRootNodeId)},\"dialogNodes\":{dialogNodes.ToJsonString(serializerOptions)}}}";
             var dialogEntry = zip.CreateEntry(manifestPrefix + "dialogs/" + tileId + ".json", CompressionLevel.Fastest);
             using (var writer = new StreamWriter(dialogEntry.Open(), new UTF8Encoding(false)))
             {
