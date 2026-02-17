@@ -12,6 +12,7 @@ public record StoryContentDto
     public string? StoryTopic { get; init; }
     public string? StoryType { get; init; }
     public bool IsEvaluative { get; init; } = false; // If true, this story contains quizzes that should be evaluated
+    public bool IsFullyInteractive { get; init; } = false; // If true, this story is full interactive
     public List<string> UnlockedStoryHeroes { get; init; } = new();
     public List<string> DialogParticipants { get; init; } = new();
     public List<StoryTileDto> Tiles { get; init; } = new();
@@ -50,6 +51,7 @@ public record StoryDialogNodeDto
     public required string SpeakerType { get; init; }
     public string? SpeakerHeroId { get; init; }
     public string? Text { get; init; }
+    public string? AudioUrl { get; init; }
     public List<StoryDialogOptionDto> Options { get; init; } = new();
     public int? X { get; init; }
     public int? Y { get; init; }

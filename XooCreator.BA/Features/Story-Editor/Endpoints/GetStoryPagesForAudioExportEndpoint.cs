@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Features.Stories.Services;
 using XooCreator.BA.Features.StoryEditor.Repositories;
+using XooCreator.BA.Features.StoryEditor.Services.Content;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
@@ -36,6 +37,8 @@ public class GetStoryPagesForAudioExportEndpoint
         public required int PageNumber { get; init; }
         public required string Text { get; init; }
         public required int SortOrder { get; init; }
+        /// <summary>For dialog tiles: 1-based replica index within the tile. Null for page/quiz.</summary>
+        public int? DialogReplicaIndex { get; init; }
     }
 
     public record StoryPagesResponse
@@ -66,7 +69,7 @@ public class GetStoryPagesForAudioExportEndpoint
         }
 
         // Use the same endpoint flow as the story editor: GetStoryForEditAsync returns tiles with
-        // Text, Question, Caption (and Answers) exactly as the editor sees them.
+        // Text, Question, Caption (and DialogNodes with Text) exactly as the editor sees them.
         var normalizedLocale = (locale ?? string.Empty).Trim().ToLowerInvariant();
         var editable = await ep._storiesService.GetStoryForEditAsync(storyId, normalizedLocale);
         if (editable == null)
@@ -96,15 +99,41 @@ public class GetStoryPagesForAudioExportEndpoint
             if (!tileById.TryGetValue(tile.Id ?? string.Empty, out var craftTile))
                 continue;
 
-            pageNumber++;
-            var text = ResolveDisplayText(tile.Text, tile.Question, tile.Caption);
-            pages.Add(new PageInfo
+            if (string.Equals(tile.Type, "dialog", StringComparison.OrdinalIgnoreCase) && tile.DialogNodes != null)
             {
-                TileId = craftTile.Id,
-                PageNumber = pageNumber,
-                Text = text,
-                SortOrder = craftTile.SortOrder
-            });
+                var replicaIndex = 0;
+                foreach (var node in tile.DialogNodes)
+                {
+                    var nodeText = (node.Text ?? string.Empty).Trim();
+                    if (string.IsNullOrEmpty(nodeText))
+                        continue;
+                    replicaIndex++;
+                    pageNumber++;
+                    pages.Add(new PageInfo
+                    {
+                        TileId = craftTile.Id,
+                        PageNumber = pageNumber,
+                        Text = nodeText,
+                        SortOrder = craftTile.SortOrder,
+                        DialogReplicaIndex = replicaIndex
+                    });
+                }
+            }
+            else
+            {
+                var text = ResolveDisplayText(tile.Text, tile.Question, tile.Caption);
+                if (string.IsNullOrWhiteSpace(text))
+                    continue;
+                pageNumber++;
+                pages.Add(new PageInfo
+                {
+                    TileId = craftTile.Id,
+                    PageNumber = pageNumber,
+                    Text = text,
+                    SortOrder = craftTile.SortOrder,
+                    DialogReplicaIndex = null
+                });
+            }
         }
 
         return TypedResults.Ok(new StoryPagesResponse

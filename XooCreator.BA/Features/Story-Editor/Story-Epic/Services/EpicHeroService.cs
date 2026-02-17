@@ -518,6 +518,7 @@ public class EpicHeroService : IEpicHeroService
         {
             Id = craft.Id,
             Name = name,
+            Description = firstTranslation?.Description,
             ImageUrl = craft.ImageUrl,
             GreetingText = greetingText,
             GreetingAudioUrl = firstTranslation?.GreetingAudioUrl,
@@ -546,6 +547,7 @@ public class EpicHeroService : IEpicHeroService
         {
             Id = definition.Id,
             Name = name,
+            Description = firstTranslation?.Description,
             ImageUrl = definition.ImageUrl,
             GreetingText = greetingText,
             GreetingAudioUrl = firstTranslation?.GreetingAudioUrl,

@@ -14,6 +14,8 @@ public class UserDto
     public string? CreatedAtUtc { get; set; }  // ISO 8601 format
     /// <summary>Alchimalia token balance (from CreatorTokenBalances).</summary>
     public int AlchimaliaTokenQuantity { get; set; }
+    /// <summary>True if user has unlimited print (active UserSubscription or admin-grant).</summary>
+    public bool HasUnlimitedPrint { get; set; }
 }
 
 public class GetAllUsersResponse

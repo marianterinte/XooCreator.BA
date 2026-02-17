@@ -28,6 +28,7 @@ public class StorySourceMapper : IStorySourceMapper
             ClassicAuthorId = source.ClassicAuthorId,
             BaseVersion = source.BaseVersion,
             IsEvaluative = source.IsEvaluative,
+            IsFullyInteractive = source.IsFullyInteractive,
             Translations = source.Translations.Select(t => new TranslationCloneData
             {
                 LanguageCode = t.LanguageCode,
@@ -78,7 +79,8 @@ public class StorySourceMapper : IStorySourceMapper
                         Translations = n.Translations.Select(t => new DialogNodeTranslationCloneData
                         {
                             LanguageCode = t.LanguageCode,
-                            Text = t.Text
+                            Text = t.Text,
+                            AudioUrl = t.AudioUrl
                         }).ToList(),
                         Options = n.OutgoingEdges
                             .OrderBy(e => e.OptionOrder)
@@ -125,6 +127,7 @@ public class StorySourceMapper : IStorySourceMapper
             ClassicAuthorId = definition.ClassicAuthorId,
             BaseVersion = definition.Version,
             IsEvaluative = definition.IsEvaluative,
+            IsFullyInteractive = definition.IsFullyInteractive,
             Translations = definition.Translations.Select(t => new TranslationCloneData
             {
                 LanguageCode = t.LanguageCode,
@@ -189,7 +192,8 @@ public class StorySourceMapper : IStorySourceMapper
                         Translations = n.Translations.Select(t => new DialogNodeTranslationCloneData
                         {
                             LanguageCode = t.LanguageCode,
-                            Text = t.Text
+                            Text = t.Text,
+                            AudioUrl = t.AudioUrl
                         }).ToList(),
                         Options = n.OutgoingEdges
                             .OrderBy(e => e.OptionOrder)
@@ -269,6 +273,7 @@ public class StoryCloneData
     public Guid? ClassicAuthorId { get; set; }
     public int? BaseVersion { get; set; }
     public bool IsEvaluative { get; set; } = false; // If true, this story contains quizzes that should be evaluated
+    public bool IsFullyInteractive { get; set; } = false; // If true, this story is full interactive
     public List<TranslationCloneData> Translations { get; set; } = new();
     public List<TileCloneData> Tiles { get; set; } = new();
     public List<Guid> Topics { get; set; } = new();
@@ -341,6 +346,7 @@ public class DialogNodeTranslationCloneData
 {
     public string LanguageCode { get; set; } = string.Empty;
     public string Text { get; set; } = string.Empty;
+    public string? AudioUrl { get; set; }
 }
 
 public class DialogEdgeCloneData
@@ -358,4 +364,5 @@ public class DialogEdgeTranslationCloneData
 {
     public string LanguageCode { get; set; } = string.Empty;
     public string OptionText { get; set; } = string.Empty;
+    public string? AudioUrl { get; set; }
 }

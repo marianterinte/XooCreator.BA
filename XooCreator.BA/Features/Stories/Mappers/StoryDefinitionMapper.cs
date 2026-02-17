@@ -208,6 +208,7 @@ public static class StoryDefinitionMapper
             StoryTopic = story.StoryTopic,
             StoryType = story.StoryType.ToString(),
             IsEvaluative = story.IsEvaluative,
+            IsFullyInteractive = story.IsFullyInteractive,
             UnlockedStoryHeroes = story.UnlockedHeroes
                 .OrderBy(h => h.HeroId)
                 .Select(h => h.HeroId)
@@ -239,6 +240,7 @@ public static class StoryDefinitionMapper
                             SpeakerType = n.SpeakerType,
                             SpeakerHeroId = n.SpeakerHeroId,
                             Text = n.Translations.FirstOrDefault(nt => nt.LanguageCode == lc)?.Text ?? string.Empty,
+                            AudioUrl = n.Translations.FirstOrDefault(nt => nt.LanguageCode == lc)?.AudioUrl,
                             Options = n.OutgoingEdges
                                 .OrderBy(e => e.OptionOrder)
                                 .Select(e => new StoryDialogOptionDto
@@ -258,6 +260,7 @@ public static class StoryDefinitionMapper
                                 .ToList()
                         })
                         .ToList(),
+                    AvailableHeroIds = ParseAvailableHeroIds(t.AvailableHeroIdsJson),
                     Answers = t.Answers
                         .OrderBy(a => a.SortOrder)
                         .Select(a => new StoryAnswerDto
@@ -317,6 +320,25 @@ public static class StoryDefinitionMapper
 
     private static string? TryGetVideoUrl(StoryTile t, string lc)
         => t.Translations?.FirstOrDefault(tr => tr.LanguageCode == lc)?.VideoUrl;
+
+    private static List<string>? ParseAvailableHeroIds(string? json)
+    {
+        if (string.IsNullOrWhiteSpace(json)) return null;
+        try
+        {
+            var ids = JsonSerializer.Deserialize<List<string>>(json);
+            if (ids == null || ids.Count == 0) return null;
+            return ids
+                .Select(x => (x ?? string.Empty).Trim())
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        }
+        catch
+        {
+            return null;
+        }
+    }
 
     #endregion
 

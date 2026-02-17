@@ -18,12 +18,15 @@ public record ImportAudioResult(bool Success, List<string> Errors, List<string> 
 
 public class StoryAudioImportProcessor : IStoryAudioImportProcessor
 {
+    /// <summary>One slot per page/quiz tile or per dialog node (same order as full audio export).</summary>
+    private sealed record AudioImportTarget(StoryCraftTile Tile, StoryCraftTileTranslation? TileTranslation, StoryCraftDialogNode? Node);
+
     private readonly XooDbContext _db;
     private readonly IStoryCraftsRepository _crafts;
     private readonly IBlobSasService _sas;
     private readonly ILogger<StoryAudioImportProcessor> _logger;
 
-    private const long MaxAudioFileSizeBytes = 10 * 1024 * 1024; // 10MB per audio file
+    private const long MaxAudioFileSizeBytes = 100 * 1024 * 1024; // 100MB per audio file
     private static readonly HashSet<string> AllowedAudioExtensions = new(StringComparer.OrdinalIgnoreCase) { ".wav", ".mp3", ".m4a" };
 
     public StoryAudioImportProcessor(
@@ -51,15 +54,12 @@ public class StoryAudioImportProcessor : IStoryAudioImportProcessor
             return new ImportAudioResult(false, errors, warnings, 0, 0);
         }
 
-        var pageOrQuizTypes = new[] { "page", "quiz", "dialog" };
-        var pageTiles = craft.Tiles
-            .Where(t => pageOrQuizTypes.Contains(t.Type, StringComparer.OrdinalIgnoreCase))
-            .OrderBy(t => t.SortOrder)
-            .ToList();
-
-        if (pageTiles.Count == 0)
+        var localeNorm = (locale ?? string.Empty).Trim().ToLowerInvariant();
+        // Same slot list as full audio export: one per page/quiz with text, one per dialog node with text
+        var targets = BuildAudioImportTargets(craft, localeNorm);
+        if (targets.Count == 0)
         {
-            errors.Add("Story has no page, quiz, or dialog tiles");
+            errors.Add("Story has no page, quiz, or dialog tiles with text");
             return new ImportAudioResult(false, errors, warnings, 0, 0);
         }
 
@@ -80,7 +80,7 @@ public class StoryAudioImportProcessor : IStoryAudioImportProcessor
         if (audioEntries.Count == 0)
         {
             errors.Add("No audio files found in ZIP archive");
-            return new ImportAudioResult(false, errors, warnings, 0, pageTiles.Count);
+            return new ImportAudioResult(false, errors, warnings, 0, targets.Count);
         }
 
         var containerClient = _sas.GetContainerClient(_sas.DraftContainer);
@@ -90,28 +90,13 @@ public class StoryAudioImportProcessor : IStoryAudioImportProcessor
         {
             var entryFileName = Path.GetFileName(entry.Name);
             var pageNumber = ExtractPageNumber(entryFileName);
-            if (pageNumber < 1 || pageNumber > pageTiles.Count)
+            if (pageNumber < 1 || pageNumber > targets.Count)
             {
-                warnings.Add($"Audio file '{entry.Name}' has page number {pageNumber}, but story only has {pageTiles.Count} pages. Skipping.");
+                warnings.Add($"Audio file '{entry.Name}' has index {pageNumber}, but story has {targets.Count} audio slots. Skipping.");
                 continue;
             }
 
-            var tile = pageTiles[pageNumber - 1];
-            var tileTranslation = tile.Translations.FirstOrDefault(t =>
-                !string.IsNullOrWhiteSpace(t.LanguageCode) &&
-                t.LanguageCode.Equals(locale, StringComparison.OrdinalIgnoreCase));
-
-            if (tileTranslation == null)
-            {
-                tileTranslation = new StoryCraftTileTranslation
-                {
-                    Id = Guid.NewGuid(),
-                    StoryCraftTileId = tile.Id,
-                    LanguageCode = locale
-                };
-                tile.Translations.Add(tileTranslation);
-                _db.StoryCraftTileTranslations.Add(tileTranslation);
-            }
+            var target = targets[pageNumber - 1];
 
             await using var entryStream = entry.Open();
             if (entry.Length > MaxAudioFileSizeBytes)
@@ -127,32 +112,94 @@ public class StoryAudioImportProcessor : IStoryAudioImportProcessor
             var audioFilename = entryFileName;
             var draftPath = BuildDraftPath(new AssetInfo(audioFilename, AssetType.Audio, locale), normalizedEmail, craft.StoryId);
 
-            if (!string.IsNullOrWhiteSpace(tileTranslation.AudioUrl) && tileTranslation.AudioUrl != audioFilename)
+            if (target.Node != null)
             {
+                var nodeTranslation = target.Node.Translations.FirstOrDefault(nt =>
+                    !string.IsNullOrWhiteSpace(nt.LanguageCode) && nt.LanguageCode.Equals(locale, StringComparison.OrdinalIgnoreCase));
+                if (nodeTranslation == null)
+                {
+                    nodeTranslation = new StoryCraftDialogNodeTranslation
+                    {
+                        Id = Guid.NewGuid(),
+                        StoryCraftDialogNodeId = target.Node.Id,
+                        LanguageCode = locale
+                    };
+                    target.Node.Translations.Add(nodeTranslation);
+                    _db.StoryCraftDialogNodeTranslations.Add(nodeTranslation);
+                }
+
+                if (!string.IsNullOrWhiteSpace(nodeTranslation.AudioUrl) && nodeTranslation.AudioUrl != audioFilename)
+                {
+                    try
+                    {
+                        var oldPath = BuildDraftPath(new AssetInfo(nodeTranslation.AudioUrl, AssetType.Audio, locale), normalizedEmail, craft.StoryId);
+                        var oldBlobClient = _sas.GetBlobClient(_sas.DraftContainer, oldPath);
+                        await oldBlobClient.DeleteIfExistsAsync(cancellationToken: ct);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to delete old dialog node audio: {OldPath}", nodeTranslation.AudioUrl);
+                    }
+                }
+
                 try
                 {
-                    var oldPath = BuildDraftPath(new AssetInfo(tileTranslation.AudioUrl, AssetType.Audio, locale), normalizedEmail, craft.StoryId);
-                    var oldBlobClient = _sas.GetBlobClient(_sas.DraftContainer, oldPath);
-                    await oldBlobClient.DeleteIfExistsAsync(cancellationToken: ct);
+                    var blobClient = _sas.GetBlobClient(_sas.DraftContainer, draftPath);
+                    await blobClient.UploadAsync(new BinaryData(audioBytes), overwrite: true, cancellationToken: ct);
+                    nodeTranslation.AudioUrl = audioFilename;
+                    importedCount++;
+                    _logger.LogInformation("Imported audio for slot {PageNumber} (dialog node {NodeId}): {Filename}", pageNumber, target.Node.NodeId, audioFilename);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "Failed to delete old audio file: {OldPath}", tileTranslation.AudioUrl);
+                    errors.Add($"Failed to upload audio file '{entry.Name}' for slot {pageNumber}: {ex.Message}");
+                    _logger.LogError(ex, "Failed to upload audio file: {Filename}", entry.Name);
                 }
             }
+            else
+            {
+                var tile = target.Tile;
+                var tileTranslation = target.TileTranslation ?? tile.Translations.FirstOrDefault(t =>
+                    !string.IsNullOrWhiteSpace(t.LanguageCode) && t.LanguageCode.Equals(locale, StringComparison.OrdinalIgnoreCase));
+                if (tileTranslation == null)
+                {
+                    tileTranslation = new StoryCraftTileTranslation
+                    {
+                        Id = Guid.NewGuid(),
+                        StoryCraftTileId = tile.Id,
+                        LanguageCode = locale
+                    };
+                    tile.Translations.Add(tileTranslation);
+                    _db.StoryCraftTileTranslations.Add(tileTranslation);
+                }
 
-            try
-            {
-                var blobClient = _sas.GetBlobClient(_sas.DraftContainer, draftPath);
-                await blobClient.UploadAsync(new BinaryData(audioBytes), overwrite: true, cancellationToken: ct);
-                tileTranslation.AudioUrl = audioFilename;
-                importedCount++;
-                _logger.LogInformation("Imported audio for page {PageNumber} (tile {TileId}): {Filename}", pageNumber, tile.Id, audioFilename);
-            }
-            catch (Exception ex)
-            {
-                errors.Add($"Failed to upload audio file '{entry.Name}' for page {pageNumber}: {ex.Message}");
-                _logger.LogError(ex, "Failed to upload audio file: {Filename}", entry.Name);
+                if (!string.IsNullOrWhiteSpace(tileTranslation.AudioUrl) && tileTranslation.AudioUrl != audioFilename)
+                {
+                    try
+                    {
+                        var oldPath = BuildDraftPath(new AssetInfo(tileTranslation.AudioUrl, AssetType.Audio, locale), normalizedEmail, craft.StoryId);
+                        var oldBlobClient = _sas.GetBlobClient(_sas.DraftContainer, oldPath);
+                        await oldBlobClient.DeleteIfExistsAsync(cancellationToken: ct);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to delete old audio file: {OldPath}", tileTranslation.AudioUrl);
+                    }
+                }
+
+                try
+                {
+                    var blobClient = _sas.GetBlobClient(_sas.DraftContainer, draftPath);
+                    await blobClient.UploadAsync(new BinaryData(audioBytes), overwrite: true, cancellationToken: ct);
+                    tileTranslation.AudioUrl = audioFilename;
+                    importedCount++;
+                    _logger.LogInformation("Imported audio for slot {PageNumber} (tile {TileId}): {Filename}", pageNumber, tile.Id, audioFilename);
+                }
+                catch (Exception ex)
+                {
+                    errors.Add($"Failed to upload audio file '{entry.Name}' for slot {pageNumber}: {ex.Message}");
+                    _logger.LogError(ex, "Failed to upload audio file: {Filename}", entry.Name);
+                }
             }
         }
 
@@ -169,9 +216,56 @@ public class StoryAudioImportProcessor : IStoryAudioImportProcessor
             }
         }
 
-        return new ImportAudioResult(errors.Count == 0, errors, warnings, importedCount, pageTiles.Count);
+        return new ImportAudioResult(errors.Count == 0, errors, warnings, importedCount, targets.Count);
     }
 
+    /// <summary>Builds the same ordered list as full audio export: one slot per page/quiz with text, one per dialog node with text.</summary>
+    private static List<AudioImportTarget> BuildAudioImportTargets(StoryCraft craft, string locale)
+    {
+        var pageOrQuizOrDialog = new[] { "page", "quiz", "dialog" };
+        var list = new List<AudioImportTarget>();
+        foreach (var tile in craft.Tiles
+            .Where(t => pageOrQuizOrDialog.Contains(t.Type, StringComparer.OrdinalIgnoreCase))
+            .OrderBy(t => t.SortOrder))
+        {
+            if (string.Equals(tile.Type, "dialog", StringComparison.OrdinalIgnoreCase) && tile.DialogTile != null)
+            {
+                foreach (var node in tile.DialogTile.Nodes.OrderBy(n => n.SortOrder))
+                {
+                    var nodeText = node.Translations
+                        .FirstOrDefault(nt => string.Equals(nt.LanguageCode, locale, StringComparison.OrdinalIgnoreCase))
+                        ?.Text?.Trim() ?? node.Translations.FirstOrDefault()?.Text?.Trim() ?? string.Empty;
+                    if (!string.IsNullOrWhiteSpace(nodeText))
+                    {
+                        list.Add(new AudioImportTarget(tile, null, node));
+                    }
+                }
+            }
+            else
+            {
+                var tileText = ResolveTileText(tile, locale);
+                if (!string.IsNullOrWhiteSpace(tileText))
+                {
+                    var tileTranslation = tile.Translations.FirstOrDefault(t =>
+                        !string.IsNullOrWhiteSpace(t.LanguageCode) && t.LanguageCode.Equals(locale, StringComparison.OrdinalIgnoreCase));
+                    list.Add(new AudioImportTarget(tile, tileTranslation, null));
+                }
+            }
+        }
+        return list;
+    }
+
+    private static string ResolveTileText(StoryCraftTile tile, string locale)
+    {
+        var tr = tile.Translations.FirstOrDefault(t => string.Equals(t.LanguageCode, locale, StringComparison.OrdinalIgnoreCase))
+                 ?? tile.Translations.FirstOrDefault();
+        if (!string.IsNullOrWhiteSpace(tr?.Text)) return tr.Text.Trim();
+        if (!string.IsNullOrWhiteSpace(tr?.Question)) return tr.Question.Trim();
+        if (!string.IsNullOrWhiteSpace(tr?.Caption)) return tr.Caption.Trim();
+        return string.Empty;
+    }
+
+    /// <summary>Slot index from filename. Supports both simple (1.wav, 4.wav) and standardized export names (01_page.wav, 04_dialog_n1_hero.wav).</summary>
     private static int ExtractPageNumber(string filename)
     {
         var match = Regex.Match(filename, @"^(\d+)");

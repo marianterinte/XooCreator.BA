@@ -11,6 +11,7 @@ using System.IO.Compression;
 using System.IO;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
 using XooCreator.BA.Data;
@@ -385,6 +386,57 @@ public partial class ImportFullStoryEndpoint
             errors.Add($"Failed to read manifest: {ex.Message}");
             return ManifestReadResult.Failed(errors, warnings);
         }
+    }
+
+    /// <summary>
+    /// Resolves dialogRef in manifest: for each tile with type "dialog" and dialogRef,
+    /// loads the referenced dialogs/{tileId}.json from the ZIP and inlines dialogRootNodeId and dialogNodes.
+    /// Returns the inflated JSON string (or original if no dialogRefs).
+    /// </summary>
+    private static string InflateManifestDialogRefs(ZipArchive zip, string manifestDir, string jsonContent)
+    {
+        var root = JsonNode.Parse(jsonContent);
+        if (root == null) return jsonContent;
+
+        var tiles = root["tiles"] as JsonArray;
+        if (tiles == null || tiles.Count == 0) return jsonContent;
+
+        foreach (var tile in tiles)
+        {
+            if (tile is not JsonObject tileObj) continue;
+            var type = tileObj["type"]?.GetValue<string>();
+            if (!string.Equals(type, "dialog", StringComparison.OrdinalIgnoreCase)) continue;
+            var dialogRef = tileObj["dialogRef"]?.GetValue<string>();
+            if (string.IsNullOrWhiteSpace(dialogRef)) continue;
+
+            var pathInZip = manifestDir + dialogRef.TrimStart('/').Replace('\\', '/');
+            var entry = zip.GetEntry(pathInZip) ?? zip.Entries.FirstOrDefault(e =>
+                string.Equals(e.FullName.Replace('\\', '/'), pathInZip, StringComparison.OrdinalIgnoreCase));
+            if (entry == null)
+            {
+                continue;
+            }
+
+            string dialogJson;
+            using (var stream = entry.Open())
+            using (var reader = new StreamReader(stream, Encoding.UTF8))
+            {
+                dialogJson = reader.ReadToEnd();
+            }
+
+            var dialogData = JsonNode.Parse(dialogJson);
+            if (dialogData is JsonObject dialogObj)
+            {
+                if (dialogObj["dialogRootNodeId"] != null)
+                    tileObj["dialogRootNodeId"] = dialogObj["dialogRootNodeId"]?.GetValue<string>() ?? string.Empty;
+                if (dialogObj["dialogNodes"] != null)
+                    tileObj["dialogNodes"] = JsonNode.Parse(dialogObj["dialogNodes"]!.ToJsonString());
+            }
+
+            tileObj.Remove("dialogRef");
+        }
+
+        return root.ToJsonString(new JsonSerializerOptions { WriteIndented = true });
     }
 
     private string SanitizeFileName(string fileName)
@@ -895,6 +947,9 @@ public partial class ImportFullStoryEndpoint
         var isEvaluative = root.TryGetProperty("isEvaluative", out var isEvaluativeElement) && isEvaluativeElement.ValueKind == JsonValueKind.True
             ? true
             : false;
+        var isFullyInteractive = root.TryGetProperty("isFullyInteractive", out var isFullyInteractiveElement) && isFullyInteractiveElement.ValueKind == JsonValueKind.True
+            ? true
+            : false;
 
         // Create StoryCraft
         var craft = new StoryCraft
@@ -911,6 +966,7 @@ public partial class ImportFullStoryEndpoint
             PriceInCredits = priceInCredits,
             BaseVersion = baseVersion,
             IsEvaluative = isEvaluative,
+            IsFullyInteractive = isFullyInteractive,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -1056,6 +1112,132 @@ public partial class ImportFullStoryEndpoint
 
                         craftTile.Answers.Add(craftAnswer);
                     }
+                }
+
+                // Add dialog tile and nodes when type is dialog and dialogNodes present
+                if (string.Equals(tileType, "dialog", StringComparison.OrdinalIgnoreCase) &&
+                    tile.TryGetProperty("dialogRootNodeId", out var dialogRootEl) &&
+                    tile.TryGetProperty("dialogNodes", out var dialogNodesEl) &&
+                    dialogNodesEl.ValueKind == JsonValueKind.Array && dialogNodesEl.GetArrayLength() > 0)
+                {
+                    var dialogRootNodeId = dialogRootEl.GetString();
+                    var dialogTile = new StoryCraftDialogTile
+                    {
+                        Id = Guid.NewGuid(),
+                        StoryCraftId = craft.Id,
+                        StoryCraftTileId = craftTile.Id,
+                        RootNodeId = dialogRootNodeId,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow
+                    };
+
+                    var nodeSortOrder = 0;
+                    foreach (var nodeEl in dialogNodesEl.EnumerateArray())
+                    {
+                        var nodeId = nodeEl.TryGetProperty("nodeId", out var nIdEl) ? nIdEl.GetString() ?? string.Empty : string.Empty;
+                        var speakerType = nodeEl.TryGetProperty("speakerType", out var stEl) ? stEl.GetString() ?? "reader" : "reader";
+                        var speakerHeroId = nodeEl.TryGetProperty("speakerHeroId", out var shEl) ? shEl.GetString() : null;
+
+                        var dialogNode = new StoryCraftDialogNode
+                        {
+                            Id = Guid.NewGuid(),
+                            StoryCraftDialogTileId = dialogTile.Id,
+                            NodeId = nodeId,
+                            SpeakerType = speakerType ?? "reader",
+                            SpeakerHeroId = speakerHeroId,
+                            SortOrder = nodeSortOrder++
+                        };
+
+                        if (nodeEl.TryGetProperty("translations", out var nodeTrEl) && nodeTrEl.ValueKind == JsonValueKind.Array)
+                        {
+                            foreach (var tr in nodeTrEl.EnumerateArray())
+                            {
+                                var lang = tr.TryGetProperty("lang", out var lEl) ? lEl.GetString() : null;
+                                var text = tr.TryGetProperty("text", out var tEl) ? tEl.GetString() : null;
+                                var audioUrl = tr.TryGetProperty("audioUrl", out var aEl) ? ExtractFilename(aEl.GetString() ?? "") : null;
+                                if (!string.IsNullOrWhiteSpace(lang))
+                                {
+                                    dialogNode.Translations.Add(new StoryCraftDialogNodeTranslation
+                                    {
+                                        Id = Guid.NewGuid(),
+                                        StoryCraftDialogNodeId = dialogNode.Id,
+                                        LanguageCode = lang,
+                                        Text = text ?? string.Empty,
+                                        AudioUrl = audioUrl
+                                    });
+                                }
+                            }
+                        }
+
+                        if (nodeEl.TryGetProperty("options", out var optionsEl) && optionsEl.ValueKind == JsonValueKind.Array)
+                        {
+                            var optionOrder = 0;
+                            foreach (var opt in optionsEl.EnumerateArray())
+                            {
+                                var edgeId = opt.TryGetProperty("id", out var eIdEl) ? eIdEl.GetString() ?? string.Empty : string.Empty;
+                                var toNodeId = opt.TryGetProperty("nextNodeId", out var toEl) ? toEl.GetString() ?? string.Empty : string.Empty;
+                                var jumpToTileId = opt.TryGetProperty("jumpToTileId", out var jEl) ? jEl.GetString() : null;
+                                var setBranchId = opt.TryGetProperty("setBranchId", out var sEl) ? sEl.GetString() : null;
+
+                                var edge = new StoryCraftDialogEdge
+                                {
+                                    Id = Guid.NewGuid(),
+                                    StoryCraftDialogNodeId = dialogNode.Id,
+                                    EdgeId = edgeId,
+                                    ToNodeId = toNodeId,
+                                    JumpToTileId = jumpToTileId,
+                                    SetBranchId = setBranchId,
+                                    OptionOrder = optionOrder++
+                                };
+
+                                if (opt.TryGetProperty("translations", out var edgeTrEl) && edgeTrEl.ValueKind == JsonValueKind.Array)
+                                {
+                                    foreach (var et in edgeTrEl.EnumerateArray())
+                                    {
+                                        var lang = et.TryGetProperty("lang", out var lel) ? lel.GetString() : null;
+                                        var optionText = et.TryGetProperty("text", out var oEl) ? oEl.GetString() : null;
+                                        if (!string.IsNullOrWhiteSpace(lang))
+                                        {
+                                            edge.Translations.Add(new StoryCraftDialogEdgeTranslation
+                                            {
+                                                Id = Guid.NewGuid(),
+                                                StoryCraftDialogEdgeId = edge.Id,
+                                                LanguageCode = lang,
+                                                OptionText = optionText ?? string.Empty
+                                            });
+                                        }
+                                    }
+                                }
+
+                                if (opt.TryGetProperty("tokens", out var tokensEl) && tokensEl.ValueKind == JsonValueKind.Array)
+                                {
+                                    foreach (var tok in tokensEl.EnumerateArray())
+                                    {
+                                        var tokenType = tok.TryGetProperty("type", out var ttEl) ? ttEl.GetString() : null;
+                                        var tokenValue = tok.TryGetProperty("value", out var tvEl) ? tvEl.GetString() : null;
+                                        var quantity = tok.TryGetProperty("quantity", out var qEl) && qEl.ValueKind == JsonValueKind.Number ? qEl.GetInt32() : 1;
+                                        if (!string.IsNullOrWhiteSpace(tokenType) && tokenValue != null)
+                                        {
+                                            edge.Tokens.Add(new StoryCraftDialogEdgeToken
+                                            {
+                                                Id = Guid.NewGuid(),
+                                                StoryCraftDialogEdgeId = edge.Id,
+                                                Type = tokenType,
+                                                Value = tokenValue,
+                                                Quantity = quantity
+                                            });
+                                        }
+                                    }
+                                }
+
+                                dialogNode.OutgoingEdges.Add(edge);
+                            }
+                        }
+
+                        dialogTile.Nodes.Add(dialogNode);
+                    }
+
+                    craftTile.DialogTile = dialogTile;
                 }
 
                 craft.Tiles.Add(craftTile);

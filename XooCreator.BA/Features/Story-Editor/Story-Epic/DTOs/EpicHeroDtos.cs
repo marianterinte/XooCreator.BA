@@ -78,6 +78,7 @@ public record EpicHeroListItemDto
 {
     public required string Id { get; init; }
     public required string Name { get; init; } // Name in the requested/default language
+    public string? Description { get; init; } // Description in the requested/default language
     public string? ImageUrl { get; init; }
     public string? GreetingText { get; init; } // Greeting text in the requested/default language
     public string? GreetingAudioUrl { get; init; }

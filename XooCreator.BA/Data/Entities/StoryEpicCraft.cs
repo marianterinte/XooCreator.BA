@@ -23,7 +23,10 @@ public class StoryEpicCraft
     
     // Incremental counter for changes performed in the editor
     public int LastDraftVersion { get; set; } = 0;
-    
+
+    /// <summary>Language codes that have audio support for this epic (e.g. ["ro-ro", "en-us"]).</summary>
+    public List<string> AudioLanguages { get; set; } = new();
+
     // Review workflow fields (similar to StoryCraft)
     public Guid? AssignedReviewerUserId { get; set; }
     public string? ReviewNotes { get; set; }

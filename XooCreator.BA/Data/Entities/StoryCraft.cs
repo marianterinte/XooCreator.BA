@@ -34,6 +34,7 @@ public class StoryCraft
     public double PriceInCredits { get; set; } = 0; // Price in credits for purchasing the story
     public bool IsEvaluative { get; set; } = false; // If true, this story contains quizzes that should be evaluated
     public bool IsPartOfEpic { get; set; } = false; // If true, this story is part of an epic (draft or published) and should not appear as independent story
+    public bool IsFullyInteractive { get; set; } = false; // If true, this story is full interactive
     public List<string> AudioLanguages { get; set; } = new(); // Language codes that have audio support (e.g., ["ro-ro", "en-us"])
     
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
@@ -109,6 +110,8 @@ public class StoryCraftTile
     // Non-translatable fields (same for all languages)
     // Image is common for all languages
     public string? ImageUrl { get; set; }
+    // Character-selection specific: selected hero IDs for this tile (JSON array)
+    public string? AvailableHeroIdsJson { get; set; }
     // Audio and Video are now language-specific (moved to StoryCraftTileTranslation)
     
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

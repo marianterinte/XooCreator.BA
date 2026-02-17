@@ -7,6 +7,7 @@ namespace XooCreator.BA.Features.UserAdministration.Repositories;
 public interface IUserAdministrationRepository
 {
     Task<List<AlchimaliaUser>> GetAllUsersAsync(CancellationToken ct = default);
+    Task<HashSet<Guid>> GetUserIdsWithUnlimitedPrintAsync(CancellationToken ct = default);
     Task<AlchimaliaUser?> GetUserByIdAsync(Guid userId, CancellationToken ct = default);
     Task<bool> UpdateUserRoleAsync(Guid userId, UserRole role, CancellationToken ct = default);
     Task<bool> UpdateUserRolesAsync(Guid userId, List<UserRole> roles, CancellationToken ct = default);
@@ -25,6 +26,18 @@ public class UserAdministrationRepository : IUserAdministrationRepository
             .OrderBy(u => u.LastName)
             .ThenBy(u => u.FirstName)
             .ToListAsync(ct);
+    }
+
+    public async Task<HashSet<Guid>> GetUserIdsWithUnlimitedPrintAsync(CancellationToken ct = default)
+    {
+        var now = DateTime.UtcNow;
+        var ids = await _db.UserSubscriptions
+            .AsNoTracking()
+            .Where(u => u.ExpiresAtUtc == null || u.ExpiresAtUtc > now)
+            .Select(u => u.UserId)
+            .Distinct()
+            .ToListAsync(ct);
+        return ids.ToHashSet();
     }
 
     public async Task<AlchimaliaUser?> GetUserByIdAsync(Guid userId, CancellationToken ct = default)

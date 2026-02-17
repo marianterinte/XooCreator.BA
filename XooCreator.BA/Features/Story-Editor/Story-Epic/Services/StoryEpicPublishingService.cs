@@ -406,6 +406,7 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
                 IsActive = true,
                 CoverImageUrl = publishedCoverImageUrl,
                 IsDefault = craft.IsDefault,
+                AudioLanguages = craft.AudioLanguages ?? new List<string>(),
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
                 PublishedAtUtc = DateTime.UtcNow,
@@ -425,6 +426,7 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
             definition.IsActive = true;
             definition.CoverImageUrl = publishedCoverImageUrl;
             definition.IsDefault = craft.IsDefault;
+            definition.AudioLanguages = craft.AudioLanguages ?? new List<string>();
             definition.UpdatedAt = DateTime.UtcNow;
             definition.PublishedAtUtc = DateTime.UtcNow;
             definition.LastPublishedVersion = craft.LastDraftVersion;
@@ -751,6 +753,7 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
         definition.Name = defaultTranslation?.Name ?? craft.Name;
         definition.Description = defaultTranslation?.Description ?? craft.Description;
         definition.IsDefault = craft.IsDefault;
+        definition.AudioLanguages = craft.AudioLanguages ?? new List<string>();
         definition.UpdatedAt = DateTime.UtcNow;
 
         await _assetLinkService.SyncCoverImageAsync(craft, ownerEmail, ct);

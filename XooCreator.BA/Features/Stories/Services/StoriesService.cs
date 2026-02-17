@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Features.Stories.DTOs;
 using XooCreator.BA.Features.Stories.Repositories;
@@ -198,6 +199,7 @@ public class StoriesService : IStoriesService
                 StoryType = (int)craft.StoryType,
                 IsEvaluative = craft.IsEvaluative,
                 IsPartOfEpic = craft.IsPartOfEpic,
+                IsFullyInteractive = craft.IsFullyInteractive,
                 UnlockedStoryHeroes = unlockedHeroes,
                 DialogParticipants = craft.DialogParticipants
                     .OrderBy(p => p.SortOrder)
@@ -231,6 +233,7 @@ public class StoriesService : IStoriesService
                                 .FirstOrDefault(text => !string.IsNullOrWhiteSpace(text))
                             : tileTranslation?.Text,
                         ImageUrl = t.ImageUrl ?? string.Empty,
+                        AvailableHeroIds = ParseAvailableHeroIds(t.AvailableHeroIdsJson),
                         // Audio and Video are now language-specific (from translation)
                         AudioUrl = tileTranslation?.AudioUrl ?? string.Empty,
                         VideoUrl = tileTranslation?.VideoUrl ?? string.Empty,
@@ -244,6 +247,7 @@ public class StoriesService : IStoriesService
                                 SpeakerType = n.SpeakerType,
                                 SpeakerHeroId = n.SpeakerHeroId,
                                 Text = n.Translations.FirstOrDefault(nt => nt.LanguageCode == lang)?.Text ?? string.Empty,
+                                AudioUrl = n.Translations.FirstOrDefault(nt => nt.LanguageCode == lang)?.AudioUrl,
                                 Options = n.OutgoingEdges
                                     .OrderBy(e => e.OptionOrder)
                                     .Select(e => new EditableDialogOptionDto
@@ -334,6 +338,7 @@ public class StoriesService : IStoriesService
             StoryType = (int)story.StoryType,
             IsEvaluative = story.IsEvaluative,
             IsPartOfEpic = story.IsPartOfEpic,
+            IsFullyInteractive = story.IsFullyInteractive,
             UnlockedStoryHeroes = unlockedHeroesFromJson,
             DialogParticipants = story.DialogParticipants
                 .OrderBy(p => p.SortOrder)
@@ -363,6 +368,7 @@ public class StoriesService : IStoriesService
                             ?? string.Empty
                         : tileTranslation?.Text ?? t.Text ?? string.Empty,
                     ImageUrl = t.ImageUrl ?? string.Empty,
+                    AvailableHeroIds = ParseAvailableHeroIds(t.AvailableHeroIdsJson),
                     // Audio and Video are now language-specific (from translation)
                     AudioUrl = tileTranslation?.AudioUrl ?? string.Empty,
                     VideoUrl = tileTranslation?.VideoUrl ?? string.Empty,
@@ -376,6 +382,7 @@ public class StoriesService : IStoriesService
                             SpeakerType = n.SpeakerType,
                             SpeakerHeroId = n.SpeakerHeroId,
                             Text = n.Translations.FirstOrDefault(nt => nt.LanguageCode == locale)?.Text ?? string.Empty,
+                            AudioUrl = n.Translations.FirstOrDefault(nt => nt.LanguageCode == locale)?.AudioUrl,
                             Options = n.OutgoingEdges
                                 .OrderBy(e => e.OptionOrder)
                                 .Select(e => new EditableDialogOptionDto
@@ -432,6 +439,25 @@ public class StoriesService : IStoriesService
             StoryStatus.ChangesRequested => "changes-requested",
             _ => "draft"
         };
+    }
+
+    private static List<string>? ParseAvailableHeroIds(string? json)
+    {
+        if (string.IsNullOrWhiteSpace(json)) return null;
+        try
+        {
+            var ids = JsonSerializer.Deserialize<List<string>>(json);
+            if (ids == null || ids.Count == 0) return null;
+            return ids
+                .Select(x => (x ?? string.Empty).Trim())
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     // JSON-based unlocked heroes removed (DB is source of truth).

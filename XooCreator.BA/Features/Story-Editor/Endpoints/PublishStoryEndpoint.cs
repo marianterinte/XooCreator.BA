@@ -309,7 +309,55 @@ public partial class PublishStoryEndpoint
         return null;
     }
 
-    [Route("/api/stories/{storyId}/publish-jobs/{jobId}")]
+    /// <summary>
+    /// Returns the most recent publish job for the story (by QueuedAtUtc). Used by "Check publish status" from the story list.
+    /// </summary>
+    [Route("/api/stories/{storyId}/publish-jobs/latest")]
+    [Authorize]
+    public static async Task<Results<Ok<PublishJobStatusResponse>, NotFound, UnauthorizedHttpResult, ForbidHttpResult>> HandleGet(
+        [FromRoute] string storyId,
+        [FromServices] PublishStoryEndpoint ep,
+        CancellationToken ct)
+    {
+        var user = await ep._auth0.GetCurrentUserAsync(ct);
+        if (user == null)
+            return TypedResults.Unauthorized();
+        if (!ep._auth0.HasRole(user, Data.Enums.UserRole.Creator))
+            return TypedResults.Forbid();
+
+        // Compare StoryId case-insensitively (frontend/URL may differ in casing from DB)
+        var storyIdLower = storyId.ToLowerInvariant();
+        var job = await ep._db.StoryPublishJobs
+            .AsNoTracking()
+            .Where(j => j.StoryId.ToLower() == storyIdLower)
+            .OrderByDescending(j => j.QueuedAtUtc)
+            .FirstOrDefaultAsync(ct);
+
+        if (job == null)
+        {
+            var countAny = await ep._db.StoryPublishJobs.CountAsync(j => j.StoryId.ToLower() == storyIdLower, ct);
+            ep._logger.LogInformation(
+                "GetLatestPublishJob: no job for storyId={StoryId} (total jobs for this story in DB: {Count}). Check that the request URL is GET .../publish-jobs/latest and storyId matches.",
+                storyId, countAny);
+            return TypedResults.NotFound();
+        }
+
+        var response = new PublishJobStatusResponse
+        {
+            JobId = job.Id,
+            StoryId = job.StoryId,
+            Status = job.Status.ToString(),
+            QueuedAtUtc = job.QueuedAtUtc,
+            StartedAtUtc = job.StartedAtUtc,
+            CompletedAtUtc = job.CompletedAtUtc,
+            ErrorMessage = job.ErrorMessage,
+            DequeueCount = job.DequeueCount
+        };
+
+        return TypedResults.Ok(response);
+    }
+
+    [Route("/api/stories/{storyId}/publish-jobs/{jobId:guid}")]
     [Authorize]
     public static async Task<Results<Ok<PublishJobStatusResponse>, NotFound, UnauthorizedHttpResult, ForbidHttpResult>> HandleGet(
         [FromRoute] string storyId,

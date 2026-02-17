@@ -219,8 +219,9 @@ public class StoryVersionQueueWorker : BackgroundService
                         _logger.LogInformation("Draft created from definition for StoryVersionJob: jobId={JobId} storyId={StoryId}", job.Id, job.StoryId);
 
                         // Copy assets from published to draft storage.
-                        // Source: published content is under the owner folder encoded in published paths.
-                        // Target: draft is under the user who requested the version (admin/creator editing the draft).
+                        // Source: published content is under the owner folder. Target: draft must be under the same
+                        // owner (draft/u/{owner}/stories/...) so the editor's request-read finds the blobs;
+                        // the editor always uses craft.OwnerUserId → owner email for draft paths.
                         try
                         {
                             var publishedOwnerEmail =
@@ -247,7 +248,7 @@ public class StoryVersionQueueWorker : BackgroundService
                                     assets,
                                     publishedOwnerEmail,
                                     definition.StoryId,
-                                    job.RequestedByEmail,
+                                    publishedOwnerEmail,
                                     job.StoryId,
                                     stoppingToken);
                                 _logger.LogInformation("Asset copy completed for StoryVersionJob: jobId={JobId} storyId={StoryId}", job.Id, job.StoryId);

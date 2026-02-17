@@ -16,5 +16,10 @@ public class StoryEpicDefinitionConfiguration : IEntityTypeConfiguration<StoryEp
         builder.HasIndex(x => new { x.OwnerUserId, x.Id }).IsUnique();
         builder.HasIndex(x => x.Status);
         builder.HasOne(x => x.Owner).WithMany().HasForeignKey(x => x.OwnerUserId).OnDelete(DeleteBehavior.Cascade);
+        builder.Property(x => x.AudioLanguages)
+            .HasConversion(
+                v => v == null || v.Count == 0 ? Array.Empty<string>() : v.ToArray(),
+                v => v == null ? new List<string>() : v.ToList())
+            .HasColumnType("text[]");
     }
 }

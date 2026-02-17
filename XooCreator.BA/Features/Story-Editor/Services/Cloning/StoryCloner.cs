@@ -29,6 +29,7 @@ public class StoryCloner : IStoryCloner
             ClassicAuthorId = cloneData.ClassicAuthorId,
             BaseVersion = cloneData.BaseVersion ?? 0,
             IsEvaluative = cloneData.IsEvaluative,
+            IsFullyInteractive = cloneData.IsFullyInteractive,
             AudioLanguages = cloneData.AudioLanguages ?? new List<string>(),
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
@@ -129,7 +130,8 @@ public class StoryCloner : IStoryCloner
                         node.Translations.Add(new StoryCraftDialogNodeTranslation
                         {
                             LanguageCode = tr.LanguageCode,
-                            Text = tr.Text
+                            Text = tr.Text,
+                            AudioUrl = tr.AudioUrl
                         });
                     }
 

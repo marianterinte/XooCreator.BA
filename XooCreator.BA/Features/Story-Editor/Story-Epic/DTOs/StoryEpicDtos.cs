@@ -36,7 +36,8 @@ public record StoryEpicDto
     public List<string> TopicIds { get; init; } = new(); // Topic IDs
     public List<string> AgeGroupIds { get; init; } = new(); // Age Group IDs
     public List<EpicCoAuthorDto> CoAuthors { get; init; } = new(); // Co-authors (user or free text)
-    
+    public List<string> AudioLanguages { get; init; } = new(); // Language codes that have audio support (e.g. ["ro-ro", "en-us"])
+
     // Helper: Get name in a specific language (falls back to first available)
     public string GetName(string languageCode)
     {
@@ -137,7 +138,9 @@ public record StoryEpicListItemDto
     public DateTime? PublishedAtUtc { get; init; }
     public int StoryCount { get; init; }
     public int RegionCount { get; init; }
-    
+    public List<string> AvailableLanguages { get; init; } = new(); // From Translations (e.g. ["ro-ro", "en-us"])
+    public List<string> AudioLanguages { get; init; } = new(); // Language codes that have audio support
+
     // Review workflow fields for list display
     public Guid? AssignedReviewerUserId { get; init; }
     public bool IsAssignedToCurrentUser { get; init; } // Computed in service based on current user

@@ -117,9 +117,10 @@ public class EpicsMarketplaceRepository
                     PublishedAtUtc = epic.PublishedAtUtc,
                     StoryCount = epic.StoryCount,
                     RegionCount = epic.RegionCount,
+                    AvailableLanguages = epic.AvailableLanguages,
+                    AudioLanguages = epic.AudioLanguages,
                     ReadersCount = st.ReadersCount,
-                    AverageRating = st.AverageRating,
-                    AvailableLanguages = epic.AvailableLanguages
+                    AverageRating = st.AverageRating
                 };
             }).ToList();
 
@@ -221,6 +222,7 @@ public class EpicsMarketplaceRepository
                 TotalReviews = totalReviews,
                 UserReview = userReview,
                 AvailableLanguages = availableLanguages,
+                AudioLanguages = epic.AudioLanguages ?? new List<string>(),
                 CoAuthors = coAuthors
             };
         }

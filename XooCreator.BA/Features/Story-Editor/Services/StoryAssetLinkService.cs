@@ -291,6 +291,23 @@ public class StoryAssetLinkService : IStoryAssetLinkService
             }
         }
 
+        // Dialog tile: collect audio from node and edge translations
+        if (string.Equals(tile.Type, "dialog", StringComparison.OrdinalIgnoreCase) && tile.DialogTile != null)
+        {
+            foreach (var node in tile.DialogTile.Nodes)
+            {
+                foreach (var nodeTr in node.Translations)
+                {
+                    if (!string.IsNullOrWhiteSpace(nodeTr.AudioUrl))
+                    {
+                        var nodeLang = nodeTr.LanguageCode.ToLowerInvariant();
+                        assets.Add(new StoryAssetPathMapper.AssetInfo(nodeTr.AudioUrl, StoryAssetPathMapper.AssetType.Audio, nodeLang));
+                    }
+                }
+                // Option audio not used: only node (replica) audio
+            }
+        }
+
         var result = assets
             .GroupBy(a => $"{a.Type}|{a.Filename}|{a.Lang}")
             .Select(g => g.First())

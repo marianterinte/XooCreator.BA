@@ -80,6 +80,7 @@ public class AdminStoryManagementEndpoint
             Status = story.Status.ToString(),
             StoryType = story.StoryType.ToString(),
             IsEvaluative = story.IsEvaluative,
+            IsFullyInteractive = story.IsFullyInteractive,
             TotalTiles = story.Tiles?.Count ?? 0,
             CreatedAt = story.CreatedAt,
             UpdatedAt = story.UpdatedAt,
@@ -255,6 +256,7 @@ public record AdminStoryDetailsResponse
     public string Status { get; init; } = string.Empty;
     public string StoryType { get; init; } = string.Empty;
     public bool IsEvaluative { get; init; }
+    public bool IsFullyInteractive { get; init; }
     public int TotalTiles { get; init; }
     public DateTime CreatedAt { get; init; }
     public DateTime? UpdatedAt { get; init; }
