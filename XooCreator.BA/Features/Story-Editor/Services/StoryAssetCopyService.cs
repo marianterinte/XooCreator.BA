@@ -342,7 +342,7 @@ public class StoryAssetCopyService : IStoryAssetCopyService
         {
             var sourceSas = await _sasService.GetReadSasAsync(sourceContainer, sourceBlobPath, TimeSpan.FromMinutes(10), ct);
             var targetClient = _sasService.GetBlobClient(targetContainer, targetBlobPath);
-            var pollUntil = DateTime.UtcNow.AddSeconds(30);
+            var pollUntil = DateTime.UtcNow.AddSeconds(90);
 
             _logger.LogDebug(
                 "Starting asset copy: storyId={StoryId} filename={Filename} source={SourcePath} target={TargetPath}",
