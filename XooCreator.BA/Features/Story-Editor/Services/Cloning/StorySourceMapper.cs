@@ -80,7 +80,7 @@ public class StorySourceMapper : IStorySourceMapper
                         {
                             LanguageCode = t.LanguageCode,
                             Text = t.Text,
-                            AudioUrl = t.AudioUrl
+                            AudioUrl = ExtractFileName(t.AudioUrl)
                         }).ToList(),
                         Options = n.OutgoingEdges
                             .OrderBy(e => e.OptionOrder)
@@ -229,7 +229,9 @@ public class StorySourceMapper : IStorySourceMapper
 
     private static string? ExtractFileName(string? path)
     {
-        return string.IsNullOrWhiteSpace(path) ? null : Path.GetFileName(path);
+        if (string.IsNullOrWhiteSpace(path)) return null;
+        var normalized = path.Trim().Replace('\\', '/');
+        return Path.GetFileName(normalized);
     }
 
     private static string? DeriveSeededAudioFilename(string? imageFilename)

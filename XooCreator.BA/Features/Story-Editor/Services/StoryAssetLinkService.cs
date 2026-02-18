@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using XooCreator.BA.Data;
@@ -52,8 +53,12 @@ public class StoryAssetLinkService : IStoryAssetLinkService
         var copyResult = await _assetService.CopyAssetsToPublishedAsync(assets, ownerEmail, craft.StoryId, ct);
         if (copyResult.HasError)
         {
-            _logger.LogWarning("Failed to copy cover asset for storyId={StoryId}", craft.StoryId);
-            return;
+            var failures = copyResult.FailedAssets.Count == 0
+                ? "none"
+                : string.Join(", ", copyResult.FailedAssets.Select(f => $"{f.Type}/{f.Language ?? "common"}/{f.Filename}: {f.Reason}"));
+            var message = $"Failed to copy cover asset for storyId={craft.StoryId}. {copyResult.ErrorMessage ?? "Unknown copy error"}. failedAssets={failures}";
+            _logger.LogError("{Message}", message);
+            throw new InvalidOperationException(message);
         }
 
         await UpsertLinkAsync(
@@ -77,8 +82,12 @@ public class StoryAssetLinkService : IStoryAssetLinkService
         var copyResult = await _assetService.CopyAssetsToPublishedAsync(assets, ownerEmail, craft.StoryId, ct);
         if (copyResult.HasError)
         {
-            _logger.LogWarning("Failed to copy assets for tileId={TileId} storyId={StoryId}", tile.TileId, craft.StoryId);
-            return;
+            var failures = copyResult.FailedAssets.Count == 0
+                ? "none"
+                : string.Join(", ", copyResult.FailedAssets.Select(f => $"{f.Type}/{f.Language ?? "common"}/{f.Filename}: {f.Reason}"));
+            var message = $"Failed to copy assets for tileId={tile.TileId} storyId={craft.StoryId}. {copyResult.ErrorMessage ?? "Unknown copy error"}. failedAssets={failures}";
+            _logger.LogError("{Message}", message);
+            throw new InvalidOperationException(message);
         }
 
         foreach (var asset in assets)

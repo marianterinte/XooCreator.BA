@@ -292,11 +292,13 @@ public class StoryEditorService : IStoryEditorService
     private static string? ExtractFileName(string? path)
     {
         if (string.IsNullOrWhiteSpace(path)) return null;
-        
+
+        var normalized = path.Trim().Replace('\\', '/');
+
         // If already just filename (no path separator), return as-is
-        if (!path.Contains('/')) return path;
-        
+        if (!normalized.Contains('/')) return normalized;
+
         // Extract filename from path
-        return Path.GetFileName(path);
+        return Path.GetFileName(normalized);
     }
 }
