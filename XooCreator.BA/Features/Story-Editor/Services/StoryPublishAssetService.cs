@@ -198,7 +198,7 @@ public class StoryPublishAssetService : IStoryPublishAssetService
             var sourceSas = await _sas.GetReadSasAsync(_sas.DraftContainer, sourceBlobPath, TimeSpan.FromMinutes(10), ct);
 
             var targetClient = _sas.GetBlobClient(_sas.PublishedContainer, targetBlobPath);
-            var pollUntil = DateTime.UtcNow.AddSeconds(30);
+            var pollUntil = DateTime.UtcNow.AddSeconds(90);
 
             _logger.LogDebug(
                 "Starting asset copy: storyId={StoryId} filename={Filename} source={SourcePath} target={TargetPath}",
