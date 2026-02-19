@@ -9,8 +9,12 @@ public class StoryImageImportJob
     /// <summary>Email used for draft blob path (owner or requester).</summary>
     public string OwnerEmail { get; set; } = string.Empty;
     public string Locale { get; set; } = "ro-ro";
-    /// <summary>Blob path where the uploaded ZIP is stored (draft container).</summary>
-    public string ZipBlobPath { get; set; } = string.Empty;
+    /// <summary>Blob path where the uploaded ZIP is stored (draft container). Null when using batch file import flow.</summary>
+    public string? ZipBlobPath { get; set; }
+    /// <summary>Staging prefix for per-file direct uploads (batch import flow).</summary>
+    public string? StagingPrefix { get; set; }
+    /// <summary>JSON payload that stores staged files and optional manual mapping overrides.</summary>
+    public string? BatchMappingJson { get; set; }
     public string Status { get; set; } = StoryImageImportJobStatus.Queued;
     public DateTime QueuedAtUtc { get; set; } = DateTime.UtcNow;
     public DateTime? StartedAtUtc { get; set; }

@@ -135,22 +135,52 @@ public class StoryImportQueueWorker : BackgroundService
                     try
                     {
                         _logger.LogInformation("Processing StoryImportJob: jobId={JobId} storyId={StoryId}", job.Id, job.StoryId);
-                        var blobClient = _sas.GetBlobClient(_sas.DraftContainer, job.ZipBlobPath);
-                        if (!await blobClient.ExistsAsync(stoppingToken))
+
+                        ImportFullStoryEndpoint.ImportJobResult result;
+                        if (!string.IsNullOrEmpty(job.ManifestBlobPath) && !string.IsNullOrEmpty(job.StagingPrefix))
                         {
-                            _logger.LogWarning("Import ZIP not found for jobId={JobId} path={Path}", job.Id, job.ZipBlobPath);
+                            result = await endpoint.ProcessImportJobFromStagingAsync(job, stoppingToken);
+                        }
+                        else if (!string.IsNullOrEmpty(job.ZipBlobPath))
+                        {
+                            // Legacy: process whole ZIP from blob (request-upload + confirm-upload flow). Prefer client-side ZIP (ManifestBlobPath + StagingPrefix).
+                            var blobClient = _sas.GetBlobClient(_sas.DraftContainer, job.ZipBlobPath);
+                            if (!await blobClient.ExistsAsync(stoppingToken))
+                            {
+                                _logger.LogWarning("Import ZIP not found for jobId={JobId} path={Path}", job.Id, job.ZipBlobPath);
+                                job.Status = StoryImportJobStatus.Failed;
+                                job.ErrorMessage = "Import archive not found.";
+                                job.CompletedAtUtc = DateTime.UtcNow;
+                                await db.SaveChangesAsync(stoppingToken);
+                                PublishStatus();
+                                await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
+                                continue;
+                            }
+                            await using var blobStream = await blobClient.OpenReadAsync(cancellationToken: stoppingToken);
+                            result = await endpoint.ProcessImportJobAsync(job, blobStream, stoppingToken);
+
+                            if (result.Success)
+                            {
+                                try
+                                {
+                                    await blobClient.DeleteIfExistsAsync(DeleteSnapshotsOption.IncludeSnapshots, cancellationToken: stoppingToken);
+                                }
+                                catch (Exception cleanupEx)
+                                {
+                                    _logger.LogWarning(cleanupEx, "Failed to delete import archive for jobId={JobId}", job.Id);
+                                }
+                            }
+                        }
+                        else
+                        {
                             job.Status = StoryImportJobStatus.Failed;
-                            job.ErrorMessage = "Import archive not found.";
+                            job.ErrorMessage = "Job has no ZipBlobPath nor StagingPrefix.";
                             job.CompletedAtUtc = DateTime.UtcNow;
                             await db.SaveChangesAsync(stoppingToken);
                             PublishStatus();
                             await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                             continue;
                         }
-
-                        await using var blobStream = await blobClient.OpenReadAsync(cancellationToken: stoppingToken);
-
-                        var result = await endpoint.ProcessImportJobAsync(job, blobStream, stoppingToken);
                         _logger.LogInformation("ProcessImportJobAsync completed: jobId={JobId} success={Success} importedAssets={ImportedAssets}", job.Id, result.Success, result.UploadedAssets);
 
                         job.TotalAssets = result.TotalAssets;
@@ -164,15 +194,6 @@ public class StoryImportQueueWorker : BackgroundService
                             job.Status = StoryImportJobStatus.Completed;
                             job.CompletedAtUtc = DateTime.UtcNow;
                             job.ErrorMessage = null;
-
-                            try
-                            {
-                                await blobClient.DeleteIfExistsAsync(DeleteSnapshotsOption.IncludeSnapshots, cancellationToken: stoppingToken);
-                            }
-                            catch (Exception cleanupEx)
-                            {
-                                _logger.LogWarning(cleanupEx, "Failed to delete import archive for jobId={JobId}", job.Id);
-                            }
                         }
                         else if (job.DequeueCount >= 3)
                         {

@@ -29,8 +29,11 @@ public partial class ImportAudioEndpoint
     private readonly ILogger<ImportAudioEndpoint> _logger;
     private const long DefaultMaxZipSizeBytes = 1024L * 1024 * 1024; // 1GB
     private const long DefaultMultipartBodyLengthLimit = 1024L * 1024 * 1024; // 1GB
+    private const int DefaultSasValidityMinutes = 60;
     private readonly long _maxZipSizeBytes;
     private readonly long _multipartBodyLengthLimit;
+    private readonly int _sasValidityMinutes;
+    private readonly bool _enableBatchDirectUpload;
     private const long MaxAudioFileSizeBytes = 100 * 1024 * 1024; // 100MB per audio file
     private static readonly HashSet<string> AllowedAudioExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -56,6 +59,8 @@ public partial class ImportAudioEndpoint
         _logger = logger;
         _maxZipSizeBytes = configuration.GetValue<long?>("StoryEditor:ImportAudio:MaxZipSizeBytes") ?? DefaultMaxZipSizeBytes;
         _multipartBodyLengthLimit = configuration.GetValue<long?>("StoryEditor:ImportAudio:MultipartBodyLengthLimit") ?? DefaultMultipartBodyLengthLimit;
+        _sasValidityMinutes = configuration.GetValue<int?>("StoryEditor:DirectUpload:SasValidityMinutes") ?? DefaultSasValidityMinutes;
+        _enableBatchDirectUpload = configuration.GetValue<bool?>("StoryEditor:DirectUpload:EnableBatchMediaImport") ?? true;
     }
 
     public record AudioImportJobResponse(Guid JobId);
@@ -69,6 +74,7 @@ public partial class ImportAudioEndpoint
         public int TotalPages { get; init; }
     }
 
+    [Obsolete("Use POST import-audio/request-upload and import-audio/confirm-upload (direct-to-blob) instead.")]
     [Route("/api/{locale}/stories/{storyId}/import-audio")]
     [Authorize]
     [DisableRequestSizeLimit]

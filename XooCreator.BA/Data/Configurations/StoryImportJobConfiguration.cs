@@ -13,7 +13,9 @@ public class StoryImportJobConfiguration : IEntityTypeConfiguration<StoryImportJ
         builder.Property(x => x.StoryId).HasMaxLength(256).IsRequired();
         builder.Property(x => x.OriginalStoryId).HasMaxLength(256);
         builder.Property(x => x.Locale).HasMaxLength(16);
-        builder.Property(x => x.ZipBlobPath).HasMaxLength(512).IsRequired();
+        builder.Property(x => x.ZipBlobPath).HasMaxLength(512);
+        builder.Property(x => x.StagingPrefix).HasMaxLength(512);
+        builder.Property(x => x.ManifestBlobPath).HasMaxLength(512);
         builder.Property(x => x.ZipFileName).HasMaxLength(256);
         builder.Property(x => x.Status).HasMaxLength(32).IsRequired();
         builder.HasIndex(x => new { x.StoryId, x.Status });
