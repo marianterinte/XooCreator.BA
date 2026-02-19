@@ -107,6 +107,21 @@ public static class StoryAssetPathMapper
                     results.Add(new AssetInfo(tileTranslation.VideoUrl, AssetType.Video, lang));
                 }
             }
+
+            // Dialog node audio (language-specific per node translation)
+            if (tile.DialogTile?.Nodes != null)
+            {
+                foreach (var node in tile.DialogTile.Nodes)
+                {
+                    var nodeTr = node.Translations?.FirstOrDefault(nt =>
+                        !string.IsNullOrWhiteSpace(nt.LanguageCode) &&
+                        nt.LanguageCode.Equals(lang, StringComparison.OrdinalIgnoreCase));
+                    if (nodeTr != null && !string.IsNullOrWhiteSpace(nodeTr.AudioUrl))
+                    {
+                        results.Add(new AssetInfo(nodeTr.AudioUrl, AssetType.Audio, lang));
+                    }
+                }
+            }
         }
 
         return results;

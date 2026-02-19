@@ -43,6 +43,7 @@ public class StorySourceMapper : IStorySourceMapper
                 Type = tile.Type,
                 BranchId = tile.BranchId,
                 ImageUrl = tile.ImageUrl,
+                AvailableHeroIdsJson = tile.AvailableHeroIdsJson,
                 Translations = tile.Translations.Select(tt => new TileTranslationCloneData
                 {
                     LanguageCode = tt.LanguageCode,
@@ -90,6 +91,8 @@ public class StorySourceMapper : IStorySourceMapper
                                 ToNodeId = e.ToNodeId,
                                 JumpToTileId = e.JumpToTileId,
                                 SetBranchId = e.SetBranchId,
+                                HideIfBranchSet = e.HideIfBranchSet,
+                                ShowOnlyIfBranchesSet = e.ShowOnlyIfBranchesSet,
                                 OptionOrder = e.OptionOrder,
                                 Translations = e.Translations.Select(et => new DialogEdgeTranslationCloneData
                                 {
@@ -147,6 +150,7 @@ public class StorySourceMapper : IStorySourceMapper
                     Type = tile.Type,
                     BranchId = tile.BranchId,
                     ImageUrl = imageFilename,
+                    AvailableHeroIdsJson = tile.AvailableHeroIdsJson,
                     Translations = tile.Translations.Select(tt =>
                     {
                         var audioFilename = ExtractFileName(tt.AudioUrl);
@@ -203,6 +207,8 @@ public class StorySourceMapper : IStorySourceMapper
                                 ToNodeId = e.ToNodeId,
                                 JumpToTileId = e.JumpToTileId,
                                 SetBranchId = e.SetBranchId,
+                                HideIfBranchSet = e.HideIfBranchSet,
+                                ShowOnlyIfBranchesSet = e.ShowOnlyIfBranchesSet,
                                 OptionOrder = e.OptionOrder,
                                 Translations = e.Translations.Select(et => new DialogEdgeTranslationCloneData
                                 {
@@ -298,6 +304,7 @@ public class TileCloneData
     public string Type { get; set; } = "page";
     public string? BranchId { get; set; }
     public string? ImageUrl { get; set; }
+    public string? AvailableHeroIdsJson { get; set; }
     public List<TileTranslationCloneData> Translations { get; set; } = new();
     public List<AnswerCloneData> Answers { get; set; } = new();
     public string? DialogRootNodeId { get; set; }
@@ -357,6 +364,8 @@ public class DialogEdgeCloneData
     public string ToNodeId { get; set; } = string.Empty;
     public string? JumpToTileId { get; set; }
     public string? SetBranchId { get; set; }
+    public string? HideIfBranchSet { get; set; }
+    public string? ShowOnlyIfBranchesSet { get; set; }
     public int OptionOrder { get; set; }
     public List<DialogEdgeTranslationCloneData> Translations { get; set; } = new();
     public List<TokenCloneData> Tokens { get; set; } = new();

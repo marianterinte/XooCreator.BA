@@ -276,6 +276,10 @@ public class StoryTileUpdater : IStoryTileUpdater
                 edge.ToNodeId = optionDto.NextNodeId?.Trim() ?? string.Empty;
                 edge.JumpToTileId = string.IsNullOrWhiteSpace(optionDto.JumpToTileId) ? null : optionDto.JumpToTileId.Trim();
                 edge.SetBranchId = string.IsNullOrWhiteSpace(optionDto.SetBranchId) ? null : optionDto.SetBranchId.Trim();
+                edge.HideIfBranchSet = string.IsNullOrWhiteSpace(optionDto.HideIfBranchSet) ? null : optionDto.HideIfBranchSet.Trim();
+                edge.ShowOnlyIfBranchesSet = optionDto.ShowOnlyIfBranchesSet is { Count: > 0 }
+                    ? JsonSerializer.Serialize(optionDto.ShowOnlyIfBranchesSet)
+                    : null;
                 edge.OptionOrder = optionIndex;
 
                 var edgeTranslation = edge.Translations.FirstOrDefault(t => t.LanguageCode == languageCode);

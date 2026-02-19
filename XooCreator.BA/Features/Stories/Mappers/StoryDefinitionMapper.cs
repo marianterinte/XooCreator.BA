@@ -250,6 +250,8 @@ public static class StoryDefinitionMapper
                                     Text = e.Translations.FirstOrDefault(et => et.LanguageCode == lc)?.OptionText ?? string.Empty,
                                     JumpToTileId = e.JumpToTileId,
                                     SetBranchId = e.SetBranchId,
+                                    HideIfBranchSet = e.HideIfBranchSet,
+                                    ShowOnlyIfBranchesSet = ParseShowOnlyIfBranchesSet(e.ShowOnlyIfBranchesSet),
                                     Tokens = (e.Tokens ?? new()).Select(tok => new TokenReward
                                     {
                                         Type = MapFamily(tok.Type),
@@ -333,6 +335,19 @@ public static class StoryDefinitionMapper
                 .Where(x => !string.IsNullOrWhiteSpace(x))
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static List<string>? ParseShowOnlyIfBranchesSet(string? json)
+    {
+        if (string.IsNullOrWhiteSpace(json)) return null;
+        try
+        {
+            return JsonSerializer.Deserialize<List<string>>(json);
         }
         catch
         {

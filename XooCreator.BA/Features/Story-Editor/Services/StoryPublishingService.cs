@@ -655,6 +655,8 @@ public class StoryPublishingService : IStoryPublishingService
                         ToNodeId = craftEdge.ToNodeId,
                         JumpToTileId = craftEdge.JumpToTileId,
                         SetBranchId = craftEdge.SetBranchId,
+                        HideIfBranchSet = craftEdge.HideIfBranchSet,
+                        ShowOnlyIfBranchesSet = craftEdge.ShowOnlyIfBranchesSet,
                         OptionOrder = craftEdge.OptionOrder
                     };
                     _db.StoryDialogEdges.Add(edge);

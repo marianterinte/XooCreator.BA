@@ -27,7 +27,10 @@ public partial class ImportAudioEndpoint
     private readonly IStoryAudioImportQueue _importQueue;
     private readonly IJobEventsHub _jobEvents;
     private readonly ILogger<ImportAudioEndpoint> _logger;
-    private const long MaxZipSizeBytes = 100 * 1024 * 1024; // 100MB
+    private const long DefaultMaxZipSizeBytes = 1024L * 1024 * 1024; // 1GB
+    private const long DefaultMultipartBodyLengthLimit = 1024L * 1024 * 1024; // 1GB
+    private readonly long _maxZipSizeBytes;
+    private readonly long _multipartBodyLengthLimit;
     private const long MaxAudioFileSizeBytes = 100 * 1024 * 1024; // 100MB per audio file
     private static readonly HashSet<string> AllowedAudioExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -41,7 +44,8 @@ public partial class ImportAudioEndpoint
         IStoryCraftsRepository crafts,
         IStoryAudioImportQueue importQueue,
         IJobEventsHub jobEvents,
-        ILogger<ImportAudioEndpoint> logger)
+        ILogger<ImportAudioEndpoint> logger,
+        IConfiguration configuration)
     {
         _db = db;
         _auth0 = auth0;
@@ -50,6 +54,8 @@ public partial class ImportAudioEndpoint
         _importQueue = importQueue;
         _jobEvents = jobEvents;
         _logger = logger;
+        _maxZipSizeBytes = configuration.GetValue<long?>("StoryEditor:ImportAudio:MaxZipSizeBytes") ?? DefaultMaxZipSizeBytes;
+        _multipartBodyLengthLimit = configuration.GetValue<long?>("StoryEditor:ImportAudio:MultipartBodyLengthLimit") ?? DefaultMultipartBodyLengthLimit;
     }
 
     public record AudioImportJobResponse(Guid JobId);
@@ -97,7 +103,7 @@ public partial class ImportAudioEndpoint
 
         var form = await request.ReadFormAsync(new Microsoft.AspNetCore.Http.Features.FormOptions
         {
-            MultipartBodyLengthLimit = 120 * 1024 * 1024,
+            MultipartBodyLengthLimit = ep._multipartBodyLengthLimit,
             ValueLengthLimit = int.MaxValue,
             KeyLengthLimit = int.MaxValue
         }, ct);
@@ -109,9 +115,9 @@ public partial class ImportAudioEndpoint
             return TypedResults.BadRequest(new ImportAudioResponse { Success = false, Errors = errors });
         }
 
-        if (file.Length > MaxZipSizeBytes)
+        if (file.Length > ep._maxZipSizeBytes)
         {
-            errors.Add($"File size exceeds maximum allowed size of {MaxZipSizeBytes / (1024 * 1024)}MB");
+            errors.Add($"File size exceeds maximum allowed size of {ep._maxZipSizeBytes / (1024 * 1024)}MB");
             return TypedResults.BadRequest(new ImportAudioResponse { Success = false, Errors = errors });
         }
 

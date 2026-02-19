@@ -297,13 +297,15 @@ public class StoryExportService : IStoryExportService
                         nodeId = n.NodeId,
                         speakerType = n.SpeakerType,
                         speakerHeroId = n.SpeakerHeroId,
-                        translations = n.Translations.Select(nt => new { lang = nt.LanguageCode, text = nt.Text }).ToList(),
+                        translations = n.Translations.Select(nt => new { lang = nt.LanguageCode, text = nt.Text, audioUrl = nt.AudioUrl }).ToList(),
                         options = n.OutgoingEdges.OrderBy(e => e.OptionOrder).Select(e => new
                         {
                             id = e.EdgeId,
                             nextNodeId = e.ToNodeId,
                             jumpToTileId = e.JumpToTileId,
                             setBranchId = e.SetBranchId,
+                            hideIfBranchSet = e.HideIfBranchSet,
+                            showOnlyIfBranchesSet = ParseShowOnlyIfBranchesSet(e.ShowOnlyIfBranchesSet),
                             sortOrder = e.OptionOrder,
                             tokens = (e.Tokens ?? new()).Select(tok => new { type = tok.Type, value = tok.Value, quantity = tok.Quantity }).ToList(),
                             translations = e.Translations.Select(et => new { lang = et.LanguageCode, text = et.OptionText }).ToList()
@@ -324,6 +326,19 @@ public class StoryExportService : IStoryExportService
                     }).ToList()
                 }).ToList()
         };
+    }
+
+    private static List<string>? ParseShowOnlyIfBranchesSet(string? json)
+    {
+        if (string.IsNullOrWhiteSpace(json)) return null;
+        try
+        {
+            return JsonSerializer.Deserialize<List<string>>(json);
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     private static object BuildExportJson(StoryCraft craft, string primaryLang)
@@ -402,13 +417,15 @@ public class StoryExportService : IStoryExportService
                         nodeId = n.NodeId,
                         speakerType = n.SpeakerType,
                         speakerHeroId = n.SpeakerHeroId,
-                        translations = n.Translations.Select(nt => new { lang = nt.LanguageCode, text = nt.Text }).ToList(),
+                        translations = n.Translations.Select(nt => new { lang = nt.LanguageCode, text = nt.Text, audioUrl = nt.AudioUrl }).ToList(),
                         options = n.OutgoingEdges.OrderBy(e => e.OptionOrder).Select(e => new
                         {
                             id = e.EdgeId,
                             nextNodeId = e.ToNodeId,
                             jumpToTileId = e.JumpToTileId,
                             setBranchId = e.SetBranchId,
+                            hideIfBranchSet = e.HideIfBranchSet,
+                            showOnlyIfBranchesSet = ParseShowOnlyIfBranchesSet(e.ShowOnlyIfBranchesSet),
                             sortOrder = e.OptionOrder,
                             tokens = (e.Tokens ?? new()).Select(tok => new { type = tok.Type, value = tok.Value, quantity = tok.Quantity }).ToList(),
                             translations = e.Translations.Select(et => new { lang = et.LanguageCode, text = et.OptionText }).ToList()
@@ -449,6 +466,19 @@ public class StoryExportService : IStoryExportService
             {
                 if (!string.IsNullOrWhiteSpace(tr.AudioUrl)) result.Add(Normalize(tr.AudioUrl));
                 if (!string.IsNullOrWhiteSpace(tr.VideoUrl)) result.Add(Normalize(tr.VideoUrl));
+            }
+
+            // Dialog node audio (per node translation)
+            if (t.DialogTile?.Nodes != null)
+            {
+                foreach (var node in t.DialogTile.Nodes)
+                {
+                    foreach (var nodeTr in node.Translations ?? new List<StoryDialogNodeTranslation>())
+                    {
+                        if (!string.IsNullOrWhiteSpace(nodeTr.AudioUrl))
+                            result.Add(Normalize(nodeTr.AudioUrl));
+                    }
+                }
             }
         }
         return result.ToList();
