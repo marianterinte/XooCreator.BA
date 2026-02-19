@@ -78,19 +78,16 @@ builder.Services.AddHostedService<AnimalPublishQueueWorker>();
 
 builder.Services.AddAuthConfiguration(builder.Configuration);
 
-// Configure request size limits for file uploads (especially import-full endpoint)
-// ImportFullStoryEndpoint allows up to 500MB, so we need to configure both Kestrel and FormOptions
+// Configure request size limits for file uploads (import-full, import-images, import-audio)
 builder.WebHost.ConfigureKestrel(options =>
 {
-    // Set max request body size to 600MB (500MB + 100MB headroom for multipart overhead)
-    options.Limits.MaxRequestBodySize = 600 * 1024 * 1024; // 600MB
+    options.Limits.MaxRequestBodySize = 1024L * 1024 * 1024; // 1GB
 });
 
 // Configure FormOptions for multipart/form-data uploads
 builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
 {
-    // Set multipart body length limit to 600MB (matching Kestrel limit)
-    options.MultipartBodyLengthLimit = 600 * 1024 * 1024; // 600MB
+    options.MultipartBodyLengthLimit = 1024L * 1024 * 1024; // 1GB
     // Increase value length limit for form fields
     options.ValueLengthLimit = int.MaxValue;
     // Increase key length limit

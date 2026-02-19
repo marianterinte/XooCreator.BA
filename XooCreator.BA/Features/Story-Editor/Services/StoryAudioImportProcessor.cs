@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
+using XooCreator.BA.Features.StoryEditor.Models;
 using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Infrastructure.Services.Blob;
 using static XooCreator.BA.Features.StoryEditor.Mappers.StoryAssetPathMapper;
@@ -12,6 +13,7 @@ namespace XooCreator.BA.Features.StoryEditor.Services;
 public interface IStoryAudioImportProcessor
 {
     Task<ImportAudioResult> ProcessAsync(Stream zipStream, string storyId, string locale, string ownerEmail, CancellationToken ct = default);
+    Task<ImportAudioResult> ProcessFromStagingAsync(AudioBatchMappingPayload payload, string storyId, string locale, string ownerEmail, CancellationToken ct = default);
 }
 
 public record ImportAudioResult(bool Success, List<string> Errors, List<string> Warnings, int ImportedCount, int TotalPages);
@@ -213,6 +215,193 @@ public class StoryAudioImportProcessor : IStoryAudioImportProcessor
             {
                 errors.Add($"Failed to save changes to database: {ex.Message}");
                 _logger.LogError(ex, "Failed to save audio import changes");
+            }
+        }
+
+        return new ImportAudioResult(errors.Count == 0, errors, warnings, importedCount, targets.Count);
+    }
+
+    public async Task<ImportAudioResult> ProcessFromStagingAsync(AudioBatchMappingPayload payload, string storyId, string locale, string ownerEmail, CancellationToken ct = default)
+    {
+        var errors = new List<string>();
+        var warnings = new List<string>();
+        var importedCount = 0;
+
+        var craft = await _crafts.GetWithLanguageAsync(storyId, locale, ct);
+        if (craft == null)
+        {
+            errors.Add("Story not found");
+            return new ImportAudioResult(false, errors, warnings, 0, 0);
+        }
+
+        var localeNorm = (locale ?? string.Empty).Trim().ToLowerInvariant();
+        var targets = BuildAudioImportTargets(craft, localeNorm);
+        if (targets.Count == 0)
+        {
+            errors.Add("Story has no page, quiz, or dialog tiles with text");
+            return new ImportAudioResult(false, errors, warnings, 0, 0);
+        }
+
+        var files = payload.Files ?? new List<StagedMediaFile>();
+        if (files.Count == 0)
+        {
+            errors.Add("No staged audio files found.");
+            return new ImportAudioResult(false, errors, warnings, 0, targets.Count);
+        }
+
+        var filesByClientId = files
+            .Where(f => !string.IsNullOrWhiteSpace(f.ClientFileId))
+            .GroupBy(f => f.ClientFileId, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+
+        var assignments = new Dictionary<int, StagedMediaFile>();
+        foreach (var file in files.OrderBy(f => ExtractPageNumber(Path.GetFileName(f.FileName))).ThenBy(f => f.FileName, StringComparer.OrdinalIgnoreCase))
+        {
+            var ext = Path.GetExtension(file.FileName);
+            if (!AllowedAudioExtensions.Contains(ext))
+            {
+                warnings.Add($"Unsupported audio format '{file.FileName}'. Skipping.");
+                continue;
+            }
+            var slot = ExtractPageNumber(Path.GetFileName(file.FileName));
+            if (slot < 1 || slot > targets.Count)
+                continue;
+            assignments[slot] = file;
+        }
+
+        foreach (var ov in payload.Overrides ?? new List<AudioImportOverride>())
+        {
+            if (string.IsNullOrWhiteSpace(ov.ClientFileId) || ov.TargetIndex < 1 || ov.TargetIndex > targets.Count)
+                continue;
+            if (!filesByClientId.TryGetValue(ov.ClientFileId, out var file))
+            {
+                warnings.Add($"Override file not found for clientFileId '{ov.ClientFileId}'.");
+                continue;
+            }
+            assignments[ov.TargetIndex] = file;
+        }
+
+        var normalizedEmail = string.IsNullOrWhiteSpace(ownerEmail) ? string.Empty : Uri.UnescapeDataString(ownerEmail);
+        var containerClient = _sas.GetContainerClient(_sas.DraftContainer);
+        await containerClient.CreateIfNotExistsAsync(cancellationToken: ct);
+
+        foreach (var kv in assignments.OrderBy(k => k.Key))
+        {
+            var slot = kv.Key;
+            var file = kv.Value;
+            var target = targets[slot - 1];
+
+            try
+            {
+                var sourceBlobClient = _sas.GetBlobClient(_sas.DraftContainer, file.BlobPath);
+                if (!await sourceBlobClient.ExistsAsync(ct))
+                {
+                    warnings.Add($"Staged file missing: {file.FileName}");
+                    continue;
+                }
+                var props = await sourceBlobClient.GetPropertiesAsync(cancellationToken: ct);
+                if (props.Value.ContentLength > MaxAudioFileSizeBytes)
+                {
+                    warnings.Add($"Audio file '{file.FileName}' exceeds maximum size of {MaxAudioFileSizeBytes / (1024 * 1024)}MB. Skipping.");
+                    continue;
+                }
+
+                var audioFilename = Path.GetFileName(file.FileName);
+                var draftPath = BuildDraftPath(new AssetInfo(audioFilename, AssetType.Audio, locale), normalizedEmail, craft.StoryId);
+
+                if (target.Node != null)
+                {
+                    var nodeTranslation = target.Node.Translations.FirstOrDefault(nt =>
+                        !string.IsNullOrWhiteSpace(nt.LanguageCode) && nt.LanguageCode.Equals(locale, StringComparison.OrdinalIgnoreCase));
+                    if (nodeTranslation == null)
+                    {
+                        nodeTranslation = new StoryCraftDialogNodeTranslation
+                        {
+                            Id = Guid.NewGuid(),
+                            StoryCraftDialogNodeId = target.Node.Id,
+                            LanguageCode = locale
+                        };
+                        target.Node.Translations.Add(nodeTranslation);
+                        _db.StoryCraftDialogNodeTranslations.Add(nodeTranslation);
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(nodeTranslation.AudioUrl) && nodeTranslation.AudioUrl != audioFilename)
+                    {
+                        try
+                        {
+                            var oldPath = BuildDraftPath(new AssetInfo(nodeTranslation.AudioUrl, AssetType.Audio, locale), normalizedEmail, craft.StoryId);
+                            var oldBlobClient = _sas.GetBlobClient(_sas.DraftContainer, oldPath);
+                            await oldBlobClient.DeleteIfExistsAsync(cancellationToken: ct);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning(ex, "Failed to delete old dialog node audio: {OldPath}", nodeTranslation.AudioUrl);
+                        }
+                    }
+
+                    var download = await sourceBlobClient.DownloadStreamingAsync(cancellationToken: ct);
+                    await using var sourceStream = download.Value.Content;
+                    var destBlobClient = _sas.GetBlobClient(_sas.DraftContainer, draftPath);
+                    await destBlobClient.UploadAsync(sourceStream, overwrite: true, cancellationToken: ct);
+                    nodeTranslation.AudioUrl = audioFilename;
+                    importedCount++;
+                }
+                else
+                {
+                    var tile = target.Tile;
+                    var tileTranslation = target.TileTranslation ?? tile.Translations.FirstOrDefault(t =>
+                        !string.IsNullOrWhiteSpace(t.LanguageCode) && t.LanguageCode.Equals(locale, StringComparison.OrdinalIgnoreCase));
+                    if (tileTranslation == null)
+                    {
+                        tileTranslation = new StoryCraftTileTranslation
+                        {
+                            Id = Guid.NewGuid(),
+                            StoryCraftTileId = tile.Id,
+                            LanguageCode = locale
+                        };
+                        tile.Translations.Add(tileTranslation);
+                        _db.StoryCraftTileTranslations.Add(tileTranslation);
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(tileTranslation.AudioUrl) && tileTranslation.AudioUrl != audioFilename)
+                    {
+                        try
+                        {
+                            var oldPath = BuildDraftPath(new AssetInfo(tileTranslation.AudioUrl, AssetType.Audio, locale), normalizedEmail, craft.StoryId);
+                            var oldBlobClient = _sas.GetBlobClient(_sas.DraftContainer, oldPath);
+                            await oldBlobClient.DeleteIfExistsAsync(cancellationToken: ct);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning(ex, "Failed to delete old audio file: {OldPath}", tileTranslation.AudioUrl);
+                        }
+                    }
+
+                    var download = await sourceBlobClient.DownloadStreamingAsync(cancellationToken: ct);
+                    await using var sourceStream = download.Value.Content;
+                    var destBlobClient = _sas.GetBlobClient(_sas.DraftContainer, draftPath);
+                    await destBlobClient.UploadAsync(sourceStream, overwrite: true, cancellationToken: ct);
+                    tileTranslation.AudioUrl = audioFilename;
+                    importedCount++;
+                }
+            }
+            catch (Exception ex)
+            {
+                errors.Add($"Failed to import staged audio '{file.FileName}' for slot {slot}: {ex.Message}");
+                _logger.LogError(ex, "Failed to import staged audio: {FileName}", file.FileName);
+            }
+        }
+
+        if (importedCount > 0)
+        {
+            try
+            {
+                await _db.SaveChangesAsync(ct);
+            }
+            catch (Exception ex)
+            {
+                errors.Add($"Failed to save changes to database: {ex.Message}");
+                _logger.LogError(ex, "Failed to save staged audio import changes");
             }
         }
 

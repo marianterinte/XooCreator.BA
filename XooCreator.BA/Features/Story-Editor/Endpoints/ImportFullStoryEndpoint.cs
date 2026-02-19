@@ -41,6 +41,8 @@ public partial class ImportFullStoryEndpoint
     private readonly string _importQueueName;
     private readonly IStoryImportQueue _importQueue;
     private readonly IJobEventsHub _jobEvents;
+    private const int DefaultSasValidityMinutes = 60;
+    private readonly int _sasValidityMinutes;
     private const long MaxZipSizeBytes = 500 * 1024 * 1024; // 500MB
     private const long MaxAssetSizeBytes = 50 * 1024 * 1024; // 50MB per asset
     private static readonly HashSet<string> AllowedExtensions = new(StringComparer.OrdinalIgnoreCase)
@@ -72,6 +74,7 @@ public partial class ImportFullStoryEndpoint
         _importQueue = importQueue;
         _jobEvents = jobEvents;
         _telemetryClient = telemetryClient;
+        _sasValidityMinutes = configuration.GetValue<int?>("StoryEditor:DirectUpload:SasValidityMinutes") ?? DefaultSasValidityMinutes;
     }
 
     public record ImportFullStoryResponse
@@ -111,6 +114,7 @@ public partial class ImportFullStoryEndpoint
         public int DequeueCount { get; init; }
     }
 
+    [Obsolete("Use POST import-full/request-upload and import-full/confirm-upload (direct-to-blob) instead.")]
     [Route("/api/{locale}/stories/import-full")]
     [Authorize]
     [DisableRequestSizeLimit] // Disable request size limit for this endpoint (allows up to 500MB as per MaxZipSizeBytes)
@@ -830,6 +834,91 @@ public partial class ImportFullStoryEndpoint
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "Failed to upload asset: {Filename}", asset.Filename);
+                warnings.Add($"Failed to upload asset '{asset.Filename}': {ex.Message}");
+            }
+        }
+
+        return new AssetUploadSummary(uploadedCount, uploadedBytes);
+    }
+
+    /// <summary>Upload assets from staging blobs (client-side ZIP flow) to draft paths.</summary>
+    private async Task<AssetUploadSummary> UploadAssetsFromStagingAsync(
+        string stagingPrefix,
+        List<(string ZipPath, AssetInfo Asset)> expectedAssets,
+        string userEmail,
+        string storyId,
+        List<string> warnings,
+        List<string> errors,
+        List<string> uploadedBlobPaths,
+        CancellationToken ct)
+    {
+        var uploadedCount = 0;
+        var uploadedBytes = 0L;
+        var containerClient = _sas.GetContainerClient(_sas.DraftContainer);
+        await containerClient.CreateIfNotExistsAsync(cancellationToken: ct);
+
+        foreach (var (zipPath, asset) in expectedAssets)
+        {
+            try
+            {
+                var normalizedZipPath = NormalizeZipPath(zipPath);
+                if (string.IsNullOrWhiteSpace(normalizedZipPath))
+                    normalizedZipPath = BuildDefaultZipPath(asset, false);
+
+                var stagingBlobPath = $"{stagingPrefix}/assets/{normalizedZipPath}";
+                var stagingBlobClient = _sas.GetBlobClient(_sas.DraftContainer, stagingBlobPath);
+                if (!await stagingBlobClient.ExistsAsync(ct))
+                {
+                    warnings.Add($"Asset '{asset.Filename}' not found at staging path '{normalizedZipPath}'");
+                    continue;
+                }
+
+                var extension = Path.GetExtension(asset.Filename);
+                if (!AllowedExtensions.Contains(extension))
+                {
+                    warnings.Add($"Asset '{asset.Filename}' has unsupported extension '{extension}'");
+                    continue;
+                }
+
+                var props = await stagingBlobClient.GetPropertiesAsync(cancellationToken: ct);
+                if (props.Value.ContentLength > MaxAssetSizeBytes)
+                {
+                    warnings.Add($"Asset '{asset.Filename}' exceeds maximum size of {MaxAssetSizeBytes / (1024 * 1024)}MB");
+                    continue;
+                }
+
+                var blobPath = BuildDraftPath(asset, userEmail, storyId);
+                var download = await stagingBlobClient.DownloadStreamingAsync(cancellationToken: ct);
+                await using var contentStream = download.Value.Content;
+                using var memoryStream = new MemoryStream();
+                await contentStream.CopyToAsync(memoryStream, ct);
+                memoryStream.Position = 0;
+
+                var contentType = extension.ToLowerInvariant() switch
+                {
+                    ".png" => "image/png",
+                    ".jpg" or ".jpeg" => "image/jpeg",
+                    ".webp" => "image/webp",
+                    ".mp3" => "audio/mpeg",
+                    ".m4a" => "audio/mp4",
+                    ".wav" => "audio/wav",
+                    ".mp4" => "video/mp4",
+                    ".webm" => "video/webm",
+                    _ => "application/octet-stream"
+                };
+
+                var blobClient = _sas.GetBlobClient(_sas.DraftContainer, blobPath);
+                await blobClient.UploadAsync(memoryStream, overwrite: true, cancellationToken: ct);
+                var headers = new Azure.Storage.Blobs.Models.BlobHttpHeaders { ContentType = contentType };
+                await blobClient.SetHttpHeadersAsync(headers, cancellationToken: ct);
+
+                uploadedBlobPaths.Add(blobPath);
+                uploadedCount++;
+                uploadedBytes += memoryStream.Length;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to upload asset from staging: {Filename}", asset.Filename);
                 warnings.Add($"Failed to upload asset '{asset.Filename}': {ex.Message}");
             }
         }

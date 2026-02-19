@@ -550,7 +550,8 @@ public class StoryPublishingService : IStoryPublishingService
 
         if (!string.IsNullOrWhiteSpace(craftTile.ImageUrl))
         {
-            var asset = new StoryAssetPathMapper.AssetInfo(craftTile.ImageUrl, StoryAssetPathMapper.AssetType.Image, null);
+            var imageFilename = ExtractFileName(craftTile.ImageUrl);
+            var asset = new StoryAssetPathMapper.AssetInfo(imageFilename!, StoryAssetPathMapper.AssetType.Image, null);
             tile.ImageUrl = StoryAssetPathMapper.BuildPublishedPath(asset, ownerEmail, def.StoryId);
         }
 
@@ -564,13 +565,15 @@ public class StoryPublishingService : IStoryPublishingService
 
             if (!string.IsNullOrWhiteSpace(tr.AudioUrl))
             {
-                var audioAsset = new StoryAssetPathMapper.AssetInfo(tr.AudioUrl, StoryAssetPathMapper.AssetType.Audio, translationLang);
+                var audioFilename = ExtractFileName(tr.AudioUrl);
+                var audioAsset = new StoryAssetPathMapper.AssetInfo(audioFilename!, StoryAssetPathMapper.AssetType.Audio, translationLang);
                 publishedAudioUrl = StoryAssetPathMapper.BuildPublishedPath(audioAsset, ownerEmail, def.StoryId);
             }
 
             if (!string.IsNullOrWhiteSpace(tr.VideoUrl))
             {
-                var videoAsset = new StoryAssetPathMapper.AssetInfo(tr.VideoUrl, StoryAssetPathMapper.AssetType.Video, translationLang);
+                var videoFilename = ExtractFileName(tr.VideoUrl);
+                var videoAsset = new StoryAssetPathMapper.AssetInfo(videoFilename!, StoryAssetPathMapper.AssetType.Video, translationLang);
                 publishedVideoUrl = StoryAssetPathMapper.BuildPublishedPath(videoAsset, ownerEmail, def.StoryId);
             }
 
@@ -626,9 +629,10 @@ public class StoryPublishingService : IStoryPublishingService
                 foreach (var nodeTranslation in craftNode.Translations)
                 {
                     var nodeLang = nodeTranslation.LanguageCode.ToLowerInvariant();
-                    var publishedNodeAudioUrl = !string.IsNullOrWhiteSpace(nodeTranslation.AudioUrl)
+                    var nodeAudioFilename = ExtractFileName(nodeTranslation.AudioUrl);
+                    var publishedNodeAudioUrl = !string.IsNullOrWhiteSpace(nodeAudioFilename)
                         ? StoryAssetPathMapper.BuildPublishedPath(
-                            new StoryAssetPathMapper.AssetInfo(nodeTranslation.AudioUrl, StoryAssetPathMapper.AssetType.Audio, nodeLang),
+                            new StoryAssetPathMapper.AssetInfo(nodeAudioFilename!, StoryAssetPathMapper.AssetType.Audio, nodeLang),
                             ownerEmail, def.StoryId)
                         : null;
                     _db.StoryDialogNodeTranslations.Add(new StoryDialogNodeTranslation
@@ -651,6 +655,8 @@ public class StoryPublishingService : IStoryPublishingService
                         ToNodeId = craftEdge.ToNodeId,
                         JumpToTileId = craftEdge.JumpToTileId,
                         SetBranchId = craftEdge.SetBranchId,
+                        HideIfBranchSet = craftEdge.HideIfBranchSet,
+                        ShowOnlyIfBranchesSet = craftEdge.ShowOnlyIfBranchesSet,
                         OptionOrder = craftEdge.OptionOrder
                     };
                     _db.StoryDialogEdges.Add(edge);
@@ -821,6 +827,14 @@ public class StoryPublishingService : IStoryPublishingService
     {
         public const string Header = "Header";
         public const string Tile = "Tile";
+    }
+
+    private static string? ExtractFileName(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path)) return null;
+        var normalized = path.Trim().Replace('\\', '/');
+        if (!normalized.Contains('/')) return normalized;
+        return Path.GetFileName(normalized);
     }
 
     private static class StoryPublishChangeTypes

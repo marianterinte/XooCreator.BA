@@ -117,12 +117,14 @@ public class StoryTileUpdater : IStoryTileUpdater
     private static string? ExtractFileName(string? path)
     {
         if (string.IsNullOrWhiteSpace(path)) return null;
-        
+
+        var normalized = path.Trim().Replace('\\', '/');
+
         // If already just filename (no path separator), return as-is
-        if (!path.Contains('/')) return path;
-        
+        if (!normalized.Contains('/')) return normalized;
+
         // Extract filename from path
-        return Path.GetFileName(path);
+        return Path.GetFileName(normalized);
     }
 
     private static string? SerializeAvailableHeroIds(EditableTileDto tileDto)
@@ -247,7 +249,7 @@ public class StoryTileUpdater : IStoryTileUpdater
                 node.Translations.Add(nodeTranslation);
             }
             nodeTranslation.Text = nodeDto.Text ?? string.Empty;
-            nodeTranslation.AudioUrl = string.IsNullOrWhiteSpace(nodeDto.AudioUrl) ? null : nodeDto.AudioUrl.Trim();
+            nodeTranslation.AudioUrl = ExtractFileName(nodeDto.AudioUrl);
 
             var options = nodeDto.Options ?? new List<EditableDialogOptionDto>();
             var edgeDict = node.OutgoingEdges.ToDictionary(e => e.EdgeId, StringComparer.OrdinalIgnoreCase);
@@ -274,6 +276,10 @@ public class StoryTileUpdater : IStoryTileUpdater
                 edge.ToNodeId = optionDto.NextNodeId?.Trim() ?? string.Empty;
                 edge.JumpToTileId = string.IsNullOrWhiteSpace(optionDto.JumpToTileId) ? null : optionDto.JumpToTileId.Trim();
                 edge.SetBranchId = string.IsNullOrWhiteSpace(optionDto.SetBranchId) ? null : optionDto.SetBranchId.Trim();
+                edge.HideIfBranchSet = string.IsNullOrWhiteSpace(optionDto.HideIfBranchSet) ? null : optionDto.HideIfBranchSet.Trim();
+                edge.ShowOnlyIfBranchesSet = optionDto.ShowOnlyIfBranchesSet is { Count: > 0 }
+                    ? JsonSerializer.Serialize(optionDto.ShowOnlyIfBranchesSet)
+                    : null;
                 edge.OptionOrder = optionIndex;
 
                 var edgeTranslation = edge.Translations.FirstOrDefault(t => t.LanguageCode == languageCode);

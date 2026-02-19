@@ -25,7 +25,13 @@ public partial class ImportImagesEndpoint
     private readonly IJobEventsHub _jobEvents;
     private readonly ILogger<ImportImagesEndpoint> _logger;
 
-    private const long MaxZipSizeBytes = 100 * 1024 * 1024; // 100MB
+    private const long DefaultMaxZipSizeBytes = 1024L * 1024 * 1024; // 1GB
+    private const long DefaultMultipartBodyLengthLimit = 1024L * 1024 * 1024; // 1GB
+    private const int DefaultSasValidityMinutes = 60;
+    private readonly long _maxZipSizeBytes;
+    private readonly long _multipartBodyLengthLimit;
+    private readonly int _sasValidityMinutes;
+    private readonly bool _enableBatchDirectUpload;
 
     public ImportImagesEndpoint(
         XooDbContext db,
@@ -34,7 +40,8 @@ public partial class ImportImagesEndpoint
         IStoryCraftsRepository crafts,
         IStoryImageImportQueue importQueue,
         IJobEventsHub jobEvents,
-        ILogger<ImportImagesEndpoint> logger)
+        ILogger<ImportImagesEndpoint> logger,
+        IConfiguration configuration)
     {
         _db = db;
         _auth0 = auth0;
@@ -43,6 +50,10 @@ public partial class ImportImagesEndpoint
         _importQueue = importQueue;
         _jobEvents = jobEvents;
         _logger = logger;
+        _maxZipSizeBytes = configuration.GetValue<long?>("StoryEditor:ImportImages:MaxZipSizeBytes") ?? DefaultMaxZipSizeBytes;
+        _multipartBodyLengthLimit = configuration.GetValue<long?>("StoryEditor:ImportImages:MultipartBodyLengthLimit") ?? DefaultMultipartBodyLengthLimit;
+        _sasValidityMinutes = configuration.GetValue<int?>("StoryEditor:DirectUpload:SasValidityMinutes") ?? DefaultSasValidityMinutes;
+        _enableBatchDirectUpload = configuration.GetValue<bool?>("StoryEditor:DirectUpload:EnableBatchMediaImport") ?? true;
     }
 
     public record ImageImportJobResponse(Guid JobId);
@@ -56,6 +67,7 @@ public partial class ImportImagesEndpoint
         public int TotalPages { get; init; }
     }
 
+    [Obsolete("Use POST import-images/request-upload and import-images/confirm-upload (direct-to-blob) instead.")]
     [Route("/api/{locale}/stories/{storyId}/import-images")]
     [Authorize]
     [DisableRequestSizeLimit]
@@ -90,7 +102,7 @@ public partial class ImportImagesEndpoint
 
         var form = await request.ReadFormAsync(new Microsoft.AspNetCore.Http.Features.FormOptions
         {
-            MultipartBodyLengthLimit = 120 * 1024 * 1024,
+            MultipartBodyLengthLimit = ep._multipartBodyLengthLimit,
             ValueLengthLimit = int.MaxValue,
             KeyLengthLimit = int.MaxValue
         }, ct);
@@ -102,9 +114,9 @@ public partial class ImportImagesEndpoint
             return TypedResults.BadRequest(new ImportImagesResponse { Success = false, Errors = errors });
         }
 
-        if (file.Length > MaxZipSizeBytes)
+        if (file.Length > ep._maxZipSizeBytes)
         {
-            errors.Add($"File size exceeds maximum allowed size of {MaxZipSizeBytes / (1024 * 1024)}MB");
+            errors.Add($"File size exceeds maximum allowed size of {ep._maxZipSizeBytes / (1024 * 1024)}MB");
             return TypedResults.BadRequest(new ImportImagesResponse { Success = false, Errors = errors });
         }
 

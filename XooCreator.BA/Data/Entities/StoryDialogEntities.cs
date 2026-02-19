@@ -85,6 +85,12 @@ public class StoryCraftDialogEdge
 
     public int OptionOrder { get; set; }
 
+    [MaxLength(100)]
+    public string? HideIfBranchSet { get; set; }
+
+    /// <summary>JSON array of branch IDs, e.g. ["b1","b2"]. Stored as TEXT.</summary>
+    public string? ShowOnlyIfBranchesSet { get; set; }
+
     public StoryCraftDialogNode StoryCraftDialogNode { get; set; } = null!;
     public List<StoryCraftDialogEdgeTranslation> Translations { get; set; } = new();
     public List<StoryCraftDialogEdgeToken> Tokens { get; set; } = new();
@@ -203,6 +209,12 @@ public class StoryDialogEdge
     public string? SetBranchId { get; set; }
 
     public int OptionOrder { get; set; }
+
+    [MaxLength(100)]
+    public string? HideIfBranchSet { get; set; }
+
+    /// <summary>JSON array of branch IDs, e.g. ["b1","b2"]. Stored as TEXT.</summary>
+    public string? ShowOnlyIfBranchesSet { get; set; }
 
     public StoryDialogNode StoryDialogNode { get; set; } = null!;
     public List<StoryDialogEdgeTranslation> Translations { get; set; } = new();

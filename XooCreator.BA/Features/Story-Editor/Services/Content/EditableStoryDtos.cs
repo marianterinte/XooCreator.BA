@@ -85,6 +85,10 @@ public class EditableDialogOptionDto
     public string NextNodeId { get; set; } = string.Empty;
     public string? JumpToTileId { get; set; }
     public string? SetBranchId { get; set; }
+    /// <summary>If set, hide this option when the given branch is set.</summary>
+    public string? HideIfBranchSet { get; set; }
+    /// <summary>If set, show this option only when all these branches are set.</summary>
+    public List<string>? ShowOnlyIfBranchesSet { get; set; }
     public List<EditableTokenDto> Tokens { get; set; } = new();
 }
 

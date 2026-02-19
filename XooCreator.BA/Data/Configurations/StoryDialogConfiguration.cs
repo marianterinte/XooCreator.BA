@@ -79,6 +79,7 @@ public class StoryCraftDialogEdgeConfiguration : IEntityTypeConfiguration<StoryC
             .OnDelete(DeleteBehavior.Cascade);
         builder.Property(x => x.JumpToTileId).HasMaxLength(100);
         builder.Property(x => x.SetBranchId).HasMaxLength(100);
+        builder.Property(x => x.HideIfBranchSet).HasMaxLength(100);
     }
 }
 
@@ -171,6 +172,7 @@ public class StoryDialogEdgeConfiguration : IEntityTypeConfiguration<StoryDialog
             .OnDelete(DeleteBehavior.Cascade);
         builder.Property(x => x.JumpToTileId).HasMaxLength(100);
         builder.Property(x => x.SetBranchId).HasMaxLength(100);
+        builder.Property(x => x.HideIfBranchSet).HasMaxLength(100);
     }
 }
 

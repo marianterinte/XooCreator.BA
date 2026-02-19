@@ -67,7 +67,8 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IHeroPublishQueue, HeroPublishQueue>();
         services.AddSingleton<IAnimalPublishQueue, AnimalPublishQueue>();
         services.AddSingleton<IAppCache, MemoryAppCache>();
-        
+        services.AddSingleton<IDirectUploadRateLimitService, DirectUploadRateLimitService>();
+
         return services;
     }
 
