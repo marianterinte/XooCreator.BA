@@ -48,6 +48,7 @@ public class StoryAudioImportProcessor : IStoryAudioImportProcessor
         var errors = new List<string>();
         var warnings = new List<string>();
         var importedCount = 0;
+        var changedTileIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         var craft = await _crafts.GetWithLanguageAsync(storyId, locale, ct);
         if (craft == null)
@@ -150,6 +151,7 @@ public class StoryAudioImportProcessor : IStoryAudioImportProcessor
                     await blobClient.UploadAsync(new BinaryData(audioBytes), overwrite: true, cancellationToken: ct);
                     nodeTranslation.AudioUrl = audioFilename;
                     importedCount++;
+                    changedTileIds.Add(target.Tile.TileId);
                     _logger.LogInformation("Imported audio for slot {PageNumber} (dialog node {NodeId}): {Filename}", pageNumber, target.Node.NodeId, audioFilename);
                 }
                 catch (Exception ex)
@@ -195,6 +197,7 @@ public class StoryAudioImportProcessor : IStoryAudioImportProcessor
                     await blobClient.UploadAsync(new BinaryData(audioBytes), overwrite: true, cancellationToken: ct);
                     tileTranslation.AudioUrl = audioFilename;
                     importedCount++;
+                    changedTileIds.Add(tile.TileId);
                     _logger.LogInformation("Imported audio for slot {PageNumber} (tile {TileId}): {Filename}", pageNumber, tile.Id, audioFilename);
                 }
                 catch (Exception ex)
@@ -210,6 +213,7 @@ public class StoryAudioImportProcessor : IStoryAudioImportProcessor
             try
             {
                 await _db.SaveChangesAsync(ct);
+                await AppendTileChangeLogsAsync(craft, localeNorm, changedTileIds, ct);
             }
             catch (Exception ex)
             {
@@ -226,6 +230,7 @@ public class StoryAudioImportProcessor : IStoryAudioImportProcessor
         var errors = new List<string>();
         var warnings = new List<string>();
         var importedCount = 0;
+        var changedTileIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         var craft = await _crafts.GetWithLanguageAsync(storyId, locale, ct);
         if (craft == null)
@@ -345,6 +350,7 @@ public class StoryAudioImportProcessor : IStoryAudioImportProcessor
                     await destBlobClient.UploadAsync(sourceStream, overwrite: true, cancellationToken: ct);
                     nodeTranslation.AudioUrl = audioFilename;
                     importedCount++;
+                    changedTileIds.Add(target.Tile.TileId);
                 }
                 else
                 {
@@ -383,6 +389,7 @@ public class StoryAudioImportProcessor : IStoryAudioImportProcessor
                     await destBlobClient.UploadAsync(sourceStream, overwrite: true, cancellationToken: ct);
                     tileTranslation.AudioUrl = audioFilename;
                     importedCount++;
+                    changedTileIds.Add(tile.TileId);
                 }
             }
             catch (Exception ex)
@@ -397,6 +404,7 @@ public class StoryAudioImportProcessor : IStoryAudioImportProcessor
             try
             {
                 await _db.SaveChangesAsync(ct);
+                await AppendTileChangeLogsAsync(craft, localeNorm, changedTileIds, ct);
             }
             catch (Exception ex)
             {
@@ -406,6 +414,41 @@ public class StoryAudioImportProcessor : IStoryAudioImportProcessor
         }
 
         return new ImportAudioResult(errors.Count == 0, errors, warnings, importedCount, targets.Count);
+    }
+
+    private async Task AppendTileChangeLogsAsync(
+        StoryCraft craft,
+        string locale,
+        IReadOnlyCollection<string> changedTileIds,
+        CancellationToken ct)
+    {
+        if (changedTileIds == null || changedTileIds.Count == 0)
+        {
+            return;
+        }
+
+        var nextVersion = craft.LastDraftVersion + 1;
+        var now = DateTime.UtcNow;
+        var userId = craft.OwnerUserId;
+
+        foreach (var tileId in changedTileIds.Where(x => !string.IsNullOrWhiteSpace(x)))
+        {
+            _db.StoryPublishChangeLogs.Add(new StoryPublishChangeLog
+            {
+                Id = Guid.NewGuid(),
+                StoryId = craft.StoryId,
+                DraftVersion = nextVersion,
+                LanguageCode = locale,
+                EntityType = "Tile",
+                EntityId = tileId,
+                ChangeType = "Updated",
+                CreatedAt = now,
+                CreatedBy = userId
+            });
+        }
+
+        craft.LastDraftVersion = nextVersion;
+        await _db.SaveChangesAsync(ct);
     }
 
     /// <summary>Builds the same ordered list as full audio export: one slot per page/quiz with text, one per dialog node with text.</summary>
