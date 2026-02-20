@@ -1040,7 +1040,7 @@ public partial class ImportFullStoryEndpoint
             ? true
             : false;
 
-        // Create StoryCraft
+        // Create StoryCraft (explicit LightChanges = false so publish always copies assets from draft)
         var craft = new StoryCraft
         {
             Id = Guid.NewGuid(),
@@ -1056,6 +1056,7 @@ public partial class ImportFullStoryEndpoint
             BaseVersion = baseVersion,
             IsEvaluative = isEvaluative,
             IsFullyInteractive = isFullyInteractive,
+            LightChanges = false,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
