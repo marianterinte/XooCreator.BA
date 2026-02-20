@@ -114,16 +114,7 @@ public class StoryPublishAssetService : IStoryPublishAssetService
                 var failure = BuildFailure(asset, sourceResult.Result.ErrorMessage ?? "Draft asset not found");
                 failedAssets.Add(failure);
 
-                // Images are mandatory for publish integrity.
-                if (asset.Type == StoryAssetPathMapper.AssetType.Image)
-                {
-                    _logger.LogError(
-                        "Blocking publish due to missing image asset: storyId={StoryId} filename={Filename} type={Type} lang={Lang}",
-                        storyId, asset.Filename, asset.Type, asset.Lang);
-                    return AssetCopyResult.AssetNotFound(asset.Filename, storyId, failedAssets);
-                }
-
-                // Audio/video remain non-blocking to allow partial language availability.
+                // Do not block publish for missing assets (cover/tile images or audio/video).
                 _logger.LogWarning(
                     "Skipping missing asset during publish: storyId={StoryId} filename={Filename} type={Type} lang={Lang}",
                     storyId, asset.Filename, asset.Type, asset.Lang);
@@ -142,16 +133,7 @@ public class StoryPublishAssetService : IStoryPublishAssetService
                 var failure = BuildFailure(asset, copyResult.ErrorMessage ?? "Copy failed");
                 failedAssets.Add(failure);
 
-                // Images are mandatory for publish integrity.
-                if (asset.Type == StoryAssetPathMapper.AssetType.Image)
-                {
-                    _logger.LogError(
-                        "Blocking publish due to image copy failure: storyId={StoryId} filename={Filename} type={Type} lang={Lang} error={Error}",
-                        storyId, asset.Filename, asset.Type, asset.Lang, copyResult.ErrorMessage);
-                    return AssetCopyResult.CopyFailed(asset.Filename, storyId, copyResult.ErrorMessage ?? "Copy failed", failedAssets);
-                }
-
-                // Audio/video remain non-blocking to allow partial language availability.
+                // Do not block publish; log and skip failed assets.
                 _logger.LogWarning(
                     "Failed to copy asset during publish: storyId={StoryId} filename={Filename} type={Type} lang={Lang} error={Error}",
                     storyId, asset.Filename, asset.Type, asset.Lang, copyResult.ErrorMessage);

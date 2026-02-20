@@ -32,7 +32,7 @@ public partial class ImportFullStoryEndpoint
 
     [Route("/api/{locale}/stories/import-full/prepare-from-manifest")]
     [Authorize]
-    public static async Task<Results<Ok<PrepareFromManifestResponse>, BadRequest<ImportFullStoryResponse>, UnauthorizedHttpResult, ForbidHttpResult, ProblemHttpResult>> HandlePrepareFromManifest(
+    public static async Task<Results<Ok<PrepareFromManifestResponse>, BadRequest<ImportFullStoryResponse>, UnauthorizedHttpResult, ForbidHttpResult, ProblemHttpResult>> HandlePost(
         [FromRoute] string locale,
         [FromBody] PrepareFromManifestRequest body,
         [FromServices] ImportFullStoryEndpoint ep,
@@ -130,7 +130,7 @@ public partial class ImportFullStoryEndpoint
 
     [Route("/api/{locale}/stories/import-full/confirm-from-assets")]
     [Authorize]
-    public static async Task<Results<Accepted<ImportFullStoryEnqueueResponse>, BadRequest<ImportFullStoryResponse>, Conflict<ImportFullStoryResponse>, UnauthorizedHttpResult, ForbidHttpResult>> HandleConfirmFromAssets(
+    public static async Task<Results<Accepted<ImportFullStoryEnqueueResponse>, BadRequest<ImportFullStoryResponse>, Conflict<ImportFullStoryResponse>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
         [FromRoute] string locale,
         [FromBody] ConfirmFromAssetsRequest body,
         [FromServices] ImportFullStoryEndpoint ep,

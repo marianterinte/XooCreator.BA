@@ -41,6 +41,9 @@ public class EditableStoryDto
 
     // Version reference
     public int? BaseVersion { get; set; }
+
+    /// <summary>When true, this draft is a light-changes version: assets are not in draft storage; editor should not request them.</summary>
+    public bool LightChanges { get; set; }
     
     // Owner email (for admin editing another user's draft)
     public string? OwnerEmail { get; set; }

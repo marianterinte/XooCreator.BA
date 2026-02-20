@@ -45,6 +45,8 @@ public class CreateVersionEndpoint
         public Guid JobId { get; init; }
     }
 
+    public record CreateVersionRequest(bool LightChanges = false);
+
     [Route("/api/stories/{storyId}/create-version")]
     [Authorize]
     public static async Task<
@@ -56,6 +58,7 @@ public class CreateVersionEndpoint
             ForbidHttpResult,
             Conflict<string>>> HandlePost(
         [FromRoute] string storyId,
+        [FromBody] CreateVersionRequest? request,
         [FromServices] CreateVersionEndpoint ep,
         CancellationToken ct)
     {
@@ -88,6 +91,7 @@ public class CreateVersionEndpoint
             OwnerUserId = definition!.CreatedBy.GetValueOrDefault(), // Ensure the new version belongs to the original creator
             RequestedByEmail = currentUser.Email ?? string.Empty,
             BaseVersion = definition!.Version,
+            LightChanges = request?.LightChanges ?? false,
             Status = StoryVersionJobStatus.Queued,
             QueuedAtUtc = DateTime.UtcNow
         };
