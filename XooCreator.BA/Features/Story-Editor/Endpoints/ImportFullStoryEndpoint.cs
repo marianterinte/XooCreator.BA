@@ -17,6 +17,7 @@ using Microsoft.Extensions.Configuration;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.Enums;
+using XooCreator.BA.Features.StoryEditor.Extensions;
 using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Features.StoryEditor.Services;
 using XooCreator.BA.Infrastructure.Endpoints;
@@ -732,19 +733,7 @@ public partial class ImportFullStoryEndpoint
         return $"media/{mediaType}/{asset.Filename}";
     }
 
-    private string ExtractFilename(string path)
-    {
-        if (string.IsNullOrWhiteSpace(path)) return string.Empty;
-
-        // Remove "media/" prefix if present
-        var cleanPath = path.StartsWith("media/", StringComparison.OrdinalIgnoreCase)
-            ? path.Substring(6)
-            : path;
-
-        // Extract filename (last part after /)
-        var parts = cleanPath.Split('/', StringSplitOptions.RemoveEmptyEntries);
-        return parts.Length > 0 ? parts[^1] : cleanPath;
-    }
+    private static string ExtractFilename(string path) => path.GetFilenameOnly() ?? string.Empty;
 
     private async Task<AssetUploadSummary> UploadAssetsFromZipAsync(
         ZipArchive zip,
@@ -767,9 +756,21 @@ public partial class ImportFullStoryEndpoint
             {
                 var normalizedZipPath = NormalizeZipPath(zipPath);
 
-                // Find asset in ZIP using the full normalized path (exact match only)
+                // Find asset in ZIP: first try expected path (e.g. media/images/tiles/1.png), then fallback by filename only
                 var zipEntry = zip.Entries.FirstOrDefault(e =>
                     ContainsPath(e, normalizedZipPath));
+
+                if (zipEntry == null)
+                {
+                    // Fallback: some exports use different structure (e.g. files at root or under assets/) — find by filename
+                    var filename = asset.Filename;
+                    zipEntry = zip.Entries.FirstOrDefault(e =>
+                    {
+                        var entryPath = NormalizeZipPath(e.FullName);
+                        return entryPath.Equals(filename, StringComparison.OrdinalIgnoreCase)
+                            || entryPath.EndsWith("/" + filename, StringComparison.OrdinalIgnoreCase);
+                    });
+                }
 
                 if (zipEntry == null)
                 {
@@ -1040,7 +1041,7 @@ public partial class ImportFullStoryEndpoint
             ? true
             : false;
 
-        // Create StoryCraft
+        // Create StoryCraft (explicit LightChanges = false so publish always copies assets from draft)
         var craft = new StoryCraft
         {
             Id = Guid.NewGuid(),
@@ -1056,6 +1057,7 @@ public partial class ImportFullStoryEndpoint
             BaseVersion = baseVersion,
             IsEvaluative = isEvaluative,
             IsFullyInteractive = isFullyInteractive,
+            LightChanges = false,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };

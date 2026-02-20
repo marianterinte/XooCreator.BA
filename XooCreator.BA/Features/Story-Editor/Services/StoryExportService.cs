@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
+using XooCreator.BA.Features.StoryEditor.Extensions;
 using XooCreator.BA.Features.StoryEditor.Mappers;
 using XooCreator.BA.Infrastructure.Services.Blob;
 using static XooCreator.BA.Features.StoryEditor.Mappers.StoryAssetPathMapper;
@@ -257,7 +258,7 @@ public class StoryExportService : IStoryExportService
             title = def.Translations.FirstOrDefault(t => t.LanguageCode == primaryLang)?.Title ?? def.Title,
             summary = def.Summary,
             storyType = def.StoryType,
-            coverImageUrl = def.CoverImageUrl,
+            coverImageUrl = def.CoverImageUrl.ToExportAssetUrl(),
             storyTopic = def.StoryTopic,
             topicIds = topicIds,
             ageGroupIds = ageGroupIds,
@@ -281,15 +282,15 @@ public class StoryExportService : IStoryExportService
                     type = t.Type,
                     branchId = t.BranchId,
                     sortOrder = t.SortOrder,
-                    imageUrl = t.ImageUrl,
+                    imageUrl = t.ImageUrl.ToExportAssetUrl(),
                     translations = t.Translations.Select(tr => new
                     {
                         lang = tr.LanguageCode,
                         caption = tr.Caption,
                         text = tr.Text,
                         question = tr.Question,
-                        audioUrl = tr.AudioUrl,
-                        videoUrl = tr.VideoUrl
+                        audioUrl = tr.AudioUrl.ToExportAssetUrl(),
+                        videoUrl = tr.VideoUrl.ToExportAssetUrl()
                     }).ToList(),
                     dialogRootNodeId = t.DialogTile?.RootNodeId,
                     dialogNodes = t.DialogTile?.Nodes.OrderBy(n => n.SortOrder).Select(n => new
@@ -297,7 +298,7 @@ public class StoryExportService : IStoryExportService
                         nodeId = n.NodeId,
                         speakerType = n.SpeakerType,
                         speakerHeroId = n.SpeakerHeroId,
-                        translations = n.Translations.Select(nt => new { lang = nt.LanguageCode, text = nt.Text, audioUrl = nt.AudioUrl }).ToList(),
+                        translations = n.Translations.Select(nt => new { lang = nt.LanguageCode, text = nt.Text, audioUrl = nt.AudioUrl.ToExportAssetUrl() }).ToList(),
                         options = n.OutgoingEdges.OrderBy(e => e.OptionOrder).Select(e => new
                         {
                             id = e.EdgeId,
@@ -375,7 +376,7 @@ public class StoryExportService : IStoryExportService
             title = primaryTranslation.Title,
             summary = primaryTranslation.Summary ?? craft.StoryTopic,
             storyType = craft.StoryType,
-            coverImageUrl = craft.CoverImageUrl,
+            coverImageUrl = craft.CoverImageUrl.ToExportAssetUrl(),
             storyTopic = craft.StoryTopic,
             topicIds = topicIds,
             ageGroupIds = ageGroupIds,
@@ -401,15 +402,15 @@ public class StoryExportService : IStoryExportService
                     type = t.Type,
                     branchId = t.BranchId,
                     sortOrder = t.SortOrder,
-                    imageUrl = t.ImageUrl,
+                    imageUrl = t.ImageUrl.ToExportAssetUrl(),
                     translations = t.Translations.Select(tr => new
                     {
                         lang = tr.LanguageCode,
                         caption = tr.Caption,
                         text = tr.Text,
                         question = tr.Question,
-                        audioUrl = tr.AudioUrl,
-                        videoUrl = tr.VideoUrl
+                        audioUrl = tr.AudioUrl.ToExportAssetUrl(),
+                        videoUrl = tr.VideoUrl.ToExportAssetUrl()
                     }).ToList(),
                     dialogRootNodeId = t.DialogTile?.RootNodeId,
                     dialogNodes = t.DialogTile?.Nodes.OrderBy(n => n.SortOrder).Select(n => new
@@ -417,7 +418,7 @@ public class StoryExportService : IStoryExportService
                         nodeId = n.NodeId,
                         speakerType = n.SpeakerType,
                         speakerHeroId = n.SpeakerHeroId,
-                        translations = n.Translations.Select(nt => new { lang = nt.LanguageCode, text = nt.Text, audioUrl = nt.AudioUrl }).ToList(),
+                        translations = n.Translations.Select(nt => new { lang = nt.LanguageCode, text = nt.Text, audioUrl = nt.AudioUrl.ToExportAssetUrl() }).ToList(),
                         options = n.OutgoingEdges.OrderBy(e => e.OptionOrder).Select(e => new
                         {
                             id = e.EdgeId,

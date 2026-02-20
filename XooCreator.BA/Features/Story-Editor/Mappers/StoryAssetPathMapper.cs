@@ -1,4 +1,5 @@
 using XooCreator.BA.Data.Entities;
+using XooCreator.BA.Features.StoryEditor.Extensions;
 
 namespace XooCreator.BA.Features.StoryEditor.Mappers;
 
@@ -140,6 +141,10 @@ public static class StoryAssetPathMapper
     /// <returns>Full blob path for published container</returns>
     public static string BuildPublishedPath(AssetInfo asset, string userEmail, string storyId)
     {
+        var filename = asset.Filename.GetFilenameOnly() ?? asset.Filename;
+        if (string.IsNullOrWhiteSpace(filename))
+            filename = asset.Filename;
+
         var category = asset.Type switch
         {
             AssetType.Image => "images",
@@ -153,7 +158,7 @@ public static class StoryAssetPathMapper
         // Special path structure for seeded stories audio/video: {category}/{lang}/tol/stories/{userEmail}/{storyId}/{filename}
         if (isSeeded && (asset.Type == AssetType.Audio || asset.Type == AssetType.Video) && !string.IsNullOrWhiteSpace(asset.Lang))
         {
-            return $"{category}/{asset.Lang}/tol/stories/{userEmail}/{storyId}/{asset.Filename}";
+            return $"{category}/{asset.Lang}/tol/stories/{userEmail}/{storyId}/{filename}";
         }
 
         // Seeded stories use 'tol' path instead of 'tales-of-alchimalia' for historical reasons
@@ -166,13 +171,14 @@ public static class StoryAssetPathMapper
             basePath = $"{basePath}/{asset.Lang}";
         }
 
-        return $"{basePath}/{asset.Filename}";
+        return $"{basePath}/{filename}";
     }
 
     /// <summary>
     /// Builds the draft blob storage path for an asset.
     /// Structure: draft/u/{emailEscaped}/stories/{storyId}/{filename} (for images - language-agnostic)
     /// Structure: draft/u/{emailEscaped}/stories/{storyId}/{lang}/{filename} (for audio/video - language-specific)
+    /// Uses only the filename part of asset.Filename so paths stored in craft (e.g. from export) still resolve to draft blobs (e.g. after full import).
     /// </summary>
     /// <param name="asset">Asset information</param>
     /// <param name="userEmail">User email (owner of the story)</param>
@@ -180,23 +186,27 @@ public static class StoryAssetPathMapper
     /// <returns>Full blob path for draft container</returns>
     public static string BuildDraftPath(AssetInfo asset, string userEmail, string storyId)
     {
+        var filename = asset.Filename.GetFilenameOnly() ?? asset.Filename;
+        if (string.IsNullOrWhiteSpace(filename))
+            filename = asset.Filename;
+
         var emailEsc = Uri.EscapeDataString(userEmail);
         var basePath = $"draft/u/{emailEsc}/stories/{storyId}";
 
         // Images are language-agnostic in draft
         if (asset.Type == AssetType.Image)
         {
-            return $"{basePath}/{asset.Filename}";
+            return $"{basePath}/{filename}";
         }
 
         // Audio and video are language-specific
         if (!string.IsNullOrWhiteSpace(asset.Lang))
         {
-            return $"{basePath}/{asset.Lang}/{asset.Filename}";
+            return $"{basePath}/{asset.Lang}/{filename}";
         }
 
         // Fallback: without language (shouldn't happen for audio/video, but handle gracefully)
-        return $"{basePath}/{asset.Filename}";
+        return $"{basePath}/{filename}";
     }
 
     /// <summary>

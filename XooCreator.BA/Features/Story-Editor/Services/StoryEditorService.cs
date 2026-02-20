@@ -3,6 +3,7 @@ using System.Text.Json;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.Enums;
+using XooCreator.BA.Features.StoryEditor.Extensions;
 using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Features.StoryEditor.Services.Content;
 
@@ -85,7 +86,7 @@ public class StoryEditorService : IStoryEditorService
             translation.Summary = dto.Summary;
         }
         
-        craft.CoverImageUrl = ExtractFileName(dto.CoverImageUrl);
+        craft.CoverImageUrl = dto.CoverImageUrl.GetFilenameOnly();
         craft.StoryTopic = dto.StoryTopic; // Keep for backward compatibility
         craft.AuthorName = dto.AuthorName; // Save author name (for "Other" option)
         craft.ClassicAuthorId = dto.ClassicAuthorId; // Save classic author ID if selected
@@ -285,20 +286,4 @@ public class StoryEditorService : IStoryEditorService
         await _crafts.DeleteAsync(storyId, ct);
     }
 
-    /// <summary>
-    /// Extracts filename from a path. If input is already just a filename (no '/'), returns it as-is.
-    /// If input contains '/', extracts the filename using Path.GetFileName().
-    /// </summary>
-    private static string? ExtractFileName(string? path)
-    {
-        if (string.IsNullOrWhiteSpace(path)) return null;
-
-        var normalized = path.Trim().Replace('\\', '/');
-
-        // If already just filename (no path separator), return as-is
-        if (!normalized.Contains('/')) return normalized;
-
-        // Extract filename from path
-        return Path.GetFileName(normalized);
-    }
 }
