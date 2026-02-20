@@ -215,6 +215,7 @@ public class StoriesService : IStoriesService
                 ReviewStartedAt = craft.ReviewStartedAt,
                 ReviewEndedAt = craft.ReviewEndedAt,
                 BaseVersion = craft.BaseVersion,
+                LightChanges = craft.LightChanges,
                 OwnerEmail = ownerEmail,
                 Tiles = craft.Tiles.OrderBy(t => t.SortOrder).Select(t =>
                 {
@@ -349,6 +350,7 @@ public class StoriesService : IStoriesService
             Status = MapStatusForFrontend(story.Status), // story.Status is already StoryStatus enum
             AvailableLanguages = availableLangs,
             AudioLanguages = story.AudioLanguages ?? new List<string>(),
+            LightChanges = false, // Definition fallback is not a light-changes draft
             OwnerEmail = ownerEmailFromDefinition,
             Tiles = story.Tiles.OrderBy(t => t.SortOrder).Select(t =>
             {

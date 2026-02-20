@@ -20,7 +20,8 @@ public interface IStoryCopyService
         Guid ownerUserId,
         string newStoryId,
         CancellationToken ct,
-        bool isCopy = false);
+        bool isCopy = false,
+        bool lightChanges = false);
 }
 
 /// <summary>
@@ -96,7 +97,8 @@ public class StoryCopyService : IStoryCopyService
         Guid ownerUserId,
         string newStoryId,
         CancellationToken ct,
-        bool isCopy = false)
+        bool isCopy = false,
+        bool lightChanges = false)
     {
         ArgumentNullException.ThrowIfNull(definition);
         ValidateInputs(ownerUserId, newStoryId);
@@ -120,6 +122,7 @@ public class StoryCopyService : IStoryCopyService
         
         // Create new craft from clone data
         var craft = _cloner.CreateCraft(cloneData, ownerUserId, newStoryId);
+        craft.LightChanges = lightChanges;
         
         await _craftsRepository.SaveAsync(craft, ct);
 
