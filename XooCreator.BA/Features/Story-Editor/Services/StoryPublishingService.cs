@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.Enums;
+using XooCreator.BA.Features.StoryEditor.Extensions;
 using XooCreator.BA.Features.StoryEditor.Mappers;
 
 namespace XooCreator.BA.Features.StoryEditor.Services;
@@ -597,7 +598,7 @@ public class StoryPublishingService : IStoryPublishingService
         }
         else if (!string.IsNullOrWhiteSpace(craftTile.ImageUrl))
         {
-            var imageFilename = ExtractFileName(craftTile.ImageUrl);
+            var imageFilename = craftTile.ImageUrl.GetFilenameOnly();
             var asset = new StoryAssetPathMapper.AssetInfo(imageFilename!, StoryAssetPathMapper.AssetType.Image, null);
             tile.ImageUrl = StoryAssetPathMapper.BuildPublishedPath(asset, ownerEmail, def.StoryId);
         }
@@ -621,14 +622,14 @@ public class StoryPublishingService : IStoryPublishingService
             }
             else if (!string.IsNullOrWhiteSpace(tr.AudioUrl))
             {
-                var audioFilename = ExtractFileName(tr.AudioUrl);
+                var audioFilename = tr.AudioUrl.GetFilenameOnly();
                 var audioAsset = new StoryAssetPathMapper.AssetInfo(audioFilename!, StoryAssetPathMapper.AssetType.Audio, translationLang);
                 publishedAudioUrl = StoryAssetPathMapper.BuildPublishedPath(audioAsset, ownerEmail, def.StoryId);
             }
 
             if (!keepAssets && !string.IsNullOrWhiteSpace(tr.VideoUrl))
             {
-                var videoFilename = ExtractFileName(tr.VideoUrl);
+                var videoFilename = tr.VideoUrl.GetFilenameOnly();
                 var videoAsset = new StoryAssetPathMapper.AssetInfo(videoFilename!, StoryAssetPathMapper.AssetType.Video, translationLang);
                 publishedVideoUrl = StoryAssetPathMapper.BuildPublishedPath(videoAsset, ownerEmail, def.StoryId);
             }
@@ -694,7 +695,7 @@ public class StoryPublishingService : IStoryPublishingService
                     }
                     else
                     {
-                        var nodeAudioFilename = ExtractFileName(nodeTranslation.AudioUrl);
+                        var nodeAudioFilename = nodeTranslation.AudioUrl.GetFilenameOnly();
                         publishedNodeAudioUrl = !string.IsNullOrWhiteSpace(nodeAudioFilename)
                             ? StoryAssetPathMapper.BuildPublishedPath(
                                 new StoryAssetPathMapper.AssetInfo(nodeAudioFilename!, StoryAssetPathMapper.AssetType.Audio, nodeLang),
@@ -899,14 +900,6 @@ public class StoryPublishingService : IStoryPublishingService
     {
         public const string Header = "Header";
         public const string Tile = "Tile";
-    }
-
-    private static string? ExtractFileName(string? path)
-    {
-        if (string.IsNullOrWhiteSpace(path)) return null;
-        var normalized = path.Trim().Replace('\\', '/');
-        if (!normalized.Contains('/')) return normalized;
-        return Path.GetFileName(normalized);
     }
 
     private static class StoryPublishChangeTypes

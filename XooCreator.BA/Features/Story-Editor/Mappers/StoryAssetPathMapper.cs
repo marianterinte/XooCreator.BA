@@ -1,4 +1,5 @@
 using XooCreator.BA.Data.Entities;
+using XooCreator.BA.Features.StoryEditor.Extensions;
 
 namespace XooCreator.BA.Features.StoryEditor.Mappers;
 
@@ -140,7 +141,7 @@ public static class StoryAssetPathMapper
     /// <returns>Full blob path for published container</returns>
     public static string BuildPublishedPath(AssetInfo asset, string userEmail, string storyId)
     {
-        var filename = GetFilenameOnly(asset.Filename);
+        var filename = asset.Filename.GetFilenameOnly() ?? asset.Filename;
         if (string.IsNullOrWhiteSpace(filename))
             filename = asset.Filename;
 
@@ -185,7 +186,7 @@ public static class StoryAssetPathMapper
     /// <returns>Full blob path for draft container</returns>
     public static string BuildDraftPath(AssetInfo asset, string userEmail, string storyId)
     {
-        var filename = GetFilenameOnly(asset.Filename);
+        var filename = asset.Filename.GetFilenameOnly() ?? asset.Filename;
         if (string.IsNullOrWhiteSpace(filename))
             filename = asset.Filename;
 
@@ -206,15 +207,6 @@ public static class StoryAssetPathMapper
 
         // Fallback: without language (shouldn't happen for audio/video, but handle gracefully)
         return $"{basePath}/{filename}";
-    }
-
-    /// <summary>Returns only the filename part (last segment) of a path. Ensures draft lookup matches import/upload paths.</summary>
-    public static string GetFilenameOnly(string? path)
-    {
-        if (string.IsNullOrWhiteSpace(path)) return string.Empty;
-        var normalized = path.Trim().Replace('\\', '/');
-        var lastSlash = normalized.LastIndexOf('/');
-        return lastSlash >= 0 ? normalized.Substring(lastSlash + 1) : normalized;
     }
 
     /// <summary>
