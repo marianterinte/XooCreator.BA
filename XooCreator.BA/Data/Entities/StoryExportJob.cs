@@ -19,6 +19,13 @@ public class StoryExportJob
     public long? ZipSizeBytes { get; set; }
     public int? MediaCount { get; set; }
     public int? LanguageCount { get; set; }
+
+    /// <summary>When true (default), include video assets in the export ZIP. When false, export JSON only for video refs.</summary>
+    public bool? IncludeVideo { get; set; }
+    /// <summary>When true (default), include audio assets in the export ZIP. When false, export JSON only for audio refs.</summary>
+    public bool? IncludeAudio { get; set; }
+    /// <summary>When true (default), include image assets in the export ZIP. When false, export JSON only for image refs.</summary>
+    public bool? IncludeImages { get; set; }
 }
 
 public static class StoryExportJobStatus

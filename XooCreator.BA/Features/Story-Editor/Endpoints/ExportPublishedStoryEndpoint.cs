@@ -57,6 +57,9 @@ public class ExportPublishedStoryEndpoint
     public static async Task<Results<Accepted<ExportResponse>, NotFound, UnauthorizedHttpResult, ForbidHttpResult>> HandleGet(
         [FromRoute] string locale,
         [FromRoute] string storyId,
+        [FromQuery] bool? includeVideo,
+        [FromQuery] bool? includeAudio,
+        [FromQuery] bool? includeImages,
         [FromServices] ExportPublishedStoryEndpoint ep,
         CancellationToken ct)
     {
@@ -111,7 +114,7 @@ public class ExportPublishedStoryEndpoint
 
         try
         {
-            // Create export job
+            // Create export job (includeVideo/Audio/Images: null or true = include; false = JSON only for that type)
             var job = new StoryExportJob
             {
                 Id = Guid.NewGuid(),
@@ -121,7 +124,10 @@ public class ExportPublishedStoryEndpoint
                 Locale = locale,
                 IsDraft = false,
                 Status = StoryExportJobStatus.Queued,
-                QueuedAtUtc = DateTime.UtcNow
+                QueuedAtUtc = DateTime.UtcNow,
+                IncludeVideo = includeVideo ?? true,
+                IncludeAudio = includeAudio ?? true,
+                IncludeImages = includeImages ?? true
             };
 
             ep._db.StoryExportJobs.Add(job);

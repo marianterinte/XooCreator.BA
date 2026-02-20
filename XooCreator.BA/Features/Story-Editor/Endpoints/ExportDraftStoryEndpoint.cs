@@ -62,6 +62,9 @@ public class ExportDraftStoryEndpoint
     public static async Task<Results<Accepted<ExportResponse>, NotFound, UnauthorizedHttpResult, ForbidHttpResult>> HandleGet(
         [FromRoute] string locale,
         [FromRoute] string storyId,
+        [FromQuery] bool? includeVideo,
+        [FromQuery] bool? includeAudio,
+        [FromQuery] bool? includeImages,
         [FromServices] ExportDraftStoryEndpoint ep,
         CancellationToken ct)
     {
@@ -113,7 +116,7 @@ public class ExportDraftStoryEndpoint
                 return TypedResults.Forbid();
             }
 
-            // Create export job
+            // Create export job (includeVideo/Audio/Images: null or true = include; false = JSON only for that type)
             var job = new StoryExportJob
             {
                 Id = Guid.NewGuid(),
@@ -123,7 +126,10 @@ public class ExportDraftStoryEndpoint
                 Locale = locale,
                 IsDraft = true,
                 Status = StoryExportJobStatus.Queued,
-                QueuedAtUtc = DateTime.UtcNow
+                QueuedAtUtc = DateTime.UtcNow,
+                IncludeVideo = includeVideo ?? true,
+                IncludeAudio = includeAudio ?? true,
+                IncludeImages = includeImages ?? true
             };
 
             ep._db.StoryExportJobs.Add(job);
