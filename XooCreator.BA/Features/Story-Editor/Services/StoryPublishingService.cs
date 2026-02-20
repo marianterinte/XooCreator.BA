@@ -153,7 +153,10 @@ public class StoryPublishingService : IStoryPublishingService
             def.Version = def.Version <= 0 ? 1 : def.Version + 1;
         }
 
-        if (!string.IsNullOrWhiteSpace(craft.CoverImageUrl))
+        await RemoveExistingDefinitionContentAsync(def, ct);
+
+        var coverSynced = await _assetLinks.SyncCoverAsync(craft, ownerEmail, ct);
+        if (coverSynced && !string.IsNullOrWhiteSpace(craft.CoverImageUrl))
         {
             var coverType = StoryAssetPathMapper.GetCoverAssetType(craft.CoverImageUrl);
             var asset = new StoryAssetPathMapper.AssetInfo(craft.CoverImageUrl, coverType, null);
@@ -163,9 +166,6 @@ public class StoryPublishingService : IStoryPublishingService
         {
             def.CoverImageUrl = null;
         }
-
-        await RemoveExistingDefinitionContentAsync(def, ct);
-        await _assetLinks.SyncCoverAsync(craft, ownerEmail, ct);
 
         foreach (var tr in craft.Translations)
         {
@@ -276,7 +276,8 @@ public class StoryPublishingService : IStoryPublishingService
             def.CreatedBy = craft.OwnerUserId;
         }
 
-        if (!string.IsNullOrWhiteSpace(craft.CoverImageUrl))
+        var coverSynced = await _assetLinks.SyncCoverAsync(craft, ownerEmail, ct);
+        if (coverSynced && !string.IsNullOrWhiteSpace(craft.CoverImageUrl))
         {
             var coverType = StoryAssetPathMapper.GetCoverAssetType(craft.CoverImageUrl);
             var asset = new StoryAssetPathMapper.AssetInfo(craft.CoverImageUrl, coverType, null);
@@ -293,7 +294,6 @@ public class StoryPublishingService : IStoryPublishingService
         await ReplaceDefinitionCoAuthorsAsync(def, craft, ct);
         await ReplaceDefinitionUnlockedHeroesAsync(def, craft, ct);
         await ReplaceDefinitionDialogParticipantsAsync(def, craft, ct);
-        await _assetLinks.SyncCoverAsync(craft, ownerEmail, ct);
     }
 
     private async Task RemoveExistingDefinitionContentAsync(StoryDefinition def, CancellationToken ct)
