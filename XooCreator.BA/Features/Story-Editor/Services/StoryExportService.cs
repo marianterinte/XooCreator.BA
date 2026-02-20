@@ -24,7 +24,7 @@ public class StoryExportService : IStoryExportService
         _logger = logger;
     }
 
-    public async Task<ExportResult> ExportPublishedStoryAsync(StoryDefinition def, string locale, CancellationToken ct)
+    public async Task<ExportResult> ExportPublishedStoryAsync(StoryDefinition def, string locale, ExportOptions options, CancellationToken ct)
     {
         var primaryLang = (locale ?? string.Empty).Trim().ToLowerInvariant();
         var exportObj = BuildExportJson(def, primaryLang);
@@ -32,7 +32,8 @@ public class StoryExportService : IStoryExportService
         var fileName = $"{def.StoryId}-v{def.Version}.zip";
         var manifestPrefix = $"manifest/{def.StoryId}/v{def.Version}/";
         var hasDialogTiles = def.Tiles.Any(t => t.DialogTile?.Nodes != null && t.DialogTile.Nodes.Count > 0);
-        var mediaPaths = CollectPublishedMediaPaths(def);
+        var allMediaPaths = CollectPublishedMediaPaths(def);
+        var mediaPaths = FilterPublishedMediaPathsByOptions(allMediaPaths, options).ToList();
 
         using var ms = new MemoryStream();
         using (var zip = new ZipArchive(ms, ZipArchiveMode.Create, leaveOpen: true))
@@ -45,12 +46,11 @@ public class StoryExportService : IStoryExportService
                 await writer.WriteAsync(manifestJson);
             }
 
-            // Collect media paths from definition (already in published layout)
+            // Add only media paths that pass the options filter
             foreach (var path in mediaPaths)
             {
                 try
                 {
-                    // Download from published container and add to ZIP preserving relative path under "media/"
                     var client = _sas.GetBlobClient(_sas.PublishedContainer, path);
                     if (!await client.ExistsAsync(ct))
                     {
@@ -66,7 +66,6 @@ public class StoryExportService : IStoryExportService
                 catch (Exception ex)
                 {
                     _logger.LogWarning(ex, "Failed to download asset from published storage: {Path}", path);
-                    // Continue with other assets even if one fails
                 }
             }
         }
@@ -82,7 +81,41 @@ public class StoryExportService : IStoryExportService
         };
     }
 
-    public async Task<ExportResult> ExportDraftStoryAsync(StoryCraft craft, string locale, string ownerEmail, CancellationToken ct)
+    private static IEnumerable<string> FilterPublishedMediaPathsByOptions(List<string> paths, ExportOptions options)
+    {
+        foreach (var path in paths)
+        {
+            var kind = ClassifyPublishedPath(path);
+            if (kind == AssetType.Video && !options.IncludeVideo) continue;
+            if (kind == AssetType.Audio && !options.IncludeAudio) continue;
+            if (kind == AssetType.Image && !options.IncludeImages) continue;
+            yield return path;
+        }
+    }
+
+    private static AssetType ClassifyPublishedPath(string path)
+    {
+        var p = (path ?? string.Empty).Trim().Replace('\\', '/').ToLowerInvariant();
+        if (p.Contains("/audio/")) return AssetType.Audio;
+        if (p.Contains("/video/")) return AssetType.Video;
+        var ext = Path.GetExtension(p);
+        if (ext is ".mp3" or ".wav" or ".ogg" or ".m4a") return AssetType.Audio;
+        if (ext is ".mp4" or ".webm") return AssetType.Video;
+        return AssetType.Image;
+    }
+
+    private static bool IncludeAssetByOptions(AssetType type, ExportOptions options)
+    {
+        return type switch
+        {
+            AssetType.Video => options.IncludeVideo,
+            AssetType.Audio => options.IncludeAudio,
+            AssetType.Image => options.IncludeImages,
+            _ => options.IncludeImages
+        };
+    }
+
+    public async Task<ExportResult> ExportDraftStoryAsync(StoryCraft craft, string locale, string ownerEmail, ExportOptions options, CancellationToken ct)
     {
         // Build export JSON
         var primaryLang = (locale ?? string.Empty).Trim().ToLowerInvariant();
@@ -109,17 +142,17 @@ public class StoryExportService : IStoryExportService
             foreach (var asset in assets)
             {
                 var blobPath = StoryAssetPathMapper.BuildDraftPath(asset, ownerEmail, craft.StoryId);
-                // Cover can be image or video (language-agnostic)
                 var isCover = !string.IsNullOrWhiteSpace(craft.CoverImageUrl) &&
                               asset.Filename.Equals(craft.CoverImageUrl, StringComparison.OrdinalIgnoreCase);
                 allAssets.Add((asset, blobPath, isCover));
             }
         }
 
-        // Remove duplicates (same blob path)
+        // Remove duplicates (same blob path) and filter by options
         var uniqueAssets = allAssets
             .GroupBy(a => a.BlobPath, StringComparer.OrdinalIgnoreCase)
             .Select(g => g.First())
+            .Where(a => IncludeAssetByOptions(a.Asset.Type, options))
             .ToList();
 
         // Build ZIP
