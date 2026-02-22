@@ -118,15 +118,22 @@ public class RequestUploadEndpoint
             ? dto.OwnerEmail!.Trim()
             : user.Email;
         
-        // Delete old asset if it exists and update DB with new filename
-        await ep._assetReplacementService.ReplaceAssetAsync(
-            emailToUse, 
-            dto.StoryId, 
-            dto.TileId, 
-            dto.Kind, 
-            dto.FileName, 
-            lang, 
-            ct);
+        // IMPORTANT:
+        // For tile-audio we do NOT mutate DB/delete old blob during request-upload.
+        // Audio is persisted by normal draft save flow after upload succeeds.
+        // This avoids destructive pre-save behavior (old audio disappearing before save).
+        if (!string.Equals(dto.Kind, "tile-audio", StringComparison.OrdinalIgnoreCase))
+        {
+            // Delete old asset if it exists and update DB with new filename
+            await ep._assetReplacementService.ReplaceAssetAsync(
+                emailToUse,
+                dto.StoryId,
+                dto.TileId,
+                dto.Kind,
+                dto.FileName,
+                lang,
+                ct);
+        }
         
         var asset = new StoryAssetPathMapper.AssetInfo(dto.FileName, assetType, lang);
         var blobPath = StoryAssetPathMapper.BuildDraftPath(asset, emailToUse, dto.StoryId);
