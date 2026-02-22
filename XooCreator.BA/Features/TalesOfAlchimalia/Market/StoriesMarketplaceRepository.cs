@@ -26,12 +26,12 @@ public interface IStoriesMarketplaceRepository
     Task<List<string>> GetAvailableRegionsAsync();
     Task<List<string>> GetAvailableAgeRatingsAsync();
     Task<List<string>> GetAvailableCharactersAsync();
-    Task<bool> PurchaseStoryAsync(Guid userId, string storyId, double creditsSpent);
+    Task<bool> PurchaseStoryAsync(Guid userId, string storyId, double creditsSpent, CancellationToken ct = default);
     Task<bool> IsStoryPurchasedAsync(Guid userId, string storyId);
     Task<List<StoryMarketplaceItemDto>> GetUserPurchasedStoriesAsync(Guid userId, string locale);
     Task<StoryDetailsDto?> GetStoryDetailsAsync(string storyId, Guid userId, string locale);
     Task<double> GetComputedPriceAsync(string storyId);
-    Task EnsureStoryReaderAsync(Guid userId, string storyId, StoryAcquisitionSource source);
+    Task EnsureStoryReaderAsync(Guid userId, string storyId, StoryAcquisitionSource source, CancellationToken ct = default);
     Task<int> GetStoryReadersCountAsync(string storyId);
     Task<List<StoryReadersAggregate>> GetTopStoriesByReadersAsync(int limit);
     Task<List<StoryReadersTrendPoint>> GetReadersTrendAsync(int days);
@@ -132,19 +132,21 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             {
                 var searchTerm = request.SearchTerm.Trim();
                 
+                // EF Core does not translate string.Contains(string, StringComparison) to SQL; use ILike for server-side case-insensitive match.
+                var likePattern = "%" + searchTerm + "%";
                 if (string.Equals(request.SearchType, "author", StringComparison.OrdinalIgnoreCase))
                 {
                     // Search by Author Name (checks System User, Manual Author, and Classic Author)
-                    q = q.Where(s => s.SearchAuthors.Any(a => 
+                    q = q.Where(s => s.SearchAuthors.Any(a =>
                         !string.IsNullOrWhiteSpace(a) &&
-                        a.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
+                        EF.Functions.ILike(a, likePattern)));
                 }
                 else
                 {
                     // Default: Search by Title
                     q = q.Where(s => s.SearchTitles.Any(t =>
                         !string.IsNullOrWhiteSpace(t) &&
-                        t.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
+                        EF.Functions.ILike(t, likePattern)));
                 }
             }
 
@@ -207,31 +209,20 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
                 };
             }
 
-            var filtered = q.ToList();
-            var totalCount = filtered.Count;
-
             var page = request.Page <= 0 ? 1 : request.Page;
             var pageSize = request.PageSize <= 0 ? 20 : request.PageSize;
             var skip = request.Skip.HasValue ? Math.Max(0, request.Skip.Value) : (page - 1) * pageSize;
-            var pageItems = filtered
-                .Skip(skip)
-                .Take(pageSize)
-                .ToList();
+            var totalCount = q.Count();
+            var pageItems = q.Skip(skip).Take(pageSize).ToList();
 
             // Note: Removed per-user queries for isPurchased/isOwned to enable 100% global cache.
             // These properties are now only available in StoryDetailsDto (loaded per request when viewing story details).
 
-            // Get likes counts for page items
+            // Get likes counts for page items (batch query)
             var pageStoryIds = pageItems.Select(p => p.StoryId).ToList();
-            var likesCounts = new Dictionary<string, int>();
-            if (_likesRepository != null)
-            {
-                foreach (var storyId in pageStoryIds)
-                {
-                    var likesCount = await _likesRepository.GetStoryLikesCountAsync(storyId);
-                    likesCounts[storyId] = likesCount;
-                }
-            }
+            var likesCounts = _likesRepository != null && pageStoryIds.Count > 0
+                ? await _likesRepository.GetStoryLikesCountsAsync(pageStoryIds)
+                : new Dictionary<string, int>();
 
             var dtoList = pageItems.Select(p =>
             {
@@ -447,9 +438,9 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             .ToList();
     }
 
-    public async Task<bool> PurchaseStoryAsync(Guid userId, string storyId, double creditsSpent)
+    public async Task<bool> PurchaseStoryAsync(Guid userId, string storyId, double creditsSpent, CancellationToken ct = default)
     {
-        using var transaction = await _context.Database.BeginTransactionAsync();
+        using var transaction = await _context.Database.BeginTransactionAsync(ct);
         try
         {
             // Check if already purchased
@@ -494,13 +485,13 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             };
             _context.CreditTransactions.Add(creditTransaction);
 
-            await _context.SaveChangesAsync();
-            await transaction.CommitAsync();
+            await _context.SaveChangesAsync(ct);
+            await transaction.CommitAsync(ct);
             return true;
         }
         catch
         {
-            await transaction.RollbackAsync();
+            await transaction.RollbackAsync(ct);
             return false;
         }
     }
@@ -528,6 +519,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
 
         var ids = purchasedStories.Select(sp => sp.StoryId).ToList();
         var defs = await _context.StoryDefinitions
+            .AsNoTracking()
             .Include(s => s.Translations)
             .Include(s => s.Topics)
                 .ThenInclude(t => t.StoryTopic)
@@ -540,6 +532,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
     public async Task<StoryDetailsDto?> GetStoryDetailsAsync(string storyId, Guid userId, string locale)
     {
         var def = await _context.StoryDefinitions
+            .AsNoTracking()
             .Include(s => s.Translations)
             .Include(s => s.Tiles)
             .Include(s => s.AgeGroups)
@@ -605,11 +598,11 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             isLiked);
     }
 
-    public async Task EnsureStoryReaderAsync(Guid userId, string storyId, StoryAcquisitionSource source)
+    public async Task EnsureStoryReaderAsync(Guid userId, string storyId, StoryAcquisitionSource source, CancellationToken ct = default)
     {
         var exists = await _context.StoryReaders
             .AsNoTracking()
-            .AnyAsync(sr => sr.UserId == userId && sr.StoryId == storyId);
+            .AnyAsync(sr => sr.UserId == userId && sr.StoryId == storyId, ct);
 
         if (exists)
         {
@@ -626,7 +619,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         };
 
         _context.StoryReaders.Add(reader);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(ct);
     }
 
     public Task<int> GetStoryReadersCountAsync(string storyId)
@@ -885,16 +878,19 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             x => x.StoryId,
             x => new { x.AverageRating, x.TotalReviews });
 
-        // Get likes counts for all stories
-        var likesCounts = new Dictionary<string, int>();
-        if (_likesRepository != null)
-        {
-            foreach (var storyId in storyIds)
-            {
-                var likesCount = await _likesRepository.GetStoryLikesCountAsync(storyId);
-                likesCounts[storyId] = likesCount;
-            }
-        }
+        // Batch author names: single query for all createdBy user IDs
+        var createdByIds = defs.Where(d => d.CreatedBy.HasValue).Select(d => d.CreatedBy!.Value).Distinct().ToList();
+        var authorNamesByUserId = createdByIds.Count > 0
+            ? await _context.Set<AlchimaliaUser>()
+                .AsNoTracking()
+                .Where(u => createdByIds.Contains(u.Id))
+                .ToDictionaryAsync(u => u.Id, u => u.Name ?? string.Empty)
+            : new Dictionary<Guid, string>();
+
+        // Get likes counts for all stories (batch query)
+        var likesCounts = _likesRepository != null && storyIds.Count > 0
+            ? await _likesRepository.GetStoryLikesCountsAsync(storyIds)
+            : new Dictionary<string, int>();
 
         foreach (var def in defs)
         {
@@ -910,7 +906,8 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
                 readersCount,
                 likesCount,
                 stats.AverageRating,
-                stats.TotalReviews));
+                stats.TotalReviews,
+                authorNamesByUserId));
         }
         return result;
     }
@@ -922,7 +919,8 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         int readersCount,
         int likesCount,
         double averageRating,
-        int totalReviews)
+        int totalReviews,
+        IReadOnlyDictionary<Guid, string>? authorNamesByUserId = null)
     {
         var translation = def.Translations?.FirstOrDefault(t => t.LanguageCode == locale);
         var title = translation?.Title ?? def.Title;
@@ -933,14 +931,18 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             .OrderBy(l => l)
             .ToList() ?? new List<string>();
 
-        // Get author name from database
+        // Author name: use batch lookup when provided, otherwise single query (e.g. when called from GetStoryDetails)
         string? authorName = null;
         if (def.CreatedBy.HasValue)
         {
-            authorName = await _context.Set<AlchimaliaUser>()
-                .Where(u => u.Id == def.CreatedBy.Value)
-                .Select(u => u.Name)
-                .FirstOrDefaultAsync();
+            if (authorNamesByUserId != null && authorNamesByUserId.TryGetValue(def.CreatedBy.Value, out var name))
+                authorName = name;
+            else
+                authorName = await _context.Set<AlchimaliaUser>()
+                    .AsNoTracking()
+                    .Where(u => u.Id == def.CreatedBy.Value)
+                    .Select(u => u.Name)
+                    .FirstOrDefaultAsync();
         }
 
         // Get summary from JSON file for the current locale, or use StoryDefinition.Summary, or empty string

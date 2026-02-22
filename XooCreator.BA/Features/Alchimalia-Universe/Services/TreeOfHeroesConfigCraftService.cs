@@ -48,7 +48,7 @@ public class TreeOfHeroesConfigCraftService : ITreeOfHeroesConfigCraftService
 
     public async Task<ListTreeOfHeroesConfigCraftsResponse> ListCraftsAsync(string? status = null, CancellationToken ct = default)
     {
-        var configs = await _repository.ListAsync(status, ct);
+        var configs = await _repository.ListAsync(status, ct: ct);
         var totalCount = await _repository.CountAsync(status, ct);
 
         var items = configs.Select(c => new TreeOfHeroesConfigListItemDto

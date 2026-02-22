@@ -25,6 +25,15 @@ public class StoryHeroRepository : IStoryHeroRepository
             .FirstOrDefaultAsync(x => x.HeroId == id, ct);
     }
 
+    public async Task<StoryHero?> GetByHeroIdWithTranslationsAsync(string heroId, CancellationToken ct = default)
+    {
+        var id = (heroId ?? string.Empty).Trim();
+        return await _context.StoryHeroes
+            .AsNoTracking()
+            .Include(x => x.Translations)
+            .FirstOrDefaultAsync(x => x.HeroId == id, ct);
+    }
+
     public async Task<StoryHero?> GetWithTranslationsAsync(Guid storyHeroId, CancellationToken ct = default)
     {
         return await _context.StoryHeroes
@@ -69,6 +78,7 @@ public class StoryHeroRepository : IStoryHeroRepository
     public async Task<List<StoryHero>> ListAsync(string? status = null, string? search = null, CancellationToken ct = default)
     {
         var query = _context.StoryHeroes
+            .AsNoTracking()
             .Include(x => x.Translations)
             .AsQueryable();
         

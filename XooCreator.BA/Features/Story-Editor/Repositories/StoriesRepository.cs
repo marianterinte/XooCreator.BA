@@ -187,7 +187,7 @@ public class StoriesRepository : IStoriesRepository
         return progress;
     }
 
-    public async Task<bool> MarkTileAsReadAsync(Guid userId, string storyId, string tileId)
+    public async Task<bool> MarkTileAsReadAsync(Guid userId, string storyId, string tileId, CancellationToken ct = default)
     {
         try
         {
@@ -214,7 +214,7 @@ public class StoriesRepository : IStoriesRepository
             };
 
             _context.UserStoryReadProgress.Add(readProgress);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(ct);
             return true;
         }
         catch
@@ -223,7 +223,7 @@ public class StoriesRepository : IStoriesRepository
         }
     }
 
-    public async Task ResetStoryProgressAsync(Guid userId, string storyId)
+    public async Task ResetStoryProgressAsync(Guid userId, string storyId, CancellationToken ct = default)
     {
         storyId = NormalizeStoryId(storyId);
         // Optimized: Filter directly in database query instead of loading all progress in memory
@@ -281,7 +281,7 @@ public class StoriesRepository : IStoriesRepository
 
         // Delete progress entries
         _context.UserStoryReadProgress.RemoveRange(entries);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(ct);
     }
 
     public async Task<StoryCompletionInfo> GetStoryCompletionStatusAsync(Guid userId, string storyId)
@@ -311,7 +311,7 @@ public class StoriesRepository : IStoriesRepository
         };
     }
 
-    public async Task SeedStoriesAsync()
+    public async Task SeedStoriesAsync(CancellationToken ct = default)
     {
         try
         {
@@ -338,7 +338,7 @@ public class StoriesRepository : IStoriesRepository
                 {
                     _context.StoryDefinitions.Add(story);
                 }
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(ct);
             }
 
             var processedDefTranslations = new HashSet<(Guid, string)>();
@@ -459,7 +459,7 @@ public class StoriesRepository : IStoriesRepository
                     }
                 }
             }
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(ct);
 
             // Process other languages
             foreach (var lc in LanguageCodeExtensions.All().Where(x => x != LanguageCode.RoRo))
@@ -578,7 +578,7 @@ public class StoriesRepository : IStoriesRepository
                     }
                 }
             }
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(ct);
         }
         catch (Exception ex)
         {
@@ -587,7 +587,7 @@ public class StoriesRepository : IStoriesRepository
         }
     }
 
-    public async Task SeedIndependentStoriesAsync()
+    public async Task SeedIndependentStoriesAsync(CancellationToken ct = default)
     {
         try
         {
@@ -602,7 +602,7 @@ public class StoriesRepository : IStoriesRepository
             
             // Save StoryDefinitions to database before creating translations
             // This ensures StoryDefinitions exist when we look them up in ApplyIndependentTranslationsForLocale
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(ct);
 
             // Now create translations for all languages (including ro-ro, unlike SeedStoriesAsync)
             // This ensures all languages have translations, including the base ro-ro
@@ -611,7 +611,7 @@ public class StoriesRepository : IStoriesRepository
                 await ApplyIndependentTranslationsForLocale(lc.ToTag());
             }
 
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(ct);
         }
         catch (Exception ex)
         {

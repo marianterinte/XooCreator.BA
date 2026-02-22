@@ -6,8 +6,8 @@ namespace XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories;
 
 public interface IFavoritesRepository
 {
-    Task<bool> AddFavoriteAsync(Guid userId, string storyId);
-    Task<bool> RemoveFavoriteAsync(Guid userId, string storyId);
+    Task<bool> AddFavoriteAsync(Guid userId, string storyId, CancellationToken ct = default);
+    Task<bool> RemoveFavoriteAsync(Guid userId, string storyId, CancellationToken ct = default);
     Task<bool> IsFavoriteAsync(Guid userId, string storyId);
     Task<List<StoryMarketplaceItemDto>> GetFavoriteStoriesAsync(Guid userId, string locale);
 }
@@ -23,7 +23,7 @@ public class FavoritesRepository : IFavoritesRepository
         _marketplaceRepository = marketplaceRepository;
     }
 
-    public async Task<bool> AddFavoriteAsync(Guid userId, string storyId)
+    public async Task<bool> AddFavoriteAsync(Guid userId, string storyId, CancellationToken ct = default)
     {
         var storyDef = await _context.StoryDefinitions
             .FirstOrDefaultAsync(s => s.StoryId == storyId && s.IsActive);
@@ -47,11 +47,11 @@ public class FavoritesRepository : IFavoritesRepository
         };
 
         _context.UserFavoriteStories.Add(favorite);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(ct);
         return true;
     }
 
-    public async Task<bool> RemoveFavoriteAsync(Guid userId, string storyId)
+    public async Task<bool> RemoveFavoriteAsync(Guid userId, string storyId, CancellationToken ct = default)
     {
         var storyDef = await _context.StoryDefinitions
             .FirstOrDefaultAsync(s => s.StoryId == storyId);
@@ -66,7 +66,7 @@ public class FavoritesRepository : IFavoritesRepository
             return false;
 
         _context.UserFavoriteStories.Remove(favorite);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(ct);
         return true;
     }
 

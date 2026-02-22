@@ -111,6 +111,7 @@ public class StoryFeedbackRepository : IStoryFeedbackRepository
     public async Task<List<StoryFeedbackEntity>> GetAllFeedbacksAsync(CancellationToken ct = default)
     {
         return await _db.StoryFeedbacks
+            .AsNoTracking()
             .Include(f => f.User)
             .OrderByDescending(f => f.CreatedAt)
             .ToListAsync(ct);

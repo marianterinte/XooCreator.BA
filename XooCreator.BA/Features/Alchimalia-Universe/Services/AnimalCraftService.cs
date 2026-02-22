@@ -51,7 +51,7 @@ public class AnimalCraftService : IAnimalCraftService
 
     public async Task<ListAnimalCraftsResponse> ListAsync(Guid currentUserId, string? status = null, Guid? regionId = null, bool? isHybrid = null, string? search = null, string? languageCode = null, CancellationToken ct = default)
     {
-        var animals = await _repository.ListAsync(status, regionId, isHybrid, search, ct);
+        var animals = await _repository.ListAsync(status, regionId, isHybrid, search, ct: ct);
 
         var normalizedLanguage = NormalizeLanguageCode(languageCode);
         var languageBase = GetLanguageBase(normalizedLanguage);

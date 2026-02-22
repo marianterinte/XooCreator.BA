@@ -91,16 +91,11 @@ public class EpicsMarketplaceRepository
                 _ => sortDesc ? q.OrderByDescending(e => e.PublishedAtUtc) : q.OrderBy(e => e.PublishedAtUtc)
             };
 
-            var filtered = q.ToList();
-            var totalCount = filtered.Count;
-
             var page = request.Page <= 0 ? 1 : request.Page;
             var pageSize = request.PageSize <= 0 ? 20 : request.PageSize;
-
-            var pageItems = filtered
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
+            var skip = (page - 1) * pageSize;
+            var totalCount = q.Count();
+            var pageItems = q.Skip(skip).Take(pageSize).ToList();
 
             var dtoList = pageItems.Select(epic =>
             {

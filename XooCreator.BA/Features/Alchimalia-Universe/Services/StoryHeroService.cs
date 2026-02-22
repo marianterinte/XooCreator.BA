@@ -32,19 +32,17 @@ public class StoryHeroService : IStoryHeroService
 
     public async Task<StoryHeroDto> GetByHeroIdAsync(string heroId, string? languageCode = null, CancellationToken ct = default)
     {
-        var storyHero = await _repository.GetByHeroIdAsync(heroId, ct);
+        var storyHero = await _repository.GetByHeroIdWithTranslationsAsync(heroId, ct);
         if (storyHero == null)
         {
             throw new KeyNotFoundException($"StoryHero with HeroId '{heroId}' not found");
         }
-
-        var fullHero = await _repository.GetWithTranslationsAsync(storyHero.Id, ct);
-        return MapToDto(fullHero!, languageCode);
+        return MapToDto(storyHero, languageCode);
     }
 
     public async Task<ListStoryHeroesResponse> ListAsync(string? status = null, string? search = null, string? languageCode = null, CancellationToken ct = default)
     {
-        var storyHeroes = await _repository.ListAsync(status, search, ct);
+        var storyHeroes = await _repository.ListAsync(status, search, ct: ct);
         var totalCount = await _repository.CountAsync(status, ct);
 
         var items = storyHeroes.Select(sh =>
