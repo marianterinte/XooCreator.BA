@@ -65,7 +65,7 @@ public class EpicProgressRepository : IEpicProgressRepository
             await _context.SaveChangesAsync();
             return true;
         }
-        catch
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return false;
         }
@@ -105,7 +105,7 @@ public class EpicProgressRepository : IEpicProgressRepository
             await _context.SaveChangesAsync();
             return true;
         }
-        catch
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return false;
         }
@@ -137,15 +137,11 @@ public class EpicProgressRepository : IEpicProgressRepository
             // This clears the CompletedAt field that determines isCompleted
             if (storyIds.Any())
             {
-                var allHistory = await _context.UserStoryReadHistory
-                    .Where(h => h.UserId == userId)
+                var historyToDelete = await _context.UserStoryReadHistory
+                    .Where(h => h.UserId == userId && storyIds.Contains(h.StoryId))
                     .ToListAsync();
 
-                var historyToDelete = allHistory
-                    .Where(h => storyIds.Any(sid => string.Equals(h.StoryId, sid, StringComparison.OrdinalIgnoreCase)))
-                    .ToList();
-
-                if (historyToDelete.Any())
+                if (historyToDelete.Count > 0)
                 {
                     _context.UserStoryReadHistory.RemoveRange(historyToDelete);
                 }
@@ -155,15 +151,11 @@ public class EpicProgressRepository : IEpicProgressRepository
             // This clears all quiz answers saved during story completion
             if (storyIds.Any())
             {
-                var allAnswers = await _context.StoryQuizAnswers
-                    .Where(a => a.UserId == userId)
+                var answersToDelete = await _context.StoryQuizAnswers
+                    .Where(a => a.UserId == userId && storyIds.Contains(a.StoryId))
                     .ToListAsync();
 
-                var answersToDelete = allAnswers
-                    .Where(a => storyIds.Any(sid => string.Equals(a.StoryId, sid, StringComparison.OrdinalIgnoreCase)))
-                    .ToList();
-
-                if (answersToDelete.Any())
+                if (answersToDelete.Count > 0)
                 {
                     _context.StoryQuizAnswers.RemoveRange(answersToDelete);
                 }
@@ -173,7 +165,7 @@ public class EpicProgressRepository : IEpicProgressRepository
             await transaction.CommitAsync();
             return true;
         }
-        catch
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return false;
         }

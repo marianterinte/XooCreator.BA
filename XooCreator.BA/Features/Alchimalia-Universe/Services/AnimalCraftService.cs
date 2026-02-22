@@ -730,12 +730,12 @@ public class AnimalCraftService : IAnimalCraftService
         {
              _logger.LogError(ex, "Database update failed during publish for animal {AnimalId}", animalId);
              // Wrap in InvalidOperationException to return 409 to client with details
-             throw new InvalidOperationException($"Database update failed: {ex.InnerException?.Message ?? ex.Message}");
+             throw new InvalidOperationException($"Database update failed: {ex.InnerException?.Message ?? ex.Message}", ex);
         }
         catch (Exception ex)
         {
              _logger.LogError(ex, "Unexpected error publishing animal {AnimalId}", animalId);
-             throw new InvalidOperationException($"Unexpected error: {ex.Message}");
+             throw new InvalidOperationException($"Unexpected error: {ex.Message}", ex);
         }
 
         _logger.LogInformation("AnimalCraft {AnimalId} published by user {UserId}", animalId, publisherId);

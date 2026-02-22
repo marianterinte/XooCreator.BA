@@ -11,16 +11,19 @@ using XooCreator.BA.Features.Stories.SeedEntities;
 namespace XooCreator.BA.Features.StoryEditor.Repositories;
 
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 
 public class StoriesRepository : IStoriesRepository
 {
     private readonly XooDbContext _context;
     private readonly IMemoryCache _cache;
+    private readonly ILogger<StoriesRepository> _logger;
 
-    public StoriesRepository(XooDbContext context, IMemoryCache cache)
+    public StoriesRepository(XooDbContext context, IMemoryCache cache, ILogger<StoriesRepository> logger)
     {
         _context = context;
         _cache = cache;
+        _logger = logger;
     }
 
     public async Task<List<StoryContentDto>> GetAllStoriesAsync(string locale)
@@ -579,7 +582,7 @@ public class StoriesRepository : IStoriesRepository
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"An error occurred during story seeding: {ex.Message}");
+            _logger.LogError(ex, "Error during story seeding");
             throw;
         }
     }
@@ -612,7 +615,7 @@ public class StoriesRepository : IStoriesRepository
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"An error occurred during independent story seeding: {ex.Message}");
+            _logger.LogError(ex, "Error during independent story seeding");
             throw;
         }
     }
@@ -992,7 +995,7 @@ public class StoriesRepository : IStoriesRepository
                 }
                 catch (Exception ex)
                 {
-                    throw ex;
+                    throw;
                 }
             }
         }

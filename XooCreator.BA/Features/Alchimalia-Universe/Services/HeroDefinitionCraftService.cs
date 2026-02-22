@@ -702,12 +702,12 @@ public class HeroDefinitionCraftService : IHeroDefinitionCraftService
         catch (DbUpdateException ex)
         {
             _logger.LogError(ex, "Database update failed during publish for hero {HeroId}", heroId);
-            throw new InvalidOperationException($"Database update failed: {ex.InnerException?.Message ?? ex.Message}");
+            throw new InvalidOperationException($"Database update failed: {ex.InnerException?.Message ?? ex.Message}", ex);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Unexpected error publishing hero {HeroId}", heroId);
-            throw new InvalidOperationException($"Unexpected error: {ex.Message}");
+            throw new InvalidOperationException($"Unexpected error: {ex.Message}", ex);
         }
 
         // Cleanup craft after successful publish
