@@ -8,7 +8,11 @@ public class StoryImportJob
     public Guid OwnerUserId { get; set; }
     public string RequestedByEmail { get; set; } = string.Empty;
     public string Locale { get; set; } = "ro-ro";
-    public string ZipBlobPath { get; set; } = string.Empty;
+    public string? ZipBlobPath { get; set; }
+    /// <summary>When set, worker loads manifest and assets from staging instead of ZIP. e.g. imports/{userId}/temp/{uploadId}.</summary>
+    public string? StagingPrefix { get; set; }
+    /// <summary>Path to manifest.json in blob when using staging. e.g. imports/{userId}/temp/{uploadId}/manifest.json.</summary>
+    public string? ManifestBlobPath { get; set; }
     public string ZipFileName { get; set; } = string.Empty;
     public long ZipSizeBytes { get; set; }
     public string Status { get; set; } = StoryImportJobStatus.Queued;

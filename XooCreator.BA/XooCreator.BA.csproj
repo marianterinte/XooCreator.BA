@@ -69,6 +69,7 @@
     <Content Remove="Data\SeedData\Stories\seed%40alchimalia.com\independent\i18n\ro-ro\learn-math-s1.json" />
     <Content Remove="Data\SeedData\Story-Editor\Topic\age-groups.json" />
     <Content Remove="Data\SeedData\Story-Editor\Topic\topics.json" />
+    <Content Remove="Properties\launchSettings - swagger-enabled.json" />
   </ItemGroup>
 
   <ItemGroup>

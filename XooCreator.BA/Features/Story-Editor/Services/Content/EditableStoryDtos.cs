@@ -41,6 +41,9 @@ public class EditableStoryDto
 
     // Version reference
     public int? BaseVersion { get; set; }
+
+    /// <summary>When true, this draft is a light-changes version: assets are not in draft storage; editor should not request them.</summary>
+    public bool LightChanges { get; set; }
     
     // Owner email (for admin editing another user's draft)
     public string? OwnerEmail { get; set; }
@@ -85,6 +88,10 @@ public class EditableDialogOptionDto
     public string NextNodeId { get; set; } = string.Empty;
     public string? JumpToTileId { get; set; }
     public string? SetBranchId { get; set; }
+    /// <summary>If set, hide this option when the given branch is set.</summary>
+    public string? HideIfBranchSet { get; set; }
+    /// <summary>If set, show this option only when all these branches are set.</summary>
+    public List<string>? ShowOnlyIfBranchesSet { get; set; }
     public List<EditableTokenDto> Tokens { get; set; } = new();
 }
 

@@ -64,6 +64,8 @@ public record StoryDialogOptionDto
     public string? Text { get; init; }
     public string? JumpToTileId { get; init; }
     public string? SetBranchId { get; init; }
+    public string? HideIfBranchSet { get; init; }
+    public List<string>? ShowOnlyIfBranchesSet { get; init; }
     public List<TokenReward> Tokens { get; init; } = new();
 }
 

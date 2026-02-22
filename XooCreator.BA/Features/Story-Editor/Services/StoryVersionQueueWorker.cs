@@ -158,6 +158,7 @@ public class StoryVersionQueueWorker : BackgroundService
                             .Include(d => d.Tiles).ThenInclude(t => t.Translations)
                             .Include(d => d.Tiles).ThenInclude(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.Translations)
                             .Include(d => d.Tiles).ThenInclude(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.OutgoingEdges).ThenInclude(e => e.Translations)
+                            .Include(d => d.Tiles).ThenInclude(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.OutgoingEdges).ThenInclude(e => e.Tokens)
                             .Include(d => d.Translations)
                             .Include(d => d.Topics).ThenInclude(t => t.StoryTopic)
                             .Include(d => d.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
@@ -215,48 +216,61 @@ public class StoryVersionQueueWorker : BackgroundService
                             job.Id, job.StoryId, job.BaseVersion);
 
                         // Create StoryCraft from StoryDefinition
-                        var newCraft = await storyCopyService.CreateCopyFromDefinitionAsync(definition, job.OwnerUserId, job.StoryId, stoppingToken);
+                        var newCraft = await storyCopyService.CreateCopyFromDefinitionAsync(
+                            definition,
+                            job.OwnerUserId,
+                            job.StoryId,
+                            stoppingToken,
+                            isCopy: false,
+                            lightChanges: job.LightChanges);
                         _logger.LogInformation("Draft created from definition for StoryVersionJob: jobId={JobId} storyId={StoryId}", job.Id, job.StoryId);
 
-                        // Copy assets from published to draft storage.
+                        // Copy assets from published to draft storage (skip for light-changes versions).
                         // Source: published content is under the owner folder. Target: draft must be under the same
                         // owner (draft/u/{owner}/stories/...) so the editor's request-read finds the blobs;
                         // the editor always uses craft.OwnerUserId → owner email for draft paths.
-                        try
+                        if (!job.LightChanges)
                         {
-                            var publishedOwnerEmail =
-                                TryExtractOwnerFolderFromPublishedPath(definition.CoverImageUrl, definition.StoryId)
-                                ?? TryExtractOwnerFolderFromPublishedPath(
-                                    definition.Tiles.FirstOrDefault(t => !string.IsNullOrWhiteSpace(t.ImageUrl))?.ImageUrl,
-                                    definition.StoryId)
-                                ?? await db.AlchimaliaUsers
-                                    .AsNoTracking()
-                                    .Where(u => u.Id == job.OwnerUserId)
-                                    .Select(u => u.Email)
-                                    .FirstOrDefaultAsync(stoppingToken);
+                            try
+                            {
+                                var publishedOwnerEmail =
+                                    TryExtractOwnerFolderFromPublishedPath(definition.CoverImageUrl, definition.StoryId)
+                                    ?? TryExtractOwnerFolderFromPublishedPath(
+                                        definition.Tiles.FirstOrDefault(t => !string.IsNullOrWhiteSpace(t.ImageUrl))?.ImageUrl,
+                                        definition.StoryId)
+                                    ?? await db.AlchimaliaUsers
+                                        .AsNoTracking()
+                                        .Where(u => u.Id == job.OwnerUserId)
+                                        .Select(u => u.Email)
+                                        .FirstOrDefaultAsync(stoppingToken);
 
-                            if (string.IsNullOrWhiteSpace(publishedOwnerEmail))
-                            {
-                                _logger.LogWarning(
-                                    "Skipping asset copy for StoryVersionJob: jobId={JobId} storyId={StoryId} — cannot resolve published owner email for OwnerUserId={OwnerUserId}",
-                                    job.Id, job.StoryId, job.OwnerUserId);
+                                if (string.IsNullOrWhiteSpace(publishedOwnerEmail))
+                                {
+                                    _logger.LogWarning(
+                                        "Skipping asset copy for StoryVersionJob: jobId={JobId} storyId={StoryId} — cannot resolve published owner email for OwnerUserId={OwnerUserId}",
+                                        job.Id, job.StoryId, job.OwnerUserId);
+                                }
+                                else
+                                {
+                                    var assets = storyAssetCopyService.CollectFromDefinition(definition);
+                                    await storyAssetCopyService.CopyPublishedToDraftAsync(
+                                        assets,
+                                        publishedOwnerEmail,
+                                        definition.StoryId,
+                                        publishedOwnerEmail,
+                                        job.StoryId,
+                                        stoppingToken);
+                                    _logger.LogInformation("Asset copy completed for StoryVersionJob: jobId={JobId} storyId={StoryId}", job.Id, job.StoryId);
+                                }
                             }
-                            else
+                            catch (Exception assetEx)
                             {
-                                var assets = storyAssetCopyService.CollectFromDefinition(definition);
-                                await storyAssetCopyService.CopyPublishedToDraftAsync(
-                                    assets,
-                                    publishedOwnerEmail,
-                                    definition.StoryId,
-                                    publishedOwnerEmail,
-                                    job.StoryId,
-                                    stoppingToken);
-                                _logger.LogInformation("Asset copy completed for StoryVersionJob: jobId={JobId} storyId={StoryId}", job.Id, job.StoryId);
+                                _logger.LogWarning(assetEx, "Failed to copy assets during create version for storyId={StoryId}, but continuing", job.StoryId);
                             }
                         }
-                        catch (Exception assetEx)
+                        else
                         {
-                            _logger.LogWarning(assetEx, "Failed to copy assets during create version for storyId={StoryId}, but continuing", job.StoryId);
+                            _logger.LogInformation("Skipping asset copy for light-changes version: jobId={JobId} storyId={StoryId}", job.Id, job.StoryId);
                         }
 
                         job.Status = StoryVersionJobStatus.Completed;

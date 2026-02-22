@@ -56,7 +56,8 @@ public class StoryCloner : IStoryCloner
                 Type = tileData.Type,
                 SortOrder = sortOrder++,
                 BranchId = tileData.BranchId,
-                ImageUrl = tileData.ImageUrl
+                ImageUrl = tileData.ImageUrl,
+                AvailableHeroIdsJson = tileData.AvailableHeroIdsJson
             };
 
             // Clone tile translations
@@ -143,6 +144,8 @@ public class StoryCloner : IStoryCloner
                             ToNodeId = optionData.ToNodeId,
                             JumpToTileId = optionData.JumpToTileId,
                             SetBranchId = optionData.SetBranchId,
+                            HideIfBranchSet = optionData.HideIfBranchSet,
+                            ShowOnlyIfBranchesSet = optionData.ShowOnlyIfBranchesSet,
                             OptionOrder = optionData.OptionOrder
                         };
                         foreach (var edgeTr in optionData.Translations)

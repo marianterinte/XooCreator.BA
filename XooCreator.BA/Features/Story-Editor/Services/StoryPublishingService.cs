@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.Enums;
+using XooCreator.BA.Features.StoryEditor.Extensions;
 using XooCreator.BA.Features.StoryEditor.Mappers;
 
 namespace XooCreator.BA.Features.StoryEditor.Services;
@@ -105,6 +106,9 @@ public class StoryPublishingService : IStoryPublishingService
         var storyId = craft.StoryId;
         var def = existingDefinition;
         var isNew = def == null;
+        var lightChanges = craft.LightChanges;
+        var previousCoverImageUrl = def?.CoverImageUrl;
+        var previousTileAssetsByTileId = BuildPublishedTileAssetSnapshots(def);
         if (isNew)
         {
             def = new StoryDefinition
@@ -153,19 +157,26 @@ public class StoryPublishingService : IStoryPublishingService
             def.Version = def.Version <= 0 ? 1 : def.Version + 1;
         }
 
-        if (!string.IsNullOrWhiteSpace(craft.CoverImageUrl))
+        await RemoveExistingDefinitionContentAsync(def, ct, keepAssets: lightChanges);
+
+        if (lightChanges)
         {
-            var coverType = StoryAssetPathMapper.GetCoverAssetType(craft.CoverImageUrl);
-            var asset = new StoryAssetPathMapper.AssetInfo(craft.CoverImageUrl, coverType, null);
-            def.CoverImageUrl = StoryAssetPathMapper.BuildPublishedPath(asset, ownerEmail, storyId);
+            def.CoverImageUrl = previousCoverImageUrl;
         }
         else
         {
-            def.CoverImageUrl = null;
+            var coverSynced = await _assetLinks.SyncCoverAsync(craft, ownerEmail, ct);
+            if (coverSynced && !string.IsNullOrWhiteSpace(craft.CoverImageUrl))
+            {
+                var coverType = StoryAssetPathMapper.GetCoverAssetType(craft.CoverImageUrl);
+                var asset = new StoryAssetPathMapper.AssetInfo(craft.CoverImageUrl, coverType, null);
+                def.CoverImageUrl = StoryAssetPathMapper.BuildPublishedPath(asset, ownerEmail, storyId);
+            }
+            else
+            {
+                def.CoverImageUrl = null;
+            }
         }
-
-        await RemoveExistingDefinitionContentAsync(def, ct);
-        await _assetLinks.SyncCoverAsync(craft, ownerEmail, ct);
 
         foreach (var tr in craft.Translations)
         {
@@ -182,7 +193,17 @@ public class StoryPublishingService : IStoryPublishingService
 
         foreach (var craftTile in tilesBySort)
         {
-            await UpsertTileFromCraftAsync(def, craft, craftTile, ownerEmail, langTag, ct, removeExisting: false);
+            previousTileAssetsByTileId.TryGetValue(craftTile.TileId, out var previousTileAssets);
+            await UpsertTileFromCraftAsync(
+                def,
+                craft,
+                craftTile,
+                ownerEmail,
+                langTag,
+                ct,
+                removeExisting: false,
+                keepAssets: lightChanges,
+                previousPublishedAssets: previousTileAssets);
         }
 
         await ReplaceDefinitionTopicsAsync(def, craft, ct);
@@ -276,15 +297,19 @@ public class StoryPublishingService : IStoryPublishingService
             def.CreatedBy = craft.OwnerUserId;
         }
 
-        if (!string.IsNullOrWhiteSpace(craft.CoverImageUrl))
+        if (!craft.LightChanges)
         {
-            var coverType = StoryAssetPathMapper.GetCoverAssetType(craft.CoverImageUrl);
-            var asset = new StoryAssetPathMapper.AssetInfo(craft.CoverImageUrl, coverType, null);
-            def.CoverImageUrl = StoryAssetPathMapper.BuildPublishedPath(asset, ownerEmail, craft.StoryId);
-        }
-        else
-        {
-            def.CoverImageUrl = null;
+            var coverSynced = await _assetLinks.SyncCoverAsync(craft, ownerEmail, ct);
+            if (coverSynced && !string.IsNullOrWhiteSpace(craft.CoverImageUrl))
+            {
+                var coverType = StoryAssetPathMapper.GetCoverAssetType(craft.CoverImageUrl);
+                var asset = new StoryAssetPathMapper.AssetInfo(craft.CoverImageUrl, coverType, null);
+                def.CoverImageUrl = StoryAssetPathMapper.BuildPublishedPath(asset, ownerEmail, craft.StoryId);
+            }
+            else
+            {
+                def.CoverImageUrl = null;
+            }
         }
 
         await ReplaceDefinitionTranslationsAsync(def, craft, ct);
@@ -293,10 +318,9 @@ public class StoryPublishingService : IStoryPublishingService
         await ReplaceDefinitionCoAuthorsAsync(def, craft, ct);
         await ReplaceDefinitionUnlockedHeroesAsync(def, craft, ct);
         await ReplaceDefinitionDialogParticipantsAsync(def, craft, ct);
-        await _assetLinks.SyncCoverAsync(craft, ownerEmail, ct);
     }
 
-    private async Task RemoveExistingDefinitionContentAsync(StoryDefinition def, CancellationToken ct)
+    private async Task RemoveExistingDefinitionContentAsync(StoryDefinition def, CancellationToken ct, bool keepAssets = false)
     {
         if (def.Id == Guid.Empty)
         {
@@ -309,7 +333,7 @@ public class StoryPublishingService : IStoryPublishingService
             .ToListAsync(ct);
         foreach (var tileId in existingTileIds)
         {
-            await RemoveTileAsync(def, tileId, ct);
+            await RemoveTileAsync(def, tileId, ct, keepAssets);
         }
 
         var existingTranslations = await _db.StoryDefinitionTranslations
@@ -336,7 +360,10 @@ public class StoryPublishingService : IStoryPublishingService
             _db.StoryDefinitionAgeGroups.RemoveRange(existingAgeGroups);
         }
 
-        await _assetLinks.RemoveCoverAsync(def.StoryId, ct);
+        if (!keepAssets)
+        {
+            await _assetLinks.RemoveCoverAsync(def.StoryId, ct);
+        }
 
         var existingDialogParticipants = await _db.StoryDialogParticipants
             .Where(p => p.StoryDefinitionId == def.Id)
@@ -509,7 +536,7 @@ public class StoryPublishingService : IStoryPublishingService
         var tileId = change.EntityId;
         if (string.Equals(change.ChangeType, StoryPublishChangeTypes.Removed, StringComparison.OrdinalIgnoreCase))
         {
-            await RemoveTileAsync(def, tileId, ct);
+            await RemoveTileAsync(def, tileId, ct, keepAssets: craft.LightChanges);
             return true;
         }
 
@@ -520,7 +547,22 @@ public class StoryPublishingService : IStoryPublishingService
             return false;
         }
 
-        await UpsertTileFromCraftAsync(def, craft, craftTile, ownerEmail, langTag, ct);
+        PublishedTileAssetSnapshot? previousAssets = null;
+        if (craft.LightChanges)
+        {
+            previousAssets = await LoadPublishedTileAssetSnapshotAsync(def, tileId, ct);
+        }
+
+        await UpsertTileFromCraftAsync(
+            def,
+            craft,
+            craftTile,
+            ownerEmail,
+            langTag,
+            ct,
+            removeExisting: true,
+            keepAssets: craft.LightChanges,
+            previousPublishedAssets: previousAssets);
         return true;
     }
 
@@ -531,11 +573,13 @@ public class StoryPublishingService : IStoryPublishingService
         string ownerEmail,
         string langTag,
         CancellationToken ct,
-        bool removeExisting = true)
+        bool removeExisting = true,
+        bool keepAssets = false,
+        PublishedTileAssetSnapshot? previousPublishedAssets = null)
     {
         if (removeExisting)
         {
-            await RemoveTileAsync(def, craftTile.TileId, ct);
+            await RemoveTileAsync(def, craftTile.TileId, ct, keepAssets);
         }
 
         var tile = new StoryTile
@@ -548,9 +592,14 @@ public class StoryPublishingService : IStoryPublishingService
             AvailableHeroIdsJson = craftTile.AvailableHeroIdsJson
         };
 
-        if (!string.IsNullOrWhiteSpace(craftTile.ImageUrl))
+        if (keepAssets)
         {
-            var asset = new StoryAssetPathMapper.AssetInfo(craftTile.ImageUrl, StoryAssetPathMapper.AssetType.Image, null);
+            tile.ImageUrl = previousPublishedAssets?.ImageUrl;
+        }
+        else if (!string.IsNullOrWhiteSpace(craftTile.ImageUrl))
+        {
+            var imageFilename = craftTile.ImageUrl.GetFilenameOnly();
+            var asset = new StoryAssetPathMapper.AssetInfo(imageFilename!, StoryAssetPathMapper.AssetType.Image, null);
             tile.ImageUrl = StoryAssetPathMapper.BuildPublishedPath(asset, ownerEmail, def.StoryId);
         }
 
@@ -562,15 +611,26 @@ public class StoryPublishingService : IStoryPublishingService
             string? publishedAudioUrl = null;
             string? publishedVideoUrl = null;
 
-            if (!string.IsNullOrWhiteSpace(tr.AudioUrl))
+            if (keepAssets)
             {
-                var audioAsset = new StoryAssetPathMapper.AssetInfo(tr.AudioUrl, StoryAssetPathMapper.AssetType.Audio, translationLang);
+                if (previousPublishedAssets != null
+                    && previousPublishedAssets.TranslationMediaByLang.TryGetValue(translationLang, out var existingTranslationMedia))
+                {
+                    publishedAudioUrl = existingTranslationMedia.AudioUrl;
+                    publishedVideoUrl = existingTranslationMedia.VideoUrl;
+                }
+            }
+            else if (!string.IsNullOrWhiteSpace(tr.AudioUrl))
+            {
+                var audioFilename = tr.AudioUrl.GetFilenameOnly();
+                var audioAsset = new StoryAssetPathMapper.AssetInfo(audioFilename!, StoryAssetPathMapper.AssetType.Audio, translationLang);
                 publishedAudioUrl = StoryAssetPathMapper.BuildPublishedPath(audioAsset, ownerEmail, def.StoryId);
             }
 
-            if (!string.IsNullOrWhiteSpace(tr.VideoUrl))
+            if (!keepAssets && !string.IsNullOrWhiteSpace(tr.VideoUrl))
             {
-                var videoAsset = new StoryAssetPathMapper.AssetInfo(tr.VideoUrl, StoryAssetPathMapper.AssetType.Video, translationLang);
+                var videoFilename = tr.VideoUrl.GetFilenameOnly();
+                var videoAsset = new StoryAssetPathMapper.AssetInfo(videoFilename!, StoryAssetPathMapper.AssetType.Video, translationLang);
                 publishedVideoUrl = StoryAssetPathMapper.BuildPublishedPath(videoAsset, ownerEmail, def.StoryId);
             }
 
@@ -626,11 +686,22 @@ public class StoryPublishingService : IStoryPublishingService
                 foreach (var nodeTranslation in craftNode.Translations)
                 {
                     var nodeLang = nodeTranslation.LanguageCode.ToLowerInvariant();
-                    var publishedNodeAudioUrl = !string.IsNullOrWhiteSpace(nodeTranslation.AudioUrl)
-                        ? StoryAssetPathMapper.BuildPublishedPath(
-                            new StoryAssetPathMapper.AssetInfo(nodeTranslation.AudioUrl, StoryAssetPathMapper.AssetType.Audio, nodeLang),
-                            ownerEmail, def.StoryId)
-                        : null;
+                    string? publishedNodeAudioUrl;
+                    if (keepAssets && previousPublishedAssets != null)
+                    {
+                        previousPublishedAssets.DialogNodeAudioByNodeAndLang.TryGetValue(
+                            BuildNodeAudioKey(craftNode.NodeId, nodeLang),
+                            out publishedNodeAudioUrl);
+                    }
+                    else
+                    {
+                        var nodeAudioFilename = nodeTranslation.AudioUrl.GetFilenameOnly();
+                        publishedNodeAudioUrl = !string.IsNullOrWhiteSpace(nodeAudioFilename)
+                            ? StoryAssetPathMapper.BuildPublishedPath(
+                                new StoryAssetPathMapper.AssetInfo(nodeAudioFilename!, StoryAssetPathMapper.AssetType.Audio, nodeLang),
+                                ownerEmail, def.StoryId)
+                            : null;
+                    }
                     _db.StoryDialogNodeTranslations.Add(new StoryDialogNodeTranslation
                     {
                         Id = Guid.NewGuid(),
@@ -651,6 +722,8 @@ public class StoryPublishingService : IStoryPublishingService
                         ToNodeId = craftEdge.ToNodeId,
                         JumpToTileId = craftEdge.JumpToTileId,
                         SetBranchId = craftEdge.SetBranchId,
+                        HideIfBranchSet = craftEdge.HideIfBranchSet,
+                        ShowOnlyIfBranchesSet = craftEdge.ShowOnlyIfBranchesSet,
                         OptionOrder = craftEdge.OptionOrder
                     };
                     _db.StoryDialogEdges.Add(edge);
@@ -683,7 +756,10 @@ public class StoryPublishingService : IStoryPublishingService
             }
         }
 
-        await _assetLinks.SyncTileAssetsAsync(craft, craftTile, ownerEmail, ct);
+        if (!keepAssets)
+        {
+            await _assetLinks.SyncTileAssetsAsync(craft, craftTile, ownerEmail, ct);
+        }
 
         var answers = craftTile.Answers.OrderBy(a => a.SortOrder).ToList();
         foreach (var craftAnswer in answers)
@@ -721,7 +797,7 @@ public class StoryPublishingService : IStoryPublishingService
         }
     }
 
-    private async Task RemoveTileAsync(StoryDefinition def, string tileId, CancellationToken ct)
+    private async Task RemoveTileAsync(StoryDefinition def, string tileId, CancellationToken ct, bool keepAssets = false)
     {
         var tile = await _db.StoryTiles
             .Include(t => t.Translations)
@@ -737,7 +813,10 @@ public class StoryPublishingService : IStoryPublishingService
             return;
         }
 
-        await _assetLinks.RemoveTileAssetsAsync(def.StoryId, tile.TileId, ct);
+        if (!keepAssets)
+        {
+            await _assetLinks.RemoveTileAssetsAsync(def.StoryId, tile.TileId, ct);
+        }
 
         _db.StoryTileTranslations.RemoveRange(tile.Translations);
         foreach (var answer in tile.Answers)
@@ -829,6 +908,68 @@ public class StoryPublishingService : IStoryPublishingService
         public const string Updated = "Updated";
         public const string Removed = "Removed";
     }
+
+    private static Dictionary<string, PublishedTileAssetSnapshot> BuildPublishedTileAssetSnapshots(StoryDefinition? definition)
+    {
+        if (definition?.Tiles == null || definition.Tiles.Count == 0)
+        {
+            return new Dictionary<string, PublishedTileAssetSnapshot>(StringComparer.OrdinalIgnoreCase);
+        }
+
+        return definition.Tiles
+            .ToDictionary(
+                t => t.TileId,
+                t => BuildPublishedTileAssetSnapshotFromTile(t),
+                StringComparer.OrdinalIgnoreCase);
+    }
+
+    private async Task<PublishedTileAssetSnapshot?> LoadPublishedTileAssetSnapshotAsync(
+        StoryDefinition def,
+        string tileId,
+        CancellationToken ct)
+    {
+        var tile = await _db.StoryTiles
+            .AsNoTracking()
+            .Include(t => t.Translations)
+            .Include(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.Translations)
+            .FirstOrDefaultAsync(t => t.StoryDefinitionId == def.Id && t.TileId == tileId, ct);
+
+        return tile == null ? null : BuildPublishedTileAssetSnapshotFromTile(tile);
+    }
+
+    private static PublishedTileAssetSnapshot BuildPublishedTileAssetSnapshotFromTile(StoryTile tile)
+    {
+        var translationMedia = tile.Translations
+            .ToDictionary(
+                tr => tr.LanguageCode.ToLowerInvariant(),
+                tr => new PublishedTranslationMedia(tr.AudioUrl, tr.VideoUrl),
+                StringComparer.OrdinalIgnoreCase);
+
+        var dialogNodeAudio = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+        if (tile.DialogTile?.Nodes != null)
+        {
+            foreach (var node in tile.DialogTile.Nodes)
+            {
+                foreach (var translation in node.Translations)
+                {
+                    var key = BuildNodeAudioKey(node.NodeId, translation.LanguageCode.ToLowerInvariant());
+                    dialogNodeAudio[key] = translation.AudioUrl;
+                }
+            }
+        }
+
+        return new PublishedTileAssetSnapshot(tile.ImageUrl, translationMedia, dialogNodeAudio);
+    }
+
+    private static string BuildNodeAudioKey(string nodeId, string lang)
+        => $"{nodeId.ToLowerInvariant()}::{lang.ToLowerInvariant()}";
+
+    private sealed record PublishedTranslationMedia(string? AudioUrl, string? VideoUrl);
+
+    private sealed record PublishedTileAssetSnapshot(
+        string? ImageUrl,
+        Dictionary<string, PublishedTranslationMedia> TranslationMediaByLang,
+        Dictionary<string, string?> DialogNodeAudioByNodeAndLang);
 }
 
 

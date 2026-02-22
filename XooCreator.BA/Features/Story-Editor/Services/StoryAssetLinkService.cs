@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using XooCreator.BA.Data;
@@ -11,7 +12,8 @@ namespace XooCreator.BA.Features.StoryEditor.Services;
 
 public interface IStoryAssetLinkService
 {
-    Task SyncCoverAsync(StoryCraft craft, string ownerEmail, CancellationToken ct);
+    /// <summary>Syncs cover image from draft to published. Returns false if cover asset was missing or copy failed (caller should set def.CoverImageUrl = null).</summary>
+    Task<bool> SyncCoverAsync(StoryCraft craft, string ownerEmail, CancellationToken ct);
     Task SyncTileAssetsAsync(StoryCraft craft, StoryCraftTile tile, string ownerEmail, CancellationToken ct);
     Task RemoveTileAssetsAsync(string storyId, string tileId, CancellationToken ct);
     Task RemoveCoverAsync(string storyId, CancellationToken ct);
@@ -38,22 +40,28 @@ public class StoryAssetLinkService : IStoryAssetLinkService
         _logger = logger;
     }
 
-    public async Task SyncCoverAsync(StoryCraft craft, string ownerEmail, CancellationToken ct)
+    public async Task<bool> SyncCoverAsync(StoryCraft craft, string ownerEmail, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(craft.CoverImageUrl))
         {
             await RemoveCoverAsync(craft.StoryId, ct);
-            return;
+            return true;
         }
 
         var coverType = StoryAssetPathMapper.GetCoverAssetType(craft.CoverImageUrl);
         var asset = new StoryAssetPathMapper.AssetInfo(craft.CoverImageUrl, coverType, null);
         var assets = new List<StoryAssetPathMapper.AssetInfo> { asset };
         var copyResult = await _assetService.CopyAssetsToPublishedAsync(assets, ownerEmail, craft.StoryId, ct);
-        if (copyResult.HasError)
+
+        var coverFailed = copyResult.FailedAssets.Any(f =>
+            string.Equals(f.Filename, asset.Filename, StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(f.Type, asset.Type.ToString(), StringComparison.OrdinalIgnoreCase));
+        if (coverFailed || copyResult.HasError)
         {
-            _logger.LogWarning("Failed to copy cover asset for storyId={StoryId}", craft.StoryId);
-            return;
+            _logger.LogWarning(
+                "Cover asset not synced (missing or copy failed); publish will continue without cover: storyId={StoryId} filename={Filename}",
+                craft.StoryId, craft.CoverImageUrl);
+            return false;
         }
 
         await UpsertLinkAsync(
@@ -63,6 +71,7 @@ public class StoryAssetLinkService : IStoryAssetLinkService
             asset,
             ownerEmail,
             ct);
+        return true;
     }
 
     public async Task SyncTileAssetsAsync(StoryCraft craft, StoryCraftTile tile, string ownerEmail, CancellationToken ct)
@@ -75,14 +84,23 @@ public class StoryAssetLinkService : IStoryAssetLinkService
         }
 
         var copyResult = await _assetService.CopyAssetsToPublishedAsync(assets, ownerEmail, craft.StoryId, ct);
-        if (copyResult.HasError)
+        var failedSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var f in copyResult.FailedAssets)
         {
-            _logger.LogWarning("Failed to copy assets for tileId={TileId} storyId={StoryId}", tile.TileId, craft.StoryId);
-            return;
+            failedSet.Add($"{f.Type}|{f.Language ?? "common"}|{f.Filename}");
+        }
+        if (failedSet.Count > 0)
+        {
+            _logger.LogWarning(
+                "Some tile assets missing or copy failed; skipping links for them: storyId={StoryId} tileId={TileId} failed={Failed}",
+                craft.StoryId, tile.TileId, string.Join(", ", copyResult.FailedAssets.Select(f => f.Filename)));
         }
 
         foreach (var asset in assets)
         {
+            var key = $"{asset.Type}|{asset.Lang ?? "common"}|{asset.Filename}";
+            if (failedSet.Contains(key))
+                continue;
             await UpsertLinkAsync(
                 craft.StoryId,
                 craft.LastDraftVersion,

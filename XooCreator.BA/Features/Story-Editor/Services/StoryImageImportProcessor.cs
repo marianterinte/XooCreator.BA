@@ -1,8 +1,10 @@
 using System.IO.Compression;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
+using XooCreator.BA.Features.StoryEditor.Models;
 using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Infrastructure.Services.Blob;
 using static XooCreator.BA.Features.StoryEditor.Mappers.StoryAssetPathMapper;
@@ -12,6 +14,7 @@ namespace XooCreator.BA.Features.StoryEditor.Services;
 public interface IStoryImageImportProcessor
 {
     Task<ImportImageResult> ProcessAsync(Stream zipStream, string storyId, string locale, string ownerEmail, CancellationToken ct = default);
+    Task<ImportImageResult> ProcessFromStagingAsync(ImageBatchMappingPayload payload, string storyId, string locale, string ownerEmail, CancellationToken ct = default);
 }
 
 public record ImportImageResult(bool Success, List<string> Errors, List<string> Warnings, int ImportedCount, int TotalPages);
@@ -156,6 +159,156 @@ public class StoryImageImportProcessor : IStoryImageImportProcessor
             {
                 errors.Add($"Failed to save changes to database: {ex.Message}");
                 _logger.LogError(ex, "Failed to save image import changes");
+            }
+        }
+
+        return new ImportImageResult(errors.Count == 0, errors, warnings, importedCount, pageTiles.Count);
+    }
+
+    public async Task<ImportImageResult> ProcessFromStagingAsync(ImageBatchMappingPayload payload, string storyId, string locale, string ownerEmail, CancellationToken ct = default)
+    {
+        var errors = new List<string>();
+        var warnings = new List<string>();
+        var importedCount = 0;
+
+        var craft = await _crafts.GetAsync(storyId, ct);
+        if (craft == null)
+        {
+            errors.Add("Story not found");
+            return new ImportImageResult(false, errors, warnings, 0, 0);
+        }
+
+        var pageOrQuizTypes = new[] { "page", "quiz", "dialog" };
+        var pageTiles = craft.Tiles
+            .Where(t => pageOrQuizTypes.Contains(t.Type, StringComparer.OrdinalIgnoreCase))
+            .OrderBy(t => t.SortOrder)
+            .ToList();
+        if (pageTiles.Count == 0)
+        {
+            errors.Add("Story has no page, quiz, or dialog tiles");
+            return new ImportImageResult(false, errors, warnings, 0, 0);
+        }
+
+        var files = payload.Files ?? new List<StagedMediaFile>();
+        if (files.Count == 0)
+        {
+            errors.Add("No staged image files found.");
+            return new ImportImageResult(false, errors, warnings, 0, pageTiles.Count);
+        }
+
+        var filesByClientId = files
+            .Where(f => !string.IsNullOrWhiteSpace(f.ClientFileId))
+            .GroupBy(f => f.ClientFileId, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+
+        var assignments = new Dictionary<Guid, StagedMediaFile>();
+        foreach (var file in files.OrderBy(f => ExtractPageNumber(Path.GetFileName(f.FileName))).ThenBy(f => f.FileName, StringComparer.OrdinalIgnoreCase))
+        {
+            var ext = Path.GetExtension(file.FileName);
+            if (!AllowedImageExtensions.Contains(ext))
+            {
+                warnings.Add($"Unsupported image format '{file.FileName}'. Skipping.");
+                continue;
+            }
+
+            var pageNumber = ExtractPageNumber(Path.GetFileName(file.FileName));
+            if (pageNumber < 1 || pageNumber > pageTiles.Count)
+                continue;
+
+            var tile = pageTiles[pageNumber - 1];
+            assignments[tile.Id] = file;
+        }
+
+        foreach (var ov in payload.Overrides ?? new List<ImageImportOverride>())
+        {
+            if (string.IsNullOrWhiteSpace(ov.TileId) || string.IsNullOrWhiteSpace(ov.ClientFileId))
+                continue;
+            if (!Guid.TryParse(ov.TileId, out var tileId))
+            {
+                warnings.Add($"Invalid tileId override '{ov.TileId}'.");
+                continue;
+            }
+            var tile = pageTiles.FirstOrDefault(t => t.Id == tileId);
+            if (tile == null)
+            {
+                warnings.Add($"Override tile not found: {ov.TileId}");
+                continue;
+            }
+            if (!filesByClientId.TryGetValue(ov.ClientFileId, out var file))
+            {
+                warnings.Add($"Override file not found for clientFileId '{ov.ClientFileId}'.");
+                continue;
+            }
+            assignments[tile.Id] = file;
+        }
+
+        var normalizedEmail = string.IsNullOrWhiteSpace(ownerEmail) ? string.Empty : Uri.UnescapeDataString(ownerEmail);
+        var containerClient = _sas.GetContainerClient(_sas.DraftContainer);
+        await containerClient.CreateIfNotExistsAsync(cancellationToken: ct);
+
+        foreach (var tile in pageTiles)
+        {
+            if (!assignments.TryGetValue(tile.Id, out var file))
+                continue;
+
+            try
+            {
+                var sourceBlobClient = _sas.GetBlobClient(_sas.DraftContainer, file.BlobPath);
+                if (!await sourceBlobClient.ExistsAsync(ct))
+                {
+                    warnings.Add($"Staged file missing: {file.FileName}");
+                    continue;
+                }
+
+                var props = await sourceBlobClient.GetPropertiesAsync(cancellationToken: ct);
+                var sourceSize = props.Value.ContentLength;
+                if (sourceSize > _maxImageFileSizeBytes)
+                {
+                    warnings.Add($"Image file '{file.FileName}' exceeds maximum size of {_maxImageFileSizeBytes / (1024 * 1024)}MB. Skipping.");
+                    continue;
+                }
+
+                var imageFilename = Path.GetFileName(file.FileName);
+                var draftPath = BuildDraftPath(new AssetInfo(imageFilename, AssetType.Image, null), normalizedEmail, craft.StoryId);
+
+                if (!string.IsNullOrWhiteSpace(tile.ImageUrl) && !tile.ImageUrl.Equals(imageFilename, StringComparison.OrdinalIgnoreCase))
+                {
+                    try
+                    {
+                        var oldPath = BuildDraftPath(new AssetInfo(tile.ImageUrl, AssetType.Image, null), normalizedEmail, craft.StoryId);
+                        var oldBlobClient = _sas.GetBlobClient(_sas.DraftContainer, oldPath);
+                        await oldBlobClient.DeleteIfExistsAsync(cancellationToken: ct);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to delete old image file: {OldPath}", tile.ImageUrl);
+                    }
+                }
+
+                var download = await sourceBlobClient.DownloadStreamingAsync(cancellationToken: ct);
+                await using var sourceStream = download.Value.Content;
+                var destBlobClient = _sas.GetBlobClient(_sas.DraftContainer, draftPath);
+                await destBlobClient.UploadAsync(sourceStream, overwrite: true, cancellationToken: ct);
+                tile.ImageUrl = imageFilename;
+                importedCount++;
+            }
+            catch (Exception ex)
+            {
+                errors.Add($"Failed to import staged image '{file.FileName}': {ex.Message}");
+                _logger.LogError(ex, "Failed to import staged image file: {FileName}", file.FileName);
+            }
+        }
+
+        if (importedCount > 0)
+        {
+            try
+            {
+                await _db.SaveChangesAsync(ct);
+            }
+            catch (Exception ex)
+            {
+                errors.Add($"Failed to save changes to database: {ex.Message}");
+                _logger.LogError(ex, "Failed to save staged image import changes");
             }
         }
 

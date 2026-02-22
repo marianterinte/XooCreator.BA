@@ -160,16 +160,19 @@ public class StoryExportQueueWorker : BackgroundService
                         _logger.LogInformation("Processing StoryExportJob: jobId={JobId} storyId={StoryId} isDraft={IsDraft}",
                             job.Id, job.StoryId, job.IsDraft);
 
+                        var options = new ExportOptions(
+                            IncludeVideo: job.IncludeVideo ?? true,
+                            IncludeAudio: job.IncludeAudio ?? true,
+                            IncludeImages: job.IncludeImages ?? true);
+
                         ExportResult exportResult;
-                        
-                        // Process export based on type (draft or published)
                         if (job.IsDraft)
                         {
-                            exportResult = await ProcessDraftExportAsync(job, exportService, crafts, db, stoppingToken);
+                            exportResult = await ProcessDraftExportAsync(job, exportService, crafts, db, options, stoppingToken);
                         }
                         else
                         {
-                            exportResult = await ProcessPublishedExportAsync(job, exportService, db, stoppingToken);
+                            exportResult = await ProcessPublishedExportAsync(job, exportService, db, options, stoppingToken);
                         }
 
                         // Save ZIP to blob storage
@@ -244,6 +247,7 @@ public class StoryExportQueueWorker : BackgroundService
         IStoryExportService exportService,
         IStoryCraftsRepository crafts,
         XooDbContext db,
+        ExportOptions options,
         CancellationToken ct)
     {
         var craft = await crafts.GetAsync(job.StoryId, ct);
@@ -252,7 +256,6 @@ public class StoryExportQueueWorker : BackgroundService
             throw new InvalidOperationException($"StoryCraft not found: {job.StoryId}");
         }
 
-        // Resolve owner email
         var owner = await db.AlchimaliaUsers
             .AsNoTracking()
             .Where(u => u.Id == job.OwnerUserId)
@@ -264,13 +267,14 @@ public class StoryExportQueueWorker : BackgroundService
             throw new InvalidOperationException($"Owner email not found for userId: {job.OwnerUserId}");
         }
 
-        return await exportService.ExportDraftStoryAsync(craft, job.Locale, owner, ct);
+        return await exportService.ExportDraftStoryAsync(craft, job.Locale, owner, options, ct);
     }
 
     private async Task<ExportResult> ProcessPublishedExportAsync(
         StoryExportJob job,
         IStoryExportService exportService,
         XooDbContext db,
+        ExportOptions options,
         CancellationToken ct)
     {
         var def = await db.StoryDefinitions
@@ -292,7 +296,7 @@ public class StoryExportQueueWorker : BackgroundService
             throw new InvalidOperationException($"StoryDefinition not found: {job.StoryId}");
         }
 
-        return await exportService.ExportPublishedStoryAsync(def, job.Locale, ct);
+        return await exportService.ExportPublishedStoryAsync(def, job.Locale, options, ct);
     }
 
     private sealed record StoryExportQueuePayload(Guid JobId, string StoryId, bool IsDraft);

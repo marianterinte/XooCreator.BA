@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using System.Linq;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Features.StoryEditor.Mappers;
 using XooCreator.BA.Features.StoryEditor.Models;
@@ -103,19 +104,20 @@ public class StoryPublishAssetService : IStoryPublishAssetService
         CancellationToken ct)
     {
         var successCount = 0;
-        var failedAssets = new List<string>();
+        var failedAssets = new List<AssetCopyFailure>();
         
         foreach (var asset in assets)
         {
             var sourceResult = await FindSourceAssetAsync(asset, userEmail, storyId, ct);
             if (sourceResult.Result.HasError)
             {
-                // Log and continue with other assets instead of failing immediately
-                // This allows multi-language stories to publish even if some audio files are missing
+                var failure = BuildFailure(asset, sourceResult.Result.ErrorMessage ?? "Draft asset not found");
+                failedAssets.Add(failure);
+
+                // Do not block publish for missing assets (cover/tile images or audio/video).
                 _logger.LogWarning(
                     "Skipping missing asset during publish: storyId={StoryId} filename={Filename} type={Type} lang={Lang}",
                     storyId, asset.Filename, asset.Type, asset.Lang);
-                failedAssets.Add($"{asset.Filename} ({asset.Lang ?? "common"})");
                 continue;
             }
 
@@ -128,10 +130,13 @@ public class StoryPublishAssetService : IStoryPublishAssetService
             
             if (copyResult.HasError)
             {
+                var failure = BuildFailure(asset, copyResult.ErrorMessage ?? "Copy failed");
+                failedAssets.Add(failure);
+
+                // Do not block publish; log and skip failed assets.
                 _logger.LogWarning(
                     "Failed to copy asset during publish: storyId={StoryId} filename={Filename} type={Type} lang={Lang} error={Error}",
                     storyId, asset.Filename, asset.Type, asset.Lang, copyResult.ErrorMessage);
-                failedAssets.Add($"{asset.Filename} ({asset.Lang ?? "common"})");
                 continue;
             }
             
@@ -141,13 +146,11 @@ public class StoryPublishAssetService : IStoryPublishAssetService
         if (failedAssets.Count > 0)
         {
             _logger.LogWarning(
-                "Some assets failed to copy during publish: storyId={StoryId} successCount={SuccessCount} failedCount={FailedCount} failedAssets={FailedAssets}",
-                storyId, successCount, failedAssets.Count, string.Join(", ", failedAssets));
+                "Some non-blocking assets failed to copy during publish: storyId={StoryId} successCount={SuccessCount} failedCount={FailedCount} failedAssets={FailedAssets}",
+                storyId, successCount, failedAssets.Count, string.Join(", ", failedAssets.Select(f => $"{f.Type}/{f.Language ?? "common"}/{f.Filename}: {f.Reason}")));
         }
 
-        // Return success - missing assets are non-blocking (allows partial publish)
-        // The audio/video for missing languages simply won't be available
-        return AssetCopyResult.Success();
+        return AssetCopyResult.Success(failedAssets);
     }
 
     private async Task<(string? SourceBlobPath, AssetCopyResult Result)> FindSourceAssetAsync(
@@ -198,7 +201,7 @@ public class StoryPublishAssetService : IStoryPublishAssetService
             var sourceSas = await _sas.GetReadSasAsync(_sas.DraftContainer, sourceBlobPath, TimeSpan.FromMinutes(10), ct);
 
             var targetClient = _sas.GetBlobClient(_sas.PublishedContainer, targetBlobPath);
-            var pollUntil = DateTime.UtcNow.AddSeconds(30);
+            var pollUntil = DateTime.UtcNow.AddSeconds(90);
 
             _logger.LogDebug(
                 "Starting asset copy: storyId={StoryId} filename={Filename} source={SourcePath} target={TargetPath}",
@@ -267,6 +270,17 @@ public class StoryPublishAssetService : IStoryPublishAssetService
                 storyId, asset.Filename, sourceBlobPath);
             return AssetCopyResult.CopyFailed(asset.Filename, storyId, ex.Message);
         }
+    }
+
+    private static AssetCopyFailure BuildFailure(StoryAssetPathMapper.AssetInfo asset, string reason)
+    {
+        return new AssetCopyFailure
+        {
+            Filename = asset.Filename,
+            Type = asset.Type.ToString(),
+            Language = asset.Lang,
+            Reason = reason
+        };
     }
 
     private static (string BasePath, string FileName) SplitPath(string blobPath)

@@ -2,6 +2,7 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
+using XooCreator.BA.Features.StoryEditor.Extensions;
 
 namespace XooCreator.BA.Features.StoryEditor.Services.Content;
 
@@ -44,7 +45,7 @@ public class StoryTileUpdater : IStoryTileUpdater
                     SortOrder = i,
                     BranchId = string.IsNullOrWhiteSpace(tileDto.BranchId) ? null : tileDto.BranchId.Trim(),
                     // Image is common for all languages
-                    ImageUrl = ExtractFileName(tileDto.ImageUrl),
+                    ImageUrl = tileDto.ImageUrl.GetFilenameOnly(),
                     AvailableHeroIdsJson = SerializeAvailableHeroIds(tileDto),
                     // Audio and Video are now language-specific (stored in translation)
                     CreatedAt = DateTime.UtcNow,
@@ -60,7 +61,7 @@ public class StoryTileUpdater : IStoryTileUpdater
                 tile.SortOrder = i;
                 tile.BranchId = string.IsNullOrWhiteSpace(tileDto.BranchId) ? null : tileDto.BranchId.Trim();
                 // Image is common for all languages
-                tile.ImageUrl = ExtractFileName(tileDto.ImageUrl);
+                tile.ImageUrl = tileDto.ImageUrl.GetFilenameOnly();
                 tile.AvailableHeroIdsJson = SerializeAvailableHeroIds(tileDto);
                 // Audio and Video are now language-specific (stored in translation)
                 tile.UpdatedAt = DateTime.UtcNow;
@@ -79,8 +80,8 @@ public class StoryTileUpdater : IStoryTileUpdater
                     Text = tileDto.Text,
                     Question = tileDto.Question,
                     // Audio and Video are language-specific
-                    AudioUrl = ExtractFileName(tileDto.AudioUrl),
-                    VideoUrl = ExtractFileName(tileDto.VideoUrl)
+                    AudioUrl = tileDto.AudioUrl.GetFilenameOnly(),
+                    VideoUrl = tileDto.VideoUrl.GetFilenameOnly()
                 };
                 _context.StoryCraftTileTranslations.Add(tileTranslation);
             }
@@ -90,8 +91,8 @@ public class StoryTileUpdater : IStoryTileUpdater
                 tileTranslation.Text = tileDto.Text;
                 tileTranslation.Question = tileDto.Question;
                 // Audio and Video are language-specific
-                tileTranslation.AudioUrl = ExtractFileName(tileDto.AudioUrl);
-                tileTranslation.VideoUrl = ExtractFileName(tileDto.VideoUrl);
+                tileTranslation.AudioUrl = tileDto.AudioUrl.GetFilenameOnly();
+                tileTranslation.VideoUrl = tileDto.VideoUrl.GetFilenameOnly();
             }
             
             // Update answers
@@ -110,20 +111,6 @@ public class StoryTileUpdater : IStoryTileUpdater
         }
     }
 
-    /// <summary>
-    /// Extracts filename from a path. If input is already just a filename (no '/'), returns it as-is.
-    /// If input contains '/', extracts the filename using Path.GetFileName().
-    /// </summary>
-    private static string? ExtractFileName(string? path)
-    {
-        if (string.IsNullOrWhiteSpace(path)) return null;
-        
-        // If already just filename (no path separator), return as-is
-        if (!path.Contains('/')) return path;
-        
-        // Extract filename from path
-        return Path.GetFileName(path);
-    }
 
     private static string? SerializeAvailableHeroIds(EditableTileDto tileDto)
     {
@@ -247,7 +234,7 @@ public class StoryTileUpdater : IStoryTileUpdater
                 node.Translations.Add(nodeTranslation);
             }
             nodeTranslation.Text = nodeDto.Text ?? string.Empty;
-            nodeTranslation.AudioUrl = string.IsNullOrWhiteSpace(nodeDto.AudioUrl) ? null : nodeDto.AudioUrl.Trim();
+            nodeTranslation.AudioUrl = nodeDto.AudioUrl.GetFilenameOnly();
 
             var options = nodeDto.Options ?? new List<EditableDialogOptionDto>();
             var edgeDict = node.OutgoingEdges.ToDictionary(e => e.EdgeId, StringComparer.OrdinalIgnoreCase);
@@ -274,6 +261,10 @@ public class StoryTileUpdater : IStoryTileUpdater
                 edge.ToNodeId = optionDto.NextNodeId?.Trim() ?? string.Empty;
                 edge.JumpToTileId = string.IsNullOrWhiteSpace(optionDto.JumpToTileId) ? null : optionDto.JumpToTileId.Trim();
                 edge.SetBranchId = string.IsNullOrWhiteSpace(optionDto.SetBranchId) ? null : optionDto.SetBranchId.Trim();
+                edge.HideIfBranchSet = string.IsNullOrWhiteSpace(optionDto.HideIfBranchSet) ? null : optionDto.HideIfBranchSet.Trim();
+                edge.ShowOnlyIfBranchesSet = optionDto.ShowOnlyIfBranchesSet is { Count: > 0 }
+                    ? JsonSerializer.Serialize(optionDto.ShowOnlyIfBranchesSet)
+                    : null;
                 edge.OptionOrder = optionIndex;
 
                 var edgeTranslation = edge.Translations.FirstOrDefault(t => t.LanguageCode == languageCode);

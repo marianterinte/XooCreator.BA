@@ -87,6 +87,20 @@ public class StoryPublishChangeLogService : IStoryPublishChangeLogService
             .Include(x => x.Tiles)
                 .ThenInclude(t => t.Answers)
                     .ThenInclude(a => a.Tokens)
+            .Include(x => x.Tiles)
+                .ThenInclude(t => t.DialogTile!)
+                    .ThenInclude(dt => dt.Nodes)
+                        .ThenInclude(n => n.Translations.Where(nt => nt.LanguageCode == lang))
+            .Include(x => x.Tiles)
+                .ThenInclude(t => t.DialogTile!)
+                    .ThenInclude(dt => dt.Nodes)
+                        .ThenInclude(n => n.OutgoingEdges)
+                            .ThenInclude(e => e.Translations.Where(et => et.LanguageCode == lang))
+            .Include(x => x.Tiles)
+                .ThenInclude(t => t.DialogTile!)
+                    .ThenInclude(dt => dt.Nodes)
+                        .ThenInclude(n => n.OutgoingEdges)
+                            .ThenInclude(e => e.Tokens)
             .Include(x => x.Topics)
                 .ThenInclude(t => t.StoryTopic)
             .Include(x => x.AgeGroups)
@@ -201,6 +215,7 @@ public sealed class StoryDraftSnapshot
         foreach (var tile in craft.Tiles.OrderBy(t => t.SortOrder))
         {
             var tileTranslation = tile.Translations.FirstOrDefault(tr => tr.LanguageCode == lang);
+            var dialogHash = ComputeDialogHash(tile, lang);
             var tileState = TileState.Create(
                 tile.TileId,
                 tile.SortOrder,
@@ -211,6 +226,7 @@ public sealed class StoryDraftSnapshot
                 tileTranslation?.Question,
                 tileTranslation?.AudioUrl,
                 tileTranslation?.VideoUrl,
+                dialogHash,
                 tile.Answers.OrderBy(a => a.SortOrder).Select(a =>
                 {
                     var answerTranslation = a.Translations.FirstOrDefault(at => at.LanguageCode == lang);
@@ -225,6 +241,64 @@ public sealed class StoryDraftSnapshot
         }
 
         return new StoryDraftSnapshot(lang, header, tiles);
+    }
+
+    private static string? ComputeDialogHash(StoryCraftTile tile, string languageCode)
+    {
+        if (!string.Equals(tile.Type, "dialog", StringComparison.OrdinalIgnoreCase) || tile.DialogTile == null)
+        {
+            return null;
+        }
+
+        var payload = new
+        {
+            rootNodeId = tile.DialogTile.RootNodeId ?? string.Empty,
+            nodes = tile.DialogTile.Nodes
+                .OrderBy(n => n.SortOrder)
+                .Select(n =>
+                {
+                    var nodeTr = n.Translations.FirstOrDefault(t => t.LanguageCode == languageCode)
+                                 ?? n.Translations.FirstOrDefault();
+                    return new
+                    {
+                        nodeId = n.NodeId ?? string.Empty,
+                        speakerType = n.SpeakerType ?? string.Empty,
+                        speakerHeroId = n.SpeakerHeroId ?? string.Empty,
+                        sortOrder = n.SortOrder,
+                        text = nodeTr?.Text ?? string.Empty,
+                        audio = nodeTr?.AudioUrl ?? string.Empty,
+                        options = n.OutgoingEdges
+                            .OrderBy(e => e.OptionOrder)
+                            .Select(e =>
+                            {
+                                var edgeTr = e.Translations.FirstOrDefault(t => t.LanguageCode == languageCode)
+                                             ?? e.Translations.FirstOrDefault();
+                                return new
+                                {
+                                    edgeId = e.EdgeId ?? string.Empty,
+                                    toNodeId = e.ToNodeId ?? string.Empty,
+                                    jumpToTileId = e.JumpToTileId ?? string.Empty,
+                                    setBranchId = e.SetBranchId ?? string.Empty,
+                                    hideIfBranchSet = e.HideIfBranchSet ?? string.Empty,
+                                    showOnlyIfBranchesSet = e.ShowOnlyIfBranchesSet ?? string.Empty,
+                                    optionOrder = e.OptionOrder,
+                                    optionText = edgeTr?.OptionText ?? string.Empty,
+                                    tokens = e.Tokens
+                                        .OrderBy(t => t.Type)
+                                        .ThenBy(t => t.Value)
+                                        .Select(t => new
+                                        {
+                                            type = t.Type ?? string.Empty,
+                                            value = t.Value ?? string.Empty,
+                                            quantity = t.Quantity
+                                        })
+                                };
+                            })
+                    };
+                })
+        };
+
+        return HashHelper.ComputeHash(payload);
     }
 
     public static StoryDraftSnapshot Empty(string languageCode)
@@ -342,7 +416,7 @@ public sealed class StoryDraftSnapshot
 
     public sealed class TileState
     {
-        private TileState(string tileId, int sortOrder, string type, string? image, string? caption, string? text, string? question, string? audio, string? video, IReadOnlyCollection<AnswerState> answers)
+        private TileState(string tileId, int sortOrder, string type, string? image, string? caption, string? text, string? question, string? audio, string? video, string? dialogHash, IReadOnlyCollection<AnswerState> answers)
         {
             TileId = tileId;
             SortOrder = sortOrder;
@@ -353,6 +427,7 @@ public sealed class StoryDraftSnapshot
             Question = question;
             Audio = audio;
             Video = video;
+            DialogHash = dialogHash;
             Answers = answers;
             Hash = HashHelper.ComputeHash(new
             {
@@ -365,6 +440,7 @@ public sealed class StoryDraftSnapshot
                 Question,
                 Audio,
                 Video,
+                DialogHash,
                 Answers = answers.Select(a => a.Hash)
             });
         }
@@ -378,6 +454,7 @@ public sealed class StoryDraftSnapshot
         public string? Question { get; }
         public string? Audio { get; }
         public string? Video { get; }
+        public string? DialogHash { get; }
         public IReadOnlyCollection<AnswerState> Answers { get; }
         public string Hash { get; }
 
@@ -392,11 +469,12 @@ public sealed class StoryDraftSnapshot
             question = Question,
             audioUrl = Audio,
             videoUrl = Video,
+            dialogHash = DialogHash,
             answers = Answers.Select(a => a.ToPayload())
         };
 
-        public static TileState Create(string tileId, int sortOrder, string type, string? image, string? caption, string? text, string? question, string? audio, string? video, IReadOnlyCollection<AnswerState> answers)
-            => new(tileId, sortOrder, type, image, caption, text, question, audio, video, answers);
+        public static TileState Create(string tileId, int sortOrder, string type, string? image, string? caption, string? text, string? question, string? audio, string? video, string? dialogHash, IReadOnlyCollection<AnswerState> answers)
+            => new(tileId, sortOrder, type, image, caption, text, question, audio, video, dialogHash, answers);
     }
 
     public sealed class AnswerState

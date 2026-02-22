@@ -2,6 +2,7 @@ using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Data.SeedData;
+using XooCreator.BA.Features.StoryEditor.Extensions;
 
 namespace XooCreator.BA.Features.StoryEditor.Services.Cloning;
 
@@ -43,6 +44,7 @@ public class StorySourceMapper : IStorySourceMapper
                 Type = tile.Type,
                 BranchId = tile.BranchId,
                 ImageUrl = tile.ImageUrl,
+                AvailableHeroIdsJson = tile.AvailableHeroIdsJson,
                 Translations = tile.Translations.Select(tt => new TileTranslationCloneData
                 {
                     LanguageCode = tt.LanguageCode,
@@ -80,7 +82,7 @@ public class StorySourceMapper : IStorySourceMapper
                         {
                             LanguageCode = t.LanguageCode,
                             Text = t.Text,
-                            AudioUrl = t.AudioUrl
+                            AudioUrl = t.AudioUrl.GetFilenameOnly()
                         }).ToList(),
                         Options = n.OutgoingEdges
                             .OrderBy(e => e.OptionOrder)
@@ -90,6 +92,8 @@ public class StorySourceMapper : IStorySourceMapper
                                 ToNodeId = e.ToNodeId,
                                 JumpToTileId = e.JumpToTileId,
                                 SetBranchId = e.SetBranchId,
+                                HideIfBranchSet = e.HideIfBranchSet,
+                                ShowOnlyIfBranchesSet = e.ShowOnlyIfBranchesSet,
                                 OptionOrder = e.OptionOrder,
                                 Translations = e.Translations.Select(et => new DialogEdgeTranslationCloneData
                                 {
@@ -121,7 +125,7 @@ public class StorySourceMapper : IStorySourceMapper
         {
             StoryType = definition.StoryType,
             StoryTopic = definition.StoryTopic,
-            CoverImageUrl = ExtractFileName(definition.CoverImageUrl),
+            CoverImageUrl = definition.CoverImageUrl.GetFilenameOnly(),
             PriceInCredits = definition.PriceInCredits,
             AuthorName = isFork ? null : definition.AuthorName,
             ClassicAuthorId = definition.ClassicAuthorId,
@@ -138,7 +142,7 @@ public class StorySourceMapper : IStorySourceMapper
             }).ToList(),
             Tiles = definition.Tiles.OrderBy(t => t.SortOrder).Select(tile =>
             {
-                var imageFilename = ExtractFileName(tile.ImageUrl);
+                var imageFilename = tile.ImageUrl.GetFilenameOnly();
                 var derivedAudioFilename = isSeeded ? DeriveSeededAudioFilename(imageFilename) : null;
 
                 return new TileCloneData
@@ -147,9 +151,10 @@ public class StorySourceMapper : IStorySourceMapper
                     Type = tile.Type,
                     BranchId = tile.BranchId,
                     ImageUrl = imageFilename,
+                    AvailableHeroIdsJson = tile.AvailableHeroIdsJson,
                     Translations = tile.Translations.Select(tt =>
                     {
-                        var audioFilename = ExtractFileName(tt.AudioUrl);
+                        var audioFilename = tt.AudioUrl.GetFilenameOnly();
                         if (string.IsNullOrWhiteSpace(audioFilename))
                         {
                             audioFilename = derivedAudioFilename;
@@ -162,7 +167,7 @@ public class StorySourceMapper : IStorySourceMapper
                             Text = tt.Text ?? string.Empty,
                             Question = tt.Question ?? string.Empty,
                             AudioUrl = audioFilename,
-                            VideoUrl = ExtractFileName(tt.VideoUrl)
+                            VideoUrl = tt.VideoUrl.GetFilenameOnly()
                         };
                     }).ToList(),
                 Answers = tile.Answers.OrderBy(a => a.SortOrder).Select(answer => new AnswerCloneData
@@ -203,6 +208,8 @@ public class StorySourceMapper : IStorySourceMapper
                                 ToNodeId = e.ToNodeId,
                                 JumpToTileId = e.JumpToTileId,
                                 SetBranchId = e.SetBranchId,
+                                HideIfBranchSet = e.HideIfBranchSet,
+                                ShowOnlyIfBranchesSet = e.ShowOnlyIfBranchesSet,
                                 OptionOrder = e.OptionOrder,
                                 Translations = e.Translations.Select(et => new DialogEdgeTranslationCloneData
                                 {
@@ -225,11 +232,6 @@ public class StorySourceMapper : IStorySourceMapper
             DialogParticipants = definition.DialogParticipants.OrderBy(p => p.SortOrder).Select(p => p.HeroId).ToList(),
             AudioLanguages = definition.AudioLanguages ?? new List<string>()
         };
-    }
-
-    private static string? ExtractFileName(string? path)
-    {
-        return string.IsNullOrWhiteSpace(path) ? null : Path.GetFileName(path);
     }
 
     private static string? DeriveSeededAudioFilename(string? imageFilename)
@@ -296,6 +298,7 @@ public class TileCloneData
     public string Type { get; set; } = "page";
     public string? BranchId { get; set; }
     public string? ImageUrl { get; set; }
+    public string? AvailableHeroIdsJson { get; set; }
     public List<TileTranslationCloneData> Translations { get; set; } = new();
     public List<AnswerCloneData> Answers { get; set; } = new();
     public string? DialogRootNodeId { get; set; }
@@ -355,6 +358,8 @@ public class DialogEdgeCloneData
     public string ToNodeId { get; set; } = string.Empty;
     public string? JumpToTileId { get; set; }
     public string? SetBranchId { get; set; }
+    public string? HideIfBranchSet { get; set; }
+    public string? ShowOnlyIfBranchesSet { get; set; }
     public int OptionOrder { get; set; }
     public List<DialogEdgeTranslationCloneData> Translations { get; set; } = new();
     public List<TokenCloneData> Tokens { get; set; } = new();

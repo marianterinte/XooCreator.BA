@@ -154,8 +154,12 @@ public class StoryPublishQueueWorker : BackgroundService
                             .Include(c => c.Tiles).ThenInclude(t => t.Translations)
                             .Include(c => c.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Translations)
                             .Include(c => c.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Tokens)
+                            .Include(c => c.Tiles).ThenInclude(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.Translations)
+                            .Include(c => c.Tiles).ThenInclude(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.OutgoingEdges).ThenInclude(e => e.Translations)
+                            .Include(c => c.Tiles).ThenInclude(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.OutgoingEdges).ThenInclude(e => e.Tokens)
                             .Include(c => c.Topics).ThenInclude(t => t.StoryTopic)
                             .Include(c => c.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
+                            .Include(c => c.DialogParticipants)
                             .AsSplitQuery() // Use split query to reduce memory pressure
                             .FirstOrDefaultAsync(c => c.StoryId == job.StoryId, stoppingToken);
 

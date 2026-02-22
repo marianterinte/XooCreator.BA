@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
+using XooCreator.BA.Features.StoryEditor.Extensions;
 using XooCreator.BA.Features.StoryEditor.Mappers;
 using XooCreator.BA.Infrastructure.Services.Blob;
 using static XooCreator.BA.Features.StoryEditor.Mappers.StoryAssetPathMapper;
@@ -23,7 +24,7 @@ public class StoryExportService : IStoryExportService
         _logger = logger;
     }
 
-    public async Task<ExportResult> ExportPublishedStoryAsync(StoryDefinition def, string locale, CancellationToken ct)
+    public async Task<ExportResult> ExportPublishedStoryAsync(StoryDefinition def, string locale, ExportOptions options, CancellationToken ct)
     {
         var primaryLang = (locale ?? string.Empty).Trim().ToLowerInvariant();
         var exportObj = BuildExportJson(def, primaryLang);
@@ -31,7 +32,8 @@ public class StoryExportService : IStoryExportService
         var fileName = $"{def.StoryId}-v{def.Version}.zip";
         var manifestPrefix = $"manifest/{def.StoryId}/v{def.Version}/";
         var hasDialogTiles = def.Tiles.Any(t => t.DialogTile?.Nodes != null && t.DialogTile.Nodes.Count > 0);
-        var mediaPaths = CollectPublishedMediaPaths(def);
+        var allMediaPaths = CollectPublishedMediaPaths(def);
+        var mediaPaths = FilterPublishedMediaPathsByOptions(allMediaPaths, options).ToList();
 
         using var ms = new MemoryStream();
         using (var zip = new ZipArchive(ms, ZipArchiveMode.Create, leaveOpen: true))
@@ -44,12 +46,11 @@ public class StoryExportService : IStoryExportService
                 await writer.WriteAsync(manifestJson);
             }
 
-            // Collect media paths from definition (already in published layout)
+            // Add only media paths that pass the options filter
             foreach (var path in mediaPaths)
             {
                 try
                 {
-                    // Download from published container and add to ZIP preserving relative path under "media/"
                     var client = _sas.GetBlobClient(_sas.PublishedContainer, path);
                     if (!await client.ExistsAsync(ct))
                     {
@@ -65,7 +66,6 @@ public class StoryExportService : IStoryExportService
                 catch (Exception ex)
                 {
                     _logger.LogWarning(ex, "Failed to download asset from published storage: {Path}", path);
-                    // Continue with other assets even if one fails
                 }
             }
         }
@@ -81,7 +81,41 @@ public class StoryExportService : IStoryExportService
         };
     }
 
-    public async Task<ExportResult> ExportDraftStoryAsync(StoryCraft craft, string locale, string ownerEmail, CancellationToken ct)
+    private static IEnumerable<string> FilterPublishedMediaPathsByOptions(List<string> paths, ExportOptions options)
+    {
+        foreach (var path in paths)
+        {
+            var kind = ClassifyPublishedPath(path);
+            if (kind == AssetType.Video && !options.IncludeVideo) continue;
+            if (kind == AssetType.Audio && !options.IncludeAudio) continue;
+            if (kind == AssetType.Image && !options.IncludeImages) continue;
+            yield return path;
+        }
+    }
+
+    private static AssetType ClassifyPublishedPath(string path)
+    {
+        var p = (path ?? string.Empty).Trim().Replace('\\', '/').ToLowerInvariant();
+        if (p.Contains("/audio/")) return AssetType.Audio;
+        if (p.Contains("/video/")) return AssetType.Video;
+        var ext = Path.GetExtension(p);
+        if (ext is ".mp3" or ".wav" or ".ogg" or ".m4a") return AssetType.Audio;
+        if (ext is ".mp4" or ".webm") return AssetType.Video;
+        return AssetType.Image;
+    }
+
+    private static bool IncludeAssetByOptions(AssetType type, ExportOptions options)
+    {
+        return type switch
+        {
+            AssetType.Video => options.IncludeVideo,
+            AssetType.Audio => options.IncludeAudio,
+            AssetType.Image => options.IncludeImages,
+            _ => options.IncludeImages
+        };
+    }
+
+    public async Task<ExportResult> ExportDraftStoryAsync(StoryCraft craft, string locale, string ownerEmail, ExportOptions options, CancellationToken ct)
     {
         // Build export JSON
         var primaryLang = (locale ?? string.Empty).Trim().ToLowerInvariant();
@@ -108,17 +142,17 @@ public class StoryExportService : IStoryExportService
             foreach (var asset in assets)
             {
                 var blobPath = StoryAssetPathMapper.BuildDraftPath(asset, ownerEmail, craft.StoryId);
-                // Cover can be image or video (language-agnostic)
                 var isCover = !string.IsNullOrWhiteSpace(craft.CoverImageUrl) &&
                               asset.Filename.Equals(craft.CoverImageUrl, StringComparison.OrdinalIgnoreCase);
                 allAssets.Add((asset, blobPath, isCover));
             }
         }
 
-        // Remove duplicates (same blob path)
+        // Remove duplicates (same blob path) and filter by options
         var uniqueAssets = allAssets
             .GroupBy(a => a.BlobPath, StringComparer.OrdinalIgnoreCase)
             .Select(g => g.First())
+            .Where(a => IncludeAssetByOptions(a.Asset.Type, options))
             .ToList();
 
         // Build ZIP
@@ -257,7 +291,7 @@ public class StoryExportService : IStoryExportService
             title = def.Translations.FirstOrDefault(t => t.LanguageCode == primaryLang)?.Title ?? def.Title,
             summary = def.Summary,
             storyType = def.StoryType,
-            coverImageUrl = def.CoverImageUrl,
+            coverImageUrl = def.CoverImageUrl.ToExportAssetUrl(),
             storyTopic = def.StoryTopic,
             topicIds = topicIds,
             ageGroupIds = ageGroupIds,
@@ -281,15 +315,15 @@ public class StoryExportService : IStoryExportService
                     type = t.Type,
                     branchId = t.BranchId,
                     sortOrder = t.SortOrder,
-                    imageUrl = t.ImageUrl,
+                    imageUrl = t.ImageUrl.ToExportAssetUrl(),
                     translations = t.Translations.Select(tr => new
                     {
                         lang = tr.LanguageCode,
                         caption = tr.Caption,
                         text = tr.Text,
                         question = tr.Question,
-                        audioUrl = tr.AudioUrl,
-                        videoUrl = tr.VideoUrl
+                        audioUrl = tr.AudioUrl.ToExportAssetUrl(),
+                        videoUrl = tr.VideoUrl.ToExportAssetUrl()
                     }).ToList(),
                     dialogRootNodeId = t.DialogTile?.RootNodeId,
                     dialogNodes = t.DialogTile?.Nodes.OrderBy(n => n.SortOrder).Select(n => new
@@ -297,13 +331,15 @@ public class StoryExportService : IStoryExportService
                         nodeId = n.NodeId,
                         speakerType = n.SpeakerType,
                         speakerHeroId = n.SpeakerHeroId,
-                        translations = n.Translations.Select(nt => new { lang = nt.LanguageCode, text = nt.Text }).ToList(),
+                        translations = n.Translations.Select(nt => new { lang = nt.LanguageCode, text = nt.Text, audioUrl = nt.AudioUrl.ToExportAssetUrl() }).ToList(),
                         options = n.OutgoingEdges.OrderBy(e => e.OptionOrder).Select(e => new
                         {
                             id = e.EdgeId,
                             nextNodeId = e.ToNodeId,
                             jumpToTileId = e.JumpToTileId,
                             setBranchId = e.SetBranchId,
+                            hideIfBranchSet = e.HideIfBranchSet,
+                            showOnlyIfBranchesSet = ParseShowOnlyIfBranchesSet(e.ShowOnlyIfBranchesSet),
                             sortOrder = e.OptionOrder,
                             tokens = (e.Tokens ?? new()).Select(tok => new { type = tok.Type, value = tok.Value, quantity = tok.Quantity }).ToList(),
                             translations = e.Translations.Select(et => new { lang = et.LanguageCode, text = et.OptionText }).ToList()
@@ -324,6 +360,19 @@ public class StoryExportService : IStoryExportService
                     }).ToList()
                 }).ToList()
         };
+    }
+
+    private static List<string>? ParseShowOnlyIfBranchesSet(string? json)
+    {
+        if (string.IsNullOrWhiteSpace(json)) return null;
+        try
+        {
+            return JsonSerializer.Deserialize<List<string>>(json);
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     private static object BuildExportJson(StoryCraft craft, string primaryLang)
@@ -360,7 +409,7 @@ public class StoryExportService : IStoryExportService
             title = primaryTranslation.Title,
             summary = primaryTranslation.Summary ?? craft.StoryTopic,
             storyType = craft.StoryType,
-            coverImageUrl = craft.CoverImageUrl,
+            coverImageUrl = craft.CoverImageUrl.ToExportAssetUrl(),
             storyTopic = craft.StoryTopic,
             topicIds = topicIds,
             ageGroupIds = ageGroupIds,
@@ -386,15 +435,15 @@ public class StoryExportService : IStoryExportService
                     type = t.Type,
                     branchId = t.BranchId,
                     sortOrder = t.SortOrder,
-                    imageUrl = t.ImageUrl,
+                    imageUrl = t.ImageUrl.ToExportAssetUrl(),
                     translations = t.Translations.Select(tr => new
                     {
                         lang = tr.LanguageCode,
                         caption = tr.Caption,
                         text = tr.Text,
                         question = tr.Question,
-                        audioUrl = tr.AudioUrl,
-                        videoUrl = tr.VideoUrl
+                        audioUrl = tr.AudioUrl.ToExportAssetUrl(),
+                        videoUrl = tr.VideoUrl.ToExportAssetUrl()
                     }).ToList(),
                     dialogRootNodeId = t.DialogTile?.RootNodeId,
                     dialogNodes = t.DialogTile?.Nodes.OrderBy(n => n.SortOrder).Select(n => new
@@ -402,13 +451,15 @@ public class StoryExportService : IStoryExportService
                         nodeId = n.NodeId,
                         speakerType = n.SpeakerType,
                         speakerHeroId = n.SpeakerHeroId,
-                        translations = n.Translations.Select(nt => new { lang = nt.LanguageCode, text = nt.Text }).ToList(),
+                        translations = n.Translations.Select(nt => new { lang = nt.LanguageCode, text = nt.Text, audioUrl = nt.AudioUrl.ToExportAssetUrl() }).ToList(),
                         options = n.OutgoingEdges.OrderBy(e => e.OptionOrder).Select(e => new
                         {
                             id = e.EdgeId,
                             nextNodeId = e.ToNodeId,
                             jumpToTileId = e.JumpToTileId,
                             setBranchId = e.SetBranchId,
+                            hideIfBranchSet = e.HideIfBranchSet,
+                            showOnlyIfBranchesSet = ParseShowOnlyIfBranchesSet(e.ShowOnlyIfBranchesSet),
                             sortOrder = e.OptionOrder,
                             tokens = (e.Tokens ?? new()).Select(tok => new { type = tok.Type, value = tok.Value, quantity = tok.Quantity }).ToList(),
                             translations = e.Translations.Select(et => new { lang = et.LanguageCode, text = et.OptionText }).ToList()
@@ -449,6 +500,19 @@ public class StoryExportService : IStoryExportService
             {
                 if (!string.IsNullOrWhiteSpace(tr.AudioUrl)) result.Add(Normalize(tr.AudioUrl));
                 if (!string.IsNullOrWhiteSpace(tr.VideoUrl)) result.Add(Normalize(tr.VideoUrl));
+            }
+
+            // Dialog node audio (per node translation)
+            if (t.DialogTile?.Nodes != null)
+            {
+                foreach (var node in t.DialogTile.Nodes)
+                {
+                    foreach (var nodeTr in node.Translations ?? new List<StoryDialogNodeTranslation>())
+                    {
+                        if (!string.IsNullOrWhiteSpace(nodeTr.AudioUrl))
+                            result.Add(Normalize(nodeTr.AudioUrl));
+                    }
+                }
             }
         }
         return result.ToList();

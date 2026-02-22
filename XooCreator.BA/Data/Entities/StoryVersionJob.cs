@@ -7,6 +7,7 @@ public class StoryVersionJob
     public Guid OwnerUserId { get; set; }
     public string RequestedByEmail { get; set; } = string.Empty;
     public int BaseVersion { get; set; }  // Versiunea publicată de la care se creează draft-ul
+    public bool LightChanges { get; set; }
     public string Status { get; set; } = StoryVersionJobStatus.Queued;
     public int DequeueCount { get; set; }
     public DateTime QueuedAtUtc { get; set; } = DateTime.UtcNow;

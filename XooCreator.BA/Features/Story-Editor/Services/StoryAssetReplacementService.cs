@@ -1,5 +1,6 @@
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
+using XooCreator.BA.Features.StoryEditor.Extensions;
 using XooCreator.BA.Features.StoryEditor.Mappers;
 using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Infrastructure.Services.Blob;
@@ -167,7 +168,7 @@ public class StoryAssetReplacementService : IStoryAssetReplacementService
             }
 
             // Build path for old asset and delete it if it exists and is different
-            var newFilenameOnly = ExtractFileName(newFileName);
+            var newFilenameOnly = newFileName.GetFilenameOnly();
             if (!string.IsNullOrWhiteSpace(oldFilename) && 
                 !string.Equals(oldFilename, newFilenameOnly, StringComparison.OrdinalIgnoreCase))
             {
@@ -265,19 +266,5 @@ public class StoryAssetReplacementService : IStoryAssetReplacementService
         }
     }
 
-    /// <summary>
-    /// Extracts filename from a path. If input is already just a filename (no '/'), returns it as-is.
-    /// If input contains '/', extracts the filename using Path.GetFileName().
-    /// </summary>
-    private static string? ExtractFileName(string? path)
-    {
-        if (string.IsNullOrWhiteSpace(path)) return null;
-        
-        // If already just filename (no path separator), return as-is
-        if (!path.Contains('/')) return path;
-        
-        // Extract filename from path
-        return Path.GetFileName(path);
-    }
 }
 

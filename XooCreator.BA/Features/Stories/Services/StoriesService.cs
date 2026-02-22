@@ -215,6 +215,7 @@ public class StoriesService : IStoriesService
                 ReviewStartedAt = craft.ReviewStartedAt,
                 ReviewEndedAt = craft.ReviewEndedAt,
                 BaseVersion = craft.BaseVersion,
+                LightChanges = craft.LightChanges,
                 OwnerEmail = ownerEmail,
                 Tiles = craft.Tiles.OrderBy(t => t.SortOrder).Select(t =>
                 {
@@ -257,6 +258,8 @@ public class StoriesService : IStoriesService
                                         Text = e.Translations.FirstOrDefault(et => et.LanguageCode == lang)?.OptionText ?? string.Empty,
                                         JumpToTileId = e.JumpToTileId,
                                         SetBranchId = e.SetBranchId,
+                                        HideIfBranchSet = e.HideIfBranchSet,
+                                        ShowOnlyIfBranchesSet = ParseShowOnlyIfBranchesSet(e.ShowOnlyIfBranchesSet),
                                         Tokens = (e.Tokens ?? new()).Select(tok => new EditableTokenDto
                                         {
                                             Type = tok.Type,
@@ -347,6 +350,7 @@ public class StoriesService : IStoriesService
             Status = MapStatusForFrontend(story.Status), // story.Status is already StoryStatus enum
             AvailableLanguages = availableLangs,
             AudioLanguages = story.AudioLanguages ?? new List<string>(),
+            LightChanges = false, // Definition fallback is not a light-changes draft
             OwnerEmail = ownerEmailFromDefinition,
             Tiles = story.Tiles.OrderBy(t => t.SortOrder).Select(t =>
             {
@@ -392,6 +396,8 @@ public class StoriesService : IStoriesService
                                     Text = e.Translations.FirstOrDefault(et => et.LanguageCode == locale)?.OptionText ?? string.Empty,
                                     JumpToTileId = e.JumpToTileId,
                                     SetBranchId = e.SetBranchId,
+                                    HideIfBranchSet = e.HideIfBranchSet,
+                                    ShowOnlyIfBranchesSet = ParseShowOnlyIfBranchesSet(e.ShowOnlyIfBranchesSet),
                                     Tokens = (e.Tokens ?? new()).Select(tok => new EditableTokenDto
                                     {
                                         Type = tok.Type ?? string.Empty,
@@ -453,6 +459,19 @@ public class StoriesService : IStoriesService
                 .Where(x => !string.IsNullOrWhiteSpace(x))
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static List<string>? ParseShowOnlyIfBranchesSet(string? json)
+    {
+        if (string.IsNullOrWhiteSpace(json)) return null;
+        try
+        {
+            return JsonSerializer.Deserialize<List<string>>(json);
         }
         catch
         {
