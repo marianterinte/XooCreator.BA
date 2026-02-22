@@ -260,7 +260,8 @@ public class StoryAudioImportProcessor : IStoryAudioImportProcessor
             .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
 
         var assignments = new Dictionary<int, StagedMediaFile>();
-        foreach (var file in files.OrderBy(f => ExtractPageNumber(Path.GetFileName(f.FileName))).ThenBy(f => f.FileName, StringComparer.OrdinalIgnoreCase))
+        var validFiles = new List<StagedMediaFile>();
+        foreach (var file in files)
         {
             var ext = Path.GetExtension(file.FileName);
             if (!AllowedAudioExtensions.Contains(ext))
@@ -268,11 +269,19 @@ public class StoryAudioImportProcessor : IStoryAudioImportProcessor
                 warnings.Add($"Unsupported audio format '{file.FileName}'. Skipping.");
                 continue;
             }
+            validFiles.Add(file);
             var slot = ExtractPageNumber(Path.GetFileName(file.FileName));
-            if (slot < 1 || slot > targets.Count)
-                continue;
-            assignments[slot] = file;
+            if (slot >= 1 && slot <= targets.Count)
+                assignments[slot] = file;
         }
+
+        // Fallback: assign files with no leading number (e.g. intro.wav, scene2.wav) to remaining slots in 1:1 order.
+        // This fixes multi-select import when user does not set overrides and filenames are not like "1.wav", "2.wav".
+        var assignedFiles = new HashSet<StagedMediaFile>(assignments.Values);
+        var unassignedFiles = validFiles.Where(f => !assignedFiles.Contains(f)).ToList();
+        var unassignedSlots = Enumerable.Range(1, targets.Count).Where(s => !assignments.ContainsKey(s)).ToList();
+        for (var i = 0; i < unassignedFiles.Count && i < unassignedSlots.Count; i++)
+            assignments[unassignedSlots[i]] = unassignedFiles[i];
 
         foreach (var ov in payload.Overrides ?? new List<AudioImportOverride>())
         {
