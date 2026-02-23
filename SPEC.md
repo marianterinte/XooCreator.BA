@@ -1,35 +1,27 @@
-# SPEC — <feature name>
+# SPEC — Current Feature
 
 ## Goal
-- What are we building / changing?
+- ...
 
 ## Non-goals
-- What we explicitly will NOT do now.
+- ...
 
-## Current Behavior (Baseline)
-- Briefly describe the existing behavior we must preserve.
+## Baseline (must preserve)
+- Comportament existent care trebuie păstrat.
 
-## Proposed Behavior
-- The new behavior, clearly.
+## New behavior
+- ...
 
-## Acceptance Criteria (Done when…)
+## Acceptance criteria (Done when…)
 - [ ] AC1
 - [ ] AC2
-- [ ] No regressions in existing flows
-- [ ] Tests green
+- [ ] No regressions vs baseline
 
-## Constraints
-- Tech constraints, performance, security, backwards compatibility.
+## Implementation tasks
+- T1:
+- T2:
+- T3:
 
-## Implementation Plan (Tasks)
-- T1: …
-- T2: …
-- T3: …
-
-## Refactor Plan (if needed)
-- Trigger: which file(s) exceed golden limits
-- Steps: smallest safe refactor + tests
- 
-
-## Risks / Edge cases
-- …
+## Refactor plan (if triggered)
+- Trigger:
+- Steps:
