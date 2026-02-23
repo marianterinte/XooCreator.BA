@@ -28,7 +28,7 @@ public class TreeOfHeroesConfigCraftRepository : ITreeOfHeroesConfigCraftReposit
 
     public async Task<List<TreeOfHeroesConfigCraft>> ListAsync(string? status = null, CancellationToken ct = default)
     {
-        var query = _context.TreeOfHeroesConfigCrafts.AsQueryable();
+        var query = _context.TreeOfHeroesConfigCrafts.AsNoTracking().AsQueryable();
         if (!string.IsNullOrWhiteSpace(status))
             query = query.Where(x => x.Status == status);
         return await query.OrderByDescending(x => x.UpdatedAt).ToListAsync(ct);

@@ -36,7 +36,7 @@ public class AnimalService : IAnimalService
 
     public async Task<ListAnimalsResponse> ListAsync(string? status = null, Guid? regionId = null, bool? isHybrid = null, string? search = null, string? languageCode = null, CancellationToken ct = default)
     {
-        var animals = await _repository.ListAsync(status, regionId, isHybrid, search, ct);
+        var animals = await _repository.ListAsync(status, regionId, isHybrid, search, ct: ct);
         var totalCount = await _repository.CountAsync(status, regionId, isHybrid, ct);
 
         var items = animals.Select(a =>

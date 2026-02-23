@@ -16,17 +16,17 @@ public interface ITreeOfHeroesRepository
     Task<List<HeroDefinitionDto>> GetHeroDefinitionsAsync(string locale);
     Task<HeroDefinitionDto?> GetHeroDefinitionByIdAsync(string heroId, string locale);
     Task<TreeOfHeroesConfigDto> GetTreeOfHeroesConfigAsync();
-    Task<bool> UnlockHeroTreeNodeAsync(Guid userId, UnlockHeroTreeNodeRequest request);
-    Task<bool> SpendTokensAsync(Guid userId, int courage = 0, int curiosity = 0, int thinking = 0, int creativity = 0, int safety = 0);
-    Task<bool> AwardTokensAsync(Guid userId, int courage = 0, int curiosity = 0, int thinking = 0, int creativity = 0, int safety = 0);
-    Task<bool> AwardTokensAsync(Guid userId, IEnumerable<TokenReward> tokenRewards);
-    Task<bool> SaveHeroProgressAsync(Guid userId, string heroId);
-    Task<List<string>> AutoUnlockNodesBasedOnPrerequisitesAsync(Guid userId);
-    Task<ResetPersonalityTokensResult> ResetPersonalityTokensAsync(Guid userId);
+    Task<bool> UnlockHeroTreeNodeAsync(Guid userId, UnlockHeroTreeNodeRequest request, CancellationToken ct = default);
+    Task<bool> SpendTokensAsync(Guid userId, int courage = 0, int curiosity = 0, int thinking = 0, int creativity = 0, int safety = 0, CancellationToken ct = default);
+    Task<bool> AwardTokensAsync(Guid userId, int courage = 0, int curiosity = 0, int thinking = 0, int creativity = 0, int safety = 0, CancellationToken ct = default);
+    Task<bool> AwardTokensAsync(Guid userId, IEnumerable<TokenReward> tokenRewards, CancellationToken ct = default);
+    Task<bool> SaveHeroProgressAsync(Guid userId, string heroId, CancellationToken ct = default);
+    Task<List<string>> AutoUnlockNodesBasedOnPrerequisitesAsync(Guid userId, CancellationToken ct = default);
+    Task<ResetPersonalityTokensResult> ResetPersonalityTokensAsync(Guid userId, CancellationToken ct = default);
     Task<UserAlchimalianProfile?> GetUserAlchimalianProfileAsync(Guid userId);
-    Task SaveUserAlchimalianProfileAsync(Guid userId, string? selectedHeroId);
+    Task SaveUserAlchimalianProfileAsync(Guid userId, string? selectedHeroId, CancellationToken ct = default);
     /// <summary>Add heroId to discovered list; optionally set as selected. Returns true if updated.</summary>
-    Task<bool> DiscoverHeroAsync(Guid userId, string heroId, bool setAsSelected);
+    Task<bool> DiscoverHeroAsync(Guid userId, string heroId, bool setAsSelected, CancellationToken ct = default);
 }
 
 public class TreeOfHeroesRepository : ITreeOfHeroesRepository
@@ -89,7 +89,7 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
             .ToListAsync();
     }
 
-    public async Task<bool> UnlockHeroTreeNodeAsync(Guid userId, UnlockHeroTreeNodeRequest request)
+    public async Task<bool> UnlockHeroTreeNodeAsync(Guid userId, UnlockHeroTreeNodeRequest request, CancellationToken ct = default)
     {
         var existingNode = await _context.HeroTreeProgress
             .FirstOrDefaultAsync(htp => htp.UserId == userId && htp.NodeId == request.NodeId);
@@ -112,11 +112,11 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
         };
 
         _context.HeroTreeProgress.Add(heroTreeNode);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(ct);
         return true;
     }
 
-    public async Task<bool> SpendTokensAsync(Guid userId, int courage = 0, int curiosity = 0, int thinking = 0, int creativity = 0, int safety = 0)
+    public async Task<bool> SpendTokensAsync(Guid userId, int courage = 0, int curiosity = 0, int thinking = 0, int creativity = 0, int safety = 0, CancellationToken ct = default)
     {
         // Check balances
         var current = await GetUserTokensAsync(userId);
@@ -141,11 +141,11 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
         await Decrement("creativity", creativity);
         await Decrement("safety", safety);
 
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(ct);
         return true;
     }
 
-    public async Task<bool> AwardTokensAsync(Guid userId, int courage = 0, int curiosity = 0, int thinking = 0, int creativity = 0, int safety = 0)
+    public async Task<bool> AwardTokensAsync(Guid userId, int courage = 0, int curiosity = 0, int thinking = 0, int creativity = 0, int safety = 0, CancellationToken ct = default)
     {
         var list = new List<TokenReward>();
         if (courage > 0) list.Add(new TokenReward { Type = TokenFamily.Personality, Value = "courage", Quantity = courage });
@@ -154,23 +154,30 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
         if (creativity > 0) list.Add(new TokenReward { Type = TokenFamily.Personality, Value = "creativity", Quantity = creativity });
         if (safety > 0) list.Add(new TokenReward { Type = TokenFamily.Personality, Value = "safety", Quantity = safety });
         if (list.Count == 0) return true;
-        return await AwardTokensAsync(userId, list);
+        return await AwardTokensAsync(userId, list, ct);
     }
 
-    public async Task<bool> AwardTokensAsync(Guid userId, IEnumerable<TokenReward> tokenRewards)
+    public async Task<bool> AwardTokensAsync(Guid userId, IEnumerable<TokenReward> tokenRewards, CancellationToken ct = default)
     {
-        foreach (var reward in tokenRewards)
+        var rewardsList = tokenRewards.ToList();
+        if (rewardsList.Count == 0)
+            return true;
+
+        // Batch load token balances for this user and relevant types (single query)
+        var rewardTypes = rewardsList.Select(r => r.Type.ToString()).Distinct().ToList();
+        var existingBalances = await _context.UserTokenBalances
+            .Where(b => b.UserId == userId && rewardTypes.Contains(b.Type))
+            .ToListAsync();
+        var balanceByTypeValue = existingBalances.ToDictionary(b => (b.Type, b.Value));
+
+        foreach (var reward in rewardsList)
         {
             var type = reward.Type;
             var value = reward.Value.Trim();
             var qty = reward.Quantity;
-
-            // Persist into generic ledger once; no recursion
             var typeString = type.ToString();
-            var balance = await _context.UserTokenBalances
-                .FirstOrDefaultAsync(b => b.UserId == userId && b.Type == typeString && b.Value == value);
 
-            if (balance == null)
+            if (!balanceByTypeValue.TryGetValue((typeString, value), out var balance))
             {
                 balance = new UserTokenBalance
                 {
@@ -182,6 +189,7 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
                     UpdatedAt = DateTime.UtcNow
                 };
                 _context.UserTokenBalances.Add(balance);
+                balanceByTypeValue[(typeString, value)] = balance;
             }
             else
             {
@@ -190,7 +198,7 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
             }
         }
 
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(ct);
         return true;
     }
 
@@ -337,16 +345,16 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
         return config;
     }
 
-    public async Task<ResetPersonalityTokensResult> ResetPersonalityTokensAsync(Guid userId)
+    public async Task<ResetPersonalityTokensResult> ResetPersonalityTokensAsync(Guid userId, CancellationToken ct = default)
     {
-        using var transaction = await _context.Database.BeginTransactionAsync();
+        using var transaction = await _context.Database.BeginTransactionAsync(ct);
         
         try
         {
             // Get all hero tree progress for user to calculate tokens to return
             var heroTreeProgress = await _context.HeroTreeProgress
                 .Where(htp => htp.UserId == userId)
-                .ToListAsync();
+                .ToListAsync(ct);
 
             // Calculate total tokens consumed
             int totalCourage = heroTreeProgress.Sum(h => h.TokensCostCourage);
@@ -358,7 +366,7 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
             // Return tokens to user
             if (totalCourage > 0 || totalCuriosity > 0 || totalThinking > 0 || totalCreativity > 0 || totalSafety > 0)
             {
-                await AwardTokensAsync(userId, totalCourage, totalCuriosity, totalThinking, totalCreativity, totalSafety);
+                await AwardTokensAsync(userId, totalCourage, totalCuriosity, totalThinking, totalCreativity, totalSafety, ct);
             }
 
             // Delete hero tree progress
@@ -377,8 +385,8 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
                 _context.HeroProgress.RemoveRange(heroProgress);
             }
 
-            await _context.SaveChangesAsync();
-            await transaction.CommitAsync();
+            await _context.SaveChangesAsync(ct);
+            await transaction.CommitAsync(ct);
 
             return new ResetPersonalityTokensResult
             {
@@ -388,7 +396,7 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
         }
         catch (Exception ex)
         {
-            await transaction.RollbackAsync();
+            await transaction.RollbackAsync(ct);
             return new ResetPersonalityTokensResult
             {
                 Success = false,
@@ -398,11 +406,11 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
         }
     }
 
-    public async Task<bool> SaveHeroProgressAsync(Guid userId, string heroId)
+    public async Task<bool> SaveHeroProgressAsync(Guid userId, string heroId, CancellationToken ct = default)
     {
         // Check if hero progress already exists
         var existingProgress = await _context.HeroProgress
-            .FirstOrDefaultAsync(hp => hp.UserId == userId && hp.HeroId == heroId);
+            .FirstOrDefaultAsync(hp => hp.UserId == userId && hp.HeroId == heroId, ct);
 
         if (existingProgress != null)
         {
@@ -420,11 +428,11 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
         };
 
         _context.HeroProgress.Add(heroProgress);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(ct);
         return true;
     }
 
-    public async Task<List<string>> AutoUnlockNodesBasedOnPrerequisitesAsync(Guid userId)
+    public async Task<List<string>> AutoUnlockNodesBasedOnPrerequisitesAsync(Guid userId, CancellationToken ct = default)
     {
         var newlyUnlockedNodes = new List<string>();
 
@@ -508,7 +516,7 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
         // Save all newly unlocked nodes
         if (newlyUnlockedNodes.Any())
         {
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(ct);
         }
 
         return newlyUnlockedNodes;
@@ -520,9 +528,9 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
             .FirstOrDefaultAsync(p => p.UserId == userId);
     }
 
-    public async Task SaveUserAlchimalianProfileAsync(Guid userId, string? selectedHeroId)
+    public async Task SaveUserAlchimalianProfileAsync(Guid userId, string? selectedHeroId, CancellationToken ct = default)
     {
-        var profile = await _context.UserAlchimalianProfiles.FirstOrDefaultAsync(p => p.UserId == userId);
+        var profile = await _context.UserAlchimalianProfiles.FirstOrDefaultAsync(p => p.UserId == userId, ct);
         var now = DateTime.UtcNow;
         if (profile == null)
         {
@@ -540,10 +548,10 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
             profile.SelectedHeroId = selectedHeroId;
             profile.UpdatedAt = now;
         }
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(ct);
     }
 
-    public async Task<bool> DiscoverHeroAsync(Guid userId, string heroId, bool setAsSelected)
+    public async Task<bool> DiscoverHeroAsync(Guid userId, string heroId, bool setAsSelected, CancellationToken ct = default)
     {
         var profile = await _context.UserAlchimalianProfiles.FirstOrDefaultAsync(p => p.UserId == userId);
         var list = SafeParseDiscoveredHeroIds(profile?.DiscoveredHeroIdsJson);
@@ -570,7 +578,7 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
                 profile.SelectedHeroId = heroId;
             profile.UpdatedAt = now;
         }
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(ct);
         return true;
     }
 

@@ -13,13 +13,13 @@ public interface ITreeOfLightRepository
     Task<List<TreeProgressDto>> GetTreeProgressAsync(Guid userId, string configId);
     Task<List<StoryProgressDto>> GetStoryProgressAsync(Guid userId, string configId);
 
-    Task<bool> CompleteStoryAsync(Guid userId, CompleteStoryRequest request, StoryContentDto? story, string configId);
-    Task<bool> UnlockRegionAsync(Guid userId, string regionId, string configId);
-    Task ResetUserProgressAsync(Guid userId);
+    Task<bool> CompleteStoryAsync(Guid userId, CompleteStoryRequest request, StoryContentDto? story, string configId, CancellationToken ct = default);
+    Task<bool> UnlockRegionAsync(Guid userId, string regionId, string configId, CancellationToken ct = default);
+    Task ResetUserProgressAsync(Guid userId, CancellationToken ct = default);
     
     Task<List<StoryHero>> GetStoryHeroesAsync();
     Task<bool> IsHeroUnlockedAsync(Guid userId, string heroId);
-    Task<bool> UnlockHeroAsync(Guid userId, string heroId, string heroType);
+    Task<bool> UnlockHeroAsync(Guid userId, string heroId, string heroType, CancellationToken ct = default);
     
     Task<List<HeroMessage>> GetHeroMessagesAsync();
     Task<List<HeroClickMessage>> GetHeroClickMessagesAsync();
@@ -30,20 +30,23 @@ public interface ITreeOfLightRepository
 public class TreeOfLightRepository : ITreeOfLightRepository
 {
     private readonly XooDbContext _context;
+    private readonly ILogger<TreeOfLightRepository> _logger;
 
-    public TreeOfLightRepository(XooDbContext context)
+    public TreeOfLightRepository(XooDbContext context, ILogger<TreeOfLightRepository> logger)
     {
         _context = context;
+        _logger = logger;
     }
 
     public async Task<List<TreeConfiguration>> GetAllConfigurationsAsync()
     {
-        return await _context.TreeConfigurations.ToListAsync();
+        return await _context.TreeConfigurations.AsNoTracking().ToListAsync();
     }
 
     public async Task<List<TreeProgressDto>> GetTreeProgressAsync(Guid userId, string configId)
     {
         return await _context.TreeProgress
+            .AsNoTracking()
             .Where(tp => tp.UserId == userId && tp.TreeConfigurationId == configId)
             .Select(tp => new TreeProgressDto
             {
@@ -57,6 +60,7 @@ public class TreeOfLightRepository : ITreeOfLightRepository
     public async Task<List<StoryProgressDto>> GetStoryProgressAsync(Guid userId, string configId)
     {
         var storyProgresses = await _context.StoryProgress
+            .AsNoTracking()
             .Where(sp => sp.UserId == userId && sp.TreeConfigurationId == configId)
             .ToListAsync();
 
@@ -72,11 +76,12 @@ public class TreeOfLightRepository : ITreeOfLightRepository
 
 
 
-    public async Task<bool> CompleteStoryAsync(Guid userId, CompleteStoryRequest request, StoryContentDto? story, string configId)
+    public async Task<bool> CompleteStoryAsync(Guid userId, CompleteStoryRequest request, StoryContentDto? story, string configId, CancellationToken ct = default)
     {
         try
         {
             var existingStory = await _context.StoryProgress
+                .AsNoTracking()
                 .FirstOrDefaultAsync(sp => sp.UserId == userId && sp.StoryId == request.StoryId && sp.TreeConfigurationId == configId);
 
             if (existingStory != null)
@@ -94,11 +99,12 @@ public class TreeOfLightRepository : ITreeOfLightRepository
             };
 
             _context.StoryProgress.Add(storyProgress);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(ct);
             return true;
         }
-        catch
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
+            _logger.LogError(ex, "Error completing story for user {UserId}, story {StoryId}, config {ConfigId}", userId, request.StoryId, configId);
             return false;
         }
     }
@@ -125,7 +131,7 @@ public class TreeOfLightRepository : ITreeOfLightRepository
         return null;
     }
 
-    public async Task<bool> UnlockRegionAsync(Guid userId, string regionId, string configId)
+    public async Task<bool> UnlockRegionAsync(Guid userId, string regionId, string configId, CancellationToken ct = default)
     {
         try
         {
@@ -156,11 +162,12 @@ public class TreeOfLightRepository : ITreeOfLightRepository
                 _context.TreeProgress.Add(treeProgress);
             }
 
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(ct);
             return true;
         }
-        catch
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
+            _logger.LogError(ex, "Error unlocking region for user {UserId}, region {RegionId}, config {ConfigId}", userId, regionId, configId);
             return false;
         }
     }
@@ -169,27 +176,27 @@ public class TreeOfLightRepository : ITreeOfLightRepository
 
 
 
-    public async Task ResetUserProgressAsync(Guid userId)
+    public async Task ResetUserProgressAsync(Guid userId, CancellationToken ct = default)
     {
-        using var transaction = await _context.Database.BeginTransactionAsync();
+        using var transaction = await _context.Database.BeginTransactionAsync(ct);
 
         try
         {
-            await _context.TreeProgress.Where(tp => tp.UserId == userId).ExecuteDeleteAsync();
-            await _context.StoryProgress.Where(sp => sp.UserId == userId).ExecuteDeleteAsync();
-            await _context.HeroProgress.Where(hp => hp.UserId == userId).ExecuteDeleteAsync();
-            await _context.HeroTreeProgress.Where(htp => htp.UserId == userId).ExecuteDeleteAsync();
+            await _context.TreeProgress.Where(tp => tp.UserId == userId).ExecuteDeleteAsync(ct);
+            await _context.StoryProgress.Where(sp => sp.UserId == userId).ExecuteDeleteAsync(ct);
+            await _context.HeroProgress.Where(hp => hp.UserId == userId).ExecuteDeleteAsync(ct);
+            await _context.HeroTreeProgress.Where(htp => htp.UserId == userId).ExecuteDeleteAsync(ct);
 
             await _context.UserTokenBalances
                 .Where(b => b.UserId == userId)
-                .ExecuteDeleteAsync();
+                .ExecuteDeleteAsync(ct);
 
-            await _context.SaveChangesAsync();
-            await transaction.CommitAsync();
+            await _context.SaveChangesAsync(ct);
+            await transaction.CommitAsync(ct);
         }
         catch
         {
-            await transaction.RollbackAsync();
+            await transaction.RollbackAsync(ct);
             throw;
         }
     }
@@ -197,6 +204,7 @@ public class TreeOfLightRepository : ITreeOfLightRepository
     public async Task<List<StoryHero>> GetStoryHeroesAsync()
     {
         return await _context.StoryHeroes
+            .AsNoTracking()
             .Where(sh => sh.Status == AlchimaliaUniverseStatus.Published.ToDb())
             .ToListAsync();
     }
@@ -204,12 +212,14 @@ public class TreeOfLightRepository : ITreeOfLightRepository
     public async Task<bool> IsHeroUnlockedAsync(Guid userId, string heroId)
     {
         return await _context.HeroProgress
+            .AsNoTracking()
             .AnyAsync(hp => hp.UserId == userId && hp.HeroId == heroId);
     }
 
-    public async Task<bool> UnlockHeroAsync(Guid userId, string heroId, string heroType)
+    public async Task<bool> UnlockHeroAsync(Guid userId, string heroId, string heroType, CancellationToken ct = default)
     {
         var existingProgress = await _context.HeroProgress
+            .AsNoTracking()
             .FirstOrDefaultAsync(hp => hp.UserId == userId && hp.HeroId == heroId);
         
         if (existingProgress != null)
@@ -228,7 +238,7 @@ public class TreeOfLightRepository : ITreeOfLightRepository
         };
 
         _context.HeroProgress.Add(heroProgress);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(ct);
         
         return true;
     }
@@ -236,6 +246,7 @@ public class TreeOfLightRepository : ITreeOfLightRepository
     public async Task<List<HeroMessage>> GetHeroMessagesAsync()
     {
         return await _context.HeroMessages
+            .AsNoTracking()
             .Where(hm => hm.IsActive)
             .ToListAsync();
     }
@@ -243,6 +254,7 @@ public class TreeOfLightRepository : ITreeOfLightRepository
     public async Task<List<HeroClickMessage>> GetHeroClickMessagesAsync()
     {
         return await _context.HeroClickMessages
+            .AsNoTracking()
             .Where(hcm => hcm.IsActive)
             .ToListAsync();
     }
@@ -250,12 +262,14 @@ public class TreeOfLightRepository : ITreeOfLightRepository
     public async Task<HeroMessage?> GetHeroMessageAsync(string heroId, string regionId)
     {
         return await _context.HeroMessages
+            .AsNoTracking()
             .FirstOrDefaultAsync(hm => hm.HeroId == heroId && hm.RegionId == regionId && hm.IsActive);
     }
 
     public async Task<HeroClickMessage?> GetHeroClickMessageAsync(string heroId)
     {
         return await _context.HeroClickMessages
+            .AsNoTracking()
             .FirstOrDefaultAsync(hcm => hcm.HeroId == heroId && hcm.IsActive);
     }
 }

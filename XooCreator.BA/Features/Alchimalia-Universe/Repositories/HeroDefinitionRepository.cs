@@ -63,6 +63,7 @@ public class HeroDefinitionRepository : IHeroDefinitionRepository
     public async Task<List<HeroDefinition>> ListAsync(string? status = null, string? type = null, string? search = null, CancellationToken ct = default)
     {
         var query = _context.HeroDefinitions
+            .AsNoTracking()
             .Include(x => x.Translations)
             .AsQueryable();
         

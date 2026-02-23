@@ -69,9 +69,10 @@ public class HeroDefinitionCraftRepository : IHeroDefinitionCraftRepository
     }
 
     public async Task<List<HeroDefinitionCraft>> ListAsync(string? status = null, string? type = null, string? search = null, CancellationToken ct = default)
-        // Type parameter kept for backward compatibility but no longer used
     {
+        // Type parameter kept for backward compatibility but no longer used
         var query = _context.HeroDefinitionCrafts
+            .AsNoTracking()
             .Include(x => x.Translations)
             .AsQueryable();
 

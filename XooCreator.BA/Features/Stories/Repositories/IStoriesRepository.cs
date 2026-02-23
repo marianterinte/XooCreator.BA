@@ -12,11 +12,11 @@ public interface IStoriesRepository
     Task<StoryDefinition?> GetStoryDefinitionByIdAsync(string storyId);
     Task<List<UserStoryProgressDto>> GetUserStoryProgressAsync(Guid userId, string storyId);
     Task<StoryCompletionInfo> GetStoryCompletionStatusAsync(Guid userId, string storyId);
-    Task<bool> MarkTileAsReadAsync(Guid userId, string storyId, string tileId);
-    Task ResetStoryProgressAsync(Guid userId, string storyId);
+    Task<bool> MarkTileAsReadAsync(Guid userId, string storyId, string tileId, CancellationToken ct = default);
+    Task ResetStoryProgressAsync(Guid userId, string storyId, CancellationToken ct = default);
     Task<bool> StoryIdExistsAsync(string storyId);
-    Task SeedStoriesAsync();
-    Task SeedIndependentStoriesAsync();
+    Task SeedStoriesAsync(CancellationToken ct = default);
+    Task SeedIndependentStoriesAsync(CancellationToken ct = default);
 }
 
 

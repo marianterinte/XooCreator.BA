@@ -40,12 +40,12 @@ public class EpicProgressRepository : IEpicProgressRepository
         }).ToList();
     }
 
-    public async Task<bool> CompleteStoryAsync(Guid userId, string epicId, string storyId, string? selectedAnswer = null)
+    public async Task<bool> CompleteStoryAsync(Guid userId, string epicId, string storyId, string? selectedAnswer = null, CancellationToken ct = default)
     {
         try
         {
             var existingStory = await _context.EpicStoryProgress
-                .FirstOrDefaultAsync(esp => esp.UserId == userId && esp.StoryId == storyId && esp.EpicId == epicId);
+                .FirstOrDefaultAsync(esp => esp.UserId == userId && esp.StoryId == storyId && esp.EpicId == epicId, ct);
 
             if (existingStory != null)
             {
@@ -62,21 +62,21 @@ public class EpicProgressRepository : IEpicProgressRepository
             };
 
             _context.EpicStoryProgress.Add(storyProgress);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(ct);
             return true;
         }
-        catch
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return false;
         }
     }
 
-    public async Task<bool> UnlockRegionAsync(Guid userId, string epicId, string regionId)
+    public async Task<bool> UnlockRegionAsync(Guid userId, string epicId, string regionId, CancellationToken ct = default)
     {
         try
         {
             var existingRegion = await _context.EpicProgress
-                .FirstOrDefaultAsync(ep => ep.UserId == userId && ep.RegionId == regionId && ep.EpicId == epicId);
+                .FirstOrDefaultAsync(ep => ep.UserId == userId && ep.RegionId == regionId && ep.EpicId == epicId, ct);
 
             if (existingRegion?.IsUnlocked == true)
             {
@@ -102,50 +102,46 @@ public class EpicProgressRepository : IEpicProgressRepository
                 _context.EpicProgress.Add(epicProgress);
             }
 
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(ct);
             return true;
         }
-        catch
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return false;
         }
     }
 
-    public async Task<bool> ResetProgressAsync(Guid userId, string epicId)
+    public async Task<bool> ResetProgressAsync(Guid userId, string epicId, CancellationToken ct = default)
     {
         try
         {
-            using var transaction = await _context.Database.BeginTransactionAsync();
+            using var transaction = await _context.Database.BeginTransactionAsync(ct);
 
             // Get all story IDs for this epic
             var storyIds = await _context.StoryEpicDefinitionStoryNodes
                 .Where(sn => sn.EpicId == epicId)
                 .Select(sn => sn.StoryId)
-                .ToListAsync();
+                .ToListAsync(ct);
 
             // Delete all epic progress for this user and epic
             await _context.EpicProgress
                 .Where(ep => ep.UserId == userId && ep.EpicId == epicId)
-                .ExecuteDeleteAsync();
+                .ExecuteDeleteAsync(ct);
 
             // Delete all epic story progress for this user and epic
             await _context.EpicStoryProgress
                 .Where(esp => esp.UserId == userId && esp.EpicId == epicId)
-                .ExecuteDeleteAsync();
+                .ExecuteDeleteAsync(ct);
 
             // Delete UserStoryReadHistory for all stories in this epic
             // This clears the CompletedAt field that determines isCompleted
             if (storyIds.Any())
             {
-                var allHistory = await _context.UserStoryReadHistory
-                    .Where(h => h.UserId == userId)
-                    .ToListAsync();
+                var historyToDelete = await _context.UserStoryReadHistory
+                    .Where(h => h.UserId == userId && storyIds.Contains(h.StoryId))
+                    .ToListAsync(ct);
 
-                var historyToDelete = allHistory
-                    .Where(h => storyIds.Any(sid => string.Equals(h.StoryId, sid, StringComparison.OrdinalIgnoreCase)))
-                    .ToList();
-
-                if (historyToDelete.Any())
+                if (historyToDelete.Count > 0)
                 {
                     _context.UserStoryReadHistory.RemoveRange(historyToDelete);
                 }
@@ -155,25 +151,21 @@ public class EpicProgressRepository : IEpicProgressRepository
             // This clears all quiz answers saved during story completion
             if (storyIds.Any())
             {
-                var allAnswers = await _context.StoryQuizAnswers
-                    .Where(a => a.UserId == userId)
-                    .ToListAsync();
+                var answersToDelete = await _context.StoryQuizAnswers
+                    .Where(a => a.UserId == userId && storyIds.Contains(a.StoryId))
+                    .ToListAsync(ct);
 
-                var answersToDelete = allAnswers
-                    .Where(a => storyIds.Any(sid => string.Equals(a.StoryId, sid, StringComparison.OrdinalIgnoreCase)))
-                    .ToList();
-
-                if (answersToDelete.Any())
+                if (answersToDelete.Count > 0)
                 {
                     _context.StoryQuizAnswers.RemoveRange(answersToDelete);
                 }
             }
 
-            await _context.SaveChangesAsync();
-            await transaction.CommitAsync();
+            await _context.SaveChangesAsync(ct);
+            await transaction.CommitAsync(ct);
             return true;
         }
-        catch
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return false;
         }

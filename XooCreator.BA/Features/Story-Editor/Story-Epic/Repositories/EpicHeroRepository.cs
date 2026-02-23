@@ -110,6 +110,7 @@ public class EpicHeroRepository : IEpicHeroRepository
     public async Task<List<EpicHeroCraft>> ListCraftsByOwnerAsync(Guid ownerUserId, string? status = null, CancellationToken ct = default)
     {
         var query = _context.EpicHeroCrafts
+            .AsNoTracking()
             .Where(x => x.OwnerUserId == ownerUserId)
             .AsQueryable();
 
@@ -128,6 +129,7 @@ public class EpicHeroRepository : IEpicHeroRepository
     public async Task<List<EpicHeroDefinition>> ListPublishedDefinitionsAsync(Guid? excludeOwnerId = null, CancellationToken ct = default)
     {
         var query = _context.EpicHeroDefinitions
+            .AsNoTracking()
             .Where(x => x.Status == "published")
             .AsQueryable();
 
@@ -147,6 +149,7 @@ public class EpicHeroRepository : IEpicHeroRepository
     public async Task<List<EpicHeroCraft>> ListCraftsForReviewAsync(CancellationToken ct = default)
     {
         return await _context.EpicHeroCrafts
+            .AsNoTracking()
             .Where(x => x.Status == "sent_for_approval" || x.Status == "in_review")
             .Include(x => x.Translations)
             .Include(x => x.Regions)

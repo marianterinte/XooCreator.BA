@@ -80,32 +80,14 @@ public class AnimalCraftRepository : IAnimalCraftRepository
     public async Task<List<AnimalCraft>> ListAsync(string? status = null, Guid? regionId = null, bool? isHybrid = null, string? search = null, CancellationToken ct = default)
     {
         var query = _context.AnimalCrafts
+            .AsNoTracking()
             .Include(x => x.Region)
             .Include(x => x.Translations)
             .Include(x => x.SupportedParts)
             .Include(x => x.HybridParts)
             .AsQueryable();
 
-        if (!string.IsNullOrWhiteSpace(status))
-        {
-            var normalized = status.Trim()
-                .Replace("-", string.Empty)
-                .Replace("_", string.Empty)
-                .ToLowerInvariant();
-
-            // Special virtual status used by the editor tab: return all non-published crafts
-            // (draft/sent_for_approval/in_review/approved/changes_requested)
-            if (normalized == "inprogress")
-            {
-                query = query.Where(x =>
-                    x.Status != AlchimaliaUniverseStatus.Published.ToDb() &&
-                    x.Status != AlchimaliaUniverseStatus.Archived.ToDb());
-            }
-            else
-            {
-                query = query.Where(x => x.Status == status);
-            }
-        }
+        query = ApplyStatusFilter(query, status);
 
         if (regionId.HasValue)
             query = query.Where(x => x.RegionId == regionId.Value);
@@ -124,26 +106,25 @@ public class AnimalCraftRepository : IAnimalCraftRepository
     public async Task<int> CountAsync(string? status = null, Guid? regionId = null, CancellationToken ct = default)
     {
         var query = _context.AnimalCrafts.AsQueryable();
-        if (!string.IsNullOrWhiteSpace(status))
-        {
-            var normalized = status.Trim()
-                .Replace("-", string.Empty)
-                .Replace("_", string.Empty)
-                .ToLowerInvariant();
-
-            if (normalized == "inprogress")
-            {
-                query = query.Where(x =>
-                    x.Status != AlchimaliaUniverseStatus.Published.ToDb() &&
-                    x.Status != AlchimaliaUniverseStatus.Archived.ToDb());
-            }
-            else
-            {
-                query = query.Where(x => x.Status == status);
-            }
-        }
+        query = ApplyStatusFilter(query, status);
         if (regionId.HasValue)
             query = query.Where(x => x.RegionId == regionId.Value);
         return await query.CountAsync(ct);
+    }
+
+    private static IQueryable<AnimalCraft> ApplyStatusFilter(IQueryable<AnimalCraft> query, string? status)
+    {
+        if (string.IsNullOrWhiteSpace(status))
+            return query;
+        var normalized = status.Trim()
+            .Replace("-", string.Empty)
+            .Replace("_", string.Empty)
+            .ToLowerInvariant();
+        // Special virtual status used by the editor tab: return all non-published crafts
+        if (normalized == "inprogress")
+            return query.Where(x =>
+                x.Status != AlchimaliaUniverseStatus.Published.ToDb() &&
+                x.Status != AlchimaliaUniverseStatus.Archived.ToDb());
+        return query.Where(x => x.Status == status);
     }
 }

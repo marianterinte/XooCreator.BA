@@ -6,9 +6,9 @@ namespace XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories;
 
 public interface IStoryReviewsRepository
 {
-    Task<StoryReviewDto?> CreateReviewAsync(Guid userId, string storyId, int rating, string? comment);
-    Task<StoryReviewDto?> UpdateReviewAsync(Guid userId, Guid reviewId, int rating, string? comment);
-    Task<bool> DeleteReviewAsync(Guid userId, Guid reviewId);
+    Task<StoryReviewDto?> CreateReviewAsync(Guid userId, string storyId, int rating, string? comment, CancellationToken ct = default);
+    Task<StoryReviewDto?> UpdateReviewAsync(Guid userId, Guid reviewId, int rating, string? comment, CancellationToken ct = default);
+    Task<bool> DeleteReviewAsync(Guid userId, Guid reviewId, CancellationToken ct = default);
     Task<StoryReviewDto?> GetUserReviewAsync(Guid userId, string storyId);
     Task<GetStoryReviewsResponse> GetStoryReviewsAsync(string storyId, Guid? currentUserId, GetStoryReviewsRequest request);
     Task<(double AverageRating, int TotalCount, Dictionary<int, int> RatingDistribution)> GetReviewStatisticsAsync(string storyId);
@@ -24,7 +24,7 @@ public class StoryReviewsRepository : IStoryReviewsRepository
         _context = context;
     }
 
-    public async Task<StoryReviewDto?> CreateReviewAsync(Guid userId, string storyId, int rating, string? comment)
+    public async Task<StoryReviewDto?> CreateReviewAsync(Guid userId, string storyId, int rating, string? comment, CancellationToken ct = default)
     {
         // Validate rating
         if (rating < 1 || rating > 5)
@@ -57,12 +57,12 @@ public class StoryReviewsRepository : IStoryReviewsRepository
         };
 
         _context.StoryReviews.Add(review);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(ct);
 
         return await MapToDtoAsync(review, userId);
     }
 
-    public async Task<StoryReviewDto?> UpdateReviewAsync(Guid userId, Guid reviewId, int rating, string? comment)
+    public async Task<StoryReviewDto?> UpdateReviewAsync(Guid userId, Guid reviewId, int rating, string? comment, CancellationToken ct = default)
     {
         // Validate rating
         if (rating < 1 || rating > 5)
@@ -79,12 +79,12 @@ public class StoryReviewsRepository : IStoryReviewsRepository
         review.Comment = comment;
         review.UpdatedAt = DateTime.UtcNow;
 
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(ct);
 
         return await MapToDtoAsync(review, userId);
     }
 
-    public async Task<bool> DeleteReviewAsync(Guid userId, Guid reviewId)
+    public async Task<bool> DeleteReviewAsync(Guid userId, Guid reviewId, CancellationToken ct = default)
     {
         var review = await _context.StoryReviews
             .FirstOrDefaultAsync(r => r.Id == reviewId && r.UserId == userId && r.IsActive);
@@ -96,7 +96,7 @@ public class StoryReviewsRepository : IStoryReviewsRepository
         review.IsActive = false;
         review.UpdatedAt = DateTime.UtcNow;
 
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(ct);
         return true;
     }
 

@@ -118,15 +118,25 @@ public class RequestUploadEndpoint
             ? dto.OwnerEmail!.Trim()
             : user.Email;
         
-        // Delete old asset if it exists and update DB with new filename
-        await ep._assetReplacementService.ReplaceAssetAsync(
-            emailToUse, 
-            dto.StoryId, 
-            dto.TileId, 
-            dto.Kind, 
-            dto.FileName, 
-            lang, 
-            ct);
+        // IMPORTANT:
+        // For tile assets (tile-image, tile-audio, video) we do NOT mutate DB/delete old blob during request-upload.
+        // The user must remove the existing asset first via DELETE endpoints, then upload. This avoids destructive
+        // pre-save behavior (wrong tile overwritten, files disappearing before save).
+        var isTileAsset = string.Equals(dto.Kind, "tile-audio", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(dto.Kind, "tile-image", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(dto.Kind, "video", StringComparison.OrdinalIgnoreCase);
+        if (!isTileAsset)
+        {
+            // Delete old asset if it exists and update DB with new filename (cover only)
+            await ep._assetReplacementService.ReplaceAssetAsync(
+                emailToUse,
+                dto.StoryId,
+                dto.TileId,
+                dto.Kind,
+                dto.FileName,
+                lang,
+                ct);
+        }
         
         var asset = new StoryAssetPathMapper.AssetInfo(dto.FileName, assetType, lang);
         var blobPath = StoryAssetPathMapper.BuildDraftPath(asset, emailToUse, dto.StoryId);

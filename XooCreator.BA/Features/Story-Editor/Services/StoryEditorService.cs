@@ -129,9 +129,9 @@ public class StoryEditorService : IStoryEditorService
     private async Task UpdateTopicsAsync(StoryCraft craft, List<string> topicIds, CancellationToken ct)
     {
         // Remove existing topics
-        var existingTopics = _context.StoryCraftTopics
+        var existingTopics = await _context.StoryCraftTopics
             .Where(t => t.StoryCraftId == craft.Id)
-            .ToList();
+            .ToListAsync(ct);
         _context.StoryCraftTopics.RemoveRange(existingTopics);
 
         if (topicIds == null || topicIds.Count == 0)
@@ -159,9 +159,9 @@ public class StoryEditorService : IStoryEditorService
     private async Task UpdateAgeGroupsAsync(StoryCraft craft, List<string> ageGroupIds, CancellationToken ct)
     {
         // Remove existing age groups
-        var existingAgeGroups = _context.StoryCraftAgeGroups
+        var existingAgeGroups = await _context.StoryCraftAgeGroups
             .Where(ag => ag.StoryCraftId == craft.Id)
-            .ToList();
+            .ToListAsync(ct);
         _context.StoryCraftAgeGroups.RemoveRange(existingAgeGroups);
 
         if (ageGroupIds == null || ageGroupIds.Count == 0)
@@ -217,9 +217,9 @@ public class StoryEditorService : IStoryEditorService
     private async Task UpdateUnlockedHeroesAsync(StoryCraft craft, List<string> heroIds, CancellationToken ct)
     {
         // Remove existing unlocked heroes
-        var existingHeroes = _context.StoryCraftUnlockedHeroes
+        var existingHeroes = await _context.StoryCraftUnlockedHeroes
             .Where(h => h.StoryCraftId == craft.Id)
-            .ToList();
+            .ToListAsync(ct);
         _context.StoryCraftUnlockedHeroes.RemoveRange(existingHeroes);
 
         if (heroIds == null || heroIds.Count == 0)
