@@ -238,6 +238,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IEpicFavoritesService, EpicFavoritesService>();
         services.AddScoped<IStoryLikesRepository, StoryLikesRepository>();
         services.AddScoped<IStoryLikesService, StoryLikesService>();
+        services.AddScoped<IEpicLikesRepository, EpicLikesRepository>();
+        services.AddScoped<IEpicLikesService, EpicLikesService>();
         services.AddScoped<IGuestSyncService, GuestSyncService>();
         services.AddScoped<StoryDetailsMapper>(sp => 
         {

@@ -12,15 +12,18 @@ public class EpicsMarketplaceRepository
 {
     private readonly XooDbContext _context;
     private readonly IMarketplaceCatalogCache _catalogCache;
+    private readonly IEpicLikesRepository? _epicLikesRepository;
     private readonly ILogger<EpicsMarketplaceRepository>? _logger;
 
     public EpicsMarketplaceRepository(
         XooDbContext context,
         IMarketplaceCatalogCache catalogCache,
+        IEpicLikesRepository? epicLikesRepository = null,
         ILogger<EpicsMarketplaceRepository>? logger = null)
     {
         _context = context;
         _catalogCache = catalogCache;
+        _epicLikesRepository = epicLikesRepository;
         _logger = logger;
     }
 
@@ -96,10 +99,15 @@ public class EpicsMarketplaceRepository
             var skip = (page - 1) * pageSize;
             var totalCount = q.Count();
             var pageItems = q.Skip(skip).Take(pageSize).ToList();
+            var epicIds = pageItems.Select(e => e.EpicId).ToList();
+            var likesCounts = _epicLikesRepository != null && epicIds.Count > 0
+                ? await _epicLikesRepository.GetEpicLikesCountsAsync(epicIds)
+                : new Dictionary<string, int>();
 
             var dtoList = pageItems.Select(epic =>
             {
                 stats.TryGetValue(epic.EpicId, out var st);
+                var likesCount = likesCounts.TryGetValue(epic.EpicId, out var likes) ? likes : 0;
                 return new EpicMarketplaceItemDto
                 {
                     Id = epic.EpicId,
@@ -115,7 +123,8 @@ public class EpicsMarketplaceRepository
                     AvailableLanguages = epic.AvailableLanguages,
                     AudioLanguages = epic.AudioLanguages,
                     ReadersCount = st.ReadersCount,
-                    AverageRating = st.AverageRating
+                    AverageRating = st.AverageRating,
+                    LikesCount = likesCount
                 };
             }).ToList();
 
@@ -200,6 +209,13 @@ public class EpicsMarketplaceRepository
                     DisplayName = ca.UserId != null ? (ca.User?.Name ?? ca.User?.Email ?? ca.DisplayName ?? "") : (ca.DisplayName ?? "")
                 }).ToList();
 
+            var likesCount = _epicLikesRepository != null
+                ? await _epicLikesRepository.GetEpicLikesCountAsync(epicId)
+                : 0;
+            var isLiked = userId != Guid.Empty && _epicLikesRepository != null
+                ? await _epicLikesRepository.IsLikedAsync(userId, epicId)
+                : false;
+
             return new EpicDetailsDto
             {
                 Id = epic.Id,
@@ -215,6 +231,8 @@ public class EpicsMarketplaceRepository
                 ReadersCount = totalReaders,
                 AverageRating = avgRating,
                 TotalReviews = totalReviews,
+                LikesCount = likesCount,
+                IsLiked = isLiked,
                 UserReview = userReview,
                 AvailableLanguages = availableLanguages,
                 AudioLanguages = epic.AudioLanguages ?? new List<string>(),
