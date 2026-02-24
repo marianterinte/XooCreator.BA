@@ -127,6 +127,7 @@ public class StoryPublishQueueWorker : BackgroundService
                         continue;
                     }
 
+                    // --- Error-handling only below: success path (Queued → Running → Completed) is unchanged ---
                     // If job was left Running too long (e.g. previous worker died), mark Failed so UI gets a clear state
                     if (job.Status == StoryPublishJobStatus.Running
                         && job.StartedAtUtc.HasValue
@@ -192,6 +193,7 @@ public class StoryPublishQueueWorker : BackgroundService
 
                         if (craft == null)
                         {
+                            // Error path only: success path goes to the else branch below
                             job.Status = StoryPublishJobStatus.Failed;
                             job.CompletedAtUtc = DateTime.UtcNow;
                             job.ErrorMessage = BuildDiagnosticMessage(job.Id, job.StoryId, null, "StoryCraft not found.");
@@ -239,7 +241,7 @@ public class StoryPublishQueueWorker : BackgroundService
                             try
                             {
                                 await publisher.UpsertFromCraftAsync(craft, ownerEmail, langTag, job.ForceFull, stoppingToken);
-                                _logger.LogInformation("UpsertFromCraftAsync completed successfully: jobId={JobId} storyId={StoryId} ownerEmail={OwnerEmail}", 
+                                _logger.LogInformation("UpsertFromCraftAsync completed successfully: jobId={JobId} storyId={StoryId} ownerEmail={OwnerEmail}",
                                     job.Id, job.StoryId, ownerEmail);
                             }
                             catch (Exception publishEx)
@@ -248,6 +250,7 @@ public class StoryPublishQueueWorker : BackgroundService
                                 throw;
                             }
 
+                            // Success path unchanged: same status/fields as before the error-handling enhancements
                             job.Status = StoryPublishJobStatus.Completed;
                             job.CompletedAtUtc = DateTime.UtcNow;
                             job.ErrorMessage = null;
