@@ -153,6 +153,7 @@ public static class ServiceCollectionExtensions
         
         // Story Publishing & Asset Management
         services.AddScoped<IStoryPublishingService, StoryPublishingService>();
+        services.AddScoped<IStoryPublishCraftValidator, StoryPublishCraftValidator>();
         services.AddScoped<IStoryPublishAssetService, StoryPublishAssetService>();
         services.AddScoped<IStoryIdGenerator, StoryIdGenerator>();
         services.AddScoped<IStoryAssetCopyService, StoryAssetCopyService>();

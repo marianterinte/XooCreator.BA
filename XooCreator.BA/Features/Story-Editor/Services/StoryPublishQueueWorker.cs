@@ -113,6 +113,7 @@ public class StoryPublishQueueWorker : BackgroundService
                 {
                     var db = scope.ServiceProvider.GetRequiredService<XooDbContext>();
                     var publisher = scope.ServiceProvider.GetRequiredService<IStoryPublishingService>();
+                    var craftValidator = scope.ServiceProvider.GetRequiredService<IStoryPublishCraftValidator>();
                     var crafts = scope.ServiceProvider.GetRequiredService<IStoryCraftsRepository>();
                     var cleanupService = scope.ServiceProvider.GetRequiredService<IStoryDraftAssetCleanupService>();
                     var marketplaceCacheInvalidator = scope.ServiceProvider.GetRequiredService<IMarketplaceCacheInvalidator>();
@@ -182,6 +183,13 @@ public class StoryPublishQueueWorker : BackgroundService
                         {
                             _logger.LogInformation("Processing StoryPublishJob: jobId={JobId} storyId={StoryId} draftVersion={DraftVersion} forceFull={ForceFull}",
                                 job.Id, job.StoryId, job.DraftVersion, job.ForceFull);
+
+                            var validationResult = craftValidator.Validate(craft);
+                            if (!validationResult.IsValid)
+                            {
+                                _logger.LogWarning("Publish validation reported issues (publish will still run): jobId={JobId} storyId={StoryId} errors={Errors}",
+                                    job.Id, job.StoryId, validationResult.ToDiagnosticMessage());
+                            }
 
                             var langTag = job.LangTag?.ToLowerInvariant() ?? "ro-ro";
 

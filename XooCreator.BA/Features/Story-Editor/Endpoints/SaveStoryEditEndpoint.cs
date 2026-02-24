@@ -94,6 +94,14 @@ public class SaveStoryEditEndpoint
             return TypedResults.BadRequest("Language is required in request body.");
         }
 
+        var saveValidationErrors = SavePayloadValidator.Validate(dto);
+        if (saveValidationErrors.Count > 0)
+        {
+            var message = string.Join(" ", saveValidationErrors);
+            ep._logger.LogWarning("Save payload validation failed: storyId={StoryId} errors={Errors}", finalStoryId, message);
+            return TypedResults.BadRequest(message);
+        }
+
         var langTag = dto.Language.ToLowerInvariant();
 
         var craft = await ep._crafts.GetAsync(finalStoryId, ct);
