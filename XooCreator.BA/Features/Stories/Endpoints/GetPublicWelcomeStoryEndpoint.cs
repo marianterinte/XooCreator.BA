@@ -10,7 +10,7 @@ namespace XooCreator.BA.Features.Stories.Endpoints;
 
 /// <summary>
 /// Public endpoint for the welcome story (no authentication required)
-/// Supports both welcome stories: ionelbacosca-s251212183034 (kindergarten) and marianterinte-s260124120317 (primary/older)
+/// Supports both welcome stories: ionelbacosca-s251212183034 (kindergarten) and learn-math-s1 (primary/older)
 /// </summary>
 [Endpoint]
 public class GetPublicWelcomeStoryEndpoint
@@ -22,14 +22,14 @@ public class GetPublicWelcomeStoryEndpoint
         _storiesService = storiesService;
     }
 
-    [Route("/api/{locale}/stories/public/welcome")] // GET /api/{locale}/stories/public/welcome?storyId=marianterinte-s260124120317
+    [Route("/api/{locale}/stories/public/welcome")] // GET /api/{locale}/stories/public/welcome?storyId=learn-math-s1
     public static async Task<Results<Ok<GetStoryByIdResponse>, NotFound, BadRequest<string>>> HandleGet(
         [FromRoute] string locale,
         [FromQuery] string? storyId,
         [FromServices] GetPublicWelcomeStoryEndpoint ep)
     {
-        // List of allowed welcome story IDs
-        var allowedWelcomeStoryIds = new[] { "ionelbacosca-s251212183034", "marianterinte-s260124120317" };
+        // List of allowed welcome story IDs (available without login)
+        var allowedWelcomeStoryIds = new[] { "ionelbacosca-s251212183034", "learn-math-s1" };
         
         // Use provided storyId or default to kindergarten welcome story for backward compatibility
         var welcomeStoryId = !string.IsNullOrWhiteSpace(storyId) 

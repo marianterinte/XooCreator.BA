@@ -139,6 +139,7 @@ public class XooDbContext : DbContext
     public DbSet<StoryReader> StoryReaders => Set<StoryReader>();
     public DbSet<EpicReader> EpicReaders => Set<EpicReader>();
     public DbSet<StoryLike> StoryLikes => Set<StoryLike>();
+    public DbSet<EpicLike> EpicLikes => Set<EpicLike>();
     
     // User Story Relations
     public DbSet<UserOwnedStories> UserOwnedStories => Set<UserOwnedStories>();
@@ -237,6 +238,7 @@ public class XooDbContext : DbContext
     public DbSet<StoryCreatorsChallengeSubscription> StoryCreatorsChallengeSubscriptions => Set<StoryCreatorsChallengeSubscription>();
     public DbSet<StoryCreatorsChallengeSubmission> StoryCreatorsChallengeSubmissions => Set<StoryCreatorsChallengeSubmission>();
     public DbSet<CreatorTokenBalance> CreatorTokenBalances => Set<CreatorTokenBalance>();
+    public DbSet<RewardTokenDefinition> RewardTokenDefinitions => Set<RewardTokenDefinition>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

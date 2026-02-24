@@ -245,6 +245,7 @@ public record EpicMarketplaceItemDto
     public int RegionCount { get; init; } // Number of regions in this epic
     public int ReadersCount { get; init; } // Total readers across all stories in epic
     public double AverageRating { get; init; } // Average rating across all stories in epic
+    public int LikesCount { get; init; } // Total likes for this epic
     public List<string> AvailableLanguages { get; init; } = new(); // e.g., ["ro-ro", "en-us", "hu-hu"]
     public List<string> AudioLanguages { get; init; } = new(); // Language codes that have audio support
 }
@@ -270,6 +271,8 @@ public record EpicDetailsDto
     public int ReadersCount { get; init; }
     public double AverageRating { get; init; } // From epic reviews, not story reviews
     public int TotalReviews { get; init; } // From epic reviews, not story reviews
+    public int LikesCount { get; init; }
+    public bool IsLiked { get; init; } // Whether current user has liked this epic
     public EpicReviewDto? UserReview { get; init; } // Current user's review if exists
     public List<string> AvailableLanguages { get; init; } = new(); // e.g., ["ro-ro", "en-us", "hu-hu"]
     public List<string> AudioLanguages { get; init; } = new(); // Language codes that have audio support

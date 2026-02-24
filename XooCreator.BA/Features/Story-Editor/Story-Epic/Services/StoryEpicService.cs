@@ -93,6 +93,7 @@ public class StoryEpicService : IStoryEpicService
                 OwnerUserId = ownerUserId,
                 Status = dto.Status ?? "draft",
                 CoverImageUrl = dto.CoverImageUrl,
+                MarketplaceCoverImageUrl = dto.MarketplaceCoverImageUrl,
                 AudioLanguages = dto.AudioLanguages ?? new List<string>(),
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -154,6 +155,7 @@ public class StoryEpicService : IStoryEpicService
 
         // Update basic properties
         craft.CoverImageUrl = dto.CoverImageUrl;
+        craft.MarketplaceCoverImageUrl = dto.MarketplaceCoverImageUrl;
         craft.Status = dto.Status ?? craft.Status;
         craft.AudioLanguages = dto.AudioLanguages ?? new List<string>();
         craft.UpdatedAt = DateTime.UtcNow;
@@ -313,6 +315,7 @@ public class StoryEpicService : IStoryEpicService
                 Name = name,
                 Description = description,
                 CoverImageUrl = craft.CoverImageUrl,
+                MarketplaceCoverImageUrl = craft.MarketplaceCoverImageUrl,
                 Status = craft.Status,
                 CreatedAt = craft.CreatedAt,
                 UpdatedAt = craft.UpdatedAt,
@@ -346,6 +349,7 @@ public class StoryEpicService : IStoryEpicService
                 Name = name,
                 Description = description,
                 CoverImageUrl = definition.CoverImageUrl,
+                MarketplaceCoverImageUrl = definition.MarketplaceCoverImageUrl,
                 Status = definition.Status,
                 CreatedAt = definition.CreatedAt,
                 UpdatedAt = definition.UpdatedAt,
@@ -414,6 +418,7 @@ public class StoryEpicService : IStoryEpicService
                 Name = name,
                 Description = description,
                 CoverImageUrl = craft.CoverImageUrl,
+                MarketplaceCoverImageUrl = craft.MarketplaceCoverImageUrl,
                 Status = craft.Status,
                 CreatedAt = craft.CreatedAt,
                 UpdatedAt = craft.UpdatedAt,
@@ -447,6 +452,7 @@ public class StoryEpicService : IStoryEpicService
                 Name = name,
                 Description = description,
                 CoverImageUrl = definition.CoverImageUrl,
+                MarketplaceCoverImageUrl = definition.MarketplaceCoverImageUrl,
                 Status = definition.Status,
                 CreatedAt = definition.CreatedAt,
                 UpdatedAt = definition.UpdatedAt,
@@ -558,6 +564,7 @@ public class StoryEpicService : IStoryEpicService
             OwnerUserId = definition.OwnerUserId,
             Status = "draft",
             CoverImageUrl = definition.CoverImageUrl,
+            MarketplaceCoverImageUrl = definition.MarketplaceCoverImageUrl,
             IsDefault = definition.IsDefault,
             AudioLanguages = definition.AudioLanguages ?? new List<string>(),
             CreatedAt = DateTime.UtcNow,
@@ -695,6 +702,7 @@ public class StoryEpicService : IStoryEpicService
             Name = name,
             Description = description,
             CoverImageUrl = craft.CoverImageUrl,
+            MarketplaceCoverImageUrl = craft.MarketplaceCoverImageUrl,
             Status = craft.Status,
             PublishedAtUtc = null, // Crafts are not published
             Translations = translations,
@@ -808,6 +816,7 @@ public class StoryEpicService : IStoryEpicService
             Name = name,
             Description = description,
             CoverImageUrl = definition.CoverImageUrl,
+            MarketplaceCoverImageUrl = definition.MarketplaceCoverImageUrl,
             Status = definition.Status,
             PublishedAtUtc = definition.PublishedAtUtc,
             Translations = translations,

@@ -325,6 +325,7 @@ public sealed class EpicDraftSnapshot
             craft.Name,
             craft.Description,
             craft.CoverImageUrl,
+            craft.MarketplaceCoverImageUrl,
             craft.Topics.Select(t => t.StoryTopic?.TopicId ?? t.StoryTopicId.ToString()),
             craft.AgeGroups.Select(ag => ag.StoryAgeGroup?.AgeGroupId ?? ag.StoryAgeGroupId.ToString()));
 
@@ -407,34 +408,37 @@ public sealed class EpicDraftSnapshot
 
     public sealed class HeaderState
     {
-        private HeaderState(string name, string? description, string? coverImageUrl, IReadOnlyList<string> topicIds, IReadOnlyList<string> ageGroupIds)
+        private HeaderState(string name, string? description, string? coverImageUrl, string? marketplaceCoverImageUrl, IReadOnlyList<string> topicIds, IReadOnlyList<string> ageGroupIds)
         {
             Name = name;
             Description = description;
             CoverImageUrl = coverImageUrl;
+            MarketplaceCoverImageUrl = marketplaceCoverImageUrl;
             TopicIds = topicIds;
             AgeGroupIds = ageGroupIds;
-            Hash = HashHelper.ComputeHash(new { Name, Description, CoverImageUrl, TopicIds, AgeGroupIds });
+            Hash = HashHelper.ComputeHash(new { Name, Description, CoverImageUrl, MarketplaceCoverImageUrl, TopicIds, AgeGroupIds });
         }
 
         public string Name { get; }
         public string? Description { get; }
         public string? CoverImageUrl { get; }
+        public string? MarketplaceCoverImageUrl { get; }
         public IReadOnlyList<string> TopicIds { get; }
         public IReadOnlyList<string> AgeGroupIds { get; }
         public string Hash { get; }
-        public bool HasContent => !string.IsNullOrEmpty(Name) || !string.IsNullOrEmpty(Description) || !string.IsNullOrEmpty(CoverImageUrl);
+        public bool HasContent => !string.IsNullOrEmpty(Name) || !string.IsNullOrEmpty(Description) || !string.IsNullOrEmpty(CoverImageUrl) || !string.IsNullOrEmpty(MarketplaceCoverImageUrl);
 
         public object ToPayload() => new
         {
             name = Name,
             description = Description,
             coverImageUrl = CoverImageUrl,
+            marketplaceCoverImageUrl = MarketplaceCoverImageUrl,
             topicIds = TopicIds,
             ageGroupIds = AgeGroupIds
         };
 
-        public static HeaderState Create(string name, string? description, string? coverImageUrl, IEnumerable<string> topicIds, IEnumerable<string> ageGroupIds)
+        public static HeaderState Create(string name, string? description, string? coverImageUrl, string? marketplaceCoverImageUrl, IEnumerable<string> topicIds, IEnumerable<string> ageGroupIds)
         {
             var normalizedTopicIds = topicIds
                 .Where(id => !string.IsNullOrWhiteSpace(id))
@@ -449,10 +453,10 @@ public sealed class EpicDraftSnapshot
                 .OrderBy(id => id, StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
-            return new HeaderState(name, description, coverImageUrl, normalizedTopicIds, normalizedAgeGroupIds);
+            return new HeaderState(name, description, coverImageUrl, marketplaceCoverImageUrl, normalizedTopicIds, normalizedAgeGroupIds);
         }
 
-        public static HeaderState Empty() => new(string.Empty, null, null, Array.Empty<string>(), Array.Empty<string>());
+        public static HeaderState Empty() => new(string.Empty, null, null, null, Array.Empty<string>(), Array.Empty<string>());
     }
 
     public sealed class RegionReferenceState
