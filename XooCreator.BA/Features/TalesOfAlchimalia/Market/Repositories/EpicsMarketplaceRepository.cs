@@ -221,7 +221,7 @@ public class EpicsMarketplaceRepository
                 Id = epic.Id,
                 Name = name,
                 Description = description,
-                CoverImageUrl = epic.CoverImageUrl,
+                CoverImageUrl = epic.MarketplaceCoverImageUrl ?? epic.CoverImageUrl,
                 CreatedBy = epic.OwnerUserId,
                 CreatedByName = epic.Owner?.Name ?? epic.Owner?.Email ?? "Unknown",
                 CreatedAt = epic.CreatedAt,

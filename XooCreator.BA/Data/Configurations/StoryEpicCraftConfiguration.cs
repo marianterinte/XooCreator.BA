@@ -12,6 +12,8 @@ public class StoryEpicCraftConfiguration : IEntityTypeConfiguration<StoryEpicCra
         builder.Property(x => x.Id).HasMaxLength(100).IsRequired();
         builder.Property(x => x.Name).HasMaxLength(200).IsRequired();
         builder.Property(x => x.Description).HasMaxLength(1000);
+        builder.Property(x => x.CoverImageUrl).HasMaxLength(500);
+        builder.Property(x => x.MarketplaceCoverImageUrl).HasMaxLength(500);
         builder.Property(x => x.Status).HasMaxLength(20).IsRequired();
         builder.HasIndex(x => new { x.OwnerUserId, x.Id }).IsUnique();
         builder.HasIndex(x => x.Status);

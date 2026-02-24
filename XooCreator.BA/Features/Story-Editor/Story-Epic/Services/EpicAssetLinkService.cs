@@ -15,9 +15,11 @@ namespace XooCreator.BA.Features.StoryEditor.StoryEpic.Services;
 public interface IEpicAssetLinkService
 {
     Task SyncCoverImageAsync(StoryEpicCraft craft, string ownerEmail, CancellationToken ct);
+    Task SyncMarketplaceCoverImageAsync(StoryEpicCraft craft, string ownerEmail, CancellationToken ct);
     Task SyncRewardImageAsync(StoryEpicCraft craft, string storyId, string ownerEmail, CancellationToken ct);
     Task SyncAllAssetsAsync(StoryEpicCraft craft, string ownerEmail, CancellationToken ct);
     Task RemoveCoverImageAsync(string epicId, CancellationToken ct);
+    Task RemoveMarketplaceCoverImageAsync(string epicId, CancellationToken ct);
     Task RemoveRewardImageAsync(string epicId, string storyId, CancellationToken ct);
     Task RemoveAllAssetsAsync(string epicId, CancellationToken ct);
 }
@@ -25,6 +27,7 @@ public interface IEpicAssetLinkService
 public class EpicAssetLinkService : IEpicAssetLinkService
 {
     private const string CoverImageEntityId = "__cover_image__";
+    private const string MarketplaceCoverImageEntityId = "__marketplace_cover_image__";
     private const string RewardImageEntityIdPrefix = "__reward_image__";
 
     private readonly XooDbContext _db;
@@ -47,6 +50,7 @@ public class EpicAssetLinkService : IEpicAssetLinkService
     public async Task SyncAllAssetsAsync(StoryEpicCraft craft, string ownerEmail, CancellationToken ct)
     {
         await SyncCoverImageAsync(craft, ownerEmail, ct);
+        await SyncMarketplaceCoverImageAsync(craft, ownerEmail, ct);
 
         // Load craft with story nodes if not already loaded
         craft = await _db.StoryEpicCrafts
@@ -86,6 +90,35 @@ public class EpicAssetLinkService : IEpicAssetLinkService
             null,
             draftPath,
             publishedPath,
+            "Cover",
+            ct);
+    }
+
+    public async Task SyncMarketplaceCoverImageAsync(StoryEpicCraft craft, string ownerEmail, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(craft.MarketplaceCoverImageUrl))
+        {
+            await RemoveMarketplaceCoverImageAsync(craft.Id, ct);
+            return;
+        }
+
+        var draftPath = NormalizeBlobPath(craft.MarketplaceCoverImageUrl);
+        var publishedPath = await PublishMarketplaceCoverImageAsync(craft.Id, draftPath, ownerEmail, ct);
+
+        if (string.IsNullOrWhiteSpace(publishedPath))
+        {
+            _logger.LogWarning("Failed to publish marketplace cover image for epicId={EpicId}", craft.Id);
+            return;
+        }
+
+        await UpsertLinkAsync(
+            craft.Id,
+            craft.LastDraftVersion,
+            MarketplaceCoverImageEntityId,
+            null,
+            draftPath,
+            publishedPath,
+            "MarketplaceCover",
             ct);
     }
 
@@ -120,6 +153,7 @@ public class EpicAssetLinkService : IEpicAssetLinkService
             storyId,
             draftPath,
             publishedPath,
+            "Reward",
             ct);
     }
 
@@ -127,6 +161,26 @@ public class EpicAssetLinkService : IEpicAssetLinkService
     {
         var links = await _db.EpicAssetLinks
             .Where(x => x.EpicId == epicId && x.EntityId == CoverImageEntityId)
+            .ToListAsync(ct);
+
+        if (links.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var link in links)
+        {
+            await DeletePublishedAssetAsync(link.PublishedPath, ct);
+        }
+
+        _db.EpicAssetLinks.RemoveRange(links);
+        await _db.SaveChangesAsync(ct);
+    }
+
+    public async Task RemoveMarketplaceCoverImageAsync(string epicId, CancellationToken ct)
+    {
+        var links = await _db.EpicAssetLinks
+            .Where(x => x.EpicId == epicId && x.EntityId == MarketplaceCoverImageEntityId)
             .ToListAsync(ct);
 
         if (links.Count == 0)
@@ -248,6 +302,66 @@ public class EpicAssetLinkService : IEpicAssetLinkService
         }
     }
 
+    private async Task<string> PublishMarketplaceCoverImageAsync(string epicId, string draftPath, string ownerEmail, CancellationToken ct)
+    {
+        if (IsAlreadyPublished(draftPath))
+        {
+            return draftPath;
+        }
+
+        var sourceClient = _blobSas.GetBlobClient(_blobSas.DraftContainer, draftPath);
+        if (!await sourceClient.ExistsAsync(ct))
+        {
+            _logger.LogWarning("Draft marketplace cover image does not exist: {Path}", draftPath);
+            return string.Empty;
+        }
+
+        var extension = Path.GetExtension(draftPath);
+        if (string.IsNullOrWhiteSpace(extension))
+        {
+            extension = ".png";
+        }
+
+        var publishedPath = $"images/epics/{epicId}/marketplace-cover{extension}";
+        var destinationClient = _blobSas.GetBlobClient(_blobSas.PublishedContainer, publishedPath);
+
+        _logger.LogInformation("Publishing epic marketplace cover image: {Source} → {Destination}", draftPath, publishedPath);
+
+        try
+        {
+            var sourceSas = sourceClient.GenerateSasUri(BlobSasPermissions.Read, DateTimeOffset.UtcNow.AddMinutes(10));
+            await destinationClient.DeleteIfExistsAsync(cancellationToken: ct);
+
+            var copyOperation = await destinationClient.StartCopyFromUriAsync(sourceSas, cancellationToken: ct);
+            await copyOperation.WaitForCompletionAsync(cancellationToken: ct);
+
+            if (publishedPath.StartsWith("images/", StringComparison.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    var (basePath, fileName) = SplitPath(publishedPath);
+                    await _imageCompression.EnsureStorySizeVariantsAsync(
+                        sourceBlobPath: publishedPath,
+                        targetBasePath: basePath,
+                        filename: fileName,
+                        overwriteExisting: true,
+                        ct: ct);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to generate marketplace cover image variants: path={Path}", publishedPath);
+                }
+            }
+
+            return publishedPath;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to publish marketplace cover image: {Path}", draftPath);
+            return string.Empty;
+        }
+    }
+
     private async Task<string> PublishRewardImageAsync(string epicId, string storyId, string draftPath, string ownerEmail, CancellationToken ct)
     {
         if (IsAlreadyPublished(draftPath))
@@ -318,17 +432,16 @@ public class EpicAssetLinkService : IEpicAssetLinkService
         string? storyId,
         string draftPath,
         string publishedPath,
+        string assetType,
         CancellationToken ct)
     {
         var hash = ComputeAssetHash(draftPath, draftVersion);
 
-        // Check by EpicId, DraftPath, and AssetType to find the correct link
-        // This ensures we update the right link when doing replacement (same filename, new version)
         var existing = await _db.EpicAssetLinks
-            .FirstOrDefaultAsync(x => 
-                x.EpicId == epicId && 
-                x.DraftPath == draftPath && 
-                x.AssetType == (entityId == CoverImageEntityId ? "Cover" : "Reward"), ct);
+            .FirstOrDefaultAsync(x =>
+                x.EpicId == epicId &&
+                x.DraftPath == draftPath &&
+                x.AssetType == assetType, ct);
 
         if (existing == null)
         {
@@ -337,7 +450,7 @@ public class EpicAssetLinkService : IEpicAssetLinkService
                 Id = Guid.NewGuid(),
                 EpicId = epicId,
                 DraftVersion = draftVersion,
-                AssetType = entityId == CoverImageEntityId ? "Cover" : "Reward",
+                AssetType = assetType,
                 EntityId = entityId,
                 DraftPath = draftPath,
                 PublishedPath = publishedPath,

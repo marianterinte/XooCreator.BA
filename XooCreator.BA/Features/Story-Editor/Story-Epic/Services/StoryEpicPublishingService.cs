@@ -387,6 +387,25 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
             }
         }
 
+        // Get published marketplace cover image URL from asset link
+        string? publishedMarketplaceCoverUrl = null;
+        if (!string.IsNullOrWhiteSpace(craft.MarketplaceCoverImageUrl))
+        {
+            var normalizedPath = NormalizeBlobPath(craft.MarketplaceCoverImageUrl);
+            var assetLink = await _context.EpicAssetLinks
+                .Where(x => x.EpicId == craft.Id && x.DraftPath == normalizedPath && x.AssetType == "MarketplaceCover")
+                .OrderByDescending(x => x.DraftVersion)
+                .FirstOrDefaultAsync(ct);
+            if (assetLink != null && !string.IsNullOrWhiteSpace(assetLink.PublishedPath))
+            {
+                publishedMarketplaceCoverUrl = assetLink.PublishedPath;
+            }
+            else if (IsAlreadyPublished(normalizedPath))
+            {
+                publishedMarketplaceCoverUrl = normalizedPath;
+            }
+        }
+
         // Use first translation for Name and Description, prefer ro-ro as default (or fallback to craft.Name/Description)
         // This ensures marketplace shows the correct language when new translations are added
         var defaultTranslation = craft.Translations.FirstOrDefault(t => t.LanguageCode == "ro-ro")
@@ -405,6 +424,7 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
                 Status = "published",
                 IsActive = true,
                 CoverImageUrl = publishedCoverImageUrl,
+                MarketplaceCoverImageUrl = publishedMarketplaceCoverUrl,
                 IsDefault = craft.IsDefault,
                 AudioLanguages = craft.AudioLanguages ?? new List<string>(),
                 CreatedAt = DateTime.UtcNow,
@@ -425,6 +445,7 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
             definition.Status = "published";
             definition.IsActive = true;
             definition.CoverImageUrl = publishedCoverImageUrl;
+            definition.MarketplaceCoverImageUrl = publishedMarketplaceCoverUrl;
             definition.IsDefault = craft.IsDefault;
             definition.AudioLanguages = craft.AudioLanguages ?? new List<string>();
             definition.UpdatedAt = DateTime.UtcNow;
@@ -761,11 +782,9 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
         if (!string.IsNullOrWhiteSpace(craft.CoverImageUrl))
         {
             var normalizedPath = NormalizeBlobPath(craft.CoverImageUrl);
-            // Find the asset link for the current draft version to ensure we get the correct published path
-            // This is important when doing replacement (same filename, new version)
             var assetLink = await _context.EpicAssetLinks
                 .Where(x => x.EpicId == craft.Id && x.DraftPath == normalizedPath && x.AssetType == "Cover")
-                .OrderByDescending(x => x.DraftVersion) // Get the latest version
+                .OrderByDescending(x => x.DraftVersion)
                 .FirstOrDefaultAsync(ct);
             
             if (assetLink != null && !string.IsNullOrWhiteSpace(assetLink.PublishedPath))
@@ -781,6 +800,30 @@ public class StoryEpicPublishingService : IStoryEpicPublishingService
         {
             definition.CoverImageUrl = null;
             await _assetLinkService.RemoveCoverImageAsync(craft.Id, ct);
+        }
+
+        await _assetLinkService.SyncMarketplaceCoverImageAsync(craft, ownerEmail, ct);
+
+        if (!string.IsNullOrWhiteSpace(craft.MarketplaceCoverImageUrl))
+        {
+            var normalizedPath = NormalizeBlobPath(craft.MarketplaceCoverImageUrl);
+            var assetLink = await _context.EpicAssetLinks
+                .Where(x => x.EpicId == craft.Id && x.DraftPath == normalizedPath && x.AssetType == "MarketplaceCover")
+                .OrderByDescending(x => x.DraftVersion)
+                .FirstOrDefaultAsync(ct);
+            if (assetLink != null && !string.IsNullOrWhiteSpace(assetLink.PublishedPath))
+            {
+                definition.MarketplaceCoverImageUrl = assetLink.PublishedPath;
+            }
+            else if (IsAlreadyPublished(normalizedPath))
+            {
+                definition.MarketplaceCoverImageUrl = normalizedPath;
+            }
+        }
+        else
+        {
+            definition.MarketplaceCoverImageUrl = null;
+            await _assetLinkService.RemoveMarketplaceCoverImageAsync(craft.Id, ct);
         }
 
         SyncDefinitionTopics(definition, craft);
