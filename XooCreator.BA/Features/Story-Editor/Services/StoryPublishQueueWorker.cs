@@ -22,6 +22,8 @@ public class StoryPublishQueueWorker : BackgroundService
     private readonly QueueClient _queueClient;
     private readonly IJobEventsHub _jobEvents;
     private readonly TimeSpan _messageVisibilityTimeout;
+    private static readonly TimeSpan RunningJobTimeout = TimeSpan.FromMinutes(20);
+    private const int MaxErrorMessageLength = 2000;
 
     public StoryPublishQueueWorker(
         IServiceProvider services,
@@ -125,6 +127,31 @@ public class StoryPublishQueueWorker : BackgroundService
                         continue;
                     }
 
+                    // If job was left Running too long (e.g. previous worker died), mark Failed so UI gets a clear state
+                    if (job.Status == StoryPublishJobStatus.Running
+                        && job.StartedAtUtc.HasValue
+                        && DateTime.UtcNow - job.StartedAtUtc.Value > RunningJobTimeout)
+                    {
+                        job.Status = StoryPublishJobStatus.Failed;
+                        job.CompletedAtUtc = DateTime.UtcNow;
+                        job.ErrorMessage = BuildDiagnosticMessage(job.Id, job.StoryId, null,
+                            "Publish timeout after 20 minutes. Check Application Insights for this JobId.");
+                        await db.SaveChangesAsync(stoppingToken);
+                        _jobEvents.Publish(JobTypes.StoryPublish, job.Id, new
+                        {
+                            jobId = job.Id,
+                            storyId = job.StoryId,
+                            status = job.Status.ToString(),
+                            queuedAtUtc = job.QueuedAtUtc,
+                            startedAtUtc = job.StartedAtUtc,
+                            completedAtUtc = job.CompletedAtUtc,
+                            errorMessage = job.ErrorMessage,
+                            dequeueCount = job.DequeueCount
+                        });
+                        await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
+                        continue;
+                    }
+
                     void PublishStatus()
                     {
                         _jobEvents.Publish(JobTypes.StoryPublish, job.Id, new
@@ -166,17 +193,22 @@ public class StoryPublishQueueWorker : BackgroundService
                         if (craft == null)
                         {
                             job.Status = StoryPublishJobStatus.Failed;
-                            job.ErrorMessage = "StoryCraft not found.";
+                            job.CompletedAtUtc = DateTime.UtcNow;
+                            job.ErrorMessage = BuildDiagnosticMessage(job.Id, job.StoryId, null, "StoryCraft not found.");
                         }
                         else if (craft.LastDraftVersion < job.DraftVersion)
                         {
                             job.Status = StoryPublishJobStatus.Failed;
-                            job.ErrorMessage = $"Draft version {job.DraftVersion} no longer available (LastDraftVersion={craft.LastDraftVersion}).";
+                            job.CompletedAtUtc = DateTime.UtcNow;
+                            job.ErrorMessage = BuildDiagnosticMessage(job.Id, job.StoryId, null,
+                                $"Draft version {job.DraftVersion} no longer available (LastDraftVersion={craft.LastDraftVersion}).");
                         }
                         else if (craft.LastDraftVersion > job.DraftVersion)
                         {
                             job.Status = StoryPublishJobStatus.Superseded;
-                            job.ErrorMessage = $"Job draftVersion={job.DraftVersion} superseded by newer draftVersion={craft.LastDraftVersion}.";
+                            job.CompletedAtUtc = DateTime.UtcNow;
+                            job.ErrorMessage = BuildDiagnosticMessage(job.Id, job.StoryId, null,
+                                $"Job draftVersion={job.DraftVersion} superseded by newer draftVersion={craft.LastDraftVersion}.");
                         }
                         else
                         {
@@ -270,7 +302,7 @@ public class StoryPublishQueueWorker : BackgroundService
                         if (job.DequeueCount >= 3)
                         {
                             job.Status = StoryPublishJobStatus.Failed;
-                            job.ErrorMessage = ex.Message;
+                            job.ErrorMessage = BuildDiagnosticMessage(job.Id, job.StoryId, ex, ex.Message);
                             job.CompletedAtUtc = DateTime.UtcNow;
                             await db.SaveChangesAsync(stoppingToken);
                             PublishStatus();
@@ -308,6 +340,18 @@ public class StoryPublishQueueWorker : BackgroundService
 
     // Note: QueueClient from Azure.Storage.Queues v12+ is stateless and doesn't implement IDisposable.
     // No explicit cleanup needed. Scoped services (DbContext, etc.) are disposed via 'using var scope'.
+
+    /// <summary>
+    /// Builds a diagnostic error message for Application Insights correlation: [JobId:...] [StoryId:...] ExceptionType: Message.
+    /// Truncates to MaxErrorMessageLength to fit DB column.
+    /// </summary>
+    private static string BuildDiagnosticMessage(Guid jobId, string storyId, Exception? ex, string? messageOverride)
+    {
+        var exceptionType = ex?.GetType().Name ?? "Error";
+        var message = messageOverride ?? ex?.Message ?? "Unknown error";
+        var full = $"[JobId:{jobId}] [StoryId:{storyId}] {exceptionType}: {message}";
+        return full.Length > MaxErrorMessageLength ? full[..MaxErrorMessageLength] : full;
+    }
 
     private sealed record StoryPublishQueuePayload(Guid JobId, string StoryId, int DraftVersion);
 }
