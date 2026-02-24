@@ -119,6 +119,9 @@ public class DraftAudioEndpoint
         var usedNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var putUrls = new List<DraftAudioPutUrlResponse>();
 
+        var normalizedLocale = (locale ?? string.Empty).Trim().ToLowerInvariant();
+        var langForPath = string.IsNullOrWhiteSpace(normalizedLocale) ? null : normalizedLocale;
+
         foreach (var file in files)
         {
             if (string.IsNullOrWhiteSpace(file?.FileName))
@@ -142,7 +145,7 @@ public class DraftAudioEndpoint
             }
             usedNames.Add(finalFileName);
 
-            var asset = new StoryAssetPathMapper.AssetInfo(finalFileName, StoryAssetPathMapper.AssetType.Audio, null);
+            var asset = new StoryAssetPathMapper.AssetInfo(finalFileName, StoryAssetPathMapper.AssetType.Audio, langForPath);
             var blobPath = StoryAssetPathMapper.BuildDraftPath(asset, emailToUse, storyId);
 
             var contentType = ext.ToLowerInvariant() switch
