@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 
 namespace XooCreator.BA.Infrastructure.Configuration;
@@ -51,14 +53,18 @@ public static class AuthConfiguration
                 },
                 OnAuthenticationFailed = context =>
                 {
-                    Console.WriteLine($"[JWT] Authentication failed: {context.Exception.Message}");
+                    var loggerFactory = context.HttpContext.RequestServices.GetService<ILoggerFactory>();
+                    var logger = loggerFactory?.CreateLogger("XooCreator.BA.Infrastructure.Configuration.JwtBearer");
+                    logger?.LogWarning("[JWT] Authentication failed: {Message}", context.Exception.Message);
                     return Task.CompletedTask;
                 },
                 OnChallenge = context =>
                 {
                     if (context.AuthenticateFailure != null)
                     {
-                        Console.WriteLine($"[JWT] Challenge failed: {context.AuthenticateFailure.Message}");
+                        var loggerFactory = context.HttpContext.RequestServices.GetService<ILoggerFactory>();
+                        var logger = loggerFactory?.CreateLogger("XooCreator.BA.Infrastructure.Configuration.JwtBearer");
+                        logger?.LogWarning("[JWT] Challenge failed: {Message}", context.AuthenticateFailure.Message);
                     }
                     return Task.CompletedTask;
                 },
@@ -67,7 +73,9 @@ public static class AuthConfiguration
                     var iss = context.Principal?.FindFirst("iss")?.Value ?? "<none>";
                     var aud = string.Join(",", context.Principal?.FindAll("aud").Select(c => c.Value) ?? Array.Empty<string>());
                     var sub = context.Principal?.FindFirst("sub")?.Value ?? "<none>";
-                    Console.WriteLine($"[JWT] Token validated. iss={iss} aud={aud} sub={sub}");
+                    var loggerFactory = context.HttpContext.RequestServices.GetService<ILoggerFactory>();
+                    var logger = loggerFactory?.CreateLogger("XooCreator.BA.Infrastructure.Configuration.JwtBearer");
+                    logger?.LogDebug("[JWT] Token validated. iss={Iss} aud={Aud} sub={Sub}", iss, aud, sub);
                     return Task.CompletedTask;
                 }
             };

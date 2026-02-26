@@ -16,10 +16,12 @@ namespace XooCreator.BA.Features.Stories.Endpoints;
 public class GetPublicWelcomeStoryEndpoint
 {
     private readonly IStoriesService _storiesService;
+    private readonly ILogger<GetPublicWelcomeStoryEndpoint> _logger;
     
-    public GetPublicWelcomeStoryEndpoint(IStoriesService storiesService)
+    public GetPublicWelcomeStoryEndpoint(IStoriesService storiesService, ILogger<GetPublicWelcomeStoryEndpoint> logger)
     {
         _storiesService = storiesService;
+        _logger = logger;
     }
 
     [Route("/api/{locale}/stories/public/welcome")] // GET /api/{locale}/stories/public/welcome?storyId=learn-math-s1
@@ -42,7 +44,7 @@ public class GetPublicWelcomeStoryEndpoint
             return TypedResults.BadRequest($"Invalid welcome story ID. Allowed IDs: {string.Join(", ", allowedWelcomeStoryIds)}");
         }
         
-        Console.WriteLine($"[GetPublicWelcomeStory] Request received - locale: {locale}, storyId: {welcomeStoryId}");
+        ep._logger.LogInformation("[GetPublicWelcomeStory] Request received - locale: {Locale}, storyId: {StoryId}", locale, welcomeStoryId);
         
         // Use empty Guid since user is not authenticated - this will return story without progress
         var effectiveUserId = Guid.Empty;
@@ -51,11 +53,11 @@ public class GetPublicWelcomeStoryEndpoint
         
         if (result.Story == null)
         {
-            Console.WriteLine($"[GetPublicWelcomeStory] Story not found: {welcomeStoryId}");
+            ep._logger.LogWarning("[GetPublicWelcomeStory] Story not found: {StoryId}", welcomeStoryId);
             return TypedResults.NotFound();
         }
         
-        Console.WriteLine($"[GetPublicWelcomeStory] Story found - Title: {result.Story.Title}, Tiles count: {result.Story.Tiles?.Count ?? 0}");
+        ep._logger.LogInformation("[GetPublicWelcomeStory] Story found - Title: {Title}, Tiles count: {TilesCount}", result.Story.Title, result.Story.Tiles?.Count ?? 0);
         
         // Ensure progress is empty for public access
         result = result with 

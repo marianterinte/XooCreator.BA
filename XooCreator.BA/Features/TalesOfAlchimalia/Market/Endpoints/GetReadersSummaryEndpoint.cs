@@ -17,15 +17,18 @@ public class GetReadersSummaryEndpoint
     private readonly XooDbContext _context;
     private readonly IStoriesMarketplaceService _marketplaceService;
     private readonly IAuth0UserService _auth0;
+    private readonly ILogger<GetReadersSummaryEndpoint> _logger;
 
     public GetReadersSummaryEndpoint(
         XooDbContext context,
         IStoriesMarketplaceService marketplaceService,
-        IAuth0UserService auth0)
+        IAuth0UserService auth0,
+        ILogger<GetReadersSummaryEndpoint> logger)
     {
         _context = context;
         _marketplaceService = marketplaceService;
         _auth0 = auth0;
+        _logger = logger;
     }
 
     [Route("/api/{locale}/admin/reports/readers/summary")]
@@ -84,7 +87,7 @@ public class GetReadersSummaryEndpoint
                               $"StackTrace: {ex.StackTrace}\n" +
                               (ex.InnerException != null ? $"InnerException: {ex.InnerException.GetType().Name} - {ex.InnerException.Message}\n" : "");
 
-            Console.WriteLine($"ERROR in GetReadersSummaryEndpoint: {errorDetails}");
+            ep._logger.LogError(ex, "GetReadersSummaryEndpoint failed: {ErrorDetails}", errorDetails);
 
             var errorResponse = new ReadersSummaryResponse
             {
