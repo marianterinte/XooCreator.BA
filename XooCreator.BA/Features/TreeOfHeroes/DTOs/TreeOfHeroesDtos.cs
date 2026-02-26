@@ -28,6 +28,14 @@ public record UserTokensDto
     public int Safety { get; init; }
 }
 
+/// <summary>Single token balance item for GET tokens/all (all types + quantities).</summary>
+public record TokenBalanceItemDto
+{
+    public required string Type { get; init; }
+    public required string Value { get; init; }
+    public int Quantity { get; init; }
+}
+
 public record HeroDto
 {
     public required string HeroId { get; init; }

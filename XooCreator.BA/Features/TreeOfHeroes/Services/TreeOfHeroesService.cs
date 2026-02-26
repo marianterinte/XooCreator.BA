@@ -10,6 +10,7 @@ namespace XooCreator.BA.Features.TreeOfHeroes.Services;
 public interface ITreeOfHeroesService
 {
     Task<UserTokensDto> GetUserTokensAsync(Guid userId);
+    Task<List<TokenBalanceItemDto>> GetAllTokenBalancesAsync(Guid userId);
     Task<List<HeroDto>> GetHeroProgressAsync(Guid userId);
     Task<List<HeroTreeNodeDto>> GetHeroTreeProgressAsync(Guid userId);
     Task<List<HeroDefinitionDto>> GetHeroDefinitionsAsync(string locale);
@@ -40,6 +41,11 @@ public class TreeOfHeroesService : ITreeOfHeroesService
     public Task<UserTokensDto> GetUserTokensAsync(Guid userId)
     {
         return _repository.GetUserTokensAsync(userId);
+    }
+
+    public Task<List<TokenBalanceItemDto>> GetAllTokenBalancesAsync(Guid userId)
+    {
+        return _repository.GetAllTokenBalancesAsync(userId);
     }
 
     public Task<List<HeroDto>> GetHeroProgressAsync(Guid userId)
