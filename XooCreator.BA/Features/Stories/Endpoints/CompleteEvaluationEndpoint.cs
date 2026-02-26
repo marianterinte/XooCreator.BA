@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
+using XooCreator.BA.Features.HeroStoryRewards.DTOs;
+using XooCreator.BA.Features.HeroStoryRewards.Services;
 using XooCreator.BA.Features.Stories.Repositories;
 using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Infrastructure;
@@ -42,17 +44,20 @@ public class CompleteEvaluationEndpoint
     private readonly XooDbContext _context;
     private readonly IStoriesRepository _repository;
     private readonly IUserContextService _userContext;
+    private readonly IHeroStoryRewardsService _rewardService;
     private readonly ILogger<CompleteEvaluationEndpoint> _logger;
 
     public CompleteEvaluationEndpoint(
         XooDbContext context,
         IStoriesRepository repository,
         IUserContextService userContext,
+        IHeroStoryRewardsService rewardService,
         ILogger<CompleteEvaluationEndpoint> logger)
     {
         _context = context;
         _repository = repository;
         _userContext = userContext;
+        _rewardService = rewardService;
         _logger = logger;
     }
 
@@ -113,6 +118,9 @@ public class CompleteEvaluationEndpoint
         // Build quiz details breakdown
         var quizDetails = new List<QuizAnswerDetail>();
         var quizTiles = story.Tiles.Where(t => t.Type == "quiz").ToList();
+
+        // Collect tokens from correct answers (Type, Value) -> total Quantity for reward award
+        var tokensByTypeValue = new Dictionary<(string Type, string Value), int>();
 
         // CRITICAL FIX: Always recalculate IsCorrect from current story version
         // NEVER trust stored IsCorrect values - they may be stale
@@ -212,6 +220,19 @@ public class CompleteEvaluationEndpoint
             if (isCorrect)
             {
                 correctAnswers++;
+                // Collect tokens from the correct selected answer for later reward award
+                if (selectedAnswer?.Tokens != null)
+                {
+                    foreach (var t in selectedAnswer.Tokens)
+                    {
+                        if (t.Quantity <= 0) continue;
+                        var type = t.Type?.Trim() ?? "";
+                        var value = (t.Value ?? "").Trim();
+                        if (string.IsNullOrEmpty(value)) continue;
+                        var key = (type, value);
+                        tokensByTypeValue[key] = tokensByTypeValue.GetValueOrDefault(key, 0) + t.Quantity;
+                    }
+                }
             }
         }
         
@@ -266,6 +287,47 @@ public class CompleteEvaluationEndpoint
 
         ep._context.StoryEvaluationResults.Add(result);
         await ep._context.SaveChangesAsync(ct);
+
+        // Award tokens for correct answers (non-blocking: evaluation success is not affected by reward failure)
+        if (tokensByTypeValue.Count > 0)
+        {
+            var tokenDtos = tokensByTypeValue
+                .Select(kv => new TokenRewardDto
+                {
+                    Type = kv.Key.Type,
+                    Value = kv.Key.Value,
+                    Quantity = kv.Value
+                })
+                .ToList();
+            try
+            {
+                var rewardRequest = new CompleteStoryRewardRequest
+                {
+                    StoryId = storyId,
+                    Source = "evaluation",
+                    Tokens = tokenDtos
+                };
+                var rewardResponse = await ep._rewardService.AwardStoryRewardsAsync(userId.Value, rewardRequest, ct);
+                if (rewardResponse.Warnings.Count > 0)
+                {
+                    ep._logger.LogWarning(
+                        "CompleteEvaluation: Token award warnings for story {StoryId}: {Warnings}",
+                        storyId, string.Join("; ", rewardResponse.Warnings));
+                }
+                if (rewardResponse.TokensAwarded)
+                {
+                    ep._logger.LogInformation(
+                        "CompleteEvaluation: Awarded {Count} token types for evaluative story {StoryId}",
+                        tokenDtos.Count, storyId);
+                }
+            }
+            catch (Exception ex)
+            {
+                ep._logger.LogWarning(ex,
+                    "CompleteEvaluation: Failed to award tokens for evaluative story {StoryId}; evaluation result was still saved.",
+                    storyId);
+            }
+        }
 
         return TypedResults.Ok(new CompleteEvaluationResponse
         {
