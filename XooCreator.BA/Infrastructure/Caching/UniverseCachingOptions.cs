@@ -9,8 +9,8 @@ public sealed class UniverseCachingOptions
     public const string SectionName = "Caching";
 
     public bool Enabled { get; set; } = true;
-    public int UniverseRegionsMinutes { get; set; } = 20;
-    public int UniverseRegionHeroesMinutes { get; set; } = 20;
+    public int UniverseRegionsMinutes { get; set; } = 720;
+    public int UniverseRegionHeroesMinutes { get; set; } = 720;
     public int StoryRegionMinutes { get; set; } = 15;
     public int StoryHeroMinutes { get; set; } = 15;
 
