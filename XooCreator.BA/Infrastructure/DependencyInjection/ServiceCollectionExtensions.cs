@@ -19,6 +19,7 @@ using XooCreator.BA.Features.StoryEditor.Services.Cloning;
 using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Services;
+using XooCreator.BA.Features.GuestSync.Services;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Mappers;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Caching;
 using XooCreator.BA.Features.Payment.Services;
@@ -153,6 +154,7 @@ public static class ServiceCollectionExtensions
         
         // Story Publishing & Asset Management
         services.AddScoped<IStoryPublishingService, StoryPublishingService>();
+        services.AddScoped<IStoryPublishCraftValidator, StoryPublishCraftValidator>();
         services.AddScoped<IStoryPublishAssetService, StoryPublishAssetService>();
         services.AddScoped<IStoryIdGenerator, StoryIdGenerator>();
         services.AddScoped<IStoryAssetCopyService, StoryAssetCopyService>();
@@ -237,6 +239,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IEpicFavoritesService, EpicFavoritesService>();
         services.AddScoped<IStoryLikesRepository, StoryLikesRepository>();
         services.AddScoped<IStoryLikesService, StoryLikesService>();
+        services.AddScoped<IEpicLikesRepository, EpicLikesRepository>();
+        services.AddScoped<IEpicLikesService, EpicLikesService>();
+        services.AddScoped<IGuestSyncService, GuestSyncService>();
         services.AddScoped<StoryDetailsMapper>(sp => 
         {
             var context = sp.GetRequiredService<XooDbContext>();
@@ -321,7 +326,17 @@ public static class ServiceCollectionExtensions
         services.AddFeedbackServices();
         services.AddAlchimaliaUniverseServices();
         services.AddStoryCreatorsChallengeServices();
+        services.AddRewardTokensServices();
         
+        return services;
+    }
+
+    /// <summary>
+    /// Registers Reward Tokens services
+    /// </summary>
+    public static IServiceCollection AddRewardTokensServices(this IServiceCollection services)
+    {
+        services.AddScoped<XooCreator.BA.Features.RewardTokens.Services.IRewardTokensService, XooCreator.BA.Features.RewardTokens.Services.RewardTokensService>();
         return services;
     }
 

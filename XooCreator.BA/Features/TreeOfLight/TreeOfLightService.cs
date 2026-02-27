@@ -34,8 +34,9 @@ public class TreeOfLightService : ITreeOfLightService
     private readonly XooDbContext _dbContext;
     private readonly ITreeOfLightTranslationService _translationService;
     private readonly IMemoryCache _cache;
+    private readonly ILogger<TreeOfLightService> _logger;
 
-    public TreeOfLightService(ITreeOfLightRepository repository, IStoriesRepository storiesRepository, ITreeOfHeroesRepository treeOfHeroesRepository, IUserContextService userContext, XooDbContext dbContext, ITreeOfLightTranslationService translationService, IMemoryCache cache)
+    public TreeOfLightService(ITreeOfLightRepository repository, IStoriesRepository storiesRepository, ITreeOfHeroesRepository treeOfHeroesRepository, IUserContextService userContext, XooDbContext dbContext, ITreeOfLightTranslationService translationService, IMemoryCache cache, ILogger<TreeOfLightService> logger)
     {
         _repository = repository;
         _storiesRepository = storiesRepository;
@@ -44,6 +45,7 @@ public class TreeOfLightService : ITreeOfLightService
         _dbContext = dbContext;
         _translationService = translationService;
         _cache = cache;
+        _logger = logger;
     }
 
     public async Task<List<TreeConfigurationDto>> GetAllConfigurationsAsync()
@@ -305,7 +307,7 @@ public class TreeOfLightService : ITreeOfLightService
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Failed to save story hero {heroId} to bestiary: {ex.Message}");
+            _logger.LogError(ex, "Failed to save story hero {HeroId} to bestiary", heroId);
         }
     }
 

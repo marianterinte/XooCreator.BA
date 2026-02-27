@@ -25,7 +25,8 @@ public record StoryEpicDto
     public required string Id { get; init; }
     public required string Name { get; init; } // Name in requested/default language
     public string? Description { get; init; } // Description in requested/default language
-    public string? CoverImageUrl { get; init; }
+    public string? CoverImageUrl { get; init; } // Background for tree logic view
+    public string? MarketplaceCoverImageUrl { get; init; } // Cover shown in marketplace
     public string Status { get; init; } = "draft";
     public DateTime? PublishedAtUtc { get; init; }
     public List<StoryEpicRegionDto> Regions { get; init; } = new();
@@ -131,7 +132,8 @@ public record StoryEpicListItemDto
     public required string Id { get; init; }
     public required string Name { get; init; }
     public string? Description { get; init; }
-    public string? CoverImageUrl { get; init; }
+    public string? CoverImageUrl { get; init; } // Tree logic background
+    public string? MarketplaceCoverImageUrl { get; init; } // Marketplace cover
     public string Status { get; init; } = "draft";
     public DateTime CreatedAt { get; init; }
     public DateTime UpdatedAt { get; init; }

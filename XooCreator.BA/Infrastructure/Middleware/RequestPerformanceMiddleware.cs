@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Extensions.Hosting;
 using XooCreator.BA.Infrastructure.Logging;
 
 namespace XooCreator.BA.Infrastructure.Middleware;
@@ -10,17 +11,20 @@ public class RequestPerformanceMiddleware
     private readonly RequestDelegate _next;
     private readonly ILogger<RequestPerformanceMiddleware> _logger;
     private readonly TelemetryClient? _telemetryClient;
+    private readonly bool _isDevelopment;
 
-    // ANSI color constants for console output
+    // ANSI color constants for console output (Development only)
     private const string Separator = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━";
 
     public RequestPerformanceMiddleware(
         RequestDelegate next,
         ILogger<RequestPerformanceMiddleware> logger,
+        IHostEnvironment hostEnvironment,
         TelemetryClient? telemetryClient = null)
     {
         _next = next;
         _logger = logger;
+        _isDevelopment = hostEnvironment.IsDevelopment();
         _telemetryClient = telemetryClient;
     }
 
@@ -32,9 +36,12 @@ public class RequestPerformanceMiddleware
         var methodColor = ConsoleColors.GetMethodColor(method);
         var timestamp = DateTime.Now.ToString("HH:mm:ss.fff");
         
-        // Log colored request start with separator
-        Console.WriteLine($"{ConsoleColors.Gray}{Separator}{ConsoleColors.Reset}");
-        Console.WriteLine($"{ConsoleColors.Gray}{timestamp}{ConsoleColors.Reset} {ConsoleColors.BrightCyan}▶{ConsoleColors.Reset} {methodColor}{ConsoleColors.Bold}{method,-7}{ConsoleColors.Reset} {ConsoleColors.Yellow}{path}{ConsoleColors.Reset}{ConsoleColors.Gray}{queryString}{ConsoleColors.Reset}");
+        // Log colored request start only in Development (avoids IOException on invalid console handle in Azure/production)
+        if (_isDevelopment)
+        {
+            Console.WriteLine($"{ConsoleColors.Gray}{Separator}{ConsoleColors.Reset}");
+            Console.WriteLine($"{ConsoleColors.Gray}{timestamp}{ConsoleColors.Reset} {ConsoleColors.BrightCyan}▶{ConsoleColors.Reset} {methodColor}{ConsoleColors.Bold}{method,-7}{ConsoleColors.Reset} {ConsoleColors.Yellow}{path}{ConsoleColors.Reset}{ConsoleColors.Gray}{queryString}{ConsoleColors.Reset}");
+        }
         
         // Also log to ILogger for Application Insights (structured logging)
         _logger.LogInformation("Request started | Path={Path} | Method={Method}",
@@ -100,16 +107,16 @@ public class RequestPerformanceMiddleware
                 gcInfo = $" {ConsoleColors.Gray}│{ConsoleColors.Reset} {ConsoleColors.Magenta}GC:{gen0Collections}/{gen1Collections}/{gen2Collections}{ConsoleColors.Reset}";
             }
 
-            // Log colored request completion
-            Console.WriteLine($"{ConsoleColors.Gray}{endTimestamp}{ConsoleColors.Reset} {statusIconColor}{statusIcon}{ConsoleColors.Reset} {methodColor}{ConsoleColors.Bold}{method,-7}{ConsoleColors.Reset} {ConsoleColors.Yellow}{path}{ConsoleColors.Reset} {ConsoleColors.Gray}│{ConsoleColors.Reset} {statusColor}{statusCode}{ConsoleColors.Reset} {ConsoleColors.Gray}│{ConsoleColors.Reset} {durationColor}{requestDuration}ms{ConsoleColors.Reset}{memoryInfo}{gcInfo}");
-            
-            // Log endpoint handler if available
-            if (!string.IsNullOrEmpty(endpointHandler) && endpointHandler != "Unknown")
+            // Log colored request completion only in Development
+            if (_isDevelopment)
             {
-                Console.WriteLine($"           {ConsoleColors.Gray}└─>{ConsoleColors.Reset} {ConsoleColors.Magenta}{endpointHandler}{ConsoleColors.Reset}");
+                Console.WriteLine($"{ConsoleColors.Gray}{endTimestamp}{ConsoleColors.Reset} {statusIconColor}{statusIcon}{ConsoleColors.Reset} {methodColor}{ConsoleColors.Bold}{method,-7}{ConsoleColors.Reset} {ConsoleColors.Yellow}{path}{ConsoleColors.Reset} {ConsoleColors.Gray}│{ConsoleColors.Reset} {statusColor}{statusCode}{ConsoleColors.Reset} {ConsoleColors.Gray}│{ConsoleColors.Reset} {durationColor}{requestDuration}ms{ConsoleColors.Reset}{memoryInfo}{gcInfo}");
+                if (!string.IsNullOrEmpty(endpointHandler) && endpointHandler != "Unknown")
+                {
+                    Console.WriteLine($"           {ConsoleColors.Gray}└─>{ConsoleColors.Reset} {ConsoleColors.Magenta}{endpointHandler}{ConsoleColors.Reset}");
+                }
+                Console.WriteLine($"{ConsoleColors.Gray}{Separator}{ConsoleColors.Reset}");
             }
-            
-            Console.WriteLine($"{ConsoleColors.Gray}{Separator}{ConsoleColors.Reset}");
 
             // Log to ILogger for Application Insights
             _logger.LogInformation(

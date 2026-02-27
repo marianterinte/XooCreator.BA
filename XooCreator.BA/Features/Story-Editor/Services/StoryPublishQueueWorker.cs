@@ -22,6 +22,8 @@ public class StoryPublishQueueWorker : BackgroundService
     private readonly QueueClient _queueClient;
     private readonly IJobEventsHub _jobEvents;
     private readonly TimeSpan _messageVisibilityTimeout;
+    private static readonly TimeSpan RunningJobTimeout = TimeSpan.FromMinutes(20);
+    private const int MaxErrorMessageLength = 2000;
 
     public StoryPublishQueueWorker(
         IServiceProvider services,
@@ -113,6 +115,7 @@ public class StoryPublishQueueWorker : BackgroundService
                 {
                     var db = scope.ServiceProvider.GetRequiredService<XooDbContext>();
                     var publisher = scope.ServiceProvider.GetRequiredService<IStoryPublishingService>();
+                    var craftValidator = scope.ServiceProvider.GetRequiredService<IStoryPublishCraftValidator>();
                     var crafts = scope.ServiceProvider.GetRequiredService<IStoryCraftsRepository>();
                     var cleanupService = scope.ServiceProvider.GetRequiredService<IStoryDraftAssetCleanupService>();
                     var marketplaceCacheInvalidator = scope.ServiceProvider.GetRequiredService<IMarketplaceCacheInvalidator>();
@@ -121,6 +124,32 @@ public class StoryPublishQueueWorker : BackgroundService
                     var job = await db.StoryPublishJobs.FirstOrDefaultAsync(j => j.Id == payload.JobId, stoppingToken);
                     if (job == null || job.Status is StoryPublishJobStatus.Completed or StoryPublishJobStatus.Failed or StoryPublishJobStatus.Superseded)
                     {
+                        await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
+                        continue;
+                    }
+
+                    // --- Error-handling only below: success path (Queued → Running → Completed) is unchanged ---
+                    // If job was left Running too long (e.g. previous worker died), mark Failed so UI gets a clear state
+                    if (job.Status == StoryPublishJobStatus.Running
+                        && job.StartedAtUtc.HasValue
+                        && DateTime.UtcNow - job.StartedAtUtc.Value > RunningJobTimeout)
+                    {
+                        job.Status = StoryPublishJobStatus.Failed;
+                        job.CompletedAtUtc = DateTime.UtcNow;
+                        job.ErrorMessage = BuildDiagnosticMessage(job.Id, job.StoryId, null,
+                            "Publish timeout after 20 minutes. Check Application Insights for this JobId.");
+                        await db.SaveChangesAsync(stoppingToken);
+                        _jobEvents.Publish(JobTypes.StoryPublish, job.Id, new
+                        {
+                            jobId = job.Id,
+                            storyId = job.StoryId,
+                            status = job.Status.ToString(),
+                            queuedAtUtc = job.QueuedAtUtc,
+                            startedAtUtc = job.StartedAtUtc,
+                            completedAtUtc = job.CompletedAtUtc,
+                            errorMessage = job.ErrorMessage,
+                            dequeueCount = job.DequeueCount
+                        });
                         await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                         continue;
                     }
@@ -165,23 +194,36 @@ public class StoryPublishQueueWorker : BackgroundService
 
                         if (craft == null)
                         {
+                            // Error path only: success path goes to the else branch below
                             job.Status = StoryPublishJobStatus.Failed;
-                            job.ErrorMessage = "StoryCraft not found.";
+                            job.CompletedAtUtc = DateTime.UtcNow;
+                            job.ErrorMessage = BuildDiagnosticMessage(job.Id, job.StoryId, null, "StoryCraft not found.");
                         }
                         else if (craft.LastDraftVersion < job.DraftVersion)
                         {
                             job.Status = StoryPublishJobStatus.Failed;
-                            job.ErrorMessage = $"Draft version {job.DraftVersion} no longer available (LastDraftVersion={craft.LastDraftVersion}).";
+                            job.CompletedAtUtc = DateTime.UtcNow;
+                            job.ErrorMessage = BuildDiagnosticMessage(job.Id, job.StoryId, null,
+                                $"Draft version {job.DraftVersion} no longer available (LastDraftVersion={craft.LastDraftVersion}).");
                         }
                         else if (craft.LastDraftVersion > job.DraftVersion)
                         {
                             job.Status = StoryPublishJobStatus.Superseded;
-                            job.ErrorMessage = $"Job draftVersion={job.DraftVersion} superseded by newer draftVersion={craft.LastDraftVersion}.";
+                            job.CompletedAtUtc = DateTime.UtcNow;
+                            job.ErrorMessage = BuildDiagnosticMessage(job.Id, job.StoryId, null,
+                                $"Job draftVersion={job.DraftVersion} superseded by newer draftVersion={craft.LastDraftVersion}.");
                         }
                         else
                         {
                             _logger.LogInformation("Processing StoryPublishJob: jobId={JobId} storyId={StoryId} draftVersion={DraftVersion} forceFull={ForceFull}",
                                 job.Id, job.StoryId, job.DraftVersion, job.ForceFull);
+
+                            var validationResult = craftValidator.Validate(craft);
+                            if (!validationResult.IsValid)
+                            {
+                                _logger.LogWarning("Publish validation reported issues (publish will still run): jobId={JobId} storyId={StoryId} errors={Errors}",
+                                    job.Id, job.StoryId, validationResult.ToDiagnosticMessage());
+                            }
 
                             var langTag = job.LangTag?.ToLowerInvariant() ?? "ro-ro";
 
@@ -207,7 +249,7 @@ public class StoryPublishQueueWorker : BackgroundService
                             try
                             {
                                 await publisher.UpsertFromCraftAsync(craft, ownerEmail, langTag, job.ForceFull, stoppingToken);
-                                _logger.LogInformation("UpsertFromCraftAsync completed successfully: jobId={JobId} storyId={StoryId} ownerEmail={OwnerEmail}", 
+                                _logger.LogInformation("UpsertFromCraftAsync completed successfully: jobId={JobId} storyId={StoryId} ownerEmail={OwnerEmail}",
                                     job.Id, job.StoryId, ownerEmail);
                             }
                             catch (Exception publishEx)
@@ -216,6 +258,7 @@ public class StoryPublishQueueWorker : BackgroundService
                                 throw;
                             }
 
+                            // Success path unchanged: same status/fields as before the error-handling enhancements
                             job.Status = StoryPublishJobStatus.Completed;
                             job.CompletedAtUtc = DateTime.UtcNow;
                             job.ErrorMessage = null;
@@ -270,7 +313,7 @@ public class StoryPublishQueueWorker : BackgroundService
                         if (job.DequeueCount >= 3)
                         {
                             job.Status = StoryPublishJobStatus.Failed;
-                            job.ErrorMessage = ex.Message;
+                            job.ErrorMessage = BuildDiagnosticMessage(job.Id, job.StoryId, ex, ex.Message);
                             job.CompletedAtUtc = DateTime.UtcNow;
                             await db.SaveChangesAsync(stoppingToken);
                             PublishStatus();
@@ -308,6 +351,18 @@ public class StoryPublishQueueWorker : BackgroundService
 
     // Note: QueueClient from Azure.Storage.Queues v12+ is stateless and doesn't implement IDisposable.
     // No explicit cleanup needed. Scoped services (DbContext, etc.) are disposed via 'using var scope'.
+
+    /// <summary>
+    /// Builds a diagnostic error message for Application Insights correlation: [JobId:...] [StoryId:...] ExceptionType: Message.
+    /// Truncates to MaxErrorMessageLength to fit DB column.
+    /// </summary>
+    private static string BuildDiagnosticMessage(Guid jobId, string storyId, Exception? ex, string? messageOverride)
+    {
+        var exceptionType = ex?.GetType().Name ?? "Error";
+        var message = messageOverride ?? ex?.Message ?? "Unknown error";
+        var full = $"[JobId:{jobId}] [StoryId:{storyId}] {exceptionType}: {message}";
+        return full.Length > MaxErrorMessageLength ? full[..MaxErrorMessageLength] : full;
+    }
 
     private sealed record StoryPublishQueuePayload(Guid JobId, string StoryId, int DraftVersion);
 }

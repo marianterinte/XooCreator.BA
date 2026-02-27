@@ -14,6 +14,7 @@ public class StoryEpicCraft
     public Guid OwnerUserId { get; set; }
     public string Status { get; set; } = "draft"; // draft, sent_for_approval, in_review, approved, changes_requested, archived
     public string? CoverImageUrl { get; set; } // Background image for tree logic view
+    public string? MarketplaceCoverImageUrl { get; set; } // Cover image shown in marketplace (separate from tree background)
     public bool IsDefault { get; set; } = false;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;

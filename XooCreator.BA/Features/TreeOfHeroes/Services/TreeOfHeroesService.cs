@@ -10,6 +10,7 @@ namespace XooCreator.BA.Features.TreeOfHeroes.Services;
 public interface ITreeOfHeroesService
 {
     Task<UserTokensDto> GetUserTokensAsync(Guid userId);
+    Task<List<TokenBalanceItemDto>> GetAllTokenBalancesAsync(Guid userId);
     Task<List<HeroDto>> GetHeroProgressAsync(Guid userId);
     Task<List<HeroTreeNodeDto>> GetHeroTreeProgressAsync(Guid userId);
     Task<List<HeroDefinitionDto>> GetHeroDefinitionsAsync(string locale);
@@ -27,17 +28,24 @@ public class TreeOfHeroesService : ITreeOfHeroesService
     private readonly ITreeOfHeroesRepository _repository;
     private readonly XooDbContext _db;
     private readonly IMemoryCache _cache;
+    private readonly ILogger<TreeOfHeroesService> _logger;
 
-    public TreeOfHeroesService(ITreeOfHeroesRepository repository, XooDbContext db, IMemoryCache cache)
+    public TreeOfHeroesService(ITreeOfHeroesRepository repository, XooDbContext db, IMemoryCache cache, ILogger<TreeOfHeroesService> logger)
     {
         _repository = repository;
         _db = db;
         _cache = cache;
+        _logger = logger;
     }
 
     public Task<UserTokensDto> GetUserTokensAsync(Guid userId)
     {
         return _repository.GetUserTokensAsync(userId);
+    }
+
+    public Task<List<TokenBalanceItemDto>> GetAllTokenBalancesAsync(Guid userId)
+    {
+        return _repository.GetAllTokenBalancesAsync(userId);
     }
 
     public Task<List<HeroDto>> GetHeroProgressAsync(Guid userId)
@@ -204,7 +212,7 @@ public class TreeOfHeroesService : ITreeOfHeroesService
             {
                 // Log error but don't fail the transformation
                 // The hero transformation was successful, bestiary save is secondary
-                Console.WriteLine($"Failed to save hero to bestiary: {ex.Message}");
+                _logger.LogError(ex, "Failed to save hero to bestiary");
             }
 
             // Create hero DTO for response
