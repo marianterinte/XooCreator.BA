@@ -99,6 +99,9 @@ public class ListStoryCraftsEndpoint
                 IsOwnedByCurrentUser = c.OwnerUserId == user.Id,
                 AssignedReviewerUserId = c.AssignedReviewerUserId,
                 IsAssignedToCurrentUser = c.AssignedReviewerUserId == user.Id,
+                IsEvaluative = c.IsEvaluative,
+                IsPartOfEpic = c.IsPartOfEpic,
+                IsFullyInteractive = c.IsFullyInteractive,
                 AvailableLanguages = availableLangs,
                 AudioLanguages = c.AudioLanguages ?? new List<string>()
             });

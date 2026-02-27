@@ -80,6 +80,9 @@ public class GetUserCreatedStoriesEndpoint
                 CreationNotes = ucs.CreationNotes,
                 OwnerEmail = ownerEmail,
                 IsOwnedByCurrentUser = ucs.UserId == userId,
+                IsEvaluative = ucs.StoryDefinition.IsEvaluative,
+                IsPartOfEpic = ucs.StoryDefinition.IsPartOfEpic,
+                IsFullyInteractive = ucs.StoryDefinition.IsFullyInteractive,
                 AvailableLanguages = availableLangs,
                 AudioLanguages = ucs.StoryDefinition.AudioLanguages ?? new List<string>()
             });
@@ -127,6 +130,9 @@ public class GetUserCreatedStoriesEndpoint
                 CreationNotes = null,
                 OwnerEmail = currentUserEmail,
                 IsOwnedByCurrentUser = true, // Drafts are always owned by current user
+                IsEvaluative = draft.IsEvaluative,
+                IsPartOfEpic = draft.IsPartOfEpic,
+                IsFullyInteractive = draft.IsFullyInteractive,
                 AvailableLanguages = draftLangs,
                 AudioLanguages = draft.AudioLanguages ?? new List<string>()
             };

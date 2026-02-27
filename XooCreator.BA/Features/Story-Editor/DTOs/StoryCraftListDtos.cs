@@ -14,6 +14,9 @@ public record StoryCraftListItemDto
     public bool IsOwnedByCurrentUser { get; init; }
     public Guid? AssignedReviewerUserId { get; init; }
     public bool IsAssignedToCurrentUser { get; init; }
+    public bool IsEvaluative { get; init; }
+    public bool IsPartOfEpic { get; init; }
+    public bool IsFullyInteractive { get; init; }
     /// <summary>Available language codes for this story (e.g. ro-ro, en-us).</summary>
     public List<string>? AvailableLanguages { get; init; }
     /// <summary>Language codes that have audio support.</summary>
