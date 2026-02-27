@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
 using XooCreator.BA.Features.TreeOfHeroes.DTOs;
 using XooCreator.BA.Features.TreeOfHeroes.Repositories;
+using XooCreator.BA.Features.Tokens;
 using System.Text.Json;
 
 namespace XooCreator.BA.Features.TreeOfHeroes.Services;
@@ -26,13 +27,20 @@ public interface ITreeOfHeroesService
 public class TreeOfHeroesService : ITreeOfHeroesService
 {
     private readonly ITreeOfHeroesRepository _repository;
+    private readonly IUserTokenRepository _userTokenRepository;
     private readonly XooDbContext _db;
     private readonly IMemoryCache _cache;
     private readonly ILogger<TreeOfHeroesService> _logger;
 
-    public TreeOfHeroesService(ITreeOfHeroesRepository repository, XooDbContext db, IMemoryCache cache, ILogger<TreeOfHeroesService> logger)
+    public TreeOfHeroesService(
+        ITreeOfHeroesRepository repository,
+        IUserTokenRepository userTokenRepository,
+        XooDbContext db,
+        IMemoryCache cache,
+        ILogger<TreeOfHeroesService> logger)
     {
         _repository = repository;
+        _userTokenRepository = userTokenRepository;
         _db = db;
         _cache = cache;
         _logger = logger;
@@ -45,7 +53,7 @@ public class TreeOfHeroesService : ITreeOfHeroesService
 
     public Task<List<TokenBalanceItemDto>> GetAllTokenBalancesAsync(Guid userId)
     {
-        return _repository.GetAllTokenBalancesAsync(userId);
+        return _userTokenRepository.GetAllTokenBalancesAsync(userId);
     }
 
     public Task<List<HeroDto>> GetHeroProgressAsync(Guid userId)

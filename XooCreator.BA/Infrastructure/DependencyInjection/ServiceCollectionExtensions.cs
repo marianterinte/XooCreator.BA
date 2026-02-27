@@ -18,6 +18,7 @@ using XooCreator.BA.Features.StoryEditor.Services.Content;
 using XooCreator.BA.Features.StoryEditor.Services.Cloning;
 using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories;
+using XooCreator.BA.Features.Tokens;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Services;
 using XooCreator.BA.Features.GuestSync.Services;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Mappers;
@@ -111,6 +112,7 @@ public static class ServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddTreeServices(this IServiceCollection services)
     {
+        services.AddScoped<IUserTokenRepository, UserTokenRepository>();
         services.AddScoped<ITreeOfHeroesRepository, TreeOfHeroesRepository>();
         services.AddScoped<ITreeOfHeroesService, TreeOfHeroesService>();
         services.AddScoped<IHeroStoryRewardsService, HeroStoryRewardsService>();

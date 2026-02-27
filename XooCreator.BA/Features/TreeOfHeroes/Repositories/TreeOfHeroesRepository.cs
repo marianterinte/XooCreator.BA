@@ -11,7 +11,6 @@ namespace XooCreator.BA.Features.TreeOfHeroes.Repositories;
 public interface ITreeOfHeroesRepository
 {
     Task<UserTokensDto> GetUserTokensAsync(Guid userId);
-    Task<List<TokenBalanceItemDto>> GetAllTokenBalancesAsync(Guid userId, CancellationToken ct = default);
     Task<List<HeroDto>> GetHeroProgressAsync(Guid userId);
     Task<List<HeroTreeNodeDto>> GetHeroTreeProgressAsync(Guid userId);
     Task<List<HeroDefinitionDto>> GetHeroDefinitionsAsync(string locale);
@@ -57,34 +56,6 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
             Creativity = Sum("creativity"),
             Safety = Sum("safety")
         };
-    }
-
-    public async Task<List<TokenBalanceItemDto>> GetAllTokenBalancesAsync(Guid userId, CancellationToken ct = default)
-    {
-        var list = new List<TokenBalanceItemDto>();
-
-        var balances = await _context.UserTokenBalances
-            .AsNoTracking()
-            .Where(b => b.UserId == userId && b.Quantity > 0)
-            .Select(b => new TokenBalanceItemDto { Type = b.Type, Value = b.Value, Quantity = b.Quantity })
-            .ToListAsync(ct);
-
-        list.AddRange(balances);
-
-        var wallet = await _context.CreditWallets
-            .AsNoTracking()
-            .FirstOrDefaultAsync(w => w.UserId == userId, ct);
-        if (wallet != null && wallet.DiscoveryBalance > 0)
-        {
-            list.Add(new TokenBalanceItemDto
-            {
-                Type = "Discovery",
-                Value = "discovery credit",
-                Quantity = (int)Math.Min(wallet.DiscoveryBalance, int.MaxValue)
-            });
-        }
-
-        return list;
     }
 
     public async Task<List<HeroDto>> GetHeroProgressAsync(Guid userId)
