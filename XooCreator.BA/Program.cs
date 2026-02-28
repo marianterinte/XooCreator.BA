@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.ResponseCompression;
+using System.IO.Compression;
 using Npgsql;
 using XooCreator.BA.Data;
 using XooCreator.BA.Infrastructure.Endpoints;
@@ -20,6 +22,29 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add Application Insights
 builder.Services.AddApplicationInsightsTelemetry();
+
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<BrotliCompressionProvider>();
+    options.Providers.Add<GzipCompressionProvider>();
+    options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[]
+    {
+        "application/json",
+        "text/plain",
+        "text/html",
+        "application/javascript",
+        "text/css"
+    });
+});
+builder.Services.Configure<BrotliCompressionProviderOptions>(options =>
+{
+    options.Level = CompressionLevel.Fastest;
+});
+builder.Services.Configure<GzipCompressionProviderOptions>(options =>
+{
+    options.Level = CompressionLevel.Fastest;
+});
 
 var portEnv = Environment.GetEnvironmentVariable("PORT");
 if (!string.IsNullOrWhiteSpace(portEnv))
@@ -95,6 +120,8 @@ builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(optio
 });
 
 var app = builder.Build();
+
+app.UseResponseCompression();
 
 // Configure detailed error page for startup errors
 StartupErrorHandler.ConfigureErrorPage(app);

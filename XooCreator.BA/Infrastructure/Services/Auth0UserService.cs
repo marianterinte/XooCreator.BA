@@ -68,8 +68,6 @@ public class Auth0UserService : IAuth0UserService
         if (string.IsNullOrWhiteSpace(email)) email = $"{auth0Id.Replace("|", "+") }@unknown.local";
 
         // Ensure user exists and sync profile data
-        // Note: EnsureAsync may update user data, so we invalidate cache first to ensure fresh data
-        InvalidateUserCache(auth0Id);
         _cachedUser = await _userRepository.EnsureAsync(auth0Id, name, email, picture, ct);
         
         // Store in memory cache for future requests (with updated data)

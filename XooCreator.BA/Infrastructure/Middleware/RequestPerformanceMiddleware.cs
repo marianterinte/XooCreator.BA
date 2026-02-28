@@ -49,13 +49,18 @@ public class RequestPerformanceMiddleware
 
         var stopwatch = Stopwatch.StartNew();
         var requestStartTime = DateTimeOffset.UtcNow;
-        
-        // Capture initial memory and GC stats
-        var initialMemory = GC.GetTotalMemory(false);
-        var initialGen0 = GC.CollectionCount(0);
-        var initialGen1 = GC.CollectionCount(1);
-        var initialGen2 = GC.CollectionCount(2);
-        var initialWorkingSet = Environment.WorkingSet;
+
+        var shouldTrackMemory = _isDevelopment || Random.Shared.Next(100) == 0; // 1% sampling in production
+        long initialMemory = 0, initialWorkingSet = 0;
+        int initialGen0 = 0, initialGen1 = 0, initialGen2 = 0;
+        if (shouldTrackMemory)
+        {
+            initialMemory = GC.GetTotalMemory(false);
+            initialGen0 = GC.CollectionCount(0);
+            initialGen1 = GC.CollectionCount(1);
+            initialGen2 = GC.CollectionCount(2);
+            initialWorkingSet = Environment.WorkingSet;
+        }
 
         try
         {
@@ -67,19 +72,23 @@ public class RequestPerformanceMiddleware
             var requestDuration = stopwatch.ElapsedMilliseconds;
             var statusCode = context.Response.StatusCode;
             var endTimestamp = DateTime.Now.ToString("HH:mm:ss.fff");
-            
-            // Capture final memory and GC stats
-            var finalMemory = GC.GetTotalMemory(false);
-            var finalGen0 = GC.CollectionCount(0);
-            var finalGen1 = GC.CollectionCount(1);
-            var finalGen2 = GC.CollectionCount(2);
-            var finalWorkingSet = Environment.WorkingSet;
-            
-            var memoryDelta = finalMemory - initialMemory;
-            var gen0Collections = finalGen0 - initialGen0;
-            var gen1Collections = finalGen1 - initialGen1;
-            var gen2Collections = finalGen2 - initialGen2;
-            var workingSetDelta = finalWorkingSet - initialWorkingSet;
+
+            long memoryDelta = 0, workingSetDelta = 0;
+            int gen0Collections = 0, gen1Collections = 0, gen2Collections = 0;
+            long finalWorkingSet = 0;
+            if (shouldTrackMemory)
+            {
+                var finalMemory = GC.GetTotalMemory(false);
+                var finalGen0 = GC.CollectionCount(0);
+                var finalGen1 = GC.CollectionCount(1);
+                var finalGen2 = GC.CollectionCount(2);
+                finalWorkingSet = Environment.WorkingSet;
+                memoryDelta = finalMemory - initialMemory;
+                gen0Collections = finalGen0 - initialGen0;
+                gen1Collections = finalGen1 - initialGen1;
+                gen2Collections = finalGen2 - initialGen2;
+                workingSetDelta = finalWorkingSet - initialWorkingSet;
+            }
 
             // Get endpoint information (available after routing)
             var endpoint = context.GetEndpoint();
@@ -154,49 +163,52 @@ public class RequestPerformanceMiddleware
                     ["StatusCode"] = statusCode.ToString()
                 });
 
-                _telemetryClient.TrackMetric("WorkingSet", finalWorkingSet, new Dictionary<string, string>
+                if (shouldTrackMemory)
                 {
-                    ["Path"] = path,
-                    ["Method"] = method
-                });
-
-                _telemetryClient.TrackMetric("WorkingSetDelta", workingSetDelta, new Dictionary<string, string>
-                {
-                    ["Path"] = path,
-                    ["Method"] = method
-                });
-
-                _telemetryClient.TrackMetric("MemoryDelta", memoryDelta, new Dictionary<string, string>
-                {
-                    ["Path"] = path,
-                    ["Method"] = method
-                });
-
-                if (gen0Collections > 0)
-                {
-                    _telemetryClient.TrackMetric("GC_Gen0_Collections", gen0Collections, new Dictionary<string, string>
+                    _telemetryClient.TrackMetric("WorkingSet", finalWorkingSet, new Dictionary<string, string>
                     {
                         ["Path"] = path,
                         ["Method"] = method
                     });
-                }
 
-                if (gen1Collections > 0)
-                {
-                    _telemetryClient.TrackMetric("GC_Gen1_Collections", gen1Collections, new Dictionary<string, string>
+                    _telemetryClient.TrackMetric("WorkingSetDelta", workingSetDelta, new Dictionary<string, string>
                     {
                         ["Path"] = path,
                         ["Method"] = method
                     });
-                }
 
-                if (gen2Collections > 0)
-                {
-                    _telemetryClient.TrackMetric("GC_Gen2_Collections", gen2Collections, new Dictionary<string, string>
+                    _telemetryClient.TrackMetric("MemoryDelta", memoryDelta, new Dictionary<string, string>
                     {
                         ["Path"] = path,
                         ["Method"] = method
                     });
+
+                    if (gen0Collections > 0)
+                    {
+                        _telemetryClient.TrackMetric("GC_Gen0_Collections", gen0Collections, new Dictionary<string, string>
+                        {
+                            ["Path"] = path,
+                            ["Method"] = method
+                        });
+                    }
+
+                    if (gen1Collections > 0)
+                    {
+                        _telemetryClient.TrackMetric("GC_Gen1_Collections", gen1Collections, new Dictionary<string, string>
+                        {
+                            ["Path"] = path,
+                            ["Method"] = method
+                        });
+                    }
+
+                    if (gen2Collections > 0)
+                    {
+                        _telemetryClient.TrackMetric("GC_Gen2_Collections", gen2Collections, new Dictionary<string, string>
+                        {
+                            ["Path"] = path,
+                            ["Method"] = method
+                        });
+                    }
                 }
             }
         }
