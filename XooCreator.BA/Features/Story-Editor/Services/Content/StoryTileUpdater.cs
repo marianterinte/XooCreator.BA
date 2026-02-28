@@ -26,7 +26,27 @@ public class StoryTileUpdater : IStoryTileUpdater
     {
         var existingTiles = craft.Tiles.ToList();
         var tileDict = existingTiles.ToDictionary(t => t.TileId);
-        
+
+        // Pre-load all dialog nodes for existing dialog tiles to avoid N+1
+        var dialogTileIds = existingTiles
+            .Where(t => string.Equals(t.Type, "dialog", StringComparison.OrdinalIgnoreCase) && t.DialogTile?.Id != Guid.Empty)
+            .Select(t => t.DialogTile!.Id)
+            .Distinct()
+            .ToList();
+        var nodesByDialogTileId = new Dictionary<Guid, List<StoryCraftDialogNode>>();
+        if (dialogTileIds.Count > 0)
+        {
+            var allNodes = await _context.StoryCraftDialogNodes
+                .Include(n => n.Translations)
+                .Include(n => n.OutgoingEdges).ThenInclude(e => e.Translations)
+                .Include(n => n.OutgoingEdges).ThenInclude(e => e.Tokens)
+                .Where(n => dialogTileIds.Contains(n.StoryCraftDialogTileId))
+                .ToListAsync(ct);
+            nodesByDialogTileId = allNodes
+                .GroupBy(n => n.StoryCraftDialogTileId)
+                .ToDictionary(g => g.Key, g => g.ToList());
+        }
+
         // Process each tile from DTO
         for (int i = 0; i < tiles.Count; i++)
         {
@@ -99,7 +119,8 @@ public class StoryTileUpdater : IStoryTileUpdater
             await _answerUpdater.UpdateAnswersAsync(tile, tileDto.Answers ?? new(), languageCode, ct);
 
             // Update dialog data when tile is dialog
-            await UpdateDialogDataAsync(craft, tile, tileDto, languageCode, allowedHeroIds, ct);
+            var preloaded = tile.DialogTile != null && nodesByDialogTileId.TryGetValue(tile.DialogTile.Id, out var nodes) ? nodes : null;
+            await UpdateDialogDataAsync(craft, tile, tileDto, languageCode, allowedHeroIds, ct, preloaded);
         }
         
         // Remove tiles that are no longer in DTO
@@ -134,7 +155,8 @@ public class StoryTileUpdater : IStoryTileUpdater
         EditableTileDto tileDto,
         string languageCode,
         IReadOnlySet<string>? allowedHeroIds,
-        CancellationToken ct)
+        CancellationToken ct,
+        List<StoryCraftDialogNode>? preloadedNodes = null)
     {
         var existingDialogTile = tile.DialogTile;
         var isDialog = string.Equals(tile.Type, "dialog", StringComparison.OrdinalIgnoreCase);
@@ -171,14 +193,15 @@ public class StoryTileUpdater : IStoryTileUpdater
         }
 
         var dtoNodes = tileDto.DialogNodes ?? new List<EditableDialogNodeDto>();
-        var existingNodes = await _context.StoryCraftDialogNodes
-            .Include(n => n.Translations)
-            .Include(n => n.OutgoingEdges)
-                .ThenInclude(e => e.Translations)
-            .Include(n => n.OutgoingEdges)
-                .ThenInclude(e => e.Tokens)
-            .Where(n => n.StoryCraftDialogTileId == dialogTile.Id)
-            .ToListAsync(ct);
+        var existingNodes = preloadedNodes
+            ?? await _context.StoryCraftDialogNodes
+                .Include(n => n.Translations)
+                .Include(n => n.OutgoingEdges)
+                    .ThenInclude(e => e.Translations)
+                .Include(n => n.OutgoingEdges)
+                    .ThenInclude(e => e.Tokens)
+                .Where(n => n.StoryCraftDialogTileId == dialogTile.Id)
+                .ToListAsync(ct);
 
         var nodeDict = existingNodes.ToDictionary(n => n.NodeId, StringComparer.OrdinalIgnoreCase);
         var dtoNodeIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);

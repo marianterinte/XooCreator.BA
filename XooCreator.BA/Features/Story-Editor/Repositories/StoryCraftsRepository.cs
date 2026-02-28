@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.Enums;
@@ -8,10 +9,12 @@ namespace XooCreator.BA.Features.StoryEditor.Repositories;
 public class StoryCraftsRepository : IStoryCraftsRepository
 {
     private readonly XooDbContext _context;
+    private readonly IMemoryCache? _cache;
 
-    public StoryCraftsRepository(XooDbContext context)
+    public StoryCraftsRepository(XooDbContext context, IMemoryCache? cache = null)
     {
         _context = context;
+        _cache = cache;
     }
 
     public async Task<StoryCraft?> GetAsync(string storyId, CancellationToken ct = default)
@@ -259,14 +262,37 @@ public class StoryCraftsRepository : IStoryCraftsRepository
 
     public Task<List<StoryCraft>> ListByOwnerAsync(Guid ownerUserId, CancellationToken ct = default)
         => _context.StoryCrafts
+            .AsNoTracking()
             .Include(s => s.Translations)
             .Where(x => x.OwnerUserId == ownerUserId)
             .OrderByDescending(x => x.UpdatedAt)
             .ToListAsync(ct);
 
+    public async Task<List<StoryCraft>> ListByAssignedReviewerAsync(Guid reviewerUserId, CancellationToken ct = default)
+    {
+        return await _context.StoryCrafts
+            .AsNoTracking()
+            .Include(s => s.Translations)
+            .Where(x => x.AssignedReviewerUserId == reviewerUserId)
+            .OrderByDescending(x => x.UpdatedAt)
+            .ToListAsync(ct);
+    }
+
+    public async Task<List<StoryCraft>> ListClaimableAsync(CancellationToken ct = default)
+    {
+        return await _context.StoryCrafts
+            .AsNoTracking()
+            .Include(s => s.Translations)
+            .Where(x => x.AssignedReviewerUserId == null
+                && (x.Status == "sent_for_approval" || x.Status == "review" || x.Status == "submitted"))
+            .OrderByDescending(x => x.UpdatedAt)
+            .ToListAsync(ct);
+    }
+
     public async Task<(List<StoryCraft> Items, int TotalCount)> ListByOwnerPagedAsync(Guid ownerUserId, int skip, int take, CancellationToken ct = default)
     {
         var query = _context.StoryCrafts
+            .AsNoTracking()
             .Include(s => s.Translations)
             .Where(x => x.OwnerUserId == ownerUserId)
             .OrderByDescending(x => x.UpdatedAt);
@@ -277,13 +303,15 @@ public class StoryCraftsRepository : IStoryCraftsRepository
 
     public Task<List<StoryCraft>> ListAllAsync(CancellationToken ct = default)
         => _context.StoryCrafts
-            .Include(s=>s.Translations)
+            .AsNoTracking()
+            .Include(s => s.Translations)
             .OrderByDescending(x => x.UpdatedAt)
             .ToListAsync(ct);
 
     public async Task<(List<StoryCraft> Items, int TotalCount)> ListAllPagedAsync(int skip, int take, CancellationToken ct = default)
     {
         var query = _context.StoryCrafts
+            .AsNoTracking()
             .Include(s => s.Translations)
             .OrderByDescending(x => x.UpdatedAt);
         var totalCount = await query.CountAsync(ct);
@@ -331,9 +359,14 @@ public class StoryCraftsRepository : IStoryCraftsRepository
     public async Task<List<string>> GetAvailableLanguagesAsync(string storyId, CancellationToken ct = default)
     {
         var id = (storyId ?? string.Empty).Trim();
-        
+        var cacheKey = $"story_languages_{id}";
+
+        if (_cache != null && _cache.TryGetValue(cacheKey, out List<string>? cached))
+            return cached ?? new List<string>();
+
         // First try to get languages from craft (draft)
         var languages = await _context.StoryCraftTranslations
+            .AsNoTracking()
             .Where(x => x.StoryCraft.StoryId == id)
             .Select(x => x.LanguageCode)
             .Distinct()
@@ -344,10 +377,19 @@ public class StoryCraftsRepository : IStoryCraftsRepository
         if (languages.Count == 0)
         {
             languages = await _context.StoryDefinitionTranslations
+                .AsNoTracking()
                 .Where(x => x.StoryDefinition.StoryId == id)
                 .Select(x => x.LanguageCode)
                 .Distinct()
                 .ToListAsync(ct);
+        }
+
+        if (_cache != null)
+        {
+            _cache.Set(cacheKey, languages, new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+            });
         }
         
         return languages;

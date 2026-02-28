@@ -57,30 +57,23 @@ public class ListStoryCraftsEndpoint
 
         if (isReviewerOrAdmin && (wantAssigned || wantClaimable))
         {
-            var fullList = (isReviewerOrAdmin && (wantAll || wantAssigned || wantClaimable))
-                ? await ep._crafts.ListAllAsync(ct)
-                : await ep._crafts.ListByOwnerAsync(user.Id, ct);
-            if (wantAssigned)
-                fullList = fullList.Where(c => c.AssignedReviewerUserId == user.Id).ToList();
-            else if (wantClaimable)
-                fullList = fullList.Where(c => c.AssignedReviewerUserId == null && StoryStatusExtensions.FromDb(c.Status) == StoryStatus.SentForApproval).ToList();
+            List<StoryCraft> fullList = wantAssigned
+                ? await ep._crafts.ListByAssignedReviewerAsync(user.Id, ct)
+                : await ep._crafts.ListClaimableAsync(ct);
             totalCount = fullList.Count;
             list = fullList.Skip(skip).Take(take).ToList();
         }
+        else if (isReviewerOrAdmin && wantAll)
+        {
+            var paged = await ep._crafts.ListAllPagedAsync(skip, take, ct);
+            list = paged.Items;
+            totalCount = paged.TotalCount;
+        }
         else
         {
-            if (isReviewerOrAdmin && wantAll)
-            {
-                var paged = await ep._crafts.ListAllPagedAsync(skip, take, ct);
-                list = paged.Items;
-                totalCount = paged.TotalCount;
-            }
-            else
-            {
-                var paged = await ep._crafts.ListByOwnerPagedAsync(user.Id, skip, take, ct);
-                list = paged.Items;
-                totalCount = paged.TotalCount;
-            }
+            var paged = await ep._crafts.ListByOwnerPagedAsync(user.Id, skip, take, ct);
+            list = paged.Items;
+            totalCount = paged.TotalCount;
         }
 
         // Enrich OwnerEmail by querying Users table

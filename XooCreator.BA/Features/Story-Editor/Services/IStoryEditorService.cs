@@ -1,4 +1,5 @@
 using XooCreator.BA.Data;
+using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Features.StoryEditor.Services.Content;
 
@@ -12,8 +13,8 @@ public interface IStoryEditorService
     // Ensure a translation exists for a specific language (creates StoryCraftTranslation if needed)
     Task EnsureTranslationAsync(Guid ownerUserId, string storyId, string languageCode, string? title = null, CancellationToken ct = default);
     
-    // Save draft from EditableStoryDto (converts to StoryCraft structure)
-    Task SaveDraftAsync(Guid ownerUserId, string storyId, string languageCode, EditableStoryDto dto, bool bypassOwnershipCheck = false, CancellationToken ct = default);
+    // Save draft from EditableStoryDto (converts to StoryCraft structure). When existingCraft is provided, skips loading from DB.
+    Task SaveDraftAsync(Guid ownerUserId, string storyId, string languageCode, EditableStoryDto dto, bool bypassOwnershipCheck = false, StoryCraft? existingCraft = null, CancellationToken ct = default);
     
     // Delete a translation (removes StoryCraftTranslation and related data for that language)
     Task DeleteTranslationAsync(Guid ownerUserId, string storyId, string languageCode, CancellationToken ct = default);

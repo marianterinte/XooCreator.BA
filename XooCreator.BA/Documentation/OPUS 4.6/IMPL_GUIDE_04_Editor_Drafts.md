@@ -5,9 +5,11 @@
 **Efort estimat:** 3–5 zile  
 **Impact:** Mare — afectează viteza de editing și publishing
 
+**Implementat (fără breaking changes):** Task 1, 2, 3, 4, 5, 7, 8, 9. **Neimplementat:** Task 6 (Streaming ZIP — schimbare de flow/API).
+
 ---
 
-## Task 1: Fix Dialog Nodes N+1 (EDT-01)
+## Task 1: Fix Dialog Nodes N+1 (EDT-01) ✅
 
 ### Fișier: `Features/Story-Editor/Services/Content/StoryTileUpdater.cs`
 
@@ -75,7 +77,7 @@ await UpdateDialogDataAsync(dialogTile, dto.DialogData, preloaded, ct);
 
 ---
 
-## Task 2: Fix ListStoryCraftsEndpoint — Filter în DB (EDT-02)
+## Task 2: Fix ListStoryCraftsEndpoint — Filter în DB (EDT-02) ✅
 
 ### Fișier: `Features/Story-Editor/Endpoints/ListStoryCraftsEndpoint.cs`
 
@@ -143,7 +145,7 @@ else
 
 ---
 
-## Task 3: AsNoTracking pe StoryCraftsRepository (EDT-03)
+## Task 3: AsNoTracking pe StoryCraftsRepository (EDT-03) ✅
 
 ### Fișier: `Features/Story-Editor/Repositories/StoryCraftsRepository.cs`
 
@@ -206,7 +208,7 @@ Apoi la apeluri:
 
 ---
 
-## Task 4: Fix Double Craft Load în SaveStoryEditEndpoint (EDT-04)
+## Task 4: Fix Double Craft Load în SaveStoryEditEndpoint (EDT-04) ✅
 
 ### Fișier: `Features/Story-Editor/Endpoints/SaveStoryEditEndpoint.cs`
 
@@ -242,7 +244,7 @@ await ep._editorService.SaveDraftAsync(userId, storyId, lang, dto, existingCraft
 
 ---
 
-## Task 5: Fix Double Craft Load în Publishing (EDT-05)
+## Task 5: Fix Double Craft Load în Publishing (EDT-05) ✅
 
 ### Fișier: `Features/Story-Editor/Services/StoryPublishingService.cs`
 
@@ -322,7 +324,7 @@ return Results.File(ms, "application/zip", $"story-{storyId}.zip");
 
 ---
 
-## Task 7: Fix PublishStoryEndpoint — StoryId.ToLower() (EDT-07)
+## Task 7: Fix PublishStoryEndpoint — StoryId.ToLower() (EDT-07) ✅
 
 ### Fișier: `Features/Story-Editor/Endpoints/PublishStoryEndpoint.cs`
 
@@ -353,7 +355,7 @@ var existingJob = await ep._context.StoryPublishJobs
 
 ---
 
-## Task 8: Fix StoryDraftManager.EnsureDraftAsync (EDT-08)
+## Task 8: Fix StoryDraftManager.EnsureDraftAsync (EDT-08) ✅
 
 ### Fișier: `Features/Story-Editor/Services/Content/StoryDraftManager.cs`
 
@@ -385,7 +387,7 @@ public async Task EnsureDraftAsync(string storyId, Guid ownerUserId, Cancellatio
 
 ---
 
-## Task 9: Cache pentru GetAvailableLanguagesAsync (EDT-09)
+## Task 9: Cache pentru GetAvailableLanguagesAsync (EDT-09) ✅
 
 ### Fișier: `Features/Story-Editor/Repositories/StoryCraftsRepository.cs`
 

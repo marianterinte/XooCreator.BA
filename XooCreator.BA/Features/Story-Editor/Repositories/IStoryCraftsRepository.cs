@@ -22,6 +22,12 @@ public interface IStoryCraftsRepository
     // List crafts by owner
     Task<List<StoryCraft>> ListByOwnerAsync(Guid ownerUserId, CancellationToken ct = default);
     
+    /// <summary>List crafts assigned to the given reviewer.</summary>
+    Task<List<StoryCraft>> ListByAssignedReviewerAsync(Guid reviewerUserId, CancellationToken ct = default);
+    
+    /// <summary>List crafts that are claimable (no assignee, status review or submitted).</summary>
+    Task<List<StoryCraft>> ListClaimableAsync(CancellationToken ct = default);
+    
     /// <summary>List crafts by owner with pagination. Returns (page items, total count).</summary>
     Task<(List<StoryCraft> Items, int TotalCount)> ListByOwnerPagedAsync(Guid ownerUserId, int skip, int take, CancellationToken ct = default);
     

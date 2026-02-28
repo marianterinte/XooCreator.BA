@@ -51,13 +51,13 @@ public class StoryEditorService : IStoryEditorService
         await _translationManager.EnsureTranslationAsync(ownerUserId, storyId, languageCode, title, ct);
     }
 
-    public async Task SaveDraftAsync(Guid ownerUserId, string storyId, string languageCode, EditableStoryDto dto, bool bypassOwnershipCheck = false, CancellationToken ct = default)
+    public async Task SaveDraftAsync(Guid ownerUserId, string storyId, string languageCode, EditableStoryDto dto, bool bypassOwnershipCheck = false, StoryCraft? existingCraft = null, CancellationToken ct = default)
     {
         // Ensure draft exists (use StoryType from DTO if provided, otherwise default to Indie)
         var storyType = dto.StoryType > 0 ? (StoryType?)dto.StoryType : StoryType.Indie;
         await _draftManager.EnsureDraftAsync(ownerUserId, storyId, storyType, ct);
         
-        var craft = await _crafts.GetAsync(storyId, ct);
+        var craft = existingCraft ?? await _crafts.GetAsync(storyId, ct);
         if (craft == null) throw new InvalidOperationException($"StoryCraft not found for storyId: {storyId}");
         
         // Verify ownership
