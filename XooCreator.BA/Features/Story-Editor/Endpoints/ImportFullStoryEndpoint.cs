@@ -25,6 +25,7 @@ using XooCreator.BA.Infrastructure.Services;
 using XooCreator.BA.Infrastructure.Services.Blob;
 using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Infrastructure.Services.Queue;
+using XooCreator.BA.Features.System.Services;
 using static XooCreator.BA.Features.StoryEditor.Mappers.StoryAssetPathMapper;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
@@ -41,6 +42,7 @@ public partial class ImportFullStoryEndpoint
     private readonly TelemetryClient? _telemetryClient;
     private readonly string _importQueueName;
     private readonly IStoryImportQueue _importQueue;
+    private readonly IStoryCreatorMaintenanceService _maintenanceService;
     private readonly IJobEventsHub _jobEvents;
     private const int DefaultSasValidityMinutes = 60;
     private readonly int _sasValidityMinutes;
@@ -63,6 +65,7 @@ public partial class ImportFullStoryEndpoint
         ILogger<ImportFullStoryEndpoint> logger,
         IStoryImportQueue importQueue,
         IJobEventsHub jobEvents,
+        IStoryCreatorMaintenanceService maintenanceService,
         TelemetryClient? telemetryClient = null)
     {
         _db = db;
@@ -74,6 +77,7 @@ public partial class ImportFullStoryEndpoint
         _logger = logger;
         _importQueue = importQueue;
         _jobEvents = jobEvents;
+        _maintenanceService = maintenanceService;
         _telemetryClient = telemetryClient;
         _sasValidityMinutes = configuration.GetValue<int?>("StoryEditor:DirectUpload:SasValidityMinutes") ?? DefaultSasValidityMinutes;
     }
@@ -119,7 +123,7 @@ public partial class ImportFullStoryEndpoint
     [Route("/api/{locale}/stories/import-full")]
     [Authorize]
     [DisableRequestSizeLimit] // Disable request size limit for this endpoint (allows up to 500MB as per MaxZipSizeBytes)
-    public static async Task<Results<Accepted<ImportFullStoryEnqueueResponse>, BadRequest<ImportFullStoryResponse>, Conflict<ImportFullStoryResponse>>> HandlePost(
+    public static async Task<IResult> HandlePost(
         [FromRoute] string locale,
         [FromServices] ImportFullStoryEndpoint ep,
         HttpRequest request,
@@ -141,6 +145,9 @@ public partial class ImportFullStoryEndpoint
             errors.Add("You do not have permission to import stories. Only users with Creator or Admin role can import stories.");
             return TypedResults.BadRequest(new ImportFullStoryResponse { Success = false, Errors = errors });
         }
+
+        if (await ep._maintenanceService.IsStoryCreatorDisabledAsync(ct))
+            return StoryCreatorMaintenanceResult.Unavailable();
 
         if (!request.HasFormContentType)
         {
@@ -1007,6 +1014,17 @@ public partial class ImportFullStoryEndpoint
         List<string> warnings,
         CancellationToken ct)
     {
+        // Diagnostic: log when manifest has missing or empty title/tiles (helps debug import issues)
+        var hasTitle = root.TryGetProperty("title", out var titleCheckEl) && !string.IsNullOrWhiteSpace(titleCheckEl.GetString());
+        var hasTiles = root.TryGetProperty("tiles", out var tilesCheckEl) && tilesCheckEl.ValueKind == JsonValueKind.Array && tilesCheckEl.GetArrayLength() > 0;
+        if (!hasTitle || !hasTiles)
+        {
+            _logger.LogWarning(
+                "Import manifest has missing or empty data: storyId={StoryId} hasTitle={HasTitle} hasTiles={HasTiles} tilesCount={TilesCount}",
+                storyId, hasTitle, hasTiles,
+                root.TryGetProperty("tiles", out var t) && t.ValueKind == JsonValueKind.Array ? t.GetArrayLength() : 0);
+        }
+
         // Check if craft already exists (for overwrite scenario)
         var existing = await _crafts.GetAsync(storyId, ct);
         if (existing != null && existing.OwnerUserId == ownerUserId)
@@ -1091,7 +1109,9 @@ public partial class ImportFullStoryEndpoint
             var sortOrder = 0;
             foreach (var tile in tilesElement.EnumerateArray())
             {
-                var tileId = tile.TryGetProperty("id", out var tileIdElement) ? tileIdElement.GetString() ?? $"tile-{sortOrder}" : $"tile-{sortOrder}";
+                // Support both "id" and "tileId" for tile identifier (v2 and some exports use tileId)
+                var tileId = tile.TryGetProperty("id", out var tileIdElement) ? tileIdElement.GetString() ?? $"tile-{sortOrder}"
+                    : (tile.TryGetProperty("tileId", out var tileIdAlt) ? tileIdAlt.GetString() : null) ?? $"tile-{sortOrder}";
                 var tileType = tile.TryGetProperty("type", out var tileTypeElement) ? tileTypeElement.GetString() ?? "page" : "page";
                 var tileImageUrl = tile.TryGetProperty("imageUrl", out var tileImageElement) ? ExtractFilename(tileImageElement.GetString() ?? "") : null;
 

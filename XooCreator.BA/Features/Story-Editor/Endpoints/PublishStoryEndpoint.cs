@@ -21,6 +21,7 @@ using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Data;
 using XooCreator.BA.Features.StoryEditor.Models;
 using XooCreator.BA.Infrastructure.Services.Jobs;
+using XooCreator.BA.Features.System.Services;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 
@@ -37,6 +38,7 @@ public partial class PublishStoryEndpoint
     private readonly IStoryDraftAssetCleanupService _cleanupService;
     private readonly IStoryPublishQueue _queue;
     private readonly XooDbContext _db;
+    private readonly IStoryCreatorMaintenanceService _maintenanceService;
     private readonly TelemetryClient? _telemetryClient;
     private readonly IJobEventsHub _jobEvents;
 
@@ -50,6 +52,7 @@ public partial class PublishStoryEndpoint
         IStoryPublishQueue queue,
         XooDbContext db,
         IJobEventsHub jobEvents,
+        IStoryCreatorMaintenanceService maintenanceService,
         TelemetryClient? telemetryClient = null)
     {
         _crafts = crafts;
@@ -61,12 +64,13 @@ public partial class PublishStoryEndpoint
         _queue = queue;
         _db = db;
         _jobEvents = jobEvents;
+        _maintenanceService = maintenanceService;
         _telemetryClient = telemetryClient;
     }
 
     [Route("/api/stories/{storyId}/publish")]
     [Authorize]
-    public static async Task<Results<Accepted<PublishResponse>, NotFound, BadRequest<string>, Conflict<string>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
+    public static async Task<IResult> HandlePost(
         [FromRoute] string storyId,
         [FromServices] PublishStoryEndpoint ep,
         [FromBody] PublishRequest? request,
@@ -100,6 +104,12 @@ public partial class PublishStoryEndpoint
             var user = authResult.User!;
             userId = user.Id.ToString();
             userEmail = user.Email;
+
+            if (await ep._maintenanceService.IsStoryCreatorDisabledAsync(ct))
+            {
+                outcome = "ServiceUnavailable";
+                return StoryCreatorMaintenanceResult.Unavailable();
+            }
 
             // Load craft
             var craft = await ep._crafts.GetAsync(storyId, ct);

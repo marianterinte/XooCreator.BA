@@ -59,7 +59,7 @@ public class StoryEditorService : IStoryEditorService
         
         var craft = existingCraft ?? await _crafts.GetAsync(storyId, ct);
         if (craft == null) throw new InvalidOperationException($"StoryCraft not found for storyId: {storyId}");
-        
+
         // Verify ownership
         _ownershipService.VerifyOwnership(craft, ownerUserId, bypassOwnershipCheck);
         
@@ -139,9 +139,12 @@ public class StoryEditorService : IStoryEditorService
             return;
         }
 
+        // Deduplicate topicIds to avoid duplicate key (StoryCraftId, StoryTopicId)
+        var distinctTopicIds = topicIds.Where(id => !string.IsNullOrWhiteSpace(id)).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+
         // Get topic entities by TopicId
         var topics = await _context.StoryTopics
-            .Where(t => topicIds.Contains(t.TopicId))
+            .Where(t => distinctTopicIds.Contains(t.TopicId))
             .ToListAsync(ct);
 
         // Add new topics

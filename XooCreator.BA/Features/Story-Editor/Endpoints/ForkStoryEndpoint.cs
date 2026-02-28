@@ -18,6 +18,7 @@ using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
 using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Infrastructure.Services.Queue;
+using XooCreator.BA.Features.System.Services;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 
@@ -35,6 +36,7 @@ public partial class ForkStoryEndpoint
     private readonly IStoryForkQueue _forkQueue;
     private readonly string _forkQueueName;
     private readonly IStoryForkAssetsQueue _forkAssetsQueue;
+    private readonly IStoryCreatorMaintenanceService _maintenanceService;
     private readonly IJobEventsHub _jobEvents;
 
     public ForkStoryEndpoint(
@@ -49,6 +51,7 @@ public partial class ForkStoryEndpoint
         IStoryForkQueue forkQueue,
         IStoryForkAssetsQueue forkAssetsQueue,
         IJobEventsHub jobEvents,
+        IStoryCreatorMaintenanceService maintenanceService,
         TelemetryClient? telemetryClient = null)
     {
         _crafts = crafts;
@@ -62,6 +65,7 @@ public partial class ForkStoryEndpoint
         _forkQueueName = configuration.GetSection("AzureStorage:Queues")?["Fork"] ?? "story-fork-queue";
         _forkAssetsQueue = forkAssetsQueue;
         _jobEvents = jobEvents;
+        _maintenanceService = maintenanceService;
         _telemetryClient = telemetryClient;
     }
 
@@ -116,14 +120,7 @@ public partial class ForkStoryEndpoint
 
     [Route("/api/stories/{storyId}/fork")]
     [Authorize]
-    public static async Task<
-        Results<
-            Accepted<ForkStoryResponse>,
-            BadRequest<string>,
-            NotFound,
-            UnauthorizedHttpResult,
-            ForbidHttpResult,
-            Conflict<string>>> HandlePost(
+    public static async Task<IResult> HandlePost(
         [FromRoute] string storyId,
         [FromBody] ForkStoryRequest request,
         [FromServices] ForkStoryEndpoint ep,
@@ -159,6 +156,12 @@ public partial class ForkStoryEndpoint
             var currentUser = user!;
             userId = currentUser.Id.ToString();
             userEmail = currentUser.Email;
+
+            if (await ep._maintenanceService.IsStoryCreatorDisabledAsync(ct))
+            {
+                outcome = "ServiceUnavailable";
+                return StoryCreatorMaintenanceResult.Unavailable();
+            }
 
             if (!ep.IsValidStoryId(storyId))
             {

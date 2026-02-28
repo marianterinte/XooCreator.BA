@@ -30,6 +30,7 @@ using XooCreator.BA.Features.StoryFeedback.Services;
 using XooCreator.BA.Features.AlchimaliaUniverse.Repositories;
 using XooCreator.BA.Features.AlchimaliaUniverse.Services;
 using XooCreator.BA.Features.StoryCreatorsChallenge.Services;
+using XooCreator.BA.Features.System.Services;
 using XooCreator.BA.Infrastructure.Services.Images;
 using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Data;
@@ -50,6 +51,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserContextService, UserContextService>();
         services.AddSingleton<IBlobSasService, BlobSasService>();
         services.AddScoped<IDbHealthService, DbHealthService>();
+        services.AddScoped<IStoryCreatorMaintenanceService, StoryCreatorMaintenanceService>();
         services.AddSingleton<IJobEventsHub, InMemoryJobEventsHub>();
         services.AddSingleton<IAzureQueueClientFactory, AzureQueueClientFactory>();
         services.AddSingleton<IStoryPublishQueue, StoryPublishQueue>();

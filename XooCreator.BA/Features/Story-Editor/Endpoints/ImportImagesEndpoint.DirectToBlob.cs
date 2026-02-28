@@ -12,6 +12,7 @@ using XooCreator.BA.Infrastructure.Services;
 using XooCreator.BA.Infrastructure.Services.Blob;
 using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Infrastructure.Services.Queue;
+using XooCreator.BA.Features.System.Services;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 
@@ -251,7 +252,7 @@ public partial class ImportImagesEndpoint
 
     [Route("/api/{locale}/stories/{storyId}/import-images/confirm-upload")]
     [Authorize]
-    public static async Task<Results<Accepted<ImageImportJobResponse>, BadRequest<ImportImagesResponse>, UnauthorizedHttpResult, ForbidHttpResult, NotFound>> HandlePost(
+    public static async Task<IResult> HandlePost(
         [FromRoute] string locale,
         [FromRoute] string storyId,
         [FromBody] ImportImagesConfirmUploadRequest body,
@@ -300,6 +301,9 @@ public partial class ImportImagesEndpoint
             return TypedResults.Forbid();
         }
 
+        if (await ep._maintenanceService.IsStoryCreatorDisabledAsync(ct))
+            return StoryCreatorMaintenanceResult.Unavailable();
+
         var blobClient = ep._sas.GetBlobClient(ep._sas.DraftContainer, body.BlobPath);
         if (!await blobClient.ExistsAsync(ct))
         {
@@ -331,7 +335,7 @@ public partial class ImportImagesEndpoint
 
     [Route("/api/{locale}/stories/{storyId}/import-images/confirm-upload-batch")]
     [Authorize]
-    public static async Task<Results<Accepted<ImageImportJobResponse>, BadRequest<ImportImagesResponse>, UnauthorizedHttpResult, ForbidHttpResult, NotFound>> HandlePost(
+    public static async Task<IResult> HandlePost(
         [FromRoute] string locale,
         [FromRoute] string storyId,
         [FromBody] ImportImagesBatchConfirmUploadRequest body,
@@ -363,6 +367,9 @@ public partial class ImportImagesEndpoint
         var isRequester = string.Equals(job.RequestedByEmail, user.Email, StringComparison.OrdinalIgnoreCase);
         if (!isAdmin && !isRequester)
             return TypedResults.Forbid();
+
+        if (await ep._maintenanceService.IsStoryCreatorDisabledAsync(ct))
+            return StoryCreatorMaintenanceResult.Unavailable();
 
         var staged = JsonSerializer.Deserialize<ImageBatchMappingPayload>(job.BatchMappingJson ?? string.Empty);
         var stagedFiles = staged?.Files ?? new List<StagedMediaFile>();

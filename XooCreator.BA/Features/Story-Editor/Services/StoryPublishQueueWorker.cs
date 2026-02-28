@@ -11,6 +11,7 @@ using XooCreator.BA.Features.Stories.Repositories;
 using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Infrastructure.Services.Queue;
+using XooCreator.BA.Features.System.Services;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Caching;
 
 namespace XooCreator.BA.Features.StoryEditor.Services;
@@ -125,6 +126,13 @@ public class StoryPublishQueueWorker : BackgroundService
                     if (job == null || job.Status is StoryPublishJobStatus.Completed or StoryPublishJobStatus.Failed or StoryPublishJobStatus.Superseded)
                     {
                         await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
+                        continue;
+                    }
+
+                    var maintenanceService = scope.ServiceProvider.GetRequiredService<IStoryCreatorMaintenanceService>();
+                    if (await maintenanceService.IsStoryCreatorDisabledAsync(stoppingToken))
+                    {
+                        _logger.LogInformation("Story Creator is in maintenance; skipping job. jobId={JobId} storyId={StoryId} messageId={MessageId}", job.Id, job.StoryId, message.MessageId);
                         continue;
                     }
 

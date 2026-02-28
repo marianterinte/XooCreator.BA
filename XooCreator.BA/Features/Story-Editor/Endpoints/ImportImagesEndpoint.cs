@@ -11,6 +11,7 @@ using XooCreator.BA.Infrastructure.Services;
 using XooCreator.BA.Infrastructure.Services.Blob;
 using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Infrastructure.Services.Queue;
+using XooCreator.BA.Features.System.Services;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 
@@ -22,6 +23,7 @@ public partial class ImportImagesEndpoint
     private readonly IBlobSasService _sas;
     private readonly IStoryCraftsRepository _crafts;
     private readonly IStoryImageImportQueue _importQueue;
+    private readonly IStoryCreatorMaintenanceService _maintenanceService;
     private readonly IJobEventsHub _jobEvents;
     private readonly ILogger<ImportImagesEndpoint> _logger;
 
@@ -40,6 +42,7 @@ public partial class ImportImagesEndpoint
         IStoryCraftsRepository crafts,
         IStoryImageImportQueue importQueue,
         IJobEventsHub jobEvents,
+        IStoryCreatorMaintenanceService maintenanceService,
         ILogger<ImportImagesEndpoint> logger,
         IConfiguration configuration)
     {
@@ -49,6 +52,7 @@ public partial class ImportImagesEndpoint
         _crafts = crafts;
         _importQueue = importQueue;
         _jobEvents = jobEvents;
+        _maintenanceService = maintenanceService;
         _logger = logger;
         _maxZipSizeBytes = configuration.GetValue<long?>("StoryEditor:ImportImages:MaxZipSizeBytes") ?? DefaultMaxZipSizeBytes;
         _multipartBodyLengthLimit = configuration.GetValue<long?>("StoryEditor:ImportImages:MultipartBodyLengthLimit") ?? DefaultMultipartBodyLengthLimit;
@@ -71,7 +75,7 @@ public partial class ImportImagesEndpoint
     [Route("/api/{locale}/stories/{storyId}/import-images")]
     [Authorize]
     [DisableRequestSizeLimit]
-    public static async Task<Results<Accepted<ImageImportJobResponse>, BadRequest<ImportImagesResponse>, UnauthorizedHttpResult, ForbidHttpResult, NotFound>> HandlePost(
+    public static async Task<IResult> HandlePost(
         [FromRoute] string locale,
         [FromRoute] string storyId,
         [FromServices] ImportImagesEndpoint ep,
@@ -93,6 +97,9 @@ public partial class ImportImagesEndpoint
             ep._logger.LogWarning("Image import forbidden: userId={UserId} storyId={StoryId} not admin", user.Id, storyId);
             return TypedResults.Forbid();
         }
+
+        if (await ep._maintenanceService.IsStoryCreatorDisabledAsync(ct))
+            return StoryCreatorMaintenanceResult.Unavailable();
 
         if (!request.HasFormContentType)
         {

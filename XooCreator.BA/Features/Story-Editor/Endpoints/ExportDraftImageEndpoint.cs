@@ -11,6 +11,7 @@ using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
 using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Infrastructure.Services.Queue;
+using XooCreator.BA.Features.System.Services;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 
@@ -22,6 +23,7 @@ public class ExportDraftImageEndpoint
     private readonly IStoryCraftsRepository _crafts;
     private readonly ILogger<ExportDraftImageEndpoint> _logger;
     private readonly IStoryImageExportQueue _queue;
+    private readonly IStoryCreatorMaintenanceService _maintenanceService;
     private readonly IJobEventsHub _jobEvents;
 
     public ExportDraftImageEndpoint(
@@ -30,7 +32,8 @@ public class ExportDraftImageEndpoint
         IStoryCraftsRepository crafts,
         ILogger<ExportDraftImageEndpoint> logger,
         IStoryImageExportQueue queue,
-        IJobEventsHub jobEvents)
+        IJobEventsHub jobEvents,
+        IStoryCreatorMaintenanceService maintenanceService)
     {
         _db = db;
         _auth0 = auth0;
@@ -38,6 +41,7 @@ public class ExportDraftImageEndpoint
         _logger = logger;
         _queue = queue;
         _jobEvents = jobEvents;
+        _maintenanceService = maintenanceService;
     }
 
     public record ImageExportRequest
@@ -62,7 +66,7 @@ public class ExportDraftImageEndpoint
 
     [Route("/api/{locale}/stories/{storyId}/image-export-draft")]
     [Authorize]
-    public static async Task<Results<Accepted<ImageExportResponse>, NotFound, UnauthorizedHttpResult, ForbidHttpResult, BadRequest<string>>> HandlePost(
+    public static async Task<IResult> HandlePost(
         [FromRoute] string locale,
         [FromRoute] string storyId,
         [FromBody] ImageExportRequest? request,
@@ -82,6 +86,9 @@ public class ExportDraftImageEndpoint
             ep._logger.LogWarning("Image export forbidden: userId={UserId} storyId={StoryId} not admin", user.Id, storyId);
             return TypedResults.Forbid();
         }
+
+        if (await ep._maintenanceService.IsStoryCreatorDisabledAsync(ct))
+            return StoryCreatorMaintenanceResult.Unavailable();
 
         var craft = await ep._crafts.GetAsync(storyId, ct);
         if (craft == null)

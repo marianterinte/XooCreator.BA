@@ -12,6 +12,7 @@ using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
 using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Infrastructure.Services.Queue;
+using XooCreator.BA.Features.System.Services;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 
@@ -23,6 +24,7 @@ public class TranslateStoryEndpoint
     private readonly IAuth0UserService _auth0;
     private readonly ILogger<TranslateStoryEndpoint> _logger;
     private readonly IStoryTranslationQueue _queue;
+    private readonly IStoryCreatorMaintenanceService _maintenanceService;
     private readonly IJobEventsHub _jobEvents;
 
     public TranslateStoryEndpoint(
@@ -31,7 +33,8 @@ public class TranslateStoryEndpoint
         IAuth0UserService auth0,
         ILogger<TranslateStoryEndpoint> logger,
         IStoryTranslationQueue queue,
-        IJobEventsHub jobEvents)
+        IJobEventsHub jobEvents,
+        IStoryCreatorMaintenanceService maintenanceService)
     {
         _db = db;
         _crafts = crafts;
@@ -39,6 +42,7 @@ public class TranslateStoryEndpoint
         _logger = logger;
         _queue = queue;
         _jobEvents = jobEvents;
+        _maintenanceService = maintenanceService;
     }
 
     public record TranslateStoryRequest
@@ -60,7 +64,7 @@ public class TranslateStoryEndpoint
 
     [Route("/api/{locale}/stories/{storyId}/translate")]
     [Authorize]
-    public static async Task<Results<Accepted<TranslateStoryJobResponse>, BadRequest<string>, NotFound, UnauthorizedHttpResult, ForbidHttpResult, Conflict<string>>> HandlePost(
+    public static async Task<IResult> HandlePost(
         [FromRoute] string locale,
         [FromRoute] string storyId,
         [FromBody] TranslateStoryRequest request,
@@ -79,6 +83,9 @@ public class TranslateStoryEndpoint
             ep._logger.LogWarning("Translate forbidden: userId={UserId} not creator/admin", user.Id);
             return TypedResults.Forbid();
         }
+
+        if (await ep._maintenanceService.IsStoryCreatorDisabledAsync(ct))
+            return StoryCreatorMaintenanceResult.Unavailable();
 
         if (request == null)
             return TypedResults.BadRequest("Request body is required.");

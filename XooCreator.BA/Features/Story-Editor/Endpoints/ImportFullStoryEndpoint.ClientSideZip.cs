@@ -11,6 +11,7 @@ using XooCreator.BA.Infrastructure.Services;
 using XooCreator.BA.Infrastructure.Services.Blob;
 using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Infrastructure.Services.Queue;
+using XooCreator.BA.Features.System.Services;
 using static XooCreator.BA.Features.StoryEditor.Mappers.StoryAssetPathMapper;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
@@ -57,9 +58,11 @@ public partial class ImportFullStoryEndpoint
         }
 
         var root = body.Manifest;
-        if (!root.TryGetProperty("id", out var idEl) || string.IsNullOrWhiteSpace(idEl.GetString()))
+        var hasId = root.TryGetProperty("id", out var idEl) && !string.IsNullOrWhiteSpace(idEl.GetString());
+        var hasStoryId = root.TryGetProperty("storyId", out var storyIdEl) && !string.IsNullOrWhiteSpace(storyIdEl.GetString());
+        if (!hasId && !hasStoryId)
         {
-            errors.Add("Missing or empty 'id' in manifest.");
+            errors.Add("Missing or empty 'id'/'storyId' in manifest.");
             return TypedResults.BadRequest(new ImportFullStoryResponse { Success = false, Errors = errors });
         }
 
@@ -130,7 +133,7 @@ public partial class ImportFullStoryEndpoint
 
     [Route("/api/{locale}/stories/import-full/confirm-from-assets")]
     [Authorize]
-    public static async Task<Results<Accepted<ImportFullStoryEnqueueResponse>, BadRequest<ImportFullStoryResponse>, Conflict<ImportFullStoryResponse>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
+    public static async Task<IResult> HandlePost(
         [FromRoute] string locale,
         [FromBody] ConfirmFromAssetsRequest body,
         [FromServices] ImportFullStoryEndpoint ep,
@@ -149,6 +152,9 @@ public partial class ImportFullStoryEndpoint
             ep._logger.LogWarning("Confirm-from-assets forbidden: userId={UserId} not creator or admin", user.Id);
             return TypedResults.Forbid();
         }
+
+        if (await ep._maintenanceService.IsStoryCreatorDisabledAsync(ct))
+            return StoryCreatorMaintenanceResult.Unavailable();
 
         if (body.UploadId == Guid.Empty)
         {
@@ -187,14 +193,24 @@ public partial class ImportFullStoryEndpoint
         using (manifestDoc)
         {
             var root = manifestDoc.RootElement;
-            if (!root.TryGetProperty("id", out var idEl) || string.IsNullOrWhiteSpace(idEl.GetString()))
+            string? originalStoryId = null;
+            if (root.TryGetProperty("id", out var idEl) && !string.IsNullOrWhiteSpace(idEl.GetString()))
             {
-                errors.Add("Missing or empty 'id' in manifest.");
+                originalStoryId = idEl.GetString();
+            }
+            else if (root.TryGetProperty("storyId", out var sidEl) && !string.IsNullOrWhiteSpace(sidEl.GetString()))
+            {
+                originalStoryId = sidEl.GetString();
+            }
+
+            if (string.IsNullOrWhiteSpace(originalStoryId))
+            {
+                errors.Add("Missing or empty 'id'/'storyId' in manifest.");
                 return TypedResults.BadRequest(new ImportFullStoryResponse { Success = false, Errors = errors });
             }
 
-            var originalStoryId = idEl.GetString()!;
-            var finalStoryId = await ep.ResolveStoryIdConflictAsync(originalStoryId, user, isAdmin, ct);
+            var safeOriginalStoryId = originalStoryId!;
+            var finalStoryId = await ep.ResolveStoryIdConflictAsync(safeOriginalStoryId, user, isAdmin, ct);
 
             var tenMinutesAgo = DateTime.UtcNow.AddMinutes(-10);
             var stuckJobs = await ep._db.StoryImportJobs
@@ -233,7 +249,7 @@ public partial class ImportFullStoryEndpoint
             {
                 Id = jobId,
                 StoryId = finalStoryId,
-                OriginalStoryId = originalStoryId,
+                OriginalStoryId = safeOriginalStoryId,
                 OwnerUserId = user.Id,
                 RequestedByEmail = user.Email ?? string.Empty,
                 Locale = locale ?? string.Empty,

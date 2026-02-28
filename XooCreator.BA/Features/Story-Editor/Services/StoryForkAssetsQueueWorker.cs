@@ -14,6 +14,7 @@ using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Features.StoryEditor.Endpoints;
 using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Infrastructure.Services.Queue;
+using XooCreator.BA.Features.System.Services;
 
 namespace XooCreator.BA.Features.StoryEditor.Services;
 
@@ -102,6 +103,13 @@ public class StoryForkAssetsQueueWorker : BackgroundService
                     if (job == null || job.Status is StoryForkAssetJobStatus.Completed or StoryForkAssetJobStatus.Failed)
                     {
                         await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
+                        continue;
+                    }
+
+                    var maintenanceService = scope.ServiceProvider.GetRequiredService<IStoryCreatorMaintenanceService>();
+                    if (await maintenanceService.IsStoryCreatorDisabledAsync(stoppingToken))
+                    {
+                        _logger.LogInformation("Story Creator is in maintenance; skipping job. jobId={JobId} messageId={MessageId}", job.Id, message.MessageId);
                         continue;
                     }
 

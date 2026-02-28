@@ -17,6 +17,7 @@ using XooCreator.BA.Infrastructure.Services;
 using XooCreator.BA.Infrastructure.Services.Blob;
 using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Infrastructure.Services.Queue;
+using XooCreator.BA.Features.System.Services;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 
@@ -30,6 +31,7 @@ public class ExportPublishedStoryEndpoint
     private readonly ILogger<ExportPublishedStoryEndpoint> _logger;
     private readonly TelemetryClient? _telemetryClient;
     private readonly IStoryExportQueue _queue;
+    private readonly IStoryCreatorMaintenanceService _maintenanceService;
     private readonly IJobEventsHub _jobEvents;
 
     public ExportPublishedStoryEndpoint(
@@ -40,6 +42,7 @@ public class ExportPublishedStoryEndpoint
         ILogger<ExportPublishedStoryEndpoint> logger,
         IStoryExportQueue queue,
         IJobEventsHub jobEvents,
+        IStoryCreatorMaintenanceService maintenanceService,
         TelemetryClient? telemetryClient = null)
     {
         _db = db;
@@ -49,12 +52,13 @@ public class ExportPublishedStoryEndpoint
         _logger = logger;
         _queue = queue;
         _jobEvents = jobEvents;
+        _maintenanceService = maintenanceService;
         _telemetryClient = telemetryClient;
     }
 
     [Route("/api/{locale}/stories/{storyId}/export")]
     [Authorize]
-    public static async Task<Results<Accepted<ExportResponse>, NotFound, UnauthorizedHttpResult, ForbidHttpResult>> HandleGet(
+    public static async Task<IResult> HandleGet(
         [FromRoute] string locale,
         [FromRoute] string storyId,
         [FromQuery] bool? includeVideo,
@@ -88,6 +92,12 @@ public class ExportPublishedStoryEndpoint
         {
             outcome = "Forbidden";
             return TypedResults.Forbid();
+        }
+
+        if (await ep._maintenanceService.IsStoryCreatorDisabledAsync(ct))
+        {
+            outcome = "ServiceUnavailable";
+            return StoryCreatorMaintenanceResult.Unavailable();
         }
 
         var def = await ep._db.StoryDefinitions

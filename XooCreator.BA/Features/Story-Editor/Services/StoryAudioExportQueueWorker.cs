@@ -15,6 +15,7 @@ using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Infrastructure.Services.Blob;
 using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Infrastructure.Services.Queue;
+using XooCreator.BA.Features.System.Services;
 
 namespace XooCreator.BA.Features.StoryEditor.Services;
 
@@ -119,6 +120,13 @@ public class StoryAudioExportQueueWorker : BackgroundService
                     if (job == null || job.Status is StoryAudioExportJobStatus.Completed or StoryAudioExportJobStatus.Failed)
                     {
                         await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
+                        continue;
+                    }
+
+                    var maintenanceService = scope.ServiceProvider.GetRequiredService<IStoryCreatorMaintenanceService>();
+                    if (await maintenanceService.IsStoryCreatorDisabledAsync(stoppingToken))
+                    {
+                        _logger.LogInformation("Story Creator is in maintenance; skipping job. jobId={JobId} storyId={StoryId} messageId={MessageId}", job.Id, job.StoryId, message.MessageId);
                         continue;
                     }
 
