@@ -26,9 +26,35 @@ public class StoryHeroBestiaryService : IStoryHeroBestiaryService
 
             var heroId = hero.HeroId.Trim();
 
-            // Find or create BestiaryItem for this story hero (keyed by ArmsKey = HeroId; storyhero items use BodyKey/HeadKey = "—")
             var bestiaryItem = await _db.BestiaryItems
                 .FirstOrDefaultAsync(bi => bi.ArmsKey == heroId && bi.BodyKey == PlaceholderKey && bi.HeadKey == PlaceholderKey, ct);
+
+            // If not found by exact ArmsKey, check for a legacy BestiaryItem
+            // whose ArmsKey matches a translation Name for this EpicHeroDefinition.
+            // This prevents duplicates when the same hero was previously discovered
+            // with a legacy heroId (e.g. "linkaro") and is now rediscovered with
+            // the EpicHeroDefinition.Id (e.g. "hero-linkaro-20250115").
+            if (bestiaryItem == null)
+            {
+                var heroTranslationNames = await _db.EpicHeroDefinitionTranslations
+                    .Where(t => t.EpicHeroDefinitionId == heroId)
+                    .Select(t => t.Name.ToLower())
+                    .ToListAsync(ct);
+
+                if (heroTranslationNames.Count > 0)
+                {
+                    bestiaryItem = await _db.BestiaryItems
+                        .FirstOrDefaultAsync(bi =>
+                            bi.BodyKey == PlaceholderKey &&
+                            bi.HeadKey == PlaceholderKey &&
+                            heroTranslationNames.Contains(bi.ArmsKey.ToLower()), ct);
+
+                    if (bestiaryItem != null)
+                    {
+                        bestiaryItem.ArmsKey = heroId;
+                    }
+                }
+            }
 
             if (bestiaryItem == null)
             {

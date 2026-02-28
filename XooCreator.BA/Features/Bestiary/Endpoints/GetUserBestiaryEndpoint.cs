@@ -76,6 +76,45 @@ public sealed class GetUserBestiaryEndpoint
             .Where(t => epicHeroDefinitions.Select(d => d.Id).Contains(t.EpicHeroDefinitionId))
             .ToListAsync(ct);
 
+        // For legacy ArmsKeys that didn't match any EpicHeroDefinition by ID,
+        // try to find them by matching EpicHeroDefinitionTranslation.Name (case-insensitive).
+        // This bridges legacy heroIds (e.g. "linkaro") to EpicHeroDefinitions with different IDs.
+        var legacyHeroIdMapping = new Dictionary<string, string>();
+        var unmatchedStoryHeroIds = storyHeroIds
+            .Where(id => !epicHeroDefinitions.Any(d => d.Id == id))
+            .ToList();
+        if (unmatchedStoryHeroIds.Count > 0)
+        {
+            var lowerUnmatched = unmatchedStoryHeroIds.Select(id => id.ToLowerInvariant()).ToList();
+            var matchingTranslations = await ep._db.EpicHeroDefinitionTranslations
+                .Where(t => lowerUnmatched.Contains(t.Name.ToLower()))
+                .ToListAsync(ct);
+
+            foreach (var mt in matchingTranslations)
+            {
+                var matchingArmsKey = unmatchedStoryHeroIds.FirstOrDefault(id =>
+                    string.Equals(id, mt.Name, StringComparison.OrdinalIgnoreCase));
+                if (matchingArmsKey != null && !legacyHeroIdMapping.ContainsKey(matchingArmsKey))
+                {
+                    legacyHeroIdMapping[matchingArmsKey] = mt.EpicHeroDefinitionId;
+                }
+            }
+
+            var additionalDefIds = legacyHeroIdMapping.Values.Distinct().ToList();
+            if (additionalDefIds.Count > 0)
+            {
+                var additionalDefs = await ep._db.EpicHeroDefinitions
+                    .Where(d => additionalDefIds.Contains(d.Id))
+                    .ToListAsync(ct);
+                var additionalTrans = await ep._db.EpicHeroDefinitionTranslations
+                    .Where(t => additionalDefIds.Contains(t.EpicHeroDefinitionId))
+                    .ToListAsync(ct);
+
+                epicHeroDefinitions.AddRange(additionalDefs);
+                epicHeroTranslations.AddRange(additionalTrans);
+            }
+        }
+
         var heroTranslations = await ep._db.HeroDefinitionDefinitionTranslations
             .Where(t => heroIds.Contains(t.HeroDefinitionDefinitionId))
             .ToListAsync(ct);
@@ -94,15 +133,15 @@ public sealed class GetUserBestiaryEndpoint
 
         var items = rawItems.Select(item =>
         {
-            var (name, story) = ep.ResolveText(item, locale, heroTranslations, storyHeroes, storyHeroTranslations, epicHeroDefinitions, epicHeroTranslations);
-            var imageUrl = ep.ResolveImageUrl(item, heroDefinitions, storyHeroes, epicHeroDefinitions);
+            var (name, story) = ep.ResolveText(item, locale, heroTranslations, storyHeroes, storyHeroTranslations, epicHeroDefinitions, epicHeroTranslations, legacyHeroIdMapping);
+            var imageUrl = ep.ResolveImageUrl(item, heroDefinitions, storyHeroes, epicHeroDefinitions, legacyHeroIdMapping);
             return new BestiaryItemDto(
-            item.Id,
+                item.Id,
                 name,
                 imageUrl,
                 story,
-            item.DiscoveredAt,
-            item.BestiaryType
+                item.DiscoveredAt,
+                item.BestiaryType
             );
         }).ToList();
 
@@ -110,20 +149,28 @@ public sealed class GetUserBestiaryEndpoint
         return TypedResults.Ok(res);
     }
 
-    private string ResolveImageUrl(dynamic item, List<HeroDefinitionDefinition> heroDefinitions, List<StoryHero> storyHeroes, List<EpicHeroDefinition> epicHeroDefinitions)
+    private string ResolveImageUrl(dynamic item, List<HeroDefinitionDefinition> heroDefinitions, List<StoryHero> storyHeroes, List<EpicHeroDefinition> epicHeroDefinitions, Dictionary<string, string> legacyHeroIdMapping)
     {
         var bestiaryType = item.BestiaryType as string;
         var armsKey = item.ArmsKey as string;
         var bodyKey = item.BodyKey as string;
         var headKey = item.HeadKey as string;
 
+        if (bestiaryType == "storyhero")
+        {
+            var epicDefId = armsKey;
+            if (epicHeroDefinitions.All(h => h.Id != epicDefId) && legacyHeroIdMapping.TryGetValue(armsKey!, out var mappedId))
+                epicDefId = mappedId;
+
+            return epicHeroDefinitions.FirstOrDefault(h => h.Id == epicDefId)?.ImageUrl
+                   ?? storyHeroes.FirstOrDefault(h => h.HeroId == armsKey)?.ImageUrl
+                   ?? $"images/tol/stories/seed@alchimalia.com/heroes/{armsKey}.png";
+        }
+
         return bestiaryType switch
         {
             "treeofheroes" => heroDefinitions.FirstOrDefault(h => h.Id == armsKey)?.Image
                               ?? armsKey + ".jpg",
-            "storyhero" => epicHeroDefinitions.FirstOrDefault(h => h.Id == armsKey)?.ImageUrl
-                           ?? storyHeroes.FirstOrDefault(h => h.HeroId == armsKey)?.ImageUrl
-                           ?? $"images/tol/stories/seed@alchimalia.com/heroes/{armsKey}.png",
             _ => (armsKey == "—" ? "None" : armsKey) + (bodyKey == "—" ? "None" : bodyKey) + (headKey == "—" ? "None" : headKey) + ".jpg"
         };
     }
@@ -135,7 +182,8 @@ public sealed class GetUserBestiaryEndpoint
         List<StoryHero> storyHeroes,
         List<StoryHeroTranslation> storyHeroTranslations,
         List<EpicHeroDefinition> epicHeroDefinitions,
-        List<EpicHeroDefinitionTranslation> epicHeroTranslations)
+        List<EpicHeroDefinitionTranslation> epicHeroTranslations,
+        Dictionary<string, string> legacyHeroIdMapping)
     {
         var bestiaryType = item.BestiaryType as string;
         var armsKey = item.ArmsKey as string;
@@ -154,20 +202,29 @@ public sealed class GetUserBestiaryEndpoint
         {
             var normalizedLang = locale.ToLowerInvariant();
 
+            // Resolve the EpicHeroDefinition ID: direct match first, then legacy mapping
+            var epicDefId = armsKey;
+            var epicHero = epicHeroDefinitions.FirstOrDefault(h => h.Id == epicDefId);
+            if (epicHero == null && armsKey != null && legacyHeroIdMapping.TryGetValue(armsKey, out var mappedId))
+            {
+                epicDefId = mappedId;
+                epicHero = epicHeroDefinitions.FirstOrDefault(h => h.Id == epicDefId);
+            }
+
             // Primary: EpicHeroDefinition + EpicHeroDefinitionTranslation (published from Story Creator)
-            var epicHero = epicHeroDefinitions.FirstOrDefault(h => h.Id == armsKey);
             if (epicHero != null)
             {
                 var epicTranslation = epicHeroTranslations.FirstOrDefault(t =>
-                        t.EpicHeroDefinitionId == armsKey && t.LanguageCode.ToLowerInvariant() == normalizedLang)
-                    ?? epicHeroTranslations.FirstOrDefault(t => t.EpicHeroDefinitionId == armsKey);
+                        t.EpicHeroDefinitionId == epicDefId && t.LanguageCode.ToLowerInvariant() == normalizedLang)
+                    ?? epicHeroTranslations.FirstOrDefault(t => t.EpicHeroDefinitionId == epicDefId);
 
                 if (epicTranslation != null)
                 {
-                    var name = epicTranslation.Name ?? armsKey ?? string.Empty;
-                    var story = epicTranslation.Description ?? epicTranslation.GreetingText ?? string.Empty;
-                    return (name, story);
+                    return (epicTranslation.Name ?? epicHero.Name, epicTranslation.Description ?? epicTranslation.GreetingText ?? string.Empty);
                 }
+
+                // EpicHeroDefinition found but no translations yet — use its display Name
+                return (epicHero.Name, string.Empty);
             }
 
             // Fallback: StoryHeroes + StoryHeroTranslations (legacy)
@@ -180,15 +237,10 @@ public sealed class GetUserBestiaryEndpoint
 
             if (storyTranslation != null)
             {
-                var name = storyTranslation.Name ?? armsKey ?? string.Empty;
-                var story = storyTranslation.Description ?? storyTranslation.GreetingText ?? string.Empty;
-                return (name, story);
+                return (storyTranslation.Name ?? armsKey ?? string.Empty, storyTranslation.Description ?? storyTranslation.GreetingText ?? string.Empty);
             }
 
-            // Fallback: translation keys from BestiaryItem (frontend i18n)
-            var itemName = item.Name as string;
-            var itemStory = item.Story as string;
-            return (itemName ?? armsKey ?? string.Empty, itemStory ?? string.Empty);
+            return (armsKey ?? string.Empty, string.Empty);
         }
 
         // discovery: use stored text (no JSON)
