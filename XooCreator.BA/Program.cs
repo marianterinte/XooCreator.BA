@@ -1,4 +1,7 @@
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.ResponseCompression;
+using System.IO.Compression;
 using Npgsql;
 using XooCreator.BA.Data;
 using XooCreator.BA.Infrastructure.Endpoints;
@@ -21,8 +24,31 @@ var builder = WebApplication.CreateBuilder(args);
 // Add Application Insights
 builder.Services.AddApplicationInsightsTelemetry();
 
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<BrotliCompressionProvider>();
+    options.Providers.Add<GzipCompressionProvider>();
+    options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[]
+    {
+        "application/json",
+        "text/plain",
+        "text/html",
+        "application/javascript",
+        "text/css"
+    });
+});
+builder.Services.Configure<BrotliCompressionProviderOptions>(options =>
+{
+    options.Level = CompressionLevel.Fastest;
+});
+builder.Services.Configure<GzipCompressionProviderOptions>(options =>
+{
+    options.Level = CompressionLevel.Fastest;
+});
+
 var portEnv = Environment.GetEnvironmentVariable("PORT");
-if (!string.IsNullOrWhiteSpace(portEnv))
+if (!string.IsNullOrWhiteSpace(portEnv) && !int.TryParse(portEnv, out _))
 {
     builder.WebHost.UseUrls($"http://0.0.0.0:{portEnv}");
 }
@@ -82,6 +108,15 @@ builder.Services.AddAuthConfiguration(builder.Configuration);
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.Limits.MaxRequestBodySize = 1024L * 1024 * 1024; // 1GB
+
+    var portStr = Environment.GetEnvironmentVariable("PORT");
+    if (int.TryParse(portStr, out var port))
+    {
+        options.ListenAnyIP(port, listenOptions =>
+        {
+            listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
+        });
+    }
 });
 
 // Configure FormOptions for multipart/form-data uploads
@@ -95,6 +130,8 @@ builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(optio
 });
 
 var app = builder.Build();
+
+app.UseResponseCompression();
 
 // Configure detailed error page for startup errors
 StartupErrorHandler.ConfigureErrorPage(app);

@@ -8,6 +8,8 @@ namespace XooCreator.BA.Infrastructure.Services.Blob;
 public class BlobSasService : IBlobSasService
 {
     private readonly BlobServiceClient _blobServiceClient;
+    private readonly HashSet<string> _verifiedContainers = new(StringComparer.OrdinalIgnoreCase);
+    private readonly SemaphoreSlim _containerLock = new(1, 1);
     public string DraftContainer { get; }
     public string PublishedContainer { get; }
 
@@ -40,10 +42,27 @@ public class BlobSasService : IBlobSasService
     public BlobContainerClient GetContainerClient(string container)
         => _blobServiceClient.GetBlobContainerClient(container);
 
+    private async Task EnsureContainerAsync(string container, CancellationToken ct)
+    {
+        if (_verifiedContainers.Contains(container)) return;
+
+        await _containerLock.WaitAsync(ct);
+        try
+        {
+            if (_verifiedContainers.Contains(container)) return;
+            await _blobServiceClient.GetBlobContainerClient(container)
+                .CreateIfNotExistsAsync(cancellationToken: ct);
+            _verifiedContainers.Add(container);
+        }
+        finally
+        {
+            _containerLock.Release();
+        }
+    }
+
     public async Task<Uri> GetPutSasAsync(string container, string blobPath, string contentType, TimeSpan ttl, CancellationToken ct = default)
     {
-        // Ensure container exists (no-op if it does)
-        await _blobServiceClient.GetBlobContainerClient(container).CreateIfNotExistsAsync(cancellationToken: ct);
+        await EnsureContainerAsync(container, ct);
         var blobClient = GetBlobClient(container, blobPath);
 
         var permissions = BlobSasPermissions.Create | BlobSasPermissions.Write;
@@ -76,19 +95,15 @@ public class BlobSasService : IBlobSasService
         var sasUri = blobClient.GenerateSasUri(sasBuilder);
         return Task.FromResult(sasUri);
     }
+
     private static string? ResolveConfiguredValue(string? configured)
     {
-        if (string.IsNullOrWhiteSpace(configured))
-        {
-            return null;
-        }
-
+        if (string.IsNullOrWhiteSpace(configured)) return null;
         if (configured.StartsWith("env:", StringComparison.OrdinalIgnoreCase))
         {
             var envKey = configured[4..].Trim();
             return string.IsNullOrWhiteSpace(envKey) ? null : Environment.GetEnvironmentVariable(envKey);
         }
-
         return configured;
     }
 }

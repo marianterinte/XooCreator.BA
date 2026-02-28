@@ -46,22 +46,21 @@ public class GetStoryQuizAnswersEndpoint
         if (userId == null)
             return TypedResults.Unauthorized();
 
-        // Get all quiz answers for this user and story
-        // We get the latest answers (most recent session) for each tile
-        var allAnswers = await ep._context.StoryQuizAnswers
-            .Where(a => a.UserId == userId.Value)
+        // Get quiz answers for this user and story in DB (case-insensitive StoryId), then latest per tile in memory
+        var storyAnswers = await ep._context.StoryQuizAnswers
+            .AsNoTracking()
+            .Where(a => a.UserId == userId.Value
+                && EF.Functions.ILike(a.StoryId, storyId))
             .ToListAsync(ct);
 
-        // Filter in memory for case-insensitive StoryId match
-        var storyAnswers = allAnswers
-            .Where(a => string.Equals(a.StoryId, storyId, StringComparison.OrdinalIgnoreCase))
+        var latestAnswers = storyAnswers
             .GroupBy(a => a.TileId)
-            .Select(g => g.OrderByDescending(a => a.AnsweredAt).First()) // Get most recent answer for each tile
+            .Select(g => g.OrderByDescending(a => a.AnsweredAt).First())
             .ToList();
 
         var response = new StoryQuizAnswersResponse
         {
-            Answers = storyAnswers.Select(a => new QuizAnswerDto
+            Answers = latestAnswers.Select(a => new QuizAnswerDto
             {
                 TileId = a.TileId,
                 SelectedAnswerId = a.SelectedAnswerId,

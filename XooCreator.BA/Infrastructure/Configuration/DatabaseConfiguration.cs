@@ -34,13 +34,12 @@ public static class DatabaseConfiguration
             // This will be logged through ILogger with category "Microsoft.EntityFrameworkCore.Database.Command"
             options.EnableSensitiveDataLogging(false); // Set to true only in development if needed
             options.EnableDetailedErrors();
-            
+            options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+
             // Add interceptor to automatically make migration SQL commands idempotent
             // This transforms CREATE TABLE, CREATE INDEX, ALTER TABLE ADD CONSTRAINT, etc.
             // to use IF NOT EXISTS, making all migrations safe to run multiple times
-            var loggerFactory = services.BuildServiceProvider().GetService<ILoggerFactory>();
-            var logger = loggerFactory?.CreateLogger<IdempotentMigrationCommandInterceptor>();
-            options.AddInterceptors(new IdempotentMigrationCommandInterceptor(dbSchema, logger));
+            options.AddInterceptors(new IdempotentMigrationCommandInterceptor(dbSchema, null));
         });
 
         return services;

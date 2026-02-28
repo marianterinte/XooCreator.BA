@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Features.StoryEditor.Repositories;
@@ -23,8 +24,8 @@ public class StoryDraftManager : IStoryDraftManager
 
     public async Task EnsureDraftAsync(Guid ownerUserId, string storyId, StoryType? storyType = null, CancellationToken ct = default)
     {
-        var existing = await _crafts.GetAsync(storyId, ct);
-        if (existing != null) return;
+        var exists = await _context.StoryCrafts.AnyAsync(x => x.StoryId == storyId, ct);
+        if (exists) return;
         
         var craft = await _crafts.CreateAsync(ownerUserId, storyId, StoryStatus.Draft.ToDb(), ct);
         

@@ -55,8 +55,10 @@ public sealed class MarketplaceCatalogCache : IMarketplaceCatalogCache, IMarketp
         _cache.Remove(StoryStatsKey);
         _cache.Remove(EpicStatsKey);
 
-        _logger.LogInformation("Marketplace cache reset (all locales). KnownStoryLocales={StoryLocales} KnownEpicLocales={EpicLocales}",
-            _knownStoryLocales.Count, _knownEpicLocales.Count);
+        _knownStoryLocales.Clear();
+        _knownEpicLocales.Clear();
+
+        _logger.LogInformation("Marketplace cache reset (all locales). KnownStoryLocales and KnownEpicLocales cleared.");
     }
 
     public bool IsEnabled
@@ -217,7 +219,7 @@ public sealed class MarketplaceCatalogCache : IMarketplaceCatalogCache, IMarketp
                 }
             }
 
-            var summary = GetSummaryFromJson(def.StoryId, locale) ?? def.Summary ?? string.Empty;
+            var summary = await GetSummaryFromJsonAsync(def.StoryId, locale) ?? def.Summary ?? string.Empty;
 
             var topicIds = def.Topics?
                 .Select(t => t.StoryTopic?.TopicId)
@@ -493,7 +495,7 @@ public sealed class MarketplaceCatalogCache : IMarketplaceCatalogCache, IMarketp
         return characters;
     }
 
-    private static string? GetSummaryFromJson(string storyId, string locale)
+    private static async Task<string?> GetSummaryFromJsonAsync(string storyId, string locale)
     {
         try
         {
@@ -508,7 +510,7 @@ public sealed class MarketplaceCatalogCache : IMarketplaceCatalogCache, IMarketp
             {
                 if (!File.Exists(filePath)) continue;
 
-                var json = File.ReadAllText(filePath);
+                var json = await File.ReadAllTextAsync(filePath);
                 var data = JsonSerializer.Deserialize<StorySeedDataJsonProbe>(json, new JsonSerializerOptions
                 {
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,

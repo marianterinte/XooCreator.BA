@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using XooCreator.BA.Data;
+using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Features.StoryEditor.DTOs;
 using XooCreator.BA.Features.StoryEditor.Repositories;
@@ -36,7 +37,9 @@ public class ListStoryCraftsEndpoint
         [FromRoute] string locale,
         [FromQuery] string? scope,
         [FromServices] ListStoryCraftsEndpoint ep,
-        CancellationToken ct)
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken ct = default)
     {
         var user = await ep._auth0.GetCurrentUserAsync(ct);
         if (user == null) return TypedResults.Unauthorized();
@@ -46,17 +49,31 @@ public class ListStoryCraftsEndpoint
         var wantAssigned = string.Equals(scope, "assigned", StringComparison.OrdinalIgnoreCase);
         var wantClaimable = string.Equals(scope, "claimable", StringComparison.OrdinalIgnoreCase);
 
-        var list = (isReviewerOrAdmin && (wantAll || wantAssigned || wantClaimable))
-            ? await ep._crafts.ListAllAsync(ct)
-            : await ep._crafts.ListByOwnerAsync(user.Id, ct);
+        var skip = Math.Max(0, (page - 1) * pageSize);
+        var take = Math.Clamp(pageSize, 1, 100);
 
-        if (isReviewerOrAdmin && wantAssigned)
+        List<StoryCraft> list;
+        int totalCount;
+
+        if (isReviewerOrAdmin && (wantAssigned || wantClaimable))
         {
-            list = list.Where(c => c.AssignedReviewerUserId == user.Id).ToList();
+            List<StoryCraft> fullList = wantAssigned
+                ? await ep._crafts.ListByAssignedReviewerAsync(user.Id, ct)
+                : await ep._crafts.ListClaimableAsync(ct);
+            totalCount = fullList.Count;
+            list = fullList.Skip(skip).Take(take).ToList();
         }
-        else if (isReviewerOrAdmin && wantClaimable)
+        else if (isReviewerOrAdmin && wantAll)
         {
-            list = list.Where(c => c.AssignedReviewerUserId == null && StoryStatusExtensions.FromDb(c.Status) == StoryStatus.SentForApproval).ToList();
+            var paged = await ep._crafts.ListAllPagedAsync(skip, take, ct);
+            list = paged.Items;
+            totalCount = paged.TotalCount;
+        }
+        else
+        {
+            var paged = await ep._crafts.ListByOwnerPagedAsync(user.Id, skip, take, ct);
+            list = paged.Items;
+            totalCount = paged.TotalCount;
         }
 
         // Enrich OwnerEmail by querying Users table
@@ -99,15 +116,21 @@ public class ListStoryCraftsEndpoint
                 IsOwnedByCurrentUser = c.OwnerUserId == user.Id,
                 AssignedReviewerUserId = c.AssignedReviewerUserId,
                 IsAssignedToCurrentUser = c.AssignedReviewerUserId == user.Id,
+                IsEvaluative = c.IsEvaluative,
+                IsPartOfEpic = c.IsPartOfEpic,
+                IsFullyInteractive = c.IsFullyInteractive,
                 AvailableLanguages = availableLangs,
                 AudioLanguages = c.AudioLanguages ?? new List<string>()
             });
         }
 
+        var hasMore = (skip + items.Count) < totalCount;
+
         return TypedResults.Ok(new ListStoryCraftsResponse
         {
             Stories = items,
-            TotalCount = items.Count
+            TotalCount = totalCount,
+            HasMore = hasMore
         });
     }
 

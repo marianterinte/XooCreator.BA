@@ -1,12 +1,12 @@
 namespace XooCreator.BA.Features.HeroStoryRewards.DTOs;
 
 /// <summary>
-/// Request to complete a story and award tokens (generic for indie, epic, or legacy sources).
+/// Request to complete a story and award tokens (indie, epic, or generic story source).
 /// </summary>
 public record CompleteStoryRewardRequest
 {
     public required string StoryId { get; init; }
-    /// <summary>Source of the story: "indie", "epic", or "legacy".</summary>
+    /// <summary>Source of the story: "indie", "epic", or "story" (generic story with token rewards).</summary>
     public string Source { get; init; } = "indie";
     public string? SelectedAnswer { get; init; }
     public List<TokenRewardDto>? Tokens { get; init; }

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using System.Text.Json;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Enums;
@@ -29,13 +30,16 @@ public interface ITreeOfLightRepository
 
 public class TreeOfLightRepository : ITreeOfLightRepository
 {
+    private const string StoryHeroesCacheKey = "story_heroes_published";
     private readonly XooDbContext _context;
     private readonly ILogger<TreeOfLightRepository> _logger;
+    private readonly IMemoryCache _cache;
 
-    public TreeOfLightRepository(XooDbContext context, ILogger<TreeOfLightRepository> logger)
+    public TreeOfLightRepository(XooDbContext context, ILogger<TreeOfLightRepository> logger, IMemoryCache cache)
     {
         _context = context;
         _logger = logger;
+        _cache = cache;
     }
 
     public async Task<List<TreeConfiguration>> GetAllConfigurationsAsync()
@@ -203,10 +207,21 @@ public class TreeOfLightRepository : ITreeOfLightRepository
 
     public async Task<List<StoryHero>> GetStoryHeroesAsync()
     {
-        return await _context.StoryHeroes
+        if (_cache.TryGetValue(StoryHeroesCacheKey, out List<StoryHero>? cached) && cached != null)
+            return cached;
+
+        var heroes = await _context.StoryHeroes
             .AsNoTracking()
             .Where(sh => sh.Status == AlchimaliaUniverseStatus.Published.ToDb())
             .ToListAsync();
+
+        _cache.Set(StoryHeroesCacheKey, heroes, new MemoryCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(12),
+            Size = 5
+        });
+
+        return heroes;
     }
 
     public async Task<bool> IsHeroUnlockedAsync(Guid userId, string heroId)

@@ -66,7 +66,7 @@ public class SubmitQuizAnswerEndpoint
             return TypedResults.BadRequest("Story not found");
         
         // Debug: Log story load
-        ep._logger.LogInformation(
+        ep._logger.LogDebug(
             "SubmitQuizAnswer: Loaded story {StoryId} for tile {TileId}",
             storyId, request.TileId);
 
@@ -83,7 +83,7 @@ public class SubmitQuizAnswerEndpoint
         // Debug: Log all answers in quiz tile to verify IsCorrect values
         foreach (var answer in quizTile.Answers)
         {
-            ep._logger.LogInformation(
+            ep._logger.LogDebug(
                 "Quiz tile answer: TileId={TileId} AnswerId={AnswerId} IsCorrect={IsCorrect}",
                 request.TileId, answer.AnswerId, answer.IsCorrect);
         }
@@ -91,7 +91,7 @@ public class SubmitQuizAnswerEndpoint
         // Check if correct (isCorrect flag from entity)
         var isCorrect = selectedAnswer.IsCorrect;
         
-        ep._logger.LogInformation(
+        ep._logger.LogDebug(
             "Submit quiz answer: TileId={TileId} SelectedAnswerId={SelectedAnswerId} IsCorrect={IsCorrect}",
             request.TileId, request.SelectedAnswerId, isCorrect);
 
@@ -111,7 +111,7 @@ public class SubmitQuizAnswerEndpoint
             existingAnswer.IsCorrect = isCorrect; // Recalculated from current story version
             existingAnswer.AnsweredAt = DateTime.UtcNow;
             
-            ep._logger.LogInformation(
+            ep._logger.LogDebug(
                 "Updated existing quiz answer: TileId={TileId} SelectedAnswerId={SelectedAnswerId} OldIsCorrect={OldIsCorrect} NewIsCorrect={NewIsCorrect}",
                 request.TileId, request.SelectedAnswerId, oldIsCorrect, isCorrect);
         }
@@ -132,7 +132,7 @@ public class SubmitQuizAnswerEndpoint
 
             ep._context.StoryQuizAnswers.Add(quizAnswer);
             
-            ep._logger.LogInformation(
+            ep._logger.LogDebug(
                 "Created new quiz answer: TileId={TileId} SelectedAnswerId={SelectedAnswerId} IsCorrect={IsCorrect}",
                 request.TileId, request.SelectedAnswerId, isCorrect);
         }

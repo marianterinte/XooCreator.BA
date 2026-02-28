@@ -45,6 +45,11 @@ public class DirectUploadRateLimitService : IDirectUploadRateLimitService
         }
     }
 
-    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, object> Locks = new();
-    private static object GetLock(string key) => Locks.GetOrAdd(key, _ => new object());
+    private const int LockPoolSize = 256;
+    private static readonly object[] LockPool = Enumerable.Range(0, LockPoolSize).Select(_ => new object()).ToArray();
+    private static object GetLock(string key)
+    {
+        var hash = StringComparer.OrdinalIgnoreCase.GetHashCode(key);
+        return LockPool[Math.Abs(unchecked(hash % LockPoolSize))];
+    }
 }

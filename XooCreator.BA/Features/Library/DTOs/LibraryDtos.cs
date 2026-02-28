@@ -27,6 +27,7 @@ public class GetUserCreatedStoriesResponse
 {
     public List<CreatedStoryDto> Stories { get; set; } = new();
     public int TotalCount { get; set; }
+    public bool HasMore { get; set; }
 }
 
 public class CreatedStoryDto
@@ -45,6 +46,9 @@ public class CreatedStoryDto
     public string? CreationNotes { get; set; }
     public string? OwnerEmail { get; set; }
     public bool IsOwnedByCurrentUser { get; set; }
+    public bool IsEvaluative { get; set; } = false;
+    public bool IsPartOfEpic { get; set; } = false;
+    public bool IsFullyInteractive { get; set; } = false;
     /// <summary>Available language codes for this story (e.g. ro-ro, en-us).</summary>
     public List<string>? AvailableLanguages { get; set; }
     /// <summary>Language codes that have audio support (e.g. ro-ro, en-us).</summary>

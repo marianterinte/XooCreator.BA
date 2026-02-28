@@ -136,7 +136,7 @@ public class SaveStoryEditEndpoint
             ? craft.OwnerUserId
             : user.Id;
         
-        await ep._editorService.SaveDraftAsync(ownerUserIdToUse, finalStoryId, langTag, dto, isAdmin, ct);
+        await ep._editorService.SaveDraftAsync(ownerUserIdToUse, finalStoryId, langTag, dto, isAdmin, existingCraft: craft, ct);
         ep._logger.LogInformation("Save story draft: storyId={StoryId} lang={Lang} ownerUserId={OwnerUserId} isAdmin={IsAdmin}", 
             finalStoryId, langTag, ownerUserIdToUse, isAdmin);
 

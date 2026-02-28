@@ -115,6 +115,7 @@ public class StoryReviewsRepository : IStoryReviewsRepository
     public async Task<GetStoryReviewsResponse> GetStoryReviewsAsync(string storyId, Guid? currentUserId, GetStoryReviewsRequest request)
     {
         var query = _context.StoryReviews
+            .AsNoTracking()
             .Include(r => r.User)
             .Where(r => r.StoryId == storyId && r.IsActive);
 
@@ -163,53 +164,42 @@ public class StoryReviewsRepository : IStoryReviewsRepository
 
     public async Task<(double AverageRating, int TotalCount, Dictionary<int, int> RatingDistribution)> GetReviewStatisticsAsync(string storyId)
     {
-        var reviews = await _context.StoryReviews
+        var stats = await _context.StoryReviews
+            .AsNoTracking()
             .Where(r => r.StoryId == storyId && r.IsActive)
+            .GroupBy(r => r.Rating)
+            .Select(g => new { Rating = g.Key, Count = g.Count() })
             .ToListAsync();
 
-        var totalCount = reviews.Count;
-        
-        if (totalCount == 0)
-        {
-            return (0, 0, new Dictionary<int, int>());
-        }
+        var totalCount = stats.Sum(s => s.Count);
+        var averageRating = totalCount > 0
+            ? stats.Sum(s => s.Rating * s.Count) / (double)totalCount
+            : 0;
 
-        var averageRating = reviews.Average(r => r.Rating);
-        
-        var ratingDistribution = reviews
-            .GroupBy(r => r.Rating)
-            .ToDictionary(g => g.Key, g => g.Count());
+        var ratingDistribution = Enumerable.Range(1, 5)
+            .ToDictionary(r => r, r => stats.FirstOrDefault(s => s.Rating == r)?.Count ?? 0);
 
-        // Ensure all ratings 1-5 are present in distribution
-        for (int i = 1; i <= 5; i++)
-        {
-            if (!ratingDistribution.ContainsKey(i))
-                ratingDistribution[i] = 0;
-        }
-
-        return (averageRating, totalCount, ratingDistribution);
+        return (Math.Round(averageRating, 1), totalCount, ratingDistribution);
     }
 
     public async Task<(double AverageRating, int TotalCount, Dictionary<int, int> RatingDistribution)> GetGlobalReviewStatisticsAsync()
     {
-        var reviews = await _context.StoryReviews
+        var stats = await _context.StoryReviews
+            .AsNoTracking()
             .Where(r => r.IsActive)
+            .GroupBy(r => r.Rating)
+            .Select(g => new { Rating = g.Key, Count = g.Count() })
             .ToListAsync();
 
-        var totalCount = reviews.Count;
+        var totalCount = stats.Sum(s => s.Count);
+        var averageRating = totalCount > 0
+            ? stats.Sum(s => s.Rating * s.Count) / (double)totalCount
+            : 0;
 
-        var ratingDistribution = reviews
-            .GroupBy(r => r.Rating)
-            .ToDictionary(g => g.Key, g => g.Count());
+        var ratingDistribution = Enumerable.Range(1, 5)
+            .ToDictionary(r => r, r => stats.FirstOrDefault(s => s.Rating == r)?.Count ?? 0);
 
-        for (int i = 1; i <= 5; i++)
-        {
-            if (!ratingDistribution.ContainsKey(i))
-                ratingDistribution[i] = 0;
-        }
-
-        var averageRating = totalCount == 0 ? 0 : reviews.Average(r => r.Rating);
-        return (averageRating, totalCount, ratingDistribution);
+        return (Math.Round(averageRating, 1), totalCount, ratingDistribution);
     }
 
     private async Task<StoryReviewDto?> MapToDtoAsync(StoryReview review, Guid? currentUserId)

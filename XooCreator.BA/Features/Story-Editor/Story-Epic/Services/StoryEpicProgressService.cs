@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
+using XooCreator.BA.Features.Bestiary.Services;
 using XooCreator.BA.Features.HeroStoryRewards.DTOs;
 using XooCreator.BA.Features.HeroStoryRewards.Services;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.DTOs;
@@ -15,6 +16,7 @@ public class StoryEpicProgressService : IStoryEpicProgressService
     private readonly IEpicProgressRepository _progressRepository;
     private readonly IEpicHeroRepository _heroRepository;
     private readonly IHeroStoryRewardsService _heroStoryRewardsService;
+    private readonly IStoryHeroBestiaryService _storyHeroBestiaryService;
     private readonly XooDbContext _context;
 
     public StoryEpicProgressService(
@@ -22,12 +24,14 @@ public class StoryEpicProgressService : IStoryEpicProgressService
         IEpicProgressRepository progressRepository,
         IEpicHeroRepository heroRepository,
         IHeroStoryRewardsService heroStoryRewardsService,
+        IStoryHeroBestiaryService storyHeroBestiaryService,
         XooDbContext context)
     {
         _epicService = epicService;
         _progressRepository = progressRepository;
         _heroRepository = heroRepository;
         _heroStoryRewardsService = heroStoryRewardsService;
+        _storyHeroBestiaryService = storyHeroBestiaryService;
         _context = context;
     }
 
@@ -176,6 +180,12 @@ public class StoryEpicProgressService : IStoryEpicProgressService
         // Evaluate and unlock heroes based on completed story
         // This includes heroes from StoryEpicHeroReferences AND heroes unlocked by the story itself (from StoryDefinitionUnlockedHeroes)
         var newlyUnlockedHeroes = await EvaluateAndUnlockHeroesAsync(userId, epicId, storyId, epicState.Epic.Heroes, storyProgress.Select(sp => sp.StoryId).ToList(), ct);
+
+        // Persist newly unlocked story heroes to Book of Heroes (UserBestiary with BestiaryType = storyhero)
+        if (newlyUnlockedHeroes.Count > 0)
+        {
+            await _storyHeroBestiaryService.AddDiscoveredStoryHeroesAsync(userId, newlyUnlockedHeroes, ct);
+        }
 
         // Award tokens via generic Hero Story Rewards pipeline (same as indie; non-blocking)
         if (tokens != null && tokens.Count > 0)
@@ -371,6 +381,42 @@ public class StoryEpicProgressService : IStoryEpicProgressService
         return epicHeroCraft?.ImageUrl ?? string.Empty;
     }
 
+    /// <summary>
+    /// Batch-load hero image URLs from EpicHeroDefinitions then EpicHeroCrafts to avoid N+1.
+    /// </summary>
+    private async Task<Dictionary<string, string>> BatchGetHeroImageUrlsAsync(
+        IEnumerable<string> heroIds, CancellationToken ct = default)
+    {
+        var idList = heroIds.Distinct().ToList();
+        if (idList.Count == 0) return new Dictionary<string, string>();
+
+        var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        var definitionImages = await _context.EpicHeroDefinitions
+            .AsNoTracking()
+            .Where(h => idList.Contains(h.Id) && h.ImageUrl != null)
+            .Select(h => new { h.Id, h.ImageUrl })
+            .ToListAsync(ct);
+
+        foreach (var h in definitionImages)
+            result[h.Id] = h.ImageUrl ?? "";
+
+        var missingIds = idList.Where(id => !result.ContainsKey(id)).ToList();
+        if (missingIds.Count > 0)
+        {
+            var craftImages = await _context.EpicHeroCrafts
+                .AsNoTracking()
+                .Where(h => missingIds.Contains(h.Id) && h.ImageUrl != null)
+                .Select(h => new { h.Id, h.ImageUrl })
+                .ToListAsync(ct);
+
+            foreach (var h in craftImages)
+                result[h.Id] = h.ImageUrl ?? "";
+        }
+
+        return result;
+    }
+
     private async Task<List<UnlockedHeroDto>> EvaluateUnlockedHeroesAsync(
         List<StoryEpicHeroReferenceDto> heroReferences,
         List<string> completedStoryIds,
@@ -378,6 +424,13 @@ public class StoryEpicProgressService : IStoryEpicProgressService
     {
         var completedStoryIdsSet = new HashSet<string>(completedStoryIds);
         var unlockedHeroes = new List<UnlockedHeroDto>();
+
+        var allHeroIds = heroReferences
+            .Where(h => string.IsNullOrWhiteSpace(h.HeroImageUrl))
+            .Select(h => h.HeroId)
+            .Distinct()
+            .ToList();
+        var heroImageMap = await BatchGetHeroImageUrlsAsync(allHeroIds, ct);
 
         foreach (var heroRef in heroReferences)
         {
@@ -388,8 +441,8 @@ public class StoryEpicProgressService : IStoryEpicProgressService
 
             if (isUnlocked)
             {
-                // Get hero image URL from EpicHero
-                var imageUrl = heroRef.HeroImageUrl ?? await GetHeroImageUrlAsync(heroRef.HeroId, ct);
+                var imageUrl = heroRef.HeroImageUrl
+                    ?? (heroImageMap.TryGetValue(heroRef.HeroId, out var cachedUrl) ? cachedUrl : string.Empty);
 
                 unlockedHeroes.Add(new UnlockedHeroDto
                 {

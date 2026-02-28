@@ -11,6 +11,7 @@ using XooCreator.BA.Features.TreeOfHeroes.Repositories;
 using XooCreator.BA.Features.HeroStoryRewards.Services;
 using XooCreator.BA.Features.TreeOfLight.Services;
 using XooCreator.BA.Features.TreeOfLight.Repositories;
+using XooCreator.BA.Features.Bestiary.Services;
 using XooCreator.BA.Features.Stories.Services;
 using XooCreator.BA.Features.Stories.Repositories;
 using XooCreator.BA.Features.StoryEditor.Services;
@@ -18,6 +19,7 @@ using XooCreator.BA.Features.StoryEditor.Services.Content;
 using XooCreator.BA.Features.StoryEditor.Services.Cloning;
 using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories;
+using XooCreator.BA.Features.Tokens;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Services;
 using XooCreator.BA.Features.GuestSync.Services;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Mappers;
@@ -111,9 +113,11 @@ public static class ServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddTreeServices(this IServiceCollection services)
     {
+        services.AddScoped<IUserTokenRepository, UserTokenRepository>();
         services.AddScoped<ITreeOfHeroesRepository, TreeOfHeroesRepository>();
         services.AddScoped<ITreeOfHeroesService, TreeOfHeroesService>();
         services.AddScoped<IHeroStoryRewardsService, HeroStoryRewardsService>();
+        services.AddScoped<IStoryHeroBestiaryService, StoryHeroBestiaryService>();
         services.AddScoped<ITreeOfLightTranslationService, TreeOfLightTranslationService>();
         services.AddScoped<ITreeOfLightRepository, TreeOfLightRepository>();
         services.AddScoped<ITreeOfLightService, TreeOfLightService>();

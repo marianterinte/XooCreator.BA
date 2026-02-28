@@ -114,6 +114,7 @@ public class EpicReviewsRepository : IEpicReviewsRepository
     public async Task<GetEpicReviewsResponse> GetEpicReviewsAsync(string epicId, Guid? currentUserId, GetEpicReviewsRequest request)
     {
         var query = _context.EpicReviews
+            .AsNoTracking()
             .Include(r => r.User)
             .Where(r => r.EpicId == epicId && r.IsActive);
 
@@ -162,31 +163,22 @@ public class EpicReviewsRepository : IEpicReviewsRepository
 
     public async Task<(double AverageRating, int TotalCount, Dictionary<int, int> RatingDistribution)> GetReviewStatisticsAsync(string epicId)
     {
-        var reviews = await _context.EpicReviews
+        var stats = await _context.EpicReviews
+            .AsNoTracking()
             .Where(r => r.EpicId == epicId && r.IsActive)
+            .GroupBy(r => r.Rating)
+            .Select(g => new { Rating = g.Key, Count = g.Count() })
             .ToListAsync();
 
-        var totalCount = reviews.Count;
-        
-        if (totalCount == 0)
-        {
-            return (0, 0, new Dictionary<int, int>());
-        }
+        var totalCount = stats.Sum(s => s.Count);
+        var averageRating = totalCount > 0
+            ? stats.Sum(s => s.Rating * s.Count) / (double)totalCount
+            : 0;
 
-        var averageRating = reviews.Average(r => r.Rating);
-        
-        var ratingDistribution = reviews
-            .GroupBy(r => r.Rating)
-            .ToDictionary(g => g.Key, g => g.Count());
+        var ratingDistribution = Enumerable.Range(1, 5)
+            .ToDictionary(r => r, r => stats.FirstOrDefault(s => s.Rating == r)?.Count ?? 0);
 
-        // Ensure all ratings 1-5 are present in distribution
-        for (int i = 1; i <= 5; i++)
-        {
-            if (!ratingDistribution.ContainsKey(i))
-                ratingDistribution[i] = 0;
-        }
-
-        return (averageRating, totalCount, ratingDistribution);
+        return (Math.Round(averageRating, 1), totalCount, ratingDistribution);
     }
 
     private async Task<EpicReviewDto?> MapToDtoAsync(EpicReview review, Guid? currentUserId)

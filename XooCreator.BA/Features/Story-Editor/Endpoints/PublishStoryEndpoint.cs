@@ -325,17 +325,16 @@ public partial class PublishStoryEndpoint
         if (!ep._auth0.HasRole(user, Data.Enums.UserRole.Creator))
             return TypedResults.Forbid();
 
-        // Compare StoryId case-insensitively (frontend/URL may differ in casing from DB)
-        var storyIdLower = storyId.ToLowerInvariant();
+        // Compare StoryId case-insensitively (frontend/URL may differ in casing from DB). Use ILike for index-friendly match.
         var job = await ep._db.StoryPublishJobs
             .AsNoTracking()
-            .Where(j => j.StoryId.ToLower() == storyIdLower)
+            .Where(j => EF.Functions.ILike(j.StoryId, storyId))
             .OrderByDescending(j => j.QueuedAtUtc)
             .FirstOrDefaultAsync(ct);
 
         if (job == null)
         {
-            var countAny = await ep._db.StoryPublishJobs.CountAsync(j => j.StoryId.ToLower() == storyIdLower, ct);
+            var countAny = await ep._db.StoryPublishJobs.CountAsync(j => EF.Functions.ILike(j.StoryId, storyId), ct);
             ep._logger.LogInformation(
                 "GetLatestPublishJob: no job for storyId={StoryId} (total jobs for this story in DB: {Count}). Check that the request URL is GET .../publish-jobs/latest and storyId matches.",
                 storyId, countAny);

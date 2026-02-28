@@ -49,20 +49,23 @@ public class StoryPublishingService : IStoryPublishingService
             .Include(d => d.DialogParticipants)
             .FirstOrDefaultAsync(d => d.StoryId == storyId, ct);
         
-        // Load craft with topics, age groups, and co-authors
-        craft = await _db.StoryCrafts
-            .Include(c => c.Translations)
-            .Include(c => c.Tiles).ThenInclude(t => t.Translations)
-            .Include(c => c.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Translations)
-            .Include(c => c.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Tokens)
-            .Include(c => c.Tiles).ThenInclude(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.Translations)
-            .Include(c => c.Tiles).ThenInclude(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.OutgoingEdges).ThenInclude(e => e.Translations)
-            .Include(c => c.Tiles).ThenInclude(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.OutgoingEdges).ThenInclude(e => e.Tokens)
-            .Include(c => c.Topics).ThenInclude(t => t.StoryTopic)
-            .Include(c => c.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
-            .Include(c => c.CoAuthors).ThenInclude(ca => ca.User)
-            .Include(c => c.DialogParticipants)
-            .FirstOrDefaultAsync(c => c.Id == craft.Id, ct) ?? craft;
+        // Reload craft only if not already fully loaded (e.g. when called from queue worker it is already loaded)
+        if (craft.Tiles == null || (craft.Topics == null && craft.AgeGroups == null))
+        {
+            craft = await _db.StoryCrafts
+                .Include(c => c.Translations)
+                .Include(c => c.Tiles).ThenInclude(t => t.Translations)
+                .Include(c => c.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Translations)
+                .Include(c => c.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Tokens)
+                .Include(c => c.Tiles).ThenInclude(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.Translations)
+                .Include(c => c.Tiles).ThenInclude(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.OutgoingEdges).ThenInclude(e => e.Translations)
+                .Include(c => c.Tiles).ThenInclude(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.OutgoingEdges).ThenInclude(e => e.Tokens)
+                .Include(c => c.Topics).ThenInclude(t => t.StoryTopic)
+                .Include(c => c.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
+                .Include(c => c.CoAuthors).ThenInclude(ca => ca.User)
+                .Include(c => c.DialogParticipants)
+                .FirstOrDefaultAsync(c => c.Id == craft.Id, ct) ?? craft;
+        }
 
         var requiresFullPublish = forceFullPublish || def == null;
         List<StoryPublishChangeLog>? pendingLogs = null;
