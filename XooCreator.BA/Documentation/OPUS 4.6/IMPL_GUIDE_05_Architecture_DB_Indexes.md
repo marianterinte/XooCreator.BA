@@ -5,6 +5,8 @@
 **Efort estimat:** 1–2 săptămâni  
 **Impact:** Structural — îmbunătățiri pe termen lung
 
+**Implementat:** Task 2 (HTTP/2), Task 3 (UserProfileService combine queries), Task 4 (TreeOfHeroes config cache), Task 5 (Database indexes — V00113), Task 6 (TreeOfLight GetStoryHeroesAsync cache). **Exclus / decis mai târziu:** Task 1 (Separare workers — feature flags sau Worker App), Task 7 (ImageCompressionService — Azure Function / worker separat).
+
 ---
 
 ## Task 1: Separare Background Workers de API (INF-01)
@@ -99,7 +101,7 @@ Asta e soluția ideală dar necesită mai mult efort de setup.
 
 ---
 
-## Task 2: Configurare HTTP/2 (INF-06)
+## Task 2: Configurare HTTP/2 (INF-06) ✅ Implementat
 
 ### Fișier: `Program.cs`
 
@@ -137,7 +139,7 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 ---
 
-## Task 3: Optimizare UserProfileService (INF-10)
+## Task 3: Optimizare UserProfileService (INF-10) ✅ Implementat
 
 ### Fișier: `Features/User/Services/UserProfileService.cs`
 
@@ -184,7 +186,7 @@ public async Task<UserProfileDto> GetUserProfileAsync(Guid userId, CancellationT
 
 ---
 
-## Task 4: TreeOfHeroes Config Cache (INF-09)
+## Task 4: TreeOfHeroes Config Cache (INF-09) ✅ Implementat
 
 ### Fișier: `Features/TreeOfHeroes/Repositories/TreeOfHeroesRepository.cs`
 
@@ -221,11 +223,11 @@ Adaugă invalidare când config-ul e modificat (din admin endpoints).
 
 ---
 
-## Task 5: Database Indexes
+## Task 5: Database Indexes ✅ Implementat
 
 ### Creează un nou script SQL
 
-**Fișier:** `Database/Scripts/V{next}__add_performance_indexes.sql`
+**Fișier:** `Database/Scripts/V00113__add_performance_indexes.sql` (creat).
 
 Verifică numerotarea ultimului script și incrementează.
 
@@ -333,9 +335,9 @@ Dacă vezi `Index Scan` → indexul există deja.
 
 ---
 
-## Task 6: TreeOfLight GetStoryHeroesAsync (INF-14)
+## Task 6: TreeOfLight GetStoryHeroesAsync (INF-14) ✅ Implementat
 
-### Fișier: `Features/TreeOfLight/Repositories/TreeOfLightRepository.cs`
+### Fișier: `Features/TreeOfLight/TreeOfLightRepository.cs`
 
 ### Problema
 `GetStoryHeroesAsync` încarcă toți eroii publicați fără paginare.

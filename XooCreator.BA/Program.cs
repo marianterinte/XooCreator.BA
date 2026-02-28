@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.ResponseCompression;
 using System.IO.Compression;
@@ -47,7 +48,7 @@ builder.Services.Configure<GzipCompressionProviderOptions>(options =>
 });
 
 var portEnv = Environment.GetEnvironmentVariable("PORT");
-if (!string.IsNullOrWhiteSpace(portEnv))
+if (!string.IsNullOrWhiteSpace(portEnv) && !int.TryParse(portEnv, out _))
 {
     builder.WebHost.UseUrls($"http://0.0.0.0:{portEnv}");
 }
@@ -107,6 +108,15 @@ builder.Services.AddAuthConfiguration(builder.Configuration);
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.Limits.MaxRequestBodySize = 1024L * 1024 * 1024; // 1GB
+
+    var portStr = Environment.GetEnvironmentVariable("PORT");
+    if (int.TryParse(portStr, out var port))
+    {
+        options.ListenAnyIP(port, listenOptions =>
+        {
+            listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
+        });
+    }
 });
 
 // Configure FormOptions for multipart/form-data uploads

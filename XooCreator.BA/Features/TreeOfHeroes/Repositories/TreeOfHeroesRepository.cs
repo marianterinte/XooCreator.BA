@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using System.Text.Json;
 using XooCreator.BA.Data;
 using XooCreator.BA.Features.TreeOfHeroes.DTOs;
@@ -31,11 +32,14 @@ public interface ITreeOfHeroesRepository
 
 public class TreeOfHeroesRepository : ITreeOfHeroesRepository
 {
+    private const string TreeConfigCacheKey = "tree_of_heroes_config";
     private readonly XooDbContext _context;
+    private readonly IMemoryCache _cache;
 
-    public TreeOfHeroesRepository(XooDbContext context)
+    public TreeOfHeroesRepository(XooDbContext context, IMemoryCache cache)
     {
         _context = context;
+        _cache = cache;
     }
 
     public async Task<UserTokensDto> GetUserTokensAsync(Guid userId)
@@ -260,6 +264,9 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
 
     public async Task<TreeOfHeroesConfigDto> GetTreeOfHeroesConfigAsync()
     {
+        if (_cache.TryGetValue(TreeConfigCacheKey, out TreeOfHeroesConfigDto? cached) && cached != null)
+            return cached;
+
         var definitions = await _context.HeroDefinitionDefinitions
             .Include(d => d.Translations)
             .ToListAsync();
@@ -341,6 +348,12 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
             TraitToBaseHeroId = traitToBaseHeroId,
             HeroIdsByTraitAndLevel = heroIdsByTraitAndLevel
         };
+
+        _cache.Set(TreeConfigCacheKey, config, new MemoryCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(24),
+            Size = 10
+        });
 
         return config;
     }

@@ -29,11 +29,27 @@ public class UserProfileService : IUserProfileService
     {
         try
         {
-            var user = await _db.AlchimaliaUsers
-                .Include(u => u == null) // Force explicit loading
-                .FirstOrDefaultAsync(u => u.Id == userId);
+            // Combined query: user + wallet + credit transaction info in one round-trip where possible
+            var userInfo = await _db.AlchimaliaUsers
+                .AsNoTracking()
+                .Where(u => u.Id == userId)
+                .Select(u => new
+                {
+                    User = u,
+                    Wallet = _db.CreditWallets.FirstOrDefault(w => w.UserId == userId),
+                    HasEverPurchased = _db.CreditTransactions.Any(t => t.UserId == userId && t.Type == CreditTransactionType.Purchase),
+                    LastPurchase = _db.CreditTransactions
+                        .Where(t => t.UserId == userId && t.Type == CreditTransactionType.Purchase)
+                        .OrderByDescending(t => t.CreatedAt)
+                        .FirstOrDefault(),
+                    LastTransaction = _db.CreditTransactions
+                        .Where(t => t.UserId == userId)
+                        .OrderByDescending(t => t.CreatedAt)
+                        .FirstOrDefault()
+                })
+                .FirstOrDefaultAsync();
 
-            if (user == null)
+            if (userInfo?.User == null)
             {
                 return new GetUserProfileResponse
                 {
@@ -42,22 +58,12 @@ public class UserProfileService : IUserProfileService
                 };
             }
 
-            var wallet = await _db.CreditWallets.FirstOrDefaultAsync(w => w.UserId == userId);
+            var user = userInfo.User;
+            var wallet = userInfo.Wallet;
             var credits = wallet?.Balance ?? 0;
-
-            // Check if user has ever purchased credits
-            var hasEverPurchased = await _db.CreditTransactions
-                .AnyAsync(t => t.UserId == userId && t.Type == CreditTransactionType.Purchase);
-
-            var lastPurchase = await _db.CreditTransactions
-                .Where(t => t.UserId == userId && t.Type == CreditTransactionType.Purchase)
-                .OrderByDescending(t => t.CreatedAt)
-                .FirstOrDefaultAsync();
-
-            var lastTransaction = await _db.CreditTransactions
-                .Where(t => t.UserId == userId)
-                .OrderByDescending(t => t.CreatedAt)
-                .FirstOrDefaultAsync();
+            var hasEverPurchased = userInfo.HasEverPurchased;
+            var lastPurchase = userInfo.LastPurchase;
+            var lastTransaction = userInfo.LastTransaction;
 
             // Get base configuration
             var config = await _db.BuilderConfigs.FirstOrDefaultAsync();
