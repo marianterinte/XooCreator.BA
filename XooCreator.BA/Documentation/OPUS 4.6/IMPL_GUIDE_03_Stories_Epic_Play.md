@@ -5,6 +5,8 @@
 **Efort estimat:** 3–4 zile  
 **Impact:** Mare — afectează experiența de reading/play
 
+**Implementat (fără breaking changes):** Task 1 (Quiz answers filter în DB), Task 3 (Batch evaluation updates), Task 4 (Hero image batch), Task 5 (AsNoTracking pe StoriesRepository + EpicProgressRepository), Task 8 (Story details tiles overfetch), Task 9 (Reduce verbose logging). **Neimplementat:** Task 2 (DB pagination User Created Stories — sortare cross-surse), Task 6 (StoriesService sequential calls — risc concurență DbContext), Task 7 (ILike/index — păstrat ILike, fără schimbare index).
+
 ---
 
 ## Task 1: Fix Quiz Answers — Filter în DB (STR-01)

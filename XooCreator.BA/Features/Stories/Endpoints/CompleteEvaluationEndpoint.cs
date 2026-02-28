@@ -81,7 +81,7 @@ public class CompleteEvaluationEndpoint
             return TypedResults.BadRequest("Story not found");
         
         // Debug: Log story version info
-        ep._logger.LogInformation(
+        ep._logger.LogDebug(
             "CompleteEvaluation: Loaded story {StoryId} with {TileCount} tiles, {QuizCount} quizzes",
             storyId, story.Tiles.Count, story.Tiles.Count(t => t.Type == "quiz"));
 
@@ -104,13 +104,13 @@ public class CompleteEvaluationEndpoint
             .ToListAsync(ct);
 
         // Debug: Log all answers to verify what we have
-        ep._logger.LogInformation(
+        ep._logger.LogDebug(
             "CompleteEvaluation: Found {Count} answers for session {SessionId}",
             answers.Count, request.SessionId);
         
         foreach (var answer in answers)
         {
-            ep._logger.LogInformation(
+            ep._logger.LogDebug(
                 "Quiz answer (from DB): TileId={TileId} SelectedAnswerId={SelectedAnswerId}",
                 answer.TileId, answer.SelectedAnswerId);
         }
@@ -137,7 +137,7 @@ public class CompleteEvaluationEndpoint
             // Debug: Log all answers in quiz tile to verify IsCorrect values
             foreach (var quizAnswer in quizTile.Answers)
             {
-                ep._logger.LogInformation(
+                ep._logger.LogDebug(
                     "Quiz tile answer: TileId={TileId} AnswerId={AnswerId} IsCorrect={IsCorrect}",
                     quizTile.TileId, quizAnswer.AnswerId, quizAnswer.IsCorrect);
             }
@@ -152,10 +152,10 @@ public class CompleteEvaluationEndpoint
                 // Track answers that need updating
                 if (answer != null)
                 {
-                    answersToUpdate.Add((answer.Id, isCorrect));
+                    answersToUpdate.Add((Id: answer.Id, NewIsCorrect: isCorrect));
                 }
                 
-                ep._logger.LogInformation(
+                ep._logger.LogDebug(
                     "Recalculated IsCorrect: TileId={TileId} SelectedAnswerId={SelectedAnswerId} IsCorrect={IsCorrect}",
                     quizTile.TileId, answer?.SelectedAnswerId ?? "none", isCorrect);
             }
@@ -197,7 +197,7 @@ public class CompleteEvaluationEndpoint
                 : null;
             
             // Debug: Log answer details
-            ep._logger.LogInformation(
+            ep._logger.LogDebug(
                 "Quiz detail: TileId={TileId} HasAnswer={HasAnswer} IsCorrect={IsCorrect} SelectedText={SelectedText} CorrectText={CorrectText}",
                 quizTile.TileId,
                 answer != null,
@@ -236,33 +236,32 @@ public class CompleteEvaluationEndpoint
             }
         }
         
-        // Update all stored IsCorrect values to match current story version
-        if (answersToUpdate.Any())
+        // Update all stored IsCorrect values to match current story version (batch: one query + in-memory updates)
+        if (answersToUpdate.Count > 0)
         {
-            foreach (var (id, newIsCorrect) in answersToUpdate)
+            var idsToUpdate = answersToUpdate.Select(x => x.Id).ToList();
+            var updateDict = answersToUpdate.ToDictionary(x => x.Id, x => x.NewIsCorrect);
+
+            var answersFromDb = await ep._context.StoryQuizAnswers
+                .Where(a => idsToUpdate.Contains(a.Id))
+                .ToListAsync(ct);
+
+            foreach (var answer in answersFromDb)
             {
-                var answerToUpdate = await ep._context.StoryQuizAnswers
-                    .FirstOrDefaultAsync(a => a.Id == id, ct);
-                
-                if (answerToUpdate != null)
+                if (updateDict.TryGetValue(answer.Id, out var newIsCorrect) && answer.IsCorrect != newIsCorrect)
                 {
-                    var oldIsCorrect = answerToUpdate.IsCorrect;
-                    answerToUpdate.IsCorrect = newIsCorrect;
-                    
-                    if (oldIsCorrect != newIsCorrect)
-                    {
-                        ep._logger.LogInformation(
-                            "Updated stored IsCorrect: AnswerId={AnswerId} OldIsCorrect={OldIsCorrect} NewIsCorrect={NewIsCorrect}",
-                            id, oldIsCorrect, newIsCorrect);
-                    }
+                    ep._logger.LogDebug(
+                        "Updated stored IsCorrect: AnswerId={AnswerId} {Old}->{New}",
+                        answer.Id, answer.IsCorrect, newIsCorrect);
+                    answer.IsCorrect = newIsCorrect;
                 }
             }
-            
+
             await ep._context.SaveChangesAsync(ct);
         }
         
         // Debug: Log summary
-        ep._logger.LogInformation(
+        ep._logger.LogDebug(
             "Evaluation summary: TotalQuizzes={TotalQuizzes} TotalAnswers={TotalAnswers} CorrectAnswers={CorrectAnswers} ScorePercentage={ScorePercentage}",
             totalQuizzes, answers.Count, correctAnswers, 
             totalQuizzes > 0 ? (int)Math.Round((double)correctAnswers / totalQuizzes * 100) : 0);

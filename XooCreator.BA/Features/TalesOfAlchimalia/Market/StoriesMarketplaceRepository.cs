@@ -537,7 +537,6 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         var def = await _context.StoryDefinitions
             .AsNoTracking()
             .Include(s => s.Translations)
-            .Include(s => s.Tiles)
             .Include(s => s.AgeGroups)
                 .ThenInclude(ag => ag.StoryAgeGroup)
                     .ThenInclude(ag => ag.Translations)
@@ -547,7 +546,9 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         if (def == null)
             return null;
 
-        // Check if user has purchased this story
+        var totalTiles = await _context.StoryTiles
+            .AsNoTracking()
+            .CountAsync(t => t.StoryDefinitionId == def.Id);
         var isPurchased = await _context.StoryPurchases
             .AnyAsync(sp => sp.UserId == userId && sp.StoryId == storyId);
 
@@ -563,7 +564,6 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             .ToListAsync();
 
         var completedTiles = progressEntries.Count;
-        var totalTiles = def.Tiles.Count;
         var progressPercentage = totalTiles > 0
             ? (int)global::System.Math.Round((double)completedTiles / global::System.Math.Max(1, totalTiles) * 100)
             : 0;

@@ -32,6 +32,7 @@ public class StoriesRepository : IStoriesRepository
         // So we need to include them even for list view
         // Optimized: Use AsSplitQuery to reduce memory pressure while keeping all necessary data
         var stories = await _context.StoryDefinitions
+            .AsNoTracking()
             .Include(s => s.Translations)
             .Include(s => s.Tiles)
                 .ThenInclude(t => t.Translations)
@@ -131,6 +132,7 @@ public class StoriesRepository : IStoriesRepository
     {
         storyId = NormalizeStoryId(storyId);
         var story = await _context.StoryDefinitions
+                .AsNoTracking()
                 .Include(s => s.Translations)
                 .Include(s => s.Tiles)
                     .ThenInclude(t => t.Translations)

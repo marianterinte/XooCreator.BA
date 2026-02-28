@@ -16,6 +16,7 @@ public class EpicProgressRepository : IEpicProgressRepository
     public async Task<List<EpicProgressDto>> GetEpicProgressAsync(Guid userId, string epicId)
     {
         return await _context.EpicProgress
+            .AsNoTracking()
             .Where(ep => ep.UserId == userId && ep.EpicId == epicId)
             .Select(ep => new EpicProgressDto
             {
@@ -29,6 +30,7 @@ public class EpicProgressRepository : IEpicProgressRepository
     public async Task<List<EpicStoryProgressDto>> GetEpicStoryProgressAsync(Guid userId, string epicId)
     {
         var storyProgresses = await _context.EpicStoryProgress
+            .AsNoTracking()
             .Where(esp => esp.UserId == userId && esp.EpicId == epicId)
             .ToListAsync();
 
