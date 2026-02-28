@@ -264,11 +264,32 @@ public class StoryCraftsRepository : IStoryCraftsRepository
             .OrderByDescending(x => x.UpdatedAt)
             .ToListAsync(ct);
 
+    public async Task<(List<StoryCraft> Items, int TotalCount)> ListByOwnerPagedAsync(Guid ownerUserId, int skip, int take, CancellationToken ct = default)
+    {
+        var query = _context.StoryCrafts
+            .Include(s => s.Translations)
+            .Where(x => x.OwnerUserId == ownerUserId)
+            .OrderByDescending(x => x.UpdatedAt);
+        var totalCount = await query.CountAsync(ct);
+        var items = await query.Skip(skip).Take(take).ToListAsync(ct);
+        return (items, totalCount);
+    }
+
     public Task<List<StoryCraft>> ListAllAsync(CancellationToken ct = default)
         => _context.StoryCrafts
             .Include(s=>s.Translations)
             .OrderByDescending(x => x.UpdatedAt)
             .ToListAsync(ct);
+
+    public async Task<(List<StoryCraft> Items, int TotalCount)> ListAllPagedAsync(int skip, int take, CancellationToken ct = default)
+    {
+        var query = _context.StoryCrafts
+            .Include(s => s.Translations)
+            .OrderByDescending(x => x.UpdatedAt);
+        var totalCount = await query.CountAsync(ct);
+        var items = await query.Skip(skip).Take(take).ToListAsync(ct);
+        return (items, totalCount);
+    }
 
     public async Task<int> CountDistinctStoryIdsByOwnerAsync(Guid ownerUserId, CancellationToken ct = default)
     {

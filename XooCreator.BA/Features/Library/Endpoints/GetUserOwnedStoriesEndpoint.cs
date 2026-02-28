@@ -24,16 +24,18 @@ public class GetUserOwnedStoriesEndpoint
 
     [Route("/api/{locale}/stories/owned")]
     [Authorize]
-    public static async Task<Ok<GetUserOwnedStoriesResponse>> HandleGet(
+    public static async Task<Results<Ok<GetUserOwnedStoriesResponse>, UnauthorizedHttpResult>> HandleGet(
         [FromRoute] string locale,
         [FromServices] GetUserOwnedStoriesEndpoint ep)
     {
-        var userId = ep._userContextService.GetCurrentUserId();
-        
+        var userId = await ep._userContextService.GetUserIdAsync();
+        if (userId == null)
+            return TypedResults.Unauthorized();
+
         var ownedStories = await ep._context.UserOwnedStories
             .Include(uos => uos.StoryDefinition)
             .ThenInclude(sd => sd.Translations.Where(t => t.LanguageCode == locale))
-            .Where(uos => uos.UserId == userId)
+            .Where(uos => uos.UserId == userId.Value)
             .Select(uos => new OwnedStoryDto
             {
                 Id = uos.StoryDefinition.Id,

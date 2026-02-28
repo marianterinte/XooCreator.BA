@@ -55,8 +55,10 @@ public sealed class MarketplaceCatalogCache : IMarketplaceCatalogCache, IMarketp
         _cache.Remove(StoryStatsKey);
         _cache.Remove(EpicStatsKey);
 
-        _logger.LogInformation("Marketplace cache reset (all locales). KnownStoryLocales={StoryLocales} KnownEpicLocales={EpicLocales}",
-            _knownStoryLocales.Count, _knownEpicLocales.Count);
+        _knownStoryLocales.Clear();
+        _knownEpicLocales.Clear();
+
+        _logger.LogInformation("Marketplace cache reset (all locales). KnownStoryLocales and KnownEpicLocales cleared.");
     }
 
     public bool IsEnabled

@@ -27,6 +27,7 @@ public record ListStoryCraftsResponse
 {
     public List<StoryCraftListItemDto> Stories { get; init; } = new();
     public int TotalCount { get; init; }
+    public bool HasMore { get; init; }
 }
 
 

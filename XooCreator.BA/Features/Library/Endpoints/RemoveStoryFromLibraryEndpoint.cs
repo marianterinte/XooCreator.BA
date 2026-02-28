@@ -29,7 +29,9 @@ public class RemoveStoryFromLibraryEndpoint
         [FromRoute] string storyId,
         [FromServices] RemoveStoryFromLibraryEndpoint ep)
     {
-        var userId = ep._userContextService.GetCurrentUserId();
+        var userId = await ep._userContextService.GetUserIdAsync();
+        if (userId == null)
+            return TypedResults.Unauthorized();
 
         // Get the story definition to find the StoryDefinitionId
         var storyDefinition = await ep._context.StoryDefinitions
@@ -40,7 +42,7 @@ public class RemoveStoryFromLibraryEndpoint
 
         // Find and remove the UserOwnedStories entry
         var ownedStory = await ep._context.UserOwnedStories
-            .FirstOrDefaultAsync(uos => uos.UserId == userId && uos.StoryDefinitionId == storyDefinition.Id);
+            .FirstOrDefaultAsync(uos => uos.UserId == userId.Value && uos.StoryDefinitionId == storyDefinition.Id);
 
         if (ownedStory == null)
             return TypedResults.NotFound();

@@ -27,6 +27,7 @@ public class GetUserCreatedStoriesResponse
 {
     public List<CreatedStoryDto> Stories { get; set; } = new();
     public int TotalCount { get; set; }
+    public bool HasMore { get; set; }
 }
 
 public class CreatedStoryDto

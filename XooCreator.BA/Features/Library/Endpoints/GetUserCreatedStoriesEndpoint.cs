@@ -33,13 +33,14 @@ public class GetUserCreatedStoriesEndpoint
     public static async Task<Ok<GetUserCreatedStoriesResponse>> HandleGet(
         [FromRoute] string locale,
         [FromServices] GetUserCreatedStoriesEndpoint ep,
-        CancellationToken ct)
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken ct = default)
     {
         var user = await ep._auth0.GetCurrentUserAsync(ct);
-        if (user == null) return TypedResults.Ok(new GetUserCreatedStoriesResponse { Stories = new List<CreatedStoryDto>(), TotalCount = 0 });
+        if (user == null) return TypedResults.Ok(new GetUserCreatedStoriesResponse { Stories = new List<CreatedStoryDto>(), TotalCount = 0, HasMore = false });
         
         var userId = user.Id;
-        var langCode = LanguageCodeExtensions.FromTag(locale);
         var isAdmin = ep._auth0.HasRole(user, UserRole.Admin);
         
         // Get published/approved stories from UserCreatedStories
@@ -148,10 +149,17 @@ public class GetUserCreatedStoriesEndpoint
             .OrderByDescending(s => s.CreatedAt)
             .ToList();
 
+        var skip = Math.Max(0, (page - 1) * pageSize);
+        var take = Math.Clamp(pageSize, 1, 100);
+        var totalCount = allStories.Count;
+        var pageStories = allStories.Skip(skip).Take(take).ToList();
+        var hasMore = (skip + pageStories.Count) < totalCount;
+
         var response = new GetUserCreatedStoriesResponse
         {
-            Stories = allStories,
-            TotalCount = allStories.Count
+            Stories = pageStories,
+            TotalCount = totalCount,
+            HasMore = hasMore
         };
 
         return TypedResults.Ok(response);

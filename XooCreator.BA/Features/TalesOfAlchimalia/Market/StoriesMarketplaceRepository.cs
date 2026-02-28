@@ -355,17 +355,11 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         // Note: Removed per-user queries for isPurchased/isOwned to enable 100% global cache.
         // These properties are now only available in StoryDetailsDto (loaded per request when viewing story details).
 
-        // Get likes counts for featured stories
+        // Get likes counts for featured stories (batch query)
         var storyIds = featured.Select(s => s.StoryId).ToList();
-        var likesCounts = new Dictionary<string, int>();
-        if (_likesRepository != null)
-        {
-            foreach (var storyId in storyIds)
-            {
-                var likesCount = await _likesRepository.GetStoryLikesCountAsync(storyId);
-                likesCounts[storyId] = likesCount;
-            }
-        }
+        var likesCounts = _likesRepository != null && storyIds.Count > 0
+            ? await _likesRepository.GetStoryLikesCountsAsync(storyIds)
+            : new Dictionary<string, int>();
 
             return featured.Select(p =>
             {
