@@ -70,6 +70,15 @@ public sealed class GetUserBestiaryEndpoint
             .Distinct()
             .ToList();
 
+        // Primary source for story heroes: published epic hero definitions (Story Creator)
+        var epicHeroDefinitions = await ep._db.EpicHeroDefinitions
+            .Where(d => storyHeroIds.Contains(d.Id))
+            .ToListAsync(ct);
+
+        var epicHeroTranslations = await ep._db.EpicHeroDefinitionTranslations
+            .Where(t => epicHeroDefinitions.Select(d => d.Id).Contains(t.EpicHeroDefinitionId))
+            .ToListAsync(ct);
+
         var heroTranslations = await ep._db.HeroDefinitionDefinitionTranslations
             .Where(t => heroIds.Contains(t.HeroDefinitionDefinitionId))
             .ToListAsync(ct);
@@ -88,8 +97,8 @@ public sealed class GetUserBestiaryEndpoint
 
         var items = rawItems.Select(item =>
         {
-            var (name, story) = ep.ResolveText(item, locale, heroTranslations, storyHeroes, storyHeroTranslations);
-            var imageUrl = ep.ResolveImageUrl(item, heroDefinitions, storyHeroes);
+            var (name, story) = ep.ResolveText(item, locale, heroTranslations, storyHeroes, storyHeroTranslations, epicHeroDefinitions, epicHeroTranslations);
+            var imageUrl = ep.ResolveImageUrl(item, heroDefinitions, storyHeroes, epicHeroDefinitions);
             return new BestiaryItemDto(
             item.Id,
                 name,
@@ -104,7 +113,7 @@ public sealed class GetUserBestiaryEndpoint
         return TypedResults.Ok(res);
     }
 
-    private string ResolveImageUrl(dynamic item, List<HeroDefinitionDefinition> heroDefinitions, List<StoryHero> storyHeroes)
+    private string ResolveImageUrl(dynamic item, List<HeroDefinitionDefinition> heroDefinitions, List<StoryHero> storyHeroes, List<EpicHeroDefinition> epicHeroDefinitions)
     {
         var bestiaryType = item.BestiaryType as string;
         var armsKey = item.ArmsKey as string;
@@ -115,7 +124,8 @@ public sealed class GetUserBestiaryEndpoint
         {
             "treeofheroes" => heroDefinitions.FirstOrDefault(h => h.Id == armsKey)?.Image
                               ?? armsKey + ".jpg",
-            "storyhero" => storyHeroes.FirstOrDefault(h => h.HeroId == armsKey)?.ImageUrl
+            "storyhero" => epicHeroDefinitions.FirstOrDefault(h => h.Id == armsKey)?.ImageUrl
+                           ?? storyHeroes.FirstOrDefault(h => h.HeroId == armsKey)?.ImageUrl
                            ?? $"images/tol/stories/seed@alchimalia.com/heroes/{armsKey}.png",
             _ => (armsKey == "—" ? "None" : armsKey) + (bodyKey == "—" ? "None" : bodyKey) + (headKey == "—" ? "None" : headKey) + ".jpg"
         };
@@ -126,7 +136,9 @@ public sealed class GetUserBestiaryEndpoint
         string locale,
         List<HeroDefinitionDefinitionTranslation> heroTranslations,
         List<StoryHero> storyHeroes,
-        List<StoryHeroTranslation> storyHeroTranslations)
+        List<StoryHeroTranslation> storyHeroTranslations,
+        List<EpicHeroDefinition> epicHeroDefinitions,
+        List<EpicHeroDefinitionTranslation> epicHeroTranslations)
     {
         var bestiaryType = item.BestiaryType as string;
         var armsKey = item.ArmsKey as string;
@@ -143,15 +155,43 @@ public sealed class GetUserBestiaryEndpoint
 
         if (bestiaryType == "storyhero")
         {
-            var storyHero = storyHeroes.FirstOrDefault(sh => sh.HeroId == armsKey);
             var normalizedLang = locale.ToLowerInvariant();
-            var translation = storyHeroTranslations.FirstOrDefault(t =>
-                    t.StoryHeroId == storyHero?.Id && t.LanguageCode.ToLowerInvariant() == normalizedLang)
-                ?? storyHeroTranslations.FirstOrDefault(t => t.StoryHeroId == storyHero?.Id);
 
-            var name = translation?.Name ?? armsKey ?? string.Empty;
-            var story = translation?.Description ?? translation?.GreetingText ?? string.Empty;
-            return (name, story);
+            // Primary: EpicHeroDefinition + EpicHeroDefinitionTranslation (published from Story Creator)
+            var epicHero = epicHeroDefinitions.FirstOrDefault(h => h.Id == armsKey);
+            if (epicHero != null)
+            {
+                var epicTranslation = epicHeroTranslations.FirstOrDefault(t =>
+                        t.EpicHeroDefinitionId == armsKey && t.LanguageCode.ToLowerInvariant() == normalizedLang)
+                    ?? epicHeroTranslations.FirstOrDefault(t => t.EpicHeroDefinitionId == armsKey);
+
+                if (epicTranslation != null)
+                {
+                    var name = epicTranslation.Name ?? armsKey ?? string.Empty;
+                    var story = epicTranslation.Description ?? epicTranslation.GreetingText ?? string.Empty;
+                    return (name, story);
+                }
+            }
+
+            // Fallback: StoryHeroes + StoryHeroTranslations (legacy)
+            var storyHero = storyHeroes.FirstOrDefault(sh => sh.HeroId == armsKey);
+            var storyTranslation = storyHero != null
+                ? storyHeroTranslations.FirstOrDefault(t =>
+                    t.StoryHeroId == storyHero.Id && t.LanguageCode.ToLowerInvariant() == normalizedLang)
+                    ?? storyHeroTranslations.FirstOrDefault(t => t.StoryHeroId == storyHero.Id)
+                : null;
+
+            if (storyTranslation != null)
+            {
+                var name = storyTranslation.Name ?? armsKey ?? string.Empty;
+                var story = storyTranslation.Description ?? storyTranslation.GreetingText ?? string.Empty;
+                return (name, story);
+            }
+
+            // Fallback: translation keys from BestiaryItem (frontend i18n)
+            var itemName = item.Name as string;
+            var itemStory = item.Story as string;
+            return (itemName ?? armsKey ?? string.Empty, itemStory ?? string.Empty);
         }
 
         // discovery: use stored text (no JSON)

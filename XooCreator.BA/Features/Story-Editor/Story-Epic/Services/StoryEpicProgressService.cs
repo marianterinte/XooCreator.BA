@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
+using XooCreator.BA.Features.Bestiary.Services;
 using XooCreator.BA.Features.HeroStoryRewards.DTOs;
 using XooCreator.BA.Features.HeroStoryRewards.Services;
 using XooCreator.BA.Features.StoryEditor.StoryEpic.DTOs;
@@ -15,6 +16,7 @@ public class StoryEpicProgressService : IStoryEpicProgressService
     private readonly IEpicProgressRepository _progressRepository;
     private readonly IEpicHeroRepository _heroRepository;
     private readonly IHeroStoryRewardsService _heroStoryRewardsService;
+    private readonly IStoryHeroBestiaryService _storyHeroBestiaryService;
     private readonly XooDbContext _context;
 
     public StoryEpicProgressService(
@@ -22,12 +24,14 @@ public class StoryEpicProgressService : IStoryEpicProgressService
         IEpicProgressRepository progressRepository,
         IEpicHeroRepository heroRepository,
         IHeroStoryRewardsService heroStoryRewardsService,
+        IStoryHeroBestiaryService storyHeroBestiaryService,
         XooDbContext context)
     {
         _epicService = epicService;
         _progressRepository = progressRepository;
         _heroRepository = heroRepository;
         _heroStoryRewardsService = heroStoryRewardsService;
+        _storyHeroBestiaryService = storyHeroBestiaryService;
         _context = context;
     }
 
@@ -176,6 +180,12 @@ public class StoryEpicProgressService : IStoryEpicProgressService
         // Evaluate and unlock heroes based on completed story
         // This includes heroes from StoryEpicHeroReferences AND heroes unlocked by the story itself (from StoryDefinitionUnlockedHeroes)
         var newlyUnlockedHeroes = await EvaluateAndUnlockHeroesAsync(userId, epicId, storyId, epicState.Epic.Heroes, storyProgress.Select(sp => sp.StoryId).ToList(), ct);
+
+        // Persist newly unlocked story heroes to Book of Heroes (UserBestiary with BestiaryType = storyhero)
+        if (newlyUnlockedHeroes.Count > 0)
+        {
+            await _storyHeroBestiaryService.AddDiscoveredStoryHeroesAsync(userId, newlyUnlockedHeroes, ct);
+        }
 
         // Award tokens via generic Hero Story Rewards pipeline (same as indie; non-blocking)
         if (tokens != null && tokens.Count > 0)
