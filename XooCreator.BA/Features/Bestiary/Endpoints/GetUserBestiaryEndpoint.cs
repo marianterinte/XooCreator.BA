@@ -5,9 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure;
-using XooCreator.BA.Features.TreeOfLight;
-using System.Text.Json;
-using XooCreator.BA.Features.TreeOfLight.Services;
 
 namespace XooCreator.BA.Features.Bestiary.Endpoints;
 
