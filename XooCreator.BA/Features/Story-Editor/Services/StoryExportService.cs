@@ -27,8 +27,6 @@ public class StoryExportService : IStoryExportService
     public async Task<ExportResult> ExportPublishedStoryAsync(StoryDefinition def, string locale, ExportOptions options, CancellationToken ct)
     {
         var primaryLang = (locale ?? string.Empty).Trim().ToLowerInvariant();
-        var exportObj = BuildExportJson(def, primaryLang);
-        var exportJson = JsonSerializer.Serialize(exportObj, new JsonSerializerOptions { WriteIndented = true });
         var fileName = $"{def.StoryId}-v{def.Version}.zip";
         var manifestPrefix = $"manifest/{def.StoryId}/v{def.Version}/";
         var hasDialogTiles = def.Tiles.Any(t => t.DialogTile?.Nodes != null && t.DialogTile.Nodes.Count > 0);
@@ -38,13 +36,8 @@ public class StoryExportService : IStoryExportService
         using var ms = new MemoryStream();
         using (var zip = new ZipArchive(ms, ZipArchiveMode.Create, leaveOpen: true))
         {
-            // Add manifest JSON (with optional split: dialogs/ when story has dialog tiles with nodes)
-            var manifestJson = ApplySplitFormatIfDialogsPresent(exportJson, zip, manifestPrefix, hasDialogTiles);
-            var manifestEntry = zip.CreateEntry(manifestPrefix + "story.json", CompressionLevel.Fastest);
-            await using (var writer = new StreamWriter(manifestEntry.Open(), new UTF8Encoding(false)))
-            {
-                await writer.WriteAsync(manifestJson);
-            }
+            var zipData = BuildExportV2ZipData(def);
+            WriteV2ZipFiles(zip, manifestPrefix, zipData);
 
             // Add only media paths that pass the options filter
             foreach (var path in mediaPaths)
@@ -118,9 +111,8 @@ public class StoryExportService : IStoryExportService
     public async Task<ExportResult> ExportDraftStoryAsync(StoryCraft craft, string locale, string ownerEmail, ExportOptions options, CancellationToken ct)
     {
         // Build export JSON
+        // Build export JSON
         var primaryLang = (locale ?? string.Empty).Trim().ToLowerInvariant();
-        var exportObj = BuildExportJson(craft, primaryLang);
-        var exportJson = JsonSerializer.Serialize(exportObj, new JsonSerializerOptions { WriteIndented = true });
         var fileName = $"{craft.StoryId}-draft-export.zip";
 
         // Collect all assets for all languages with metadata
@@ -157,17 +149,11 @@ public class StoryExportService : IStoryExportService
 
         // Build ZIP
         var manifestPrefix = $"manifest/{craft.StoryId}/";
-        var hasDialogTiles = craft.Tiles.Any(t => t.DialogTile?.Nodes != null && t.DialogTile.Nodes.Count > 0);
         using var ms = new MemoryStream();
         using (var zip = new ZipArchive(ms, ZipArchiveMode.Create, leaveOpen: true))
         {
-            // Add manifest JSON (with optional split: dialogs/ when story has dialog tiles with nodes)
-            var manifestJson = ApplySplitFormatIfDialogsPresent(exportJson, zip, manifestPrefix, hasDialogTiles);
-            var manifestEntry = zip.CreateEntry(manifestPrefix + "story.json", CompressionLevel.Fastest);
-            await using (var writer = new StreamWriter(manifestEntry.Open(), new UTF8Encoding(false)))
-            {
-                await writer.WriteAsync(manifestJson);
-            }
+            var zipData = BuildExportV2ZipData(craft);
+            WriteV2ZipFiles(zip, manifestPrefix, zipData);
 
             // Download and add media files from draft container
             foreach (var (asset, blobPath, isCover) in uniqueAssets)
@@ -211,155 +197,295 @@ public class StoryExportService : IStoryExportService
     }
 
     /// <summary>
-    /// If the export JSON contains any dialog tile with nodes, writes split format: main manifest with
-    /// dialogRef + empty dialogNodes for those tiles, and separate dialogs/{tileId}.json files.
-    /// Returns the (possibly modified) manifest JSON string to write to story.json.
+    /// Writes the V2 files to the zip archive
     /// </summary>
-    private static string ApplySplitFormatIfDialogsPresent(string exportJson, ZipArchive zip, string manifestPrefix, bool hasDialogTiles)
+    private static void WriteV2ZipFiles(ZipArchive zip, string manifestPrefix, (object Master, Dictionary<string, object> Languages, Dictionary<string, object> Dialogs) zipData)
     {
-        if (!hasDialogTiles) return exportJson;
-
-        var root = JsonNode.Parse(exportJson);
-        if (root == null) return exportJson;
-
-        var tiles = root["tiles"] as JsonArray;
-        if (tiles == null || tiles.Count == 0) return exportJson;
-
-        var hasAnyDialogWithNodes = false;
-        foreach (var tile in tiles)
-        {
-            if (tile is not JsonObject tileObj) continue;
-            var type = tileObj["type"]?.GetValue<string>();
-            if (!string.Equals(type, "dialog", StringComparison.OrdinalIgnoreCase)) continue;
-            var dialogNodes = tileObj["dialogNodes"] as JsonArray;
-            if (dialogNodes == null || dialogNodes.Count == 0) continue;
-
-            hasAnyDialogWithNodes = true;
-            break;
-        }
-
-        if (!hasAnyDialogWithNodes) return exportJson;
-
         var serializerOptions = new JsonSerializerOptions { WriteIndented = true };
 
-        foreach (var tile in tiles)
+        // Write master.json
+        var masterEntry = zip.CreateEntry(manifestPrefix + "master.json", CompressionLevel.Fastest);
+        using (var writer = new StreamWriter(masterEntry.Open(), new UTF8Encoding(false)))
         {
-            if (tile is not JsonObject tileObj) continue;
-            var type = tileObj["type"]?.GetValue<string>();
-            if (!string.Equals(type, "dialog", StringComparison.OrdinalIgnoreCase)) continue;
-            var dialogNodes = tileObj["dialogNodes"] as JsonArray;
-            if (dialogNodes == null || dialogNodes.Count == 0) continue;
-
-            var tileId = tileObj["id"]?.GetValue<string>() ?? "dialog";
-            var dialogRootNodeId = tileObj["dialogRootNodeId"]?.GetValue<string>() ?? string.Empty;
-
-            // Avoid deep cloning dialog nodes (high memory on large dialog trees).
-            var dialogJson =
-                $"{{\"dialogRootNodeId\":{JsonSerializer.Serialize(dialogRootNodeId)},\"dialogNodes\":{dialogNodes.ToJsonString(serializerOptions)}}}";
-            var dialogEntry = zip.CreateEntry(manifestPrefix + "dialogs/" + tileId + ".json", CompressionLevel.Fastest);
-            using (var writer = new StreamWriter(dialogEntry.Open(), new UTF8Encoding(false)))
-            {
-                writer.Write(dialogJson);
-            }
-
-            tileObj["dialogRef"] = "dialogs/" + tileId + ".json";
-            tileObj["dialogNodes"] = new JsonArray();
+            writer.Write(JsonSerializer.Serialize(zipData.Master, serializerOptions));
         }
 
-        return root.ToJsonString(serializerOptions);
+        // Write languages/{lang}.json
+        foreach (var langPair in zipData.Languages)
+        {
+            var langEntry = zip.CreateEntry($"{manifestPrefix}languages/{langPair.Key}.json", CompressionLevel.Fastest);
+            using (var writer = new StreamWriter(langEntry.Open(), new UTF8Encoding(false)))
+            {
+                writer.Write(JsonSerializer.Serialize(langPair.Value, serializerOptions));
+            }
+        }
+
+        // Write dialogs/{lang}/{tileId}.json
+        foreach (var dialogPair in zipData.Dialogs)
+        {
+            var dialogEntry = zip.CreateEntry($"{manifestPrefix}dialogs/{dialogPair.Key}.json", CompressionLevel.Fastest);
+            using (var writer = new StreamWriter(dialogEntry.Open(), new UTF8Encoding(false)))
+            {
+                writer.Write(JsonSerializer.Serialize(dialogPair.Value, serializerOptions));
+            }
+        }
     }
 
-    private static object BuildExportJson(StoryDefinition def, string primaryLang)
+    private static (object Master, Dictionary<string, object> Languages, Dictionary<string, object> Dialogs) BuildExportV2ZipData(StoryDefinition def)
     {
-        // Extract topic IDs
-        var topicIds = def.Topics?
-            .Where(t => t.StoryTopic != null)
-            .Select(t => t.StoryTopic!.TopicId)
-            .ToList() ?? new List<string>();
+        var topicIds = def.Topics?.Where(t => t.StoryTopic != null).Select(t => t.StoryTopic!.TopicId).ToList() ?? new List<string>();
+        var ageGroupIds = def.AgeGroups?.Where(ag => ag.StoryAgeGroup != null).Select(ag => ag.StoryAgeGroup!.AgeGroupId).ToList() ?? new List<string>();
 
-        // Extract age group IDs
-        var ageGroupIds = def.AgeGroups?
-            .Where(ag => ag.StoryAgeGroup != null)
-            .Select(ag => ag.StoryAgeGroup!.AgeGroupId)
-            .ToList() ?? new List<string>();
-
-        return new
+        var masterTiles = def.Tiles.OrderBy(t => t.SortOrder).Select((t, i) => new
         {
+            tileId = t.TileId,
+            type = t.Type,
+            sortOrder = i + 1,
+            branchId = t.BranchId,
+            imageUrl = t.ImageUrl.ToExportAssetUrl(),
+            answers = t.Type != "quiz" ? null : (t.Answers ?? new()).OrderBy(a => a.SortOrder).Select((a, ai) => new
+            {
+                answerId = a.AnswerId,
+                isCorrect = a.IsCorrect,
+                tokens = (a.Tokens ?? new()).Select(tok => new { type = tok.Type, value = tok.Value, quantity = tok.Quantity }).ToList(),
+                sortOrder = ai + 1
+            }).ToList()
+        }).ToList();
+
+        var master = new
+        {
+            formatVersion = 2,
             id = def.StoryId,
-            version = def.Version,
-            // Published definitions only have translated Title (no translated Summary field on StoryDefinitionTranslation)
-            title = def.Translations.FirstOrDefault(t => t.LanguageCode == primaryLang)?.Title ?? def.Title,
-            summary = def.Summary,
             storyType = def.StoryType,
             coverImageUrl = def.CoverImageUrl.ToExportAssetUrl(),
             storyTopic = def.StoryTopic,
             topicIds = topicIds,
             ageGroupIds = ageGroupIds,
-            authorName = def.AuthorName,
-            classicAuthorId = def.ClassicAuthorId,
             priceInCredits = def.PriceInCredits,
-            isEvaluative = def.IsEvaluative,
-            isFullyInteractive = def.IsFullyInteractive,
-            audioLanguages = def.AudioLanguages ?? new List<string>(),
+            unlockedStoryHeroes = new List<string>(), // Simplified
             dialogParticipants = def.DialogParticipants.OrderBy(p => p.SortOrder).Select(p => p.HeroId).ToList(),
-            translations = def.Translations.Select(t => new
+            audioLanguages = def.AudioLanguages ?? new List<string>(),
+            tiles = masterTiles
+        };
+
+        var availableLangs = def.Translations.Select(t => t.LanguageCode).Distinct().ToList();
+        var languages = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+        var dialogs = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var lang in availableLangs)
+        {
+            var lowerLang = lang.ToLowerInvariant();
+            var storyTr = def.Translations.FirstOrDefault(t => t.LanguageCode.Equals(lang, StringComparison.OrdinalIgnoreCase));
+            
+            var langTiles = def.Tiles.Select(t =>
             {
-                lang = t.LanguageCode,
-                title = t.Title
-            }).ToList(),
-            tiles = def.Tiles
-                .OrderBy(t => t.SortOrder)
-                .Select(t => new
+                var tr = t.Translations.FirstOrDefault(x => x.LanguageCode.Equals(lang, StringComparison.OrdinalIgnoreCase));
+                return new
                 {
-                    id = t.TileId,
-                    type = t.Type,
-                    branchId = t.BranchId,
-                    sortOrder = t.SortOrder,
-                    imageUrl = t.ImageUrl.ToExportAssetUrl(),
-                    translations = t.Translations.Select(tr => new
+                    tileId = t.TileId,
+                    caption = tr?.Caption ?? string.Empty,
+                    text = tr?.Text ?? string.Empty,
+                    question = tr?.Question ?? string.Empty,
+                    audioUrl = tr?.AudioUrl.ToExportAssetUrl() ?? string.Empty,
+                    videoUrl = tr?.VideoUrl.ToExportAssetUrl() ?? string.Empty,
+                    answers = t.Type != "quiz" ? null : (t.Answers ?? new()).Select(a => new
                     {
-                        lang = tr.LanguageCode,
-                        caption = tr.Caption,
-                        text = tr.Text,
-                        question = tr.Question,
-                        audioUrl = tr.AudioUrl.ToExportAssetUrl(),
-                        videoUrl = tr.VideoUrl.ToExportAssetUrl()
-                    }).ToList(),
-                    dialogRootNodeId = t.DialogTile?.RootNodeId,
-                    dialogNodes = t.DialogTile?.Nodes.OrderBy(n => n.SortOrder).Select(n => new
+                        answerId = a.AnswerId,
+                        text = (a.Translations ?? new()).FirstOrDefault(at => at.LanguageCode.Equals(lang, StringComparison.OrdinalIgnoreCase))?.Text ?? string.Empty
+                    })
+                };
+            }).ToList();
+
+            languages[lowerLang] = new
+            {
+                formatVersion = 2,
+                storyId = def.StoryId,
+                languageCode = lowerLang,
+                title = storyTr?.Title ?? def.Title,
+                summary = def.Summary ?? string.Empty,
+                tiles = langTiles
+            };
+
+            // Build dialogs manually for this lang
+            foreach (var tile in def.Tiles.Where(t => t.Type == "dialog" && t.DialogTile?.Nodes?.Count > 0))
+            {
+                var dialogNodes = tile.DialogTile!.Nodes.OrderBy(n => n.SortOrder).Select(n =>
+                {
+                    var nodeTr = n.Translations.FirstOrDefault(nt => nt.LanguageCode.Equals(lang, StringComparison.OrdinalIgnoreCase));
+                    return new
                     {
                         nodeId = n.NodeId,
                         speakerType = n.SpeakerType,
                         speakerHeroId = n.SpeakerHeroId,
-                        translations = n.Translations.Select(nt => new { lang = nt.LanguageCode, text = nt.Text, audioUrl = nt.AudioUrl.ToExportAssetUrl() }).ToList(),
-                        options = n.OutgoingEdges.OrderBy(e => e.OptionOrder).Select(e => new
+                        text = nodeTr?.Text ?? string.Empty,
+                        audioUrl = nodeTr?.AudioUrl.ToExportAssetUrl() ?? string.Empty,
+                        options = n.OutgoingEdges.OrderBy(e => e.OptionOrder).Select(e =>
                         {
-                            id = e.EdgeId,
-                            nextNodeId = e.ToNodeId,
-                            jumpToTileId = e.JumpToTileId,
-                            setBranchId = e.SetBranchId,
-                            hideIfBranchSet = e.HideIfBranchSet,
-                            showOnlyIfBranchesSet = ParseShowOnlyIfBranchesSet(e.ShowOnlyIfBranchesSet),
-                            sortOrder = e.OptionOrder,
-                            tokens = (e.Tokens ?? new()).Select(tok => new { type = tok.Type, value = tok.Value, quantity = tok.Quantity }).ToList(),
-                            translations = e.Translations.Select(et => new { lang = et.LanguageCode, text = et.OptionText }).ToList()
+                            var optionTr = e.Translations.FirstOrDefault(et => et.LanguageCode.Equals(lang, StringComparison.OrdinalIgnoreCase));
+                            return new
+                            {
+                                id = e.EdgeId,
+                                nextNodeId = e.ToNodeId,
+                                jumpToTileId = e.JumpToTileId,
+                                setBranchId = e.SetBranchId,
+                                hideIfBranchSet = e.HideIfBranchSet,
+                                showOnlyIfBranchesSet = ParseShowOnlyIfBranchesSet(e.ShowOnlyIfBranchesSet),
+                                sortOrder = e.OptionOrder,
+                                tokens = (e.Tokens ?? new()).Select(tok => new { type = tok.Type, value = tok.Value, quantity = tok.Quantity }).ToList(),
+                                text = optionTr?.OptionText ?? string.Empty
+                            };
                         }).ToList()
-                    }).ToList(),
-                    answers = (t.Answers ?? new()).OrderBy(a => a.SortOrder).Select(a => new
-                    {
-                        id = a.AnswerId,
-                        sortOrder = a.SortOrder,
-                        isCorrect = a.IsCorrect,
-                        text = a.Text,
-                        tokens = (a.Tokens ?? new()).Select(tok => new { type = tok.Type, value = tok.Value, quantity = tok.Quantity }).ToList(),
-                        translations = (a.Translations ?? new()).Select(at => new
-                        {
-                            lang = at.LanguageCode,
-                            text = at.Text
-                        }).ToList()
-                    }).ToList()
-                }).ToList()
+                    };
+                }).ToList();
+
+                var key = $"{lowerLang}/{tile.TileId}";
+                dialogs[key] = new
+                {
+                    formatVersion = 2,
+                    storyId = def.StoryId,
+                    languageCode = lowerLang,
+                    tileId = tile.TileId,
+                    dialogRootNodeId = tile.DialogTile.RootNodeId,
+                    dialogNodes = dialogNodes
+                };
+            }
+        }
+
+        return (master, languages, dialogs);
+    }
+
+    private static (object Master, Dictionary<string, object> Languages, Dictionary<string, object> Dialogs) BuildExportV2ZipData(StoryCraft craft)
+    {
+        var topicIds = craft.Topics?.Where(t => t.StoryTopic != null).Select(t => t.StoryTopic!.TopicId).ToList() ?? new List<string>();
+        var ageGroupIds = craft.AgeGroups?.Where(ag => ag.StoryAgeGroup != null).Select(ag => ag.StoryAgeGroup!.AgeGroupId).ToList() ?? new List<string>();
+        var unlockedHeroes = craft.UnlockedHeroes.Select(h => h.HeroId).ToList();
+
+        var masterTiles = craft.Tiles.OrderBy(t => t.SortOrder).Select((t, i) => new
+        {
+            tileId = t.TileId,
+            type = t.Type,
+            sortOrder = i + 1,
+            branchId = t.BranchId,
+            imageUrl = t.ImageUrl.ToExportAssetUrl(),
+            answers = t.Type != "quiz" ? null : (t.Answers ?? new()).OrderBy(a => a.SortOrder).Select((a, ai) => new
+            {
+                answerId = a.AnswerId,
+                isCorrect = a.IsCorrect,
+                tokens = (a.Tokens ?? new()).Select(tok => new { type = tok.Type, value = tok.Value, quantity = tok.Quantity }).ToList(),
+                sortOrder = ai + 1
+            }).ToList()
+        }).ToList();
+
+        var master = new
+        {
+            formatVersion = 2,
+            id = craft.StoryId,
+            storyType = craft.StoryType,
+            coverImageUrl = craft.CoverImageUrl.ToExportAssetUrl(),
+            storyTopic = craft.StoryTopic,
+            topicIds = topicIds,
+            ageGroupIds = ageGroupIds,
+            priceInCredits = craft.PriceInCredits,
+            unlockedStoryHeroes = unlockedHeroes,
+            dialogParticipants = craft.DialogParticipants.OrderBy(p => p.SortOrder).Select(p => p.HeroId).ToList(),
+            audioLanguages = craft.AudioLanguages ?? new List<string>(),
+            tiles = masterTiles
         };
+
+        var availableLangs = craft.Translations.Select(t => t.LanguageCode).Distinct().ToList();
+        var languages = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+        var dialogs = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+
+        // In draft, some language data might only exist in the tile translations. Ensure we gather all active languages.
+        var allTileLangs = craft.Tiles.SelectMany(t => t.Translations.Select(tr => tr.LanguageCode)).Distinct().ToList();
+        foreach (var l in allTileLangs)
+        {
+            if (!availableLangs.Contains(l, StringComparer.OrdinalIgnoreCase))
+            {
+                availableLangs.Add(l);
+            }
+        }
+
+        foreach (var lang in availableLangs)
+        {
+            var lowerLang = lang.ToLowerInvariant();
+            var storyTr = craft.Translations.FirstOrDefault(t => t.LanguageCode.Equals(lang, StringComparison.OrdinalIgnoreCase));
+            
+            var langTiles = craft.Tiles.Select(t =>
+            {
+                var tr = t.Translations.FirstOrDefault(x => x.LanguageCode.Equals(lang, StringComparison.OrdinalIgnoreCase));
+                return new
+                {
+                    tileId = t.TileId,
+                    caption = tr?.Caption ?? string.Empty,
+                    text = tr?.Text ?? string.Empty,
+                    question = tr?.Question ?? string.Empty,
+                    audioUrl = tr?.AudioUrl.ToExportAssetUrl() ?? string.Empty,
+                    videoUrl = tr?.VideoUrl.ToExportAssetUrl() ?? string.Empty,
+                    answers = t.Type != "quiz" ? null : (t.Answers ?? new()).Select(a => new
+                    {
+                        answerId = a.AnswerId,
+                        text = (a.Translations ?? new()).FirstOrDefault(at => at.LanguageCode.Equals(lang, StringComparison.OrdinalIgnoreCase))?.Text ?? string.Empty
+                    })
+                };
+            }).ToList();
+
+            languages[lowerLang] = new
+            {
+                formatVersion = 2,
+                storyId = craft.StoryId,
+                languageCode = lowerLang,
+                title = storyTr?.Title ?? string.Empty,
+                summary = storyTr?.Summary ?? string.Empty, // Draft has summary localized
+                tiles = langTiles
+            };
+
+            // Build dialogs manually for this lang
+            foreach (var tile in craft.Tiles.Where(t => t.Type == "dialog" && t.DialogTile?.Nodes?.Count > 0))
+            {
+                var dialogNodes = tile.DialogTile!.Nodes.OrderBy(n => n.SortOrder).Select(n =>
+                {
+                    var nodeTr = n.Translations.FirstOrDefault(nt => nt.LanguageCode.Equals(lang, StringComparison.OrdinalIgnoreCase));
+                    return new
+                    {
+                        nodeId = n.NodeId,
+                        speakerType = n.SpeakerType,
+                        speakerHeroId = n.SpeakerHeroId,
+                        text = nodeTr?.Text ?? string.Empty,
+                        audioUrl = nodeTr?.AudioUrl.ToExportAssetUrl() ?? string.Empty,
+                        options = n.OutgoingEdges.OrderBy(e => e.OptionOrder).Select(e =>
+                        {
+                            var optionTr = e.Translations.FirstOrDefault(et => et.LanguageCode.Equals(lang, StringComparison.OrdinalIgnoreCase));
+                            return new
+                            {
+                                id = e.EdgeId,
+                                nextNodeId = e.ToNodeId,
+                                jumpToTileId = e.JumpToTileId,
+                                setBranchId = e.SetBranchId,
+                                hideIfBranchSet = e.HideIfBranchSet,
+                                showOnlyIfBranchesSet = ParseShowOnlyIfBranchesSet(e.ShowOnlyIfBranchesSet),
+                                sortOrder = e.OptionOrder,
+                                tokens = (e.Tokens ?? new()).Select(tok => new { type = tok.Type, value = tok.Value, quantity = tok.Quantity }).ToList(),
+                                text = optionTr?.OptionText ?? string.Empty
+                            };
+                        }).ToList()
+                    };
+                }).ToList();
+
+                var key = $"{lowerLang}/{tile.TileId}";
+                dialogs[key] = new
+                {
+                    formatVersion = 2,
+                    storyId = craft.StoryId,
+                    languageCode = lowerLang,
+                    tileId = tile.TileId,
+                    dialogRootNodeId = tile.DialogTile.RootNodeId,
+                    dialogNodes = dialogNodes
+                };
+            }
+        }
+
+        return (master, languages, dialogs);
     }
 
     private static List<string>? ParseShowOnlyIfBranchesSet(string? json)
@@ -373,117 +499,6 @@ public class StoryExportService : IStoryExportService
         {
             return null;
         }
-    }
-
-    private static object BuildExportJson(StoryCraft craft, string primaryLang)
-    {
-        // Get primary translation (first one or default)
-        var primaryTranslation = craft.Translations.FirstOrDefault(t => t.LanguageCode == primaryLang)
-                                 ?? craft.Translations.FirstOrDefault()
-                                 ?? new StoryCraftTranslation
-        {
-            LanguageCode = "ro-ro",
-            Title = string.Empty,
-            Summary = null
-        };
-
-        // Extract topic IDs
-        var topicIds = craft.Topics?
-            .Where(t => t.StoryTopic != null)
-            .Select(t => t.StoryTopic!.TopicId)
-            .ToList() ?? new List<string>();
-
-        // Extract age group IDs
-        var ageGroupIds = craft.AgeGroups?
-            .Where(ag => ag.StoryAgeGroup != null)
-            .Select(ag => ag.StoryAgeGroup!.AgeGroupId)
-            .ToList() ?? new List<string>();
-
-        // Load UnlockedStoryHeroes from many-to-many table
-        var unlockedHeroes = craft.UnlockedHeroes.Select(h => h.HeroId).ToList();
-
-        return new
-        {
-            id = craft.StoryId,
-            version = craft.BaseVersion > 0 ? craft.BaseVersion : 0,
-            title = primaryTranslation.Title,
-            summary = primaryTranslation.Summary ?? craft.StoryTopic,
-            storyType = craft.StoryType,
-            coverImageUrl = craft.CoverImageUrl.ToExportAssetUrl(),
-            storyTopic = craft.StoryTopic,
-            topicIds = topicIds,
-            ageGroupIds = ageGroupIds,
-            authorName = craft.AuthorName,
-            classicAuthorId = craft.ClassicAuthorId,
-            priceInCredits = craft.PriceInCredits,
-            isEvaluative = craft.IsEvaluative,
-            isFullyInteractive = craft.IsFullyInteractive,
-            audioLanguages = craft.AudioLanguages ?? new List<string>(),
-            unlockedStoryHeroes = unlockedHeroes,
-            dialogParticipants = craft.DialogParticipants.OrderBy(p => p.SortOrder).Select(p => p.HeroId).ToList(),
-            translations = craft.Translations.Select(t => new
-            {
-                lang = t.LanguageCode,
-                title = t.Title,
-                summary = t.Summary
-            }).ToList(),
-            tiles = craft.Tiles
-                .OrderBy(t => t.SortOrder)
-                .Select(t => new
-                {
-                    id = t.TileId,
-                    type = t.Type,
-                    branchId = t.BranchId,
-                    sortOrder = t.SortOrder,
-                    imageUrl = t.ImageUrl.ToExportAssetUrl(),
-                    translations = t.Translations.Select(tr => new
-                    {
-                        lang = tr.LanguageCode,
-                        caption = tr.Caption,
-                        text = tr.Text,
-                        question = tr.Question,
-                        audioUrl = tr.AudioUrl.ToExportAssetUrl(),
-                        videoUrl = tr.VideoUrl.ToExportAssetUrl()
-                    }).ToList(),
-                    dialogRootNodeId = t.DialogTile?.RootNodeId,
-                    dialogNodes = t.DialogTile?.Nodes.OrderBy(n => n.SortOrder).Select(n => new
-                    {
-                        nodeId = n.NodeId,
-                        speakerType = n.SpeakerType,
-                        speakerHeroId = n.SpeakerHeroId,
-                        translations = n.Translations.Select(nt => new { lang = nt.LanguageCode, text = nt.Text, audioUrl = nt.AudioUrl.ToExportAssetUrl() }).ToList(),
-                        options = n.OutgoingEdges.OrderBy(e => e.OptionOrder).Select(e => new
-                        {
-                            id = e.EdgeId,
-                            nextNodeId = e.ToNodeId,
-                            jumpToTileId = e.JumpToTileId,
-                            setBranchId = e.SetBranchId,
-                            hideIfBranchSet = e.HideIfBranchSet,
-                            showOnlyIfBranchesSet = ParseShowOnlyIfBranchesSet(e.ShowOnlyIfBranchesSet),
-                            sortOrder = e.OptionOrder,
-                            tokens = (e.Tokens ?? new()).Select(tok => new { type = tok.Type, value = tok.Value, quantity = tok.Quantity }).ToList(),
-                            translations = e.Translations.Select(et => new { lang = et.LanguageCode, text = et.OptionText }).ToList()
-                        }).ToList()
-                    }).ToList(),
-                    answers = (t.Answers ?? new()).OrderBy(a => a.SortOrder).Select(a => new
-                    {
-                        id = a.AnswerId,
-                        sortOrder = a.SortOrder,
-                        isCorrect = a.IsCorrect,
-                        // Convenience field: export answer text for the primary language at top-level.
-                        // (Draft answers store text per-language in Translations.)
-                        text = (a.Translations ?? new()).FirstOrDefault(at => at.LanguageCode == primaryTranslation.LanguageCode)?.Text
-                               ?? (a.Translations ?? new()).FirstOrDefault()?.Text
-                               ?? string.Empty,
-                        tokens = (a.Tokens ?? new()).Select(tok => new { type = tok.Type, value = tok.Value, quantity = tok.Quantity }).ToList(),
-                        translations = (a.Translations ?? new()).Select(at => new
-                        {
-                            lang = at.LanguageCode,
-                            text = at.Text
-                        }).ToList()
-                    }).ToList()
-                }).ToList()
-        };
     }
 
     private static List<string> CollectPublishedMediaPaths(StoryDefinition def)
