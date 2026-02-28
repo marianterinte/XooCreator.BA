@@ -48,7 +48,7 @@ public class StoryDetailsMapper
                 .FirstOrDefaultAsync();
         }
 
-        var summary = GetSummaryFromJson(def.StoryId, locale) ?? def.Summary ?? string.Empty;
+        var summary = await GetSummaryFromJsonAsync(def.StoryId, locale) ?? def.Summary ?? string.Empty;
 
         // Get review statistics
         double averageRating = 0;
@@ -149,7 +149,7 @@ public class StoryDetailsMapper
         };
     }
 
-    private string? GetSummaryFromJson(string storyId, string locale)
+    private async Task<string?> GetSummaryFromJsonAsync(string storyId, string locale)
     {
         try
         {
@@ -163,14 +163,14 @@ public class StoryDetailsMapper
             foreach (var filePath in candidates)
             {
                 if (!File.Exists(filePath)) continue;
-                
-                var json = File.ReadAllText(filePath);
+
+                var json = await File.ReadAllTextAsync(filePath);
                 var data = JsonSerializer.Deserialize<StorySeedDataJsonProbe>(json, new JsonSerializerOptions
                 {
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                     PropertyNameCaseInsensitive = true
                 });
-                
+
                 if (!string.IsNullOrWhiteSpace(data?.Summary))
                 {
                     return data.Summary;
@@ -178,7 +178,7 @@ public class StoryDetailsMapper
             }
         }
         catch { }
-        
+
         return null;
     }
 

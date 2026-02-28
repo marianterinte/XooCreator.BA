@@ -5,9 +5,11 @@
 **Efort estimat:** 3–5 zile  
 **Impact:** Mare — marketplace e una din zonele cele mai accesate
 
+**Implementat (fără breaking changes):** Task 1, 2, 3, 4, 5, 7. **Neimplementat:** Task 6 (N+1 StoryDetailsMapper — necesită verificare Include/structură), Task 8 (Purchase flow paralel — risc concurență DbContext).
+
 ---
 
-## Task 1: SQL Aggregation pentru Review Statistics (MKT-03, MKT-04, MKT-05, MKT-06)
+## Task 1: SQL Aggregation pentru Review Statistics (MKT-03, MKT-04, MKT-05, MKT-06) ✅
 
 ### Fișier: `Features/TalesOfAlchimalia/Market/Repositories/StoryReviewsRepository.cs`
 
@@ -121,7 +123,7 @@ var avgRating = reviewStats?.Avg ?? 0.0;
 
 ---
 
-## Task 2: Fix Favorites — Load by IDs (MKT-01, MKT-02)
+## Task 2: Fix Favorites — Load by IDs (MKT-01, MKT-02) ✅
 
 ### Fișier: `Features/TalesOfAlchimalia/Market/Repositories/FavoritesRepository.cs`
 
@@ -196,7 +198,7 @@ Aplică același pattern: obține `favoriteEpicIds` din `UserFavoriteEpics`, apo
 
 ---
 
-## Task 3: AsNoTracking pe toate query-urile read-only (MKT-09)
+## Task 3: AsNoTracking pe toate query-urile read-only (MKT-09) ✅
 
 ### Fișiere afectate și locuri exacte:
 
@@ -240,7 +242,7 @@ var result = await _context.StoryReviews
 
 ---
 
-## Task 4: Paralelizare GetReadersSummaryEndpoint (MKT-10)
+## Task 4: Paralelizare GetReadersSummaryEndpoint (MKT-10) ✅
 
 ### Fișier: `Features/TalesOfAlchimalia/Market/Endpoints/GetReadersSummaryEndpoint.cs`
 
@@ -284,7 +286,7 @@ var correlationRaw = await ep._marketplaceService.GetReadersVsReviewsAsync(10);
 
 ---
 
-## Task 5: File I/O Async (MKT-11)
+## Task 5: File I/O Async (MKT-11) ✅
 
 ### Fișiere afectate:
 - `StoriesMarketplaceRepository.cs` — `GetSummaryFromJson` method
@@ -332,7 +334,7 @@ var authorName = def.CoAuthors?.FirstOrDefault()?.User?.Name
 
 ---
 
-## Task 7: Fix FavoritesRepository.IsFavoriteAsync (MKT-16)
+## Task 7: Fix FavoritesRepository.IsFavoriteAsync (MKT-16) ✅
 
 ### Fișier: `Features/TalesOfAlchimalia/Market/Repositories/FavoritesRepository.cs`
 

@@ -46,6 +46,7 @@ public class StoryLikesRepository : IStoryLikesRepository
     public async Task<bool> IsLikedAsync(Guid userId, string storyId)
     {
         return await _context.StoryLikes
+            .AsNoTracking()
             .AnyAsync(l => l.UserId == userId && 
                 EF.Functions.ILike(l.StoryId, storyId));
     }
@@ -53,6 +54,7 @@ public class StoryLikesRepository : IStoryLikesRepository
     public Task<int> GetStoryLikesCountAsync(string storyId)
     {
         return _context.StoryLikes
+            .AsNoTracking()
             .Where(l => EF.Functions.ILike(l.StoryId, storyId))
             .CountAsync();
     }

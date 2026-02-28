@@ -128,6 +128,8 @@ public record SearchStoriesRequest
     public int PageSize { get; init; } = 20;
     public int? Skip { get; init; }
     public string SearchType { get; init; } = "title"; // "title", "author"
+    /// <summary>When non-empty, only stories with these StoryIds are returned (e.g. for favorites).</summary>
+    public List<string>? StoryIds { get; init; }
 }
 
 public record GetUserPurchasedStoriesResponse

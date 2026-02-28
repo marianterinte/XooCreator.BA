@@ -67,6 +67,7 @@ public class EpicFavoritesRepository : IEpicFavoritesRepository
     public async Task<bool> IsFavoriteAsync(Guid userId, string epicId)
     {
         return await _context.UserFavoriteEpics
+            .AsNoTracking()
             .AnyAsync(f => f.UserId == userId && f.EpicId == epicId);
     }
 
@@ -74,6 +75,7 @@ public class EpicFavoritesRepository : IEpicFavoritesRepository
     {
         // Get favorite epic IDs for this user
         var favoriteEpicIds = await _context.UserFavoriteEpics
+            .AsNoTracking()
             .Where(f => f.UserId == userId)
             .Select(f => f.EpicId)
             .ToListAsync();
@@ -83,6 +85,7 @@ public class EpicFavoritesRepository : IEpicFavoritesRepository
 
         // Verify that these epics are published (use StoryEpicDefinitions)
         var publishedEpicIds = await _context.StoryEpicDefinitions
+            .AsNoTracking()
             .Where(e => favoriteEpicIds.Contains(e.Id) && e.Status == "published")
             .Select(e => e.Id)
             .ToListAsync();

@@ -86,6 +86,13 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
 
             IEnumerable<StoryMarketplaceBaseItem> q = baseItems;
 
+            // Filter by specific story IDs (e.g. favorites)
+            if (request.StoryIds != null && request.StoryIds.Count > 0)
+            {
+                var idSet = new HashSet<string>(request.StoryIds, StringComparer.OrdinalIgnoreCase);
+                q = q.Where(s => idSet.Contains(s.StoryId));
+            }
+
             // Implicit filters: Published already enforced by cache source; apply Indie default if no categories.
             if (!(request.Categories?.Any() ?? false))
             {
@@ -499,6 +506,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
     public async Task<List<StoryMarketplaceItemDto>> GetUserPurchasedStoriesAsync(Guid userId, string locale)
     {
         var purchasedStories = await _context.StoryPurchases
+            .AsNoTracking()
             .Include(sp => sp.Story)
                 .ThenInclude(s => s.Translations)
             .Where(sp => sp.UserId == userId && sp.Story.IsActive)
@@ -506,6 +514,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             .ToListAsync();
 
         var storyProgress = await _context.UserStoryReadProgress
+            .AsNoTracking()
             .Where(usp => usp.UserId == userId)
             .GroupBy(usp => usp.StoryId)
             .Select(g => new StoryProgressInfo(g.Key, g.Count()))
@@ -746,7 +755,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         return _context.StoryReaders.CountAsync();
     }
 
-    private string? GetSummaryFromJson(string storyId, string locale)
+    private async Task<string?> GetSummaryFromJsonAsync(string storyId, string locale)
     {
         try
         {
@@ -760,14 +769,14 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             foreach (var filePath in candidates)
             {
                 if (!File.Exists(filePath)) continue;
-                
-                var json = File.ReadAllText(filePath);
+
+                var json = await File.ReadAllTextAsync(filePath);
                 var data = JsonSerializer.Deserialize<StorySeedDataJsonProbe>(json, new JsonSerializerOptions
                 {
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                     PropertyNameCaseInsensitive = true
                 });
-                
+
                 if (!string.IsNullOrWhiteSpace(data?.Summary))
                 {
                     return data.Summary;
@@ -775,7 +784,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             }
         }
         catch { }
-        
+
         return null;
     }
 
@@ -940,8 +949,8 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         }
 
         // Get summary from JSON file for the current locale, or use StoryDefinition.Summary, or empty string
-        var summary = GetSummaryFromJson(def.StoryId, locale) 
-            ?? def.Summary 
+        var summary = await GetSummaryFromJsonAsync(def.StoryId, locale)
+            ?? def.Summary
             ?? string.Empty;
 
         // Note: Removed per-user queries for isPurchased/isOwned to enable 100% global cache.
@@ -987,6 +996,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
     public async Task<double> GetComputedPriceAsync(string storyId)
     {
         var def = await _context.StoryDefinitions
+            .AsNoTracking()
             .FirstOrDefaultAsync(s => s.StoryId == storyId);
         return def?.PriceInCredits ?? 0;
     }

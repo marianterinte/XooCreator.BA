@@ -143,6 +143,7 @@ public class EpicsMarketplaceRepository
         try
         {
             var epic = await _context.StoryEpicDefinitions
+                .AsNoTracking()
                 .Include(e => e.Owner)
                 .Include(e => e.StoryNodes)
                 .Include(e => e.Regions)
@@ -160,14 +161,19 @@ public class EpicsMarketplaceRepository
             var totalReaders = await GetEpicReadersCountAsync(epicId);
 
             // Get review statistics from EpicReviews (not StoryReviews)
-            var epicReviews = await _context.EpicReviews
+            var reviewStats = await _context.EpicReviews
+                .AsNoTracking()
                 .Where(r => r.EpicId == epicId && r.IsActive)
-                .ToListAsync();
+                .GroupBy(r => 1)
+                .Select(g => new
+                {
+                    Total = g.Count(),
+                    Avg = g.Average(r => (double)r.Rating)
+                })
+                .FirstOrDefaultAsync();
 
-            var totalReviews = epicReviews.Count;
-            var avgRating = totalReviews > 0
-                ? epicReviews.Average(r => r.Rating)
-                : 0.0;
+            var totalReviews = reviewStats?.Total ?? 0;
+            var avgRating = reviewStats?.Avg ?? 0.0;
 
             // Get user's review if exists
             EpicReviewDto? userReview = null;
@@ -299,6 +305,7 @@ public class EpicsMarketplaceRepository
     public Task<int> GetEpicReadersCountAsync(string epicId)
     {
         return _context.EpicReaders
+            .AsNoTracking()
             .Where(er => er.EpicId == epicId)
             .CountAsync();
     }

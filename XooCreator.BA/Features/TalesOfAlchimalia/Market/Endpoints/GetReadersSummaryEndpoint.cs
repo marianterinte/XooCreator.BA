@@ -51,13 +51,17 @@ public class GetReadersSummaryEndpoint
 
         try
         {
-            var totalReaders = await ep._marketplaceService.GetTotalReadersAsync();
-            var leaderboard = await ep.BuildLeaderboardAsync(ct);
-            var trendPoints = await ep._marketplaceService.GetReadersTrendAsync(7);
+            var totalReadersTask = ep._marketplaceService.GetTotalReadersAsync();
+            var trendPointsTask = ep._marketplaceService.GetReadersTrendAsync(7);
+            await Task.WhenAll(totalReadersTask, trendPointsTask);
+
+            var totalReaders = totalReadersTask.Result;
+            var trendPoints = trendPointsTask.Result;
             var trend = trendPoints
                 .Select(tp => new ReadersTrendPointDto(tp.Date.ToString("yyyy-MM-dd"), tp.ReadersCount))
                 .ToList();
 
+            var leaderboard = await ep.BuildLeaderboardAsync(ct);
             var correlationRaw = await ep._marketplaceService.GetReadersVsReviewsAsync(10);
             var correlation = correlationRaw
                 .Select(item => new ReadersCorrelationItemDto(

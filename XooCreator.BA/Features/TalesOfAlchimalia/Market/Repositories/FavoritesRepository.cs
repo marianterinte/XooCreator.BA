@@ -72,40 +72,34 @@ public class FavoritesRepository : IFavoritesRepository
 
     public async Task<bool> IsFavoriteAsync(Guid userId, string storyId)
     {
-        var storyDef = await _context.StoryDefinitions
-            .FirstOrDefaultAsync(s => s.StoryId == storyId);
-
-        if (storyDef == null)
-            return false;
-
         return await _context.UserFavoriteStories
-            .AnyAsync(f => f.UserId == userId && f.StoryDefinitionId == storyDef.Id);
+            .AsNoTracking()
+            .AnyAsync(f => f.UserId == userId && f.StoryDefinition.StoryId == storyId);
     }
 
     public async Task<List<StoryMarketplaceItemDto>> GetFavoriteStoriesAsync(Guid userId, string locale)
     {
         var favoriteStoryIds = await _context.UserFavoriteStories
+            .AsNoTracking()
             .Include(f => f.StoryDefinition)
             .Where(f => f.UserId == userId && f.StoryDefinition.IsActive)
             .Select(f => f.StoryDefinition.StoryId)
             .ToListAsync();
 
-        if (!favoriteStoryIds.Any())
+        if (favoriteStoryIds.Count == 0)
             return new List<StoryMarketplaceItemDto>();
 
-        // Get all marketplace stories and filter to favorites
-        var allStories = await _marketplaceRepository.GetMarketplaceStoriesAsync(userId, locale, new SearchStoriesRequest
-        {
-            Page = 1,
-            PageSize = 10000 // Get all to filter favorites
-        });
+        var (stories, _, _) = await _marketplaceRepository.GetMarketplaceStoriesWithPaginationAsync(
+            userId,
+            locale,
+            new SearchStoriesRequest
+            {
+                Page = 1,
+                PageSize = favoriteStoryIds.Count,
+                StoryIds = favoriteStoryIds
+            });
 
-        // Filter to only favorites
-        var favoriteStories = allStories
-            .Where(s => favoriteStoryIds.Contains(s.Id))
-            .ToList();
-
-        return favoriteStories;
+        return stories;
     }
 }
 

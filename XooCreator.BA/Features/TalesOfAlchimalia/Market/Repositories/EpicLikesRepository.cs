@@ -41,6 +41,7 @@ public class EpicLikesRepository : IEpicLikesRepository
     public async Task<bool> IsLikedAsync(Guid userId, string epicId)
     {
         return await _context.EpicLikes
+            .AsNoTracking()
             .AnyAsync(l => l.UserId == userId &&
                 EF.Functions.ILike(l.EpicId, epicId));
     }
@@ -48,6 +49,7 @@ public class EpicLikesRepository : IEpicLikesRepository
     public Task<int> GetEpicLikesCountAsync(string epicId)
     {
         return _context.EpicLikes
+            .AsNoTracking()
             .Where(l => EF.Functions.ILike(l.EpicId, epicId))
             .CountAsync();
     }
