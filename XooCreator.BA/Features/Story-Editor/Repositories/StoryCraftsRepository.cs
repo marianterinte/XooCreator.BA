@@ -273,6 +273,7 @@ public class StoryCraftsRepository : IStoryCraftsRepository
         return await _context.StoryCrafts
             .AsNoTracking()
             .Include(s => s.Translations)
+            .Include(s => s.Tiles).ThenInclude(t => t.Translations)
             .Where(x => x.AssignedReviewerUserId == reviewerUserId)
             .OrderByDescending(x => x.UpdatedAt)
             .ToListAsync(ct);
@@ -283,6 +284,7 @@ public class StoryCraftsRepository : IStoryCraftsRepository
         return await _context.StoryCrafts
             .AsNoTracking()
             .Include(s => s.Translations)
+            .Include(s => s.Tiles).ThenInclude(t => t.Translations)
             .Where(x => x.AssignedReviewerUserId == null
                 && (x.Status == "sent_for_approval" || x.Status == "review" || x.Status == "submitted"))
             .OrderByDescending(x => x.UpdatedAt)
@@ -294,6 +296,7 @@ public class StoryCraftsRepository : IStoryCraftsRepository
         var query = _context.StoryCrafts
             .AsNoTracking()
             .Include(s => s.Translations)
+            .Include(s => s.Tiles).ThenInclude(t => t.Translations)
             .Where(x => x.OwnerUserId == ownerUserId)
             .OrderByDescending(x => x.UpdatedAt);
         var totalCount = await query.CountAsync(ct);
@@ -305,6 +308,7 @@ public class StoryCraftsRepository : IStoryCraftsRepository
         => _context.StoryCrafts
             .AsNoTracking()
             .Include(s => s.Translations)
+            .Include(s => s.Tiles).ThenInclude(t => t.Translations)
             .OrderByDescending(x => x.UpdatedAt)
             .ToListAsync(ct);
 
@@ -313,6 +317,7 @@ public class StoryCraftsRepository : IStoryCraftsRepository
         var query = _context.StoryCrafts
             .AsNoTracking()
             .Include(s => s.Translations)
+            .Include(s => s.Tiles).ThenInclude(t => t.Translations)
             .OrderByDescending(x => x.UpdatedAt);
         var totalCount = await query.CountAsync(ct);
         var items = await query.Skip(skip).Take(take).ToListAsync(ct);

@@ -925,7 +925,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         int totalReviews,
         IReadOnlyDictionary<Guid, string>? authorNamesByUserId = null)
     {
-        var translation = def.Translations?.FirstOrDefault(t => t.LanguageCode == locale);
+        var translation = def.Translations?.FirstOrDefault(t => string.Equals(t.LanguageCode, locale, StringComparison.OrdinalIgnoreCase));
         var title = translation?.Title ?? def.Title;
 
         // Extract available languages from translations

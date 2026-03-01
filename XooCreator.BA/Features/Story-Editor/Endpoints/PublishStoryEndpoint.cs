@@ -131,7 +131,7 @@ public partial class PublishStoryEndpoint
             }
 
             // Use first available translation or ro-ro as fallback
-            langTag = craft.Translations.FirstOrDefault(t => t.LanguageCode == "ro-ro")?.LanguageCode
+            langTag = craft.Translations.FirstOrDefault(t => string.Equals(t.LanguageCode, "ro-ro", StringComparison.OrdinalIgnoreCase))?.LanguageCode
                 ?? craft.Translations.FirstOrDefault()?.LanguageCode
                 ?? "ro-ro";
 

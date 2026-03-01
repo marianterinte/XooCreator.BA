@@ -973,7 +973,7 @@ public partial class ImportFullStoryEndpoint
             {
                 if (translation.TryGetProperty("lang", out var langElement))
                 {
-                    var lang = langElement.GetString();
+                    var lang = langElement.GetString()?.ToLowerInvariant();
                     if (!string.IsNullOrWhiteSpace(lang))
                     {
                         languages.Add(lang);
@@ -993,7 +993,7 @@ public partial class ImportFullStoryEndpoint
                     {
                         if (translation.TryGetProperty("lang", out var langElement))
                         {
-                            var lang = langElement.GetString();
+                            var lang = langElement.GetString()?.ToLowerInvariant();
                             if (!string.IsNullOrWhiteSpace(lang))
                             {
                                 languages.Add(lang);
@@ -1085,7 +1085,7 @@ public partial class ImportFullStoryEndpoint
         {
             foreach (var translation in translationsElement.EnumerateArray())
             {
-                var lang = translation.TryGetProperty("lang", out var langElement) ? langElement.GetString() : null;
+                var lang = translation.TryGetProperty("lang", out var langElement) ? langElement.GetString()?.ToLowerInvariant() : null;
                 var transTitle = translation.TryGetProperty("title", out var transTitleElement) ? transTitleElement.GetString() : null;
                 var transSummary = translation.TryGetProperty("summary", out var transSummaryElement) ? transSummaryElement.GetString() : null;
 
@@ -1130,7 +1130,7 @@ public partial class ImportFullStoryEndpoint
                 {
                     foreach (var translation in tileTranslationsElement.EnumerateArray())
                     {
-                        var lang = translation.TryGetProperty("lang", out var langElement) ? langElement.GetString() : null;
+                        var lang = translation.TryGetProperty("lang", out var langElement) ? langElement.GetString()?.ToLowerInvariant() : null;
                         var caption = translation.TryGetProperty("caption", out var captionElement) ? captionElement.GetString() : null;
                         var text = translation.TryGetProperty("text", out var textElement) ? textElement.GetString() : null;
                         var question = translation.TryGetProperty("question", out var questionElement) ? questionElement.GetString() : null;
@@ -1180,7 +1180,7 @@ public partial class ImportFullStoryEndpoint
                         {
                             foreach (var translation in answerTranslationsElement.EnumerateArray())
                             {
-                                var lang = translation.TryGetProperty("lang", out var langElement) ? langElement.GetString() : null;
+                                var lang = translation.TryGetProperty("lang", out var langElement) ? langElement.GetString()?.ToLowerInvariant() : null;
                                 var answerText = translation.TryGetProperty("text", out var textElement) ? textElement.GetString() : null;
 
                                 if (!string.IsNullOrWhiteSpace(lang))
@@ -1263,7 +1263,7 @@ public partial class ImportFullStoryEndpoint
                         {
                             foreach (var tr in nodeTrEl.EnumerateArray())
                             {
-                                var lang = tr.TryGetProperty("lang", out var lEl) ? lEl.GetString() : null;
+                                var lang = tr.TryGetProperty("lang", out var lEl) ? lEl.GetString()?.ToLowerInvariant() : null;
                                 var text = tr.TryGetProperty("text", out var tEl) ? tEl.GetString() : null;
                                 var audioUrl = tr.TryGetProperty("audioUrl", out var aEl) ? ExtractFilename(aEl.GetString() ?? "") : null;
                                 if (!string.IsNullOrWhiteSpace(lang))
@@ -1305,7 +1305,7 @@ public partial class ImportFullStoryEndpoint
                                 {
                                     foreach (var et in edgeTrEl.EnumerateArray())
                                     {
-                                        var lang = et.TryGetProperty("lang", out var lel) ? lel.GetString() : null;
+                                        var lang = et.TryGetProperty("lang", out var lel) ? lel.GetString()?.ToLowerInvariant() : null;
                                         var optionText = et.TryGetProperty("text", out var oEl) ? oEl.GetString() : null;
                                         if (!string.IsNullOrWhiteSpace(lang))
                                         {

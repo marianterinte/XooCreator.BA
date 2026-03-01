@@ -90,15 +90,41 @@ public class ListStoryCraftsEndpoint
         {
             // Try to get translation for requested locale, fallback to first available
             var translation = c.Translations
-                .FirstOrDefault(t => t.LanguageCode == requestedLocale && !string.IsNullOrWhiteSpace(t.Title))
-                ?? c.Translations.FirstOrDefault(t => t.LanguageCode == requestedLocale)
+                .FirstOrDefault(t => string.Equals(t.LanguageCode, requestedLocale, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(t.Title))
+                ?? c.Translations.FirstOrDefault(t => string.Equals(t.LanguageCode, requestedLocale, StringComparison.OrdinalIgnoreCase))
                 ?? c.Translations.FirstOrDefault(t => !string.IsNullOrWhiteSpace(t.Title))
                 ?? c.Translations.FirstOrDefault();
             string title = string.IsNullOrWhiteSpace(translation?.Title) ? c.StoryId : translation!.Title!;
+
+            // When story-level translations are empty, try to extract title from the first tile's Caption
+            if (c.Translations.Count == 0 && c.Tiles != null && c.Tiles.Count > 0)
+            {
+                var firstTile = c.Tiles.OrderBy(t => t.SortOrder).FirstOrDefault();
+                if (firstTile?.Translations != null && firstTile.Translations.Count > 0)
+                {
+                    var tileTranslation = firstTile.Translations
+                        .FirstOrDefault(tt => string.Equals(tt.LanguageCode, requestedLocale, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(tt.Caption))
+                        ?? firstTile.Translations.FirstOrDefault(tt => !string.IsNullOrWhiteSpace(tt.Caption));
+                    if (tileTranslation != null && !string.IsNullOrWhiteSpace(tileTranslation.Caption))
+                    {
+                        title = tileTranslation.Caption;
+                    }
+                }
+            }
+
             string? cover = c.CoverImageUrl;
             
-            // Get available languages
+            // Get available languages (from story translations or tile translations)
             var availableLangs = c.Translations.Select(t => t.LanguageCode).ToList();
+            if (availableLangs.Count == 0 && c.Tiles != null)
+            {
+                availableLangs = c.Tiles
+                    .SelectMany(t => t.Translations ?? new List<StoryCraftTileTranslation>())
+                    .Select(tt => tt.LanguageCode)
+                    .Where(lc => !string.IsNullOrWhiteSpace(lc))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+            }
             var primaryLang = availableLangs.FirstOrDefault() ?? "ro-ro";
 
             var status = StoryStatusExtensions.FromDb(c.Status);

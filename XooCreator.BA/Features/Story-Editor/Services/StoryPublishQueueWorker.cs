@@ -188,6 +188,7 @@ public class StoryPublishQueueWorker : BackgroundService
                         // Load craft with all necessary includes for publishing
                         // Note: This loads significant data into memory, but it's necessary for publish operation
                         var craft = await db.StoryCrafts
+                            .Include(c => c.Translations)
                             .Include(c => c.Tiles).ThenInclude(t => t.Translations)
                             .Include(c => c.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Translations)
                             .Include(c => c.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Tokens)
