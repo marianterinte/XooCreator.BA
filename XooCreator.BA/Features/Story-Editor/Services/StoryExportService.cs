@@ -28,7 +28,7 @@ public class StoryExportService : IStoryExportService
     {
         var primaryLang = (locale ?? string.Empty).Trim().ToLowerInvariant();
         var fileName = $"{def.StoryId}-v{def.Version}.zip";
-        var manifestPrefix = $"manifest/{def.StoryId}/v{def.Version}/";
+        var manifestPrefix = $"manifest/{def.StoryId}/";
         var hasDialogTiles = def.Tiles.Any(t => t.DialogTile?.Nodes != null && t.DialogTile.Nodes.Count > 0);
         var allMediaPaths = CollectPublishedMediaPaths(def);
         var mediaPaths = FilterPublishedMediaPathsByOptions(allMediaPaths, options).ToList();
