@@ -1,0 +1,173 @@
+{
+  "hero_tree_seed_name": "Heldensaat",
+  "hero_tree_seed_desc": "Der Samen, aus dem alle Helden wachsen. Klicke, um dein heldenhaftes Potenzial zu entdecken.",
+  "hero_tree_seed_story": "In deinem Herzen schlägt ein Samen des Heldentums. Klicke darauf, um deine ersten Helden zu entdecken und deine heldenhafte Reise zu beginnen.",
+
+  "hero_tree_alchimalia_hero_name": "Alchimalia-Held",
+  "hero_tree_alchimalia_hero_desc": "Die Wurzel aller Helden, die Quelle der Verwandlung.",
+  "hero_tree_alchimalia_hero_story": "Dein treuer Begleiter, der Beginn der heldenhaften Reise.",
+
+  "hero_tree_brave_puppy_name": "Mutiger Welpe",
+  "hero_tree_brave_puppy_desc": "Ein kleiner Welpe voller Mut und Entschlossenheit.",
+  "hero_tree_brave_puppy_story": "Dieser kleine Welpe stellt sich Herausforderungen mutig, und inspiriert Tapferkeit in allen.",
+
+  "hero_tree_curious_cat_name": "Neugierige Katze",
+  "hero_tree_curious_cat_desc": "Ein neugieriges Wesen, das jeden Winkel der Welt erkundet.",
+  "hero_tree_curious_cat_story": "Die Neugierige Katze führt dich durch Geheimnisse und Wunder und weckt deine Neugier.",
+
+  "hero_tree_wise_owl_name": "Weise Eule",
+  "hero_tree_wise_owl_desc": "Ein scharfer Beobachter, voller Wissen und Einsicht.",
+  "hero_tree_wise_owl_story": "Die Weise Eule wacht über die Welt und teilt Weisheit und Führung mit Suchenden.",
+
+  "hero_tree_playful_horse_name": "Verspieltes Pferd",
+  "hero_tree_playful_horse_desc": "Ein fröhliches Geschöpf, das Kreativität und Spaß überall hinbringt.",
+  "hero_tree_playful_horse_story": "Das Verspielte Pferd galoppiert frei und inspiriert Fantasie und spielerische Ideen.",
+
+  "hero_tree_cautious_hedgehog_name": "Vorsichtiger Igel",
+  "hero_tree_cautious_hedgehog_desc": "Ein aufmerksamer Beschützer, achtsam gegenüber Gefahr und Sicherheit.",
+  "hero_tree_cautious_hedgehog_story": "Der Igel lehrt Besonnenheit und Voraussicht und hält alle sicher.",
+
+  "hero_tree_catdog_interstellar_name": "KatzeHund Interstellar",
+  "hero_tree_catdog_interstellar_desc": "Ein Hybrid aus Neugier und Mut, bereit für interstellare Abenteuer.",
+  "hero_tree_catdog_interstellar_story": "Dieser heldenhafte Hybrid vereint die besten Eigenschaften von Katze und Hund und erkundet furchtlos den Kosmos.",
+
+  "hero_tree_brave_sage_name": "Mutiger Weiser",
+  "hero_tree_brave_sage_desc": "Eine Mischung aus Weisheit und Tapferkeit, die Helden mit Einsicht führt.",
+  "hero_tree_brave_sage_story": "Der Mutige Weise vereint Intellekt und Mut, um andere durch Herausforderungen zu führen.",
+
+  "hero_tree_brave_artist_name": "Mutiger Künstler",
+  "hero_tree_brave_artist_desc": "Eine kreative Seele mit mutigem Herzen.",
+  "hero_tree_brave_artist_story": "Der Mutige Künstler malt heldenhafte Geschichten mit Tapferkeit und Fantasie.",
+
+  "hero_tree_brave_guardian_name": "Lichtwolf",
+  "hero_tree_brave_guardian_desc": "Ein Wächter des Mutes, standhaft gegen alle Bedrohungen.",
+  "hero_tree_brave_guardian_story": "Der Lichtwolf beschützt das Reich und verkörpert Mut und Wachsamkeit.",
+
+  "hero_tree_wise_researcher_name": "Weiser Forscher",
+  "hero_tree_wise_researcher_desc": "Neugierig und analytisch, sucht Wissen in jedem Winkel.",
+  "hero_tree_wise_researcher_story": "Dieser Held enthüllt Geheimnisse und führt andere mit aufschlussreichen Entdeckungen.",
+
+  "hero_tree_creative_explorer_name": "Kreativer Entdecker",
+  "hero_tree_creative_explorer_desc": "Abenteuerlich und erfinderisch, findet immer neue Wege.",
+  "hero_tree_creative_explorer_story": "Der Kreative Entdecker kartiert unbekanntes Land mit Fantasie und Neugier.",
+
+  "hero_tree_guard_cat_name": "Wächterkatze",
+  "hero_tree_guard_cat_desc": "Ein schützender Hybrid, aufmerksam und wachsam.",
+  "hero_tree_guard_cat_story": "Die Wächterkatze hält Wache und verbindet Vorsicht und Neugier in jeder Bewegung.",
+
+  "hero_tree_wise_pegasus_name": "Weiser Pegasus",
+  "hero_tree_wise_pegasus_desc": "Ein majestätisches Geschöpf aus Intellekt und Kreativität.",
+  "hero_tree_wise_pegasus_story": "Der Weise Pegasus fliegt durch Herausforderungen und bietet Führung und Inspiration.",
+
+  "hero_tree_thoughtful_guardian_name": "Nachdenklicher Wächter",
+  "hero_tree_thoughtful_guardian_desc": "Ein sorgfältiger Denker, der Sicherheit mit Weisheit verbindet.",
+  "hero_tree_thoughtful_guardian_story": "Dieser Held balanciert Besonnenheit und Intelligenz, um das Reich zu schützen.",
+
+  "hero_tree_creative_guardian_name": "Kreativer Wächter",
+  "hero_tree_creative_guardian_desc": "Ein Wächter, der Fantasie mit Vorsicht verbindet.",
+  "hero_tree_creative_guardian_story": "Der Kreative Wächter verteidigt und inspiriert dabei erfinderische Lösungen.",
+
+  "hero_tree_alchimalian_dragon_name": "Alchimalischer Drache",
+  "hero_tree_alchimalian_dragon_desc": "Der ultimative Held, der alle Eigenschaften perfekt verkörpert.",
+  "hero_tree_alchimalian_dragon_story": "Dieser mächtige Drache repräsentiert den Gipfel von Mut, Neugier, Denken, Kreativität und Sicherheit.",
+
+  "hero_tree_guardian_dog_name": "Wächterhund",
+  "hero_tree_guardian_dog_desc": "Ein treuer Beschützer mit unerschütterlichem Mut und Hingabe.",
+  "hero_tree_guardian_dog_story": "Der Wächterhund hält Wache und verteidigt Bedürftige mit mutiger Entschlossenheit.",
+
+  "hero_tree_legendary_dog_name": "Legendärer Hund",
+  "hero_tree_legendary_dog_desc": "Ein legendärer Held mit unvergleichlichem Mut und edlem Geist.",
+  "hero_tree_legendary_dog_story": "Der Legendäre Hund inspiriert Legenden und verkörpert die reinste Form heldenhaften Mutes.",
+
+  "hero_tree_explorer_cat_name": "Entdeckerkatze",
+  "hero_tree_explorer_cat_desc": "Ein furchtloser Entdecker, angetrieben von endloser Neugier und Staunen.",
+  "hero_tree_explorer_cat_story": "Die Entdeckerkatze wagt sich in unbekannte Gebiete vor und entdeckt verborgene Geheimnisse und Mysterien.",
+
+  "hero_tree_oracle_cat_name": "Orakelkatze",
+  "hero_tree_oracle_cat_desc": "Ein mystischer Seher mit tiefer Einsicht und prophetischer Weisheit.",
+  "hero_tree_oracle_cat_story": "Die Orakelkatze sieht hinter den Schleier der Realität und enthüllt Wahrheiten, die dem gewöhnlichen Blick verborgen sind.",
+
+  "hero_tree_scholar_owl_name": "Gelehrte Eule",
+  "hero_tree_scholar_owl_desc": "Ein Gelehrter mit tiefem Wissen und analytischem Denken.",
+  "hero_tree_scholar_owl_story": "Die Gelehrte Eule studiert die Geheimnisse der Welt und teilt Weisheit durch sorgfältige Analyse.",
+
+  "hero_tree_ancient_owl_name": "Uralte Eule",
+  "hero_tree_ancient_owl_desc": "Ein uralter Weiser mit zeitloser Weisheit und ewigem Wissen.",
+  "hero_tree_ancient_owl_story": "Die Uralte Eule hat die Zeitalter miterlebt und hütet die tiefsten Geheimnisse des Universums.",
+
+  "hero_tree_artistic_horse_name": "Künstlerisches Pferd",
+  "hero_tree_artistic_horse_desc": "Ein kreativer Künstler, der Schönheit durch Fantasie und Können ausdrückt.",
+  "hero_tree_artistic_horse_story": "Das Künstlerische Pferd erschafft Meisterwerke und erweckt Träume durch kreativen Ausdruck zum Leben.",
+
+  "hero_tree_genius_horse_name": "Geniepferd",
+  "hero_tree_genius_horse_desc": "Ein kreatives Genie mit unvergleichlicher künstlerischer Vision und Innovation.",
+  "hero_tree_genius_horse_story": "Das Geniepferd übersteigt gewöhnliche Kreativität und erschafft Werke reiner künstlerischer Brillanz.",
+
+  "hero_tree_shieldquill_name": "Schildstachel",
+  "hero_tree_shieldquill_desc": "Sorgfältiger Schutz, aufgebaut aus Besonnenheit und Erfahrung.",
+  "hero_tree_shieldquill_story": "Nutzt seine Stacheln als Schild, um das zu schützen, was am wichtigsten ist.",
+
+  "hero_tree_wardenspike_name": "Wächter-Stachel",
+  "hero_tree_wardenspike_desc": "Unerschütterlicher Wächter, entschlossen, die Sicherheit aufrechtzuerhalten.",
+  "hero_tree_wardenspike_story": "Macht Wachsamkeit zur Kunst und hält Wache an den Rändern der Welt.",
+
+  "hero_tree_wise_lion_sage_name": "Weiser Löwenweiser",
+  "hero_tree_wise_lion_sage_desc": "Ein majestätischer Löwe, der Mut, Neugier und Weisheit vereint.",
+  "hero_tree_wise_lion_sage_story": "Der Weise Löwenweiser führt mit Stärke und Einsicht und inspiriert andere durch edles Beispiel.",
+
+  "hero_tree_brave_lion_artist_name": "Mutiger Löwenkünstler",
+  "hero_tree_brave_lion_artist_desc": "Ein mutiger Löwe, der Kreativität durch kühne künstlerische Vision ausdrückt.",
+  "hero_tree_brave_lion_artist_story": "Der Mutige Löwenkünstler erschafft Meisterwerke, die Mut und Fantasie in allen inspirieren, die sie sehen.",
+
+  "hero_tree_guardian_lion_name": "Wächterlöwe",
+  "hero_tree_guardian_lion_desc": "Ein schützender Löwe, der Mut, Neugier und Sicherheit vereint.",
+  "hero_tree_guardian_lion_story": "Der Wächterlöwe wacht über das Reich und gewährleistet Sicherheit, während er Erkundung und Entdeckung fördert.",
+
+  "hero_tree_brave_sage_artist_name": "Mutiger Weiser Künstler",
+  "hero_tree_brave_sage_artist_desc": "Ein weiser Künstler, der Mut, Denken und Kreativität vereint.",
+  "hero_tree_brave_sage_artist_story": "Der Mutige Weise Künstler erschafft tiefgründige Werke, die intellektuelle Tiefe mit künstlerischer Schönheit verbinden.",
+
+  "hero_tree_brave_sage_guardian_name": "Mutiger Weiser Wächter",
+  "hero_tree_brave_sage_guardian_desc": "Ein schützender Weiser, der Mut, Weisheit und Sicherheit vereint.",
+  "hero_tree_brave_sage_guardian_story": "Der Mutige Weise Wächter verteidigt mit Stärke und Weisheit und gewährleistet Sicherheit durch durchdachten Schutz.",
+
+  "hero_tree_brave_artist_guardian_name": "Mutiger Künstler-Wächter",
+  "hero_tree_brave_artist_guardian_desc": "Ein kreativer Wächter, der Mut, Kreativität und Sicherheit vereint.",
+  "hero_tree_brave_artist_guardian_story": "Der Mutige Künstler-Wächter schützt durch kreative Lösungen und verbindet künstlerische Vision mit wachsamer Fürsorge.",
+
+  "hero_tree_wise_explorer_artist_name": "Weiser Entdecker-Künstler",
+  "hero_tree_wise_explorer_artist_desc": "Ein intellektueller Künstler, der Neugier, Denken und Kreativität vereint.",
+  "hero_tree_wise_explorer_artist_story": "Der Weise Entdecker-Künstler entdeckt neue künstlerische Grenzen durch nachdenkliche Erkundung und kreativen Ausdruck.",
+
+  "hero_tree_wise_guardian_explorer_name": "Weiser Wächter-Entdecker",
+  "hero_tree_wise_guardian_explorer_desc": "Ein schützender Entdecker, der Neugier, Weisheit und Sicherheit vereint.",
+  "hero_tree_wise_guardian_explorer_story": "Der Weise Wächter-Entdecker wagt sich sicher in unbekannte Gebiete, geführt von Weisheit und geschützt durch Vorsicht.",
+
+  "hero_tree_creative_guardian_explorer_name": "Kreativer Wächter-Entdecker",
+  "hero_tree_creative_guardian_explorer_desc": "Ein erfinderischer Entdecker, der Neugier, Kreativität und Sicherheit vereint.",
+  "hero_tree_creative_guardian_explorer_story": "Der Kreative Wächter-Entdecker entdeckt neue Welten durch fantasievolle Lösungen und gewährleistet dabei sichere Passage.",
+
+  "hero_tree_wise_creative_guardian_name": "Weiser Kreativer Wächter",
+  "hero_tree_wise_creative_guardian_desc": "Ein nachdenklicher Wächter, der Weisheit, Kreativität und Sicherheit vereint.",
+  "hero_tree_wise_creative_guardian_story": "Der Weise Kreative Wächter schützt durch innovative Lösungen und verbindet intellektuelle Einsicht mit künstlerischer Vision.",
+
+  "hero_tree_master_lion_artist_name": "Meister-Löwenkünstler",
+  "hero_tree_master_lion_artist_desc": "Der ultimative künstlerische Löwe, Meister des Mutes, der Neugier, der Weisheit und der Kreativität.",
+  "hero_tree_master_lion_artist_story": "Der Meister-Löwenkünstler erschafft legendäre Werke, die alle inspirieren, die Zeuge seines künstlerischen Genies und edlen Geistes werden.",
+
+  "hero_tree_master_guardian_lion_name": "Meister-Wächterlöwe",
+  "hero_tree_master_guardian_lion_desc": "Der ultimative schützende Löwe, Meister des Mutes, der Neugier, der Weisheit und der Sicherheit.",
+  "hero_tree_master_guardian_lion_story": "Der Meister-Wächterlöwe steht als ultimativer Beschützer da und gewährleistet Sicherheit, während er Erkundung und Wachstum fördert.",
+
+  "hero_tree_master_explorer_lion_name": "Meister-Entdeckerlöwe",
+  "hero_tree_master_explorer_lion_desc": "Der ultimative erkundende Löwe, Meister des Mutes, der Neugier, der Kreativität und der Sicherheit.",
+  "hero_tree_master_explorer_lion_story": "Der Meister-Entdeckerlöwe wagt sich in die herausforderndsten Gebiete und entdeckt Wunder, während er sichere Passage gewährleistet.",
+
+  "hero_tree_master_sage_guardian_name": "Meister-Weiser Wächter",
+  "hero_tree_master_sage_guardian_desc": "Der ultimative weise Wächter, Meister des Mutes, des Denkens, der Kreativität und der Sicherheit.",
+  "hero_tree_master_sage_guardian_story": "Der Meister-Weise Wächter vereint tiefe Weisheit mit kreativem Schutz und gewährleistet Sicherheit durch erleuchtete Führung.",
+
+  "hero_tree_master_creative_explorer_name": "Meister-Kreativer Entdecker",
+  "hero_tree_master_creative_explorer_desc": "Der ultimative kreative Entdecker, Meister der Neugier, des Denkens, der Kreativität und der Sicherheit.",
+  "hero_tree_master_creative_explorer_story": "Der Meister-Kreative Entdecker entdeckt neue Reiche der Möglichkeit durch innovatives Denken und künstlerische Vision."
+}
