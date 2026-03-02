@@ -333,7 +333,7 @@ public sealed class MarketplaceCatalogCache : IMarketplaceCatalogCache, IMarketp
         var epics = await db.StoryEpicDefinitions
             .AsNoTracking()
             .Include(e => e.Owner)
-            .Include(e => e.StoryNodes)
+            .Include(e => e.StoryNodes).ThenInclude(n => n.StoryDefinition).ThenInclude(s => s.Translations)
             .Include(e => e.Regions)
             .Include(e => e.Translations)
             .Include(e => e.Topics).ThenInclude(t => t.StoryTopic)
@@ -367,6 +367,23 @@ public sealed class MarketplaceCatalogCache : IMarketplaceCatalogCache, IMarketp
                 {
                     if (!string.IsNullOrWhiteSpace(t.Name)) searchTexts.Add(t.Name!);
                     if (!string.IsNullOrWhiteSpace(t.Description)) searchTexts.Add(t.Description!);
+                }
+            }
+            // Include child story titles so search by story title finds the volume
+            if (epic.StoryNodes != null)
+            {
+                foreach (var node in epic.StoryNodes)
+                {
+                    var def = node.StoryDefinition;
+                    if (def == null) continue;
+                    if (!string.IsNullOrWhiteSpace(def.Title)) searchTexts.Add(def.Title!);
+                    if (def.Translations != null)
+                    {
+                        foreach (var tr in def.Translations)
+                        {
+                            if (!string.IsNullOrWhiteSpace(tr.Title)) searchTexts.Add(tr.Title!);
+                        }
+                    }
                 }
             }
 
@@ -463,7 +480,7 @@ public sealed class MarketplaceCatalogCache : IMarketplaceCatalogCache, IMarketp
     }
 
     private static string GetStoriesBaseKey(string locale) => $"marketplace:stories:base:{locale}";
-    private static string GetEpicsBaseKey(string locale) => $"marketplace:epics:base:v2:{locale}";
+    private static string GetEpicsBaseKey(string locale) => $"marketplace:epics:base:v3:{locale}";
 
     private static string NormalizeLocale(string? locale) =>
         string.IsNullOrWhiteSpace(locale) ? "ro-ro" : locale.Trim().ToLowerInvariant();
