@@ -94,23 +94,7 @@ public class ListStoryCraftsEndpoint
                 ?? c.Translations.FirstOrDefault(t => string.Equals(t.LanguageCode, requestedLocale, StringComparison.OrdinalIgnoreCase))
                 ?? c.Translations.FirstOrDefault(t => !string.IsNullOrWhiteSpace(t.Title))
                 ?? c.Translations.FirstOrDefault();
-            string title = string.IsNullOrWhiteSpace(translation?.Title) ? c.StoryId : translation!.Title!;
-
-            // When story-level translations are empty, try to extract title from the first tile's Caption
-            if (c.Translations.Count == 0 && c.Tiles != null && c.Tiles.Count > 0)
-            {
-                var firstTile = c.Tiles.OrderBy(t => t.SortOrder).FirstOrDefault();
-                if (firstTile?.Translations != null && firstTile.Translations.Count > 0)
-                {
-                    var tileTranslation = firstTile.Translations
-                        .FirstOrDefault(tt => string.Equals(tt.LanguageCode, requestedLocale, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(tt.Caption))
-                        ?? firstTile.Translations.FirstOrDefault(tt => !string.IsNullOrWhiteSpace(tt.Caption));
-                    if (tileTranslation != null && !string.IsNullOrWhiteSpace(tileTranslation.Caption))
-                    {
-                        title = tileTranslation.Caption;
-                    }
-                }
-            }
+            string title = translation?.Title ?? string.Empty;
 
             string? cover = c.CoverImageUrl;
             

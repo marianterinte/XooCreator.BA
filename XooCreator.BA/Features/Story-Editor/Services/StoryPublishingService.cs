@@ -113,31 +113,11 @@ public class StoryPublishingService : IStoryPublishingService
         var previousCoverImageUrl = def?.CoverImageUrl;
         var previousTileAssetsByTileId = BuildPublishedTileAssetSnapshots(def);
 
-        // When craft.Translations is empty (e.g. imported stories), synthesize story-level
-        // translations from the first tile's Caption per language so we have titles to publish.
         var effectiveTranslations = craft.Translations;
-        if (effectiveTranslations.Count == 0)
-        {
-            var firstTile = craft.Tiles.OrderBy(t => t.SortOrder).FirstOrDefault();
-            if (firstTile?.Translations != null && firstTile.Translations.Count > 0)
-            {
-                _logger.LogInformation("Synthesizing story translations from first tile for storyId={StoryId}, found {Count} language(s)",
-                    storyId, firstTile.Translations.Count);
-                effectiveTranslations = firstTile.Translations
-                    .Where(tt => !string.IsNullOrWhiteSpace(tt.LanguageCode))
-                    .Select(tt => new StoryCraftTranslation
-                    {
-                        LanguageCode = tt.LanguageCode,
-                        Title = !string.IsNullOrWhiteSpace(tt.Caption) ? tt.Caption : storyId,
-                        Summary = tt.Text?.Length > 200 ? tt.Text.Substring(0, 200) : tt.Text
-                    })
-                    .ToList();
-            }
-        }
 
         var resolvedTitle = effectiveTranslations.FirstOrDefault(t => string.Equals(t.LanguageCode, langTag, StringComparison.OrdinalIgnoreCase))?.Title
                             ?? effectiveTranslations.FirstOrDefault()?.Title
-                            ?? storyId;
+                            ?? string.Empty;
 
         if (isNew)
         {

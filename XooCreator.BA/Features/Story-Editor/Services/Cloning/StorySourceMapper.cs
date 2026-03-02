@@ -132,14 +132,7 @@ public class StorySourceMapper : IStorySourceMapper
             BaseVersion = definition.Version,
             IsEvaluative = definition.IsEvaluative,
             IsFullyInteractive = definition.IsFullyInteractive,
-            Translations = definition.Translations.Select(t => new TranslationCloneData
-            {
-                LanguageCode = t.LanguageCode,
-                Title = isCopy && !string.IsNullOrWhiteSpace(t.Title) && !t.Title.StartsWith("Copy of ", StringComparison.OrdinalIgnoreCase)
-                    ? $"Copy of {t.Title}"
-                    : t.Title,
-                Summary = definition.Summary
-            }).ToList(),
+            Translations = BuildTranslationsFromDefinition(definition, isCopy),
             Tiles = definition.Tiles.OrderBy(t => t.SortOrder).Select(tile =>
             {
                 var imageFilename = tile.ImageUrl.GetFilenameOnly();
@@ -232,6 +225,32 @@ public class StorySourceMapper : IStorySourceMapper
             DialogParticipants = definition.DialogParticipants.OrderBy(p => p.SortOrder).Select(p => p.HeroId).ToList(),
             AudioLanguages = definition.AudioLanguages ?? new List<string>()
         };
+    }
+
+    private static List<TranslationCloneData> BuildTranslationsFromDefinition(StoryDefinition definition, bool isCopy)
+    {
+        var translations = definition.Translations.Select(t => new TranslationCloneData
+        {
+            LanguageCode = t.LanguageCode,
+            Title = isCopy && !string.IsNullOrWhiteSpace(t.Title) && !t.Title.StartsWith("Copy of ", StringComparison.OrdinalIgnoreCase)
+                ? $"Copy of {t.Title}"
+                : t.Title,
+            Summary = definition.Summary
+        }).ToList();
+
+        if (translations.Count == 0 && !string.IsNullOrWhiteSpace(definition.Title))
+        {
+            translations.Add(new TranslationCloneData
+            {
+                LanguageCode = "ro-ro",
+                Title = isCopy && !definition.Title.StartsWith("Copy of ", StringComparison.OrdinalIgnoreCase)
+                    ? $"Copy of {definition.Title}"
+                    : definition.Title,
+                Summary = definition.Summary
+            });
+        }
+
+        return translations;
     }
 
     private static string? DeriveSeededAudioFilename(string? imageFilename)
