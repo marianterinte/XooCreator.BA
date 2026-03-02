@@ -29,6 +29,7 @@ public class StorySourceMapper : IStorySourceMapper
             ClassicAuthorId = source.ClassicAuthorId,
             BaseVersion = source.BaseVersion,
             IsEvaluative = source.IsEvaluative,
+            IsPartOfEpic = source.IsPartOfEpic,
             IsFullyInteractive = source.IsFullyInteractive,
             Translations = source.Translations.Select(t => new TranslationCloneData
             {
@@ -131,6 +132,7 @@ public class StorySourceMapper : IStorySourceMapper
             ClassicAuthorId = definition.ClassicAuthorId,
             BaseVersion = definition.Version,
             IsEvaluative = definition.IsEvaluative,
+            IsPartOfEpic = definition.IsPartOfEpic,
             IsFullyInteractive = definition.IsFullyInteractive,
             Translations = BuildTranslationsFromDefinition(definition, isCopy),
             Tiles = definition.Tiles.OrderBy(t => t.SortOrder).Select(tile =>
@@ -294,6 +296,7 @@ public class StoryCloneData
     public Guid? ClassicAuthorId { get; set; }
     public int? BaseVersion { get; set; }
     public bool IsEvaluative { get; set; } = false; // If true, this story contains quizzes that should be evaluated
+    public bool IsPartOfEpic { get; set; } = false; // If true, this story is part of an epic
     public bool IsFullyInteractive { get; set; } = false; // If true, this story is full interactive
     public List<TranslationCloneData> Translations { get; set; } = new();
     public List<TileCloneData> Tiles { get; set; } = new();
