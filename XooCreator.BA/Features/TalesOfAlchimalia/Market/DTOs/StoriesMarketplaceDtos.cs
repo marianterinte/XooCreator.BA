@@ -43,6 +43,7 @@ public record StoryDetailsDto
     public bool IsEvaluative { get; init; } = false; // If true, this story contains quizzes that should be evaluated
     public bool IsPartOfEpic { get; init; } = false; // If true, this story is part of an epic (draft or published) and should not appear as independent story
     public bool IsFullyInteractive { get; init; } = false; // If true, this story is full interactive
+    public bool AlwaysShowInStoriesList { get; init; } = false; // If true and story is part of an epic, it can still appear in standalone marketplace story lists
     public List<StoryCoAuthorDto> CoAuthors { get; init; } = new(); // Co-authors (user or free text)
 }
 

@@ -31,6 +31,7 @@ public class StorySourceMapper : IStorySourceMapper
             IsEvaluative = source.IsEvaluative,
             IsPartOfEpic = source.IsPartOfEpic,
             IsFullyInteractive = source.IsFullyInteractive,
+            AlwaysShowInStoriesList = source.AlwaysShowInStoriesList,
             Translations = source.Translations.Select(t => new TranslationCloneData
             {
                 LanguageCode = t.LanguageCode,
@@ -134,6 +135,7 @@ public class StorySourceMapper : IStorySourceMapper
             IsEvaluative = definition.IsEvaluative,
             IsPartOfEpic = definition.IsPartOfEpic,
             IsFullyInteractive = definition.IsFullyInteractive,
+            AlwaysShowInStoriesList = definition.AlwaysShowInStoriesList,
             Translations = BuildTranslationsFromDefinition(definition, isCopy),
             Tiles = definition.Tiles.OrderBy(t => t.SortOrder).Select(tile =>
             {
@@ -298,6 +300,7 @@ public class StoryCloneData
     public bool IsEvaluative { get; set; } = false; // If true, this story contains quizzes that should be evaluated
     public bool IsPartOfEpic { get; set; } = false; // If true, this story is part of an epic
     public bool IsFullyInteractive { get; set; } = false; // If true, this story is full interactive
+    public bool AlwaysShowInStoriesList { get; set; } = false; // If true and story is part of an epic, it can still appear in standalone marketplace story lists
     public List<TranslationCloneData> Translations { get; set; } = new();
     public List<TileCloneData> Tiles { get; set; } = new();
     public List<Guid> Topics { get; set; } = new();

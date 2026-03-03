@@ -173,7 +173,7 @@ public sealed class MarketplaceCatalogCache : IMarketplaceCatalogCache, IMarketp
             .Include(s => s.AgeGroups).ThenInclude(ag => ag.StoryAgeGroup)
             .Include(s => s.ClassicAuthor)
             .Include(s => s.CoAuthors).ThenInclude(c => c.User)
-            .Where(s => s.IsActive && s.Status == StoryStatus.Published && !s.IsPartOfEpic)
+            .Where(s => s.IsActive && s.Status == StoryStatus.Published && (!s.IsPartOfEpic || s.AlwaysShowInStoriesList))
             .AsSplitQuery()
             .ToListAsync(ct);
 

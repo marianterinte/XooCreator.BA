@@ -87,7 +87,8 @@ public class GetUserCreatedStoriesEndpoint
                 IsPartOfEpic = ucs.StoryDefinition.IsPartOfEpic,
                 IsFullyInteractive = ucs.StoryDefinition.IsFullyInteractive,
                 AvailableLanguages = availableLangs,
-                AudioLanguages = ucs.StoryDefinition.AudioLanguages ?? new List<string>()
+                AudioLanguages = ucs.StoryDefinition.AudioLanguages ?? new List<string>(),
+                AlwaysShowInStoriesList = ucs.StoryDefinition.AlwaysShowInStoriesList
             });
         }
 
@@ -137,7 +138,8 @@ public class GetUserCreatedStoriesEndpoint
                 IsPartOfEpic = draft.IsPartOfEpic,
                 IsFullyInteractive = draft.IsFullyInteractive,
                 AvailableLanguages = draftLangs,
-                AudioLanguages = draft.AudioLanguages ?? new List<string>()
+                AudioLanguages = draft.AudioLanguages ?? new List<string>(),
+                AlwaysShowInStoriesList = draft.AlwaysShowInStoriesList
             };
 
             draftStories.Add(storyDto);

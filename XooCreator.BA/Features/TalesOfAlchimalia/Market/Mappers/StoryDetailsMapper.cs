@@ -146,6 +146,7 @@ public class StoryDetailsMapper
             IsEvaluative = def.IsEvaluative,
             IsPartOfEpic = def.IsPartOfEpic,
             IsFullyInteractive = def.IsFullyInteractive,
+            AlwaysShowInStoriesList = def.AlwaysShowInStoriesList,
             CoAuthors = coAuthors
         };
     }

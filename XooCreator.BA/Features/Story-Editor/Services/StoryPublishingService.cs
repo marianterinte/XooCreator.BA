@@ -134,6 +134,7 @@ public class StoryPublishingService : IStoryPublishingService
                 IsEvaluative = craft.IsEvaluative,
                 IsPartOfEpic = craft.IsPartOfEpic,
                 IsFullyInteractive = craft.IsFullyInteractive,
+                AlwaysShowInStoriesList = craft.AlwaysShowInStoriesList,
                 SortOrder = 0,
                 Version = 1,
                 PriceInCredits = craft.PriceInCredits,
@@ -156,6 +157,7 @@ public class StoryPublishingService : IStoryPublishingService
         def.IsEvaluative = craft.IsEvaluative;
         def.IsPartOfEpic = craft.IsPartOfEpic;
         def.IsFullyInteractive = craft.IsFullyInteractive;
+        def.AlwaysShowInStoriesList = craft.AlwaysShowInStoriesList;
         def.PriceInCredits = craft.PriceInCredits;
         def.AudioLanguages = craft.AudioLanguages ?? new List<string>();
         def.Status = StoryStatus.Published;
@@ -304,6 +306,7 @@ public class StoryPublishingService : IStoryPublishingService
         def.IsEvaluative = craft.IsEvaluative;
         def.IsPartOfEpic = craft.IsPartOfEpic;
         def.IsFullyInteractive = craft.IsFullyInteractive;
+        def.AlwaysShowInStoriesList = craft.AlwaysShowInStoriesList;
         def.PriceInCredits = craft.PriceInCredits;
         def.AudioLanguages = craft.AudioLanguages ?? new List<string>();
         def.Status = StoryStatus.Published;
