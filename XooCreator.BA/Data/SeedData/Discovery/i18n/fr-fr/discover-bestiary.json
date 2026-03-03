@@ -1,0 +1,296 @@
+[
+  {
+    "Combination": "BunnyGiraffeNone",
+    "Name": "Lapigirafe",
+    "Story": "Dans les branches de l'Arbre de Lumiere naquit la Lapigirafe, une creature unique, mi-lapin, mi-girafe. Ses bras courts et agiles creusent des tunnels et allument des feux vifs, tandis que son grand corps, orne de taches lumineuses, percoit des horizons lointains que les autres ne peuvent atteindre.\n\nLa legende dit que la Lapigirafe emergea lorsqu'un petit lapin courageux se cacha aux racines d'une vieille girafe tandis que l'obscurite devorait la savane. De leur etreinte desperee, l'Arbre de Lumiere tissa deux esprits en un seul corps.\n\nLa Lapigirafe est la gardienne des horizons. Quand elle court dans l'herbe, la terre bondit de joie. Quand elle s'eleve pour combattre, les ombres fuient honteuses. Mais sa vraie force ne reside pas seulement dans la vitesse ou la hauteur, mais dans l'amitie qu'elle offre a ceux qui errent entre les branches des mondes.\n\nLes anciens esprits disent que la Lapigirafe sera toujours la ou quelqu'un tente de reparer ce qui a ete brise, apportant courage et espoir.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a cute bunny and the body of a tall giraffe. The bunny arms are soft, white, and glowing with gentle magical light. The giraffe body is golden with shimmering spots that glow like amber. The character wears a colorful robe with rainbow silk and star patterns. Its eyes shine bright green with playful energy. The scene is a fantasy savanna-meadow filled with glowing flowers and fireflies under a starry sky. The style is vibrant, whimsical, fantasy-themed, cartoonish, like an illustration from a children's fairy tale.",
+    "ImageFileName": "BunnyGiraffeNone.jpg"
+  },
+  {
+    "Combination": "BunnyHippoNone",
+    "Name": "Lapipotame",
+    "Story": "Le Lapipotame naquit lorsqu'un lapin et un hippopotame se rencontrerent au milieu d'une tempete d'eaux sombres. De leur amitie inattendue, l'Arbre de Lumiere tissa l'agilite du lapin avec la force de l'hippopotame. Le Lapipotame est doux et protecteur : avec ses bras agiles, il creuse des refuges, et avec son corps puissant, il ouvre des chemins a travers les eaux. Il apporte le calme la ou regne la peur et construit des ponts de confiance entre les mondes.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a bunny and the body of a hippo. The bunny arms are soft, white, glowing with magical light. The hippo body is strong and round, shimmering with a pearly gray glow. The character wears a robe dyed in rainbow hues with wave and flower embroidery. Its eyes are sapphire blue, full of calm joy. The scene is a fantasy pond with glowing lotus flowers, enchanted reeds, and magical koi fish. The style is colorful, whimsical, fantasy-themed, cartoon-like.",
+    "ImageFileName": "BunnyHippoNone.jpg"
+  },
+  {
+    "Combination": "GiraffeHippoNone",
+    "Name": "Girafopotame",
+    "Story": "Le Girafopotame est une creature nee du reve d'une girafe contemplant les etoiles et du chant d'un hippopotame resonnant sous les eaux. L'Arbre de Lumiere les unit en un seul corps pour apporter l'equilibre : la hauteur de la girafe et la solidite de l'hippopotame. Il veille sur les savanes de lumiere et les eaux profondes, cherchant a unir le ciel a la terre. Le Girafopotame est un mediateur entre les mondes, porteur de sagesse et de force douce.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the body of a giraffe and the body of a hippo combined, tall yet rounded and solid. The giraffe part is golden with glowing amber spots, while the hippo part is gray and pearly with soft magical ripples. The character wears a cloak patterned with stars and rivers. Its eyes are emerald and blue, showing both wisdom and calm. The scene is a magical grassland by a shimmering river under a starlit sky. The style is fantasy, vibrant, whimsical, cartoon-like.",
+    "ImageFileName": "GiraffeHippoNone.jpg"
+  },
+  {
+    "Combination": "BunnyGiraffeHippo",
+    "Name": "Lapigirafopotame",
+    "Story": "Le Lapigirafopotame est un heros legendaire, ne d'une alliance impossible : un lapin, une girafe et un hippopotame qui choisirent d'unir leurs destins. L'Arbre de Lumiere vit leur courage et leur donna un seul coeur. Avec les bras du lapin, il aide et protege. Avec le corps de la girafe, il voit loin. Avec la tete de l'hippopotame, il inspire la tranquillite et la sagesse. Il est le symbole de la diversite et de l'amitie entre des mondes differents.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a bunny, the body of a giraffe, and the head of a hippo. The bunny arms are soft and glowing, the giraffe torso tall and golden with glowing spots, and the hippo head round and gray with a calm aura. The character wears a robe embroidered with cosmic spirals and river motifs. Its eyes shine turquoise and sapphire, full of playful kindness. The scene is a magical savanna-river junction glowing with enchanted flowers and fireflies. The style is whimsical, colorful, fantasy-themed, cartoon-like.",
+    "ImageFileName": "BunnyGiraffeHippo.jpg"
+  },
+  {
+    "Combination": "GiraffeBunnyNone",
+    "Name": "Girapin",
+    "Story": "Le Girapin naquit lorsque les bras d'une girafe embrasserent un petit lapin tremblant dans la nuit. A partir de ce moment, l'Arbre de Lumiere les unit en un hybride inhabituel. Le Girapin est enjoue et intrepide : il utilise ses longs bras pour cueillir les etoiles et le corps du lapin pour bondir entre les ombres. C'est un esprit de joie qui porte rires et lumiere partout ou il va.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a giraffe and the body of a bunny. The giraffe arms are long, golden, and patterned with glowing amber spots. The bunny body is small, agile, and shimmering with pastel fur. The character wears a playful robe of rainbow silk with flower embroidery. Its eyes shine bright violet with mischievous curiosity. The scene is a magical meadow filled with glowing mushrooms and starlight fireflies. The style is whimsical, vibrant, fantasy, cartoon-like.",
+    "ImageFileName": "GiraffeBunnyNone.jpg"
+  },
+  {
+    "Combination": "GiraffeHippoBunny",
+    "Name": "Girafopotin",
+    "Story": "Le Girafopotin naquit au milieu d'une pluie de meteores, lorsqu'une girafe, un hippopotame et un lapin jurerent de proteger l'Arbre de Lumiere. De leur serment, les branches unirent trois esprits en un seul corps. Avec les bras de la girafe, il eleve la lumiere vers le ciel ; avec le corps de l'hippopotame, il protege la terre ; avec la tete du lapin, il apporte sourires et espoir. Le Girafopotin est considere comme le gardien de l'equilibre.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a giraffe, the body of a hippo, and the head of a bunny. The giraffe arms are tall and golden with glowing amber spots. The hippo torso is massive and pearly gray, glowing with magical ripples. The bunny head is soft, white, with long ears shimmering with pastel light. The character wears a robe embroidered with constellations and river waves. Its eyes shine turquoise and green, playful and wise. The background is a magical meadow by a glowing river under a starry sky. The style is whimsical, colorful, fantasy-themed, cartoon-like.",
+    "ImageFileName": "GiraffeHippoBunny.jpg"
+  },
+  {
+    "Combination": "HippoBunnyNone",
+    "Name": "Hipposaute",
+    "Story": "L'Hipposaute naquit d'un reve joueur dans lequel un lapin demandait la force d'un hippopotame. L'Arbre de Lumiere les unit en un etre equilibre : petit mais robuste, doux mais determine. L'Hipposaute utilise les bras de l'hippopotame pour proteger et le corps du lapin pour sauter les obstacles. Il apporte du courage aux petits et leur montre que la taille ne definit pas la force de l'ame.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a hippo and the body of a bunny. The hippo arms are strong, gray, glowing faintly with magical ripples. The bunny body is small and agile, shimmering with pastel fur. The character wears a robe with rainbow silk embroidered with lotus flowers and moons. Its eyes shine sapphire blue with playful calmness. The background is a whimsical meadow near a glowing pond. The style is vibrant, magical, cartoon-like.",
+    "ImageFileName": "HippoBunnyNone.jpg"
+  },
+  {
+    "Combination": "HippoGiraffeNone",
+    "Name": "Hippogirafe",
+    "Story": "L'Hippogirafe naquit lorsqu'un hippopotame jura de proteger une girafe perdue de l'obscurite. L'Arbre de Lumiere les unit en un seul etre pour tenir leur promesse. Il est fort et sage, construit des ponts entre le ciel et la terre. L'Hippogirafe est connue comme l'esprit qui apporte l'equilibre entre la force et la grace.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a hippo and the body of a giraffe. The hippo arms are massive, gray, glowing faintly with magic. The giraffe torso is tall, golden, decorated with glowing amber spots. The character wears a flowing robe with cosmic embroidery of suns and stars. Its eyes are emerald green, full of wisdom. The background is a magical savanna filled with glowing flowers beneath a starlit sky. The style is vibrant, fantasy-themed, cartoon-like.",
+    "ImageFileName": "HippoGiraffeNone.jpg"
+  },
+  {
+    "Combination": "HippoBunnyGiraffe",
+    "Name": "Hippogirafit",
+    "Story": "L'Hippogirafit est une creature de contrastes, nee lorsque trois mondes se rencontrerent dans l'Arbre de Lumiere. De l'hippopotame, il recut la puissance ; du lapin, l'agilite ; de la girafe, la vision. Il parcourt les branches de l'arbre en quete d'harmonie entre les extremes et montre que la vraie force nait de l'union des differences.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a hippo, the body of a bunny, and the head of a giraffe. The hippo arms are powerful and gray, shimmering with magical ripples. The bunny torso is agile, glowing with pastel fur. The giraffe head is tall and golden, decorated with glowing spots and runes. The character wears a robe patterned with moons and stars. Its eyes shine bright jade and turquoise, mixing playfulness and wisdom. The background is a magical clearing where savanna meets enchanted forest. The style is whimsical, colorful, fantasy, cartoon-like.",
+    "ImageFileName": "HippoBunnyGiraffe.jpg"
+  },
+  {
+    "Combination": "BunnyHippoGiraffe",
+    "Name": "Lapipotamgirafe",
+    "Story": "Le Lapipotamgirafe naquit au milieu d'une tempete de lumiere, lorsque trois amis tenterent de reparer une branche brisee de l'Arbre de Lumiere. Leur sacrifice se transforma en magie. C'est un gardien doux, portant en lui l'espoir et le courage de l'amitie.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a bunny, the body of a hippo, and the head of a giraffe. The bunny arms are small, soft, glowing with gentle magical light. The hippo torso is wide and strong, glowing with pearly gray. The giraffe head is golden with glowing amber patterns. The character wears a robe embroidered with rainbow spirals and celestial motifs. Its eyes shine violet and green, curious and kind. The background is a fantasy pond in a glowing savanna filled with fireflies. The style is vibrant, whimsical, fantasy, cartoonish.",
+    "ImageFileName": "BunnyHippoGiraffe.jpg"
+  },
+  {
+    "Combination": "GiraffeNoneHippo",
+    "Name": "Girafopotamir",
+    "Story": "Le Girafopotamir naquit d'un pacte entre un hippopotame et une girafe qui veillaient ensemble sur une branche tombee de l'Arbre de Lumiere. L'Arbre unit leurs forces et leur donna un corps commun. Le Girafopotamir est un esprit d'equilibre entre le pouvoir et la douceur, portant en lui la sagesse des deux mondes.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a giraffe and the head of a hippo, while the body is absent. The giraffe arms are long, golden, patterned with glowing amber spots. The hippo head is round, gray, shimmering with a calm magical aura. The character wears a robe decorated with celestial motifs and river-like embroidery. Its eyes shine sapphire and green, wise and gentle. The background is a magical savanna merging into a glowing pond under a starlit sky. The style is whimsical, vibrant, fantasy, cartoon-like.",
+    "ImageFileName": "GiraffeNoneHippo.jpg"
+  },
+  {
+    "Combination": "BunnyNoneHippo",
+    "Name": "Lapipotam",
+    "Story": "Le Lapipotam emergea lorsqu'un lapin et un hippopotame se tinrent ensemble sous la tempete de la nuit. L'Arbre de Lumiere les tissa en un seul corps, preservant l'agilite du lapin et la sagesse de l'hippopotame. Le Lapipotam est un symbole de solidarite et d'amitie entre le petit et le grand.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a bunny and the head of a hippo, with no torso visible. The bunny arms are soft, glowing with pastel magical light. The hippo head is massive, gray, shimmering with pearly ripples. The character wears a robe patterned with rainbow stars and lotus motifs. Its eyes shine turquoise and sapphire, playful yet calm. The background is a magical pond surrounded by glowing flowers and reeds. The style is whimsical, colorful, fantasy, cartoon-like.",
+    "ImageFileName": "BunnyNoneHippo.jpg"
+  },
+  {
+    "Combination": "HippoNoneBunny",
+    "Name": "Hippolapin",
+    "Story": "L'Hippolapin apparut lorsqu'un lapin demanda la protection d'un hippopotame pour survivre a l'obscurite. L'Arbre de Lumiere unit leurs ames et donna vie a cet etre joueur mais puissant. L'Hippolapin est un protecteur joyeux qui apporte l'espoir la ou regne la peur.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a hippo and the head of a bunny, with no torso present. The hippo arms are gray, powerful, glowing faintly with magic. The bunny head is soft, white, with long ears shimmering with pastel light. The character wears a robe of rainbow silk embroidered with stars and moons. Its eyes shine violet with mischievous curiosity. The background is a fantastical meadow lit by enchanted fireflies. The style is vibrant, whimsical, cartoonish, fantasy.",
+    "ImageFileName": "HippoNoneBunny.jpg"
+  },
+  {
+    "Combination": "NoneBunnyHippo",
+    "Name": "Lapipotamos",
+    "Story": "Le Lapipotamos naquit lorsqu'un lapin reva d'avoir la force d'un hippopotame. L'Arbre de Lumiere transforma le reve en realite, unissant deux mondes opposes. Le Lapipotamos est doux et pacifique, mais possede une force cachee qui s'eveille pour defendre la lumiere. Il est le symbole des reves accomplis.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the body of a bunny and the head of a hippo, no arms visible. The bunny torso is small and pastel, glowing with gentle magical light. The hippo head is gray and calm, shimmering with pearly waves. The character wears a cloak embroidered with flowers and constellations. Its eyes shine turquoise and jade, warm and wise. The background is a glowing pond in an enchanted forest. The style is whimsical, colorful, cartoon-like, fantasy.",
+    "ImageFileName": "NoneBunnyHippo.jpg"
+  },
+  {
+    "Combination": "NoneGiraffeHippo",
+    "Name": "Girafotame",
+    "Story": "Le Girafotame emergea lorsqu'un hippopotame chercha la hauteur d'une girafe pour surveiller la savane. L'Arbre de Lumiere les unit en leur donnant un corps commun. Le Girafotame est un esprit de stabilite qui maintient l'equilibre entre les eaux et le ciel. Il est le protecteur des horizons.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the body of a giraffe and the head of a hippo, without arms. The giraffe torso is tall, golden, glowing with amber spots. The hippo head is massive and gray, shimmering with magical calmness. The character wears a robe embroidered with suns, moons, and river patterns. Its eyes shine sapphire and emerald, wise and steady. The background is a magical savanna next to a glowing lake. The style is whimsical, fantasy, colorful, cartoon-like.",
+    "ImageFileName": "NoneGiraffeHippo.jpg"
+  },
+  {
+    "Combination": "NoneHippoGiraffe",
+    "Name": "Hippogiraffon",
+    "Story": "L'Hippogiraffon naquit lorsqu'un hippopotame reva de voir au-dela de l'horizon des eaux. L'Arbre de Lumiere l'unit avec l'esprit d'une girafe et leur donna un corps commun. L'Hippogiraffon est un esprit de vision et d'endurance qui unit la stabilite des eaux a la hauteur du ciel.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the body of a hippo and the head of a giraffe, without arms. The hippo torso is massive, gray, glowing with pearly ripples. The giraffe head is tall, golden, patterned with glowing amber spots. The character wears a cloak embroidered with constellations and lotus flowers. Its eyes shine emerald and turquoise, filled with wisdom. The background is a magical riverbank merging with a glowing savanna. The style is whimsical, vibrant, cartoon-like, fantasy.",
+    "ImageFileName": "NoneHippoGiraffe.jpg"
+  },
+  {
+    "Combination": "BunnyNoneGiraffe",
+    "Name": "Lapigiraffe",
+    "Story": "Le Lapigiraffe fut cree lorsqu'un lapin et une girafe tenterent ensemble d'illuminer une branche tombee de l'Arbre de Lumiere. La magie les unit en un seul corps. Le Lapigiraffe est un esprit de courage et d'amitie, capable d'apporter espoir et lumiere dans l'obscurite.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a bunny and the head of a giraffe, without a torso. The bunny arms are soft, glowing with pastel magical light. The giraffe head is tall, golden, patterned with glowing spots. The character wears a robe with rainbow silk embroidered with stars and flowers. Its eyes shine violet and jade, playful yet noble. The background is a magical meadow with enchanted vines under a star-filled sky. The style is whimsical, colorful, cartoonish, fantasy.",
+    "ImageFileName": "BunnyNoneGiraffe.jpg"
+  },
+  {
+    "Combination": "GiraffeNoneBunny",
+    "Name": "Girafin",
+    "Story": "Le Girafin emergea du rire d'un lapin accroche au cou d'une girafe. L'Arbre de Lumiere trouva leur joie et leur donna un corps commun. Le Girafin est joueur et joyeux, mais a aussi un grand coeur, pret a defendre la lumiere. Il est souvent decrit comme l'esprit de l'optimisme.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a giraffe and the head of a bunny, without torso. The giraffe arms are long and golden, patterned with glowing amber runes. The bunny head is soft and white, glowing with pastel light. The character wears a cloak embroidered with moons and blossoms. Its eyes shine turquoise and amber, full of curiosity. The background is a magical savanna blending into an enchanted meadow. The style is vibrant, whimsical, cartoon-like.",
+    "ImageFileName": "GiraffeNoneBunny.jpg"
+  },
+  {
+    "Combination": "HippoNoneGiraffe",
+    "Name": "Hippiraf",
+    "Story": "L'Hippiraf naquit lorsqu'un hippopotame et une girafe veillaient ensemble sur la savane. L'Arbre de Lumiere les unit en leur donnant un coeur commun. L'Hippiraf est un esprit de vigilance qui porte l'equilibre entre la force et la clarte. Il est le protecteur des nuits etoilees.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a hippo and the head of a giraffe, torso absent. The hippo arms are gray and powerful, glowing faintly with magical waves. The giraffe head is golden and noble, patterned with amber runes. The character wears a robe embroidered with river and starlight motifs. Its eyes shine jade and blue, wise and calm. The background is a glowing savanna under enchanted constellations. The style is whimsical, fantasy, colorful, cartoonish.",
+    "ImageFileName": "HippoNoneGiraffe.jpg"
+  },
+  {
+    "Combination": "HippoGiraffeBunny",
+    "Name": "Hippogirapin",
+    "Story": "L'Hippogirapin naquit au moment ou un hippopotame, une girafe et un lapin leverent ensemble les yeux vers la lumiere de l'Arbre. Leurs esprits se fondirent en un nouvel etre. C'est un esprit de collaboration et d'harmonie qui apporte paix et sagesse dans les luttes entre les mondes.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a hippo, the body of a giraffe, and the head of a bunny. The hippo arms are gray, massive, glowing faintly with magical light. The giraffe torso is tall, golden, patterned with glowing amber spots. The bunny head is white, with long glowing ears. The character wears a robe embroidered with rivers and constellations. Its eyes shine turquoise and amber, gentle and curious. The background is a glowing savanna filled with enchanted fireflies. The style is whimsical, vibrant, cartoon-like, fantasy.",
+    "ImageFileName": "HippoGiraffeBunny.jpg"
+  },
+  {
+    "Combination": "GiraffeBunnyHippo",
+    "Name": "Girafopotamos",
+    "Story": "Le Girafopotamos apparut lorsque trois creatures jurerent de proteger ensemble les branches de l'arbre. De leur amitie, l'Arbre de Lumiere crea un corps commun. Le Girafopotamos est un esprit d'unite et d'amitie qui porte en lui l'espoir d'unir des mondes differents.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a giraffe, the body of a bunny, and the head of a hippo. The giraffe arms are long, golden, patterned with glowing amber runes. The bunny torso is small and pastel, glowing with magical light. The hippo head is gray, calm, and pearly with shimmering ripples. The character wears a cloak decorated with moons and stars. Its eyes shine sapphire and jade, playful yet steady. The background is a magical clearing under an enchanted sky. The style is whimsical, colorful, fantasy, cartoonish.",
+    "ImageFileName": "GiraffeBunnyHippo.jpg"
+  },
+  {
+    "Combination": "NoneGiraffeBunny",
+    "Name": "Giralapin",
+    "Story": "Le Giralapin naquit lorsqu'un lapin monta sur les epaules d'une girafe pour regarder le ciel. L'Arbre de Lumiere vit leur joie et les unit en un corps commun. Le Giralapin est un esprit joueur et amical qui repand gaite et espoir partout ou il va.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the body of a giraffe and the head of a bunny, no arms visible. The giraffe torso is golden, tall, glowing with amber constellations. The bunny head is soft, white, glowing with pastel light and long ears sparkling with magical runes. The character wears a cloak embroidered with blossoms and spirals. Its eyes shine jade and turquoise, full of cheer. The background is an enchanted savanna filled with glowing mushrooms. The style is whimsical, colorful, fantasy, cartoonish.",
+    "ImageFileName": "NoneGiraffeBunny.jpg"
+  },
+  {
+    "Combination": "NoneHippoBunny",
+    "Name": "Hippouriel",
+    "Story": "L'Hippouriel apparut lorsqu'un lapin et un hippopotame chantaient ensemble au bord d'un lac etoile. L'Arbre de Lumiere tissa leur chant et leurs rires en un corps commun. L'Hippouriel est un esprit de gaite et d'harmonie qui porte l'espoir a ceux qui errent.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the body of a hippo and the head of a bunny, no arms visible. The hippo torso is massive, gray, shimmering with pearly light. The bunny head is white, glowing with pastel ears that sparkle with magical runes. The character wears a cloak embroidered with constellations and lotus flowers. Its eyes shine turquoise and amber, curious and kind. The background is a whimsical pond glowing with fireflies. The style is colorful, vibrant, fantasy, cartoon-like.",
+    "ImageFileName": "NoneHippoBunny.jpg"
+  },
+  {
+    "Combination": "NoneBunnyGiraffe",
+    "Name": "Lapigiraffine",
+    "Story": "La Lapigiraffine apparut lorsqu'un lapin souhaita surveiller une savane. L'Arbre de Lumiere entendit son souhait et l'unit avec l'esprit d'une girafe. La Lapigiraffine est un esprit de responsabilite et de joie qui porte en lui le desir de proteger.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the body of a bunny and the head of a giraffe, no arms visible. The bunny torso is small, glowing pastel, agile. The giraffe head is tall and golden, glowing with amber constellations. The character wears a robe embroidered with rainbow spirals and stars. Its eyes shine sapphire and emerald, curious and kind. The background is an enchanted savanna lit by magical fireflies. The style is whimsical, vibrant, fantasy, cartoon-like.",
+    "ImageFileName": "NoneBunnyGiraffe.jpg"
+  },
+  {
+    "Combination": "GiraffeGiraffeHippo",
+    "Name": "Doublegirafe",
+    "Story": "La Doublegirafe naquit lorsque deux esprits de girafe veillaient ensemble sur un hippopotame perdu. L'Arbre de Lumiere les unit en un seul etre, grand et robuste, mais doux. La Doublegirafe est la gardienne des horizons qui porte l'equilibre entre la force et la vision.",
+    "ImagePrompt": "An anthropomorphic hybrid with the arms and body of a giraffe and the head of a hippo. The giraffe parts are tall and golden, glowing with amber constellations, while the hippo head is gray and calm, shimmering with pearly magic. The character wears a cloak embroidered with suns and rivers. Its eyes shine emerald and sapphire. The background is a glowing savanna by a mystical pond. The style is whimsical, colorful, fantasy, cartoon-like.",
+    "ImageFileName": "GiraffeGiraffeHippo.jpg"
+  },
+  {
+    "Combination": "GiraffeGiraffeBunny",
+    "Name": "Girafunix",
+    "Story": "Le Girafunix emergea lorsque deux girafes voulurent partager leur hauteur avec un petit lapin. L'Arbre de Lumiere les unit en une creature d'amitie et de joie. Le Girafunix apporte l'espoir aux petits, montrant que la grandeur peut etre partagee.",
+    "ImagePrompt": "An anthropomorphic hybrid with the arms and body of a giraffe and the head of a bunny. The giraffe body is golden, patterned with glowing amber spots. The bunny head is soft, white, with long ears glowing pastel. The character wears a robe with star and flower embroidery. Its eyes shine violet and jade. The background is a magical meadow filled with fireflies under enchanted skies. The style is whimsical, fantasy, cartoon-like.",
+    "ImageFileName": "GiraffeGiraffeBunny.jpg"
+  },
+  {
+    "Combination": "BunnyBunnyGiraffe",
+    "Name": "Lapirafix",
+    "Story": "Le Lapirafix apparut lorsque deux lapins reva ensemble d'atteindre le ciel a travers les yeux d'une girafe. L'Arbre de Lumiere les unit en un seul etre. C'est un esprit de curiosite et de courage qui bondit entre les mondes en portant la lumiere dans les ombres.",
+    "ImagePrompt": "An anthropomorphic hybrid with the arms and body of a bunny and the head of a giraffe. The bunny parts are small, white, glowing with playful magical light, while the giraffe head is tall, golden, glowing with amber constellations. The character wears a cloak embroidered with moons and blossoms. Its eyes shine turquoise and jade. The background is a glowing meadow with enchanted vines. The style is whimsical, colorful, fantasy, cartoonish.",
+    "ImageFileName": "BunnyBunnyGiraffe.jpg"
+  },
+  {
+    "Combination": "BunnyBunnyHippo",
+    "Name": "Lapipotix",
+    "Story": "Le Lapipotix naquit du reve de deux lapins qui demandaient la force d'un hippopotame pour proteger leurs amis. L'Arbre de Lumiere unit leurs ames. C'est un esprit joueur mais protecteur qui apporte du courage aux petits et la paix aux perdus.",
+    "ImagePrompt": "An anthropomorphic hybrid with the arms and body of a bunny and the head of a hippo. The bunny torso and arms are small, agile, glowing pastel, while the hippo head is massive, gray, shimmering with pearly waves. The character wears a robe decorated with rainbow stars. Its eyes shine sapphire and emerald. The background is a magical pond filled with glowing lotus flowers. The style is whimsical, vibrant, fantasy, cartoonish.",
+    "ImageFileName": "BunnyBunnyHippo.jpg"
+  },
+  {
+    "Combination": "HippoHippoBunny",
+    "Name": "Hipponelix",
+    "Story": "L'Hipponelix apparut lorsque deux hippopotames jurerent de proteger un lapin. L'Arbre de Lumiere les unit en un seul corps. C'est un esprit de douceur et de force qui porte la paix entre les mondes.",
+    "ImagePrompt": "An anthropomorphic hybrid with the arms and body of a hippo and the head of a bunny. The hippo torso and arms are massive, gray, glowing with magical ripples, while the bunny head is white with long pastel ears. The character wears a robe patterned with lotus and stars. Its eyes shine violet and jade. The background is a magical riverbank with glowing flowers. The style is whimsical, colorful, fantasy, cartoon-like.",
+    "ImageFileName": "HippoHippoBunny.jpg"
+  },
+  {
+    "Combination": "HippoHippoGiraffe",
+    "Name": "Hippogaffix",
+    "Story": "L'Hippogaffix naquit lorsque deux hippopotames chercherent la sagesse d'une girafe. L'Arbre de Lumiere les unit en un esprit de stabilite et de clarte. Il veille sur les branches en portant l'equilibre entre l'eau et le ciel.",
+    "ImagePrompt": "An anthropomorphic hybrid with the arms and body of a hippo and the head of a giraffe. The hippo body is gray, strong, glowing with pearly ripples, while the giraffe head is golden, tall, patterned with glowing amber constellations. The character wears a cloak embroidered with moons and rivers. Its eyes shine emerald and turquoise. The background is a glowing savanna under enchanted stars. The style is whimsical, vibrant, fantasy, cartoon-like.",
+    "ImageFileName": "HippoHippoGiraffe.jpg"
+  },
+  {
+    "Combination": "GiraffeHippoHippo",
+    "Name": "Girafopotix",
+    "Story": "Le Girafopotix apparut lorsqu'une girafe jura de veiller sur deux hippopotames au milieu d'une tempete. L'Arbre de Lumiere les unit en un seul corps. C'est un esprit de protection et d'amitie qui porte la puissance des eaux et la vision du ciel.",
+    "ImagePrompt": "An anthropomorphic hybrid with the arms of a giraffe, the body and head of a hippo. The giraffe arms are long and golden with glowing amber runes, while the hippo torso and head are gray, strong, shimmering with magical waves. The character wears a robe embroidered with constellations. Its eyes shine sapphire and jade. The background is a glowing pond beneath starlit skies. The style is whimsical, colorful, fantasy, cartoon-like.",
+    "ImageFileName": "GiraffeHippoHippo.jpg"
+  },
+  {
+    "Combination": "BunnyHippoHippo",
+    "Name": "Lapipotixdouble",
+    "Story": "Le Lapipotixdouble naquit lorsqu'un lapin apporta de la joie a deux hippopotames. L'Arbre de Lumiere les unit en un etre protecteur et joyeux. C'est un esprit d'amitie et de courage qui porte la lumiere dans l'obscurite.",
+    "ImagePrompt": "An anthropomorphic hybrid with the arms of a bunny, the body and head of a hippo. The bunny arms are soft, glowing pastel, while the hippo torso and head are strong, gray, shimmering with pearly magic. The character wears a robe embroidered with lotus flowers and rainbow spirals. Its eyes shine turquoise and emerald. The background is a whimsical pond filled with glowing reeds. The style is vibrant, fantasy, cartoon-like.",
+    "ImageFileName": "BunnyHippoHippo.jpg"
+  },
+  {
+    "Combination": "BunnyGiraffeGiraffe",
+    "Name": "Lapibirgirafe",
+    "Story": "La Lapibirgirafe apparut lorsqu'un lapin voulut partager son jeu avec deux girafes. L'Arbre de Lumiere les unit en un seul etre. C'est un esprit de curiosite et d'amitie qui unit la vivacite a la grandeur.",
+    "ImagePrompt": "An anthropomorphic hybrid with the arms of a bunny, the body and head of a giraffe. The bunny arms are soft and white, glowing with pastel magic, while the giraffe torso and head are tall, golden, glowing with amber constellations. The character wears a cloak embroidered with moons and stars. Its eyes shine turquoise and jade. The background is a magical meadow with glowing fireflies. The style is whimsical, colorful, fantasy, cartoonish.",
+    "ImageFileName": "BunnyGiraffeGiraffe.jpg"
+  },
+  {
+    "Combination": "HippoGiraffeGiraffe",
+    "Name": "Hippobirgirafe",
+    "Story": "L'Hippobirgirafe emergea lorsqu'un hippopotame et deux girafes veillaient ensemble sur une branche de l'arbre. De leur amitie naquit cet etre unique, un esprit d'equilibre et de sagesse.",
+    "ImagePrompt": "An anthropomorphic hybrid with the arms of a hippo, the body and head of a giraffe. The hippo arms are gray, glowing faintly with magic, while the giraffe body and head are tall, golden, glowing with amber constellations. The character wears a robe embroidered with suns and rivers. Its eyes shine emerald and turquoise. The background is a glowing savanna beneath enchanted stars. The style is whimsical, vibrant, fantasy, cartoon-like.",
+    "ImageFileName": "HippoGiraffeGiraffe.jpg"
+  },
+  {
+    "Combination": "HippoBunnyBunny",
+    "Name": "Hippolapins",
+    "Story": "L'Hippolapins naquit lorsqu'un hippopotame protegea deux lapins effrayes par l'obscurite. L'Arbre de Lumiere les unit en un corps commun. C'est un esprit de joie et de resilience qui porte l'espoir aux petits.",
+    "ImagePrompt": "An anthropomorphic hybrid with the arms of a hippo, the body and head of a bunny. The hippo arms are strong, gray, shimmering with pearly ripples, while the bunny torso and head are small, white, glowing with pastel light. The character wears a robe embroidered with constellations and blossoms. Its eyes shine sapphire and jade. The background is a whimsical meadow glowing with mushrooms. The style is colorful, vibrant, fantasy, cartoon-like.",
+    "ImageFileName": "HippoBunnyBunny.jpg"
+  },
+  {
+    "Combination": "GiraffeBunnyBunny",
+    "Name": "Girafelapins",
+    "Story": "La Girafelapins apparut lorsqu'une girafe embrassa deux lapins. L'Arbre de Lumiere les unit en un seul etre. C'est un esprit de compassion et de jeu qui porte la gaite entre les branches des mondes.",
+    "ImagePrompt": "An anthropomorphic hybrid with the arms of a giraffe, the body and head of a bunny. The giraffe arms are long, golden, glowing with runes, while the bunny torso and head are soft, white, glowing with pastel colors. The character wears a cloak embroidered with moons and flowers. Its eyes shine violet and turquoise. The background is a magical meadow filled with glowing mushrooms under enchanted skies. The style is whimsical, colorful, fantasy, cartoon-like.",
+    "ImageFileName": "GiraffeBunnyBunny.jpg"
+  },
+  {
+    "Combination": "BunnyHippoBunny",
+    "Name": "Lapipotarel",
+    "Story": "Le Lapipotarel naquit lorsqu'un lapin chercha l'amitie d'un hippopotame et que l'Arbre de Lumiere unit leurs destins. Avec des bras agiles et une tete joueuse, mais un corps solide, c'est un esprit de l'equilibre entre la fragilite et la force, portant gaite et protection aux mondes.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms and head of a bunny and the body of a hippo. The bunny arms are small, soft, glowing pastel, the hippo torso is wide, gray, shimmering with pearly ripples, and the bunny head is white, glowing with magical ears. The character wears a robe embroidered with moons and flowers. Its eyes shine turquoise and violet, full of playful courage. The background is a magical pond with glowing reeds and enchanted fireflies. The style is whimsical, colorful, fantasy, cartoon-like.",
+    "ImageFileName": "BunnyHippoBunny.jpg"
+  },
+  {
+    "Combination": "BunnyGiraffeBunny",
+    "Name": "Lapirafonix",
+    "Story": "Le Lapirafonix emergea lorsque deux lapins desirerent voir le monde d'en haut. L'Arbre de Lumiere repondit en leur donnant le corps d'une girafe, mais preserva leurs coeurs joueurs. C'est un esprit de reves et d'espoir qui porte dans ses yeux la lumiere de l'enfance.",
+    "ImagePrompt": "An anthropomorphic hybrid with the arms and head of a bunny and the body of a giraffe. The bunny arms and head are white, glowing with pastel magical light, while the giraffe torso is tall and golden, decorated with glowing amber spots. The character wears a robe embroidered with stars and rainbow spirals. Its eyes shine emerald and violet, joyful and curious. The background is a glowing savanna meadow under starlit skies. The style is whimsical, colorful, fantasy, cartoonish.",
+    "ImageFileName": "BunnyGiraffeBunny.jpg"
+  },
+  {
+    "Combination": "GiraffeHippoGiraffe",
+    "Name": "Girafopotamrel",
+    "Story": "Le Girafopotamrel apparut lorsque deux girafes veillaient sur un hippopotame perdu sous la lumiere des etoiles. L'Arbre de Lumiere les unit pour maintenir l'equilibre entre le ciel et l'eau. C'est un esprit de protection et de clarte qui porte vision et force douce.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms and head of a giraffe and the body of a hippo. The giraffe arms are long and golden with glowing constellations, the hippo torso is massive and gray with pearly ripples, and the giraffe head is tall, glowing amber with runes. The character wears a cloak embroidered with rivers and stars. Its eyes shine turquoise and jade. The background is a magical riverbank in a glowing savanna. The style is whimsical, colorful, fantasy, cartoon-like.",
+    "ImageFileName": "GiraffeHippoGiraffe.jpg"
+  },
+  {
+    "Combination": "GiraffeBunnyGiraffe",
+    "Name": "Giraffiepix",
+    "Story": "Le Giraffiepix naquit lorsque deux girafes protegerent un petit lapin. L'Arbre de Lumiere les unit en un seul corps, leur conferant l'agilite de la terre et la vision du ciel. C'est un esprit d'amitie et de sagesse capable d'unir des mondes opposes.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms and head of a giraffe and the body of a bunny. The giraffe arms are long and golden, the bunny torso is agile and glowing with pastel light, while the giraffe head is tall and noble, decorated with amber runes. The character wears a robe embroidered with moons and flowers. Its eyes shine emerald and violet. The background is a whimsical meadow lit by enchanted fireflies. The style is vibrant, colorful, fantasy, cartoonish.",
+    "ImageFileName": "GiraffeBunnyGiraffe.jpg"
+  },
+  {
+    "Combination": "HippoBunnyHippo",
+    "Name": "Hippopotarel",
+    "Story": "L'Hippopotarel apparut lorsque deux hippopotames voulurent proteger un fragile lapin. L'Arbre de Lumiere les unit en un corps commun, petit mais robuste. C'est un esprit de protection et de courage qui porte l'equilibre entre le jeu et la force.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms and head of a hippo and the body of a bunny. The hippo arms are strong, gray, glowing faintly with magic, the bunny torso is small and pastel, agile, while the hippo head is large and calm, shimmering with pearly waves. The character wears a robe embroidered with lotus and constellations. Its eyes shine sapphire and emerald. The background is a magical meadow near a glowing pond. The style is whimsical, colorful, fantasy, cartoon-like.",
+    "ImageFileName": "HippoBunnyHippo.jpg"
+  },
+  {
+    "Combination": "HippoGiraffeHippo",
+    "Name": "Hippogaffon",
+    "Story": "L'Hippogaffon naquit lorsque deux hippopotames et une girafe partagerent un reve commun : unir les eaux et le ciel. L'Arbre de Lumiere les unit en un seul corps. C'est un esprit de stabilite et de sagesse qui apporte la clarte au milieu de la tempete.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms and head of a hippo and the body of a giraffe. The hippo arms are massive and gray, shimmering with pearly light, the giraffe torso is tall and golden with glowing amber spots, and the hippo head is large and noble. The character wears a cloak embroidered with rivers and stars. Its eyes shine turquoise and jade. The background is a glowing savanna with enchanted fireflies under starlit skies. The style is whimsical, colorful, fantasy, cartoon-like.",
+    "ImageFileName": "HippoGiraffeHippo.jpg"
+  }
+]

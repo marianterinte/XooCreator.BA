@@ -21,6 +21,7 @@ public class XooDbContext : DbContext
     public DbSet<CreditWallet> CreditWallets => Set<CreditWallet>();
     public DbSet<CreditTransaction> CreditTransactions => Set<CreditTransaction>();
     public DbSet<BestiaryItem> BestiaryItems => Set<BestiaryItem>();
+    public DbSet<BestiaryItemTranslation> BestiaryItemTranslations => Set<BestiaryItemTranslation>();
     public DbSet<UserBestiary> UserBestiary => Set<UserBestiary>();
     public DbSet<Tree> Trees => Set<Tree>();
     public DbSet<TreeChoice> TreeChoices => Set<TreeChoice>();
