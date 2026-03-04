@@ -44,6 +44,7 @@ public class XooDbContext : DbContext
     public DbSet<HeroDefinitionDefinition> HeroDefinitionDefinitions => Set<HeroDefinitionDefinition>();
     public DbSet<HeroDefinitionDefinitionTranslation> HeroDefinitionDefinitionTranslations => Set<HeroDefinitionDefinitionTranslation>();
     public DbSet<PlatformSetting> PlatformSettings => Set<PlatformSetting>();
+    public DbSet<WelcomeFlowConfig> WelcomeFlowConfigs => Set<WelcomeFlowConfig>();
     
     public DbSet<TreeRegion> TreeRegions => Set<TreeRegion>();
     public DbSet<TreeStoryNode> TreeStoryNodes => Set<TreeStoryNode>();

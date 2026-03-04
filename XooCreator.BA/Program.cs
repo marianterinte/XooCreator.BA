@@ -83,6 +83,7 @@ builder.Services.Configure<ImageCompressionOptions>(builder.Configuration.GetSec
 builder.Services.Configure<MarketplaceCacheOptions>(builder.Configuration.GetSection(MarketplaceCacheOptions.SectionName));
 builder.Services.Configure<XooCreator.BA.Features.Stories.Configuration.WelcomeFlowOptions>(
     builder.Configuration.GetSection(XooCreator.BA.Features.Stories.Configuration.WelcomeFlowOptions.SectionName));
+builder.Services.AddScoped<XooCreator.BA.Features.Stories.Services.IWelcomeFlowConfigService, XooCreator.BA.Features.Stories.Services.WelcomeFlowConfigService>();
 builder.Services.AddHostedService<StoryPublishQueueWorker>();
 builder.Services.AddHostedService<StoryVersionQueueWorker>();
 builder.Services.AddHostedService<StoryImportQueueWorker>();

@@ -131,3 +131,20 @@ public record StoryCompletionInfo
     public DateTime? CompletedAt { get; init; }
 }
 
+/// <summary>
+/// Welcome Flow config for API: entry point + next story per age group and gender.
+/// </summary>
+public record WelcomeFlowConfigDto
+{
+    public string EntryPointStoryId { get; init; } = string.Empty;
+    public WelcomeFlowAgeGroupDto Kindergarten { get; init; } = new();
+    public WelcomeFlowAgeGroupDto Primary { get; init; } = new();
+    public WelcomeFlowAgeGroupDto Older { get; init; } = new();
+}
+
+public record WelcomeFlowAgeGroupDto
+{
+    public string Girl { get; init; } = string.Empty;
+    public string Boy { get; init; } = string.Empty;
+}
+

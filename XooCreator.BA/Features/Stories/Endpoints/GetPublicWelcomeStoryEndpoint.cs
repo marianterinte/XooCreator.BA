@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Features.Stories.Configuration;
 using XooCreator.BA.Features.Stories.Services;
@@ -12,35 +11,37 @@ namespace XooCreator.BA.Features.Stories.Endpoints;
 
 /// <summary>
 /// Public endpoint for the welcome story (no authentication required).
-/// Allowed story IDs and default are read from WelcomeFlow options.
+/// Allowed story IDs and default are read from WelcomeFlow config (DB with appsettings fallback).
 /// </summary>
 [Endpoint]
 public class GetPublicWelcomeStoryEndpoint
 {
     private readonly IStoriesService _storiesService;
+    private readonly IWelcomeFlowConfigService _welcomeFlowConfig;
     private readonly ILogger<GetPublicWelcomeStoryEndpoint> _logger;
-    private readonly WelcomeFlowOptions _welcomeFlowOptions;
 
     public GetPublicWelcomeStoryEndpoint(
         IStoriesService storiesService,
-        ILogger<GetPublicWelcomeStoryEndpoint> logger,
-        IOptions<WelcomeFlowOptions> welcomeFlowOptions)
+        IWelcomeFlowConfigService welcomeFlowConfig,
+        ILogger<GetPublicWelcomeStoryEndpoint> logger)
     {
         _storiesService = storiesService;
+        _welcomeFlowConfig = welcomeFlowConfig;
         _logger = logger;
-        _welcomeFlowOptions = welcomeFlowOptions.Value;
     }
 
     [Route("/api/{locale}/stories/public/welcome")] // GET /api/{locale}/stories/public/welcome?storyId=...
     public static async Task<Results<Ok<GetStoryByIdResponse>, NotFound, BadRequest<string>>> HandleGet(
         [FromRoute] string locale,
         [FromQuery] string? storyId,
-        [FromServices] GetPublicWelcomeStoryEndpoint ep)
+        [FromServices] GetPublicWelcomeStoryEndpoint ep,
+        CancellationToken ct)
     {
-        var allowedWelcomeStoryIds = ep._welcomeFlowOptions.GetAllowedStoryIds().ToList();
+        var options = await ep._welcomeFlowConfig.GetOptionsAsync(ct);
+        var allowedWelcomeStoryIds = options.GetAllowedStoryIds().ToList();
         var welcomeStoryId = !string.IsNullOrWhiteSpace(storyId)
             ? storyId!.Trim()
-            : ep._welcomeFlowOptions.GetDefaultStoryId();
+            : options.GetDefaultStoryId();
 
         if (string.IsNullOrWhiteSpace(welcomeStoryId) || !allowedWelcomeStoryIds.Any(id => string.Equals(id, welcomeStoryId, StringComparison.OrdinalIgnoreCase)))
         {
