@@ -2,44 +2,47 @@ using System;
 using System.Linq;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using XooCreator.BA.Infrastructure.Endpoints;
+using XooCreator.BA.Features.Stories.Configuration;
 using XooCreator.BA.Features.Stories.Services;
 using XooCreator.BA.Features.Stories.DTOs;
 
 namespace XooCreator.BA.Features.Stories.Endpoints;
 
 /// <summary>
-/// Public endpoint for the welcome story (no authentication required)
-/// Supports both welcome stories: ionelbacosca-s251212183034 (kindergarten) and marianterinte-s260228163555 (primary/older)
+/// Public endpoint for the welcome story (no authentication required).
+/// Allowed story IDs and default are read from WelcomeFlow options.
 /// </summary>
 [Endpoint]
 public class GetPublicWelcomeStoryEndpoint
 {
     private readonly IStoriesService _storiesService;
     private readonly ILogger<GetPublicWelcomeStoryEndpoint> _logger;
-    
-    public GetPublicWelcomeStoryEndpoint(IStoriesService storiesService, ILogger<GetPublicWelcomeStoryEndpoint> logger)
+    private readonly WelcomeFlowOptions _welcomeFlowOptions;
+
+    public GetPublicWelcomeStoryEndpoint(
+        IStoriesService storiesService,
+        ILogger<GetPublicWelcomeStoryEndpoint> logger,
+        IOptions<WelcomeFlowOptions> welcomeFlowOptions)
     {
         _storiesService = storiesService;
         _logger = logger;
+        _welcomeFlowOptions = welcomeFlowOptions.Value;
     }
 
-    [Route("/api/{locale}/stories/public/welcome")] // GET /api/{locale}/stories/public/welcome?storyId=marianterinte-s260228163555
+    [Route("/api/{locale}/stories/public/welcome")] // GET /api/{locale}/stories/public/welcome?storyId=...
     public static async Task<Results<Ok<GetStoryByIdResponse>, NotFound, BadRequest<string>>> HandleGet(
         [FromRoute] string locale,
         [FromQuery] string? storyId,
         [FromServices] GetPublicWelcomeStoryEndpoint ep)
     {
-        // List of allowed welcome story IDs (available without login)
-        var allowedWelcomeStoryIds = new[] { "ionelbacosca-s251212183034", "marianterinte-s260228163555" };
-        
-        // Use provided storyId or default to kindergarten welcome story for backward compatibility
-        var welcomeStoryId = !string.IsNullOrWhiteSpace(storyId) 
-            ? storyId 
-            : "ionelbacosca-s251212183034";
-        
-        // Validate that the storyId is one of the allowed welcome stories
-        if (!allowedWelcomeStoryIds.Any(id => string.Equals(id, welcomeStoryId, StringComparison.OrdinalIgnoreCase)))
+        var allowedWelcomeStoryIds = ep._welcomeFlowOptions.GetAllowedStoryIds().ToList();
+        var welcomeStoryId = !string.IsNullOrWhiteSpace(storyId)
+            ? storyId!.Trim()
+            : ep._welcomeFlowOptions.GetDefaultStoryId();
+
+        if (string.IsNullOrWhiteSpace(welcomeStoryId) || !allowedWelcomeStoryIds.Any(id => string.Equals(id, welcomeStoryId, StringComparison.OrdinalIgnoreCase)))
         {
             return TypedResults.BadRequest($"Invalid welcome story ID. Allowed IDs: {string.Join(", ", allowedWelcomeStoryIds)}");
         }
