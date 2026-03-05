@@ -1042,6 +1042,12 @@ public partial class ImportFullStoryEndpoint
             : StoryType.Indie;
         var coverImageUrl = root.TryGetProperty("coverImageUrl", out var coverElement) ? ExtractFilename(coverElement.GetString() ?? "") : null;
         var storyTopic = root.TryGetProperty("storyTopic", out var topicElement) ? topicElement.GetString() : null;
+
+        // Fallback language for flat text on dialog nodes/edges (when no translations array)
+        var fallbackLang = (root.TryGetProperty("primaryLang", out var plEl) ? plEl.GetString() : null)
+            ?? (root.TryGetProperty("languageCode", out var lcEl) ? lcEl.GetString() : null)
+            ?? "ro-ro";
+        fallbackLang = fallbackLang.Trim().ToLowerInvariant();
         var authorName = root.TryGetProperty("authorName", out var authorElement) ? authorElement.GetString() : null;
         var classicAuthorId = root.TryGetProperty("classicAuthorId", out var classicAuthorElement) && classicAuthorElement.ValueKind == JsonValueKind.String
             ? Guid.TryParse(classicAuthorElement.GetString(), out var guid) ? guid : (Guid?)null
@@ -1259,7 +1265,7 @@ public partial class ImportFullStoryEndpoint
                             SortOrder = nodeSortOrder++
                         };
 
-                        if (nodeEl.TryGetProperty("translations", out var nodeTrEl) && nodeTrEl.ValueKind == JsonValueKind.Array)
+                        if (nodeEl.TryGetProperty("translations", out var nodeTrEl) && nodeTrEl.ValueKind == JsonValueKind.Array && nodeTrEl.GetArrayLength() > 0)
                         {
                             foreach (var tr in nodeTrEl.EnumerateArray())
                             {
@@ -1279,6 +1285,23 @@ public partial class ImportFullStoryEndpoint
                                 }
                             }
                         }
+                        else
+                        {
+                            // Fallback: read flat text/audioUrl directly from node (single-language export format)
+                            var flatText = nodeEl.TryGetProperty("text", out var ftEl) ? ftEl.GetString() : null;
+                            var flatAudioUrl = nodeEl.TryGetProperty("audioUrl", out var faEl) ? ExtractFilename(faEl.GetString() ?? "") : null;
+                            if (!string.IsNullOrWhiteSpace(flatText) || !string.IsNullOrWhiteSpace(flatAudioUrl))
+                            {
+                                dialogNode.Translations.Add(new StoryCraftDialogNodeTranslation
+                                {
+                                    Id = Guid.NewGuid(),
+                                    StoryCraftDialogNodeId = dialogNode.Id,
+                                    LanguageCode = fallbackLang,
+                                    Text = flatText ?? string.Empty,
+                                    AudioUrl = flatAudioUrl
+                                });
+                            }
+                        }
 
                         if (nodeEl.TryGetProperty("options", out var optionsEl) && optionsEl.ValueKind == JsonValueKind.Array)
                         {
@@ -1289,6 +1312,14 @@ public partial class ImportFullStoryEndpoint
                                 var toNodeId = opt.TryGetProperty("nextNodeId", out var toEl) ? toEl.GetString() ?? string.Empty : string.Empty;
                                 var jumpToTileId = opt.TryGetProperty("jumpToTileId", out var jEl) ? jEl.GetString() : null;
                                 var setBranchId = opt.TryGetProperty("setBranchId", out var sEl) ? sEl.GetString() : null;
+                                var hideIfBranchSet = opt.TryGetProperty("hideIfBranchSet", out var hEl) ? hEl.GetString() : null;
+                                string? showOnlyIfBranchesSet = null;
+                                if (opt.TryGetProperty("showOnlyIfBranchesSet", out var soEl))
+                                {
+                                    showOnlyIfBranchesSet = soEl.ValueKind == JsonValueKind.Array
+                                        ? soEl.ToString()
+                                        : soEl.ValueKind == JsonValueKind.String ? soEl.GetString() : null;
+                                }
 
                                 var edge = new StoryCraftDialogEdge
                                 {
@@ -1298,10 +1329,12 @@ public partial class ImportFullStoryEndpoint
                                     ToNodeId = toNodeId,
                                     JumpToTileId = jumpToTileId,
                                     SetBranchId = setBranchId,
+                                    HideIfBranchSet = hideIfBranchSet,
+                                    ShowOnlyIfBranchesSet = showOnlyIfBranchesSet,
                                     OptionOrder = optionOrder++
                                 };
 
-                                if (opt.TryGetProperty("translations", out var edgeTrEl) && edgeTrEl.ValueKind == JsonValueKind.Array)
+                                if (opt.TryGetProperty("translations", out var edgeTrEl) && edgeTrEl.ValueKind == JsonValueKind.Array && edgeTrEl.GetArrayLength() > 0)
                                 {
                                     foreach (var et in edgeTrEl.EnumerateArray())
                                     {
@@ -1317,6 +1350,21 @@ public partial class ImportFullStoryEndpoint
                                                 OptionText = optionText ?? string.Empty
                                             });
                                         }
+                                    }
+                                }
+                                else
+                                {
+                                    // Fallback: read flat text from option (single-language export format)
+                                    var flatOptionText = opt.TryGetProperty("text", out var fotEl) ? fotEl.GetString() : null;
+                                    if (!string.IsNullOrWhiteSpace(flatOptionText))
+                                    {
+                                        edge.Translations.Add(new StoryCraftDialogEdgeTranslation
+                                        {
+                                            Id = Guid.NewGuid(),
+                                            StoryCraftDialogEdgeId = edge.Id,
+                                            LanguageCode = fallbackLang,
+                                            OptionText = flatOptionText
+                                        });
                                     }
                                 }
 
