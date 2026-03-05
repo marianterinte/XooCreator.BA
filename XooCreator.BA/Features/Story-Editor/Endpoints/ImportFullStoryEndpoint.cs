@@ -657,6 +657,54 @@ public partial class ImportFullStoryEndpoint
                         }
                     }
                 }
+
+                // Dialog node audio (inside dialogNodes on this tile)
+                if (includeAudio && tile.TryGetProperty("dialogNodes", out var dialogNodesEl) && dialogNodesEl.ValueKind == JsonValueKind.Array)
+                {
+                    // Determine fallback language from manifest root
+                    var manifestLang = (root.TryGetProperty("primaryLang", out var plElement) ? plElement.GetString() : null)
+                        ?? (root.TryGetProperty("languageCode", out var lcElement) ? lcElement.GetString() : null);
+                    var defaultLang = string.IsNullOrWhiteSpace(manifestLang) ? null : manifestLang!.Trim().ToLowerInvariant();
+
+                    foreach (var dialogNode in dialogNodesEl.EnumerateArray())
+                    {
+                        // Flat audioUrl directly on node (single-language format)
+                        if (dialogNode.TryGetProperty("audioUrl", out var nodeAudioEl) && nodeAudioEl.ValueKind == JsonValueKind.String)
+                        {
+                            var audioPath = nodeAudioEl.GetString();
+                            if (!string.IsNullOrWhiteSpace(audioPath))
+                            {
+                                var filename = ExtractFilename(audioPath);
+                                if (!string.IsNullOrWhiteSpace(filename))
+                                {
+                                    assets.Add(CreateAssetEntry(audioPath, new AssetInfo(filename, AssetType.Audio, defaultLang)));
+                                }
+                            }
+                        }
+
+                        // Translations audioUrl per node (multi-language format)
+                        if (dialogNode.TryGetProperty("translations", out var nodeTrEl) && nodeTrEl.ValueKind == JsonValueKind.Array)
+                        {
+                            foreach (var nodeTr in nodeTrEl.EnumerateArray())
+                            {
+                                var nLang = nodeTr.TryGetProperty("lang", out var nLangEl) ? nLangEl.GetString() : null;
+                                var nNormalizedLang = string.IsNullOrWhiteSpace(nLang) ? null : nLang!.Trim().ToLowerInvariant();
+                                if (nodeTr.TryGetProperty("audioUrl", out var nAudioEl) && nAudioEl.ValueKind == JsonValueKind.String)
+                                {
+                                    var audioPath = nAudioEl.GetString();
+                                    if (!string.IsNullOrWhiteSpace(audioPath) && !string.IsNullOrWhiteSpace(nNormalizedLang))
+                                    {
+                                        var filename = ExtractFilename(audioPath);
+                                        if (!string.IsNullOrWhiteSpace(filename))
+                                        {
+                                            assets.Add(CreateAssetEntry(audioPath, new AssetInfo(filename, AssetType.Audio, nNormalizedLang)));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 
