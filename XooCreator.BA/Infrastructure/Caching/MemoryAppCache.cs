@@ -29,10 +29,10 @@ public sealed class MemoryAppCache : IAppCache
             return await factory();
         }
 
-        if (_cache.TryGetValue(key, out T? cached) && cached is not null)
+        if (_cache.TryGetValue(key, out T? cached))
         {
             _logger.LogDebug("AppCache HIT for key {Key}.", key);
-            return cached;
+            return cached!;
         }
 
         _logger.LogDebug("AppCache MISS for key {Key}. Loading value...", key);
