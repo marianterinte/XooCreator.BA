@@ -30,6 +30,7 @@ public class GetUserCreatedStoriesEndpoint
 
     [Route("/api/{locale}/stories/created")]
     [Authorize]
+    [AllowAnonymous]
     public static async Task<Ok<GetUserCreatedStoriesResponse>> HandleGet(
         [FromRoute] string locale,
         [FromServices] GetUserCreatedStoriesEndpoint ep,

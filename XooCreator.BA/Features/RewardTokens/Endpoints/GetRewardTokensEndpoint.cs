@@ -19,6 +19,7 @@ public class GetRewardTokensEndpoint
 
     [Route("/api/reward-tokens")]
     [Authorize]
+    [AllowAnonymous]
     public static async Task<Ok<List<RewardTokenDto>>> HandleGet(
         [FromServices] GetRewardTokensEndpoint ep,
         CancellationToken ct)
