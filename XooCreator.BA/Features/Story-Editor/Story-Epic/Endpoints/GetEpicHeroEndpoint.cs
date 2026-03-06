@@ -28,13 +28,13 @@ public class GetEpicHeroEndpoint
 
     [Route("/api/story-editor/heroes/{heroId}")]
     [Authorize]
+    [AllowAnonymous]
     public static async Task<Results<Ok<EpicHeroDto>, NotFound, UnauthorizedHttpResult>> HandleGet(
         [FromRoute] string heroId,
         [FromServices] GetEpicHeroEndpoint ep,
         CancellationToken ct)
     {
         var user = await ep._auth0.GetCurrentUserAsync(ct);
-        if (user == null) return TypedResults.Unauthorized();
 
         var hero = await ep._heroService.GetHeroAsync(heroId, ct);
         if (hero == null)
