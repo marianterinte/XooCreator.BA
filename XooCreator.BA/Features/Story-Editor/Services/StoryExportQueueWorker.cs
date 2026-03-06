@@ -13,6 +13,7 @@ using XooCreator.BA.Features.StoryEditor.Services;
 using XooCreator.BA.Infrastructure.Services.Blob;
 using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Infrastructure.Services.Queue;
+using XooCreator.BA.Features.System.Services;
 
 namespace XooCreator.BA.Features.StoryEditor.Services;
 
@@ -127,6 +128,13 @@ public class StoryExportQueueWorker : BackgroundService
                         _logger.LogInformation(
                             "Skipping export message for already running job: jobId={JobId} storyId={StoryId} dequeueCount={DequeueCount}",
                             job.Id, job.StoryId, job.DequeueCount);
+                        continue;
+                    }
+
+                    var maintenanceService = scope.ServiceProvider.GetRequiredService<IStoryCreatorMaintenanceService>();
+                    if (await maintenanceService.IsStoryCreatorDisabledAsync(stoppingToken))
+                    {
+                        _logger.LogInformation("Story Creator is in maintenance; skipping job. jobId={JobId} storyId={StoryId} messageId={MessageId}", job.Id, job.StoryId, message.MessageId);
                         continue;
                     }
 

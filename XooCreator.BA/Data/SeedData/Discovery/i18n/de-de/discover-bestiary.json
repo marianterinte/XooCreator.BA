@@ -1,0 +1,296 @@
+[
+  {
+    "Combination": "BunnyGiraffeNone",
+    "Name": "Hasengiraffe",
+    "Story": "In den Aesten des Baumes des Lichts wurde die Hasengiraffe geboren, eine einzigartige Kreatur, halb Hase, halb Giraffe. Ihre kurzen, flinken Arme graben Tunnel und entfachen lebhafte Feuer, waehrend ihr grosser Koerper, verziert mit leuchtenden Flecken, weit in Horizonte blickt, die andere nicht erreichen koennen.\n\nDer Legende nach erschien die Hasengiraffe, als sich ein kleiner, tapferer Hase an den Wurzeln einer alten Giraffe versteckte, waehrend die Dunkelheit die Savanne verschlang. Aus ihrer verzweifelten Umarmung webte der Baum des Lichts zwei Geister in einen einzigen Koerper.\n\nDie Hasengiraffe ist die Hueterin der Horizonte. Wenn sie durch das Gras laeuft, springt die Erde vor Freude. Wenn sie aufsteht zu kaempfen, fliehen die Schatten beschaemt. Doch ihre Staerke liegt nicht nur in Geschwindigkeit oder Groesse, sondern in der Freundschaft, die sie jenen anbietet, die zwischen den Aesten der Welten umherirren.\n\nAlte Geister sagen, die Hasengiraffe wird immer dort sein, wo jemand versucht zu reparieren, was zerbrochen ist, und Mut und Hoffnung bringt.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a cute bunny and the body of a tall giraffe. The bunny arms are soft, white, and glowing with gentle magical light. The giraffe body is golden with shimmering spots that glow like amber. The character wears a colorful robe with rainbow silk and star patterns. Its eyes shine bright green with playful energy. The scene is a fantasy savanna-meadow filled with glowing flowers and fireflies under a starry sky. The style is vibrant, whimsical, fantasy-themed, cartoonish, like an illustration from a children's fairy tale.",
+    "ImageFileName": "BunnyGiraffeNone.jpg"
+  },
+  {
+    "Combination": "BunnyHippoNone",
+    "Name": "Hasennilpferd",
+    "Story": "Das Hasennilpferd wurde geboren, als ein Hase und ein Nilpferd inmitten eines Sturms dunkler Wasser aufeinandertrafen. Aus ihrer unerwarteten Freundschaft webte der Baum des Lichts die Agilitat des Hasen mit der Staerke des Nilpferds zusammen. Das Hasennilpferd ist sanft und beschuetzend: Mit seinen flinken Armen grabt es Verstecke, und mit seinem maechtigen Koerper oeffnet es Wege durch die Gewaesser. Es bringt Ruhe dorthin, wo Angst herrscht, und baut Bruecken des Vertrauens zwischen den Welten.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a bunny and the body of a hippo. The bunny arms are soft, white, glowing with magical light. The hippo body is strong and round, shimmering with a pearly gray glow. The character wears a robe dyed in rainbow hues with wave and flower embroidery. Its eyes are sapphire blue, full of calm joy. The scene is a fantasy pond with glowing lotus flowers, enchanted reeds, and magical koi fish. The style is colorful, whimsical, fantasy-themed, cartoon-like.",
+    "ImageFileName": "BunnyHippoNone.jpg"
+  },
+  {
+    "Combination": "GiraffeHippoNone",
+    "Name": "Giraffennilpferd",
+    "Story": "Das Giraffennilpferd ist eine Kreatur, die aus dem Traum einer Giraffe, die die Sterne betrachtete, und dem Gesang eines Nilpferds, der unter den Wassern hallte, geboren wurde. Der Baum des Lichts vereinte sie in einem einzigen Koerper, um Gleichgewicht zu bringen: die Hoehe der Giraffe und die Bestaendigkeit des Nilpferds. Es wacht ueber die Savannen des Lichts und die tiefen Gewaesser und sucht, den Himmel mit der Erde zu vereinen. Das Giraffennilpferd ist ein Vermittler zwischen den Welten, Traeger von Weisheit und sanfter Kraft.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the body of a giraffe and the body of a hippo combined, tall yet rounded and solid. The giraffe part is golden with glowing amber spots, while the hippo part is gray and pearly with soft magical ripples. The character wears a cloak patterned with stars and rivers. Its eyes are emerald and blue, showing both wisdom and calm. The scene is a magical grassland by a shimmering river under a starlit sky. The style is fantasy, vibrant, whimsical, cartoon-like.",
+    "ImageFileName": "GiraffeHippoNone.jpg"
+  },
+  {
+    "Combination": "BunnyGiraffeHippo",
+    "Name": "Hase-Giraffe-Nilpferd",
+    "Story": "Das Hase-Giraffe-Nilpferd ist ein legendaerer Held, geboren aus einer unmoeglichen Allianz: ein Hase, eine Giraffe und ein Nilpferd, die ihre Schicksale vereinten. Der Baum des Lichts sah ihren Mut und schenkte ihnen ein einziges Herz. Mit den Armen des Hasen hilft und schuetzt es. Mit dem Koerper der Giraffe sieht es weit. Mit dem Kopf des Nilpferds inspiriert es Ruhe und Weisheit. Es ist das Symbol der Vielfalt und Freundschaft zwischen verschiedenen Welten.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a bunny, the body of a giraffe, and the head of a hippo. The bunny arms are soft and glowing, the giraffe torso tall and golden with glowing spots, and the hippo head round and gray with a calm aura. The character wears a robe embroidered with cosmic spirals and river motifs. Its eyes shine turquoise and sapphire, full of playful kindness. The scene is a magical savanna-river junction glowing with enchanted flowers and fireflies. The style is whimsical, colorful, fantasy-themed, cartoon-like.",
+    "ImageFileName": "BunnyGiraffeHippo.jpg"
+  },
+  {
+    "Combination": "GiraffeBunnyNone",
+    "Name": "Giraffenhase",
+    "Story": "Der Giraffenhase wurde geboren, als die Arme einer Giraffe einen kleinen, zitternden Hasen in der Nacht umarmten. Von diesem Moment an vereinte der Baum des Lichts sie zu einem ungewoehnlichen Mischwesen. Der Giraffenhase ist verspielt und furchtlos: Er nutzt seine langen Arme, um Sterne zu sammeln, und den Koerper des Hasen, um durch Schatten zu springen. Er ist ein Geist der Freude, der Lachen und Licht ueberallhin bringt.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a giraffe and the body of a bunny. The giraffe arms are long, golden, and patterned with glowing amber spots. The bunny body is small, agile, and shimmering with pastel fur. The character wears a playful robe of rainbow silk with flower embroidery. Its eyes shine bright violet with mischievous curiosity. The scene is a magical meadow filled with glowing mushrooms and starlight fireflies. The style is whimsical, vibrant, fantasy, cartoon-like.",
+    "ImageFileName": "GiraffeBunnyNone.jpg"
+  },
+  {
+    "Combination": "GiraffeHippoBunny",
+    "Name": "Giraffe-Nilpferd-Hase",
+    "Story": "Das Giraffe-Nilpferd-Hase wurde inmitten eines Meteoritenschauers geboren, als eine Giraffe, ein Nilpferd und ein Hase schworen, den Baum des Lichts zu beschuetzen. Aus ihrem Schwur vereinten die Aeste drei Geister in einem einzigen Koerper. Es ist das Symbol der Freundschaft zwischen voellig verschiedenen Wesen. Mit den Armen der Giraffe hebt es Licht zum Himmel; mit dem Koerper des Nilpferds schuetzt es die Erde; mit dem Kopf des Hasen bringt es Laecheln und Hoffnung.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a giraffe, the body of a hippo, and the head of a bunny. The giraffe arms are tall and golden with glowing amber spots. The hippo torso is massive and pearly gray, glowing with magical ripples. The bunny head is soft, white, with long ears shimmering with pastel light. The character wears a robe embroidered with constellations and river waves. Its eyes shine turquoise and green, playful and wise. The background is a magical meadow by a glowing river under a starry sky. The style is whimsical, colorful, fantasy-themed, cartoon-like.",
+    "ImageFileName": "GiraffeHippoBunny.jpg"
+  },
+  {
+    "Combination": "HippoBunnyNone",
+    "Name": "Nilpferdhase",
+    "Story": "Der Nilpferdhase wurde aus einem verspielten Traum geboren, in dem ein Hase um die Staerke eines Nilpferds bat. Der Baum des Lichts vereinte sie zu einem ausgewogenen Wesen: klein, aber stark, sanft, aber entschlossen. Der Nilpferdhase nutzt die Arme des Nilpferds zum Schutz und den Koerper des Hasen, um Hindernisse zu ueberspringen. Er bringt den Kleinen Mut und zeigt ihnen, dass die Groesse nicht die Kraft der Seele bestimmt.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a hippo and the body of a bunny. The hippo arms are strong, gray, glowing faintly with magical ripples. The bunny body is small and agile, shimmering with pastel fur. The character wears a robe with rainbow silk embroidered with lotus flowers and moons. Its eyes shine sapphire blue with playful calmness. The background is a whimsical meadow near a glowing pond. The style is vibrant, magical, cartoon-like.",
+    "ImageFileName": "HippoBunnyNone.jpg"
+  },
+  {
+    "Combination": "HippoGiraffeNone",
+    "Name": "Nilpferdgiraffe",
+    "Story": "Die Nilpferdgiraffe wurde geboren, als ein Nilpferd schwor, eine verlorene Giraffe vor der Dunkelheit zu schuetzen. Der Baum des Lichts vereinte sie zu einem einzigen Wesen, um ihr Versprechen zu halten. Sie ist stark und weise und baut Bruecken zwischen Himmel und Erde. Die Nilpferdgiraffe ist bekannt als der Geist, der Gleichgewicht zwischen Staerke und Anmut bringt.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a hippo and the body of a giraffe. The hippo arms are massive, gray, glowing faintly with magic. The giraffe torso is tall, golden, decorated with glowing amber spots. The character wears a flowing robe with cosmic embroidery of suns and stars. Its eyes are emerald green, full of wisdom. The background is a magical savanna filled with glowing flowers beneath a starlit sky. The style is vibrant, fantasy-themed, cartoon-like.",
+    "ImageFileName": "HippoGiraffeNone.jpg"
+  },
+  {
+    "Combination": "HippoBunnyGiraffe",
+    "Name": "Nilpferd-Hase-Giraffe",
+    "Story": "Das Nilpferd-Hase-Giraffe ist eine Kreatur der Gegensaetze, geboren, als drei Welten im Baum des Lichts aufeinandertrafen. Vom Nilpferd erhielt es Macht; vom Hasen Agilitat; von der Giraffe Vision. Es durchstreift die Aeste des Baumes auf der Suche nach Harmonie zwischen den Extremen und zeigt, dass wahre Kraft aus der Vereinigung der Verschiedenheit entsteht.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a hippo, the body of a bunny, and the head of a giraffe. The hippo arms are powerful and gray, shimmering with magical ripples. The bunny torso is agile, glowing with pastel fur. The giraffe head is tall and golden, decorated with glowing spots and runes. The character wears a robe patterned with moons and stars. Its eyes shine bright jade and turquoise, mixing playfulness and wisdom. The background is a magical clearing where savanna meets enchanted forest. The style is whimsical, colorful, fantasy, cartoon-like.",
+    "ImageFileName": "HippoBunnyGiraffe.jpg"
+  },
+  {
+    "Combination": "BunnyHippoGiraffe",
+    "Name": "Hase-Nilpferd-Giraffe",
+    "Story": "Das Hase-Nilpferd-Giraffe wurde inmitten eines Lichtsturms geboren, als drei Freunde einen zerbrochenen Ast des Baumes des Lichts zu reparieren versuchten. Ihr Opfer verwandelte sich in Magie, und so entstand dieses einzigartige Wesen. Das Hase-Nilpferd-Giraffe ist ein sanfter Beschuetzer, der die Hoffnung und den Mut der Freundschaft in sich traegt.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a bunny, the body of a hippo, and the head of a giraffe. The bunny arms are small, soft, glowing with gentle magical light. The hippo torso is wide and strong, glowing with pearly gray. The giraffe head is golden with glowing amber patterns. The character wears a robe embroidered with rainbow spirals and celestial motifs. Its eyes shine violet and green, curious and kind. The background is a fantasy pond in a glowing savanna filled with fireflies. The style is vibrant, whimsical, fantasy, cartoonish.",
+    "ImageFileName": "BunnyHippoGiraffe.jpg"
+  },
+  {
+    "Combination": "GiraffeNoneHippo",
+    "Name": "Giraffennilpferdchen",
+    "Story": "Das Giraffennilpferdchen wurde aus einem Pakt zwischen einem Nilpferd und einer Giraffe geboren, die gemeinsam ueber einen gefallenen Ast des Baumes des Lichts wachten. Der Baum vereinte ihre Kraefte und schenkte ihnen einen gemeinsamen Koerper. Das Giraffennilpferdchen ist ein Geist des Gleichgewichts zwischen Macht und Sanftheit.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a giraffe and the head of a hippo, while the body is absent. The giraffe arms are long, golden, patterned with glowing amber spots. The hippo head is round, gray, shimmering with a calm magical aura. The character wears a robe decorated with celestial motifs and river-like embroidery. Its eyes shine sapphire and green, wise and gentle. The background is a magical savanna merging into a glowing pond under a starlit sky. The style is whimsical, vibrant, fantasy, cartoon-like.",
+    "ImageFileName": "GiraffeNoneHippo.jpg"
+  },
+  {
+    "Combination": "BunnyNoneHippo",
+    "Name": "Hasenpotam",
+    "Story": "Der Hasenpotam tauchte auf, als ein Hase und ein Nilpferd gemeinsam dem Sturm der Nacht trotzten. Der Baum des Lichts webte sie zu einem einzigen Koerper zusammen, bewahrte die Agilitat des Hasen und die Weisheit des Nilpferds. Der Hasenpotam ist ein Symbol der Solidaritaet und Freundschaft zwischen dem Kleinen und dem Grossen.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a bunny and the head of a hippo, with no torso visible. The bunny arms are soft, glowing with pastel magical light. The hippo head is massive, gray, shimmering with pearly ripples. The character wears a robe patterned with rainbow stars and lotus motifs. Its eyes shine turquoise and sapphire, playful yet calm. The background is a magical pond surrounded by glowing flowers and reeds. The style is whimsical, colorful, fantasy, cartoon-like.",
+    "ImageFileName": "BunnyNoneHippo.jpg"
+  },
+  {
+    "Combination": "HippoNoneBunny",
+    "Name": "Nilpferdhaesin",
+    "Story": "Das Nilpferdhaesin erschien, als ein Hase den Schutz eines Nilpferds erbat, um die Dunkelheit zu ueberleben. Der Baum des Lichts vereinte ihre Seelen und erweckte dieses verspielte, aber kraftvolle Wesen. Das Nilpferdhaesin ist ein froehlicher Beschuetzer, der Hoffnung bringt, wo Angst herrscht.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a hippo and the head of a bunny, with no torso present. The hippo arms are gray, powerful, glowing faintly with magic. The bunny head is soft, white, with long ears shimmering with pastel light. The character wears a robe of rainbow silk embroidered with stars and moons. Its eyes shine violet with mischievous curiosity. The background is a fantastical meadow lit by enchanted fireflies. The style is vibrant, whimsical, cartoonish, fantasy.",
+    "ImageFileName": "HippoNoneBunny.jpg"
+  },
+  {
+    "Combination": "NoneBunnyHippo",
+    "Name": "Hasen-Nilpferdling",
+    "Story": "Das Hasen-Nilpferdling wurde geboren, als ein Hase davon traeumte, die Staerke eines Nilpferds zu haben. Der Baum des Lichts verwandelte den Traum in Wirklichkeit und vereinte zwei gegensaetzliche Welten. Das Hasen-Nilpferdling ist sanft und friedlich, aber besitzt eine verborgene Staerke, die erwacht, um das Licht zu verteidigen. Es ist das Symbol der erfuellten Traeume.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the body of a bunny and the head of a hippo, no arms visible. The bunny torso is small and pastel, glowing with gentle magical light. The hippo head is gray and calm, shimmering with pearly waves. The character wears a cloak embroidered with flowers and constellations. Its eyes shine turquoise and jade, warm and wise. The background is a glowing pond in an enchanted forest. The style is whimsical, colorful, cartoon-like, fantasy.",
+    "ImageFileName": "NoneBunnyHippo.jpg"
+  },
+  {
+    "Combination": "NoneGiraffeHippo",
+    "Name": "Giraffenpotam",
+    "Story": "Der Giraffenpotam entstand, als ein Nilpferd die Hoehe einer Giraffe suchte, um die Savanne zu bewachen. Der Baum des Lichts vereinte sie und schenkte ihnen einen gemeinsamen Koerper. Der Giraffenpotam ist ein Geist der Bestaendigkeit, der das Gleichgewicht zwischen den Gewaessern und dem Himmel aufrecht erhaelt. Er ist der Hueter der Horizonte.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the body of a giraffe and the head of a hippo, without arms. The giraffe torso is tall, golden, glowing with amber spots. The hippo head is massive and gray, shimmering with magical calmness. The character wears a robe embroidered with suns, moons, and river patterns. Its eyes shine sapphire and emerald, wise and steady. The background is a magical savanna next to a glowing lake. The style is whimsical, fantasy, colorful, cartoon-like.",
+    "ImageFileName": "NoneGiraffeHippo.jpg"
+  },
+  {
+    "Combination": "NoneHippoGiraffe",
+    "Name": "Nilpferdgiraffon",
+    "Story": "Der Nilpferdgiraffon wurde geboren, als ein Nilpferd davon traeumte, ueber den Horizont der Gewaesser hinaus zu sehen. Der Baum des Lichts vereinte es mit dem Geist einer Giraffe und schenkte ihnen einen gemeinsamen Koerper. Der Nilpferdgiraffon ist ein Geist der Vision und Ausdauer, der die Bestaendigkeit der Gewaesser mit der Hoehe des Himmels vereint.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the body of a hippo and the head of a giraffe, without arms. The hippo torso is massive, gray, glowing with pearly ripples. The giraffe head is tall, golden, patterned with glowing amber spots. The character wears a cloak embroidered with constellations and lotus flowers. Its eyes shine emerald and turquoise, filled with wisdom. The background is a magical riverbank merging with a glowing savanna. The style is whimsical, vibrant, cartoon-like, fantasy.",
+    "ImageFileName": "NoneHippoGiraffe.jpg"
+  },
+  {
+    "Combination": "BunnyNoneGiraffe",
+    "Name": "Hasengiraff",
+    "Story": "Der Hasengiraff wurde erschaffen, als ein Hase und eine Giraffe gemeinsam versuchten, einen gefallenen Ast des Baumes des Lichts zu beleuchten. Die Magie vereinte sie zu einem einzigen Koerper. Der Hasengiraff ist ein Geist des Mutes und der Freundschaft, faehig, Hoffnung und Licht in die Dunkelheit zu bringen.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a bunny and the head of a giraffe, without a torso. The bunny arms are soft, glowing with pastel magical light. The giraffe head is tall, golden, patterned with glowing spots. The character wears a robe with rainbow silk embroidered with stars and flowers. Its eyes shine violet and jade, playful yet noble. The background is a magical meadow with enchanted vines under a star-filled sky. The style is whimsical, colorful, cartoonish, fantasy.",
+    "ImageFileName": "BunnyNoneGiraffe.jpg"
+  },
+  {
+    "Combination": "GiraffeNoneBunny",
+    "Name": "Giraffin",
+    "Story": "Der Giraffin entstand aus dem Lachen eines Hasen, der sich an den Hals einer Giraffe klammerte. Der Baum des Lichts fand ihre Freude und schenkte ihnen einen gemeinsamen Koerper. Der Giraffin ist verspielt und froehlich, hat aber auch ein grosses Herz und ist bereit, das Licht zu verteidigen. Er wird oft als der Geist des Optimismus beschrieben.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a giraffe and the head of a bunny, without torso. The giraffe arms are long and golden, patterned with glowing amber runes. The bunny head is soft and white, glowing with pastel light. The character wears a cloak embroidered with moons and blossoms. Its eyes shine turquoise and amber, full of curiosity. The background is a magical savanna blending into an enchanted meadow. The style is vibrant, whimsical, cartoon-like.",
+    "ImageFileName": "GiraffeNoneBunny.jpg"
+  },
+  {
+    "Combination": "HippoNoneGiraffe",
+    "Name": "Nilpferdiraffe",
+    "Story": "Die Nilpferdiraffe wurde geboren, als ein Nilpferd und eine Giraffe gemeinsam die Savanne bewachten. Der Baum des Lichts vereinte sie und schenkte ihnen ein gemeinsames Herz. Die Nilpferdiraffe ist ein Geist der Wachsamkeit, der Gleichgewicht zwischen Staerke und Klarheit bringt. Sie ist die Hueterin der Sternennaechte.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a hippo and the head of a giraffe, torso absent. The hippo arms are gray and powerful, glowing faintly with magical waves. The giraffe head is golden and noble, patterned with amber runes. The character wears a robe embroidered with river and starlight motifs. Its eyes shine jade and blue, wise and calm. The background is a glowing savanna under enchanted constellations. The style is whimsical, fantasy, colorful, cartoonish.",
+    "ImageFileName": "HippoNoneGiraffe.jpg"
+  },
+  {
+    "Combination": "HippoGiraffeBunny",
+    "Name": "Nilpferd-Giraffe-Hase",
+    "Story": "Das Nilpferd-Giraffe-Hase wurde in dem Moment geboren, als ein Nilpferd, eine Giraffe und ein Hase gemeinsam zum Licht des Baumes aufblickten. Ihre Geister verschmolzen zu einem neuen Wesen. Das Nilpferd-Giraffe-Hase ist ein Geist der Zusammenarbeit und Harmonie, der Frieden und Weisheit in den Kaempfen zwischen den Welten bringt.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a hippo, the body of a giraffe, and the head of a bunny. The hippo arms are gray, massive, glowing faintly with magical light. The giraffe torso is tall, golden, patterned with glowing amber spots. The bunny head is white, with long glowing ears. The character wears a robe embroidered with rivers and constellations. Its eyes shine turquoise and amber, gentle and curious. The background is a glowing savanna filled with enchanted fireflies. The style is whimsical, vibrant, cartoon-like, fantasy.",
+    "ImageFileName": "HippoGiraffeBunny.jpg"
+  },
+  {
+    "Combination": "GiraffeBunnyHippo",
+    "Name": "Giraffe-Hasen-Nilpferd",
+    "Story": "Das Giraffe-Hasen-Nilpferd erschien, als drei Wesen schworen, gemeinsam die Aeste des Baumes zu schuetzen. Aus ihrer Freundschaft schuf der Baum des Lichts einen gemeinsamen Koerper. Das Giraffe-Hasen-Nilpferd ist ein Geist der Einheit und Freundschaft, der die Hoffnung traegt, verschiedene Welten zu vereinen.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms of a giraffe, the body of a bunny, and the head of a hippo. The giraffe arms are long, golden, patterned with glowing amber runes. The bunny torso is small and pastel, glowing with magical light. The hippo head is gray, calm, and pearly with shimmering ripples. The character wears a cloak decorated with moons and stars. Its eyes shine sapphire and jade, playful yet steady. The background is a magical clearing under an enchanted sky. The style is whimsical, colorful, fantasy, cartoonish.",
+    "ImageFileName": "GiraffeBunnyHippo.jpg"
+  },
+  {
+    "Combination": "NoneGiraffeBunny",
+    "Name": "Giraffenhaesin",
+    "Story": "Das Giraffenhaesin wurde geboren, als ein Hase auf die Schultern einer Giraffe kletterte, um den Himmel zu betrachten. Der Baum des Lichts sah ihre Freude und vereinte sie zu einem gemeinsamen Koerper. Das Giraffenhaesin ist ein verspielter und freundlicher Geist, der ueberall Heiterkeit und Hoffnung verbreitet.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the body of a giraffe and the head of a bunny, no arms visible. The giraffe torso is golden, tall, glowing with amber constellations. The bunny head is soft, white, glowing with pastel light and long ears sparkling with magical runes. The character wears a cloak embroidered with blossoms and spirals. Its eyes shine jade and turquoise, full of cheer. The background is an enchanted savanna filled with glowing mushrooms. The style is whimsical, colorful, fantasy, cartoonish.",
+    "ImageFileName": "NoneGiraffeBunny.jpg"
+  },
+  {
+    "Combination": "NoneHippoBunny",
+    "Name": "Nilpferdriel",
+    "Story": "Das Nilpferdriel erschien, als ein Hase und ein Nilpferd gemeinsam an einem gestirnenbedeckten See sangen. Der Baum des Lichts webte ihr Lied und Lachen zu einem gemeinsamen Koerper. Das Nilpferdriel ist ein Geist der Froehlichkeit und Harmonie, der den Umherirrenden Hoffnung bringt.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the body of a hippo and the head of a bunny, no arms visible. The hippo torso is massive, gray, shimmering with pearly light. The bunny head is white, glowing with pastel ears that sparkle with magical runes. The character wears a cloak embroidered with constellations and lotus flowers. Its eyes shine turquoise and amber, curious and kind. The background is a whimsical pond glowing with fireflies. The style is colorful, vibrant, fantasy, cartoon-like.",
+    "ImageFileName": "NoneHippoBunny.jpg"
+  },
+  {
+    "Combination": "NoneBunnyGiraffe",
+    "Name": "Hasen-Giraffin",
+    "Story": "Der Hasen-Giraffin erschien, als ein Hase sich wuenschte, ueber eine Savanne zu wachen. Der Baum des Lichts erhoerte seinen Wunsch und vereinte ihn mit dem Geist einer Giraffe. Der Hasen-Giraffin ist ein Geist der Verantwortung und Freude, der in sich den Wunsch zu schuetzen traegt.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the body of a bunny and the head of a giraffe, no arms visible. The bunny torso is small, glowing pastel, agile. The giraffe head is tall and golden, glowing with amber constellations. The character wears a robe embroidered with rainbow spirals and stars. Its eyes shine sapphire and emerald, curious and kind. The background is an enchanted savanna lit by magical fireflies. The style is whimsical, vibrant, fantasy, cartoon-like.",
+    "ImageFileName": "NoneBunnyGiraffe.jpg"
+  },
+  {
+    "Combination": "GiraffeGiraffeHippo",
+    "Name": "Doppelgiraffe",
+    "Story": "Die Doppelgiraffe wurde geboren, als zwei Giraffen-Geister gemeinsam ueber ein verlorenes Nilpferd wachten. Der Baum des Lichts vereinte sie zu einem einzigen Wesen, gross und stark, aber sanft. Die Doppelgiraffe ist die Hueterin der Horizonte, die Gleichgewicht zwischen Staerke und Vision bringt.",
+    "ImagePrompt": "An anthropomorphic hybrid with the arms and body of a giraffe and the head of a hippo. The giraffe parts are tall and golden, glowing with amber constellations, while the hippo head is gray and calm, shimmering with pearly magic. The character wears a cloak embroidered with suns and rivers. Its eyes shine emerald and sapphire. The background is a glowing savanna by a mystical pond. The style is whimsical, colorful, fantasy, cartoon-like.",
+    "ImageFileName": "GiraffeGiraffeHippo.jpg"
+  },
+  {
+    "Combination": "GiraffeGiraffeBunny",
+    "Name": "Giraffennix",
+    "Story": "Der Giraffennix entstand, als zwei Giraffen ihre Hoehe mit einem kleinen Hasen teilen wollten. Der Baum des Lichts vereinte sie zu einem Wesen der Freundschaft und Freude. Der Giraffennix bringt den Kleinen Hoffnung und zeigt, dass Groesse geteilt werden kann.",
+    "ImagePrompt": "An anthropomorphic hybrid with the arms and body of a giraffe and the head of a bunny. The giraffe body is golden, patterned with glowing amber spots. The bunny head is soft, white, with long ears glowing pastel. The character wears a robe with star and flower embroidery. Its eyes shine violet and jade. The background is a magical meadow filled with fireflies under enchanted skies. The style is whimsical, fantasy, cartoon-like.",
+    "ImageFileName": "GiraffeGiraffeBunny.jpg"
+  },
+  {
+    "Combination": "BunnyBunnyGiraffe",
+    "Name": "Hasengiraffix",
+    "Story": "Der Hasengiraffix erschien, als zwei Hasen gemeinsam davon traeumten, den Himmel durch die Augen einer Giraffe zu erreichen. Der Baum des Lichts vereinte sie zu einem einzigen Wesen. Er ist ein Geist der Neugier und des Mutes, der zwischen Welten springt und Licht in die Schatten bringt.",
+    "ImagePrompt": "An anthropomorphic hybrid with the arms and body of a bunny and the head of a giraffe. The bunny parts are small, white, glowing with playful magical light, while the giraffe head is tall, golden, glowing with amber constellations. The character wears a cloak embroidered with moons and blossoms. Its eyes shine turquoise and jade. The background is a glowing meadow with enchanted vines. The style is whimsical, colorful, fantasy, cartoonish.",
+    "ImageFileName": "BunnyBunnyGiraffe.jpg"
+  },
+  {
+    "Combination": "BunnyBunnyHippo",
+    "Name": "Hasen-Nilpferdix",
+    "Story": "Der Hasen-Nilpferdix wurde aus dem Traum zweier Hasen geboren, die sich die Staerke eines Nilpferds erbaten, um ihre Freunde zu schuetzen. Der Baum des Lichts vereinte ihre Seelen. Er ist ein verspielter, aber beschuetzender Geist, der den Kleinen Mut und den Verlorenen Frieden bringt.",
+    "ImagePrompt": "An anthropomorphic hybrid with the arms and body of a bunny and the head of a hippo. The bunny torso and arms are small, agile, glowing pastel, while the hippo head is massive, gray, shimmering with pearly waves. The character wears a robe decorated with rainbow stars. Its eyes shine sapphire and emerald. The background is a magical pond filled with glowing lotus flowers. The style is whimsical, vibrant, fantasy, cartoonish.",
+    "ImageFileName": "BunnyBunnyHippo.jpg"
+  },
+  {
+    "Combination": "HippoHippoBunny",
+    "Name": "Doppelnilpferdhase",
+    "Story": "Der Doppelnilpferdhase erschien, als zwei Nilpferde schworen, einen Hasen zu beschuetzen. Der Baum des Lichts vereinte sie zu einem einzigen Koerper. Er ist ein Geist der Sanftheit und Staerke, der Frieden zwischen den Welten bringt.",
+    "ImagePrompt": "An anthropomorphic hybrid with the arms and body of a hippo and the head of a bunny. The hippo torso and arms are massive, gray, glowing with magical ripples, while the bunny head is white with long pastel ears. The character wears a robe patterned with lotus and stars. Its eyes shine violet and jade. The background is a magical riverbank with glowing flowers. The style is whimsical, colorful, fantasy, cartoon-like.",
+    "ImageFileName": "HippoHippoBunny.jpg"
+  },
+  {
+    "Combination": "HippoHippoGiraffe",
+    "Name": "Doppelnilpferdgiraffe",
+    "Story": "Die Doppelnilpferdgiraffe wurde geboren, als zwei Nilpferde die Weisheit einer Giraffe suchten. Der Baum des Lichts vereinte sie zu einem Geist der Bestaendigkeit und Klarheit. Sie wacht ueber die Aeste und bringt Gleichgewicht zwischen Wasser und Himmel.",
+    "ImagePrompt": "An anthropomorphic hybrid with the arms and body of a hippo and the head of a giraffe. The hippo body is gray, strong, glowing with pearly ripples, while the giraffe head is golden, tall, patterned with glowing amber constellations. The character wears a cloak embroidered with moons and rivers. Its eyes shine emerald and turquoise. The background is a glowing savanna under enchanted stars. The style is whimsical, vibrant, fantasy, cartoon-like.",
+    "ImageFileName": "HippoHippoGiraffe.jpg"
+  },
+  {
+    "Combination": "GiraffeHippoHippo",
+    "Name": "Giraffe-Doppelnilpferd",
+    "Story": "Das Giraffe-Doppelnilpferd erschien, als eine Giraffe schwor, inmitten eines Sturms ueber zwei Nilpferde zu wachen. Der Baum des Lichts vereinte sie zu einem einzigen Koerper. Es ist ein Geist des Schutzes und der Freundschaft, der die Macht der Gewaesser und die Vision des Himmels in sich traegt.",
+    "ImagePrompt": "An anthropomorphic hybrid with the arms of a giraffe, the body and head of a hippo. The giraffe arms are long and golden with glowing amber runes, while the hippo torso and head are gray, strong, shimmering with magical waves. The character wears a robe embroidered with constellations. Its eyes shine sapphire and jade. The background is a glowing pond beneath starlit skies. The style is whimsical, colorful, fantasy, cartoon-like.",
+    "ImageFileName": "GiraffeHippoHippo.jpg"
+  },
+  {
+    "Combination": "BunnyHippoHippo",
+    "Name": "Hase-Doppelnilpferd",
+    "Story": "Das Hase-Doppelnilpferd wurde geboren, als ein Hase zwei Nilpferden Freude brachte. Der Baum des Lichts vereinte sie zu einem schuetzenden und froehlichen Wesen. Es ist ein Geist der Freundschaft und des Mutes, der Licht in die Dunkelheit bringt.",
+    "ImagePrompt": "An anthropomorphic hybrid with the arms of a bunny, the body and head of a hippo. The bunny arms are soft, glowing pastel, while the hippo torso and head are strong, gray, shimmering with pearly magic. The character wears a robe embroidered with lotus flowers and rainbow spirals. Its eyes shine turquoise and emerald. The background is a whimsical pond filled with glowing reeds. The style is vibrant, fantasy, cartoon-like.",
+    "ImageFileName": "BunnyHippoHippo.jpg"
+  },
+  {
+    "Combination": "BunnyGiraffeGiraffe",
+    "Name": "Hase-Doppelgiraffe",
+    "Story": "Die Hase-Doppelgiraffe erschien, als ein Hase sein Spiel mit zwei Giraffen teilen wollte. Der Baum des Lichts vereinte sie zu einem einzigen Wesen. Sie ist ein Geist der Neugier und Freundschaft, der Lebhaftigkeit mit Groesse vereint.",
+    "ImagePrompt": "An anthropomorphic hybrid with the arms of a bunny, the body and head of a giraffe. The bunny arms are soft and white, glowing with pastel magic, while the giraffe torso and head are tall, golden, glowing with amber constellations. The character wears a cloak embroidered with moons and stars. Its eyes shine turquoise and jade. The background is a magical meadow with glowing fireflies. The style is whimsical, colorful, fantasy, cartoonish.",
+    "ImageFileName": "BunnyGiraffeGiraffe.jpg"
+  },
+  {
+    "Combination": "HippoGiraffeGiraffe",
+    "Name": "Nilpferd-Doppelgiraffe",
+    "Story": "Die Nilpferd-Doppelgiraffe entstand, als ein Nilpferd und zwei Giraffen gemeinsam ueber einen Ast des Baumes wachten. Aus ihrer Freundschaft entstand dieses einzigartige Wesen, ein Geist des Gleichgewichts und der Weisheit.",
+    "ImagePrompt": "An anthropomorphic hybrid with the arms of a hippo, the body and head of a giraffe. The hippo arms are gray, glowing faintly with magic, while the giraffe body and head are tall, golden, glowing with amber constellations. The character wears a robe embroidered with suns and rivers. Its eyes shine emerald and turquoise. The background is a glowing savanna beneath enchanted stars. The style is whimsical, vibrant, fantasy, cartoon-like.",
+    "ImageFileName": "HippoGiraffeGiraffe.jpg"
+  },
+  {
+    "Combination": "HippoBunnyBunny",
+    "Name": "Nilpferd-Doppelhase",
+    "Story": "Das Nilpferd-Doppelhase wurde geboren, als ein Nilpferd zwei von der Dunkelheit erschreckte Hasen beschuetzte. Der Baum des Lichts vereinte sie zu einem gemeinsamen Koerper. Es ist ein Geist der Freude und Widerstandsfaehigkeit, der den Kleinen Hoffnung bringt.",
+    "ImagePrompt": "An anthropomorphic hybrid with the arms of a hippo, the body and head of a bunny. The hippo arms are strong, gray, shimmering with pearly ripples, while the bunny torso and head are small, white, glowing with pastel light. The character wears a robe embroidered with constellations and blossoms. Its eyes shine sapphire and jade. The background is a whimsical meadow glowing with mushrooms. The style is colorful, vibrant, fantasy, cartoon-like.",
+    "ImageFileName": "HippoBunnyBunny.jpg"
+  },
+  {
+    "Combination": "GiraffeBunnyBunny",
+    "Name": "Giraffe-Doppelhase",
+    "Story": "Die Giraffe-Doppelhase erschien, als eine Giraffe zwei Hasen umarmte. Der Baum des Lichts vereinte sie zu einem einzigen Wesen. Sie ist ein Geist des Mitgefuehls und des Spiels, der Froehlichkeit zwischen den Aesten der Welten verbreitet.",
+    "ImagePrompt": "An anthropomorphic hybrid with the arms of a giraffe, the body and head of a bunny. The giraffe arms are long, golden, glowing with runes, while the bunny torso and head are soft, white, glowing with pastel colors. The character wears a cloak embroidered with moons and flowers. Its eyes shine violet and turquoise. The background is a magical meadow filled with glowing mushrooms under enchanted skies. The style is whimsical, colorful, fantasy, cartoon-like.",
+    "ImageFileName": "GiraffeBunnyBunny.jpg"
+  },
+  {
+    "Combination": "BunnyHippoBunny",
+    "Name": "Hasen-Nilpferd-Hasenling",
+    "Story": "Der Hasen-Nilpferd-Hasenling wurde geboren, als ein Hase die Freundschaft eines Nilpferds suchte, und der Baum des Lichts ihre Schicksale vereinte. Mit flinken Armen und verspielem Kopf, aber solidem Koerper, ist er ein Geist des Gleichgewichts zwischen Zerbrechlichkeit und Kraft, der Heiterkeit und Schutz in die Welten bringt.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms and head of a bunny and the body of a hippo. The bunny arms are small, soft, glowing pastel, the hippo torso is wide, gray, shimmering with pearly ripples, and the bunny head is white, glowing with magical ears. The character wears a robe embroidered with moons and flowers. Its eyes shine turquoise and violet, full of playful courage. The background is a magical pond with glowing reeds and enchanted fireflies. The style is whimsical, colorful, fantasy, cartoon-like.",
+    "ImageFileName": "BunnyHippoBunny.jpg"
+  },
+  {
+    "Combination": "BunnyGiraffeBunny",
+    "Name": "Hasengiraffennix",
+    "Story": "Der Hasengiraffennix entstand, als zwei Hasen sich wuenschten, die Welt von oben zu sehen. Der Baum des Lichts antwortete und schenkte ihnen den Koerper einer Giraffe, bewahrte aber ihre verspielten Herzen. Er ist ein Geist der Traeume und Hoffnung, der das Licht der Kindheit in seinen Augen traegt.",
+    "ImagePrompt": "An anthropomorphic hybrid with the arms and head of a bunny and the body of a giraffe. The bunny arms and head are white, glowing with pastel magical light, while the giraffe torso is tall and golden, decorated with glowing amber spots. The character wears a robe embroidered with stars and rainbow spirals. Its eyes shine emerald and violet, joyful and curious. The background is a glowing savanna meadow under starlit skies. The style is whimsical, colorful, fantasy, cartoonish.",
+    "ImageFileName": "BunnyGiraffeBunny.jpg"
+  },
+  {
+    "Combination": "GiraffeHippoGiraffe",
+    "Name": "Giraffe-Nilpferd-Giraffon",
+    "Story": "Das Giraffe-Nilpferd-Giraffon erschien, als zwei Giraffen ueber ein verlorenes Nilpferd im Sternenlicht wachten. Der Baum des Lichts vereinte sie, um das Gleichgewicht zwischen Himmel und Wasser zu bewahren. Es ist ein Geist des Schutzes und der Klarheit, der Vision und sanfte Kraft bringt.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms and head of a giraffe and the body of a hippo. The giraffe arms are long and golden with glowing constellations, the hippo torso is massive and gray with pearly ripples, and the giraffe head is tall, glowing amber with runes. The character wears a cloak embroidered with rivers and stars. Its eyes shine turquoise and jade. The background is a magical riverbank in a glowing savanna. The style is whimsical, colorful, fantasy, cartoon-like.",
+    "ImageFileName": "GiraffeHippoGiraffe.jpg"
+  },
+  {
+    "Combination": "GiraffeBunnyGiraffe",
+    "Name": "Giraffenpix",
+    "Story": "Der Giraffenpix wurde geboren, als zwei Giraffen einen kleinen Hasen beschuetzten. Der Baum des Lichts vereinte sie zu einem einzigen Koerper und bestimmte sie mit der Agilitat der Erde und der Vision des Himmels. Er ist ein Geist der Freundschaft und Weisheit, faehig, gegensaetzliche Welten zu vereinen.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms and head of a giraffe and the body of a bunny. The giraffe arms are long and golden, the bunny torso is agile and glowing with pastel light, while the giraffe head is tall and noble, decorated with amber runes. The character wears a robe embroidered with moons and flowers. Its eyes shine emerald and violet. The background is a whimsical meadow lit by enchanted fireflies. The style is vibrant, colorful, fantasy, cartoonish.",
+    "ImageFileName": "GiraffeBunnyGiraffe.jpg"
+  },
+  {
+    "Combination": "HippoBunnyHippo",
+    "Name": "Nilpferd-Hasen-Nilpferd",
+    "Story": "Das Nilpferd-Hasen-Nilpferd erschien, als zwei Nilpferde einen zerbrechlichen Hasen schuetzen wollten. Der Baum des Lichts vereinte sie zu einem gemeinsamen Koerper, klein aber stark. Es ist ein Geist des Schutzes und Mutes, der Gleichgewicht zwischen Spiel und Staerke bringt.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms and head of a hippo and the body of a bunny. The hippo arms are strong, gray, glowing faintly with magic, the bunny torso is small and pastel, agile, while the hippo head is large and calm, shimmering with pearly waves. The character wears a robe embroidered with lotus and constellations. Its eyes shine sapphire and emerald. The background is a magical meadow near a glowing pond. The style is whimsical, colorful, fantasy, cartoon-like.",
+    "ImageFileName": "HippoBunnyHippo.jpg"
+  },
+  {
+    "Combination": "HippoGiraffeHippo",
+    "Name": "Nilpferd-Giraffe-Nilpferd",
+    "Story": "Das Nilpferd-Giraffe-Nilpferd wurde geboren, als zwei Nilpferde und eine Giraffe einen gemeinsamen Traum teilten: die Gewaesser und den Himmel zu vereinen. Der Baum des Lichts vereinte sie zu einem einzigen Koerper. Es ist ein Geist der Bestaendigkeit und Weisheit, der Klarheit inmitten des Sturms bringt.",
+    "ImagePrompt": "An anthropomorphic hybrid character with the arms and head of a hippo and the body of a giraffe. The hippo arms are massive and gray, shimmering with pearly light, the giraffe torso is tall and golden with glowing amber spots, and the hippo head is large and noble. The character wears a cloak embroidered with rivers and stars. Its eyes shine turquoise and jade. The background is a glowing savanna with enchanted fireflies under starlit skies. The style is whimsical, colorful, fantasy, cartoon-like.",
+    "ImageFileName": "HippoGiraffeHippo.jpg"
+  }
+]

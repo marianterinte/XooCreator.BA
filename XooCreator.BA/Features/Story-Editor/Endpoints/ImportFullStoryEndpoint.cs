@@ -25,6 +25,7 @@ using XooCreator.BA.Infrastructure.Services;
 using XooCreator.BA.Infrastructure.Services.Blob;
 using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Infrastructure.Services.Queue;
+using XooCreator.BA.Features.System.Services;
 using static XooCreator.BA.Features.StoryEditor.Mappers.StoryAssetPathMapper;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
@@ -41,6 +42,7 @@ public partial class ImportFullStoryEndpoint
     private readonly TelemetryClient? _telemetryClient;
     private readonly string _importQueueName;
     private readonly IStoryImportQueue _importQueue;
+    private readonly IStoryCreatorMaintenanceService _maintenanceService;
     private readonly IJobEventsHub _jobEvents;
     private const int DefaultSasValidityMinutes = 60;
     private readonly int _sasValidityMinutes;
@@ -63,6 +65,7 @@ public partial class ImportFullStoryEndpoint
         ILogger<ImportFullStoryEndpoint> logger,
         IStoryImportQueue importQueue,
         IJobEventsHub jobEvents,
+        IStoryCreatorMaintenanceService maintenanceService,
         TelemetryClient? telemetryClient = null)
     {
         _db = db;
@@ -74,6 +77,7 @@ public partial class ImportFullStoryEndpoint
         _logger = logger;
         _importQueue = importQueue;
         _jobEvents = jobEvents;
+        _maintenanceService = maintenanceService;
         _telemetryClient = telemetryClient;
         _sasValidityMinutes = configuration.GetValue<int?>("StoryEditor:DirectUpload:SasValidityMinutes") ?? DefaultSasValidityMinutes;
     }
@@ -119,7 +123,7 @@ public partial class ImportFullStoryEndpoint
     [Route("/api/{locale}/stories/import-full")]
     [Authorize]
     [DisableRequestSizeLimit] // Disable request size limit for this endpoint (allows up to 500MB as per MaxZipSizeBytes)
-    public static async Task<Results<Accepted<ImportFullStoryEnqueueResponse>, BadRequest<ImportFullStoryResponse>, Conflict<ImportFullStoryResponse>>> HandlePost(
+    public static async Task<IResult> HandlePost(
         [FromRoute] string locale,
         [FromServices] ImportFullStoryEndpoint ep,
         HttpRequest request,
@@ -141,6 +145,9 @@ public partial class ImportFullStoryEndpoint
             errors.Add("You do not have permission to import stories. Only users with Creator or Admin role can import stories.");
             return TypedResults.BadRequest(new ImportFullStoryResponse { Success = false, Errors = errors });
         }
+
+        if (await ep._maintenanceService.IsStoryCreatorDisabledAsync(ct))
+            return StoryCreatorMaintenanceResult.Unavailable();
 
         if (!request.HasFormContentType)
         {
@@ -650,6 +657,54 @@ public partial class ImportFullStoryEndpoint
                         }
                     }
                 }
+
+                // Dialog node audio (inside dialogNodes on this tile)
+                if (includeAudio && tile.TryGetProperty("dialogNodes", out var dialogNodesEl) && dialogNodesEl.ValueKind == JsonValueKind.Array)
+                {
+                    // Determine fallback language from manifest root
+                    var manifestLang = (root.TryGetProperty("primaryLang", out var plElement) ? plElement.GetString() : null)
+                        ?? (root.TryGetProperty("languageCode", out var lcElement) ? lcElement.GetString() : null);
+                    var defaultLang = string.IsNullOrWhiteSpace(manifestLang) ? null : manifestLang!.Trim().ToLowerInvariant();
+
+                    foreach (var dialogNode in dialogNodesEl.EnumerateArray())
+                    {
+                        // Flat audioUrl directly on node (single-language format)
+                        if (dialogNode.TryGetProperty("audioUrl", out var nodeAudioEl) && nodeAudioEl.ValueKind == JsonValueKind.String)
+                        {
+                            var audioPath = nodeAudioEl.GetString();
+                            if (!string.IsNullOrWhiteSpace(audioPath))
+                            {
+                                var filename = ExtractFilename(audioPath);
+                                if (!string.IsNullOrWhiteSpace(filename))
+                                {
+                                    assets.Add(CreateAssetEntry(audioPath, new AssetInfo(filename, AssetType.Audio, defaultLang)));
+                                }
+                            }
+                        }
+
+                        // Translations audioUrl per node (multi-language format)
+                        if (dialogNode.TryGetProperty("translations", out var nodeTrEl) && nodeTrEl.ValueKind == JsonValueKind.Array)
+                        {
+                            foreach (var nodeTr in nodeTrEl.EnumerateArray())
+                            {
+                                var nLang = nodeTr.TryGetProperty("lang", out var nLangEl) ? nLangEl.GetString() : null;
+                                var nNormalizedLang = string.IsNullOrWhiteSpace(nLang) ? null : nLang!.Trim().ToLowerInvariant();
+                                if (nodeTr.TryGetProperty("audioUrl", out var nAudioEl) && nAudioEl.ValueKind == JsonValueKind.String)
+                                {
+                                    var audioPath = nAudioEl.GetString();
+                                    if (!string.IsNullOrWhiteSpace(audioPath) && !string.IsNullOrWhiteSpace(nNormalizedLang))
+                                    {
+                                        var filename = ExtractFilename(audioPath);
+                                        if (!string.IsNullOrWhiteSpace(filename))
+                                        {
+                                            assets.Add(CreateAssetEntry(audioPath, new AssetInfo(filename, AssetType.Audio, nNormalizedLang)));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -966,7 +1021,7 @@ public partial class ImportFullStoryEndpoint
             {
                 if (translation.TryGetProperty("lang", out var langElement))
                 {
-                    var lang = langElement.GetString();
+                    var lang = langElement.GetString()?.ToLowerInvariant();
                     if (!string.IsNullOrWhiteSpace(lang))
                     {
                         languages.Add(lang);
@@ -986,7 +1041,7 @@ public partial class ImportFullStoryEndpoint
                     {
                         if (translation.TryGetProperty("lang", out var langElement))
                         {
-                            var lang = langElement.GetString();
+                            var lang = langElement.GetString()?.ToLowerInvariant();
                             if (!string.IsNullOrWhiteSpace(lang))
                             {
                                 languages.Add(lang);
@@ -1007,6 +1062,17 @@ public partial class ImportFullStoryEndpoint
         List<string> warnings,
         CancellationToken ct)
     {
+        // Diagnostic: log when manifest has missing or empty title/tiles (helps debug import issues)
+        var hasTitle = root.TryGetProperty("title", out var titleCheckEl) && !string.IsNullOrWhiteSpace(titleCheckEl.GetString());
+        var hasTiles = root.TryGetProperty("tiles", out var tilesCheckEl) && tilesCheckEl.ValueKind == JsonValueKind.Array && tilesCheckEl.GetArrayLength() > 0;
+        if (!hasTitle || !hasTiles)
+        {
+            _logger.LogWarning(
+                "Import manifest has missing or empty data: storyId={StoryId} hasTitle={HasTitle} hasTiles={HasTiles} tilesCount={TilesCount}",
+                storyId, hasTitle, hasTiles,
+                root.TryGetProperty("tiles", out var t) && t.ValueKind == JsonValueKind.Array ? t.GetArrayLength() : 0);
+        }
+
         // Check if craft already exists (for overwrite scenario)
         var existing = await _crafts.GetAsync(storyId, ct);
         if (existing != null && existing.OwnerUserId == ownerUserId)
@@ -1024,6 +1090,12 @@ public partial class ImportFullStoryEndpoint
             : StoryType.Indie;
         var coverImageUrl = root.TryGetProperty("coverImageUrl", out var coverElement) ? ExtractFilename(coverElement.GetString() ?? "") : null;
         var storyTopic = root.TryGetProperty("storyTopic", out var topicElement) ? topicElement.GetString() : null;
+
+        // Fallback language for flat text on dialog nodes/edges (when no translations array)
+        var fallbackLang = (root.TryGetProperty("primaryLang", out var plEl) ? plEl.GetString() : null)
+            ?? (root.TryGetProperty("languageCode", out var lcEl) ? lcEl.GetString() : null)
+            ?? "ro-ro";
+        fallbackLang = fallbackLang.Trim().ToLowerInvariant();
         var authorName = root.TryGetProperty("authorName", out var authorElement) ? authorElement.GetString() : null;
         var classicAuthorId = root.TryGetProperty("classicAuthorId", out var classicAuthorElement) && classicAuthorElement.ValueKind == JsonValueKind.String
             ? Guid.TryParse(classicAuthorElement.GetString(), out var guid) ? guid : (Guid?)null
@@ -1067,7 +1139,7 @@ public partial class ImportFullStoryEndpoint
         {
             foreach (var translation in translationsElement.EnumerateArray())
             {
-                var lang = translation.TryGetProperty("lang", out var langElement) ? langElement.GetString() : null;
+                var lang = translation.TryGetProperty("lang", out var langElement) ? langElement.GetString()?.ToLowerInvariant() : null;
                 var transTitle = translation.TryGetProperty("title", out var transTitleElement) ? transTitleElement.GetString() : null;
                 var transSummary = translation.TryGetProperty("summary", out var transSummaryElement) ? transSummaryElement.GetString() : null;
 
@@ -1091,7 +1163,9 @@ public partial class ImportFullStoryEndpoint
             var sortOrder = 0;
             foreach (var tile in tilesElement.EnumerateArray())
             {
-                var tileId = tile.TryGetProperty("id", out var tileIdElement) ? tileIdElement.GetString() ?? $"tile-{sortOrder}" : $"tile-{sortOrder}";
+                // Support both "id" and "tileId" for tile identifier (v2 and some exports use tileId)
+                var tileId = tile.TryGetProperty("id", out var tileIdElement) ? tileIdElement.GetString() ?? $"tile-{sortOrder}"
+                    : (tile.TryGetProperty("tileId", out var tileIdAlt) ? tileIdAlt.GetString() : null) ?? $"tile-{sortOrder}";
                 var tileType = tile.TryGetProperty("type", out var tileTypeElement) ? tileTypeElement.GetString() ?? "page" : "page";
                 var tileImageUrl = tile.TryGetProperty("imageUrl", out var tileImageElement) ? ExtractFilename(tileImageElement.GetString() ?? "") : null;
 
@@ -1110,7 +1184,7 @@ public partial class ImportFullStoryEndpoint
                 {
                     foreach (var translation in tileTranslationsElement.EnumerateArray())
                     {
-                        var lang = translation.TryGetProperty("lang", out var langElement) ? langElement.GetString() : null;
+                        var lang = translation.TryGetProperty("lang", out var langElement) ? langElement.GetString()?.ToLowerInvariant() : null;
                         var caption = translation.TryGetProperty("caption", out var captionElement) ? captionElement.GetString() : null;
                         var text = translation.TryGetProperty("text", out var textElement) ? textElement.GetString() : null;
                         var question = translation.TryGetProperty("question", out var questionElement) ? questionElement.GetString() : null;
@@ -1160,7 +1234,7 @@ public partial class ImportFullStoryEndpoint
                         {
                             foreach (var translation in answerTranslationsElement.EnumerateArray())
                             {
-                                var lang = translation.TryGetProperty("lang", out var langElement) ? langElement.GetString() : null;
+                                var lang = translation.TryGetProperty("lang", out var langElement) ? langElement.GetString()?.ToLowerInvariant() : null;
                                 var answerText = translation.TryGetProperty("text", out var textElement) ? textElement.GetString() : null;
 
                                 if (!string.IsNullOrWhiteSpace(lang))
@@ -1239,11 +1313,11 @@ public partial class ImportFullStoryEndpoint
                             SortOrder = nodeSortOrder++
                         };
 
-                        if (nodeEl.TryGetProperty("translations", out var nodeTrEl) && nodeTrEl.ValueKind == JsonValueKind.Array)
+                        if (nodeEl.TryGetProperty("translations", out var nodeTrEl) && nodeTrEl.ValueKind == JsonValueKind.Array && nodeTrEl.GetArrayLength() > 0)
                         {
                             foreach (var tr in nodeTrEl.EnumerateArray())
                             {
-                                var lang = tr.TryGetProperty("lang", out var lEl) ? lEl.GetString() : null;
+                                var lang = tr.TryGetProperty("lang", out var lEl) ? lEl.GetString()?.ToLowerInvariant() : null;
                                 var text = tr.TryGetProperty("text", out var tEl) ? tEl.GetString() : null;
                                 var audioUrl = tr.TryGetProperty("audioUrl", out var aEl) ? ExtractFilename(aEl.GetString() ?? "") : null;
                                 if (!string.IsNullOrWhiteSpace(lang))
@@ -1259,6 +1333,23 @@ public partial class ImportFullStoryEndpoint
                                 }
                             }
                         }
+                        else
+                        {
+                            // Fallback: read flat text/audioUrl directly from node (single-language export format)
+                            var flatText = nodeEl.TryGetProperty("text", out var ftEl) ? ftEl.GetString() : null;
+                            var flatAudioUrl = nodeEl.TryGetProperty("audioUrl", out var faEl) ? ExtractFilename(faEl.GetString() ?? "") : null;
+                            if (!string.IsNullOrWhiteSpace(flatText) || !string.IsNullOrWhiteSpace(flatAudioUrl))
+                            {
+                                dialogNode.Translations.Add(new StoryCraftDialogNodeTranslation
+                                {
+                                    Id = Guid.NewGuid(),
+                                    StoryCraftDialogNodeId = dialogNode.Id,
+                                    LanguageCode = fallbackLang,
+                                    Text = flatText ?? string.Empty,
+                                    AudioUrl = flatAudioUrl
+                                });
+                            }
+                        }
 
                         if (nodeEl.TryGetProperty("options", out var optionsEl) && optionsEl.ValueKind == JsonValueKind.Array)
                         {
@@ -1269,6 +1360,14 @@ public partial class ImportFullStoryEndpoint
                                 var toNodeId = opt.TryGetProperty("nextNodeId", out var toEl) ? toEl.GetString() ?? string.Empty : string.Empty;
                                 var jumpToTileId = opt.TryGetProperty("jumpToTileId", out var jEl) ? jEl.GetString() : null;
                                 var setBranchId = opt.TryGetProperty("setBranchId", out var sEl) ? sEl.GetString() : null;
+                                var hideIfBranchSet = opt.TryGetProperty("hideIfBranchSet", out var hEl) ? hEl.GetString() : null;
+                                string? showOnlyIfBranchesSet = null;
+                                if (opt.TryGetProperty("showOnlyIfBranchesSet", out var soEl))
+                                {
+                                    showOnlyIfBranchesSet = soEl.ValueKind == JsonValueKind.Array
+                                        ? soEl.ToString()
+                                        : soEl.ValueKind == JsonValueKind.String ? soEl.GetString() : null;
+                                }
 
                                 var edge = new StoryCraftDialogEdge
                                 {
@@ -1278,14 +1377,16 @@ public partial class ImportFullStoryEndpoint
                                     ToNodeId = toNodeId,
                                     JumpToTileId = jumpToTileId,
                                     SetBranchId = setBranchId,
+                                    HideIfBranchSet = hideIfBranchSet,
+                                    ShowOnlyIfBranchesSet = showOnlyIfBranchesSet,
                                     OptionOrder = optionOrder++
                                 };
 
-                                if (opt.TryGetProperty("translations", out var edgeTrEl) && edgeTrEl.ValueKind == JsonValueKind.Array)
+                                if (opt.TryGetProperty("translations", out var edgeTrEl) && edgeTrEl.ValueKind == JsonValueKind.Array && edgeTrEl.GetArrayLength() > 0)
                                 {
                                     foreach (var et in edgeTrEl.EnumerateArray())
                                     {
-                                        var lang = et.TryGetProperty("lang", out var lel) ? lel.GetString() : null;
+                                        var lang = et.TryGetProperty("lang", out var lel) ? lel.GetString()?.ToLowerInvariant() : null;
                                         var optionText = et.TryGetProperty("text", out var oEl) ? oEl.GetString() : null;
                                         if (!string.IsNullOrWhiteSpace(lang))
                                         {
@@ -1297,6 +1398,21 @@ public partial class ImportFullStoryEndpoint
                                                 OptionText = optionText ?? string.Empty
                                             });
                                         }
+                                    }
+                                }
+                                else
+                                {
+                                    // Fallback: read flat text from option (single-language export format)
+                                    var flatOptionText = opt.TryGetProperty("text", out var fotEl) ? fotEl.GetString() : null;
+                                    if (!string.IsNullOrWhiteSpace(flatOptionText))
+                                    {
+                                        edge.Translations.Add(new StoryCraftDialogEdgeTranslation
+                                        {
+                                            Id = Guid.NewGuid(),
+                                            StoryCraftDialogEdgeId = edge.Id,
+                                            LanguageCode = fallbackLang,
+                                            OptionText = flatOptionText
+                                        });
                                     }
                                 }
 

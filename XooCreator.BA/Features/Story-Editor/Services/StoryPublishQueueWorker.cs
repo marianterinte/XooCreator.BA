@@ -11,6 +11,7 @@ using XooCreator.BA.Features.Stories.Repositories;
 using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Infrastructure.Services.Queue;
+using XooCreator.BA.Features.System.Services;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Caching;
 
 namespace XooCreator.BA.Features.StoryEditor.Services;
@@ -128,6 +129,13 @@ public class StoryPublishQueueWorker : BackgroundService
                         continue;
                     }
 
+                    var maintenanceService = scope.ServiceProvider.GetRequiredService<IStoryCreatorMaintenanceService>();
+                    if (await maintenanceService.IsStoryCreatorDisabledAsync(stoppingToken))
+                    {
+                        _logger.LogInformation("Story Creator is in maintenance; skipping job. jobId={JobId} storyId={StoryId} messageId={MessageId}", job.Id, job.StoryId, message.MessageId);
+                        continue;
+                    }
+
                     // --- Error-handling only below: success path (Queued → Running → Completed) is unchanged ---
                     // If job was left Running too long (e.g. previous worker died), mark Failed so UI gets a clear state
                     if (job.Status == StoryPublishJobStatus.Running
@@ -180,6 +188,7 @@ public class StoryPublishQueueWorker : BackgroundService
                         // Load craft with all necessary includes for publishing
                         // Note: This loads significant data into memory, but it's necessary for publish operation
                         var craft = await db.StoryCrafts
+                            .Include(c => c.Translations)
                             .Include(c => c.Tiles).ThenInclude(t => t.Translations)
                             .Include(c => c.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Translations)
                             .Include(c => c.Tiles).ThenInclude(t => t.Answers).ThenInclude(a => a.Tokens)

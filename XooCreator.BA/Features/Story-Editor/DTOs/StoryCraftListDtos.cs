@@ -17,6 +17,7 @@ public record StoryCraftListItemDto
     public bool IsEvaluative { get; init; }
     public bool IsPartOfEpic { get; init; }
     public bool IsFullyInteractive { get; init; }
+    public bool AlwaysShowInStoriesList { get; init; }
     /// <summary>Available language codes for this story (e.g. ro-ro, en-us).</summary>
     public List<string>? AvailableLanguages { get; init; }
     /// <summary>Language codes that have audio support.</summary>

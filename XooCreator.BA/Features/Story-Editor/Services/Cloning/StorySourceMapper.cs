@@ -29,7 +29,9 @@ public class StorySourceMapper : IStorySourceMapper
             ClassicAuthorId = source.ClassicAuthorId,
             BaseVersion = source.BaseVersion,
             IsEvaluative = source.IsEvaluative,
+            IsPartOfEpic = source.IsPartOfEpic,
             IsFullyInteractive = source.IsFullyInteractive,
+            AlwaysShowInStoriesList = source.AlwaysShowInStoriesList,
             Translations = source.Translations.Select(t => new TranslationCloneData
             {
                 LanguageCode = t.LanguageCode,
@@ -131,15 +133,10 @@ public class StorySourceMapper : IStorySourceMapper
             ClassicAuthorId = definition.ClassicAuthorId,
             BaseVersion = definition.Version,
             IsEvaluative = definition.IsEvaluative,
+            IsPartOfEpic = definition.IsPartOfEpic,
             IsFullyInteractive = definition.IsFullyInteractive,
-            Translations = definition.Translations.Select(t => new TranslationCloneData
-            {
-                LanguageCode = t.LanguageCode,
-                Title = isCopy && !string.IsNullOrWhiteSpace(t.Title) && !t.Title.StartsWith("Copy of ", StringComparison.OrdinalIgnoreCase)
-                    ? $"Copy of {t.Title}"
-                    : t.Title,
-                Summary = definition.Summary
-            }).ToList(),
+            AlwaysShowInStoriesList = definition.AlwaysShowInStoriesList,
+            Translations = BuildTranslationsFromDefinition(definition, isCopy),
             Tiles = definition.Tiles.OrderBy(t => t.SortOrder).Select(tile =>
             {
                 var imageFilename = tile.ImageUrl.GetFilenameOnly();
@@ -234,6 +231,32 @@ public class StorySourceMapper : IStorySourceMapper
         };
     }
 
+    private static List<TranslationCloneData> BuildTranslationsFromDefinition(StoryDefinition definition, bool isCopy)
+    {
+        var translations = definition.Translations.Select(t => new TranslationCloneData
+        {
+            LanguageCode = t.LanguageCode,
+            Title = isCopy && !string.IsNullOrWhiteSpace(t.Title) && !t.Title.StartsWith("Copy of ", StringComparison.OrdinalIgnoreCase)
+                ? $"Copy of {t.Title}"
+                : t.Title,
+            Summary = definition.Summary
+        }).ToList();
+
+        if (translations.Count == 0 && !string.IsNullOrWhiteSpace(definition.Title))
+        {
+            translations.Add(new TranslationCloneData
+            {
+                LanguageCode = "ro-ro",
+                Title = isCopy && !definition.Title.StartsWith("Copy of ", StringComparison.OrdinalIgnoreCase)
+                    ? $"Copy of {definition.Title}"
+                    : definition.Title,
+                Summary = definition.Summary
+            });
+        }
+
+        return translations;
+    }
+
     private static string? DeriveSeededAudioFilename(string? imageFilename)
     {
         if (string.IsNullOrWhiteSpace(imageFilename)) return null;
@@ -275,7 +298,9 @@ public class StoryCloneData
     public Guid? ClassicAuthorId { get; set; }
     public int? BaseVersion { get; set; }
     public bool IsEvaluative { get; set; } = false; // If true, this story contains quizzes that should be evaluated
+    public bool IsPartOfEpic { get; set; } = false; // If true, this story is part of an epic
     public bool IsFullyInteractive { get; set; } = false; // If true, this story is full interactive
+    public bool AlwaysShowInStoriesList { get; set; } = false; // If true and story is part of an epic, it can still appear in standalone marketplace story lists
     public List<TranslationCloneData> Translations { get; set; } = new();
     public List<TileCloneData> Tiles { get; set; } = new();
     public List<Guid> Topics { get; set; } = new();

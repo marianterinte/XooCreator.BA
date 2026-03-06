@@ -30,6 +30,7 @@ public class GetUserCreatedStoriesEndpoint
 
     [Route("/api/{locale}/stories/created")]
     [Authorize]
+    [AllowAnonymous]
     public static async Task<Ok<GetUserCreatedStoriesResponse>> HandleGet(
         [FromRoute] string locale,
         [FromServices] GetUserCreatedStoriesEndpoint ep,
@@ -64,7 +65,9 @@ public class GetUserCreatedStoriesEndpoint
         {
             var ownerEmail = ucs.User?.Email ?? "";
             var translations = ucs.StoryDefinition.Translations ?? new List<StoryDefinitionTranslation>();
-            var titleForLocale = translations.FirstOrDefault(t => t.LanguageCode == locale)?.Title ?? ucs.StoryDefinition.Title;
+            var titleForLocale = translations.FirstOrDefault(t => string.Equals(t.LanguageCode, locale, StringComparison.OrdinalIgnoreCase))?.Title
+                ?? translations.FirstOrDefault()?.Title
+                ?? ucs.StoryDefinition.Title;
             var availableLangs = translations.Select(t => t.LanguageCode).Distinct().ToList();
             publishedStories.Add(new CreatedStoryDto
             {
@@ -85,7 +88,8 @@ public class GetUserCreatedStoriesEndpoint
                 IsPartOfEpic = ucs.StoryDefinition.IsPartOfEpic,
                 IsFullyInteractive = ucs.StoryDefinition.IsFullyInteractive,
                 AvailableLanguages = availableLangs,
-                AudioLanguages = ucs.StoryDefinition.AudioLanguages ?? new List<string>()
+                AudioLanguages = ucs.StoryDefinition.AudioLanguages ?? new List<string>(),
+                AlwaysShowInStoriesList = ucs.StoryDefinition.AlwaysShowInStoriesList
             });
         }
 
@@ -110,7 +114,7 @@ public class GetUserCreatedStoriesEndpoint
 
             // Get translation for the requested locale
             var draftTranslations = draft.Translations ?? new List<StoryCraftTranslation>();
-            var draftTranslation = draftTranslations.FirstOrDefault(t => t.LanguageCode == locale)
+            var draftTranslation = draftTranslations.FirstOrDefault(t => string.Equals(t.LanguageCode, locale, StringComparison.OrdinalIgnoreCase))
                 ?? draftTranslations.FirstOrDefault();
 
             var draftLangs = draft.Translations?.Select(t => t.LanguageCode).Distinct().ToList() ?? new List<string>();
@@ -135,7 +139,8 @@ public class GetUserCreatedStoriesEndpoint
                 IsPartOfEpic = draft.IsPartOfEpic,
                 IsFullyInteractive = draft.IsFullyInteractive,
                 AvailableLanguages = draftLangs,
-                AudioLanguages = draft.AudioLanguages ?? new List<string>()
+                AudioLanguages = draft.AudioLanguages ?? new List<string>(),
+                AlwaysShowInStoriesList = draft.AlwaysShowInStoriesList
             };
 
             draftStories.Add(storyDto);

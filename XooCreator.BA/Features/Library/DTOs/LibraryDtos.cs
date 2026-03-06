@@ -53,6 +53,7 @@ public class CreatedStoryDto
     public List<string>? AvailableLanguages { get; set; }
     /// <summary>Language codes that have audio support (e.g. ro-ro, en-us).</summary>
     public List<string>? AudioLanguages { get; set; }
+    public bool AlwaysShowInStoriesList { get; set; } = false; // If true and story is part of an epic, it can still appear in standalone marketplace story lists
 }
 
 

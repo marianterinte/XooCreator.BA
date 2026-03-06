@@ -36,7 +36,8 @@ public class StoryDetailsMapper
         int likesCount = 0,
         bool isLiked = false)
     {
-        var translation = def.Translations?.FirstOrDefault(t => t.LanguageCode == locale);
+        var translation = def.Translations?.FirstOrDefault(t => string.Equals(t.LanguageCode, locale, StringComparison.OrdinalIgnoreCase)) 
+                          ?? def.Translations?.FirstOrDefault();
         var title = translation?.Title ?? def.Title;
         
         string? authorName = null;
@@ -77,7 +78,7 @@ public class StoryDetailsMapper
                 var ageGroup = ageGroupRel.StoryAgeGroup;
                 if (ageGroup == null) continue;
 
-                var translation2 = ageGroup.Translations?.FirstOrDefault(t => t.LanguageCode == locale)
+                var translation2 = ageGroup.Translations?.FirstOrDefault(t => string.Equals(t.LanguageCode, locale, StringComparison.OrdinalIgnoreCase))
                     ?? ageGroup.Translations?.FirstOrDefault();
 
                 if (translation2 != null)
@@ -145,6 +146,7 @@ public class StoryDetailsMapper
             IsEvaluative = def.IsEvaluative,
             IsPartOfEpic = def.IsPartOfEpic,
             IsFullyInteractive = def.IsFullyInteractive,
+            AlwaysShowInStoriesList = def.AlwaysShowInStoriesList,
             CoAuthors = coAuthors
         };
     }

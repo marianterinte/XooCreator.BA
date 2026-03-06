@@ -34,7 +34,9 @@ public static class DatabaseConfiguration
             // This will be logged through ILogger with category "Microsoft.EntityFrameworkCore.Database.Command"
             options.EnableSensitiveDataLogging(false); // Set to true only in development if needed
             options.EnableDetailedErrors();
-            options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+            // NOTE: Do NOT use UseQueryTrackingBehavior(NoTracking) globally.
+            // With NoTracking, entities loaded for update (SaveDraft, epics, admin flags, etc.) are never tracked,
+            // so SaveChanges writes nothing. Use .AsNoTracking() on read-only queries instead.
 
             // Add interceptor to automatically make migration SQL commands idempotent
             // This transforms CREATE TABLE, CREATE INDEX, ALTER TABLE ADD CONSTRAINT, etc.

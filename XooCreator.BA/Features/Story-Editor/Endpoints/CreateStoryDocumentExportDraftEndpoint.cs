@@ -11,6 +11,7 @@ using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
 using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Infrastructure.Services.Queue;
+using XooCreator.BA.Features.System.Services;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 
@@ -21,6 +22,7 @@ public class CreateStoryDocumentExportDraftEndpoint
     private readonly IAuth0UserService _auth0;
     private readonly IStoryCraftsRepository _crafts;
     private readonly IStoryDocumentExportQueue _queue;
+    private readonly IStoryCreatorMaintenanceService _maintenanceService;
     private readonly IJobEventsHub _jobEvents;
     private readonly IConfiguration _config;
 
@@ -30,6 +32,7 @@ public class CreateStoryDocumentExportDraftEndpoint
         IStoryCraftsRepository crafts,
         IStoryDocumentExportQueue queue,
         IJobEventsHub jobEvents,
+        IStoryCreatorMaintenanceService maintenanceService,
         IConfiguration config)
     {
         _db = db;
@@ -37,6 +40,7 @@ public class CreateStoryDocumentExportDraftEndpoint
         _crafts = crafts;
         _queue = queue;
         _jobEvents = jobEvents;
+        _maintenanceService = maintenanceService;
         _config = config;
     }
 
@@ -52,7 +56,7 @@ public class CreateStoryDocumentExportDraftEndpoint
 
     [Route("/api/{locale}/stories/{storyId}/pdf-draft")]
     [Authorize]
-    public static async Task<Results<Accepted<CreateStoryDocumentExportResponse>, NotFound, UnauthorizedHttpResult, ForbidHttpResult, BadRequest<string>, ProblemHttpResult>> HandlePost(
+    public static async Task<IResult> HandlePost(
         [FromRoute] string locale,
         [FromRoute] string storyId,
         [FromBody] CreateStoryDocumentExportRequest? body,
@@ -70,6 +74,9 @@ public class CreateStoryDocumentExportDraftEndpoint
         if (craft == null) return TypedResults.NotFound();
 
         if (!isAdmin && craft.OwnerUserId != user.Id) return TypedResults.Forbid();
+
+        if (await ep._maintenanceService.IsStoryCreatorDisabledAsync(ct))
+            return StoryCreatorMaintenanceResult.Unavailable();
 
         var request = body ?? new CreateStoryDocumentExportRequest(
             Format: StoryDocumentExportFormat.Pdf,

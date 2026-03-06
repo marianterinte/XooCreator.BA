@@ -213,9 +213,9 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
             .Select(hd => new HeroDefinitionDto
             {
                 Id = hd.Id,
-                Name = hd.Translations.FirstOrDefault(t => t.LanguageCode == locale).Name ?? hd.Id,
-                Description = hd.Translations.FirstOrDefault(t => t.LanguageCode == locale).Description ?? string.Empty,
-                Story = hd.Translations.FirstOrDefault(t => t.LanguageCode == locale).Story ?? string.Empty,
+                Name = hd.Translations.FirstOrDefault(t => t.LanguageCode.ToLower() == locale.ToLower()) != null ? hd.Translations.FirstOrDefault(t => t.LanguageCode.ToLower() == locale.ToLower())!.Name : hd.Id,
+                Description = hd.Translations.FirstOrDefault(t => t.LanguageCode.ToLower() == locale.ToLower()) != null ? hd.Translations.FirstOrDefault(t => t.LanguageCode.ToLower() == locale.ToLower())!.Description : string.Empty,
+                Story = hd.Translations.FirstOrDefault(t => t.LanguageCode.ToLower() == locale.ToLower()) != null ? hd.Translations.FirstOrDefault(t => t.LanguageCode.ToLower() == locale.ToLower())!.Story : string.Empty,
                 Image = hd.Image,
                 CourageCost = hd.CourageCost,
                 CuriosityCost = hd.CuriosityCost,
@@ -240,7 +240,7 @@ public class TreeOfHeroesRepository : ITreeOfHeroesRepository
         if (heroDefinition == null)
             return null;
 
-        var translation = heroDefinition.Translations.FirstOrDefault(t => t.LanguageCode == locale);
+        var translation = heroDefinition.Translations.FirstOrDefault(t => t.LanguageCode.Equals(locale, StringComparison.OrdinalIgnoreCase));
 
         return new HeroDefinitionDto
         {

@@ -1,0 +1,173 @@
+{
+  "hero_tree_seed_name": "Semilla Heroica",
+  "hero_tree_seed_desc": "La semilla de la que crecen todos los héroes. Haz clic para descubrir tu potencial heroico.",
+  "hero_tree_seed_story": "En tu corazón late una semilla de heroísmo. Haz clic en ella para descubrir tus primeros héroes y comenzar tu viaje heroico.",
+
+  "hero_tree_alchimalia_hero_name": "Héroe Alchimalia",
+  "hero_tree_alchimalia_hero_desc": "La raíz de todos los héroes, la fuente de la transformación.",
+  "hero_tree_alchimalia_hero_story": "Tu fiel compañero, el comienzo del viaje heroico.",
+
+  "hero_tree_brave_puppy_name": "Cachorro Valiente",
+  "hero_tree_brave_puppy_desc": "Un pequeño cachorro lleno de coraje y determinación.",
+  "hero_tree_brave_puppy_story": "Este pequeño cachorro enfrenta los desafíos de frente, inspirando valentía en todos.",
+
+  "hero_tree_curious_cat_name": "Gato Curioso",
+  "hero_tree_curious_cat_desc": "Un ser curioso que explora cada rincón del mundo.",
+  "hero_tree_curious_cat_story": "El Gato Curioso te guía a través de misterios y maravillas, despertando tu curiosidad.",
+
+  "hero_tree_wise_owl_name": "Búho Sabio",
+  "hero_tree_wise_owl_desc": "Un observador agudo, lleno de conocimiento y perspicacia.",
+  "hero_tree_wise_owl_story": "El Búho Sabio vigila el mundo, compartiendo sabiduría y orientación a los buscadores.",
+
+  "hero_tree_playful_horse_name": "Caballo Juguetón",
+  "hero_tree_playful_horse_desc": "Una criatura alegre que trae creatividad y diversión a donde va.",
+  "hero_tree_playful_horse_story": "El Caballo Juguetón galopa libremente, inspirando imaginación e ideas lúdicas.",
+
+  "hero_tree_cautious_hedgehog_name": "Erizo Cauteloso",
+  "hero_tree_cautious_hedgehog_desc": "Un protector cuidadoso, atento al peligro y la seguridad.",
+  "hero_tree_cautious_hedgehog_story": "El Erizo enseña prudencia y previsión, manteniendo a todos a salvo.",
+
+  "hero_tree_catdog_interstellar_name": "GatoPerro Interestelar",
+  "hero_tree_catdog_interstellar_desc": "Un híbrido de curiosidad y coraje, listo para aventuras interestelares.",
+  "hero_tree_catdog_interstellar_story": "Este híbrido heroico combina los mejores rasgos de gato y perro, explorando el cosmos sin miedo.",
+
+  "hero_tree_brave_sage_name": "Sabio Valiente",
+  "hero_tree_brave_sage_desc": "Una mezcla de sabiduría y valentía, guiando héroes con perspicacia.",
+  "hero_tree_brave_sage_story": "El Sabio Valiente combina intelecto y coraje para guiar a otros a través de los desafíos.",
+
+  "hero_tree_brave_artist_name": "Artista Valiente",
+  "hero_tree_brave_artist_desc": "Un alma creativa con un corazón valiente.",
+  "hero_tree_brave_artist_story": "El Artista Valiente pinta relatos heroicos con valentía e imaginación.",
+
+  "hero_tree_brave_guardian_name": "Lobo de Luz",
+  "hero_tree_brave_guardian_desc": "Un guardián del coraje, firme contra todas las amenazas.",
+  "hero_tree_brave_guardian_story": "El Lobo de Luz protege el reino, encarnando coraje y vigilancia.",
+
+  "hero_tree_wise_researcher_name": "Investigador Sabio",
+  "hero_tree_wise_researcher_desc": "Curioso y analítico, buscando conocimiento en cada rincón.",
+  "hero_tree_wise_researcher_story": "Este héroe descubre secretos y guía a otros con descubrimientos perspicaces.",
+
+  "hero_tree_creative_explorer_name": "Explorador Creativo",
+  "hero_tree_creative_explorer_desc": "Aventurero e inventivo, siempre encontrando nuevos caminos.",
+  "hero_tree_creative_explorer_story": "El Explorador Creativo traza tierras desconocidas con imaginación y curiosidad.",
+
+  "hero_tree_guard_cat_name": "Gato Guardián",
+  "hero_tree_guard_cat_desc": "Un híbrido protector, atento y vigilante.",
+  "hero_tree_guard_cat_story": "El Gato Guardián vigila, combinando cautela y curiosidad en cada movimiento.",
+
+  "hero_tree_wise_pegasus_name": "Pegaso Sabio",
+  "hero_tree_wise_pegasus_desc": "Una criatura majestuosa de intelecto y creatividad.",
+  "hero_tree_wise_pegasus_story": "El Pegaso Sabio vuela a través de los desafíos, ofreciendo guía e inspiración.",
+
+  "hero_tree_thoughtful_guardian_name": "Guardián Reflexivo",
+  "hero_tree_thoughtful_guardian_desc": "Un pensador cuidadoso, combinando seguridad con sabiduría.",
+  "hero_tree_thoughtful_guardian_story": "Este héroe equilibra prudencia e inteligencia para proteger el reino.",
+
+  "hero_tree_creative_guardian_name": "Guardián Creativo",
+  "hero_tree_creative_guardian_desc": "Un guardián que mezcla imaginación con cautela.",
+  "hero_tree_creative_guardian_story": "El Guardián Creativo defiende mientras inspira soluciones inventivas.",
+
+  "hero_tree_alchimalian_dragon_name": "Dragón Alchimaliano",
+  "hero_tree_alchimalian_dragon_desc": "El héroe definitivo, encarnando todos los rasgos a la perfección.",
+  "hero_tree_alchimalian_dragon_story": "Este poderoso dragón representa la cúspide del coraje, la curiosidad, el pensamiento, la creatividad y la seguridad.",
+
+  "hero_tree_guardian_dog_name": "Perro Guardián",
+  "hero_tree_guardian_dog_desc": "Un protector leal con coraje y devoción inquebrantables.",
+  "hero_tree_guardian_dog_story": "El Perro Guardián monta guardia, defendiendo a los necesitados con valiente determinación.",
+
+  "hero_tree_legendary_dog_name": "Perro Legendario",
+  "hero_tree_legendary_dog_desc": "Un héroe legendario de coraje inigualable y espíritu noble.",
+  "hero_tree_legendary_dog_story": "El Perro Legendario inspira leyendas, encarnando la forma más pura de coraje heroico.",
+
+  "hero_tree_explorer_cat_name": "Gato Explorador",
+  "hero_tree_explorer_cat_desc": "Un explorador intrépido impulsado por curiosidad y asombro infinitos.",
+  "hero_tree_explorer_cat_story": "El Gato Explorador se aventura en territorios desconocidos, descubriendo secretos y misterios ocultos.",
+
+  "hero_tree_oracle_cat_name": "Gato Oráculo",
+  "hero_tree_oracle_cat_desc": "Un vidente místico con profunda perspicacia y sabiduría profética.",
+  "hero_tree_oracle_cat_story": "El Gato Oráculo ve más allá del velo de la realidad, revelando verdades ocultas a la vista ordinaria.",
+
+  "hero_tree_scholar_owl_name": "Búho Erudito",
+  "hero_tree_scholar_owl_desc": "Un erudito con profundo conocimiento y pensamiento analítico.",
+  "hero_tree_scholar_owl_story": "El Búho Erudito estudia los misterios del mundo, compartiendo sabiduría a través de un análisis cuidadoso.",
+
+  "hero_tree_ancient_owl_name": "Búho Ancestral",
+  "hero_tree_ancient_owl_desc": "Un sabio ancestral con sabiduría eterna y conocimiento imperecedero.",
+  "hero_tree_ancient_owl_story": "El Búho Ancestral ha presenciado las eras, guardando los secretos más profundos del universo.",
+
+  "hero_tree_artistic_horse_name": "Caballo Artístico",
+  "hero_tree_artistic_horse_desc": "Un artista creativo que expresa belleza a través de la imaginación y la habilidad.",
+  "hero_tree_artistic_horse_story": "El Caballo Artístico crea obras maestras, dando vida a los sueños a través de la expresión creativa.",
+
+  "hero_tree_genius_horse_name": "Caballo Genio",
+  "hero_tree_genius_horse_desc": "Un genio creativo con visión artística e innovación sin igual.",
+  "hero_tree_genius_horse_story": "El Caballo Genio trasciende la creatividad ordinaria, creando obras de pura brillantez artística.",
+
+  "hero_tree_shieldquill_name": "Escudopúa",
+  "hero_tree_shieldquill_desc": "Protección cuidadosa construida con prudencia y experiencia.",
+  "hero_tree_shieldquill_story": "Usa sus púas como escudo para proteger lo que más importa.",
+
+  "hero_tree_wardenspike_name": "Centinela de Púas",
+  "hero_tree_wardenspike_desc": "Centinela inquebrantable, decidido a mantener la seguridad.",
+  "hero_tree_wardenspike_story": "Convierte la vigilancia en un arte, montando guardia en los confines del mundo.",
+
+  "hero_tree_wise_lion_sage_name": "León Sabio",
+  "hero_tree_wise_lion_sage_desc": "Un león majestuoso que combina coraje, curiosidad y sabiduría.",
+  "hero_tree_wise_lion_sage_story": "El León Sabio lidera con fuerza y perspicacia, inspirando a otros con su noble ejemplo.",
+
+  "hero_tree_brave_lion_artist_name": "León Artista Valiente",
+  "hero_tree_brave_lion_artist_desc": "Un león valiente que expresa creatividad a través de una visión artística audaz.",
+  "hero_tree_brave_lion_artist_story": "El León Artista Valiente crea obras maestras que inspiran coraje e imaginación en todos los que las ven.",
+
+  "hero_tree_guardian_lion_name": "León Guardián",
+  "hero_tree_guardian_lion_desc": "Un león protector que combina coraje, curiosidad y seguridad.",
+  "hero_tree_guardian_lion_story": "El León Guardián vigila el reino, asegurando la seguridad mientras fomenta la exploración y el descubrimiento.",
+
+  "hero_tree_brave_sage_artist_name": "Sabio Artista Valiente",
+  "hero_tree_brave_sage_artist_desc": "Un artista sabio que combina coraje, pensamiento y creatividad.",
+  "hero_tree_brave_sage_artist_story": "El Sabio Artista Valiente crea obras profundas que combinan profundidad intelectual con belleza artística.",
+
+  "hero_tree_brave_sage_guardian_name": "Sabio Guardián Valiente",
+  "hero_tree_brave_sage_guardian_desc": "Un sabio protector que combina coraje, sabiduría y seguridad.",
+  "hero_tree_brave_sage_guardian_story": "El Sabio Guardián Valiente defiende con fuerza y sabiduría, asegurando la seguridad a través de protección reflexiva.",
+
+  "hero_tree_brave_artist_guardian_name": "Artista Guardián Valiente",
+  "hero_tree_brave_artist_guardian_desc": "Un guardián creativo que combina coraje, creatividad y seguridad.",
+  "hero_tree_brave_artist_guardian_story": "El Artista Guardián Valiente protege a través de soluciones creativas, combinando visión artística con cuidado vigilante.",
+
+  "hero_tree_wise_explorer_artist_name": "Explorador Artista Sabio",
+  "hero_tree_wise_explorer_artist_desc": "Un artista intelectual que combina curiosidad, pensamiento y creatividad.",
+  "hero_tree_wise_explorer_artist_story": "El Explorador Artista Sabio descubre nuevas fronteras artísticas a través de exploración reflexiva y expresión creativa.",
+
+  "hero_tree_wise_guardian_explorer_name": "Explorador Guardián Sabio",
+  "hero_tree_wise_guardian_explorer_desc": "Un explorador protector que combina curiosidad, sabiduría y seguridad.",
+  "hero_tree_wise_guardian_explorer_story": "El Explorador Guardián Sabio se aventura con seguridad en territorios desconocidos, guiado por la sabiduría y protegido por la cautela.",
+
+  "hero_tree_creative_guardian_explorer_name": "Explorador Guardián Creativo",
+  "hero_tree_creative_guardian_explorer_desc": "Un explorador inventivo que combina curiosidad, creatividad y seguridad.",
+  "hero_tree_creative_guardian_explorer_story": "El Explorador Guardián Creativo descubre nuevos mundos a través de soluciones imaginativas mientras asegura un paso seguro.",
+
+  "hero_tree_wise_creative_guardian_name": "Guardián Creativo Sabio",
+  "hero_tree_wise_creative_guardian_desc": "Un guardián reflexivo que combina sabiduría, creatividad y seguridad.",
+  "hero_tree_wise_creative_guardian_story": "El Guardián Creativo Sabio protege a través de soluciones innovadoras, combinando perspicacia intelectual con visión artística.",
+
+  "hero_tree_master_lion_artist_name": "León Artista Maestro",
+  "hero_tree_master_lion_artist_desc": "El león artístico definitivo, maestro del coraje, la curiosidad, la sabiduría y la creatividad.",
+  "hero_tree_master_lion_artist_story": "El León Artista Maestro crea obras legendarias que inspiran a todos los que presencian su genio artístico y espíritu noble.",
+
+  "hero_tree_master_guardian_lion_name": "León Guardián Maestro",
+  "hero_tree_master_guardian_lion_desc": "El león protector definitivo, maestro del coraje, la curiosidad, la sabiduría y la seguridad.",
+  "hero_tree_master_guardian_lion_story": "El León Guardián Maestro se erige como el protector definitivo, asegurando la seguridad mientras fomenta la exploración y el crecimiento.",
+
+  "hero_tree_master_explorer_lion_name": "León Explorador Maestro",
+  "hero_tree_master_explorer_lion_desc": "El león explorador definitivo, maestro del coraje, la curiosidad, la creatividad y la seguridad.",
+  "hero_tree_master_explorer_lion_story": "El León Explorador Maestro se aventura en los territorios más desafiantes, descubriendo maravillas mientras asegura un paso seguro.",
+
+  "hero_tree_master_sage_guardian_name": "Sabio Guardián Maestro",
+  "hero_tree_master_sage_guardian_desc": "El sabio guardián definitivo, maestro del coraje, el pensamiento, la creatividad y la seguridad.",
+  "hero_tree_master_sage_guardian_story": "El Sabio Guardián Maestro combina profunda sabiduría con protección creativa, asegurando la seguridad a través de guía iluminada.",
+
+  "hero_tree_master_creative_explorer_name": "Explorador Creativo Maestro",
+  "hero_tree_master_creative_explorer_desc": "El explorador creativo definitivo, maestro de la curiosidad, el pensamiento, la creatividad y la seguridad.",
+  "hero_tree_master_creative_explorer_story": "El Explorador Creativo Maestro descubre nuevos reinos de posibilidad a través de pensamiento innovador y visión artística."
+}

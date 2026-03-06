@@ -9,6 +9,7 @@ using XooCreator.BA.Infrastructure.Services;
 using XooCreator.BA.Infrastructure.Services.Blob;
 using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Infrastructure.Services.Queue;
+using XooCreator.BA.Features.System.Services;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 
@@ -96,7 +97,7 @@ public partial class ImportFullStoryEndpoint
     [Obsolete("Prefer prepare-from-manifest + confirm-from-assets (client-side ZIP). Kept for backward compatibility.")]
     [Route("/api/{locale}/stories/import-full/confirm-upload")]
     [Authorize]
-    public static async Task<Results<Accepted<ImportFullStoryEnqueueResponse>, BadRequest<ImportFullStoryResponse>, Conflict<ImportFullStoryResponse>, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
+    public static async Task<IResult> HandlePost(
         [FromRoute] string locale,
         [FromBody] ImportFullStoryConfirmUploadRequest body,
         [FromServices] ImportFullStoryEndpoint ep,
@@ -115,6 +116,9 @@ public partial class ImportFullStoryEndpoint
             ep._logger.LogWarning("Full story confirm-upload forbidden: userId={UserId} not creator or admin", user.Id);
             return TypedResults.Forbid();
         }
+
+        if (await ep._maintenanceService.IsStoryCreatorDisabledAsync(ct))
+            return StoryCreatorMaintenanceResult.Unavailable();
 
         if (body.UploadId == Guid.Empty)
         {

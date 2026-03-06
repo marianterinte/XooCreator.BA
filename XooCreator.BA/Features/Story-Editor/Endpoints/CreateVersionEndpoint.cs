@@ -11,6 +11,7 @@ using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
 using XooCreator.BA.Infrastructure.Services.Queue;
 using XooCreator.BA.Infrastructure.Services.Jobs;
+using XooCreator.BA.Features.System.Services;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 
@@ -21,6 +22,7 @@ public class CreateVersionEndpoint
     private readonly IAuth0UserService _auth0;
     private readonly XooDbContext _db;
     private readonly IStoryVersionQueue _queue;
+    private readonly IStoryCreatorMaintenanceService _maintenanceService;
     private readonly ILogger<CreateVersionEndpoint> _logger;
     private readonly IJobEventsHub _jobEvents;
 
@@ -30,6 +32,7 @@ public class CreateVersionEndpoint
         XooDbContext db,
         IStoryVersionQueue queue,
         IJobEventsHub jobEvents,
+        IStoryCreatorMaintenanceService maintenanceService,
         ILogger<CreateVersionEndpoint> logger)
     {
         _crafts = crafts;
@@ -37,6 +40,7 @@ public class CreateVersionEndpoint
         _db = db;
         _queue = queue;
         _jobEvents = jobEvents;
+        _maintenanceService = maintenanceService;
         _logger = logger;
     }
 
@@ -49,14 +53,7 @@ public class CreateVersionEndpoint
 
     [Route("/api/stories/{storyId}/create-version")]
     [Authorize]
-    public static async Task<
-        Results<
-            Accepted<CreateVersionResponse>,
-            BadRequest<string>,
-            NotFound,
-            UnauthorizedHttpResult,
-            ForbidHttpResult,
-            Conflict<string>>> HandlePost(
+    public static async Task<IResult> HandlePost(
         [FromRoute] string storyId,
         [FromBody] CreateVersionRequest? request,
         [FromServices] CreateVersionEndpoint ep,
@@ -82,6 +79,9 @@ public class CreateVersionEndpoint
 
         var existingDraftResult = await ep.CheckExistingDraftAsync(storyId, ct);
         if (existingDraftResult != null) return existingDraftResult;
+
+        if (await ep._maintenanceService.IsStoryCreatorDisabledAsync(ct))
+            return StoryCreatorMaintenanceResult.Unavailable();
 
         // Create version job
         var job = new StoryVersionJob

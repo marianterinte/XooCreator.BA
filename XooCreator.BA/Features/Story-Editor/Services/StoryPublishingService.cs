@@ -112,12 +112,19 @@ public class StoryPublishingService : IStoryPublishingService
         var lightChanges = craft.LightChanges;
         var previousCoverImageUrl = def?.CoverImageUrl;
         var previousTileAssetsByTileId = BuildPublishedTileAssetSnapshots(def);
+
+        var effectiveTranslations = craft.Translations;
+
+        var resolvedTitle = effectiveTranslations.FirstOrDefault(t => string.Equals(t.LanguageCode, langTag, StringComparison.OrdinalIgnoreCase))?.Title
+                            ?? effectiveTranslations.FirstOrDefault()?.Title
+                            ?? string.Empty;
+
         if (isNew)
         {
             def = new StoryDefinition
             {
                 StoryId = storyId,
-                Title = craft.Translations.FirstOrDefault(t => t.LanguageCode == langTag)?.Title ?? storyId,
+                Title = resolvedTitle,
                 StoryTopic = craft.StoryTopic,
                 AuthorName = craft.AuthorName,
                 ClassicAuthorId = craft.ClassicAuthorId,
@@ -127,6 +134,7 @@ public class StoryPublishingService : IStoryPublishingService
                 IsEvaluative = craft.IsEvaluative,
                 IsPartOfEpic = craft.IsPartOfEpic,
                 IsFullyInteractive = craft.IsFullyInteractive,
+                AlwaysShowInStoriesList = craft.AlwaysShowInStoriesList,
                 SortOrder = 0,
                 Version = 1,
                 PriceInCredits = craft.PriceInCredits,
@@ -136,8 +144,12 @@ public class StoryPublishingService : IStoryPublishingService
             _db.StoryDefinitions.Add(def);
         }
 
-        def!.Title = craft.Translations.FirstOrDefault(t => t.LanguageCode == langTag)?.Title ?? def.Title;
-        def.Summary = craft.Translations.FirstOrDefault(t => t.LanguageCode == langTag)?.Summary ?? def.Summary;
+        def!.Title = effectiveTranslations.FirstOrDefault(t => string.Equals(t.LanguageCode, langTag, StringComparison.OrdinalIgnoreCase))?.Title 
+                     ?? effectiveTranslations.FirstOrDefault()?.Title 
+                     ?? def.Title;
+        def.Summary = effectiveTranslations.FirstOrDefault(t => string.Equals(t.LanguageCode, langTag, StringComparison.OrdinalIgnoreCase))?.Summary 
+                      ?? effectiveTranslations.FirstOrDefault()?.Summary 
+                      ?? def.Summary;
         def.StoryTopic = craft.StoryTopic ?? def.StoryTopic;
         def.AuthorName = craft.AuthorName ?? def.AuthorName;
         def.ClassicAuthorId = craft.ClassicAuthorId ?? def.ClassicAuthorId;
@@ -145,6 +157,7 @@ public class StoryPublishingService : IStoryPublishingService
         def.IsEvaluative = craft.IsEvaluative;
         def.IsPartOfEpic = craft.IsPartOfEpic;
         def.IsFullyInteractive = craft.IsFullyInteractive;
+        def.AlwaysShowInStoriesList = craft.AlwaysShowInStoriesList;
         def.PriceInCredits = craft.PriceInCredits;
         def.AudioLanguages = craft.AudioLanguages ?? new List<string>();
         def.Status = StoryStatus.Published;
@@ -181,7 +194,7 @@ public class StoryPublishingService : IStoryPublishingService
             }
         }
 
-        foreach (var tr in craft.Translations)
+        foreach (var tr in effectiveTranslations)
         {
             _db.StoryDefinitionTranslations.Add(new StoryDefinitionTranslation
             {
@@ -280,8 +293,12 @@ public class StoryPublishingService : IStoryPublishingService
 
     private async Task ApplyDefinitionMetadataDeltaAsync(StoryDefinition def, StoryCraft craft, string ownerEmail, string langTag, CancellationToken ct)
     {
-        def.Title = craft.Translations.FirstOrDefault(t => t.LanguageCode == langTag)?.Title ?? def.Title;
-        def.Summary = craft.Translations.FirstOrDefault(t => t.LanguageCode == langTag)?.Summary ?? def.Summary;
+        def.Title = craft.Translations.FirstOrDefault(t => string.Equals(t.LanguageCode, langTag, StringComparison.OrdinalIgnoreCase))?.Title 
+                    ?? craft.Translations.FirstOrDefault()?.Title 
+                    ?? def.Title;
+        def.Summary = craft.Translations.FirstOrDefault(t => string.Equals(t.LanguageCode, langTag, StringComparison.OrdinalIgnoreCase))?.Summary 
+                      ?? craft.Translations.FirstOrDefault()?.Summary 
+                      ?? def.Summary;
         def.StoryTopic = craft.StoryTopic ?? def.StoryTopic;
         def.AuthorName = craft.AuthorName ?? def.AuthorName;
         def.ClassicAuthorId = craft.ClassicAuthorId ?? def.ClassicAuthorId;
@@ -289,6 +306,7 @@ public class StoryPublishingService : IStoryPublishingService
         def.IsEvaluative = craft.IsEvaluative;
         def.IsPartOfEpic = craft.IsPartOfEpic;
         def.IsFullyInteractive = craft.IsFullyInteractive;
+        def.AlwaysShowInStoriesList = craft.AlwaysShowInStoriesList;
         def.PriceInCredits = craft.PriceInCredits;
         def.AudioLanguages = craft.AudioLanguages ?? new List<string>();
         def.Status = StoryStatus.Published;
@@ -771,7 +789,7 @@ public class StoryPublishingService : IStoryPublishingService
             {
                 StoryTile = tile,
                 AnswerId = craftAnswer.AnswerId,
-                Text = craftAnswer.Translations.FirstOrDefault(t => t.LanguageCode == langTag)?.Text ?? string.Empty,
+                Text = craftAnswer.Translations.FirstOrDefault(t => string.Equals(t.LanguageCode, langTag, StringComparison.OrdinalIgnoreCase))?.Text ?? string.Empty,
                 IsCorrect = craftAnswer.IsCorrect,
                 SortOrder = craftAnswer.SortOrder
             };

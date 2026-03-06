@@ -9,6 +9,7 @@ public class BestiaryItem
     public string Name { get; set; } = string.Empty;
     public string Story { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public ICollection<BestiaryItemTranslation> Translations { get; set; } = new List<BestiaryItemTranslation>();
 }
 
 

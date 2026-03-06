@@ -1,0 +1,173 @@
+{
+  "hero_tree_seed_name": "Graine Héroïque",
+  "hero_tree_seed_desc": "La graine dont naissent tous les héros. Clique pour découvrir ton potentiel héroïque.",
+  "hero_tree_seed_story": "Dans ton cœur bat une graine d'héroïsme. Clique dessus pour découvrir tes premiers héros et commencer ton voyage héroïque.",
+
+  "hero_tree_alchimalia_hero_name": "Héros Alchimalia",
+  "hero_tree_alchimalia_hero_desc": "La racine de tous les héros, la source de la transformation.",
+  "hero_tree_alchimalia_hero_story": "Ton fidèle compagnon, le début du voyage héroïque.",
+
+  "hero_tree_brave_puppy_name": "Chiot Courageux",
+  "hero_tree_brave_puppy_desc": "Un petit chiot plein de courage et de détermination.",
+  "hero_tree_brave_puppy_story": "Ce petit chiot affronte les défis de front, inspirant la bravoure chez tous.",
+
+  "hero_tree_curious_cat_name": "Chat Curieux",
+  "hero_tree_curious_cat_desc": "Un être curieux qui explore chaque recoin du monde.",
+  "hero_tree_curious_cat_story": "Le Chat Curieux te guide à travers mystères et merveilles, éveillant ta curiosité.",
+
+  "hero_tree_wise_owl_name": "Hibou Sage",
+  "hero_tree_wise_owl_desc": "Un observateur avisé, plein de savoir et de perspicacité.",
+  "hero_tree_wise_owl_story": "Le Hibou Sage veille sur le monde, partageant sagesse et conseils aux chercheurs.",
+
+  "hero_tree_playful_horse_name": "Cheval Joueur",
+  "hero_tree_playful_horse_desc": "Une créature joyeuse qui apporte créativité et amusement partout où elle va.",
+  "hero_tree_playful_horse_story": "Le Cheval Joueur galope librement, inspirant imagination et idées ludiques.",
+
+  "hero_tree_cautious_hedgehog_name": "Hérisson Prudent",
+  "hero_tree_cautious_hedgehog_desc": "Un protecteur attentif, conscient du danger et de la sécurité.",
+  "hero_tree_cautious_hedgehog_story": "Le Hérisson enseigne la prudence et la prévoyance, gardant tout le monde en sécurité.",
+
+  "hero_tree_catdog_interstellar_name": "ChatChien Interstellaire",
+  "hero_tree_catdog_interstellar_desc": "Un hybride de curiosité et de courage, prêt pour des aventures interstellaires.",
+  "hero_tree_catdog_interstellar_story": "Cet hybride héroïque combine les meilleurs traits du chat et du chien, explorant le cosmos sans peur.",
+
+  "hero_tree_brave_sage_name": "Sage Courageux",
+  "hero_tree_brave_sage_desc": "Un mélange de sagesse et de bravoure, guidant les héros avec perspicacité.",
+  "hero_tree_brave_sage_story": "Le Sage Courageux combine intellect et courage pour guider les autres à travers les défis.",
+
+  "hero_tree_brave_artist_name": "Artiste Courageux",
+  "hero_tree_brave_artist_desc": "Une âme créative avec un cœur courageux.",
+  "hero_tree_brave_artist_story": "L'Artiste Courageux peint des récits héroïques avec bravoure et imagination.",
+
+  "hero_tree_brave_guardian_name": "Loup de Lumière",
+  "hero_tree_brave_guardian_desc": "Un gardien du courage, ferme face à toutes les menaces.",
+  "hero_tree_brave_guardian_story": "Le Loup de Lumière protège le royaume, incarnant courage et vigilance.",
+
+  "hero_tree_wise_researcher_name": "Chercheur Sage",
+  "hero_tree_wise_researcher_desc": "Curieux et analytique, cherchant le savoir dans chaque recoin.",
+  "hero_tree_wise_researcher_story": "Ce héros découvre des secrets et guide les autres avec des découvertes perspicaces.",
+
+  "hero_tree_creative_explorer_name": "Explorateur Créatif",
+  "hero_tree_creative_explorer_desc": "Aventurier et inventif, trouvant toujours de nouveaux chemins.",
+  "hero_tree_creative_explorer_story": "L'Explorateur Créatif trace des terres inconnues avec imagination et curiosité.",
+
+  "hero_tree_guard_cat_name": "Chat Gardien",
+  "hero_tree_guard_cat_desc": "Un hybride protecteur, attentif et vigilant.",
+  "hero_tree_guard_cat_story": "Le Chat Gardien monte la garde, mêlant prudence et curiosité dans chaque mouvement.",
+
+  "hero_tree_wise_pegasus_name": "Pégase Sage",
+  "hero_tree_wise_pegasus_desc": "Une créature majestueuse d'intellect et de créativité.",
+  "hero_tree_wise_pegasus_story": "Le Pégase Sage vole à travers les défis, offrant guidance et inspiration.",
+
+  "hero_tree_thoughtful_guardian_name": "Gardien Réfléchi",
+  "hero_tree_thoughtful_guardian_desc": "Un penseur prudent, alliant sécurité et sagesse.",
+  "hero_tree_thoughtful_guardian_story": "Ce héros équilibre prudence et intelligence pour protéger le royaume.",
+
+  "hero_tree_creative_guardian_name": "Gardien Créatif",
+  "hero_tree_creative_guardian_desc": "Un gardien alliant imagination et prudence.",
+  "hero_tree_creative_guardian_story": "Le Gardien Créatif défend tout en inspirant des solutions inventives.",
+
+  "hero_tree_alchimalian_dragon_name": "Dragon Alchimalien",
+  "hero_tree_alchimalian_dragon_desc": "Le héros ultime, incarnant tous les traits à la perfection.",
+  "hero_tree_alchimalian_dragon_story": "Ce puissant dragon représente le sommet du courage, de la curiosité, de la réflexion, de la créativité et de la sécurité.",
+
+  "hero_tree_guardian_dog_name": "Chien Gardien",
+  "hero_tree_guardian_dog_desc": "Un protecteur loyal au courage et à la dévotion inébranlables.",
+  "hero_tree_guardian_dog_story": "Le Chien Gardien monte la garde, défendant ceux dans le besoin avec une détermination courageuse.",
+
+  "hero_tree_legendary_dog_name": "Chien Légendaire",
+  "hero_tree_legendary_dog_desc": "Un héros légendaire au courage inégalé et à l'esprit noble.",
+  "hero_tree_legendary_dog_story": "Le Chien Légendaire inspire des légendes, incarnant la forme la plus pure du courage héroïque.",
+
+  "hero_tree_explorer_cat_name": "Chat Explorateur",
+  "hero_tree_explorer_cat_desc": "Un explorateur intrépide animé par une curiosité et un émerveillement sans fin.",
+  "hero_tree_explorer_cat_story": "Le Chat Explorateur s'aventure dans des territoires inconnus, découvrant des secrets et des mystères cachés.",
+
+  "hero_tree_oracle_cat_name": "Chat Oracle",
+  "hero_tree_oracle_cat_desc": "Un voyant mystique doté d'une perspicacité profonde et d'une sagesse prophétique.",
+  "hero_tree_oracle_cat_story": "Le Chat Oracle voit au-delà du voile de la réalité, révélant des vérités cachées au regard ordinaire.",
+
+  "hero_tree_scholar_owl_name": "Hibou Érudit",
+  "hero_tree_scholar_owl_desc": "Un érudit avec un savoir profond et une pensée analytique.",
+  "hero_tree_scholar_owl_story": "Le Hibou Érudit étudie les mystères du monde, partageant la sagesse à travers une analyse minutieuse.",
+
+  "hero_tree_ancient_owl_name": "Hibou Ancestral",
+  "hero_tree_ancient_owl_desc": "Un sage ancestral avec une sagesse intemporelle et un savoir éternel.",
+  "hero_tree_ancient_owl_story": "Le Hibou Ancestral a été témoin des âges, gardant les secrets les plus profonds de l'univers.",
+
+  "hero_tree_artistic_horse_name": "Cheval Artistique",
+  "hero_tree_artistic_horse_desc": "Un artiste créatif exprimant la beauté par l'imagination et le talent.",
+  "hero_tree_artistic_horse_story": "Le Cheval Artistique crée des chefs-d'œuvre, donnant vie aux rêves par l'expression créative.",
+
+  "hero_tree_genius_horse_name": "Cheval Génie",
+  "hero_tree_genius_horse_desc": "Un génie créatif avec une vision artistique et une innovation sans pareilles.",
+  "hero_tree_genius_horse_story": "Le Cheval Génie transcende la créativité ordinaire, créant des œuvres de pure brillance artistique.",
+
+  "hero_tree_shieldquill_name": "Bouclépine",
+  "hero_tree_shieldquill_desc": "Une protection soigneuse bâtie sur la prudence et l'expérience.",
+  "hero_tree_shieldquill_story": "Utilise ses piquants comme bouclier pour protéger ce qui compte le plus.",
+
+  "hero_tree_wardenspike_name": "Sentinépine",
+  "hero_tree_wardenspike_desc": "Sentinelle inébranlable, déterminée à maintenir la sécurité.",
+  "hero_tree_wardenspike_story": "Transforme la vigilance en art, montant la garde aux confins du monde.",
+
+  "hero_tree_wise_lion_sage_name": "Lion Sage",
+  "hero_tree_wise_lion_sage_desc": "Un lion majestueux alliant courage, curiosité et sagesse.",
+  "hero_tree_wise_lion_sage_story": "Le Lion Sage dirige avec force et perspicacité, inspirant les autres par son noble exemple.",
+
+  "hero_tree_brave_lion_artist_name": "Lion Artiste Courageux",
+  "hero_tree_brave_lion_artist_desc": "Un lion courageux exprimant la créativité à travers une vision artistique audacieuse.",
+  "hero_tree_brave_lion_artist_story": "Le Lion Artiste Courageux crée des chefs-d'œuvre qui inspirent courage et imagination chez tous ceux qui les voient.",
+
+  "hero_tree_guardian_lion_name": "Lion Gardien",
+  "hero_tree_guardian_lion_desc": "Un lion protecteur alliant courage, curiosité et sécurité.",
+  "hero_tree_guardian_lion_story": "Le Lion Gardien veille sur le royaume, assurant la sécurité tout en encourageant l'exploration et la découverte.",
+
+  "hero_tree_brave_sage_artist_name": "Sage Artiste Courageux",
+  "hero_tree_brave_sage_artist_desc": "Un artiste sage alliant courage, réflexion et créativité.",
+  "hero_tree_brave_sage_artist_story": "Le Sage Artiste Courageux crée des œuvres profondes qui allient profondeur intellectuelle et beauté artistique.",
+
+  "hero_tree_brave_sage_guardian_name": "Sage Gardien Courageux",
+  "hero_tree_brave_sage_guardian_desc": "Un sage protecteur alliant courage, sagesse et sécurité.",
+  "hero_tree_brave_sage_guardian_story": "Le Sage Gardien Courageux défend avec force et sagesse, assurant la sécurité par une protection réfléchie.",
+
+  "hero_tree_brave_artist_guardian_name": "Artiste Gardien Courageux",
+  "hero_tree_brave_artist_guardian_desc": "Un gardien créatif alliant courage, créativité et sécurité.",
+  "hero_tree_brave_artist_guardian_story": "L'Artiste Gardien Courageux protège par des solutions créatives, alliant vision artistique et soin vigilant.",
+
+  "hero_tree_wise_explorer_artist_name": "Explorateur Artiste Sage",
+  "hero_tree_wise_explorer_artist_desc": "Un artiste intellectuel alliant curiosité, réflexion et créativité.",
+  "hero_tree_wise_explorer_artist_story": "L'Explorateur Artiste Sage découvre de nouvelles frontières artistiques par l'exploration réfléchie et l'expression créative.",
+
+  "hero_tree_wise_guardian_explorer_name": "Explorateur Gardien Sage",
+  "hero_tree_wise_guardian_explorer_desc": "Un explorateur protecteur alliant curiosité, sagesse et sécurité.",
+  "hero_tree_wise_guardian_explorer_story": "L'Explorateur Gardien Sage s'aventure en sécurité dans des territoires inconnus, guidé par la sagesse et protégé par la prudence.",
+
+  "hero_tree_creative_guardian_explorer_name": "Explorateur Gardien Créatif",
+  "hero_tree_creative_guardian_explorer_desc": "Un explorateur inventif alliant curiosité, créativité et sécurité.",
+  "hero_tree_creative_guardian_explorer_story": "L'Explorateur Gardien Créatif découvre de nouveaux mondes par des solutions imaginatives tout en assurant un passage sûr.",
+
+  "hero_tree_wise_creative_guardian_name": "Gardien Créatif Sage",
+  "hero_tree_wise_creative_guardian_desc": "Un gardien réfléchi alliant sagesse, créativité et sécurité.",
+  "hero_tree_wise_creative_guardian_story": "Le Gardien Créatif Sage protège par des solutions innovantes, alliant perspicacité intellectuelle et vision artistique.",
+
+  "hero_tree_master_lion_artist_name": "Lion Artiste Maître",
+  "hero_tree_master_lion_artist_desc": "Le lion artistique ultime, maître du courage, de la curiosité, de la sagesse et de la créativité.",
+  "hero_tree_master_lion_artist_story": "Le Lion Artiste Maître crée des œuvres légendaires qui inspirent tous ceux qui sont témoins de son génie artistique et de son esprit noble.",
+
+  "hero_tree_master_guardian_lion_name": "Lion Gardien Maître",
+  "hero_tree_master_guardian_lion_desc": "Le lion protecteur ultime, maître du courage, de la curiosité, de la sagesse et de la sécurité.",
+  "hero_tree_master_guardian_lion_story": "Le Lion Gardien Maître se dresse comme le protecteur ultime, assurant la sécurité tout en encourageant l'exploration et la croissance.",
+
+  "hero_tree_master_explorer_lion_name": "Lion Explorateur Maître",
+  "hero_tree_master_explorer_lion_desc": "Le lion explorateur ultime, maître du courage, de la curiosité, de la créativité et de la sécurité.",
+  "hero_tree_master_explorer_lion_story": "Le Lion Explorateur Maître s'aventure dans les territoires les plus difficiles, découvrant des merveilles tout en assurant un passage sûr.",
+
+  "hero_tree_master_sage_guardian_name": "Sage Gardien Maître",
+  "hero_tree_master_sage_guardian_desc": "Le sage gardien ultime, maître du courage, de la réflexion, de la créativité et de la sécurité.",
+  "hero_tree_master_sage_guardian_story": "Le Sage Gardien Maître combine une sagesse profonde avec une protection créative, assurant la sécurité par une guidance éclairée.",
+
+  "hero_tree_master_creative_explorer_name": "Explorateur Créatif Maître",
+  "hero_tree_master_creative_explorer_desc": "L'explorateur créatif ultime, maître de la curiosité, de la réflexion, de la créativité et de la sécurité.",
+  "hero_tree_master_creative_explorer_story": "L'Explorateur Créatif Maître découvre de nouveaux royaumes de possibilité par la pensée innovante et la vision artistique."
+}

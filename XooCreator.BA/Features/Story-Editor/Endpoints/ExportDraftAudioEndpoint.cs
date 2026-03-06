@@ -11,6 +11,7 @@ using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
 using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Infrastructure.Services.Queue;
+using XooCreator.BA.Features.System.Services;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 
@@ -22,6 +23,7 @@ public class ExportDraftAudioEndpoint
     private readonly IStoryCraftsRepository _crafts;
     private readonly ILogger<ExportDraftAudioEndpoint> _logger;
     private readonly IStoryAudioExportQueue _queue;
+    private readonly IStoryCreatorMaintenanceService _maintenanceService;
     private readonly IJobEventsHub _jobEvents;
 
     public ExportDraftAudioEndpoint(
@@ -30,7 +32,8 @@ public class ExportDraftAudioEndpoint
         IStoryCraftsRepository crafts,
         ILogger<ExportDraftAudioEndpoint> logger,
         IStoryAudioExportQueue queue,
-        IJobEventsHub jobEvents)
+        IJobEventsHub jobEvents,
+        IStoryCreatorMaintenanceService maintenanceService)
     {
         _db = db;
         _auth0 = auth0;
@@ -38,6 +41,7 @@ public class ExportDraftAudioEndpoint
         _logger = logger;
         _queue = queue;
         _jobEvents = jobEvents;
+        _maintenanceService = maintenanceService;
     }
 
     public record AudioExportRequest
@@ -56,7 +60,7 @@ public class ExportDraftAudioEndpoint
 
     [Route("/api/{locale}/stories/{storyId}/audio-export-draft")]
     [Authorize]
-    public static async Task<Results<Accepted<AudioExportResponse>, NotFound, UnauthorizedHttpResult, ForbidHttpResult, BadRequest<string>>> HandlePost(
+    public static async Task<IResult> HandlePost(
         [FromRoute] string locale,
         [FromRoute] string storyId,
         [FromBody] AudioExportRequest? request,
@@ -76,6 +80,9 @@ public class ExportDraftAudioEndpoint
             ep._logger.LogWarning("Audio export forbidden: userId={UserId} storyId={StoryId} not admin", user.Id, storyId);
             return TypedResults.Forbid();
         }
+
+        if (await ep._maintenanceService.IsStoryCreatorDisabledAsync(ct))
+            return StoryCreatorMaintenanceResult.Unavailable();
 
         var craft = await ep._crafts.GetAsync(storyId, ct);
         if (craft == null)

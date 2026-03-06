@@ -6,6 +6,7 @@ using XooCreator.BA.Data;
 using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
+using XooCreator.BA.Features.System.Services;
 
 namespace XooCreator.BA.Features.System.Endpoints;
 
@@ -15,15 +16,18 @@ public class StoryCreatorAvailabilityEndpoint
     private const string SettingKey = "story-creator-disabled";
     private readonly XooDbContext _context;
     private readonly IAuth0UserService _auth0;
+    private readonly IStoryCreatorMaintenanceService _maintenanceService;
     private readonly ILogger<StoryCreatorAvailabilityEndpoint> _logger;
 
     public StoryCreatorAvailabilityEndpoint(
         XooDbContext context,
         IAuth0UserService auth0,
+        IStoryCreatorMaintenanceService maintenanceService,
         ILogger<StoryCreatorAvailabilityEndpoint> logger)
     {
         _context = context;
         _auth0 = auth0;
+        _maintenanceService = maintenanceService;
         _logger = logger;
     }
 
@@ -78,6 +82,7 @@ public class StoryCreatorAvailabilityEndpoint
 
         await ep._context.SaveChangesAsync(ct);
 
+        ep._maintenanceService.InvalidateCache();
         ep._logger.LogInformation("Story Creator availability updated: disabled={Disabled}, adminId={AdminId}", request.IsDisabled, user.Id);
 
         return TypedResults.Ok(new StoryCreatorStatusResponse

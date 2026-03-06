@@ -12,6 +12,7 @@ using XooCreator.BA.Infrastructure.Services;
 using XooCreator.BA.Infrastructure.Services.Blob;
 using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Infrastructure.Services.Queue;
+using XooCreator.BA.Features.System.Services;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 
@@ -239,7 +240,7 @@ public partial class ImportAudioEndpoint
 
     [Route("/api/{locale}/stories/{storyId}/import-audio/confirm-upload")]
     [Authorize]
-    public static async Task<Results<Accepted<AudioImportJobResponse>, BadRequest<ImportAudioResponse>, UnauthorizedHttpResult, ForbidHttpResult, NotFound>> HandlePost(
+    public static async Task<IResult> HandlePost(
         [FromRoute] string locale,
         [FromRoute] string storyId,
         [FromBody] ImportAudioConfirmUploadRequest body,
@@ -288,6 +289,9 @@ public partial class ImportAudioEndpoint
             return TypedResults.Forbid();
         }
 
+        if (await ep._maintenanceService.IsStoryCreatorDisabledAsync(ct))
+            return StoryCreatorMaintenanceResult.Unavailable();
+
         var blobClient = ep._sas.GetBlobClient(ep._sas.DraftContainer, body.BlobPath);
         if (!await blobClient.ExistsAsync(ct))
         {
@@ -319,7 +323,7 @@ public partial class ImportAudioEndpoint
 
     [Route("/api/{locale}/stories/{storyId}/import-audio/confirm-upload-batch")]
     [Authorize]
-    public static async Task<Results<Accepted<AudioImportJobResponse>, BadRequest<ImportAudioResponse>, UnauthorizedHttpResult, ForbidHttpResult, NotFound>> HandlePost(
+    public static async Task<IResult> HandlePost(
         [FromRoute] string locale,
         [FromRoute] string storyId,
         [FromBody] ImportAudioBatchConfirmUploadRequest body,
@@ -347,6 +351,9 @@ public partial class ImportAudioEndpoint
         var isRequester = string.Equals(job.RequestedByEmail, user.Email, StringComparison.OrdinalIgnoreCase);
         if (!isAdmin && !isRequester)
             return TypedResults.Forbid();
+
+        if (await ep._maintenanceService.IsStoryCreatorDisabledAsync(ct))
+            return StoryCreatorMaintenanceResult.Unavailable();
 
         var staged = JsonSerializer.Deserialize<AudioBatchMappingPayload>(job.BatchMappingJson ?? string.Empty);
         var stagedFiles = staged?.Files ?? new List<StagedMediaFile>();

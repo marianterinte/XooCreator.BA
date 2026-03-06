@@ -131,9 +131,18 @@ public sealed class GetUserBestiaryEndpoint
             .Where(t => storyHeroes.Select(sh => sh.Id).Contains(t.StoryHeroId))
             .ToListAsync(ct);
 
+        var discoveryItemIds = rawItems
+            .Where(i => i.BestiaryType == "discovery")
+            .Select(i => i.Id)
+            .ToList();
+
+        var discoveryTranslations = await ep._db.BestiaryItemTranslations
+            .Where(t => discoveryItemIds.Contains(t.BestiaryItemId) && t.LanguageCode == locale)
+            .ToListAsync(ct);
+
         var items = rawItems.Select(item =>
         {
-            var (name, story) = ep.ResolveText(item, locale, heroTranslations, storyHeroes, storyHeroTranslations, epicHeroDefinitions, epicHeroTranslations, legacyHeroIdMapping);
+            var (name, story) = ep.ResolveText(item, locale, heroTranslations, storyHeroes, storyHeroTranslations, epicHeroDefinitions, epicHeroTranslations, legacyHeroIdMapping, discoveryTranslations);
             var imageUrl = ep.ResolveImageUrl(item, heroDefinitions, storyHeroes, epicHeroDefinitions, legacyHeroIdMapping);
             return new BestiaryItemDto(
                 item.Id,
@@ -183,7 +192,8 @@ public sealed class GetUserBestiaryEndpoint
         List<StoryHeroTranslation> storyHeroTranslations,
         List<EpicHeroDefinition> epicHeroDefinitions,
         List<EpicHeroDefinitionTranslation> epicHeroTranslations,
-        Dictionary<string, string> legacyHeroIdMapping)
+        Dictionary<string, string> legacyHeroIdMapping,
+        List<BestiaryItemTranslation> discoveryTranslations)
     {
         var bestiaryType = item.BestiaryType as string;
         var armsKey = item.ArmsKey as string;
@@ -243,8 +253,12 @@ public sealed class GetUserBestiaryEndpoint
             return (armsKey ?? string.Empty, string.Empty);
         }
 
-        // discovery: use stored text (no JSON)
-        return (item.Name as string ?? string.Empty, item.Story as string ?? string.Empty);
+        // discovery: use localized translation if available, fall back to stored text
+        var discoveryTranslation = discoveryTranslations.FirstOrDefault(t => t.BestiaryItemId == (Guid)item.Id);
+        return (
+            discoveryTranslation?.Name ?? item.Name as string ?? string.Empty,
+            discoveryTranslation?.Story ?? item.Story as string ?? string.Empty
+        );
     }
 }
 

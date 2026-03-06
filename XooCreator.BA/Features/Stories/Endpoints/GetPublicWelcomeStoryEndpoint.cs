@@ -3,43 +3,47 @@ using System.Linq;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using XooCreator.BA.Infrastructure.Endpoints;
+using XooCreator.BA.Features.Stories.Configuration;
 using XooCreator.BA.Features.Stories.Services;
 using XooCreator.BA.Features.Stories.DTOs;
 
 namespace XooCreator.BA.Features.Stories.Endpoints;
 
 /// <summary>
-/// Public endpoint for the welcome story (no authentication required)
-/// Supports both welcome stories: ionelbacosca-s251212183034 (kindergarten) and learn-math-s1 (primary/older)
+/// Public endpoint for the welcome story (no authentication required).
+/// Allowed story IDs and default are read from WelcomeFlow config (DB with appsettings fallback).
 /// </summary>
 [Endpoint]
 public class GetPublicWelcomeStoryEndpoint
 {
     private readonly IStoriesService _storiesService;
+    private readonly IWelcomeFlowConfigService _welcomeFlowConfig;
     private readonly ILogger<GetPublicWelcomeStoryEndpoint> _logger;
-    
-    public GetPublicWelcomeStoryEndpoint(IStoriesService storiesService, ILogger<GetPublicWelcomeStoryEndpoint> logger)
+
+    public GetPublicWelcomeStoryEndpoint(
+        IStoriesService storiesService,
+        IWelcomeFlowConfigService welcomeFlowConfig,
+        ILogger<GetPublicWelcomeStoryEndpoint> logger)
     {
         _storiesService = storiesService;
+        _welcomeFlowConfig = welcomeFlowConfig;
         _logger = logger;
     }
 
-    [Route("/api/{locale}/stories/public/welcome")] // GET /api/{locale}/stories/public/welcome?storyId=learn-math-s1
+    [Route("/api/{locale}/stories/public/welcome")] // GET /api/{locale}/stories/public/welcome?storyId=...
     public static async Task<Results<Ok<GetStoryByIdResponse>, NotFound, BadRequest<string>>> HandleGet(
         [FromRoute] string locale,
         [FromQuery] string? storyId,
-        [FromServices] GetPublicWelcomeStoryEndpoint ep)
+        [FromServices] GetPublicWelcomeStoryEndpoint ep,
+        CancellationToken ct)
     {
-        // List of allowed welcome story IDs (available without login)
-        var allowedWelcomeStoryIds = new[] { "ionelbacosca-s251212183034", "learn-math-s1" };
-        
-        // Use provided storyId or default to kindergarten welcome story for backward compatibility
-        var welcomeStoryId = !string.IsNullOrWhiteSpace(storyId) 
-            ? storyId 
-            : "ionelbacosca-s251212183034";
-        
-        // Validate that the storyId is one of the allowed welcome stories
-        if (!allowedWelcomeStoryIds.Any(id => string.Equals(id, welcomeStoryId, StringComparison.OrdinalIgnoreCase)))
+        var options = await ep._welcomeFlowConfig.GetOptionsAsync(ct);
+        var allowedWelcomeStoryIds = options.GetAllowedStoryIds().ToList();
+        var welcomeStoryId = !string.IsNullOrWhiteSpace(storyId)
+            ? storyId!.Trim()
+            : options.GetDefaultStoryId();
+
+        if (string.IsNullOrWhiteSpace(welcomeStoryId) || !allowedWelcomeStoryIds.Any(id => string.Equals(id, welcomeStoryId, StringComparison.OrdinalIgnoreCase)))
         {
             return TypedResults.BadRequest($"Invalid welcome story ID. Allowed IDs: {string.Join(", ", allowedWelcomeStoryIds)}");
         }

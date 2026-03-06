@@ -134,26 +134,23 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
             }
 
             // Search by title/translation titles OR author (case-insensitive)
-            // Search by title/translation titles OR author (case-insensitive)
+            // Data comes from cache (in-memory); use string.Contains - EF.Functions.ILike does not support client-side evaluation.
             if (!string.IsNullOrWhiteSpace(request.SearchTerm))
             {
                 var searchTerm = request.SearchTerm.Trim();
-                
-                // EF Core does not translate string.Contains(string, StringComparison) to SQL; use ILike for server-side case-insensitive match.
-                var likePattern = "%" + searchTerm + "%";
                 if (string.Equals(request.SearchType, "author", StringComparison.OrdinalIgnoreCase))
                 {
                     // Search by Author Name (checks System User, Manual Author, and Classic Author)
                     q = q.Where(s => s.SearchAuthors.Any(a =>
                         !string.IsNullOrWhiteSpace(a) &&
-                        EF.Functions.ILike(a, likePattern)));
+                        a.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
                 }
                 else
                 {
                     // Default: Search by Title
                     q = q.Where(s => s.SearchTitles.Any(t =>
                         !string.IsNullOrWhiteSpace(t) &&
-                        EF.Functions.ILike(t, likePattern)));
+                        t.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
                 }
             }
 
@@ -925,7 +922,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
         int totalReviews,
         IReadOnlyDictionary<Guid, string>? authorNamesByUserId = null)
     {
-        var translation = def.Translations?.FirstOrDefault(t => t.LanguageCode == locale);
+        var translation = def.Translations?.FirstOrDefault(t => string.Equals(t.LanguageCode, locale, StringComparison.OrdinalIgnoreCase));
         var title = translation?.Title ?? def.Title;
 
         // Extract available languages from translations

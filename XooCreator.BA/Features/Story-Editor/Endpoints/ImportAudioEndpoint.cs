@@ -13,6 +13,7 @@ using XooCreator.BA.Infrastructure.Services;
 using XooCreator.BA.Infrastructure.Services.Blob;
 using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Infrastructure.Services.Queue;
+using XooCreator.BA.Features.System.Services;
 using static XooCreator.BA.Features.StoryEditor.Mappers.StoryAssetPathMapper;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
@@ -25,6 +26,7 @@ public partial class ImportAudioEndpoint
     private readonly IBlobSasService _sas;
     private readonly IStoryCraftsRepository _crafts;
     private readonly IStoryAudioImportQueue _importQueue;
+    private readonly IStoryCreatorMaintenanceService _maintenanceService;
     private readonly IJobEventsHub _jobEvents;
     private readonly ILogger<ImportAudioEndpoint> _logger;
     private const long DefaultMaxZipSizeBytes = 1024L * 1024 * 1024; // 1GB
@@ -47,6 +49,7 @@ public partial class ImportAudioEndpoint
         IStoryCraftsRepository crafts,
         IStoryAudioImportQueue importQueue,
         IJobEventsHub jobEvents,
+        IStoryCreatorMaintenanceService maintenanceService,
         ILogger<ImportAudioEndpoint> logger,
         IConfiguration configuration)
     {
@@ -56,6 +59,7 @@ public partial class ImportAudioEndpoint
         _crafts = crafts;
         _importQueue = importQueue;
         _jobEvents = jobEvents;
+        _maintenanceService = maintenanceService;
         _logger = logger;
         _maxZipSizeBytes = configuration.GetValue<long?>("StoryEditor:ImportAudio:MaxZipSizeBytes") ?? DefaultMaxZipSizeBytes;
         _multipartBodyLengthLimit = configuration.GetValue<long?>("StoryEditor:ImportAudio:MultipartBodyLengthLimit") ?? DefaultMultipartBodyLengthLimit;
@@ -78,7 +82,7 @@ public partial class ImportAudioEndpoint
     [Route("/api/{locale}/stories/{storyId}/import-audio")]
     [Authorize]
     [DisableRequestSizeLimit]
-    public static async Task<Results<Accepted<AudioImportJobResponse>, BadRequest<ImportAudioResponse>, UnauthorizedHttpResult, ForbidHttpResult, NotFound>> HandlePost(
+    public static async Task<IResult> HandlePost(
         [FromRoute] string locale,
         [FromRoute] string storyId,
         [FromServices] ImportAudioEndpoint ep,
@@ -100,6 +104,9 @@ public partial class ImportAudioEndpoint
             ep._logger.LogWarning("Audio import forbidden: userId={UserId} storyId={StoryId} not admin", user.Id, storyId);
             return TypedResults.Forbid();
         }
+
+        if (await ep._maintenanceService.IsStoryCreatorDisabledAsync(ct))
+            return StoryCreatorMaintenanceResult.Unavailable();
 
         if (!request.HasFormContentType)
         {

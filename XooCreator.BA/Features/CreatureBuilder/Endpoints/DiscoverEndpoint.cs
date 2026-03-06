@@ -80,11 +80,15 @@ public sealed class DiscoverEndpoint
         string normalize(string s) => s == "—" ? "None" : s;
         string imageUrl = $"{normalize(item.ArmsKey)}{normalize(item.BodyKey)}{normalize(item.HeadKey)}.jpg";
 
+        // Load localized translation; fall back to BestiaryItem default (Romanian) if not found
+        var translation = await ep._db.BestiaryItemTranslations
+            .FirstOrDefaultAsync(t => t.BestiaryItemId == item.Id && t.LanguageCode == locale, ct);
+
         var responseItem = new DiscoverItemDto(
             item.Id,
-            item.Name,
+            translation?.Name ?? item.Name,
             imageUrl,
-            item.Story
+            translation?.Story ?? item.Story
         );
 
         // Get updated wallet balance

@@ -21,6 +21,7 @@ public class XooDbContext : DbContext
     public DbSet<CreditWallet> CreditWallets => Set<CreditWallet>();
     public DbSet<CreditTransaction> CreditTransactions => Set<CreditTransaction>();
     public DbSet<BestiaryItem> BestiaryItems => Set<BestiaryItem>();
+    public DbSet<BestiaryItemTranslation> BestiaryItemTranslations => Set<BestiaryItemTranslation>();
     public DbSet<UserBestiary> UserBestiary => Set<UserBestiary>();
     public DbSet<Tree> Trees => Set<Tree>();
     public DbSet<TreeChoice> TreeChoices => Set<TreeChoice>();
@@ -43,6 +44,7 @@ public class XooDbContext : DbContext
     public DbSet<HeroDefinitionDefinition> HeroDefinitionDefinitions => Set<HeroDefinitionDefinition>();
     public DbSet<HeroDefinitionDefinitionTranslation> HeroDefinitionDefinitionTranslations => Set<HeroDefinitionDefinitionTranslation>();
     public DbSet<PlatformSetting> PlatformSettings => Set<PlatformSetting>();
+    public DbSet<WelcomeFlowConfig> WelcomeFlowConfigs => Set<WelcomeFlowConfig>();
     
     public DbSet<TreeRegion> TreeRegions => Set<TreeRegion>();
     public DbSet<TreeStoryNode> TreeStoryNodes => Set<TreeStoryNode>();

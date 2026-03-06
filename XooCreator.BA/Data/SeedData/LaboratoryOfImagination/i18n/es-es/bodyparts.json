@@ -1,0 +1,50 @@
+[
+  {
+    "key": "head",
+    "name": "Cabeza",
+    "image": "images/bodyparts/face.webp",
+    "isBaseLocked": false
+  },
+  {
+    "key": "body",
+    "name": "Cuerpo",
+    "image": "images/bodyparts/body.webp",
+    "isBaseLocked": false
+  },
+  {
+    "key": "arms",
+    "name": "Brazos",
+    "image": "images/bodyparts/hands.webp",
+    "isBaseLocked": false
+  },
+  {
+    "key": "legs",
+    "name": "Piernas",
+    "image": "images/bodyparts/legs.webp",
+    "isBaseLocked": true
+  },
+  {
+    "key": "tail",
+    "name": "Cola",
+    "image": "images/bodyparts/tail.webp",
+    "isBaseLocked": true
+  },
+  {
+    "key": "wings",
+    "name": "Alas",
+    "image": "images/bodyparts/wings.webp",
+    "isBaseLocked": true
+  },
+  {
+    "key": "horn",
+    "name": "Cuerno",
+    "image": "images/bodyparts/horn.webp",
+    "isBaseLocked": true
+  },
+  {
+    "key": "horns",
+    "name": "Cuernos",
+    "image": "images/bodyparts/horns.webp",
+    "isBaseLocked": true
+  }
+]
