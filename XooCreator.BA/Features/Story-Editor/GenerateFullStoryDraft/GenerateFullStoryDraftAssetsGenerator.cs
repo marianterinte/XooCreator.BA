@@ -142,7 +142,7 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
             try
             {
                 var (imageData, mimeType) = isOpenAi
-                    ? await _openAIImage.GenerateStoryImageAsync(storyJson, tileText, request.LanguageCode, request.ImageSeedInstructions, previousImageData, previousImageMime, request.ApiKey.Trim(), request.ImageModel, ct)
+                    ? await _openAIImage.GenerateStoryImageAsync(storyJson, tileText, request.LanguageCode, request.ImageSeedInstructions, previousImageData, previousImageMime, request.ApiKey.Trim(), request.ImageModel, request.ImageQuality?.Trim(), ct)
                     : await _googleImage.GenerateStoryImageAsync(storyJson, tileText, request.LanguageCode, request.ImageSeedInstructions, previousImageData, previousImageMime, ct, request.ApiKey.Trim(), request.ImageModel);
                 var ext = (mimeType ?? "image/png").Contains("png", StringComparison.OrdinalIgnoreCase) ? "png" : "jpg";
                 var filename = $"{tile.Id}.{ext}";
@@ -185,7 +185,7 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
             try
             {
                 var (imageData, mimeType) = isOpenAi
-                    ? await _openAIImage.GenerateStoryImageAsync(storyJson, tileText, request.LanguageCode, request.ImageSeedInstructions, referenceImageData, referenceImageMime, request.ApiKey.Trim(), request.ImageModel, ct)
+                    ? await _openAIImage.GenerateStoryImageAsync(storyJson, tileText, request.LanguageCode, request.ImageSeedInstructions, referenceImageData, referenceImageMime, request.ApiKey.Trim(), request.ImageModel, request.ImageQuality?.Trim(), ct)
                     : await _googleImage.GenerateStoryImageAsync(storyJson, tileText, request.LanguageCode, request.ImageSeedInstructions, referenceImageData, referenceImageMime, ct, request.ApiKey.Trim(), request.ImageModel);
                 return (item.Tile, item.Index, ImageData: imageData, MimeType: mimeType ?? "image/png");
             }

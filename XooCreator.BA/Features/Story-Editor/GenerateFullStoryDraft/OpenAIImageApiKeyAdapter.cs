@@ -35,6 +35,7 @@ public class OpenAIImageApiKeyAdapter : IOpenAIImageWithApiKey
         string? referenceImageMimeType = null,
         string? apiKeyOverride = null,
         string? modelOverride = null,
+        string? imageQualityOverride = null,
         CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(storyJson))
@@ -52,12 +53,15 @@ public class OpenAIImageApiKeyAdapter : IOpenAIImageWithApiKey
             throw new ArgumentException($"Image prompt must be at most {MaxImagePromptLength} characters (current: {prompt.Length}). Shorten the story context or image instructions.", nameof(extraInstructions));
 
         var model = modelOverride ?? _model;
-        var size = ParseImageSize(_sizeConfig);
+        var sizeConfig = !string.IsNullOrWhiteSpace(imageQualityOverride)
+            ? ImageQualityToSize(imageQualityOverride.Trim())
+            : _sizeConfig;
+        var size = ParseImageSize(sizeConfig);
         var imageClient = new ImageClient(model, apiKeyOverride);
 
         _logger.LogInformation(
-            "OpenAI Image (user key). Language: {LanguageCode}, Model: {Model}",
-            languageCode, model);
+            "OpenAI Image (user key). Language: {LanguageCode}, Model: {Model}, Size: {Size}",
+            languageCode, model, sizeConfig);
 
         var options = new ImageGenerationOptions { Size = size };
         var result = await imageClient.GenerateImageAsync(prompt, options, ct);
@@ -69,6 +73,17 @@ public class OpenAIImageApiKeyAdapter : IOpenAIImageWithApiKey
         var imageBytes = generatedImage.ImageBytes.ToArray();
         var cropped = StoryImageAspectRatio.CropTo4x5(imageBytes);
         return (cropped, "image/png");
+    }
+
+    /// <summary>Maps light/medium/heavy to OpenAI size string (4:5 preserved via crop).</summary>
+    private static string ImageQualityToSize(string imageQuality)
+    {
+        return imageQuality switch
+        {
+            "light" => "512x512",
+            "heavy" => "1792x1024",
+            _ => "1024x1024" // medium or unknown
+        };
     }
 
     private static string BuildImagePrompt(string storyJson, string tileText, string? extraInstructions)

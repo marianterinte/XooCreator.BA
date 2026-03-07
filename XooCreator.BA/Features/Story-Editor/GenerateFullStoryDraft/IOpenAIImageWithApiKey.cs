@@ -15,5 +15,6 @@ public interface IOpenAIImageWithApiKey
         string? referenceImageMimeType = null,
         string? apiKeyOverride = null,
         string? modelOverride = null,
+        string? imageQualityOverride = null,
         CancellationToken ct = default);
 }

@@ -22,6 +22,8 @@ public sealed class GenerateFullStoryDraftRequest
     public string? TextModel { get; init; }
     public string? ImageModel { get; init; }
     public string? AudioModel { get; init; }
+    /// <summary>Image quality: light | medium | heavy. Same 4:5 aspect ratio; affects resolution/cost (e.g. OpenAI size).</summary>
+    public string? ImageQuality { get; init; }
     /// <summary>When true, endpoint returns 202 and enqueues job; when false, runs synchronously and returns 200 with storyId.</summary>
     public bool RunInBackground { get; init; }
 }
