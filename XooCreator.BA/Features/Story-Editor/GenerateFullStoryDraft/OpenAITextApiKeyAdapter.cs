@@ -61,7 +61,7 @@ public class OpenAITextApiKeyAdapter : IOpenAITextWithApiKey
                 new { role = "user", content = userMessage }
             },
             temperature = 0.9,
-            max_tokens = 4096
+            max_tokens = 8192
         };
 
         var json = JsonSerializer.Serialize(requestBody);
@@ -96,12 +96,18 @@ public class OpenAITextApiKeyAdapter : IOpenAITextWithApiKey
         string? storyInstructions)
     {
         var sb = new StringBuilder();
-        sb.AppendLine($"Children's story. Generate a complete story with exactly {numberOfPages} pages.");
-        sb.AppendLine($"Format your response as: Page 1: [text for page 1]");
-        sb.AppendLine($"Page 2: [text for page 2]");
-        sb.AppendLine($"... and so on for all {numberOfPages} pages.");
-        sb.AppendLine($"Each page should be approximately 150-200 words. Use clear page delimiters: 'Page X:' at the start of each page.");
-        sb.AppendLine($"Language: {languageCode}.");
+        sb.AppendLine("You are a children's story writer. Reply with plain text only, using exactly these section markers.");
+        sb.AppendLine("Format:");
+        sb.AppendLine("###T");
+        sb.AppendLine("[Story title on one line]");
+        sb.AppendLine("###S");
+        sb.AppendLine("[Story summary in one short paragraph]");
+        for (var i = 1; i <= numberOfPages; i++)
+        {
+            sb.AppendLine($"###P{i}");
+            sb.AppendLine($"[Page {i} text; multiple lines allowed]");
+        }
+        sb.AppendLine($"Language: {languageCode}. Generate exactly {numberOfPages} pages.");
         if (ageGroupIds != null && ageGroupIds.Count > 0)
             sb.AppendLine($"Target age groups: {string.Join(", ", ageGroupIds)}");
         if (topicIds != null && topicIds.Count > 0)
@@ -113,9 +119,9 @@ public class OpenAITextApiKeyAdapter : IOpenAITextWithApiKey
 
     private static string BuildFullStoryUserMessage(string title, string summary, int numberOfPages)
     {
-        return $"Title: {title}\n\nSummary: {summary}\n\nGenerate a complete children's story with exactly {numberOfPages} pages. " +
-               $"Format each page as 'Page X: [text]' where X is the page number (1 to {numberOfPages}). " +
-               $"Each page should be approximately 150-200 words. Make sure the story is coherent from beginning to end.";
+        return $"Seed/summary for the story:\n{summary}\n\nSuggested title: {title}\n\n" +
+               $"Generate the complete story in the requested format with exactly {numberOfPages} pages. " +
+               "Use ###T for title, ###S for summary, ###P1, ###P2, etc. for each page. Each page can be multiple lines.";
     }
 
     private static string ExtractTextFromResponse(string responseJson)
