@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using XooCreator.BA.Data;
@@ -47,7 +48,7 @@ public class GenerateFullStoryDraftEndpoint
 
     [Route("/api/{locale}/story-editor/generate-full-story-draft")]
     [Authorize]
-    public static async Task<Results<Ok<GenerateFullStoryDraftResponse>, Accepted<GenerateFullStoryDraftAsyncResponse>, BadRequest<string>, ObjectResult, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
+    public static async Task<Results<Ok<GenerateFullStoryDraftResponse>, Accepted<GenerateFullStoryDraftAsyncResponse>, BadRequest<string>, IResult, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
         [FromRoute] string locale,
         [FromServices] GenerateFullStoryDraftEndpoint ep,
         [FromBody] GenerateFullStoryDraftRequest request,
@@ -135,7 +136,8 @@ public class GenerateFullStoryDraftEndpoint
         {
             ep._logger.LogWarning(ex, "GenerateFullStoryDraft sync: rate limit (429) from provider");
             var body = new { errorCode = "RateLimitExceeded", message = "Generation stopped: rate limit exceeded (429). Please try again in a few minutes." };
-            return new ObjectResult(body) { StatusCode = 429 };
+            return (Results<Ok<GenerateFullStoryDraftResponse>, Accepted<GenerateFullStoryDraftAsyncResponse>, BadRequest<string>, IResult, UnauthorizedHttpResult, ForbidHttpResult>)
+                Results.Json(body, statusCode: StatusCodes.Status429TooManyRequests);
         }
     }
 
