@@ -124,6 +124,7 @@ public sealed class GenerateFullStoryDraftHandler : IGenerateFullStoryDraftHandl
             userContent,
             request.ApiKey.Trim(),
             request.TextModel,
+            responseMimeType: "text/plain",
             ct);
     }
 
