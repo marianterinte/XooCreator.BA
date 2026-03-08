@@ -31,6 +31,7 @@ public sealed class JobEventsSseEndpoint
         JobTypes.StoryTranslation,
         JobTypes.StoryImageImport,
         JobTypes.StoryImageExport,
+        JobTypes.StoryAIGenerate,
         JobTypes.EpicVersion,
         JobTypes.EpicPublish,
         JobTypes.HeroVersion,
@@ -430,6 +431,31 @@ public sealed class JobEventsSseEndpoint
                 };
 
                 return new Snapshot(payload.status?.ToString() ?? string.Empty, JsonSerializer.Serialize(payload, Json));
+            }
+            case JobTypes.StoryAIGenerate:
+            {
+                var job = await db.StoryAIGenerateJobs.AsNoTracking().FirstOrDefaultAsync(j => j.Id == jobId, ct);
+                if (job == null) return null;
+
+                if (!auth0.HasRole(user, UserRole.Admin) && job.OwnerUserId != user.Id)
+                {
+                    return null;
+                }
+
+                var payload = new
+                {
+                    jobId = job.Id,
+                    storyId = job.StoryId,
+                    status = job.Status,
+                    progressMessage = job.ProgressMessage,
+                    queuedAtUtc = job.QueuedAtUtc,
+                    startedAtUtc = job.StartedAtUtc,
+                    completedAtUtc = job.CompletedAtUtc,
+                    errorMessage = job.ErrorMessage,
+                    errorCode = job.ErrorCode
+                };
+
+                return new Snapshot(payload.status ?? string.Empty, JsonSerializer.Serialize(payload, Json));
             }
             case JobTypes.StoryTranslation:
             {

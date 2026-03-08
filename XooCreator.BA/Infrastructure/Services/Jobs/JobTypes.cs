@@ -21,6 +21,7 @@ public static class JobTypes
     public const string HeroPublish = "hero-publish";
     public const string AnimalPublish = "animal-publish";
     public const string HeroDefinitionVersion = "hero-definition-version";
+    public const string StoryAIGenerate = "story-ai-generate";
 }
 
 

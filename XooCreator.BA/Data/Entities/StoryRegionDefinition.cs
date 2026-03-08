@@ -33,6 +33,9 @@ public class StoryRegionDefinition
     public int BaseVersion { get; set; } = 0; // The published version from which this draft originated (for re-publish)
     public int LastPublishedVersion { get; set; } = 0; // Draft version that produced the current publish
     
+    /// <summary>When true, region appears on Explore Alchimalia Universe page.</summary>
+    public bool? ShowInUniverse { get; set; }
+    
     // Navigation properties
     public AlchimaliaUser Owner { get; set; } = null!;
     public ICollection<StoryRegionDefinitionTranslation> Translations { get; set; } = new List<StoryRegionDefinitionTranslation>();

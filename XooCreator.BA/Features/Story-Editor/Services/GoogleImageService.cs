@@ -42,7 +42,7 @@ public interface IGoogleImageService
     /// <param name="apiKeyOverride">Optional API key (e.g. from job). When set, used instead of config key.</param>
     /// <param name="modelOverride">Optional model id (e.g. from job). When set and BaseUrl is configured, used to build the API URL.</param>
     /// <returns>
-    /// Generated image bytes and MIME type (usually "image/png").
+    /// Generated image bytes and MIME type (usually "image/png"). Image is always 4:5 aspect ratio.
     /// </returns>
     Task<(byte[] ImageData, string MimeType)> GenerateStoryImageAsync(
         string storyJson,
@@ -198,7 +198,9 @@ public class GoogleImageService : IGoogleImageService
                 response.EnsureSuccessStatusCode();
             }
 
-            return ExtractImageFromResponse(responseContent);
+            var (bytes, mimeType) = ExtractImageFromResponse(responseContent);
+            var cropped = StoryImageAspectRatio.CropTo4x5(bytes);
+            return (cropped, "image/png");
         }
         catch (Exception ex)
         {
@@ -296,7 +298,7 @@ public class GoogleImageService : IGoogleImageService
         string? extraInstructions)
     {
         var sb = new StringBuilder();
-        sb.AppendLine("Children's book illustration. Colorful, friendly. No text. Landscape. Consistent style.");
+        sb.AppendLine("Children's book illustration. Colorful, friendly. No text. Portrait, vertical composition, 4:5 aspect ratio. Consistent style.");
         sb.AppendLine($"Context: {storyJson}");
         sb.AppendLine($"Scene: {tileText}");
 

@@ -66,6 +66,7 @@ public class StoryRegionService : IStoryRegionService
                 UpdatedAt = craft.UpdatedAt,
                 PublishedAtUtc = null,
                 TopicIds = (craft.Topics ?? Enumerable.Empty<StoryRegionCraftTopic>()).Select(t => t.StoryTopic?.TopicId).Where(s => s != null).Cast<string>().ToList(),
+                ShowInUniverse = craft.ShowInUniverse,
                 AssignedReviewerUserId = craft.AssignedReviewerUserId,
                 ReviewedByUserId = craft.ReviewedByUserId,
                 ApprovedByUserId = craft.ApprovedByUserId,
@@ -94,6 +95,7 @@ public class StoryRegionService : IStoryRegionService
                 UpdatedAt = definition.UpdatedAt,
                 PublishedAtUtc = definition.PublishedAtUtc,
                 TopicIds = (definition.Topics ?? Enumerable.Empty<StoryRegionDefinitionTopic>()).Select(t => t.StoryTopic?.TopicId).Where(s => s != null).Cast<string>().ToList(),
+                ShowInUniverse = definition.ShowInUniverse,
                 AssignedReviewerUserId = null,
                 ReviewedByUserId = null,
                 ApprovedByUserId = null,
@@ -143,6 +145,7 @@ public class StoryRegionService : IStoryRegionService
             UpdatedAt = regionCraft.UpdatedAt,
             PublishedAtUtc = null,
             TopicIds = new List<string>(),
+            ShowInUniverse = regionCraft.ShowInUniverse,
             AssignedReviewerUserId = regionCraft.AssignedReviewerUserId,
             ReviewedByUserId = regionCraft.ReviewedByUserId,
             ApprovedByUserId = regionCraft.ApprovedByUserId,
@@ -180,6 +183,7 @@ public class StoryRegionService : IStoryRegionService
 
         // Update properties (non-translatable)
         regionCraft.ImageUrl = dto.ImageUrl;
+        regionCraft.ShowInUniverse = dto.ShowInUniverse;
         regionCraft.UpdatedAt = DateTime.UtcNow;
 
         // Update translations
@@ -414,6 +418,30 @@ public class StoryRegionService : IStoryRegionService
         }).ToList();
     }
 
+    public async Task<List<StoryRegionListItemDto>> ListPublishedRegionsForUniverseAsync(CancellationToken ct = default)
+    {
+        var definitions = await _context.StoryRegionDefinitions
+            .AsNoTracking()
+            .Where(x => x.Status == "published" && x.ShowInUniverse == true)
+            .Include(x => x.Translations)
+            .Include(x => x.Topics!).ThenInclude(t => t.StoryTopic)
+            .OrderByDescending(x => x.UpdatedAt)
+            .ToListAsync(ct);
+
+        var uniqueOwnerIds = definitions.Select(d => d.OwnerUserId).Distinct().ToList();
+        var ownerEmailMap = await _context.AlchimaliaUsers
+            .AsNoTracking()
+            .Where(u => uniqueOwnerIds.Contains(u.Id))
+            .Select(u => new { u.Id, u.Email })
+            .ToDictionaryAsync(u => u.Id, u => u.Email ?? "", ct);
+
+        return definitions.Select(d =>
+        {
+            var ownerEmail = ownerEmailMap.TryGetValue(d.OwnerUserId, out var email) ? email : "";
+            return MapDefinitionToListItem(d, null, ownerEmail);
+        }).ToList();
+    }
+
     public async Task DeleteRegionAsync(Guid requestingUserId, string regionId, bool allowAdminOverride = false, CancellationToken ct = default)
     {
         var regionCraft = await _repository.GetCraftAsync(regionId, ct);
@@ -624,7 +652,8 @@ public class StoryRegionService : IStoryRegionService
                 UpdatedAt = DateTime.UtcNow,
                 PublishedAtUtc = DateTime.UtcNow,
                 Version = 1,
-                LastPublishedVersion = regionCraft.LastDraftVersion
+                LastPublishedVersion = regionCraft.LastDraftVersion,
+                ShowInUniverse = regionCraft.ShowInUniverse
             };
             _context.StoryRegionDefinitions.Add(definition);
         }
@@ -633,6 +662,7 @@ public class StoryRegionService : IStoryRegionService
             // Update existing definition
             existingDefinition.Name = regionCraft.Name;
             existingDefinition.ImageUrl = publishedImageUrl;
+            existingDefinition.ShowInUniverse = regionCraft.ShowInUniverse;
             existingDefinition.UpdatedAt = DateTime.UtcNow;
             existingDefinition.PublishedAtUtc = DateTime.UtcNow;
             existingDefinition.Version += 1;
@@ -913,6 +943,7 @@ public class StoryRegionService : IStoryRegionService
             UpdatedAt = craft.UpdatedAt,
             PublishedAtUtc = null,
             TopicIds = new List<string>(),
+            ShowInUniverse = craft.ShowInUniverse,
             AssignedReviewerUserId = craft.AssignedReviewerUserId,
             IsAssignedToCurrentUser = isAssignedToCurrentUser,
             IsOwnedByCurrentUser = isOwnedByCurrentUser,
@@ -937,6 +968,7 @@ public class StoryRegionService : IStoryRegionService
             UpdatedAt = definition.UpdatedAt,
             PublishedAtUtc = definition.PublishedAtUtc,
             TopicIds = new List<string>(),
+            ShowInUniverse = definition.ShowInUniverse,
             AssignedReviewerUserId = null,
             IsAssignedToCurrentUser = false,
             IsOwnedByCurrentUser = isOwnedByCurrentUser,

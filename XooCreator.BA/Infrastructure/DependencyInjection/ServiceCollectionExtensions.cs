@@ -18,6 +18,7 @@ using XooCreator.BA.Features.StoryEditor.Services;
 using XooCreator.BA.Features.StoryEditor.Services.Content;
 using XooCreator.BA.Features.StoryEditor.Services.Cloning;
 using XooCreator.BA.Features.StoryEditor.Repositories;
+using XooCreator.BA.Features.StoryEditor.GenerateFullStoryDraft;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories;
 using XooCreator.BA.Features.Tokens;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Services;
@@ -68,6 +69,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IStoryTranslationQueue, StoryTranslationQueue>();
         services.AddSingleton<IStoryImageImportQueue, StoryImageImportQueue>();
         services.AddSingleton<IStoryImageExportQueue, StoryImageExportQueue>();
+        services.AddSingleton<IStoryAIGenerateQueue, StoryAIGenerateQueue>();
         services.AddSingleton<IEpicAggregatesQueue, EpicAggregatesQueue>();
         services.AddSingleton<IHeroPublishQueue, HeroPublishQueue>();
         services.AddSingleton<IAnimalPublishQueue, AnimalPublishQueue>();
@@ -214,6 +216,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IGoogleAudioGeneratorService, GoogleAudioGeneratorService>();
         services.AddScoped<IGoogleTextService, GoogleTextService>();
         services.AddScoped<IGoogleImageService, GoogleImageService>();
+        services.AddScoped<ISequentialStoryImageGenerator, SequentialStoryImageGenerator>();
         services.AddScoped<IGoogleFullStoryService, GoogleFullStoryService>();
         
         // OpenAI Services
@@ -221,7 +224,16 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IOpenAITextService, OpenAITextService>();
         services.AddScoped<IOpenAIImageService, OpenAIImageService>();
         services.AddScoped<IOpenAIFullStoryService, OpenAIFullStoryService>();
-        
+
+        // Generate Full Story Draft: OpenAI with caller-provided API key (no changes to existing services)
+        services.AddScoped<IOpenAITextWithApiKey, OpenAITextApiKeyAdapter>();
+        services.AddScoped<IOpenAIAudioWithApiKey, OpenAIAudioApiKeyAdapter>();
+        services.AddScoped<IOpenAIImageWithApiKey, OpenAIImageApiKeyAdapter>();
+
+        // Generate Full Story Draft: handler (create draft + generate text + parse + save)
+        services.AddScoped<IGenerateFullStoryDraftAssetsGenerator, GenerateFullStoryDraftAssetsGenerator>();
+        services.AddScoped<IGenerateFullStoryDraftHandler, GenerateFullStoryDraftHandler>();
+
         return services;
     }
 

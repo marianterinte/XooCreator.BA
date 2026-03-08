@@ -2,19 +2,30 @@ using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Features.RewardTokens.DTOs;
+using XooCreator.BA.Infrastructure.Caching;
 
 namespace XooCreator.BA.Features.RewardTokens.Services;
 
 public class RewardTokensService : IRewardTokensService
 {
-    private readonly XooDbContext _context;
+    private const string ActiveTokensCacheKey = "RewardTokens:Active";
+    private static readonly TimeSpan ActiveTokensTtl = TimeSpan.FromHours(24);
 
-    public RewardTokensService(XooDbContext context)
+    private readonly XooDbContext _context;
+    private readonly IAppCache _cache;
+
+    public RewardTokensService(XooDbContext context, IAppCache cache)
     {
         _context = context;
+        _cache = cache;
     }
 
     public async Task<List<RewardTokenDto>> GetActiveTokensAsync(CancellationToken ct = default)
+    {
+        return await _cache.GetOrCreateAsync(ActiveTokensCacheKey, ActiveTokensTtl, () => LoadActiveTokensAsync(ct), ct);
+    }
+
+    private async Task<List<RewardTokenDto>> LoadActiveTokensAsync(CancellationToken ct)
     {
         return await _context.RewardTokenDefinitions
             .Where(t => t.IsActive)
@@ -76,6 +87,7 @@ public class RewardTokensService : IRewardTokensService
         };
         _context.RewardTokenDefinitions.Add(entity);
         await _context.SaveChangesAsync(ct);
+        _cache.Remove(ActiveTokensCacheKey);
         return MapToDto(entity);
     }
 
@@ -92,6 +104,7 @@ public class RewardTokensService : IRewardTokensService
         entity.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync(ct);
+        _cache.Remove(ActiveTokensCacheKey);
         return MapToDto(entity);
     }
 
@@ -103,6 +116,7 @@ public class RewardTokensService : IRewardTokensService
         entity.IsActive = false;
         entity.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync(ct);
+        _cache.Remove(ActiveTokensCacheKey);
         return true;
     }
 

@@ -34,13 +34,15 @@ public interface IGoogleTextService
 
     /// <summary>
     /// Generates content using a custom system instruction and user content.
-    /// Intended for translation or structured responses.
+    /// Intended for translation (JSON response) or full-story plain text (###T/###S/###P).
     /// </summary>
+    /// <param name="responseMimeType">When "text/plain", Gemini returns plain text; when null or other, returns JSON (default).</param>
     Task<string> GenerateContentAsync(
         string systemInstruction,
         string userContent,
         string? apiKeyOverride = null,
         string? modelOverride = null,
+        string? responseMimeType = null,
         CancellationToken ct = default);
 }
  
@@ -167,12 +169,17 @@ public class GoogleTextService : IGoogleTextService
         string userContent,
         string? apiKeyOverride = null,
         string? modelOverride = null,
+        string? responseMimeType = null,
         CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(systemInstruction))
             throw new ArgumentException("System instruction cannot be empty", nameof(systemInstruction));
         if (string.IsNullOrWhiteSpace(userContent))
             throw new ArgumentException("User content cannot be empty", nameof(userContent));
+
+        var mimeType = string.Equals(responseMimeType, "text/plain", StringComparison.OrdinalIgnoreCase)
+            ? "text/plain"
+            : "application/json";
 
         var requestBody = new
         {
@@ -199,7 +206,7 @@ public class GoogleTextService : IGoogleTextService
                 topP = 0.9,
                 topK = 40,
                 maxOutputTokens = 4096,
-                response_mime_type = "application/json"
+                response_mime_type = mimeType
             },
             model = modelOverride ?? "gemini-1.5-flash-latest"
         };
