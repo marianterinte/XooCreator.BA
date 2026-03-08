@@ -8,11 +8,9 @@ namespace XooCreator.BA.Features.StoryEditor.GenerateFullStoryDraft;
 /// <summary>
 /// Adapter that calls OpenAI image API with a caller-provided API key.
 /// Does not modify existing OpenAIImageService; used only by Generate Full Story Draft.
-/// Prompt must be at most 1500 characters (validation, no truncation).
 /// </summary>
 public class OpenAIImageApiKeyAdapter : IOpenAIImageWithApiKey
 {
-    public const int MaxImagePromptLength = 1500;
     private readonly string _model;
     private readonly string _sizeConfig;
     private readonly ILogger<OpenAIImageApiKeyAdapter> _logger;
@@ -49,8 +47,6 @@ public class OpenAIImageApiKeyAdapter : IOpenAIImageWithApiKey
             _logger.LogWarning("gpt-image-1 does not support reference images, ignoring reference image parameter");
 
         var prompt = BuildImagePrompt(storyJson, tileText, extraInstructions);
-        if (prompt.Length > MaxImagePromptLength)
-            throw new ArgumentException($"Image prompt must be at most {MaxImagePromptLength} characters (current: {prompt.Length}). Shorten the story context or image instructions.", nameof(extraInstructions));
 
         var model = modelOverride ?? _model;
         var sizeConfig = !string.IsNullOrWhiteSpace(imageQualityOverride)

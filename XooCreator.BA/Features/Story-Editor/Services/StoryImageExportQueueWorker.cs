@@ -19,8 +19,6 @@ namespace XooCreator.BA.Features.StoryEditor.Services;
 
 public class StoryImageExportQueueWorker : BackgroundService
 {
-    private const int MaxConcurrency = 3;
-
     private readonly IServiceProvider _services;
     private readonly ILogger<StoryImageExportQueueWorker> _logger;
     private readonly QueueClient _queueClient;
@@ -106,7 +104,7 @@ public class StoryImageExportQueueWorker : BackgroundService
                 {
                     var db = scope.ServiceProvider.GetRequiredService<XooDbContext>();
                     var crafts = scope.ServiceProvider.GetRequiredService<IStoryCraftsRepository>();
-                    var imageService = scope.ServiceProvider.GetRequiredService<IGoogleImageService>();
+                    var sequentialImageGenerator = scope.ServiceProvider.GetRequiredService<ISequentialStoryImageGenerator>();
                     var sas = scope.ServiceProvider.GetRequiredService<IBlobSasService>();
 
                     var job = await db.StoryImageExportJobs.FirstOrDefaultAsync(j => j.Id == payload.JobId, stoppingToken);
@@ -152,7 +150,7 @@ public class StoryImageExportQueueWorker : BackgroundService
                         _logger.LogInformation("Processing StoryImageExportJob: jobId={JobId} storyId={StoryId} locale={Locale}",
                             job.Id, job.StoryId, job.Locale);
 
-                        var exportResult = await ProcessImageExportAsync(job, crafts, imageService, stoppingToken);
+                        var exportResult = await ProcessImageExportAsync(job, crafts, sequentialImageGenerator, stoppingToken);
 
                         var zipBlobPath = $"exports/images/{job.Id}/{exportResult.FileName}";
                         var blobClient = sas.GetBlobClient(sas.DraftContainer, zipBlobPath);
@@ -213,7 +211,7 @@ public class StoryImageExportQueueWorker : BackgroundService
     private async Task<ImageExportResult> ProcessImageExportAsync(
         StoryImageExportJob job,
         IStoryCraftsRepository crafts,
-        IGoogleImageService imageService,
+        ISequentialStoryImageGenerator sequentialImageGenerator,
         CancellationToken ct)
     {
         var craft = await crafts.GetWithLanguageAsync(job.StoryId, job.Locale, ct);
@@ -281,77 +279,46 @@ public class StoryImageExportQueueWorker : BackgroundService
             extraInstructions = "Use the reference image as a style guide and keep characters consistent. Generate each page as a scene from the story.";
         }
 
+        var orderedPages = pages.OrderBy(p => p.Index).ToList();
+        var tileTexts = orderedPages.Select(p => p.Text).ToList();
+
+        List<(byte[] ImageData, string MimeType)> generatedImages;
         try
         {
-            var testPage = pages[0];
-            await imageService.GenerateStoryImageAsync(
-                storyContextJson, testPage.Text, job.Locale,
-                extraInstructions, referenceImageBytes, job.ReferenceImageMimeType, ct, job.ApiKeyOverride, job.ImageModel);
+            generatedImages = await sequentialImageGenerator.GenerateSequentialWithChainingAsync(
+                storyContextJson,
+                tileTexts,
+                job.Locale,
+                extraInstructions,
+                referenceImageBytes,
+                job.ReferenceImageMimeType,
+                job.ApiKeyOverride!,
+                job.ImageModel,
+                ct).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
-            var errorMessage = ExtractErrorMessage(ex);
-            if (errorMessage.Contains("quota", StringComparison.OrdinalIgnoreCase) ||
-                errorMessage.Contains("rate limit", StringComparison.OrdinalIgnoreCase) ||
-                errorMessage.Contains("API key", StringComparison.OrdinalIgnoreCase))
+            var errMsg = ExtractErrorMessage(ex);
+            if (errMsg.Contains("quota", StringComparison.OrdinalIgnoreCase) ||
+                errMsg.Contains("rate limit", StringComparison.OrdinalIgnoreCase) ||
+                errMsg.Contains("API key", StringComparison.OrdinalIgnoreCase))
             {
-                throw new InvalidOperationException(errorMessage);
+                throw new InvalidOperationException(errMsg);
             }
-            _logger.LogWarning(ex, "Test request for first page failed, but continuing: {ErrorMessage}", errorMessage);
+            throw new InvalidOperationException($"Failed to generate images for all pages. Errors: {errMsg}");
+        }
+
+        if (generatedImages.Count == 0)
+        {
+            throw new InvalidOperationException($"No images generated for story: {job.StoryId}");
         }
 
         var results = new List<ImagePageResult>();
-        var errors = new List<(int PageNumber, string ErrorMessage)>();
-        using var semaphore = new SemaphoreSlim(MaxConcurrency, MaxConcurrency);
-
-        var tasks = pages.Select(async page =>
+        for (var i = 0; i < generatedImages.Count && i < orderedPages.Count; i++)
         {
-            await semaphore.WaitAsync(ct);
-            try
-            {
-                var (imageData, mimeType) = await imageService.GenerateStoryImageAsync(
-                    storyContextJson, page.Text, job.Locale,
-                    extraInstructions, referenceImageBytes, job.ReferenceImageMimeType, ct, job.ApiKeyOverride, job.ImageModel);
-                var ext = mimeType?.Contains("png", StringComparison.OrdinalIgnoreCase) == true ? "png" : "jpg";
-                lock (results)
-                {
-                    results.Add(new ImagePageResult(page.Index, imageData, ext));
-                }
-            }
-            catch (Exception ex)
-            {
-                lock (errors)
-                {
-                    var errMsg = ExtractErrorMessage(ex);
-                    errors.Add((page.Index, errMsg));
-                    _logger.LogError(ex, "Failed to generate image for page {PageNumber} in story {StoryId}: {ErrorMessage}",
-                        page.Index, job.StoryId, errMsg);
-                }
-            }
-            finally
-            {
-                semaphore.Release();
-            }
-        }).ToList();
-
-        await Task.WhenAll(tasks);
-
-        if (results.Count == 0 && errors.Count > 0)
-        {
-            var quotaErrors = errors.Where(e =>
-                e.ErrorMessage.Contains("quota", StringComparison.OrdinalIgnoreCase) ||
-                e.ErrorMessage.Contains("rate limit", StringComparison.OrdinalIgnoreCase)).ToList();
-            if (quotaErrors.Count == errors.Count && quotaErrors.Count > 0)
-            {
-                throw new InvalidOperationException($"Failed to generate images: {quotaErrors[0].ErrorMessage}");
-            }
-            var errorSummary = string.Join("; ", errors.Select(e => $"Page {e.PageNumber}: {e.ErrorMessage}"));
-            throw new InvalidOperationException($"Failed to generate images for all pages. Errors: {errorSummary}");
-        }
-
-        if (results.Count == 0)
-        {
-            throw new InvalidOperationException($"No images generated for story: {job.StoryId}");
+            var (imageData, mimeType) = generatedImages[i];
+            var ext = mimeType?.Contains("png", StringComparison.OrdinalIgnoreCase) == true ? "png" : "jpg";
+            results.Add(new ImagePageResult(orderedPages[i].Index, imageData, ext));
         }
 
         using var ms = new MemoryStream();

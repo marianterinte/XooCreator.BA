@@ -28,6 +28,9 @@ public interface IStoryRegionService
 
     // List published regions filtered by topic
     Task<List<StoryRegionListItemDto>> ListPublishedRegionsByTopicAsync(string? topicId, CancellationToken ct = default);
+
+    // List published regions for Explore Alchimalia Universe page (ShowInUniverse == true)
+    Task<List<StoryRegionListItemDto>> ListPublishedRegionsForUniverseAsync(CancellationToken ct = default);
     
     // Delete region (allowAdminOverride: when true, requesting user may delete any region e.g. admin)
     Task DeleteRegionAsync(Guid requestingUserId, string regionId, bool allowAdminOverride = false, CancellationToken ct = default);

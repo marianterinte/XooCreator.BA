@@ -105,9 +105,6 @@ public class GoogleImageService : IGoogleImageService
         var optimizedJson = ExtractOptimizedStoryContext(storyJson);
 
         var prompt = BuildImagePrompt(optimizedJson, tileText, languageCode, extraInstructions);
-        const int maxImagePromptLength = 1500;
-        if (prompt.Length > maxImagePromptLength)
-            throw new ArgumentException($"Image prompt must be at most {maxImagePromptLength} characters (current: {prompt.Length}). Shorten the story context or image instructions.", nameof(extraInstructions));
 
         // Construim parts: text + (opțional) imagine de referință
         var parts = new List<object>
