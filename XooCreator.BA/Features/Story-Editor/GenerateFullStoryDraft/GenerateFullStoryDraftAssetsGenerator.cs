@@ -28,6 +28,7 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
     private readonly IBlobSasService _blobSas;
     private readonly IGoogleImageService _googleImage;
     private readonly IOpenAIImageWithApiKey _openAIImage;
+    private readonly ISequentialStoryImageGenerator _sequentialImageGenerator;
     private readonly IGoogleAudioGeneratorService _googleAudio;
     private readonly IOpenAIAudioWithApiKey _openAIAudio;
     private readonly ILogger<GenerateFullStoryDraftAssetsGenerator> _logger;
@@ -36,6 +37,7 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
         IBlobSasService blobSas,
         IGoogleImageService googleImage,
         IOpenAIImageWithApiKey openAIImage,
+        ISequentialStoryImageGenerator sequentialImageGenerator,
         IGoogleAudioGeneratorService googleAudio,
         IOpenAIAudioWithApiKey openAIAudio,
         ILogger<GenerateFullStoryDraftAssetsGenerator> logger)
@@ -43,6 +45,7 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
         _blobSas = blobSas;
         _googleImage = googleImage;
         _openAIImage = openAIImage;
+        _sequentialImageGenerator = sequentialImageGenerator;
         _googleAudio = googleAudio;
         _openAIAudio = openAIAudio;
         _logger = logger;
@@ -132,6 +135,56 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
         bool isOpenAi,
         CancellationToken ct)
     {
+        if (isOpenAi)
+        {
+            await FillImagesSequentialOpenAiAsync(request, dto, storyId, ownerEmail, storyJson, referenceImageData, referenceImageMime, ct);
+            return;
+        }
+
+        // Google path: reuse shared sequential + reference chaining logic (same as Story Image Export).
+        var tilesWithText = dto.Tiles
+            .Select((t, idx) => (Tile: t, Index: idx, Text: (t.Text ?? string.Empty).Trim()))
+            .Where(x => !string.IsNullOrEmpty(x.Text))
+            .ToList();
+        if (tilesWithText.Count == 0) return;
+
+        var tileTexts = tilesWithText.Select(x => x.Text).ToList();
+        var generatedImages = await _sequentialImageGenerator.GenerateSequentialWithChainingAsync(
+            storyJson,
+            tileTexts,
+            request.LanguageCode ?? "en-us",
+            request.ImageSeedInstructions,
+            referenceImageData,
+            referenceImageMime,
+            request.ApiKey.Trim(),
+            request.ImageModel,
+            ct).ConfigureAwait(false);
+
+        for (var j = 0; j < generatedImages.Count && j < tilesWithText.Count; j++)
+        {
+            var (imageData, mimeType) = generatedImages[j];
+            var tile = tilesWithText[j].Tile;
+            var originalIndex = tilesWithText[j].Index;
+            var ext = (mimeType ?? "image/png").Contains("png", StringComparison.OrdinalIgnoreCase) ? "png" : "jpg";
+            var filename = $"{tile.Id}.{ext}";
+            var asset = new StoryAssetPathMapper.AssetInfo(filename, StoryAssetPathMapper.AssetType.Image, null);
+            var blobPath = StoryAssetPathMapper.BuildDraftPath(asset, ownerEmail, storyId);
+            await UploadBlobAsync(_blobSas.DraftContainer, blobPath, imageData, mimeType ?? "image/png", ct);
+            tile.ImageUrl = filename;
+            if (originalIndex == 0) dto.CoverImageUrl = filename;
+        }
+    }
+
+    private async Task FillImagesSequentialOpenAiAsync(
+        GenerateFullStoryDraftRequest request,
+        EditableStoryDto dto,
+        string storyId,
+        string ownerEmail,
+        string storyJson,
+        byte[]? referenceImageData,
+        string? referenceImageMime,
+        CancellationToken ct)
+    {
         byte[]? previousImageData = referenceImageData;
         string? previousImageMime = referenceImageMime;
         for (var i = 0; i < dto.Tiles.Count; i++)
@@ -141,9 +194,7 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
             if (string.IsNullOrEmpty(tileText)) continue;
             try
             {
-                var (imageData, mimeType) = isOpenAi
-                    ? await _openAIImage.GenerateStoryImageAsync(storyJson, tileText, request.LanguageCode, request.ImageSeedInstructions, previousImageData, previousImageMime, request.ApiKey.Trim(), request.ImageModel, request.ImageQuality?.Trim(), ct)
-                    : await _googleImage.GenerateStoryImageAsync(storyJson, tileText, request.LanguageCode, request.ImageSeedInstructions, previousImageData, previousImageMime, ct, request.ApiKey.Trim(), request.ImageModel);
+                var (imageData, mimeType) = await _openAIImage.GenerateStoryImageAsync(storyJson, tileText, request.LanguageCode, request.ImageSeedInstructions, previousImageData, previousImageMime, request.ApiKey.Trim(), request.ImageModel, request.ImageQuality?.Trim(), ct);
                 var ext = (mimeType ?? "image/png").Contains("png", StringComparison.OrdinalIgnoreCase) ? "png" : "jpg";
                 var filename = $"{tile.Id}.{ext}";
                 var asset = new StoryAssetPathMapper.AssetInfo(filename, StoryAssetPathMapper.AssetType.Image, null);

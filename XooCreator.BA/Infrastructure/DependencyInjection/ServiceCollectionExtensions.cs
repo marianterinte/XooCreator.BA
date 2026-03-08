@@ -216,6 +216,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IGoogleAudioGeneratorService, GoogleAudioGeneratorService>();
         services.AddScoped<IGoogleTextService, GoogleTextService>();
         services.AddScoped<IGoogleImageService, GoogleImageService>();
+        services.AddScoped<ISequentialStoryImageGenerator, SequentialStoryImageGenerator>();
         services.AddScoped<IGoogleFullStoryService, GoogleFullStoryService>();
         
         // OpenAI Services
