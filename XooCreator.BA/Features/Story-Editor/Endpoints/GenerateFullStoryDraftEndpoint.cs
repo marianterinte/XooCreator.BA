@@ -76,8 +76,6 @@ public class GenerateFullStoryDraftEndpoint
         if (!string.Equals(provider, "Google", StringComparison.OrdinalIgnoreCase) &&
             !string.Equals(provider, "OpenAI", StringComparison.OrdinalIgnoreCase))
             return TypedResults.BadRequest("Provider must be Google or OpenAI.");
-        if (request.GenerateImages && request.ImageSeedInstructions != null && request.ImageSeedInstructions.Trim().Length > 1500)
-            return TypedResults.BadRequest("Image seed instructions must be at most 1500 characters.");
         const int maxInstructionsLength = 3000;
         if (request.Instructions != null && request.Instructions.Trim().Length > maxInstructionsLength)
             return TypedResults.BadRequest("Instructions must be at most 3000 characters.");
