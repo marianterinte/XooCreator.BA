@@ -88,6 +88,8 @@ public record StoryMarketplaceItemDto
     public int TotalReviews { get; init; }
     public bool IsEvaluative { get; init; } = false;
     public bool IsFullyInteractive { get; init; } = false;
+    /// <summary>True when this story is in a Supporter Pack exclusive bundle (07).</summary>
+    public bool IsExclusive { get; init; }
 }
 
 public record PurchaseStoryRequest
@@ -251,6 +253,8 @@ public record EpicMarketplaceItemDto
     public int LikesCount { get; init; } // Total likes for this epic
     public List<string> AvailableLanguages { get; init; } = new(); // e.g., ["ro-ro", "en-us", "hu-hu"]
     public List<string> AudioLanguages { get; init; } = new(); // Language codes that have audio support
+    /// <summary>True when this epic is in a Supporter Pack exclusive bundle (07).</summary>
+    public bool IsExclusive { get; init; }
 }
 
 public record EpicCoAuthorDto

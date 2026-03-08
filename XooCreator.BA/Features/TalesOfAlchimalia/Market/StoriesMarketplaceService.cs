@@ -3,6 +3,7 @@ using XooCreator.BA.Data;
 using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.DTOs;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Repositories;
+using XooCreator.BA.Features.Subscription.Services;
 
 namespace XooCreator.BA.Features.TalesOfAlchimalia.Market.Services;
 
@@ -25,11 +26,13 @@ public class StoriesMarketplaceService : IStoriesMarketplaceService
 {
     private readonly IStoriesMarketplaceRepository _repository;
     private readonly XooDbContext _context;
+    private readonly IExclusiveContentService _exclusiveContent;
 
-    public StoriesMarketplaceService(IStoriesMarketplaceRepository repository, XooDbContext context)
+    public StoriesMarketplaceService(IStoriesMarketplaceRepository repository, XooDbContext context, IExclusiveContentService exclusiveContent)
     {
         _repository = repository;
         _context = context;
+        _exclusiveContent = exclusiveContent;
     }
 
     public async Task<GetMarketplaceStoriesResponse> GetMarketplaceStoriesAsync(Guid userId, string locale, SearchStoriesRequest request)
@@ -37,10 +40,12 @@ public class StoriesMarketplaceService : IStoriesMarketplaceService
         try
         {
             var (stories, totalCount, hasMore) = await _repository.GetMarketplaceStoriesWithPaginationAsync(userId, locale, request);
+            var (exclusiveStoryIds, _) = await _exclusiveContent.GetAllExclusiveIdsAsync();
+            var enrichedStories = stories.Select(s => s with { IsExclusive = exclusiveStoryIds.Contains(s.Id) }).ToList();
 
             return new GetMarketplaceStoriesResponse
             {
-                Stories = stories,
+                Stories = enrichedStories,
                 TotalCount = totalCount,
                 HasMore = hasMore
             };

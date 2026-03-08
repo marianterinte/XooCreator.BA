@@ -47,12 +47,18 @@ public sealed class CreatureBuilderService : ICreatureBuilderService
         var wallet = await _db.CreditWallets.FirstOrDefaultAsync(w => w.UserId == userId, ct);
         var credits = wallet?.Balance ?? 0;
         var discovery = wallet?.DiscoveryBalance ?? 0;
+        var generative = wallet?.GenerativeBalance ?? 0;
 
         var hasEverPurchased = await _db.CreditTransactions
             .AnyAsync(t => t.UserId == userId && t.Type == CreditTransactionType.Purchase, ct);
 
-        // Logic: Full access if user has ever purchased
-        var hasFullAccess = hasEverPurchased;
+        // Supporter Pack grant: permanent full unlock (all parts & animals) in Generative mode (03).
+        var hasSupporterPackGrant = await _db.UserPackGrants
+            .AsNoTracking()
+            .AnyAsync(g => g.UserId == userId, ct);
+
+        // Full access: ever purchased OR has at least one Supporter Pack grant
+        var hasFullAccess = hasEverPurchased || hasSupporterPackGrant;
 
         // Get base configuration
         var config = await _db.BuilderConfigs.FirstOrDefaultAsync(ct);
@@ -112,7 +118,7 @@ public sealed class CreatureBuilderService : ICreatureBuilderService
             unlockedAnimalCount,
             totalAnimalCount,
             hasFullAccess,
-            new UserCreditsInfoDto(credits, hasEverPurchased, discovery, credits)
+            new UserCreditsInfoDto(credits, hasEverPurchased, discovery, generative)
         );
     }
 

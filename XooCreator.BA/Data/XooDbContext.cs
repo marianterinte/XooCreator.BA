@@ -183,6 +183,8 @@ public class XooDbContext : DbContext
     public DbSet<StoryDocumentExportJob> StoryDocumentExportJobs => Set<StoryDocumentExportJob>();
     public DbSet<StoryPrintRecord> StoryPrintRecords => Set<StoryPrintRecord>();
     public DbSet<UserSubscription> UserSubscriptions => Set<UserSubscription>();
+    public DbSet<UserPackGrant> UserPackGrants => Set<UserPackGrant>();
+    public DbSet<SupporterPackPlanExclusive> SupporterPackPlanExclusives => Set<SupporterPackPlanExclusive>();
     public DbSet<StoryAudioExportJob> StoryAudioExportJobs => Set<StoryAudioExportJob>();
     public DbSet<StoryAudioImportJob> StoryAudioImportJobs => Set<StoryAudioImportJob>();
     public DbSet<StoryTranslationJob> StoryTranslationJobs => Set<StoryTranslationJob>();
@@ -290,7 +292,9 @@ public class XooDbContext : DbContext
             new CreditWallet 
             { 
                 UserId = systemAdminUserId, 
-                Balance = 1000, 
+                Balance = 1000,
+                DiscoveryBalance = 0,
+                GenerativeBalance = 0,
                 UpdatedAt = DateTime.UtcNow 
             }
         );

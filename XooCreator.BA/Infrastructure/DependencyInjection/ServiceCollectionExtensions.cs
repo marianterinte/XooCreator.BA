@@ -32,6 +32,7 @@ using XooCreator.BA.Features.AlchimaliaUniverse.Repositories;
 using XooCreator.BA.Features.AlchimaliaUniverse.Services;
 using XooCreator.BA.Features.StoryCreatorsChallenge.Services;
 using XooCreator.BA.Features.System.Services;
+using XooCreator.BA.Features.Subscription.Services;
 using XooCreator.BA.Infrastructure.Services.Images;
 using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Data;
@@ -94,7 +95,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<XooCreator.BA.Features.User.Services.INewsletterTemplateService, XooCreator.BA.Features.User.Services.NewsletterTemplateService>();
         services.AddScoped<XooCreator.BA.Features.User.Services.INewsletterAutoSendService, XooCreator.BA.Features.User.Services.NewsletterAutoSendService>();
         services.AddScoped<XooCreator.BA.Infrastructure.Services.Email.IEmailService, XooCreator.BA.Infrastructure.Services.Email.EmailService>();
-        
+        services.AddScoped<IExclusiveContentService, ExclusiveContentService>();
+
         return services;
     }
 

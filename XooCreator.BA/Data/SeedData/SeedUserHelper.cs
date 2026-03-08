@@ -69,6 +69,8 @@ public static class SeedUserHelper
             {
                 UserId = seedUser.Id,
                 Balance = 0,
+                DiscoveryBalance = 0,
+                GenerativeBalance = 0,
                 UpdatedAt = DateTime.UtcNow
             });
             

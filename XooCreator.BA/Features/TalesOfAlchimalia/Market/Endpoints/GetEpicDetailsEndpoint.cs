@@ -5,6 +5,7 @@ using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.DTOs;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Services;
+using XooCreator.BA.Features.Subscription.Services;
 
 namespace XooCreator.BA.Features.TalesOfAlchimalia.Market.Endpoints;
 
@@ -13,38 +14,47 @@ public class GetEpicDetailsEndpoint
 {
     private readonly IEpicsMarketplaceService _epicsMarketplaceService;
     private readonly IUserContextService _userContext;
+    private readonly IExclusiveContentService _exclusiveContent;
     private readonly ILogger<GetEpicDetailsEndpoint>? _logger;
 
     public GetEpicDetailsEndpoint(
         IEpicsMarketplaceService epicsMarketplaceService,
         IUserContextService userContext,
+        IExclusiveContentService exclusiveContent,
         ILogger<GetEpicDetailsEndpoint>? logger = null)
     {
         _epicsMarketplaceService = epicsMarketplaceService;
         _userContext = userContext;
+        _exclusiveContent = exclusiveContent;
         _logger = logger;
     }
 
     [Route("/api/{locale}/tales-of-alchimalia/market/epics/{epicId}")]
     [AllowAnonymous]
-    public static async Task<Results<Ok<EpicDetailsDto>, NotFound>> HandleGet(
+    public static async Task<Results<Ok<EpicDetailsDto>, NotFound, ProblemHttpResult>> HandleGet(
         [FromRoute] string locale,
         [FromRoute] string epicId,
-        [FromServices] GetEpicDetailsEndpoint ep)
+        [FromServices] GetEpicDetailsEndpoint ep,
+        CancellationToken ct)
     {
         try
         {
             var userId = await ep._userContext.GetUserIdAsync();
 
-            // For anonymous users, pass an empty userId to get a generic epic view
-            var effectiveUserId = userId ?? Guid.Empty;
-
-            var epicDetails = await ep._epicsMarketplaceService.GetEpicDetailsAsync(epicId, effectiveUserId, locale);
-            
-            if (epicDetails == null)
+            var isExclusive = await ep._exclusiveContent.IsEpicExclusiveAsync(epicId, ct);
+            if (isExclusive)
             {
-                return TypedResults.NotFound();
+                if (userId == null)
+                    return TypedResults.Problem("Exclusive content. Supporter Pack required.", statusCode: StatusCodes.Status403Forbidden);
+                if (!await ep._exclusiveContent.HasAccessToEpicAsync(userId.Value, epicId, ct))
+                    return TypedResults.Problem("Exclusive content. Supporter Pack required.", statusCode: StatusCodes.Status403Forbidden);
             }
+
+            var effectiveUserId = userId ?? Guid.Empty;
+            var epicDetails = await ep._epicsMarketplaceService.GetEpicDetailsAsync(epicId, effectiveUserId, locale);
+
+            if (epicDetails == null)
+                return TypedResults.NotFound();
 
             return TypedResults.Ok(epicDetails);
         }

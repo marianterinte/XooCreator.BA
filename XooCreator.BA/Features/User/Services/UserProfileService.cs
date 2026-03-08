@@ -84,6 +84,13 @@ public class UserProfileService : IUserProfileService
             var totalAnimals = await _db.AnimalDefinitions.Where(a => !a.IsHybrid).CountAsync();
             var unlockedAnimalCount = hasFullAccess ? totalAnimals : baseUnlockedAnimalIds.Count;
 
+            var supporterGrants = await _db.UserPackGrants
+                .AsNoTracking()
+                .Where(g => g.UserId == userId)
+                .OrderBy(g => g.GrantedAtUtc)
+                .Select(g => new SupporterGrantDto(g.PlanId, g.GrantedAtUtc))
+                .ToListAsync();
+
             var userProfile = new UserProfileDto
             {
                 Id = user.Id.ToString(),
@@ -103,7 +110,8 @@ public class UserProfileService : IUserProfileService
                     UnlockedAnimalCount = unlockedAnimalCount,
                     UnlockedParts = unlockedParts,
                     LockedParts = lockedParts
-                }
+                },
+                SupporterGrants = supporterGrants
             };
 
             return new GetUserProfileResponse
@@ -222,8 +230,41 @@ public class UserProfileService : IUserProfileService
 
     public Task<SpendCreditsResponse> SpendGenerativeCreditsAsync(Guid userId, SpendCreditsRequest request)
     {
-        // For now, generative == legacy balance path
-        return SpendCreditsAsync(userId, request);
+        return SpendGenerativeCreditsCoreAsync(userId, request);
+    }
+
+    private async Task<SpendCreditsResponse> SpendGenerativeCreditsCoreAsync(Guid userId, SpendCreditsRequest request)
+    {
+        try
+        {
+            var wallet = await _db.CreditWallets.FirstOrDefaultAsync(w => w.UserId == userId);
+            if (wallet == null)
+                return new SpendCreditsResponse { Success = false, ErrorMessage = "Credit wallet not found", NewBalance = 0 };
+
+            if (wallet.GenerativeBalance < request.Amount)
+                return new SpendCreditsResponse { Success = false, ErrorMessage = "Insufficient generative credits", NewBalance = wallet.GenerativeBalance };
+
+            wallet.GenerativeBalance -= request.Amount;
+            wallet.UpdatedAt = DateTime.UtcNow;
+
+            var transaction = new CreditTransaction
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                Amount = -request.Amount,
+                Type = CreditTransactionType.Spend,
+                Reference = request.Reference ?? "generative",
+                CreatedAt = DateTime.UtcNow
+            };
+            _db.CreditTransactions.Add(transaction);
+            await _db.SaveChangesAsync();
+
+            return new SpendCreditsResponse { Success = true, NewBalance = wallet.GenerativeBalance };
+        }
+        catch (Exception ex)
+        {
+            return new SpendCreditsResponse { Success = false, ErrorMessage = ex.Message, NewBalance = 0 };
+        }
     }
 
     private static List<string> GetBaseUnlockedAnimalIds(BuilderConfig? config)

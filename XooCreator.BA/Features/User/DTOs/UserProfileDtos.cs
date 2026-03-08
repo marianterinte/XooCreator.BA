@@ -8,7 +8,11 @@ public record UserProfileDto
     public required UserCreditsDto Credits { get; init; }
     public required UserPermissionsDto Permissions { get; init; }
     public DateTime CreatedAt { get; init; }
+    /// <summary>Supporter Pack grants (planId + grantedAt). Empty if none.</summary>
+    public List<SupporterGrantDto> SupporterGrants { get; init; } = new();
 }
+
+public record SupporterGrantDto(string PlanId, DateTime GrantedAtUtc);
 
 public record UserCreditsDto
 {

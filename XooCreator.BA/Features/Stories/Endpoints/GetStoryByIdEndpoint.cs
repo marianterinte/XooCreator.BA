@@ -6,6 +6,7 @@ using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Features.Stories.Services;
 using XooCreator.BA.Features.Stories.DTOs;
 using XooCreator.BA.Features.StoryEditor.Services.Content;
+using XooCreator.BA.Features.Subscription.Services;
 
 namespace XooCreator.BA.Features.Stories.Endpoints;
 
@@ -14,24 +15,33 @@ public class GetStoryByIdEndpoint
 {
     private readonly IStoriesService _storiesService;
     private readonly IUserContextService _userContext;
-    public GetStoryByIdEndpoint(IStoriesService storiesService, IUserContextService userContext)
+    private readonly IExclusiveContentService _exclusiveContent;
+
+    public GetStoryByIdEndpoint(IStoriesService storiesService, IUserContextService userContext, IExclusiveContentService exclusiveContent)
     {
         _storiesService = storiesService;
         _userContext = userContext;
-    }   
+        _exclusiveContent = exclusiveContent;
+    }
 
     [Route("/api/{locale}/stories/{storyId}")] // GET /api/{locale}/stories/{storyId}
     [Authorize]
-    public static async Task<Results<Ok<GetStoryByIdResponse>, UnauthorizedHttpResult, NotFound>> HandleGet(
+    public static async Task<Results<Ok<GetStoryByIdResponse>, UnauthorizedHttpResult, NotFound, ProblemHttpResult>> HandleGet(
         [FromRoute] string locale,
         [FromServices] GetStoryByIdEndpoint ep,
-        [FromRoute] string storyId)
+        [FromRoute] string storyId,
+        CancellationToken ct)
     {
         var userId = await ep._userContext.GetUserIdAsync();
         if (userId == null) return TypedResults.Unauthorized();
 
         var result = await ep._storiesService.GetStoryByIdAsync(userId.Value, storyId, locale);
         if (result.Story == null) return TypedResults.NotFound();
+
+        var isExclusive = await ep._exclusiveContent.IsStoryExclusiveAsync(storyId, ct);
+        if (isExclusive && !await ep._exclusiveContent.HasAccessToStoryAsync(userId.Value, storyId, ct))
+            return TypedResults.Problem("Exclusive content. Supporter Pack required.", statusCode: StatusCodes.Status403Forbidden);
+
         return TypedResults.Ok(result);
     }
 

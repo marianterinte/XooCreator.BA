@@ -55,4 +55,22 @@ public class SpendCreditsEndpoint
             ? TypedResults.Ok(result) 
             : TypedResults.BadRequest(result);
     }
+
+    [Route("/api/{locale}/user/spend-generative-credits")] // POST – LOI generative credits (Supporter Packs)
+    [Authorize]
+    public static async Task<Results<Ok<SpendCreditsResponse>, UnauthorizedHttpResult, BadRequest<SpendCreditsResponse>>> HandlePostGenerative(
+        [FromRoute] string locale,
+        [FromServices] SpendCreditsEndpoint ep,
+        [FromBody] SpendCreditsRequest request,
+        CancellationToken ct)
+    {
+        var userId = await ep._userContext.GetUserIdAsync();
+        if (userId == null) 
+            return TypedResults.Unauthorized();
+
+        var result = await ep._userProfileService.SpendGenerativeCreditsAsync(userId.Value, request);
+        return result.Success 
+            ? TypedResults.Ok(result) 
+            : TypedResults.BadRequest(result);
+    }
 }
