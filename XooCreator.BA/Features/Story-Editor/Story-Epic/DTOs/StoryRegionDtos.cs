@@ -25,6 +25,9 @@ public record StoryRegionDto
     /// <summary>Topic IDs (e.g. alchimalia_universe, classic_author) for tagging.</summary>
     public List<string> TopicIds { get; init; } = new();
 
+    /// <summary>When true and published, region appears on Explore Alchimalia Universe page.</summary>
+    public bool? ShowInUniverse { get; init; }
+
     // Review workflow fields (similar to StoryCraft/EditableStoryDto)
     public Guid? AssignedReviewerUserId { get; init; }
     public Guid? ReviewedByUserId { get; init; }
@@ -65,6 +68,9 @@ public record StoryRegionListItemDto
     public DateTime? PublishedAtUtc { get; init; }
 
     public List<string> TopicIds { get; init; } = new();
+
+    /// <summary>When true (and published), region appears on Explore Alchimalia Universe page.</summary>
+    public bool? ShowInUniverse { get; init; }
 
     // Review workflow fields for list display
     public Guid? AssignedReviewerUserId { get; init; }

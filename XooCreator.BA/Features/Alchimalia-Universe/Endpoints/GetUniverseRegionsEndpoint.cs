@@ -27,12 +27,13 @@ public class GetUniverseRegionsEndpoint
     }
 
     [Route("/api/alchimalia-universe/regions")]
+    [AllowAnonymous]
     [Authorize]
     public static async Task<Results<Ok<List<StoryRegionListItemDto>>, UnauthorizedHttpResult>> HandleGet(
         [FromServices] GetUniverseRegionsEndpoint ep,
         CancellationToken ct)
     {
-        // Hardcoded filtering for "alchimalia_universe" topic as required for this page
+        // Only regions with ShowInUniverse == true (and published) appear on Explore Alchimalia Universe page
         var cfg = ep._cachingOptions.CurrentValue;
         var ttlMinutes = cfg.Enabled ? cfg.UniverseRegionsMinutes : 0;
         var cacheKey = UniverseCachingOptions.GetUniverseRegionsKey();
@@ -40,7 +41,7 @@ public class GetUniverseRegionsEndpoint
         var regions = await ep._cache.GetOrCreateAsync(
             cacheKey,
             TimeSpan.FromMinutes(ttlMinutes),
-            () => ep._service.ListPublishedRegionsByTopicAsync("alchimalia_universe", ct),
+            () => ep._service.ListPublishedRegionsForUniverseAsync(ct),
             ct);
         return TypedResults.Ok(regions);
     }

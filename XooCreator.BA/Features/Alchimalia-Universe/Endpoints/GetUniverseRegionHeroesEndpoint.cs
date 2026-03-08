@@ -26,6 +26,7 @@ public class GetUniverseRegionHeroesEndpoint
     }
 
     [Route("/api/alchimalia-universe/regions/{regionId}/heroes")]
+    [AllowAnonymous]
     [Authorize]
     public static async Task<Results<Ok<List<UniverseHeroListItemDto>>, UnauthorizedHttpResult>> HandleGet(
         [FromRoute] string regionId,

@@ -39,6 +39,9 @@ public class StoryRegionCraft
     public Guid? ReviewedByUserId { get; set; }
     public Guid? ApprovedByUserId { get; set; }
     
+    /// <summary>When true and published, region appears on Explore Alchimalia Universe page.</summary>
+    public bool? ShowInUniverse { get; set; }
+    
     // Navigation properties
     public AlchimaliaUser Owner { get; set; } = null!;
     public ICollection<StoryRegionCraftTranslation> Translations { get; set; } = new List<StoryRegionCraftTranslation>();
