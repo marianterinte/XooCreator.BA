@@ -21,6 +21,8 @@ public class StoryAudioExportJob
     public string? ApiKeyOverride { get; set; } // Google API key provided by user in Generate Audio modal (required for audio export)
     /// <summary>Optional TTS model override (e.g. gemini-2.5-flash-preview-tts, gemini-2.5-pro-tts). When null, uses server default from config.</summary>
     public string? TtsModel { get; set; }
+    /// <summary>Optional Gemini TTS voice name override (e.g. Sulafat, Zephyr). When null, uses server default from config.</summary>
+    public string? VoiceName { get; set; }
 }
 
 public static class StoryAudioExportJobStatus

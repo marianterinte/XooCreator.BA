@@ -51,6 +51,8 @@ public class ExportDraftAudioEndpoint
         public string? ApiKey { get; init; }
         /// <summary>Optional TTS model (e.g. gemini-2.5-flash-preview-tts, gemini-2.5-pro-tts). When null, uses server default.</summary>
         public string? TtsModel { get; init; }
+        /// <summary>Optional Gemini TTS voice name (e.g. Sulafat, Zephyr). When null, uses server default.</summary>
+        public string? VoiceName { get; init; }
     }
 
     public record AudioExportResponse
@@ -112,7 +114,8 @@ public class ExportDraftAudioEndpoint
             QueuedAtUtc = DateTime.UtcNow,
             SelectedTileIdsJson = selectedTileIdsJson,
             ApiKeyOverride = request!.ApiKey!.Trim(),
-            TtsModel = string.IsNullOrWhiteSpace(request.TtsModel) ? null : request.TtsModel.Trim()
+            TtsModel = string.IsNullOrWhiteSpace(request.TtsModel) ? null : request.TtsModel.Trim(),
+            VoiceName = string.IsNullOrWhiteSpace(request.VoiceName) ? null : request.VoiceName.Trim()
         };
 
         ep._db.StoryAudioExportJobs.Add(job);
