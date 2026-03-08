@@ -37,3 +37,15 @@ public record DiscoverResponseDto(
     string? ErrorMessage,
     double? DiscoveryCredits
 );
+
+// LOI Generative: generate animal (image + story), 1 credit
+public record GenerateGenerativeAnimalRequestDto(DiscoverCombinationDto Combination, DiscoverSelectionDto? Selection);
+public record GenerateGenerativeAnimalResponseDto(
+    bool Success,
+    Guid? Id,
+    string? Name,
+    string? ImageUrl,
+    string? StoryText,
+    string? ErrorMessage,
+    double? NewGenerativeBalance
+);

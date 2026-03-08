@@ -31,6 +31,7 @@ using XooCreator.BA.Features.StoryFeedback.Services;
 using XooCreator.BA.Features.AlchimaliaUniverse.Repositories;
 using XooCreator.BA.Features.AlchimaliaUniverse.Services;
 using XooCreator.BA.Features.StoryCreatorsChallenge.Services;
+using XooCreator.BA.Features.CreatureBuilder.Services;
 using XooCreator.BA.Features.System.Services;
 using XooCreator.BA.Features.Subscription.Services;
 using XooCreator.BA.Infrastructure.Services.Images;
@@ -107,6 +108,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddSeedServices(this IServiceCollection services)
     {
         services.AddScoped<ICreatureBuilderService, CreatureBuilderService>();
+        services.AddScoped<IGenerateLoiAnimalService, GenerateLoiAnimalService>();
         services.AddScoped<ISeedDiscoveryService, SeedDiscoveryService>();
         services.AddScoped<IBestiaryFileUpdater, BestiaryFileUpdater>();
         services.AddScoped<IHeroDefinitionSeedService, HeroDefinitionSeedService>();

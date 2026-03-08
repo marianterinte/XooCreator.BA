@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
+using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure;
+using XooCreator.BA.Infrastructure.Services.Blob;
 
 namespace XooCreator.BA.Features.Bestiary.Endpoints;
 
@@ -13,10 +15,13 @@ public sealed class GetUserBestiaryEndpoint
 {
     private readonly XooDbContext _db;
     private readonly IUserContextService _userContext;
-    public GetUserBestiaryEndpoint(XooDbContext db, IUserContextService userContext)
+    private readonly IBlobSasService _blobSas;
+
+    public GetUserBestiaryEndpoint(XooDbContext db, IUserContextService userContext, IBlobSasService blobSas)
     {
         _db = db;
         _userContext = userContext;
+        _blobSas = blobSas;
     }
 
     [Route("/api/{locale}/bestiary")] // GET
@@ -29,6 +34,34 @@ public sealed class GetUserBestiaryEndpoint
     {
         var userId = await ep._userContext.GetUserIdAsync();
         if (userId == null) return TypedResults.Unauthorized();
+
+        // Generative: return UserGeneratedLoiAnimals for this user (separate table)
+        if (string.Equals(bestiaryType, "generative", StringComparison.OrdinalIgnoreCase))
+        {
+            var generativeList = await ep._db.UserGeneratedLoiAnimals
+                .Where(a => a.UserId == userId.Value)
+                .OrderByDescending(a => a.CreatedAtUtc)
+                .ToListAsync(ct);
+
+            var container = ep._blobSas.DraftContainer;
+            var sasTtl = TimeSpan.FromHours(1);
+            var generativeItems = new List<BestiaryItemDto>();
+            foreach (var a in generativeList)
+            {
+                var imageUrl = "";
+                try
+                {
+                    var sasUri = await ep._blobSas.GetReadSasAsync(container, a.ImageBlobPath, sasTtl, ct);
+                    imageUrl = sasUri.ToString();
+                }
+                catch
+                {
+                    // If blob missing or SAS fails, use placeholder or empty
+                }
+                generativeItems.Add(new BestiaryItemDto(a.Id, a.Name, imageUrl, a.StoryText ?? "", a.CreatedAtUtc, "generative"));
+            }
+            return TypedResults.Ok(new BestiaryResponse(generativeItems));
+        }
 
         var query = ep._db.UserBestiary
             .Where(ub => ub.UserId == userId.Value);
