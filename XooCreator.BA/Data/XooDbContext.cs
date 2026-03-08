@@ -185,6 +185,7 @@ public class XooDbContext : DbContext
     public DbSet<UserSubscription> UserSubscriptions => Set<UserSubscription>();
     public DbSet<UserPackGrant> UserPackGrants => Set<UserPackGrant>();
     public DbSet<SupporterPackOrder> SupporterPackOrders => Set<SupporterPackOrder>();
+    public DbSet<SupporterPackPlan> SupporterPackPlans => Set<SupporterPackPlan>();
     public DbSet<SupporterPackPlanExclusive> SupporterPackPlanExclusives => Set<SupporterPackPlanExclusive>();
     public DbSet<StoryAudioExportJob> StoryAudioExportJobs => Set<StoryAudioExportJob>();
     public DbSet<StoryAudioImportJob> StoryAudioImportJobs => Set<StoryAudioImportJob>();

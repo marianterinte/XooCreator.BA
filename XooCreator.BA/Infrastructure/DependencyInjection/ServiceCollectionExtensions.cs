@@ -96,6 +96,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<XooCreator.BA.Features.User.Services.INewsletterAutoSendService, XooCreator.BA.Features.User.Services.NewsletterAutoSendService>();
         services.AddScoped<XooCreator.BA.Infrastructure.Services.Email.IEmailService, XooCreator.BA.Infrastructure.Services.Email.EmailService>();
         services.AddScoped<IExclusiveContentService, ExclusiveContentService>();
+        services.AddScoped<ISupporterPackPlanConfigService, SupporterPackPlanConfigService>();
 
         return services;
     }

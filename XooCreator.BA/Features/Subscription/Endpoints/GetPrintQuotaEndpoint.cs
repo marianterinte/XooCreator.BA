@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.Enums;
+using XooCreator.BA.Features.Subscription.Services;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
 
@@ -13,8 +14,8 @@ namespace XooCreator.BA.Features.Subscription.Endpoints;
 [Endpoint]
 public class GetPrintQuotaEndpoint
 {
-    /// <summary>Print quota per Supporter Pack plan (total exports allowed per grant).</summary>
-    private static readonly IReadOnlyDictionary<string, int> PlanPrintQuota = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+    /// <summary>Fallback print quota per plan when SupporterPackPlans table is empty.</summary>
+    private static readonly IReadOnlyDictionary<string, int> FallbackPlanPrintQuota = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
     {
         { "Bronze", 10 },
         { "Silver", 20 },
@@ -25,12 +26,14 @@ public class GetPrintQuotaEndpoint
     private readonly XooDbContext _db;
     private readonly IAuth0UserService _auth0;
     private readonly IConfiguration _config;
+    private readonly ISupporterPackPlanConfigService _planConfig;
 
-    public GetPrintQuotaEndpoint(XooDbContext db, IAuth0UserService auth0, IConfiguration config)
+    public GetPrintQuotaEndpoint(XooDbContext db, IAuth0UserService auth0, IConfiguration config, ISupporterPackPlanConfigService planConfig)
     {
         _db = db;
         _auth0 = auth0;
         _config = config;
+        _planConfig = planConfig;
     }
 
     public record PrintQuotaResponse(int UsedCount, int Limit, int Remaining, bool CanPrint, bool IsSupporter);
@@ -60,7 +63,9 @@ public class GetPrintQuotaEndpoint
             .Where(g => g.UserId == user.Id)
             .Select(g => g.PlanId)
             .ToListAsync(ct);
-        var limit = grantLimit.Sum(planId => PlanPrintQuota.TryGetValue(planId, out var q) ? q : 0);
+        var plans = await ep._planConfig.GetAllPlansAsync(ct);
+        var quotaByPlan = plans.ToDictionary(p => p.PlanId, p => p.PrintQuota, StringComparer.OrdinalIgnoreCase);
+        var limit = grantLimit.Sum(planId => quotaByPlan.TryGetValue(planId, out var q) ? q : FallbackPlanPrintQuota.TryGetValue(planId, out var f) ? f : 0);
         if (limit <= 0)
         {
             limit = ep._config.GetValue("Subscription:FreePrintLimit", 1);

@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.Enums;
+using XooCreator.BA.Features.Subscription.Services;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
 
@@ -13,7 +14,8 @@ namespace XooCreator.BA.Features.Subscription.Endpoints;
 [Endpoint]
 public class AcceptSupporterPackOrderEndpoint
 {
-    private static readonly IReadOnlyDictionary<string, int> PlanGenerativeCredits = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+    /// <summary>Fallback when plan not in config.</summary>
+    private static readonly IReadOnlyDictionary<string, int> FallbackPlanGenerativeCredits = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
     {
         { "Bronze", 5 },
         { "Silver", 10 },
@@ -23,11 +25,13 @@ public class AcceptSupporterPackOrderEndpoint
 
     private readonly XooDbContext _db;
     private readonly IAuth0UserService _auth0;
+    private readonly ISupporterPackPlanConfigService _planConfig;
 
-    public AcceptSupporterPackOrderEndpoint(XooDbContext db, IAuth0UserService auth0)
+    public AcceptSupporterPackOrderEndpoint(XooDbContext db, IAuth0UserService auth0, ISupporterPackPlanConfigService planConfig)
     {
         _db = db;
         _auth0 = auth0;
+        _planConfig = planConfig;
     }
 
     [Route("/api/admin/supporter-packs/orders/{orderId:guid}/accept")]
@@ -64,7 +68,8 @@ public class AcceptSupporterPackOrderEndpoint
         };
         ep._db.UserPackGrants.Add(grant);
 
-        var creditsToAdd = PlanGenerativeCredits.TryGetValue(order.PlanId, out var c) ? c : 0;
+        var plan = await ep._planConfig.GetPlanAsync(order.PlanId, ct);
+        var creditsToAdd = plan != null ? plan.GenerativeCredits : (FallbackPlanGenerativeCredits.TryGetValue(order.PlanId, out var c) ? c : 0);
         if (creditsToAdd > 0)
         {
             var wallet = await ep._db.CreditWallets.FirstOrDefaultAsync(w => w.UserId == order.UserId, ct);

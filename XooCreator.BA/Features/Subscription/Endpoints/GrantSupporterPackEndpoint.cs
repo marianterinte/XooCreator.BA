@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.Enums;
+using XooCreator.BA.Features.Subscription.Services;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
 
@@ -16,8 +17,8 @@ public class GrantSupporterPackEndpoint
     private static readonly HashSet<string> ValidPlanIds = new(StringComparer.OrdinalIgnoreCase)
         { "Bronze", "Silver", "Gold", "Platinum" };
 
-    /// <summary>Generative LOI credits per plan (03, 05).</summary>
-    private static readonly IReadOnlyDictionary<string, int> PlanGenerativeCredits = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+    /// <summary>Fallback credits when plan not in config.</summary>
+    private static readonly IReadOnlyDictionary<string, int> FallbackPlanGenerativeCredits = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
     {
         { "Bronze", 5 },
         { "Silver", 10 },
@@ -27,11 +28,13 @@ public class GrantSupporterPackEndpoint
 
     private readonly XooDbContext _db;
     private readonly IAuth0UserService _auth0;
+    private readonly ISupporterPackPlanConfigService _planConfig;
 
-    public GrantSupporterPackEndpoint(XooDbContext db, IAuth0UserService auth0)
+    public GrantSupporterPackEndpoint(XooDbContext db, IAuth0UserService auth0, ISupporterPackPlanConfigService planConfig)
     {
         _db = db;
         _auth0 = auth0;
+        _planConfig = planConfig;
     }
 
     public record GrantSupporterPackRequest(string? UserId, string? Email, string PlanId, string? EmailUsed);
@@ -88,7 +91,8 @@ public class GrantSupporterPackEndpoint
         };
         ep._db.UserPackGrants.Add(grant);
 
-        var creditsToAdd = PlanGenerativeCredits.TryGetValue(grant.PlanId, out var c) ? c : 0;
+        var plan = await ep._planConfig.GetPlanAsync(grant.PlanId, ct);
+        var creditsToAdd = plan != null ? plan.GenerativeCredits : (FallbackPlanGenerativeCredits.TryGetValue(grant.PlanId, out var c) ? c : 0);
         if (creditsToAdd > 0)
         {
             var wallet = await ep._db.CreditWallets.FirstOrDefaultAsync(w => w.UserId == userId.Value, ct);
