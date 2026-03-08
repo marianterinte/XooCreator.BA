@@ -1,6 +1,3 @@
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
@@ -14,7 +11,7 @@ namespace XooCreator.BA.Features.StoryEditor.Services;
 public interface IOpenAIImageService
 {
     /// <summary>
-    /// Generates a single illustration image for the current story page/tile.
+    /// Generates a single illustration image for the current story page/tile. Output is always 4:5 aspect ratio.
     /// </summary>
     Task<(byte[] ImageData, string MimeType)> GenerateStoryImageAsync(
         string storyJson,
@@ -127,10 +124,7 @@ public class OpenAIImageService : IOpenAIImageService
             }
 
             var imageBytes = generatedImage.ImageBytes.ToArray();
-            
-            // Crop image to 4:5 aspect ratio (gpt-image-1 generates squares by default, crop to 4:5 for mobile/tablet optimization)
-            var croppedImage = CropToAspectRatio(imageBytes, 4, 5);
-            
+            var croppedImage = StoryImageAspectRatio.CropTo4x5(imageBytes);
             return (croppedImage, "image/png");
         }
         catch (Exception ex)
@@ -348,61 +342,5 @@ public class OpenAIImageService : IOpenAIImageService
         
         throw new InvalidOperationException("Failed to extract summarized prompt from OpenAI response");
     }
-
-    /// <summary>
-    /// Crops an image to the specified aspect ratio (width:height).
-    /// For 4:5 aspect ratio, crops from center horizontally.
-    /// </summary>
-    private byte[] CropToAspectRatio(byte[] imageBytes, int widthRatio, int heightRatio)
-    {
-        try
-        {
-            using var originalImage = Image.FromStream(new MemoryStream(imageBytes));
-            
-            var originalWidth = originalImage.Width;
-            var originalHeight = originalImage.Height;
-            
-            // Calculate target dimensions for aspect ratio widthRatio:heightRatio
-            // We keep the height and crop the width
-            var targetHeight = originalHeight;
-            var targetWidth = (int)(targetHeight * (double)widthRatio / heightRatio);
-            
-            // If calculated width is larger than original, keep width and crop height instead
-            if (targetWidth > originalWidth)
-            {
-                targetWidth = originalWidth;
-                targetHeight = (int)(targetWidth * (double)heightRatio / widthRatio);
-            }
-            
-            // Calculate crop position (center)
-            var cropX = (originalWidth - targetWidth) / 2;
-            var cropY = (originalHeight - targetHeight) / 2;
-            
-            // Create cropped image
-            using var croppedBitmap = new Bitmap(targetWidth, targetHeight);
-            using (var graphics = Graphics.FromImage(croppedBitmap))
-            {
-                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                graphics.SmoothingMode = SmoothingMode.HighQuality;
-                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-                
-                graphics.DrawImage(originalImage, 
-                    new Rectangle(0, 0, targetWidth, targetHeight),
-                    new Rectangle(cropX, cropY, targetWidth, targetHeight),
-                    GraphicsUnit.Pixel);
-            }
-            
-            // Convert to bytes
-            using var ms = new MemoryStream();
-            croppedBitmap.Save(ms, ImageFormat.Png);
-            return ms.ToArray();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Failed to crop image to aspect ratio {WidthRatio}:{HeightRatio}, returning original image", widthRatio, heightRatio);
-            return imageBytes; // Return original if crop fails
-        }
-    }
-
 }
 

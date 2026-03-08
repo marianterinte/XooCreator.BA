@@ -25,7 +25,9 @@ public class EpicHeroService : IEpicHeroService
     private readonly IHeroPublishChangeLogService _changeLogService;
     private readonly IHeroAssetLinkService _assetLinkService;
     private readonly ILogger<EpicHeroService> _logger;
-    private readonly IAppCache _cache; // used only for cache invalidation on publish
+    private readonly IAppCache _cache; // cache for GetHeroAsync + invalidation on publish/mutate
+
+    private static readonly TimeSpan HeroCacheTtl = TimeSpan.FromHours(24);
 
     public EpicHeroService(
         IEpicHeroRepository repository,
@@ -50,6 +52,12 @@ public class EpicHeroService : IEpicHeroService
     }
 
     public async Task<EpicHeroDto?> GetHeroAsync(string heroId, CancellationToken ct = default)
+    {
+        var key = UniverseCachingOptions.GetStoryHeroKey(heroId);
+        return await _cache.GetOrCreateAsync(key, HeroCacheTtl, () => LoadHeroInternalAsync(heroId, ct), ct);
+    }
+
+    private async Task<EpicHeroDto?> LoadHeroInternalAsync(string heroId, CancellationToken ct)
     {
         // Try to get craft first (draft/in-review/approved)
         var craft = await _repository.GetCraftAsync(heroId, ct);
@@ -229,6 +237,7 @@ public class EpicHeroService : IEpicHeroService
         
         // Append changes to change log for delta publish
         await _changeLogService.AppendChangesAsync(heroCraft, snapshotBeforeChanges, langForTracking, ownerUserId, ct);
+        _cache.Remove(UniverseCachingOptions.GetStoryHeroKey(heroId));
     }
 
     public async Task SaveHeroTopicsAsync(Guid ownerUserId, string heroId, IReadOnlyList<string> topicIds, CancellationToken ct = default)
@@ -241,6 +250,7 @@ public class EpicHeroService : IEpicHeroService
         await UpdateHeroTopicsAsync(heroCraft, topicIds?.ToList() ?? new List<string>(), ct);
         heroCraft.UpdatedAt = DateTime.UtcNow;
         await _repository.SaveCraftAsync(heroCraft, ct);
+        _cache.Remove(UniverseCachingOptions.GetStoryHeroKey(heroId));
     }
 
     private async Task UpdateHeroTopicsAsync(EpicHeroCraft craft, List<string> topicIds, CancellationToken ct)
@@ -281,6 +291,7 @@ public class EpicHeroService : IEpicHeroService
         await UpdateHeroRegionsAsync(heroCraft, regionIds?.ToList() ?? new List<string>(), ct);
         heroCraft.UpdatedAt = DateTime.UtcNow;
         await _repository.SaveCraftAsync(heroCraft, ct);
+        _cache.Remove(UniverseCachingOptions.GetStoryHeroKey(heroId));
     }
 
     private async Task UpdateHeroRegionsAsync(EpicHeroCraft craft, List<string> regionIds, CancellationToken ct)
@@ -584,6 +595,7 @@ public class EpicHeroService : IEpicHeroService
         }
 
         await _repository.DeleteCraftAsync(heroId, ct);
+        _cache.Remove(UniverseCachingOptions.GetStoryHeroKey(heroId));
     }
 
     public async Task SubmitForReviewAsync(Guid ownerUserId, string heroId, CancellationToken ct = default)
@@ -612,6 +624,7 @@ public class EpicHeroService : IEpicHeroService
 
         await _repository.SaveCraftAsync(heroCraft, ct);
         _logger.LogInformation("Hero craft submitted for review: heroId={HeroId}", heroId);
+        _cache.Remove(UniverseCachingOptions.GetStoryHeroKey(heroId));
     }
 
     public async Task ReviewAsync(Guid reviewerUserId, string heroId, bool approve, string? notes, CancellationToken ct = default)
@@ -641,6 +654,7 @@ public class EpicHeroService : IEpicHeroService
 
         await _repository.SaveCraftAsync(heroCraft, ct);
         _logger.LogInformation("Hero craft reviewed: heroId={HeroId} approved={Approve}", heroId, approve);
+        _cache.Remove(UniverseCachingOptions.GetStoryHeroKey(heroId));
     }
 
     public async Task PublishAsync(Guid ownerUserId, string heroId, string ownerEmail, bool isAdmin = false, CancellationToken ct = default)
@@ -1162,6 +1176,7 @@ public class EpicHeroService : IEpicHeroService
 
         await _repository.SaveCraftAsync(heroCraft, ct);
         _logger.LogInformation("Hero craft retracted: heroId={HeroId}", heroId);
+        _cache.Remove(UniverseCachingOptions.GetStoryHeroKey(heroId));
     }
 
     private async Task<string> PublishImageAsync(string heroId, string draftPath, string ownerEmail, CancellationToken ct)
@@ -1465,6 +1480,7 @@ public class EpicHeroService : IEpicHeroService
         await _context.SaveChangesAsync(ct);
 
         _logger.LogInformation("Created new version from published hero: heroId={HeroId} baseVersion={BaseVersion}", heroId, definition.Version);
+        _cache.Remove(UniverseCachingOptions.GetStoryHeroKey(heroId));
     }
 
     public async Task UnpublishAsync(Guid ownerUserId, string heroId, string reason, CancellationToken ct = default)

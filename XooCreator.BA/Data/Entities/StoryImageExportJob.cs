@@ -29,6 +29,10 @@ public class StoryImageExportJob
     public string? ExtraInstructions { get; set; }
     /// <summary>Optional image model identifier (for future model selection).</summary>
     public string? ImageModel { get; set; }
+    /// <summary>When true, client should apply generated images to the story after job completes. Default true.</summary>
+    public bool ApplyToStoryWhenDone { get; set; } = true;
+    /// <summary>Image quality: light | medium | heavy. Used where supported (e.g. OpenAI size).</summary>
+    public string? ImageQuality { get; set; }
 }
 
 public static class StoryImageExportJobStatus

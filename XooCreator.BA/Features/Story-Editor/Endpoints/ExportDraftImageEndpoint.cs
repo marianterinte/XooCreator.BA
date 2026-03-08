@@ -57,6 +57,10 @@ public class ExportDraftImageEndpoint
         public string? ExtraInstructions { get; init; }
         /// <summary>Optional image model identifier (for future selection).</summary>
         public string? ImageModel { get; init; }
+        /// <summary>When true, client will apply generated images to the story draft after job completes. Stored for reference.</summary>
+        public bool? ApplyToStoryWhenDone { get; init; }
+        /// <summary>Image quality: light | medium | heavy. Affects resolution/cost where supported (e.g. OpenAI).</summary>
+        public string? ImageQuality { get; init; }
     }
 
     public record ImageExportResponse
@@ -135,7 +139,9 @@ public class ExportDraftImageEndpoint
             ReferenceImageBase64 = referenceImageBase64,
             ReferenceImageMimeType = request?.ReferenceImageMimeType?.Trim(),
             ExtraInstructions = request?.ExtraInstructions?.Trim(),
-            ImageModel = request?.ImageModel?.Trim()
+            ImageModel = request?.ImageModel?.Trim(),
+            ApplyToStoryWhenDone = request?.ApplyToStoryWhenDone ?? true,
+            ImageQuality = request?.ImageQuality?.Trim()
         };
 
         ep._db.StoryImageExportJobs.Add(job);
