@@ -1,3 +1,4 @@
+using System.Text.Json;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.SeedData;
@@ -12,6 +13,30 @@ public interface IStoryAssetCopyService
 {
     List<StoryAssetPathMapper.AssetInfo> CollectFromCraft(StoryCraft craft);
     List<StoryAssetPathMapper.AssetInfo> CollectFromDefinition(StoryDefinition definition);
+
+    /// <summary>
+    /// Filters collected assets by version copy profile (asset types + languages).
+    /// When copyImages/copyAudio/copyVideo are null, treat as true (legacy).
+    /// When languageMode is not 'selected', treat as 'all'.
+    /// </summary>
+    List<StoryAssetPathMapper.AssetInfo> FilterByVersionProfile(
+        IEnumerable<StoryAssetPathMapper.AssetInfo> assets,
+        bool? copyImages,
+        bool? copyAudio,
+        bool? copyVideo,
+        string? languageMode,
+        string? selectedLanguagesJson);
+
+    /// <summary>
+    /// Clears craft asset URLs not in the copied set so the editor doesn't request them.
+    /// </summary>
+    void ClearCraftAssetsNotInCopiedSet(StoryCraft craft, IReadOnlyList<StoryAssetPathMapper.AssetInfo> copiedAssets);
+
+    /// <summary>
+    /// Removes translations for languages not in selectedLanguages from the craft.
+    /// When languageMode is 'selected', the draft should only contain the selected languages.
+    /// </summary>
+    void RetainOnlySelectedLanguages(StoryCraft craft, string? selectedLanguagesJson);
 
     Task<AssetCopyResult> CopyDraftToDraftAsync(
         IEnumerable<StoryAssetPathMapper.AssetInfo> assets,
@@ -189,6 +214,179 @@ public class StoryAssetCopyService : IStoryAssetCopyService
             definition.StoryId, results.Count);
 
         return results;
+    }
+
+    public List<StoryAssetPathMapper.AssetInfo> FilterByVersionProfile(
+        IEnumerable<StoryAssetPathMapper.AssetInfo> assets,
+        bool? copyImages,
+        bool? copyAudio,
+        bool? copyVideo,
+        string? languageMode,
+        string? selectedLanguagesJson)
+    {
+        var copyImg = copyImages ?? true;
+        var copyAud = copyAudio ?? true;
+        var copyVid = copyVideo ?? true;
+        var isSelected = string.Equals(languageMode, "selected", StringComparison.OrdinalIgnoreCase);
+        var selectedLangs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        if (isSelected && !string.IsNullOrWhiteSpace(selectedLanguagesJson))
+        {
+            try
+            {
+                var list = JsonSerializer.Deserialize<List<string>>(selectedLanguagesJson);
+                if (list != null)
+                {
+                    foreach (var lang in list)
+                    {
+                        if (!string.IsNullOrWhiteSpace(lang))
+                            selectedLangs.Add(lang.Trim().ToLowerInvariant());
+                    }
+                }
+            }
+            catch
+            {
+                _logger.LogWarning("Failed to parse SelectedLanguagesJson: {Json}", selectedLanguagesJson);
+            }
+        }
+
+        var result = new List<StoryAssetPathMapper.AssetInfo>();
+        foreach (var a in assets)
+        {
+            if (a.Type == StoryAssetPathMapper.AssetType.Image && !copyImg) continue;
+            if (a.Type == StoryAssetPathMapper.AssetType.Audio && !copyAud) continue;
+            if (a.Type == StoryAssetPathMapper.AssetType.Video && !copyVid) continue;
+            if (isSelected && selectedLangs.Count > 0 && !string.IsNullOrWhiteSpace(a.Lang))
+            {
+                if (!selectedLangs.Contains(a.Lang.Trim().ToLowerInvariant())) continue;
+            }
+            result.Add(a);
+        }
+        return result;
+    }
+
+    public void ClearCraftAssetsNotInCopiedSet(StoryCraft craft, IReadOnlyList<StoryAssetPathMapper.AssetInfo> copiedAssets)
+    {
+        var kept = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var a in copiedAssets)
+        {
+            var fn = Path.GetFileName(a.Filename) ?? a.Filename;
+            if (string.IsNullOrWhiteSpace(fn)) continue;
+            var lang = (a.Lang ?? string.Empty).Trim().ToLowerInvariant();
+            kept.Add($"{a.Type}:{lang}:{fn}");
+        }
+
+        if (craft.CoverImageUrl != null)
+        {
+            var coverType = StoryAssetPathMapper.GetCoverAssetType(craft.CoverImageUrl);
+            var fn = Path.GetFileName(craft.CoverImageUrl);
+            if (!string.IsNullOrWhiteSpace(fn) && !kept.Contains($"{coverType}::{fn}"))
+                craft.CoverImageUrl = null;
+        }
+
+        foreach (var tile in craft.Tiles)
+        {
+            if (tile.ImageUrl != null)
+            {
+                var fn = Path.GetFileName(tile.ImageUrl);
+                if (!string.IsNullOrWhiteSpace(fn) && !kept.Contains($"{StoryAssetPathMapper.AssetType.Image}::{fn}"))
+                    tile.ImageUrl = null;
+            }
+
+            foreach (var tr in tile.Translations)
+            {
+                var lang = (tr.LanguageCode ?? string.Empty).Trim().ToLowerInvariant();
+                if (tr.AudioUrl != null)
+                {
+                    var fn = Path.GetFileName(tr.AudioUrl);
+                    if (!string.IsNullOrWhiteSpace(fn) && !kept.Contains($"{StoryAssetPathMapper.AssetType.Audio}:{lang}:{fn}"))
+                        tr.AudioUrl = null;
+                }
+                if (tr.VideoUrl != null)
+                {
+                    var fn = Path.GetFileName(tr.VideoUrl);
+                    if (!string.IsNullOrWhiteSpace(fn) && !kept.Contains($"{StoryAssetPathMapper.AssetType.Video}:{lang}:{fn}"))
+                        tr.VideoUrl = null;
+                }
+            }
+
+            if (tile.DialogTile != null)
+            {
+                foreach (var node in tile.DialogTile.Nodes)
+                {
+                    foreach (var nodeTr in node.Translations)
+                    {
+                        if (nodeTr.AudioUrl != null)
+                        {
+                            var nLang = (nodeTr.LanguageCode ?? string.Empty).Trim().ToLowerInvariant();
+                            var fn = Path.GetFileName(nodeTr.AudioUrl);
+                            if (!string.IsNullOrWhiteSpace(fn) && !kept.Contains($"{StoryAssetPathMapper.AssetType.Audio}:{nLang}:{fn}"))
+                                nodeTr.AudioUrl = null;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public void RetainOnlySelectedLanguages(StoryCraft craft, string? selectedLanguagesJson)
+    {
+        if (string.IsNullOrWhiteSpace(selectedLanguagesJson))
+        {
+            return;
+        }
+
+        HashSet<string> selectedLangs;
+        try
+        {
+            var list = JsonSerializer.Deserialize<List<string>>(selectedLanguagesJson);
+            if (list == null || list.Count == 0)
+            {
+                return;
+            }
+            selectedLangs = new HashSet<string>(list.Select(l => (l ?? string.Empty).Trim().ToLowerInvariant()).Where(l => l.Length > 0), StringComparer.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            _logger.LogWarning("Failed to parse SelectedLanguagesJson for RetainOnlySelectedLanguages: {Json}", selectedLanguagesJson);
+            return;
+        }
+
+        craft.Translations?.RemoveAll(t => !selectedLangs.Contains((t.LanguageCode ?? string.Empty).Trim().ToLowerInvariant()));
+
+        if (craft.AudioLanguages != null && craft.AudioLanguages.Count > 0)
+        {
+            craft.AudioLanguages = craft.AudioLanguages
+                .Where(lang => selectedLangs.Contains((lang ?? string.Empty).Trim().ToLowerInvariant()))
+                .ToList();
+        }
+
+        foreach (var tile in craft.Tiles ?? new List<StoryCraftTile>())
+        {
+            tile.Translations?.RemoveAll(tr => !selectedLangs.Contains((tr.LanguageCode ?? string.Empty).Trim().ToLowerInvariant()));
+
+            foreach (var answer in tile.Answers ?? new List<StoryCraftAnswer>())
+            {
+                answer.Translations?.RemoveAll(tr => !selectedLangs.Contains((tr.LanguageCode ?? string.Empty).Trim().ToLowerInvariant()));
+            }
+
+            if (tile.DialogTile != null)
+            {
+                foreach (var node in tile.DialogTile.Nodes ?? new List<StoryCraftDialogNode>())
+                {
+                    node.Translations?.RemoveAll(tr => !selectedLangs.Contains((tr.LanguageCode ?? string.Empty).Trim().ToLowerInvariant()));
+
+                    foreach (var edge in node.OutgoingEdges ?? new List<StoryCraftDialogEdge>())
+                    {
+                        edge.Translations?.RemoveAll(tr => !selectedLangs.Contains((tr.LanguageCode ?? string.Empty).Trim().ToLowerInvariant()));
+                    }
+                }
+            }
+        }
+
+        _logger.LogInformation(
+            "RetainOnlySelectedLanguages applied: storyId={StoryId} keptLangs={Langs}",
+            craft.StoryId,
+            string.Join(",", selectedLangs));
     }
 
     public async Task<AssetCopyResult> CopyDraftToDraftAsync(

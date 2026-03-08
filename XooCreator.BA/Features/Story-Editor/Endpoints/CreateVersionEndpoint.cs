@@ -49,7 +49,18 @@ public class CreateVersionEndpoint
         public Guid JobId { get; init; }
     }
 
-    public record CreateVersionRequest(bool LightChanges = false);
+    /// <summary>
+    /// Request for create version. When LightChanges is true, no assets are copied and granular options are ignored.
+    /// When LightChanges is false, CopyImages/CopyAudio/CopyVideo control which asset types to copy;
+    /// LanguageMode + SelectedLanguages filter by language.
+    /// </summary>
+    public record CreateVersionRequest(
+        bool LightChanges = false,
+        bool? CopyImages = null,
+        bool? CopyAudio = null,
+        bool? CopyVideo = null,
+        string? LanguageMode = null,
+        List<string>? SelectedLanguages = null);
 
     [Route("/api/stories/{storyId}/create-version")]
     [Authorize]
@@ -83,15 +94,25 @@ public class CreateVersionEndpoint
         if (await ep._maintenanceService.IsStoryCreatorDisabledAsync(ct))
             return StoryCreatorMaintenanceResult.Unavailable();
 
+        var lightChanges = request?.LightChanges ?? false;
+        var selectedLangsJson = request?.SelectedLanguages != null && request.SelectedLanguages.Count > 0
+            ? global::System.Text.Json.JsonSerializer.Serialize(request.SelectedLanguages)
+            : (string?)null;
+
         // Create version job
         var job = new StoryVersionJob
         {
             Id = Guid.NewGuid(),
             StoryId = storyId,
-            OwnerUserId = definition!.CreatedBy.GetValueOrDefault(), // Ensure the new version belongs to the original creator
+            OwnerUserId = definition!.CreatedBy.GetValueOrDefault(),
             RequestedByEmail = currentUser.Email ?? string.Empty,
             BaseVersion = definition!.Version,
-            LightChanges = request?.LightChanges ?? false,
+            LightChanges = lightChanges,
+            CopyImages = request?.CopyImages,
+            CopyAudio = request?.CopyAudio,
+            CopyVideo = request?.CopyVideo,
+            LanguageMode = request?.LanguageMode,
+            SelectedLanguagesJson = selectedLangsJson,
             Status = StoryVersionJobStatus.Queued,
             QueuedAtUtc = DateTime.UtcNow
         };

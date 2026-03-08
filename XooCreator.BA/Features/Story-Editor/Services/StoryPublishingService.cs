@@ -173,20 +173,34 @@ public class StoryPublishingService : IStoryPublishingService
             def.Version = def.Version <= 0 ? 1 : def.Version + 1;
         }
 
-        await RemoveExistingDefinitionContentAsync(def, ct, keepAssets: lightChanges);
+        var selectedLangs = StoryPublishLanguageMergeHelper.GetSelectedLanguagesFromCraft(craft);
+        var useLanguageMerge = StoryPublishLanguageMergeHelper.ShouldUseLanguageMerge(craft, isNew);
 
-        if (lightChanges)
+        if (useLanguageMerge)
         {
-            def.CoverImageUrl = previousCoverImageUrl;
+            await ApplyFullPublishWithLanguageMergeAsync(def, craft, ownerEmail, langTag, selectedLangs!, previousTileAssetsByTileId, ct);
         }
         else
         {
+            await RemoveExistingDefinitionContentAsync(def, ct, keepAssets: lightChanges);
+
+            if (lightChanges)
+            {
+                def.CoverImageUrl = previousCoverImageUrl;
+            }
+            else
+            {
             var coverSynced = await _assetLinks.SyncCoverAsync(craft, ownerEmail, ct);
             if (coverSynced && !string.IsNullOrWhiteSpace(craft.CoverImageUrl))
             {
                 var coverType = StoryAssetPathMapper.GetCoverAssetType(craft.CoverImageUrl);
                 var asset = new StoryAssetPathMapper.AssetInfo(craft.CoverImageUrl, coverType, null);
                 def.CoverImageUrl = StoryAssetPathMapper.BuildPublishedPath(asset, ownerEmail, storyId);
+            }
+            else if (!string.IsNullOrWhiteSpace(previousCoverImageUrl))
+            {
+                // Granular version: draft has no cover (was not copied); keep published cover.
+                def.CoverImageUrl = previousCoverImageUrl;
             }
             else
             {
@@ -227,6 +241,7 @@ public class StoryPublishingService : IStoryPublishingService
         await ReplaceDefinitionCoAuthorsAsync(def, craft, ct);
         await ReplaceDefinitionUnlockedHeroesAsync(def, craft, ct);
         await ReplaceDefinitionDialogParticipantsAsync(def, craft, ct);
+        }
 
         def.LastPublishedVersion = craft.LastDraftVersion;
 
@@ -234,6 +249,341 @@ public class StoryPublishingService : IStoryPublishingService
         LogPublication(def, craft.OwnerUserId, ownerEmail, StoryPublicationAction.Publish, null);
         await _db.SaveChangesAsync(ct);
         return def.Version;
+    }
+
+    private async Task ApplyFullPublishWithLanguageMergeAsync(
+        StoryDefinition def,
+        StoryCraft craft,
+        string ownerEmail,
+        string langTag,
+        HashSet<string> selectedLangs,
+        Dictionary<string, PublishedTileAssetSnapshot> previousTileAssetsByTileId,
+        CancellationToken ct)
+    {
+        var storyId = def.StoryId;
+
+        // Merge story-level translations: remove only selected langs, add from craft
+        await MergeDefinitionTranslationsForSelectedLanguagesAsync(def, craft, selectedLangs, ct);
+
+        // Merge AudioLanguages: keep def languages not in selected, add craft's
+        var defAudioLangs = def.AudioLanguages ?? new List<string>();
+        var craftAudioLangs = craft.AudioLanguages ?? new List<string>();
+        def.AudioLanguages = defAudioLangs
+            .Where(l => !selectedLangs.Contains(l.ToLowerInvariant()))
+            .Concat(craftAudioLangs)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        // Cover: use craft's if present, else keep published (asset preservation)
+        // Do NOT call SyncCoverAsync when craft has no cover - that would remove published cover
+        if (!string.IsNullOrWhiteSpace(craft.CoverImageUrl))
+        {
+            var coverSynced = await _assetLinks.SyncCoverAsync(craft, ownerEmail, ct);
+            if (coverSynced)
+            {
+                var coverType = StoryAssetPathMapper.GetCoverAssetType(craft.CoverImageUrl);
+                var asset = new StoryAssetPathMapper.AssetInfo(craft.CoverImageUrl, coverType, null);
+                def.CoverImageUrl = StoryAssetPathMapper.BuildPublishedPath(asset, ownerEmail, storyId);
+            }
+        }
+        // else: def.CoverImageUrl unchanged (keep published cover)
+
+        // Merge tile translations for selected languages only
+        await MergeTilesForSelectedLanguagesAsync(def, craft, ownerEmail, selectedLangs, previousTileAssetsByTileId, ct);
+
+        await ReplaceDefinitionTopicsAsync(def, craft, ct);
+        await ReplaceDefinitionAgeGroupsAsync(def, craft, ct);
+        await ReplaceDefinitionCoAuthorsAsync(def, craft, ct);
+        await ReplaceDefinitionUnlockedHeroesAsync(def, craft, ct);
+        await ReplaceDefinitionDialogParticipantsAsync(def, craft, ct);
+    }
+
+    private async Task MergeDefinitionTranslationsForSelectedLanguagesAsync(
+        StoryDefinition def,
+        StoryCraft craft,
+        HashSet<string> selectedLangs,
+        CancellationToken ct)
+    {
+        var existing = await _db.StoryDefinitionTranslations
+            .Where(t => t.StoryDefinitionId == def.Id)
+            .ToListAsync(ct);
+
+        var toRemove = existing.Where(t => selectedLangs.Contains(t.LanguageCode.ToLowerInvariant())).ToList();
+        if (toRemove.Count > 0)
+        {
+            _db.StoryDefinitionTranslations.RemoveRange(toRemove);
+        }
+
+        foreach (var tr in craft.Translations.Where(t => selectedLangs.Contains(t.LanguageCode.ToLowerInvariant())))
+        {
+            _db.StoryDefinitionTranslations.Add(new StoryDefinitionTranslation
+            {
+                StoryDefinitionId = def.Id,
+                LanguageCode = tr.LanguageCode.ToLowerInvariant(),
+                Title = tr.Title ?? string.Empty
+            });
+        }
+    }
+
+    private async Task MergeTilesForSelectedLanguagesAsync(
+        StoryDefinition def,
+        StoryCraft craft,
+        string ownerEmail,
+        HashSet<string> selectedLangs,
+        Dictionary<string, PublishedTileAssetSnapshot> previousTileAssetsByTileId,
+        CancellationToken ct)
+    {
+        var defTiles = await _db.StoryTiles
+            .Include(t => t.Translations)
+            .Include(t => t.Answers).ThenInclude(a => a.Translations)
+            .Include(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.Translations)
+            .Include(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.OutgoingEdges).ThenInclude(e => e.Translations)
+            .Where(t => t.StoryDefinitionId == def.Id)
+            .ToListAsync(ct);
+
+        var craftTilesByTileId = craft.Tiles.ToDictionary(t => t.TileId, t => t, StringComparer.OrdinalIgnoreCase);
+
+        foreach (var defTile in defTiles)
+        {
+            if (!craftTilesByTileId.TryGetValue(defTile.TileId, out var craftTile))
+            {
+                continue;
+            }
+
+            previousTileAssetsByTileId.TryGetValue(defTile.TileId, out var previousAssets);
+            await MergeSingleTileForSelectedLanguagesAsync(def, craft, craftTile, ownerEmail, selectedLangs, previousAssets, ct);
+            await _assetLinks.SyncTileAssetsAsync(craft, craftTile, ownerEmail, ct, preserveExistingWhenEmpty: true);
+        }
+    }
+
+    private async Task MergeSingleTileForSelectedLanguagesAsync(
+        StoryDefinition def,
+        StoryCraft craft,
+        StoryCraftTile craftTile,
+        string ownerEmail,
+        HashSet<string> selectedLangs,
+        PublishedTileAssetSnapshot? previousAssets,
+        CancellationToken ct)
+    {
+        var defTile = await _db.StoryTiles
+            .Include(t => t.Translations)
+            .Include(t => t.Answers).ThenInclude(a => a.Translations)
+            .Include(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.Translations)
+            .Include(t => t.DialogTile!).ThenInclude(dt => dt.Nodes).ThenInclude(n => n.OutgoingEdges).ThenInclude(e => e.Translations)
+            .FirstOrDefaultAsync(t => t.StoryDefinitionId == def.Id && t.TileId == craftTile.TileId, ct);
+
+        if (defTile == null)
+        {
+            return;
+        }
+
+        // Tile-level ImageUrl: use craft's if non-empty, else keep def's (asset preservation)
+        if (!string.IsNullOrWhiteSpace(craftTile.ImageUrl))
+        {
+            var imageFilename = craftTile.ImageUrl.GetFilenameOnly();
+            if (!string.IsNullOrWhiteSpace(imageFilename))
+            {
+                var asset = new StoryAssetPathMapper.AssetInfo(imageFilename!, StoryAssetPathMapper.AssetType.Image, null);
+                defTile.ImageUrl = StoryAssetPathMapper.BuildPublishedPath(asset, ownerEmail, def.StoryId);
+            }
+        }
+
+        // Merge tile translations: remove selected langs, add from craft
+        var tileTransToRemove = defTile.Translations
+            .Where(tr => selectedLangs.Contains(tr.LanguageCode.ToLowerInvariant()))
+            .ToList();
+        foreach (var t in tileTransToRemove)
+        {
+            _db.StoryTileTranslations.Remove(t);
+        }
+
+        foreach (var tr in craftTile.Translations.Where(t => selectedLangs.Contains(t.LanguageCode.ToLowerInvariant())))
+        {
+            var lang = tr.LanguageCode.ToLowerInvariant();
+            string? publishedAudioUrl = null;
+            string? publishedVideoUrl = null;
+
+            PublishedTranslationMedia? existingMedia = null;
+            if (previousAssets?.TranslationMediaByLang.TryGetValue(lang, out var media) == true)
+            {
+                existingMedia = media;
+            }
+
+            if (!string.IsNullOrWhiteSpace(tr.AudioUrl))
+            {
+                var audioFilename = tr.AudioUrl.GetFilenameOnly();
+                var audioAsset = new StoryAssetPathMapper.AssetInfo(audioFilename!, StoryAssetPathMapper.AssetType.Audio, lang);
+                publishedAudioUrl = StoryAssetPathMapper.BuildPublishedPath(audioAsset, ownerEmail, def.StoryId);
+            }
+            else if (existingMedia != null)
+            {
+                publishedAudioUrl = existingMedia.AudioUrl;
+            }
+
+            if (!string.IsNullOrWhiteSpace(tr.VideoUrl))
+            {
+                var videoFilename = tr.VideoUrl.GetFilenameOnly();
+                var videoAsset = new StoryAssetPathMapper.AssetInfo(videoFilename!, StoryAssetPathMapper.AssetType.Video, lang);
+                publishedVideoUrl = StoryAssetPathMapper.BuildPublishedPath(videoAsset, ownerEmail, def.StoryId);
+            }
+            else if (existingMedia != null)
+            {
+                publishedVideoUrl = existingMedia.VideoUrl;
+            }
+
+            _db.StoryTileTranslations.Add(new StoryTileTranslation
+            {
+                StoryTile = defTile,
+                LanguageCode = lang,
+                Caption = tr.Caption,
+                Text = tr.Text,
+                Question = tr.Question,
+                AudioUrl = publishedAudioUrl,
+                VideoUrl = publishedVideoUrl
+            });
+        }
+
+        // Merge answer translations for selected langs
+        var defAnswers = defTile.Answers?.ToList() ?? new List<StoryAnswer>();
+        foreach (var defAnswer in defAnswers)
+        {
+            var craftAnswer = craftTile.Answers?.FirstOrDefault(a =>
+                string.Equals(a.AnswerId, defAnswer.AnswerId, StringComparison.OrdinalIgnoreCase));
+            if (craftAnswer == null)
+            {
+                continue;
+            }
+
+            var answerTransToRemove = defAnswer.Translations?
+                .Where(tr => selectedLangs.Contains(tr.LanguageCode.ToLowerInvariant()))
+                .ToList() ?? new List<StoryAnswerTranslation>();
+            foreach (var t in answerTransToRemove)
+            {
+                _db.StoryAnswerTranslations.Remove(t);
+            }
+
+            foreach (var tr in craftAnswer.Translations.Where(t => selectedLangs.Contains(t.LanguageCode.ToLowerInvariant())))
+            {
+                _db.StoryAnswerTranslations.Add(new StoryAnswerTranslation
+                {
+                    StoryAnswer = defAnswer,
+                    LanguageCode = tr.LanguageCode.ToLowerInvariant(),
+                    Text = tr.Text ?? string.Empty
+                });
+            }
+        }
+
+        // Merge dialog node/edge translations for selected langs
+        if (string.Equals(craftTile.Type, "dialog", StringComparison.OrdinalIgnoreCase)
+            && craftTile.DialogTile != null
+            && defTile.DialogTile != null)
+        {
+            await MergeDialogTranslationsForSelectedLanguagesAsync(
+                defTile,
+                craftTile,
+                def.StoryId,
+                ownerEmail,
+                selectedLangs,
+                previousAssets,
+                ct);
+        }
+    }
+
+    private async Task MergeDialogTranslationsForSelectedLanguagesAsync(
+        StoryTile defTile,
+        StoryCraftTile craftTile,
+        string storyId,
+        string ownerEmail,
+        HashSet<string> selectedLangs,
+        PublishedTileAssetSnapshot? previousAssets,
+        CancellationToken ct)
+    {
+        var craftDialogTileId = craftTile.DialogTile!.Id;
+        var craftNodes = await _db.StoryCraftDialogNodes
+            .AsNoTracking()
+            .Include(n => n.Translations)
+            .Include(n => n.OutgoingEdges).ThenInclude(e => e.Translations)
+            .Where(n => n.StoryCraftDialogTileId == craftDialogTileId)
+            .OrderBy(n => n.SortOrder)
+            .ToListAsync(ct);
+
+        var defNodes = defTile.DialogTile!.Nodes.OrderBy(n => n.SortOrder).ToList();
+
+        for (var i = 0; i < craftNodes.Count && i < defNodes.Count; i++)
+        {
+            var craftNode = craftNodes[i];
+            var defNode = defNodes[i];
+
+            // Merge node translations
+            var nodeTransToRemove = defNode.Translations?
+                .Where(tr => selectedLangs.Contains(tr.LanguageCode.ToLowerInvariant()))
+                .ToList() ?? new List<StoryDialogNodeTranslation>();
+            foreach (var t in nodeTransToRemove)
+            {
+                _db.StoryDialogNodeTranslations.Remove(t);
+            }
+
+            foreach (var nodeTr in craftNode.Translations.Where(t => selectedLangs.Contains(t.LanguageCode.ToLowerInvariant())))
+            {
+                var nodeLang = nodeTr.LanguageCode.ToLowerInvariant();
+                string? publishedNodeAudioUrl = null;
+                if (!string.IsNullOrWhiteSpace(nodeTr.AudioUrl))
+                {
+                    var nodeAudioFilename = nodeTr.AudioUrl.GetFilenameOnly();
+                    publishedNodeAudioUrl = !string.IsNullOrWhiteSpace(nodeAudioFilename)
+                        ? StoryAssetPathMapper.BuildPublishedPath(
+                            new StoryAssetPathMapper.AssetInfo(nodeAudioFilename!, StoryAssetPathMapper.AssetType.Audio, nodeLang),
+                            ownerEmail, storyId)
+                        : null;
+                }
+                else if (previousAssets?.DialogNodeAudioByNodeAndLang.TryGetValue(
+                    BuildNodeAudioKey(craftNode.NodeId, nodeLang),
+                    out var fallback) == true)
+                {
+                    publishedNodeAudioUrl = fallback;
+                }
+
+                _db.StoryDialogNodeTranslations.Add(new StoryDialogNodeTranslation
+                {
+                    Id = Guid.NewGuid(),
+                    StoryDialogNode = defNode,
+                    LanguageCode = nodeLang,
+                    Text = nodeTr.Text ?? string.Empty,
+                    AudioUrl = publishedNodeAudioUrl
+                });
+            }
+
+            // Merge edge translations
+            var craftEdges = craftNode.OutgoingEdges.OrderBy(e => e.OptionOrder).ToList();
+            var defEdges = defNode.OutgoingEdges.OrderBy(e => e.OptionOrder).ToList();
+            for (var j = 0; j < craftEdges.Count && j < defEdges.Count; j++)
+            {
+                var craftEdge = craftEdges[j];
+                var defEdge = defEdges[j];
+
+                var edgeTransToRemove = defEdge.Translations?
+                    .Where(tr => selectedLangs.Contains(tr.LanguageCode.ToLowerInvariant()))
+                    .ToList() ?? new List<StoryDialogEdgeTranslation>();
+                foreach (var t in edgeTransToRemove)
+                {
+                    _db.StoryDialogEdgeTranslations.Remove(t);
+                }
+
+                foreach (var edgeTr in craftEdge.Translations.Where(t => selectedLangs.Contains(t.LanguageCode.ToLowerInvariant())))
+                {
+                    _db.StoryDialogEdgeTranslations.Add(new StoryDialogEdgeTranslation
+                    {
+                        Id = Guid.NewGuid(),
+                        StoryDialogEdge = defEdge,
+                        LanguageCode = edgeTr.LanguageCode.ToLowerInvariant(),
+                        OptionText = edgeTr.OptionText ?? string.Empty,
+                        AudioUrl = null
+                    });
+                }
+            }
+        }
+
+        await Task.CompletedTask;
     }
 
     private async Task<bool> TryApplyDeltaPublishAsync(
@@ -264,14 +614,27 @@ public class StoryPublishingService : IStoryPublishingService
             return false;
         }
 
+        var selectedLangsForDelta = StoryPublishLanguageMergeHelper.GetSelectedLanguagesFromCraft(craft);
+        var useLanguageMergeForDelta = selectedLangsForDelta != null && selectedLangsForDelta.Count > 0
+            && string.Equals(craft.VersionCopyLanguageMode, "selected", StringComparison.OrdinalIgnoreCase);
+
         if (headerChanged)
         {
-            await ApplyDefinitionMetadataDeltaAsync(def, craft, ownerEmail, langTag, ct);
+            if (useLanguageMergeForDelta)
+            {
+                await ApplyDefinitionMetadataDeltaWithLanguageMergeAsync(def, craft, ownerEmail, langTag, selectedLangsForDelta!, ct);
+            }
+            else
+            {
+                await ApplyDefinitionMetadataDeltaAsync(def, craft, ownerEmail, langTag, ct);
+            }
         }
 
         foreach (var change in tileChanges)
         {
-            var applied = await ApplyTileChangeAsync(def, craft, change, ownerEmail, langTag, ct);
+            var applied = useLanguageMergeForDelta
+                ? await ApplyTileChangeWithLanguageMergeAsync(def, craft, change, ownerEmail, langTag, selectedLangsForDelta!, ct)
+                : await ApplyTileChangeAsync(def, craft, change, ownerEmail, langTag, ct);
             if (!applied)
             {
                 return false;
@@ -289,6 +652,65 @@ public class StoryPublishingService : IStoryPublishingService
         def.UpdatedBy = craft.OwnerUserId;
 
         return true;
+    }
+
+    private async Task ApplyDefinitionMetadataDeltaWithLanguageMergeAsync(
+        StoryDefinition def,
+        StoryCraft craft,
+        string ownerEmail,
+        string langTag,
+        HashSet<string> selectedLangs,
+        CancellationToken ct)
+    {
+        def.Title = craft.Translations.FirstOrDefault(t => string.Equals(t.LanguageCode, langTag, StringComparison.OrdinalIgnoreCase))?.Title
+                    ?? craft.Translations.FirstOrDefault()?.Title
+                    ?? def.Title;
+        def.Summary = craft.Translations.FirstOrDefault(t => string.Equals(t.LanguageCode, langTag, StringComparison.OrdinalIgnoreCase))?.Summary
+                      ?? craft.Translations.FirstOrDefault()?.Summary
+                      ?? def.Summary;
+        def.StoryTopic = craft.StoryTopic ?? def.StoryTopic;
+        def.AuthorName = craft.AuthorName ?? def.AuthorName;
+        def.ClassicAuthorId = craft.ClassicAuthorId ?? def.ClassicAuthorId;
+        def.StoryType = craft.StoryType;
+        def.IsEvaluative = craft.IsEvaluative;
+        def.IsPartOfEpic = craft.IsPartOfEpic;
+        def.IsFullyInteractive = craft.IsFullyInteractive;
+        def.AlwaysShowInStoriesList = craft.AlwaysShowInStoriesList;
+        def.PriceInCredits = craft.PriceInCredits;
+        var defAudioLangs = def.AudioLanguages ?? new List<string>();
+        var craftAudioLangs = craft.AudioLanguages ?? new List<string>();
+        def.AudioLanguages = defAudioLangs
+            .Where(l => !selectedLangs.Contains(l.ToLowerInvariant()))
+            .Concat(craftAudioLangs)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        def.Status = StoryStatus.Published;
+        def.IsActive = true;
+        def.UpdatedAt = DateTime.UtcNow;
+        def.UpdatedBy = craft.OwnerUserId;
+        if (!def.CreatedBy.HasValue)
+        {
+            def.CreatedBy = craft.OwnerUserId;
+        }
+
+        if (!craft.LightChanges && !string.IsNullOrWhiteSpace(craft.CoverImageUrl))
+        {
+            var coverSynced = await _assetLinks.SyncCoverAsync(craft, ownerEmail, ct);
+            if (coverSynced)
+            {
+                var coverType = StoryAssetPathMapper.GetCoverAssetType(craft.CoverImageUrl);
+                var asset = new StoryAssetPathMapper.AssetInfo(craft.CoverImageUrl, coverType, null);
+                def.CoverImageUrl = StoryAssetPathMapper.BuildPublishedPath(asset, ownerEmail, craft.StoryId);
+            }
+        }
+        // else: keep def.CoverImageUrl unchanged (asset preservation)
+
+        await MergeDefinitionTranslationsForSelectedLanguagesAsync(def, craft, selectedLangs, ct);
+        await ReplaceDefinitionTopicsAsync(def, craft, ct);
+        await ReplaceDefinitionAgeGroupsAsync(def, craft, ct);
+        await ReplaceDefinitionCoAuthorsAsync(def, craft, ct);
+        await ReplaceDefinitionUnlockedHeroesAsync(def, craft, ct);
+        await ReplaceDefinitionDialogParticipantsAsync(def, craft, ct);
     }
 
     private async Task ApplyDefinitionMetadataDeltaAsync(StoryDefinition def, StoryCraft craft, string ownerEmail, string langTag, CancellationToken ct)
@@ -541,6 +963,40 @@ public class StoryPublishingService : IStoryPublishingService
         }
     }
 
+    private async Task<bool> ApplyTileChangeWithLanguageMergeAsync(
+        StoryDefinition def,
+        StoryCraft craft,
+        StoryPublishChangeLog change,
+        string ownerEmail,
+        string langTag,
+        HashSet<string> selectedLangs,
+        CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(change.EntityId))
+        {
+            return true;
+        }
+
+        var tileId = change.EntityId;
+        if (string.Equals(change.ChangeType, StoryPublishChangeTypes.Removed, StringComparison.OrdinalIgnoreCase))
+        {
+            await RemoveTileAsync(def, tileId, ct, keepAssets: craft.LightChanges);
+            return true;
+        }
+
+        var craftTile = craft.Tiles.FirstOrDefault(t => string.Equals(t.TileId, tileId, StringComparison.OrdinalIgnoreCase));
+        if (craftTile == null)
+        {
+            _logger.LogWarning("Delta publish failed: storyId={StoryId} tileId={TileId} missing in craft.", def.StoryId, tileId);
+            return false;
+        }
+
+        var previousAssets = await LoadPublishedTileAssetSnapshotAsync(def, tileId, ct);
+        await MergeSingleTileForSelectedLanguagesAsync(def, craft, craftTile, ownerEmail, selectedLangs, previousAssets, ct);
+        await _assetLinks.SyncTileAssetsAsync(craft, craftTile, ownerEmail, ct, preserveExistingWhenEmpty: true);
+        return true;
+    }
+
     private async Task<bool> ApplyTileChangeAsync(
         StoryDefinition def,
         StoryCraft craft,
@@ -623,6 +1079,11 @@ public class StoryPublishingService : IStoryPublishingService
             var asset = new StoryAssetPathMapper.AssetInfo(imageFilename!, StoryAssetPathMapper.AssetType.Image, null);
             tile.ImageUrl = StoryAssetPathMapper.BuildPublishedPath(asset, ownerEmail, def.StoryId);
         }
+        else if (!string.IsNullOrWhiteSpace(previousPublishedAssets?.ImageUrl))
+        {
+            // Granular version: craft has no image (was not copied); keep published image.
+            tile.ImageUrl = previousPublishedAssets.ImageUrl;
+        }
 
         _db.StoryTiles.Add(tile);
 
@@ -632,10 +1093,16 @@ public class StoryPublishingService : IStoryPublishingService
             string? publishedAudioUrl = null;
             string? publishedVideoUrl = null;
 
+            PublishedTranslationMedia? existingTranslationMedia = null;
+            if (previousPublishedAssets != null
+                && previousPublishedAssets.TranslationMediaByLang.TryGetValue(translationLang, out var media))
+            {
+                existingTranslationMedia = media;
+            }
+
             if (keepAssets)
             {
-                if (previousPublishedAssets != null
-                    && previousPublishedAssets.TranslationMediaByLang.TryGetValue(translationLang, out var existingTranslationMedia))
+                if (existingTranslationMedia != null)
                 {
                     publishedAudioUrl = existingTranslationMedia.AudioUrl;
                     publishedVideoUrl = existingTranslationMedia.VideoUrl;
@@ -647,12 +1114,20 @@ public class StoryPublishingService : IStoryPublishingService
                 var audioAsset = new StoryAssetPathMapper.AssetInfo(audioFilename!, StoryAssetPathMapper.AssetType.Audio, translationLang);
                 publishedAudioUrl = StoryAssetPathMapper.BuildPublishedPath(audioAsset, ownerEmail, def.StoryId);
             }
+            else if (!string.IsNullOrWhiteSpace(existingTranslationMedia?.AudioUrl))
+            {
+                publishedAudioUrl = existingTranslationMedia.AudioUrl;
+            }
 
             if (!keepAssets && !string.IsNullOrWhiteSpace(tr.VideoUrl))
             {
                 var videoFilename = tr.VideoUrl.GetFilenameOnly();
                 var videoAsset = new StoryAssetPathMapper.AssetInfo(videoFilename!, StoryAssetPathMapper.AssetType.Video, translationLang);
                 publishedVideoUrl = StoryAssetPathMapper.BuildPublishedPath(videoAsset, ownerEmail, def.StoryId);
+            }
+            else if (!string.IsNullOrWhiteSpace(existingTranslationMedia?.VideoUrl))
+            {
+                publishedVideoUrl = existingTranslationMedia.VideoUrl;
             }
 
             _db.StoryTileTranslations.Add(new StoryTileTranslation
@@ -714,7 +1189,7 @@ public class StoryPublishingService : IStoryPublishingService
                             BuildNodeAudioKey(craftNode.NodeId, nodeLang),
                             out publishedNodeAudioUrl);
                     }
-                    else
+                    else if (!string.IsNullOrWhiteSpace(nodeTranslation.AudioUrl))
                     {
                         var nodeAudioFilename = nodeTranslation.AudioUrl.GetFilenameOnly();
                         publishedNodeAudioUrl = !string.IsNullOrWhiteSpace(nodeAudioFilename)
@@ -722,6 +1197,17 @@ public class StoryPublishingService : IStoryPublishingService
                                 new StoryAssetPathMapper.AssetInfo(nodeAudioFilename!, StoryAssetPathMapper.AssetType.Audio, nodeLang),
                                 ownerEmail, def.StoryId)
                             : null;
+                    }
+                    else if (previousPublishedAssets?.DialogNodeAudioByNodeAndLang.TryGetValue(
+                                 BuildNodeAudioKey(craftNode.NodeId, nodeLang),
+                                 out var fallbackNodeAudio) == true
+                             && !string.IsNullOrWhiteSpace(fallbackNodeAudio))
+                    {
+                        publishedNodeAudioUrl = fallbackNodeAudio;
+                    }
+                    else
+                    {
+                        publishedNodeAudioUrl = null;
                     }
                     _db.StoryDialogNodeTranslations.Add(new StoryDialogNodeTranslation
                     {

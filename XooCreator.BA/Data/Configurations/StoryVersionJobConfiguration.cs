@@ -14,6 +14,8 @@ public class StoryVersionJobConfiguration : IEntityTypeConfiguration<StoryVersio
         builder.Property(x => x.RequestedByEmail).HasMaxLength(256);
         builder.Property(x => x.Status).HasMaxLength(32).IsRequired();
         builder.Property(x => x.ErrorMessage).HasMaxLength(2000);
+        builder.Property(x => x.LanguageMode).HasMaxLength(16);
+        builder.Property(x => x.SelectedLanguagesJson).HasMaxLength(2000);
         builder.HasIndex(x => new { x.StoryId, x.Status });
         builder.HasIndex(x => x.QueuedAtUtc);
     }

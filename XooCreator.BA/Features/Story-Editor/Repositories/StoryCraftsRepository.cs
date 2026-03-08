@@ -364,10 +364,6 @@ public class StoryCraftsRepository : IStoryCraftsRepository
     public async Task<List<string>> GetAvailableLanguagesAsync(string storyId, CancellationToken ct = default)
     {
         var id = (storyId ?? string.Empty).Trim();
-        var cacheKey = $"story_languages_{id}";
-
-        if (_cache != null && _cache.TryGetValue(cacheKey, out List<string>? cached))
-            return cached ?? new List<string>();
 
         // First try to get languages from craft (draft)
         var languages = await _context.StoryCraftTranslations
@@ -387,14 +383,6 @@ public class StoryCraftsRepository : IStoryCraftsRepository
                 .Select(x => x.LanguageCode)
                 .Distinct()
                 .ToListAsync(ct);
-        }
-
-        if (_cache != null)
-        {
-            _cache.Set(cacheKey, languages, new MemoryCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
-            });
         }
         
         return languages;

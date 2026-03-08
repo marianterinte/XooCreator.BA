@@ -14,7 +14,8 @@ public interface IStoryAssetLinkService
 {
     /// <summary>Syncs cover image from draft to published. Returns false if cover asset was missing or copy failed (caller should set def.CoverImageUrl = null).</summary>
     Task<bool> SyncCoverAsync(StoryCraft craft, string ownerEmail, CancellationToken ct);
-    Task SyncTileAssetsAsync(StoryCraft craft, StoryCraftTile tile, string ownerEmail, CancellationToken ct);
+    /// <summary>When preserveExistingWhenEmpty is true and craft tile has no assets, existing published assets are kept (language merge mode).</summary>
+    Task SyncTileAssetsAsync(StoryCraft craft, StoryCraftTile tile, string ownerEmail, CancellationToken ct, bool preserveExistingWhenEmpty = false);
     Task RemoveTileAssetsAsync(string storyId, string tileId, CancellationToken ct);
     Task RemoveCoverAsync(string storyId, CancellationToken ct);
 }
@@ -74,12 +75,15 @@ public class StoryAssetLinkService : IStoryAssetLinkService
         return true;
     }
 
-    public async Task SyncTileAssetsAsync(StoryCraft craft, StoryCraftTile tile, string ownerEmail, CancellationToken ct)
+    public async Task SyncTileAssetsAsync(StoryCraft craft, StoryCraftTile tile, string ownerEmail, CancellationToken ct, bool preserveExistingWhenEmpty = false)
     {
         var assets = CollectTileAssets(tile);
         if (assets.Count == 0)
         {
-            await RemoveTileAssetsAsync(craft.StoryId, tile.TileId, ct);
+            if (!preserveExistingWhenEmpty)
+            {
+                await RemoveTileAssetsAsync(craft.StoryId, tile.TileId, ct);
+            }
             return;
         }
 

@@ -233,6 +233,19 @@ public class StoryVersionQueueWorker : BackgroundService
                             lightChanges: job.LightChanges);
                         _logger.LogInformation("Draft created from definition for StoryVersionJob: jobId={JobId} storyId={StoryId}", job.Id, job.StoryId);
 
+                        // Persist version copy profile on craft for publish-time language merge.
+                        newCraft.VersionCopyLanguageMode = job.LanguageMode;
+                        newCraft.VersionCopySelectedLanguagesJson = job.SelectedLanguagesJson;
+
+                        // When languageMode is 'selected', retain only selected languages in the draft.
+                        var isLangSelected = string.Equals(job.LanguageMode, "selected", StringComparison.OrdinalIgnoreCase);
+                        if (isLangSelected && !string.IsNullOrWhiteSpace(job.SelectedLanguagesJson))
+                        {
+                            storyAssetCopyService.RetainOnlySelectedLanguages(newCraft, job.SelectedLanguagesJson);
+                        }
+
+                        await crafts.SaveAsync(newCraft, stoppingToken);
+
                         // Copy assets from published to draft storage (skip for light-changes versions).
                         // Source: published content is under the owner folder. Target: draft must be under the same
                         // owner (draft/u/{owner}/stories/...) so the editor's request-read finds the blobs;
@@ -260,7 +273,17 @@ public class StoryVersionQueueWorker : BackgroundService
                                 }
                                 else
                                 {
-                                    var assets = storyAssetCopyService.CollectFromDefinition(definition);
+                                    var allAssets = storyAssetCopyService.CollectFromDefinition(definition);
+                                    var assets = storyAssetCopyService.FilterByVersionProfile(
+                                        allAssets,
+                                        job.CopyImages,
+                                        job.CopyAudio,
+                                        job.CopyVideo,
+                                        job.LanguageMode,
+                                        job.SelectedLanguagesJson);
+                                    _logger.LogInformation(
+                                        "Filtered assets for StoryVersionJob: jobId={JobId} storyId={StoryId} from={Total} to={Filtered}",
+                                        job.Id, job.StoryId, allAssets.Count, assets.Count);
                                     await storyAssetCopyService.CopyPublishedToDraftAsync(
                                         assets,
                                         publishedOwnerEmail,
@@ -268,6 +291,8 @@ public class StoryVersionQueueWorker : BackgroundService
                                         publishedOwnerEmail,
                                         job.StoryId,
                                         stoppingToken);
+                                    storyAssetCopyService.ClearCraftAssetsNotInCopiedSet(newCraft, assets);
+                                    await crafts.SaveAsync(newCraft, stoppingToken);
                                     _logger.LogInformation("Asset copy completed for StoryVersionJob: jobId={JobId} storyId={StoryId}", job.Id, job.StoryId);
                                 }
                             }

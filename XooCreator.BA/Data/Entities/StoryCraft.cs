@@ -37,6 +37,12 @@ public class StoryCraft
     public bool IsFullyInteractive { get; set; } = false; // If true, this story is full interactive
     public bool AlwaysShowInStoriesList { get; set; } = false; // If true and story is part of an epic, it can still appear in standalone marketplace story lists
     public bool LightChanges { get; set; } = false; // If true, publish updates metadata/text only and keeps published assets unchanged
+    /// <summary>When 'selected', publish updates only selected languages; unselected remain untouched.</summary>
+    [MaxLength(16)]
+    public string? VersionCopyLanguageMode { get; set; }
+    /// <summary>JSON array of language codes when VersionCopyLanguageMode is 'selected'. Null/empty = none.</summary>
+    [MaxLength(2000)]
+    public string? VersionCopySelectedLanguagesJson { get; set; }
     public List<string> AudioLanguages { get; set; } = new(); // Language codes that have audio support (e.g., ["ro-ro", "en-us"])
     
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
