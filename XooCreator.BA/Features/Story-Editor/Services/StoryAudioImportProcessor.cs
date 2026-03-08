@@ -21,7 +21,12 @@ public record ImportAudioResult(bool Success, List<string> Errors, List<string> 
 public class StoryAudioImportProcessor : IStoryAudioImportProcessor
 {
     /// <summary>One slot per page/quiz tile or per dialog node (same order as full audio export).</summary>
-    private sealed record AudioImportTarget(StoryCraftTile Tile, StoryCraftTileTranslation? TileTranslation, StoryCraftDialogNode? Node);
+    private sealed record AudioImportTarget(
+        StoryCraftTile Tile,
+        StoryCraftTileTranslation? TileTranslation,
+        StoryCraftDialogNode? Node,
+        int TileSequenceIndex,
+        int? DialogReplicaIndex);
 
     private readonly XooDbContext _db;
     private readonly IStoryCraftsRepository _crafts;
@@ -92,14 +97,16 @@ public class StoryAudioImportProcessor : IStoryAudioImportProcessor
         foreach (var entry in audioEntries)
         {
             var entryFileName = Path.GetFileName(entry.Name);
-            var pageNumber = ExtractPageNumber(entryFileName);
-            if (pageNumber < 1 || pageNumber > targets.Count)
+            var parsed = ParseImportFileName(entryFileName);
+            var targetIndex = ResolveTargetIndex(parsed, targets);
+            var pageNumber = targetIndex + 1;
+            if (targetIndex < 0 || targetIndex >= targets.Count)
             {
-                warnings.Add($"Audio file '{entry.Name}' has index {pageNumber}, but story has {targets.Count} audio slots. Skipping.");
+                warnings.Add($"Audio file '{entry.Name}' does not match any audio slot in story (total slots: {targets.Count}). Skipping.");
                 continue;
             }
 
-            var target = targets[pageNumber - 1];
+            var target = targets[targetIndex];
 
             await using var entryStream = entry.Open();
             if (entry.Length > MaxAudioFileSizeBytes)
@@ -270,9 +277,12 @@ public class StoryAudioImportProcessor : IStoryAudioImportProcessor
                 continue;
             }
             validFiles.Add(file);
-            var slot = ExtractPageNumber(Path.GetFileName(file.FileName));
-            if (slot >= 1 && slot <= targets.Count)
-                assignments[slot] = file;
+            var parsed = ParseImportFileName(Path.GetFileName(file.FileName));
+            var targetIndex = ResolveTargetIndex(parsed, targets);
+            if (targetIndex >= 0 && targetIndex < targets.Count)
+            {
+                assignments[targetIndex + 1] = file;
+            }
         }
 
         // Fallback: assign files with no leading number (e.g. intro.wav, scene2.wav) to remaining slots in 1:1 order.
@@ -465,12 +475,26 @@ public class StoryAudioImportProcessor : IStoryAudioImportProcessor
     {
         var pageOrQuizOrDialog = new[] { "page", "quiz", "dialog" };
         var list = new List<AudioImportTarget>();
+        var tileSequenceIndex = 0;
         foreach (var tile in craft.Tiles
             .Where(t => pageOrQuizOrDialog.Contains(t.Type, StringComparer.OrdinalIgnoreCase))
             .OrderBy(t => t.SortOrder))
         {
+            int? currentTileSequence = null;
+            int EnsureTileSequence()
+            {
+                if (currentTileSequence.HasValue)
+                {
+                    return currentTileSequence.Value;
+                }
+
+                currentTileSequence = ++tileSequenceIndex;
+                return currentTileSequence.Value;
+            }
+
             if (string.Equals(tile.Type, "dialog", StringComparison.OrdinalIgnoreCase) && tile.DialogTile != null)
             {
+                var dialogReplicaIndex = 0;
                 foreach (var node in tile.DialogTile.Nodes.OrderBy(n => n.SortOrder))
                 {
                     var nodeText = node.Translations
@@ -478,7 +502,8 @@ public class StoryAudioImportProcessor : IStoryAudioImportProcessor
                         ?.Text?.Trim() ?? node.Translations.FirstOrDefault()?.Text?.Trim() ?? string.Empty;
                     if (!string.IsNullOrWhiteSpace(nodeText))
                     {
-                        list.Add(new AudioImportTarget(tile, null, node));
+                        dialogReplicaIndex++;
+                        list.Add(new AudioImportTarget(tile, null, node, EnsureTileSequence(), dialogReplicaIndex));
                     }
                 }
             }
@@ -489,7 +514,7 @@ public class StoryAudioImportProcessor : IStoryAudioImportProcessor
                 {
                     var tileTranslation = tile.Translations.FirstOrDefault(t =>
                         !string.IsNullOrWhiteSpace(t.LanguageCode) && t.LanguageCode.Equals(locale, StringComparison.OrdinalIgnoreCase));
-                    list.Add(new AudioImportTarget(tile, tileTranslation, null));
+                    list.Add(new AudioImportTarget(tile, tileTranslation, null, EnsureTileSequence(), null));
                 }
             }
         }
@@ -506,10 +531,60 @@ public class StoryAudioImportProcessor : IStoryAudioImportProcessor
         return string.Empty;
     }
 
-    /// <summary>Slot index from filename. Supports both simple (1.wav, 4.wav) and standardized export names (01_page.wav, 04_dialog_n1_hero.wav).</summary>
+    /// <summary>Slot index from filename. Supports simple (1.wav) and decorated formats (01_anything.wav).</summary>
     private static int ExtractPageNumber(string filename)
     {
         var match = Regex.Match(filename, @"^(\d+)");
         return match.Success && int.TryParse(match.Groups[1].Value, out var pageNumber) ? pageNumber : 0;
+    }
+
+    private static (int LeadingNumber, int? DialogReplicaIndex) ParseImportFileName(string filename)
+    {
+        var leadingNumber = ExtractPageNumber(filename);
+        int? dialogReplicaIndex = null;
+        var replicaMatch = Regex.Match(filename, @"_n(\d+)(?:\D|$)", RegexOptions.IgnoreCase);
+        if (replicaMatch.Success && int.TryParse(replicaMatch.Groups[1].Value, out var parsedReplica))
+        {
+            dialogReplicaIndex = parsedReplica;
+        }
+
+        return (leadingNumber, dialogReplicaIndex);
+    }
+
+    private static int ResolveTargetIndex((int LeadingNumber, int? DialogReplicaIndex) parsed, IReadOnlyList<AudioImportTarget> targets)
+    {
+        if (parsed.LeadingNumber <= 0 || targets.Count == 0)
+        {
+            return -1;
+        }
+
+        // Preferred mapping for dialog naming format: {tile:D2}_n{replica}.wav
+        if (parsed.DialogReplicaIndex.HasValue)
+        {
+            for (var i = 0; i < targets.Count; i++)
+            {
+                var t = targets[i];
+                if (t.TileSequenceIndex == parsed.LeadingNumber && t.DialogReplicaIndex == parsed.DialogReplicaIndex.Value)
+                {
+                    return i;
+                }
+            }
+        }
+        else
+        {
+            // Preferred mapping for non-dialog naming format: {tile:D2}.wav
+            for (var i = 0; i < targets.Count; i++)
+            {
+                var t = targets[i];
+                if (t.TileSequenceIndex == parsed.LeadingNumber && t.DialogReplicaIndex == null)
+                {
+                    return i;
+                }
+            }
+        }
+
+        // Backward-compatible fallback: leading number as global slot index (legacy 1.wav / 01_page.wav).
+        var fallback = parsed.LeadingNumber - 1;
+        return fallback >= 0 && fallback < targets.Count ? fallback : -1;
     }
 }
