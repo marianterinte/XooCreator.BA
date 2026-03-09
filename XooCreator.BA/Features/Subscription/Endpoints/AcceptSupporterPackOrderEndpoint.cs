@@ -8,6 +8,7 @@ using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Features.Subscription.Services;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
+using XooCreator.BA.Infrastructure.Services.Email;
 
 namespace XooCreator.BA.Features.Subscription.Endpoints;
 
@@ -26,12 +27,14 @@ public class AcceptSupporterPackOrderEndpoint
     private readonly XooDbContext _db;
     private readonly IAuth0UserService _auth0;
     private readonly ISupporterPackPlanConfigService _planConfig;
+    private readonly IResendEmailService _resend;
 
-    public AcceptSupporterPackOrderEndpoint(XooDbContext db, IAuth0UserService auth0, ISupporterPackPlanConfigService planConfig)
+    public AcceptSupporterPackOrderEndpoint(XooDbContext db, IAuth0UserService auth0, ISupporterPackPlanConfigService planConfig, IResendEmailService resend)
     {
         _db = db;
         _auth0 = auth0;
         _planConfig = planConfig;
+        _resend = resend;
     }
 
     [Route("/api/admin/supporter-packs/orders/{orderId:guid}/accept")]
@@ -97,6 +100,20 @@ public class AcceptSupporterPackOrderEndpoint
         order.ProcessedByUserId = admin.Id;
 
         await ep._db.SaveChangesAsync(ct);
+
+        // Notify user that pack is active
+        var user = await ep._db.AlchimaliaUsers.AsNoTracking().FirstOrDefaultAsync(u => u.Id == order.UserId, ct);
+        if (user != null && !string.IsNullOrWhiteSpace(user.Email))
+        {
+            var subject = "Pack-ul tău Supporter este activ – Alchimalia";
+            var body = $@"
+<p>Bună ziua,</p>
+<p>Am confirmat plata pentru comanda ta <strong>{order.PlanId}</strong>. Pack-ul tău Supporter este acum <strong>activ</strong>.</p>
+<p>Poți folosi toate beneficiile: credite generative LOI, export PDF, acces la conținut exclusiv (în funcție de plan).</p>
+<p>Mulțumim!</p>
+<p>Echipa Alchimalia</p>";
+            await ep._resend.SendAsync(user.Email, subject, body, ct);
+        }
 
         return TypedResults.Ok((object)new { OrderId = order.Id, GrantId = grant.Id, UserId = order.UserId, PlanId = order.PlanId });
     }

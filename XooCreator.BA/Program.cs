@@ -15,6 +15,8 @@ using XooCreator.DbScriptRunner;
 using XooCreator.BA.Infrastructure.Services.Images;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Caching;
 using XooCreator.BA.Features.AlchimaliaUniverse.Services;
+using Resend;
+using XooCreator.BA.Infrastructure.Services.Email;
 
 // Store startup exception for display
 Exception? startupException = null;
@@ -83,6 +85,25 @@ builder.Services.Configure<ImageCompressionOptions>(builder.Configuration.GetSec
 builder.Services.Configure<MarketplaceCacheOptions>(builder.Configuration.GetSection(MarketplaceCacheOptions.SectionName));
 builder.Services.Configure<XooCreator.BA.Features.Stories.Configuration.WelcomeFlowOptions>(
     builder.Configuration.GetSection(XooCreator.BA.Features.Stories.Configuration.WelcomeFlowOptions.SectionName));
+// Resend email (bank-transfer, order confirmation) – API key from config or RESEND_EMAIL secret/env
+builder.Services.AddOptions();
+var resendApiKey = builder.Configuration["Resend:ApiKey"]
+                   ?? builder.Configuration["RESEND_EMAIL"];
+builder.Services.AddHttpClient<ResendClient>();
+builder.Services.Configure<ResendClientOptions>(o =>
+{
+    o.ApiToken = resendApiKey ?? string.Empty;
+});
+builder.Services.AddTransient<IResend, ResendClient>();
+builder.Services.Configure<ResendOptions>(options =>
+{
+    builder.Configuration.GetSection(ResendOptions.SectionName).Bind(options);
+    if (string.IsNullOrWhiteSpace(options.ApiKey))
+    {
+        options.ApiKey = resendApiKey ?? string.Empty;
+    }
+});
+builder.Services.AddScoped<IResendEmailService, ResendEmailService>();
 builder.Services.AddScoped<XooCreator.BA.Features.Stories.Services.Caching.IWelcomeFlowCacheService, XooCreator.BA.Features.Stories.Services.Caching.WelcomeFlowCacheService>();
 builder.Services.AddScoped<XooCreator.BA.Features.Stories.Services.IWelcomeFlowConfigService, XooCreator.BA.Features.Stories.Services.WelcomeFlowConfigService>();
 builder.Services.AddHostedService<StoryPublishQueueWorker>();
