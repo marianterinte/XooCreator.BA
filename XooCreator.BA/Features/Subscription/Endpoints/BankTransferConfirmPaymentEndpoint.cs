@@ -65,14 +65,14 @@ public class BankTransferConfirmPaymentEndpoint
         internalBody.AppendLine("</ul>");
         await ep._resend.SendAsync(InternalEmail, internalSubject, internalBody.ToString(), ct);
 
-        // Email to user (if provided)
+        // Email to user (if provided) – they already made the transfer and clicked "Am făcut plata"
         if (!string.IsNullOrEmpty(email))
         {
             var userSubject = "Am primit cererea ta de plată – Supporter Pack Alchimalia";
             var userBody = $@"
 <p>Bună{(string.IsNullOrEmpty(name) ? "" : " " + WebUtility.HtmlEncode(name))},</p>
 <p>Am înregistrat cererea ta pentru <strong>Supporter Pack {WebUtility.HtmlEncode(order.PlanId)}</strong> (Order ID: <strong>{request.OrderId:N}</strong>).</p>
-<p>Până activăm plata cu cardul, te rugăm să faci viramentul bancar conform instrucțiunilor de pe site. După ce confirmăm plata, pack-ul tău va fi activat și vei primi un email de confirmare.</p>
+<p>Vom verifica plata făcută de tine; dacă toate sunt în ordine, în scurt timp îți vom activa pack-ul.</p>
 <p>Mulțumim!</p>
 <p>Echipa Alchimalia</p>";
             await ep._resend.SendAsync(email, userSubject, userBody, ct);

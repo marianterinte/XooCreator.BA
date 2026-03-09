@@ -1,11 +1,14 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
+using System.Text;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Features.Subscription.Services;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
+using XooCreator.BA.Infrastructure.Services.Email;
 
 namespace XooCreator.BA.Features.Subscription.Endpoints;
 
@@ -27,12 +30,14 @@ public class CreateSupporterPackOrderEndpoint
     private readonly XooDbContext _db;
     private readonly IAuth0UserService _auth0;
     private readonly ISupporterPackPlanConfigService _planConfig;
+    private readonly IResendEmailService _resend;
 
-    public CreateSupporterPackOrderEndpoint(XooDbContext db, IAuth0UserService auth0, ISupporterPackPlanConfigService planConfig)
+    public CreateSupporterPackOrderEndpoint(XooDbContext db, IAuth0UserService auth0, ISupporterPackPlanConfigService planConfig, IResendEmailService resend)
     {
         _db = db;
         _auth0 = auth0;
         _planConfig = planConfig;
+        _resend = resend;
     }
 
     public record CreateOrderRequest(string PlanId);
@@ -70,6 +75,29 @@ public class CreateSupporterPackOrderEndpoint
         };
         ep._db.SupporterPackOrders.Add(order);
         await ep._db.SaveChangesAsync(ct);
+
+        if (!string.IsNullOrWhiteSpace(user.Email))
+        {
+            try
+            {
+                var subject = $"Ai creat comanda #{order.Id:N} – Supporter Pack {order.PlanId}";
+                var body = new StringBuilder();
+                body.AppendLine("<p>Ai creat o comandă Supporter Pack.</p>");
+                body.AppendLine("<ul>");
+                body.AppendLine($"<li><strong>ID comandă:</strong> {order.Id:N}</li>");
+                body.AppendLine($"<li><strong>Plan:</strong> {WebUtility.HtmlEncode(order.PlanId)}</li>");
+                body.AppendLine($"<li><strong>Sumă:</strong> {order.Amount} RON</li>");
+                body.AppendLine("</ul>");
+                body.AppendLine("<p>Următorul pas: completează plata prin virament bancar conform instrucțiunilor de pe site. După ce confirmăm plata, pack-ul tău va fi activat.</p>");
+                body.AppendLine("<p>Mulțumim!</p>");
+                body.AppendLine("<p>Echipa Alchimalia</p>");
+                await ep._resend.SendAsync(user.Email, subject, body.ToString(), ct);
+            }
+            catch (Exception)
+            {
+                // Log is handled inside ResendEmailService; do not fail the request
+            }
+        }
 
         return TypedResults.Ok(new CreateOrderResponse(order.Id, order.PlanId, order.Amount));
     }
