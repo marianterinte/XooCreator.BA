@@ -254,16 +254,31 @@ public class StoryAudioExportQueueWorker : BackgroundService
         }
 
         // Build audio items: one per page/quiz tile, one per dialog node (replica text) so full export includes dialogues
+        // Naming convention uses tile sequence index (one index per tile) + dialog replica index.
         var pageOrQuizOrDialogTypes = new[] { "page", "quiz", "dialog" };
         var locale = (job.Locale ?? string.Empty).Trim().ToLowerInvariant();
         var allPages = new List<AudioPage>();
         var runningIndex = 1;
+        var tileSequenceIndex = 0;
         foreach (var tile in craft.Tiles
             .Where(t => pageOrQuizOrDialogTypes.Contains(t.Type, StringComparer.OrdinalIgnoreCase))
             .OrderBy(t => t.SortOrder))
         {
+            int? currentTileSequence = null;
+            int EnsureTileSequence()
+            {
+                if (currentTileSequence.HasValue)
+                {
+                    return currentTileSequence.Value;
+                }
+
+                currentTileSequence = ++tileSequenceIndex;
+                return currentTileSequence.Value;
+            }
+
             if (string.Equals(tile.Type, "dialog", StringComparison.OrdinalIgnoreCase) && tile.DialogTile != null)
             {
+                var dialogReplicaIndex = 0;
                 foreach (var node in tile.DialogTile.Nodes.OrderBy(n => n.SortOrder))
                 {
                     var nodeText = node.Translations
@@ -271,7 +286,15 @@ public class StoryAudioExportQueueWorker : BackgroundService
                         ?.Text?.Trim() ?? node.Translations.FirstOrDefault()?.Text?.Trim() ?? string.Empty;
                     if (!string.IsNullOrWhiteSpace(nodeText))
                     {
-                        allPages.Add(new AudioPage(tile, runningIndex++, nodeText, node.NodeId, node.SpeakerType));
+                        dialogReplicaIndex++;
+                        allPages.Add(new AudioPage(
+                            tile,
+                            runningIndex++,
+                            EnsureTileSequence(),
+                            nodeText,
+                            dialogReplicaIndex,
+                            node.NodeId,
+                            node.SpeakerType));
                     }
                 }
             }
@@ -280,7 +303,7 @@ public class StoryAudioExportQueueWorker : BackgroundService
                 var tileText = ResolveTileText(tile, job.Locale);
                 if (!string.IsNullOrWhiteSpace(tileText))
                 {
-                    allPages.Add(new AudioPage(tile, runningIndex++, tileText));
+                    allPages.Add(new AudioPage(tile, runningIndex++, EnsureTileSequence(), tileText));
                 }
             }
         }
@@ -397,7 +420,7 @@ public class StoryAudioExportQueueWorker : BackgroundService
         using var ms = new MemoryStream();
         using (var zip = new ZipArchive(ms, ZipArchiveMode.Create, leaveOpen: true))
         {
-            // Sort by slot index; filename is descriptive for dialog (e.g. 04_n1_hero.wav), numeric for page/quiz (01.wav)
+            // Sort by slot index; filename is tile-based for dialog (e.g. 05_n1.wav), numeric for page/quiz (01.wav).
             var sortedResults = results.OrderBy(r => r.Index).ToList();
             foreach (var result in sortedResults)
             {
@@ -418,18 +441,20 @@ public class StoryAudioExportQueueWorker : BackgroundService
         };
     }
 
-    /// <summary>Standardized ZIP name: {slot:D2}_{type}_{rest}.wav — e.g. 01_page.wav, 04_dialog_n1_hero.wav. Import uses leading digits only.</summary>
+    /// <summary>
+    /// Standardized ZIP naming:
+    /// - page/quiz: {tile:D2}.wav (e.g. 01.wav)
+    /// - dialog replica: {tile:D2}_n{replica}.wav (e.g. 05_n2.wav)
+    /// Import remains backward-compatible via parser logic.
+    /// </summary>
     private static string BuildExportFileName(AudioPage page)
     {
-        var slot = page.Index.ToString("D2");
-        var type = GetTileTypeSlug(page.Tile.Type);
-        if (!string.IsNullOrEmpty(page.NodeId) && !string.IsNullOrEmpty(page.SpeakerType))
+        var tileSequence = page.TileSequenceIndex.ToString("D2");
+        if (page.DialogReplicaIndex.HasValue)
         {
-            var nodePart = SanitizeFileNamePart(page.NodeId);
-            var speakerPart = SanitizeFileNamePart(page.SpeakerType);
-            return $"{slot}_dialog_{nodePart}_{speakerPart}.wav";
+            return $"{tileSequence}_n{page.DialogReplicaIndex.Value}.wav";
         }
-        return $"{slot}_{type}.wav";
+        return $"{tileSequence}.wav";
     }
 
     private static string GetTileTypeSlug(string? tileType)
@@ -706,7 +731,14 @@ public class StoryAudioExportQueueWorker : BackgroundService
     }
 
     private sealed record StoryAudioExportQueuePayload(Guid JobId, string StoryId);
-    private sealed record AudioPage(StoryCraftTile Tile, int Index, string Text, string? NodeId = null, string? SpeakerType = null);
+    private sealed record AudioPage(
+        StoryCraftTile Tile,
+        int Index,
+        int TileSequenceIndex,
+        string Text,
+        int? DialogReplicaIndex = null,
+        string? NodeId = null,
+        string? SpeakerType = null);
     private sealed record AudioPageResult(int Index, byte[] AudioBytes, string Format, string FileName);
 
     private sealed record AudioExportResult
