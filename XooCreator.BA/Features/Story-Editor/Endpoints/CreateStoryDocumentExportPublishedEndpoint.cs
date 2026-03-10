@@ -11,6 +11,7 @@ using XooCreator.BA.Infrastructure.Services;
 using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Infrastructure.Services.Queue;
 using XooCreator.BA.Features.System.Services;
+using XooCreator.BA.Features.Subscription.Services;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 
@@ -23,6 +24,7 @@ public class CreateStoryDocumentExportPublishedEndpoint
     private readonly IStoryCreatorMaintenanceService _maintenanceService;
     private readonly IJobEventsHub _jobEvents;
     private readonly IConfiguration _config;
+    private readonly IPrintQuotaService _printQuota;
 
     public CreateStoryDocumentExportPublishedEndpoint(
         XooDbContext db,
@@ -30,7 +32,8 @@ public class CreateStoryDocumentExportPublishedEndpoint
         IStoryDocumentExportQueue queue,
         IJobEventsHub jobEvents,
         IStoryCreatorMaintenanceService maintenanceService,
-        IConfiguration config)
+        IConfiguration config,
+        IPrintQuotaService printQuota)
     {
         _db = db;
         _auth0 = auth0;
@@ -38,6 +41,7 @@ public class CreateStoryDocumentExportPublishedEndpoint
         _jobEvents = jobEvents;
         _maintenanceService = maintenanceService;
         _config = config;
+        _printQuota = printQuota;
     }
 
     public record CreateStoryDocumentExportRequest(
@@ -84,35 +88,10 @@ public class CreateStoryDocumentExportPublishedEndpoint
         if (await ep._maintenanceService.IsStoryCreatorDisabledAsync(ct))
             return StoryCreatorMaintenanceResult.Unavailable();
 
-        // Print quota: Free users get limited prints; supporters (UserSubscriptions) get unlimited
-        var freePrintLimit = ep._config.GetValue("Subscription:FreePrintLimit", 1);
-        if (freePrintLimit >= 0 && !isAdmin)
-        {
-            var nowUtc = DateTime.UtcNow;
-            var isSupporter = await ep._db.UserSubscriptions
-                .AsNoTracking()
-                .AnyAsync(u => u.UserId == user.Id && (u.ExpiresAtUtc == null || u.ExpiresAtUtc > nowUtc), ct);
-            if (!isSupporter)
-            {
-                var printedIds = await ep._db.StoryPrintRecords
-                    .AsNoTracking()
-                    .Where(r => r.UserId == user.Id)
-                    .Select(r => r.StoryId)
-                    .Distinct()
-                    .ToListAsync(ct);
-                var exportedIds = await ep._db.StoryDocumentExportJobs
-                    .AsNoTracking()
-                    .Where(j => j.RequestedByUserId == user.Id && j.Status == StoryDocumentExportJobStatus.Completed)
-                    .Select(j => j.StoryId)
-                    .Distinct()
-                    .ToListAsync(ct);
-                var usedCount = printedIds.Union(exportedIds).Count();
-                var alreadyPrinted = printedIds.Contains(storyId) || exportedIds.Contains(storyId);
-                var canPrint = usedCount < freePrintLimit || alreadyPrinted;
-                if (!canPrint)
-                    return TypedResults.Problem(detail: "print_quota_api_limit_reached", statusCode: 402);
-            }
-        }
+        // Print quota: Free users get limited prints; supporter packs are stacking; legacy UserSubscriptions get unlimited.
+        var quota = await ep._printQuota.GetAsync(user.Id, isAdmin, ct);
+        if (!quota.CanPrint)
+            return TypedResults.Problem(detail: "print_quota_api_limit_reached", statusCode: 402);
 
         var request = body ?? new CreateStoryDocumentExportRequest(
             Format: StoryDocumentExportFormat.Pdf,

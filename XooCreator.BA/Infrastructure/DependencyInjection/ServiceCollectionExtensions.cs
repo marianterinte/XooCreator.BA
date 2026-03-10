@@ -38,6 +38,7 @@ using XooCreator.BA.Infrastructure.Services.Images;
 using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Data;
 using XooCreator.BA.Infrastructure.Caching;
+using XooCreator.BA.Infrastructure.Services.Email;
 
 namespace XooCreator.BA.Infrastructure.DependencyInjection;
 
@@ -95,9 +96,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<XooCreator.BA.Features.User.Services.INewsletterSendingService, XooCreator.BA.Features.User.Services.NewsletterSendingService>();
         services.AddScoped<XooCreator.BA.Features.User.Services.INewsletterTemplateService, XooCreator.BA.Features.User.Services.NewsletterTemplateService>();
         services.AddScoped<XooCreator.BA.Features.User.Services.INewsletterAutoSendService, XooCreator.BA.Features.User.Services.NewsletterAutoSendService>();
-        services.AddScoped<XooCreator.BA.Infrastructure.Services.Email.IEmailService, XooCreator.BA.Infrastructure.Services.Email.EmailService>();
+        services.AddScoped<IEmailService, ResendBulkEmailService>();
         services.AddScoped<IExclusiveContentService, ExclusiveContentService>();
         services.AddScoped<ISupporterPackPlanConfigService, SupporterPackPlanConfigService>();
+        services.AddScoped<IPrintQuotaService, PrintQuotaService>();
 
         return services;
     }

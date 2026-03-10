@@ -9,6 +9,7 @@ using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
+using XooCreator.BA.Features.Subscription.Services;
 
 namespace XooCreator.BA.Features.StoryEditor.Endpoints;
 
@@ -18,22 +19,25 @@ public class RecordStoryPrintEndpoint
     private readonly XooDbContext _db;
     private readonly IAuth0UserService _auth0;
     private readonly IStoryCraftsRepository _crafts;
+    private readonly IPrintQuotaService _printQuota;
 
     public RecordStoryPrintEndpoint(
         XooDbContext db,
         IAuth0UserService auth0,
-        IStoryCraftsRepository crafts)
+        IStoryCraftsRepository crafts,
+        IPrintQuotaService printQuota)
     {
         _db = db;
         _auth0 = auth0;
         _crafts = crafts;
+        _printQuota = printQuota;
     }
 
     public record RecordStoryPrintRequest(string? LanguageCode, bool? IsDraft);
 
     [Route("/api/{locale}/stories/{storyId}/print-record")]
     [Authorize]
-    public static async Task<Results<Ok, NotFound, UnauthorizedHttpResult, ForbidHttpResult>> HandlePost(
+    public static async Task<Results<Ok, NotFound, UnauthorizedHttpResult, ForbidHttpResult, ProblemHttpResult>> HandlePost(
         [FromRoute] string locale,
         [FromRoute] string storyId,
         [FromBody] RecordStoryPrintRequest? body,
@@ -71,6 +75,12 @@ public class RecordStoryPrintEndpoint
 
             if (!isAdmin && !isOwner && !canReaderDownload) return TypedResults.Forbid();
         }
+
+        // Enforce print quota (client-side print also consumes 1).
+        var isAdminUser = ep._auth0.HasRole(user, UserRole.Admin);
+        var quota = await ep._printQuota.GetAsync(user.Id, isAdminUser, ct);
+        if (!quota.CanPrint)
+            return TypedResults.Problem(detail: "print_quota_api_limit_reached", statusCode: 402);
 
         ep._db.StoryPrintRecords.Add(new StoryPrintRecord
         {
