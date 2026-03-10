@@ -13,6 +13,8 @@ public class SupporterPackOrder
     public decimal Amount { get; set; }
     public SupporterPackOrderStatus Status { get; set; }
     public DateTime CreatedAtUtc { get; set; }
+    /// <summary>Idempotency key used to deduplicate create-order requests for a user.</summary>
+    public string? IdempotencyKey { get; set; }
     /// <summary>Optional reference for payment (e.g. bank transfer note).</summary>
     public string? OrderReference { get; set; }
     public DateTime? ProcessedAtUtc { get; set; }
