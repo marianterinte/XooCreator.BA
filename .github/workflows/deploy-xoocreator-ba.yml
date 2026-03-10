@@ -74,7 +74,8 @@ jobs:
               --settings \
                 ASPNETCORE_ENVIRONMENT=Production \
                 ConnectionStrings__Postgres="${{ secrets.AZURE_PG_CONNSTRING_PROD_EUROPA }}" \
-                RESEND_EMAIL=${{ secrets.RESEND_EMAIL }}
+                RESEND_EMAIL="${{ secrets.RESEND_EMAIL }}" \
+                Resend__ApiKey="${{ secrets.RESEND_EMAIL }}"
           else
             # Method 2: Auto-discover resource group
             echo "Auto-discovering resource group..."
@@ -86,7 +87,8 @@ jobs:
               --settings \
                 ASPNETCORE_ENVIRONMENT=Production \
                 ConnectionStrings__Postgres="${{ secrets.AZURE_PG_CONNSTRING_PROD_EUROPA }}" \
-                RESEND_EMAIL=${{ secrets.RESEND_EMAIL }}
+                RESEND_EMAIL="${{ secrets.RESEND_EMAIL }}" \
+                Resend__ApiKey="${{ secrets.RESEND_EMAIL }}"
           fi
 
       - name: Deploy to Azure Web App
