@@ -2,9 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using XooCreator.BA.Data;
-using XooCreator.BA.Data.Entities;
+using XooCreator.BA.Data.Repositories;
 using XooCreator.BA.Features.User.DTOs;
-using XooCreator.BA.Features.User.Repositories;
 using XooCreator.BA.Features.User.Services;
 using Xunit;
 
