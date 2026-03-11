@@ -1,6 +1,6 @@
 namespace XooCreator.BA.Data.Entities;
 
-/// <summary>Async job for LOI generative: image + text, 2 credits (1 image + 1 text), persisted to BestiaryItem + UserBestiary + BestiaryItemTranslation.</summary>
+/// <summary>Async job for LOI generative: image + text, 1 credit, persisted to BestiaryItem + UserBestiary + BestiaryItemTranslation.</summary>
 public class GenerativeLoiJob
 {
     public Guid Id { get; set; }

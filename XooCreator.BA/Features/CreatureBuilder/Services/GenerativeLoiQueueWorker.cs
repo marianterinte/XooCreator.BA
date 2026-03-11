@@ -38,6 +38,20 @@ public class GenerativeLoiQueueWorker : BackgroundService
         _queueClient = queueClientFactory.CreateClient(queueName, "generative-loi-queue");
     }
 
+    private static string GetLanguageName(string locale)
+    {
+        if (string.IsNullOrWhiteSpace(locale)) return "the user's language";
+        var code = locale.ToLowerInvariant();
+        if (code.StartsWith("ro")) return "Romanian";
+        if (code.StartsWith("en")) return "English";
+        if (code.StartsWith("fr")) return "French";
+        if (code.StartsWith("de")) return "German";
+        if (code.StartsWith("es")) return "Spanish";
+        if (code.StartsWith("it")) return "Italian";
+        if (code.StartsWith("hu")) return "Hungarian";
+        return "the user's language";
+    }
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _logger.LogInformation("GenerativeLoiQueueWorker starting... QueueName={QueueName}", _queueClient.Name);
@@ -113,10 +127,10 @@ public class GenerativeLoiQueueWorker : BackgroundService
                     try
                     {
                         var wallet = await db.CreditWallets.FirstOrDefaultAsync(w => w.UserId == job.UserId, stoppingToken);
-                        if (wallet == null || wallet.GenerativeBalance < 2)
+                        if (wallet == null || wallet.GenerativeBalance < 1)
                         {
                             job.Status = "Failed";
-                            job.ErrorMessage = "Insufficient generative credits (need 2).";
+                            job.ErrorMessage = "Insufficient generative credits (need 1).";
                             job.CompletedAtUtc = DateTime.UtcNow;
                             await db.SaveChangesAsync(stoppingToken);
                             Publish();
@@ -136,27 +150,29 @@ public class GenerativeLoiQueueWorker : BackgroundService
                             continue;
                         }
                         var lang = string.IsNullOrWhiteSpace(job.Locale) ? "ro-RO" : job.Locale;
+                        var languageName = GetLanguageName(lang);
 
                         var userProfile = scope.ServiceProvider.GetRequiredService<IUserProfileService>();
                         var loiImageService = scope.ServiceProvider.GetRequiredService<ILOIImageGenerationService>();
                         var textService = scope.ServiceProvider.GetRequiredService<IGoogleTextService>();
                         var blobSas = scope.ServiceProvider.GetRequiredService<IBlobSasService>();
 
-                        job.ProgressMessage = "Generating image...";
-                        await db.SaveChangesAsync(stoppingToken);
-                        Publish();
-
-                        var spend1 = await userProfile.SpendGenerativeCreditsAsync(job.UserId, new SpendCreditsRequest { Amount = 1, Reference = "loi-generative-image" });
-                        if (!spend1.Success)
+                        // Charge a single generative credit for the whole job (image + text) up front.
+                        var spend = await userProfile.SpendGenerativeCreditsAsync(job.UserId, new SpendCreditsRequest { Amount = 1, Reference = "loi-generative" });
+                        if (!spend.Success)
                         {
                             job.Status = "Failed";
-                            job.ErrorMessage = spend1.ErrorMessage ?? "Insufficient credits for image.";
+                            job.ErrorMessage = spend.ErrorMessage ?? "Insufficient generative credits.";
                             job.CompletedAtUtc = DateTime.UtcNow;
                             await db.SaveChangesAsync(stoppingToken);
                             Publish();
                             await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                             continue;
                         }
+
+                        job.ProgressMessage = "Generating image...";
+                        await db.SaveChangesAsync(stoppingToken);
+                        Publish();
 
                         var (imageBytes, _) = await loiImageService.GenerateCreatureImageAsync(combination, lang, stoppingToken);
                         var blobPath = $"loi-generative/{job.UserId:N}/{job.Id}.png";
@@ -167,23 +183,12 @@ public class GenerativeLoiQueueWorker : BackgroundService
                         job.ProgressMessage = "Writing story...";
                         await db.SaveChangesAsync(stoppingToken);
                         Publish();
-
-                        var spend2 = await userProfile.SpendGenerativeCreditsAsync(job.UserId, new SpendCreditsRequest { Amount = 1, Reference = "loi-generative-text" });
-                        if (!spend2.Success)
-                        {
-                            job.Status = "Failed";
-                            job.ErrorMessage = spend2.ErrorMessage ?? "Insufficient credits for text.";
-                            job.CompletedAtUtc = DateTime.UtcNow;
-                            await db.SaveChangesAsync(stoppingToken);
-                            Publish();
-                            await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
-                            continue;
-                        }
-
                         var creatureDesc = BuildCreatureDescription(combination);
                         var systemInstruction = "You write short, kid-friendly texts for a children's app. Safe only: no scary, violent, or mature content. " +
-                            "Output format: first line is a creative short name for the creature (one or two words, can be a portmanteau), then a blank line, then 3-5 sentences describing the creature in a magical, gentle way. No titles or labels.";
-                        var userContent = $"Hybrid creature: {creatureDesc}. Write a name and a very short story (in the same language as the user, family-friendly).";
+                            "Always write the output entirely in " + languageName + ". " +
+                            "Output format: first line is a creative short name for the creature (one or two words, can be a portmanteau), then a blank line, then 3-5 sentences describing the creature in a magical, gentle way. " +
+                            "The story should be an origin story about how the creature came into the world from combining the animals, highlighting either friendship, or cooperation, or helping each other between them. No titles or labels.";
+                        var userContent = $"Hybrid creature made from: {creatureDesc}. Write a name and a very short origin story about how this creature came into the world, for children, in {languageName}, showing either friendship, or cooperation, or helping each other between these animals.";
                         var storyText = await textService.GenerateContentAsync(systemInstruction, userContent, responseMimeType: "text/plain", ct: stoppingToken);
                         var (name, story) = ParseNameAndStory(storyText, combination);
 

@@ -1,4 +1,4 @@
--- GenerativeLoiJobs: async job for LOI generative (image + text, 2 credits)
+-- GenerativeLoiJobs: async job for LOI generative (image + text, 1 credit)
 DO $$
 BEGIN
   IF NOT EXISTS (

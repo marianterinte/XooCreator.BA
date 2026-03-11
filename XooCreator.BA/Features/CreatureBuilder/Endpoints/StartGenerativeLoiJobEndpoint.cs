@@ -53,8 +53,8 @@ public sealed class StartGenerativeLoiJobEndpoint
             return TypedResults.BadRequest(new StartGenerativeLoiResponse(Guid.Empty, "Combination is required (object with part keys and animal labels)."));
 
         var wallet = await ep._db.CreditWallets.FirstOrDefaultAsync(w => w.UserId == userId.Value, ct);
-        if (wallet == null || wallet.GenerativeBalance < 2)
-            return TypedResults.BadRequest(new StartGenerativeLoiResponse(Guid.Empty, "Insufficient generative credits (need 2)."));
+        if (wallet == null || wallet.GenerativeBalance < 1)
+            return TypedResults.BadRequest(new StartGenerativeLoiResponse(Guid.Empty, "Insufficient generative credits (need 1)."));
 
         var combinationJson = JsonSerializer.Serialize(request.Combination);
         var job = new GenerativeLoiJob
