@@ -274,6 +274,13 @@ public class GoogleImageService : IGoogleImageService
             using var doc = JsonDocument.Parse(fullStoryJson);
             var root = doc.RootElement;
 
+            // If caller explicitly requests full context, do not trim pages.
+            if (root.TryGetProperty("fullContext", out var fullContextProp) &&
+                fullContextProp.ValueKind == JsonValueKind.True)
+            {
+                return fullStoryJson;
+            }
+
             // Extragem metadata esențială
             var storyId = root.TryGetProperty("storyId", out var sid) ? sid.GetString() : null;
             var title = root.TryGetProperty("title", out var t) ? t.GetString() : null;

@@ -41,6 +41,7 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
     private readonly IGoogleAudioGeneratorService _googleAudio;
     private readonly IOpenAIAudioWithApiKey _openAIAudio;
     private readonly IDiacriticsNormalizer _diacriticsNormalizer;
+    private readonly IStoryImagePromptConsistencyValidator _promptConsistencyValidator;
     private readonly ILogger<GenerateFullStoryDraftAssetsGenerator> _logger;
 
     public GenerateFullStoryDraftAssetsGenerator(
@@ -51,6 +52,7 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
         IGoogleAudioGeneratorService googleAudio,
         IOpenAIAudioWithApiKey openAIAudio,
         IDiacriticsNormalizer diacriticsNormalizer,
+        IStoryImagePromptConsistencyValidator promptConsistencyValidator,
         ILogger<GenerateFullStoryDraftAssetsGenerator> logger)
     {
         _blobSas = blobSas;
@@ -60,6 +62,7 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
         _googleAudio = googleAudio;
         _openAIAudio = openAIAudio;
         _diacriticsNormalizer = diacriticsNormalizer;
+        _promptConsistencyValidator = promptConsistencyValidator;
         _logger = logger;
     }
 
@@ -80,7 +83,7 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
 
         // Use Story Bible-enhanced context if available
         var storyJson = storyBible != null 
-            ? BuildStoryBibleContext(storyBible, dto.Title, dto.Summary)
+            ? BuildStoryBibleContext(storyBible, dto.Title, dto.Summary, dto.Tiles, fullContext: true)
             : BuildMinimalStoryJson(dto.Title, dto.Summary);
             
         byte[]? imageSeedData = null;
@@ -326,6 +329,9 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
         var container = usePublishedPaths ? _blobSas.PublishedContainer : _blobSas.DraftContainer;
         byte[]? currentRefBytes = referenceImageData;
         string? currentRefMime = referenceImageMime;
+        var expectedAnchorsTotal = 0;
+        var patchedAnchorsTotal = 0;
+        var storyBibleContext = BuildStoryBibleContext(storyBible, dto.Title, dto.Summary, dto.Tiles, fullContext: true);
 
         // Match tiles with scenes
         var tilesWithScenes = dto.Tiles
@@ -343,20 +349,47 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
                 string promptText;
                 if (scene != null)
                 {
-                    var illustrationPrompt = promptBuilder.Build(storyBible, scene);
-                    promptText = promptBuilder.GetPromptText(illustrationPrompt);
+                    var mergedScene = MergeCharactersPresentWithTextHints(scene, storyBible, tile.Text ?? string.Empty, out var wasPatchedByHints);
+                    if (wasPatchedByHints)
+                    {
+                        _logger.LogInformation(
+                            "Patched scene characters from text hints. storyId={StoryId} sceneId={SceneId} chars={Characters}",
+                            storyId,
+                            mergedScene.SceneId,
+                            string.Join(",", mergedScene.CharactersPresent));
+                    }
+
+                    var illustrationPrompt = promptBuilder.Build(storyBible, mergedScene);
+                    var lockedPrompt = AddHardRosterLock(promptBuilder.GetPromptText(illustrationPrompt), storyBible);
+                    expectedAnchorsTotal += illustrationPrompt.CharacterAnchors.Count;
+                    var validation = _promptConsistencyValidator.ValidateAndPatch(
+                        lockedPrompt,
+                        storyBible,
+                        mergedScene,
+                        illustrationPrompt.CharacterAnchors);
+                    promptText = validation.PromptText;
+                    patchedAnchorsTotal += validation.PatchedCount;
                 }
                 else
                 {
                     // Fallback: use tile text with character descriptions
-                    promptText = BuildFallbackPromptWithBible(storyBible, tile.Text ?? string.Empty);
+                    promptText = AddHardRosterLock(
+                        BuildFallbackPromptWithBible(storyBible, tile.Text ?? string.Empty),
+                        storyBible);
+                    var validation = _promptConsistencyValidator.ValidateAndPatch(
+                        promptText,
+                        storyBible,
+                        null,
+                        []);
+                    promptText = validation.PromptText;
+                    patchedAnchorsTotal += validation.PatchedCount;
                 }
 
                 _logger.LogDebug("Generating image {Index} with Story Bible prompt", index + 1);
 
                 var (imageData, mimeType) = isOpenAi
                     ? await _openAIImage.GenerateStoryImageAsync(
-                        BuildStoryBibleContext(storyBible, dto.Title, dto.Summary),
+                        storyBibleContext,
                         promptText,
                         request.LanguageCode,
                         request.ImageSeedInstructions,
@@ -367,7 +400,7 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
                         request.ImageQuality?.Trim(),
                         ct)
                     : await _googleImage.GenerateStoryImageAsync(
-                        BuildStoryBibleContext(storyBible, dto.Title, dto.Summary),
+                        storyBibleContext,
                         promptText,
                         request.LanguageCode,
                         request.ImageSeedInstructions,
@@ -399,19 +432,44 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
                 _logger.LogWarning(ex, "Story Bible image generation failed for tile {TileId}, index {Index}", tile.Id, index);
             }
         }
+
+        var anchorCoveragePercent = expectedAnchorsTotal == 0
+            ? 100
+            : Math.Max(0, Math.Min(100, (int)Math.Round(((double)(expectedAnchorsTotal - patchedAnchorsTotal) / expectedAnchorsTotal) * 100)));
+        _logger.LogInformation(
+            "Story Bible image consistency stats: storyId={StoryId} expectedAnchors={ExpectedAnchors} patched={Patched} coveragePercent={CoveragePercent}",
+            storyId,
+            expectedAnchorsTotal,
+            patchedAnchorsTotal,
+            anchorCoveragePercent);
     }
 
     /// <summary>
     /// Build enhanced story context including character descriptions from Story Bible.
     /// </summary>
-    private static string BuildStoryBibleContext(StoryBible bible, string? title, string? summary)
+    private static string BuildStoryBibleContext(
+        StoryBible bible,
+        string? title,
+        string? summary,
+        IReadOnlyList<EditableTileDto>? tiles = null,
+        bool fullContext = false)
     {
         var characters = bible.Characters.Select(c => new
         {
             c.Name,
             c.Species,
-            Visual = $"{c.Visual.PrimaryColor} {c.Visual.Size}, features: {string.Join(", ", c.Visual.Features)}"
+            Visual = $"{c.Visual.PrimaryColor} {c.Visual.Size}, features: {string.Join(", ", c.Visual.Features)}",
+            Marker = c.Visual.Accessories.Count > 0 ? string.Join(", ", c.Visual.Accessories) : null
         });
+
+        var pages = tiles?
+            .Where(t => !string.IsNullOrWhiteSpace(t.Text))
+            .Select((t, idx) => new
+            {
+                index = idx + 1,
+                text = t.Text
+            })
+            .ToList();
 
         var obj = new
         {
@@ -419,10 +477,87 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
             summary = summary ?? string.Empty,
             visualStyle = bible.VisualStyle,
             setting = $"{bible.Setting.Place}, {bible.Setting.Time}",
-            characters
+            characters,
+            fullContext,
+            pages
         };
 
         return JsonSerializer.Serialize(obj);
+    }
+
+    private static SceneDefinition MergeCharactersPresentWithTextHints(
+        SceneDefinition scene,
+        StoryBible bible,
+        string tileText,
+        out bool wasPatched)
+    {
+        wasPatched = false;
+        var existing = new HashSet<string>(scene.CharactersPresent, StringComparer.OrdinalIgnoreCase);
+        var text = tileText.Trim();
+        if (string.IsNullOrWhiteSpace(text))
+            return scene;
+
+        foreach (var character in bible.Characters)
+        {
+            var nameMentioned = text.Contains(character.Name, StringComparison.OrdinalIgnoreCase);
+            var speciesMentioned = IsSpeciesMentioned(text, character.Species);
+
+            if ((nameMentioned || speciesMentioned) && !existing.Contains(character.Id) && !existing.Contains(character.Name))
+            {
+                existing.Add(character.Id);
+                wasPatched = true;
+            }
+        }
+
+        if (!wasPatched)
+            return scene;
+
+        return scene with { CharactersPresent = existing.ToList() };
+    }
+
+    private static bool IsSpeciesMentioned(string text, string species)
+    {
+        if (string.IsNullOrWhiteSpace(species))
+            return false;
+
+        var s = species.Trim().ToLowerInvariant();
+        if (text.Contains(s, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return s switch
+        {
+            "cat" => text.Contains("cats", StringComparison.OrdinalIgnoreCase)
+                || text.Contains("pisica", StringComparison.OrdinalIgnoreCase)
+                || text.Contains("pisici", StringComparison.OrdinalIgnoreCase)
+                || text.Contains("pisicile", StringComparison.OrdinalIgnoreCase),
+            "dog" => text.Contains("dogs", StringComparison.OrdinalIgnoreCase)
+                || text.Contains("caine", StringComparison.OrdinalIgnoreCase)
+                || text.Contains("caini", StringComparison.OrdinalIgnoreCase),
+            "duck" => text.Contains("ducks", StringComparison.OrdinalIgnoreCase)
+                || text.Contains("rata", StringComparison.OrdinalIgnoreCase)
+                || text.Contains("ratusca", StringComparison.OrdinalIgnoreCase)
+                || text.Contains("ratuste", StringComparison.OrdinalIgnoreCase),
+            _ => false
+        };
+    }
+
+    private static string AddHardRosterLock(string promptText, StoryBible bible)
+    {
+        var roster = bible.Characters.Select(c =>
+        {
+            var marker = c.Visual.Accessories.Count > 0 ? string.Join(", ", c.Visual.Accessories) : "no-marker";
+            return $"- {c.Name} ({c.Species}): color={c.Visual.PrimaryColor}; size={c.Visual.Size}; marker={marker}; features={string.Join(", ", c.Visual.Features)}";
+        });
+
+        return $@"{promptText}
+
+CHARACTER ROSTER LOCK (IMMUTABLE FOR ALL PAGES):
+{string.Join(Environment.NewLine, roster)}
+
+LOCK RULES:
+- Keep character identities stable across all pages.
+- Do not swap colors/markers between characters.
+- If scene text references a species pair (e.g. two cats), include the matching recurring characters.";
     }
 
     /// <summary>
@@ -475,7 +610,7 @@ CONSISTENCY RULES: Do not change character colors, sizes, or species.";
                 tileText,
                 languageCode,
                 request.ApiKey.Trim(),
-                request.AudioModel,
+                request.TextModel,
                 ct);
         }
         catch (Exception ex) when (!ct.IsCancellationRequested)

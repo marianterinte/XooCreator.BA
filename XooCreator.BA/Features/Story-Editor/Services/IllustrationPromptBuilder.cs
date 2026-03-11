@@ -80,6 +80,11 @@ public sealed class IllustrationPromptBuilder : IIllustrationPromptBuilder
             parts.Add(string.Join(", ", character.Visual.Features));
         }
 
+        if (character.Visual.Accessories.Count > 0)
+        {
+            parts.Add($"unique marker: {string.Join(", ", character.Visual.Accessories)}");
+        }
+
         if (!string.IsNullOrEmpty(character.Visual.SecondaryColor))
         {
             parts.Add($"with {character.Visual.SecondaryColor} accents");
@@ -120,7 +125,11 @@ public sealed class IllustrationPromptBuilder : IIllustrationPromptBuilder
         
         // Anti-drift rules
         sb.AppendLine();
-        sb.AppendLine("CONSISTENCY RULES: Do not change character colors, sizes, or species. Maintain exact visual appearance as described above.");
+        sb.AppendLine("CONSISTENCY RULES:");
+        sb.AppendLine("- Do not change character colors, sizes, or species.");
+        sb.AppendLine("- Do not remove or alter unique markers/accessories.");
+        sb.AppendLine("- Keep recurring characters visually identical across pages 1-10.");
+        sb.AppendLine("- If user explicitly described a trait, preserve it exactly.");
 
         return sb.ToString();
     }

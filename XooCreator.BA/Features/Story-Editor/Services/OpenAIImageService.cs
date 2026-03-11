@@ -141,6 +141,12 @@ public class OpenAIImageService : IOpenAIImageService
             using var doc = JsonDocument.Parse(fullStoryJson);
             var root = doc.RootElement;
 
+            if (root.TryGetProperty("fullContext", out var fullContextProp) &&
+                fullContextProp.ValueKind == JsonValueKind.True)
+            {
+                return fullStoryJson;
+            }
+
             var title = root.TryGetProperty("title", out var t) ? t.GetString() : null;
             var summary = root.TryGetProperty("summary", out var s) ? s.GetString() : null;
 

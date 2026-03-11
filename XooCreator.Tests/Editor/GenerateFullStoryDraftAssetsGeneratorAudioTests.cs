@@ -26,6 +26,7 @@ public class GenerateFullStoryDraftAssetsGeneratorAudioTests
         googleAudioMock = new Mock<IGoogleAudioGeneratorService>();
         var openAiAudio = new Mock<IOpenAIAudioWithApiKey>();
         diacriticsMock = new Mock<IDiacriticsNormalizer>();
+        var promptValidator = new Mock<IStoryImagePromptConsistencyValidator>();
         var logger = new Mock<ILogger<GenerateFullStoryDraftAssetsGenerator>>();
 
         // Blob client stub
@@ -52,6 +53,7 @@ public class GenerateFullStoryDraftAssetsGeneratorAudioTests
             googleAudioMock.Object,
             openAiAudio.Object,
             diacriticsMock.Object,
+            promptValidator.Object,
             logger.Object);
     }
 
@@ -61,7 +63,7 @@ public class GenerateFullStoryDraftAssetsGeneratorAudioTests
         var generator = CreateGenerator(out var diacriticsMock, out var googleAudioMock);
 
         diacriticsMock
-            .Setup(x => x.NormalizeAsync("Original text", "ro-RO", "key", "tts-model", It.IsAny<CancellationToken>()))
+            .Setup(x => x.NormalizeAsync("Original text", "ro-RO", "key", null, It.IsAny<CancellationToken>()))
             .ReturnsAsync("Text cu diacritice");
 
         var request = new GenerateFullStoryDraftRequest

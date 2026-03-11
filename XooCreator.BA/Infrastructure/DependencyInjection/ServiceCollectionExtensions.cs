@@ -250,6 +250,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IStoryRepairService, StoryRepairService>();
         services.AddScoped<IScenePlanner, ScenePlanner>();
         services.AddScoped<IIllustrationPromptBuilder, IllustrationPromptBuilder>();
+        services.AddScoped<IStoryImagePromptConsistencyValidator, StoryImagePromptConsistencyValidator>();
 
         // Your-story private generation: persist directly to StoryDefinition with IsPrivate
         services.AddScoped<IPrivateStoryCreationService, PrivateStoryCreationService>();
