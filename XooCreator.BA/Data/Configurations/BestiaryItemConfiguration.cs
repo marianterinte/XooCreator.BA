@@ -15,5 +15,7 @@ public class BestiaryItemConfiguration : IEntityTypeConfiguration<BestiaryItem>
         builder.Property(x => x.HeadKey).HasMaxLength(32);
         builder.Property(x => x.Name).HasMaxLength(128);
         builder.Property(x => x.Story).HasMaxLength(10000);
+        builder.Property(x => x.ImageBlobPath).HasMaxLength(512);
+        builder.Property(x => x.PartsJson).HasMaxLength(2000);
     }
 }

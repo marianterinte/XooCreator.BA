@@ -38,7 +38,8 @@ public sealed class JobEventsSseEndpoint
         JobTypes.RegionVersion,
         JobTypes.HeroPublish,
         JobTypes.AnimalPublish,
-        JobTypes.HeroDefinitionVersion
+        JobTypes.HeroDefinitionVersion,
+        JobTypes.GenerativeLoi
     };
 
     [Route("/api/jobs/{jobType}/{jobId}/events")]
@@ -68,7 +69,8 @@ public sealed class JobEventsSseEndpoint
 
         var isAdmin = auth0.HasRole(user, UserRole.Admin);
         var isCreator = auth0.HasRole(user, UserRole.Creator);
-        if (!isAdmin && !isCreator)
+        var isGenerativeLoi = string.Equals(jobType, JobTypes.GenerativeLoi, StringComparison.OrdinalIgnoreCase);
+        if (!isAdmin && !isCreator && !isGenerativeLoi)
         {
             http.Response.StatusCode = StatusCodes.Status403Forbidden;
             return;
@@ -701,6 +703,29 @@ public sealed class JobEventsSseEndpoint
                 };
 
                 return new Snapshot(payload.status?.ToString() ?? string.Empty, JsonSerializer.Serialize(payload, Json));
+            }
+            case JobTypes.GenerativeLoi:
+            {
+                var job = await db.GenerativeLoiJobs.AsNoTracking().FirstOrDefaultAsync(j => j.Id == jobId, ct);
+                if (job == null) return null;
+                if (job.UserId != user.Id) return null;
+
+                var payload = new
+                {
+                    jobId = job.Id,
+                    status = job.Status,
+                    progressMessage = job.ProgressMessage,
+                    errorMessage = job.ErrorMessage,
+                    queuedAtUtc = job.QueuedAtUtc,
+                    startedAtUtc = job.StartedAtUtc,
+                    completedAtUtc = job.CompletedAtUtc,
+                    bestiaryItemId = job.BestiaryItemId,
+                    resultName = job.ResultName,
+                    resultImageUrl = job.ResultImageUrl,
+                    resultStoryText = job.ResultStoryText
+                };
+
+                return new Snapshot(job.Status, JsonSerializer.Serialize(payload, Json));
             }
         }
 

@@ -73,6 +73,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IStoryImageImportQueue, StoryImageImportQueue>();
         services.AddSingleton<IStoryImageExportQueue, StoryImageExportQueue>();
         services.AddSingleton<IStoryAIGenerateQueue, StoryAIGenerateQueue>();
+        services.AddSingleton<IGenerativeLoiQueue, GenerativeLoiQueue>();
         services.AddSingleton<IEpicAggregatesQueue, EpicAggregatesQueue>();
         services.AddSingleton<IHeroPublishQueue, HeroPublishQueue>();
         services.AddSingleton<IAnimalPublishQueue, AnimalPublishQueue>();
@@ -111,6 +112,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<ICreatureBuilderService, CreatureBuilderService>();
         services.AddScoped<IGenerateLoiAnimalService, GenerateLoiAnimalService>();
+        services.AddScoped<ILOIImageGenerationService, LOIImageGenerationService>();
         services.AddScoped<ISeedDiscoveryService, SeedDiscoveryService>();
         services.AddScoped<IBestiaryFileUpdater, BestiaryFileUpdater>();
         services.AddScoped<IHeroDefinitionSeedService, HeroDefinitionSeedService>();

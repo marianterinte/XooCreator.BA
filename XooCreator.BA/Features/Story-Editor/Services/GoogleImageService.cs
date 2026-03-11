@@ -54,6 +54,16 @@ public interface IGoogleImageService
         CancellationToken ct = default,
         string? apiKeyOverride = null,
         string? modelOverride = null);
+
+    /// <summary>
+    /// Generates a single image from a text prompt (Gemini image API, one text part). Returns 4:5 cropped PNG.
+    /// Used by higher-level services (e.g. LOI creature image) that build the prompt.
+    /// </summary>
+    Task<(byte[] ImageData, string MimeType)> GenerateImageFromPromptAsync(
+        string prompt,
+        CancellationToken ct = default,
+        string? apiKeyOverride = null,
+        string? modelOverride = null);
 }
 
 /// <summary>
@@ -207,6 +217,43 @@ public class GoogleImageService : IGoogleImageService
             _logger.LogError(ex, "Error while generating story image with Gemini.");
             throw;
         }
+    }
+
+    public async Task<(byte[] ImageData, string MimeType)> GenerateImageFromPromptAsync(
+        string prompt,
+        CancellationToken ct = default,
+        string? apiKeyOverride = null,
+        string? modelOverride = null)
+    {
+        if (string.IsNullOrWhiteSpace(prompt))
+            throw new ArgumentException("Prompt cannot be empty", nameof(prompt));
+        var parts = new List<object> { new { text = prompt } };
+        var requestBody = new
+        {
+            contents = new[] { new { parts = parts.ToArray() } },
+            generationConfig = new { responseModalities = new[] { "TEXT", "IMAGE" } }
+        };
+        var json = JsonSerializer.Serialize(requestBody);
+        using var content = new StringContent(json, Encoding.UTF8, "application/json");
+        var requestUrl = _imageEndpoint;
+        if (!string.IsNullOrWhiteSpace(_imageBaseUrl) && !string.IsNullOrWhiteSpace(_imageDefaultModel))
+        {
+            var modelId = !string.IsNullOrWhiteSpace(modelOverride) ? modelOverride : _imageDefaultModel;
+            requestUrl = $"{_imageBaseUrl.TrimEnd('/')}/{modelId}:generateContent";
+        }
+        using var request = new HttpRequestMessage(HttpMethod.Post, requestUrl) { Content = content };
+        var apiKey = !string.IsNullOrWhiteSpace(apiKeyOverride) ? apiKeyOverride : _apiKey;
+        request.Headers.Add("x-goog-api-key", apiKey);
+        using var response = await _httpClient.SendAsync(request, ct);
+        var responseContent = await response.Content.ReadAsStringAsync(ct);
+        if (!response.IsSuccessStatusCode)
+        {
+            _logger.LogError("Gemini Image API returned {StatusCode}: {Body}", (int)response.StatusCode, responseContent);
+            response.EnsureSuccessStatusCode();
+        }
+        var (bytes, _) = ExtractImageFromResponse(responseContent);
+        var cropped = StoryImageAspectRatio.CropTo4x5(bytes);
+        return (cropped, "image/png");
     }
 
     /// <summary>

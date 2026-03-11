@@ -22,6 +22,7 @@ public static class JobTypes
     public const string AnimalPublish = "animal-publish";
     public const string HeroDefinitionVersion = "hero-definition-version";
     public const string StoryAIGenerate = "story-ai-generate";
+    public const string GenerativeLoi = "generative-loi";
 }
 
 

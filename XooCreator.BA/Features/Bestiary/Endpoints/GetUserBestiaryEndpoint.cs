@@ -35,30 +35,39 @@ public sealed class GetUserBestiaryEndpoint
         var userId = await ep._userContext.GetUserIdAsync();
         if (userId == null) return TypedResults.Unauthorized();
 
-        // Generative: return UserGeneratedLoiAnimals for this user (separate table)
+        // Generative: return from UserBestiary + BestiaryItems (type=generative, ImageBlobPath for image)
         if (string.Equals(bestiaryType, "generative", StringComparison.OrdinalIgnoreCase))
         {
-            var generativeList = await ep._db.UserGeneratedLoiAnimals
-                .Where(a => a.UserId == userId.Value)
-                .OrderByDescending(a => a.CreatedAtUtc)
+            var generativeRaw = await ep._db.UserBestiary
+                .Where(ub => ub.UserId == userId.Value && ub.BestiaryType == "generative")
+                .Join(ep._db.BestiaryItems, ub => ub.BestiaryItemId, bi => bi.Id, (ub, bi) => new { ub, bi })
+                .OrderByDescending(x => x.ub.DiscoveredAt)
                 .ToListAsync(ct);
 
+            var generativeItems = new List<BestiaryItemDto>();
             var container = ep._blobSas.DraftContainer;
             var sasTtl = TimeSpan.FromHours(1);
-            var generativeItems = new List<BestiaryItemDto>();
-            foreach (var a in generativeList)
+            var localeLang = (locale ?? "ro").Split('-').FirstOrDefault()?.ToLowerInvariant() ?? "ro";
+            var generativeTranslations = await ep._db.BestiaryItemTranslations
+                .Where(t => generativeRaw.Select(x => x.bi.Id).Contains(t.BestiaryItemId) && t.LanguageCode == localeLang)
+                .ToListAsync(ct);
+
+            foreach (var x in generativeRaw)
             {
                 var imageUrl = "";
-                try
+                if (!string.IsNullOrWhiteSpace(x.bi.ImageBlobPath))
                 {
-                    var sasUri = await ep._blobSas.GetReadSasAsync(container, a.ImageBlobPath, sasTtl, ct);
-                    imageUrl = sasUri.ToString();
+                    try
+                    {
+                        var sasUri = await ep._blobSas.GetReadSasAsync(container, x.bi.ImageBlobPath, sasTtl, ct);
+                        imageUrl = sasUri.ToString();
+                    }
+                    catch { /* placeholder */ }
                 }
-                catch
-                {
-                    // If blob missing or SAS fails, use placeholder or empty
-                }
-                generativeItems.Add(new BestiaryItemDto(a.Id, a.Name, imageUrl, a.StoryText ?? "", a.CreatedAtUtc, "generative"));
+                var trans = generativeTranslations.FirstOrDefault(t => t.BestiaryItemId == x.bi.Id);
+                var name = trans?.Name ?? x.bi.Name;
+                var story = trans?.Story ?? x.bi.Story;
+                generativeItems.Add(new BestiaryItemDto(x.bi.Id, name, imageUrl, story ?? "", x.ub.DiscoveredAt, "generative"));
             }
             return TypedResults.Ok(new BestiaryResponse(generativeItems));
         }
