@@ -1,3 +1,4 @@
+using System.Net.Http;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -64,13 +65,16 @@ public sealed class GeneratePrivateStoryHandler : IGeneratePrivateStoryHandler
         if (string.IsNullOrWhiteSpace(apiKey))
             throw new InvalidOperationException("GoogleAI:ApiKey is not configured for private story generation.");
 
-        var rawText = await _googleTextService.GenerateContentAsync(
-            systemInstruction,
-            userContent,
-            apiKeyOverride: apiKey,
-            modelOverride: null,
-            responseMimeType: "text/plain",
-            ct: ct);
+        var rawText = await RetryAsync(
+            () => _googleTextService.GenerateContentAsync(
+                systemInstruction,
+                userContent,
+                apiKeyOverride: apiKey,
+                modelOverride: null,
+                responseMimeType: "text/plain",
+                ct: ct),
+            "private-story-text",
+            ct);
 
         var parseResult = StoryTextDelimiterParser.Parse(rawText);
         var dto = BuildEditableStoryDto(storyId, lang, parseResult);
@@ -89,13 +93,16 @@ public sealed class GeneratePrivateStoryHandler : IGeneratePrivateStoryHandler
             Title = request.Title
         };
 
-        await _assetsGenerator.FillImagesAndAudioAsync(
-            syntheticRequest,
-            dto,
-            storyId,
-            ownerEmail ?? "unknown",
-            isOpenAi: false,
-            usePublishedPaths: true,
+        await RetryAsync(
+            () => _assetsGenerator.FillImagesAndAudioAsync(
+                syntheticRequest,
+                dto,
+                storyId,
+                ownerEmail ?? "unknown",
+                isOpenAi: false,
+                usePublishedPaths: true,
+                ct),
+            "private-story-assets",
             ct);
 
         await _privateStoryCreation.CreateFromDtoAsync(dto, storyId, ownerUserId, ownerEmail ?? string.Empty, lang, ct);
@@ -162,5 +169,65 @@ public sealed class GeneratePrivateStoryHandler : IGeneratePrivateStoryHandler
             StoryType = 1,
             Tiles = tiles
         };
+    }
+
+    private async Task RetryAsync(Func<Task> action, string operationName, CancellationToken ct)
+    {
+        await RetryAsync(async () =>
+        {
+            await action();
+            return true;
+        }, operationName, ct);
+    }
+
+    private async Task<T> RetryAsync<T>(Func<Task<T>> action, string operationName, CancellationToken ct)
+    {
+        const int maxAttempts = 2;
+        var delay = TimeSpan.FromMilliseconds(450);
+        Exception? lastException = null;
+
+        for (var attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            try
+            {
+                return await action();
+            }
+            catch (Exception ex) when (attempt < maxAttempts && IsTransient(ex))
+            {
+                lastException = ex;
+                _logger.LogWarning(
+                    ex,
+                    "Transient failure in {OperationName}. Retrying {Attempt}/{MaxAttempts}...",
+                    operationName,
+                    attempt + 1,
+                    maxAttempts);
+                await Task.Delay(delay, ct);
+                delay = TimeSpan.FromMilliseconds(delay.TotalMilliseconds * 2);
+            }
+            catch (Exception ex)
+            {
+                lastException = ex;
+                break;
+            }
+        }
+
+        throw lastException ?? new InvalidOperationException($"Retry operation '{operationName}' failed.");
+    }
+
+    private static bool IsTransient(Exception ex)
+    {
+        if (ex is GoogleImageGenerationException imgEx)
+            return imgEx.IsTransient;
+
+        if (ex is TaskCanceledException or TimeoutException or HttpRequestException)
+            return true;
+
+        var message = (ex.Message + " " + ex.InnerException?.Message).ToLowerInvariant();
+        return message.Contains("429")
+               || message.Contains("too many requests")
+               || message.Contains("rate limit")
+               || message.Contains("timeout")
+               || message.Contains("temporarily unavailable")
+               || message.Contains("service unavailable");
     }
 }

@@ -13,6 +13,8 @@ public interface IUserProfileService
     Task<SpendCreditsResponse> SpendDiscoveryCreditsAsync(Guid userId, SpendCreditsRequest request);
     Task<SpendCreditsResponse> SpendGenerativeCreditsAsync(Guid userId, SpendCreditsRequest request);
     Task<SpendCreditsResponse> SpendFullStoryCreditsAsync(Guid userId, SpendCreditsRequest request);
+    Task<SpendCreditsResponse> RefundGenerativeCreditsAsync(Guid userId, SpendCreditsRequest request);
+    Task<SpendCreditsResponse> RefundFullStoryCreditsAsync(Guid userId, SpendCreditsRequest request);
 }
 
 public class UserProfileService : IUserProfileService
@@ -239,6 +241,16 @@ public class UserProfileService : IUserProfileService
         return SpendFullStoryCreditsCoreAsync(userId, request);
     }
 
+    public Task<SpendCreditsResponse> RefundGenerativeCreditsAsync(Guid userId, SpendCreditsRequest request)
+    {
+        return RefundGenerativeCreditsCoreAsync(userId, request);
+    }
+
+    public Task<SpendCreditsResponse> RefundFullStoryCreditsAsync(Guid userId, SpendCreditsRequest request)
+    {
+        return RefundFullStoryCreditsCoreAsync(userId, request);
+    }
+
     private async Task<SpendCreditsResponse> SpendFullStoryCreditsCoreAsync(Guid userId, SpendCreditsRequest request)
     {
         try
@@ -294,6 +306,92 @@ public class UserProfileService : IUserProfileService
                 Amount = -request.Amount,
                 Type = CreditTransactionType.Spend,
                 Reference = request.Reference ?? "generative",
+                CreatedAt = DateTime.UtcNow
+            };
+            _db.CreditTransactions.Add(transaction);
+            await _db.SaveChangesAsync();
+
+            return new SpendCreditsResponse { Success = true, NewBalance = wallet.GenerativeBalance };
+        }
+        catch (Exception ex)
+        {
+            return new SpendCreditsResponse { Success = false, ErrorMessage = ex.Message, NewBalance = 0 };
+        }
+    }
+
+    private async Task<SpendCreditsResponse> RefundFullStoryCreditsCoreAsync(Guid userId, SpendCreditsRequest request)
+    {
+        try
+        {
+            if (request.Amount <= 0)
+                return new SpendCreditsResponse { Success = false, ErrorMessage = "Refund amount must be > 0", NewBalance = 0 };
+            if (string.IsNullOrWhiteSpace(request.Reference))
+                return new SpendCreditsResponse { Success = false, ErrorMessage = "Refund reference is required", NewBalance = 0 };
+
+            var wallet = await _db.CreditWallets.FirstOrDefaultAsync(w => w.UserId == userId);
+            if (wallet == null)
+                return new SpendCreditsResponse { Success = false, ErrorMessage = "Credit wallet not found", NewBalance = 0 };
+
+            var alreadyRefunded = await _db.CreditTransactions.AnyAsync(t =>
+                t.UserId == userId &&
+                t.Type == CreditTransactionType.Grant &&
+                t.Reference == request.Reference);
+            if (alreadyRefunded)
+                return new SpendCreditsResponse { Success = true, NewBalance = wallet.FullStoryGenerationBalance };
+
+            wallet.FullStoryGenerationBalance += request.Amount;
+            wallet.UpdatedAt = DateTime.UtcNow;
+
+            var transaction = new CreditTransaction
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                Amount = request.Amount,
+                Type = CreditTransactionType.Grant,
+                Reference = request.Reference,
+                CreatedAt = DateTime.UtcNow
+            };
+            _db.CreditTransactions.Add(transaction);
+            await _db.SaveChangesAsync();
+
+            return new SpendCreditsResponse { Success = true, NewBalance = wallet.FullStoryGenerationBalance };
+        }
+        catch (Exception ex)
+        {
+            return new SpendCreditsResponse { Success = false, ErrorMessage = ex.Message, NewBalance = 0 };
+        }
+    }
+
+    private async Task<SpendCreditsResponse> RefundGenerativeCreditsCoreAsync(Guid userId, SpendCreditsRequest request)
+    {
+        try
+        {
+            if (request.Amount <= 0)
+                return new SpendCreditsResponse { Success = false, ErrorMessage = "Refund amount must be > 0", NewBalance = 0 };
+            if (string.IsNullOrWhiteSpace(request.Reference))
+                return new SpendCreditsResponse { Success = false, ErrorMessage = "Refund reference is required", NewBalance = 0 };
+
+            var wallet = await _db.CreditWallets.FirstOrDefaultAsync(w => w.UserId == userId);
+            if (wallet == null)
+                return new SpendCreditsResponse { Success = false, ErrorMessage = "Credit wallet not found", NewBalance = 0 };
+
+            var alreadyRefunded = await _db.CreditTransactions.AnyAsync(t =>
+                t.UserId == userId &&
+                t.Type == CreditTransactionType.Grant &&
+                t.Reference == request.Reference);
+            if (alreadyRefunded)
+                return new SpendCreditsResponse { Success = true, NewBalance = wallet.GenerativeBalance };
+
+            wallet.GenerativeBalance += request.Amount;
+            wallet.UpdatedAt = DateTime.UtcNow;
+
+            var transaction = new CreditTransaction
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                Amount = request.Amount,
+                Type = CreditTransactionType.Grant,
+                Reference = request.Reference,
                 CreatedAt = DateTime.UtcNow
             };
             _db.CreditTransactions.Add(transaction);

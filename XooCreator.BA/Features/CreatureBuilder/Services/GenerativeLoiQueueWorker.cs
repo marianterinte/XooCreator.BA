@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Net.Http;
 using System.Text.Json;
 using Azure.Storage.Queues;
 using Microsoft.EntityFrameworkCore;
@@ -138,6 +139,8 @@ public class GenerativeLoiQueueWorker : BackgroundService
                     job.ProgressMessage = "Starting...";
                     await db.SaveChangesAsync(stoppingToken);
                     Publish();
+                    var spentCredits = false;
+                    var refundReference = $"refund:loig:{job.Id:N}";
 
                     try
                     {
@@ -184,12 +187,16 @@ public class GenerativeLoiQueueWorker : BackgroundService
                             await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
                             continue;
                         }
+                        spentCredits = true;
 
                         job.ProgressMessage = "Generating image...";
                         await db.SaveChangesAsync(stoppingToken);
                         Publish();
 
-                        var (imageBytes, _) = await loiImageService.GenerateCreatureImageAsync(combination, lang, stoppingToken);
+                        var (imageBytes, _) = await RetryAsync(
+                            () => loiImageService.GenerateCreatureImageAsync(combination, lang, stoppingToken),
+                            "loig-image",
+                            stoppingToken);
                         var blobPath = $"loi-generative/{job.UserId:N}/{job.Id}.png";
                         var container = blobSas.DraftContainer;
                         var blobClient = blobSas.GetBlobClient(container, blobPath);
@@ -205,7 +212,10 @@ public class GenerativeLoiQueueWorker : BackgroundService
                             "Output format: first line is a creative short name for the creature (one or two words, can be a portmanteau), then a blank line, then 3-5 sentences describing the creature in a magical, gentle way. " +
                             "The story should be an origin story about how the creature came into the world from combining the animals, highlighting " + theme + " between them. No titles or labels.";
                         var userContent = $"Hybrid creature made from: {creatureDesc}. Write a name and a very short origin story about how this creature came into the world, for children, in {languageName}, showing {theme} between these animals.";
-                        var storyText = await textService.GenerateContentAsync(systemInstruction, userContent, responseMimeType: "text/plain", ct: stoppingToken);
+                        var storyText = await RetryAsync(
+                            () => textService.GenerateContentAsync(systemInstruction, userContent, responseMimeType: "text/plain", ct: stoppingToken),
+                            "loig-text",
+                            stoppingToken);
                         var (name, story) = ParseNameAndStory(storyText, combination);
 
                         var bestiaryItemId = Guid.NewGuid();
@@ -265,8 +275,25 @@ public class GenerativeLoiQueueWorker : BackgroundService
                     catch (Exception ex)
                     {
                         _logger.LogError(ex, "GenerativeLoi job failed: jobId={JobId}", job.Id);
+                        if (spentCredits)
+                        {
+                            var userProfile = scope.ServiceProvider.GetRequiredService<IUserProfileService>();
+                            var refund = await userProfile.RefundGenerativeCreditsAsync(
+                                job.UserId,
+                                new SpendCreditsRequest { Amount = 1, Reference = refundReference });
+                            if (!refund.Success)
+                            {
+                                _logger.LogError(
+                                    "Failed to refund generative credits for failed LOIG jobId={JobId}. reason={Reason}",
+                                    job.Id,
+                                    refund.ErrorMessage);
+                            }
+                        }
                         job.Status = "Failed";
-                        job.ErrorMessage = ex.Message.Length > 1998 ? ex.Message[..1998] : ex.Message;
+                        var mappedError = ex is GoogleImageGenerationException imageEx
+                            ? $"[{imageEx.ErrorCode}] {ex.Message}"
+                            : ex.Message;
+                        job.ErrorMessage = mappedError.Length > 1998 ? mappedError[..1998] : mappedError;
                         job.CompletedAtUtc = DateTime.UtcNow;
                         await db.SaveChangesAsync(stoppingToken);
                         Publish();
@@ -330,5 +357,57 @@ public class GenerativeLoiQueueWorker : BackgroundService
             .ToList();
         if (labels.Count == 0) return "Creature";
         return string.Join("-", labels);
+    }
+
+    private async Task<T> RetryAsync<T>(Func<Task<T>> action, string operationName, CancellationToken ct)
+    {
+        const int maxAttempts = 2;
+        var delay = TimeSpan.FromMilliseconds(450);
+        Exception? lastException = null;
+
+        for (var attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            try
+            {
+                return await action();
+            }
+            catch (Exception ex) when (attempt < maxAttempts && IsTransient(ex))
+            {
+                lastException = ex;
+                _logger.LogWarning(
+                    ex,
+                    "Transient failure in {OperationName}. Retrying {Attempt}/{MaxAttempts}...",
+                    operationName,
+                    attempt + 1,
+                    maxAttempts);
+                await Task.Delay(delay, ct);
+                delay = TimeSpan.FromMilliseconds(delay.TotalMilliseconds * 2);
+            }
+            catch (Exception ex)
+            {
+                lastException = ex;
+                break;
+            }
+        }
+
+        throw lastException ?? new InvalidOperationException($"Retry operation '{operationName}' failed.");
+    }
+
+    private static bool IsTransient(Exception ex)
+    {
+        if (ex is GoogleImageGenerationException imgEx)
+            return imgEx.IsTransient;
+
+        if (ex is TaskCanceledException or TimeoutException or HttpRequestException)
+            return true;
+
+        var message = (ex.Message + " " + ex.InnerException?.Message).ToLowerInvariant();
+        return message.Contains("429")
+               || message.Contains("too many requests")
+               || message.Contains("rate limit")
+               || message.Contains("timeout")
+               || message.Contains("temporarily unavailable")
+               || message.Contains("service unavailable")
+               || message.Contains("resource exhausted");
     }
 }

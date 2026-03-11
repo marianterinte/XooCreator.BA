@@ -196,13 +196,21 @@ public class GoogleImageService : IGoogleImageService
                 {
                     var errorMessage = "Image generation rate limit exceeded (429). " +
                                      "Free tier has limited requests per minute. Try again in a minute or check aistudio.google.com/usage.";
-                    throw new InvalidOperationException(errorMessage);
+                    throw new GoogleImageGenerationException(
+                        "GoogleImageRateLimit",
+                        BuildDebugMessage(errorMessage, responseContent),
+                        isTransient: true,
+                        statusCode: (int)response.StatusCode);
                 }
                 if (response.StatusCode == HttpStatusCode.Forbidden)
                 {
                     var errorMessage = "Image generation not allowed (403). " +
                                      "Ensure the Generative Language API is enabled and your API key has access to gemini-2.5-flash-image (see aistudio.google.com).";
-                    throw new InvalidOperationException(errorMessage);
+                    throw new GoogleImageGenerationException(
+                        "GoogleImageForbidden",
+                        BuildDebugMessage(errorMessage, responseContent),
+                        isTransient: false,
+                        statusCode: (int)response.StatusCode);
                 }
 
                 response.EnsureSuccessStatusCode();
@@ -372,7 +380,11 @@ public class GoogleImageService : IGoogleImageService
             {
                 var reason = blockReason.GetString();
                 _logger.LogWarning("Gemini blocked the image generation prompt. Reason: {BlockReason}", reason);
-                throw new InvalidOperationException($"Image generation was blocked by Gemini safety filters. Reason: {reason}");
+                throw new GoogleImageGenerationException(
+                    "GoogleImagePromptBlocked",
+                    $"Image generation was blocked by Gemini safety filters. Reason: {reason}",
+                    isTransient: false,
+                    blockReason: reason);
             }
         }
 
@@ -380,7 +392,10 @@ public class GoogleImageService : IGoogleImageService
             candidates.GetArrayLength() == 0)
         {
             _logger.LogError("Gemini image response has no candidates. Full response: {Response}", responseJson);
-            throw new InvalidOperationException("No candidates returned from Gemini image API. The response may have been blocked or failed.");
+            throw new GoogleImageGenerationException(
+                "GoogleImageNoCandidates",
+                BuildDebugMessage("No candidates returned from Gemini image API. The response may have been blocked or failed.", responseJson),
+                isTransient: true);
         }
 
         var candidate = candidates[0];
@@ -424,10 +439,18 @@ public class GoogleImageService : IGoogleImageService
                     if (safetyDetails.Length > 0)
                         errorMsg += $"\nSafety ratings: {safetyDetails}";
                     
-                    throw new InvalidOperationException(errorMsg);
+                    throw new GoogleImageGenerationException(
+                        "GoogleImageSafetyBlocked",
+                        errorMsg,
+                        isTransient: false,
+                        finishReason: reason);
                 }
                 
-                throw new InvalidOperationException($"Image generation finished unexpectedly. Reason: {reason}");
+                throw new GoogleImageGenerationException(
+                    "GoogleImageUnexpectedFinishReason",
+                    $"Image generation finished unexpectedly. Reason: {reason}",
+                    isTransient: true,
+                    finishReason: reason);
             }
         }
 
@@ -435,7 +458,10 @@ public class GoogleImageService : IGoogleImageService
         if (!candidate.TryGetProperty("content", out var contentElement))
         {
             _logger.LogError("Gemini image candidate has no content property. Full response: {Response}", responseJson);
-            throw new InvalidOperationException("Gemini image response candidate does not contain a content property.");
+            throw new GoogleImageGenerationException(
+                "GoogleImageMissingContent",
+                BuildDebugMessage("Gemini image response candidate does not contain a content property.", responseJson),
+                isTransient: true);
         }
 
         // Check if parts exist
@@ -443,7 +469,10 @@ public class GoogleImageService : IGoogleImageService
             parts.GetArrayLength() == 0)
         {
             _logger.LogError("Gemini image response has no content parts. Candidate: {Candidate}", candidate.GetRawText());
-            throw new InvalidOperationException("Gemini image response does not contain content parts. The content may have been blocked or the response format is unexpected.");
+            throw new GoogleImageGenerationException(
+                "GoogleImageMissingParts",
+                BuildDebugMessage("Gemini image response does not contain content parts. The content may have been blocked or the response format is unexpected.", candidate.GetRawText()),
+                isTransient: true);
         }
 
         // Extract image from parts
@@ -473,6 +502,43 @@ public class GoogleImageService : IGoogleImageService
         }
 
         _logger.LogError("No inline image data found in Gemini response. Parts count: {PartsCount}", parts.GetArrayLength());
-        throw new InvalidOperationException("No inline image data found in Gemini response. The model may not have generated an image.");
+        throw new GoogleImageGenerationException(
+            "GoogleImageNoInlineData",
+            BuildDebugMessage("No inline image data found in Gemini response. The model may not have generated an image.", responseJson),
+            isTransient: true);
     }
+
+    private static string BuildDebugMessage(string baseMessage, string? rawResponse)
+    {
+        if (string.IsNullOrWhiteSpace(rawResponse))
+            return baseMessage;
+
+        var excerpt = rawResponse.Length > 1200 ? rawResponse[..1200] + "..." : rawResponse;
+        return $"{baseMessage}\nRawResponseExcerpt: {excerpt}";
+    }
+}
+
+public sealed class GoogleImageGenerationException : Exception
+{
+    public GoogleImageGenerationException(
+        string errorCode,
+        string message,
+        bool isTransient,
+        int? statusCode = null,
+        string? finishReason = null,
+        string? blockReason = null,
+        Exception? innerException = null) : base(message, innerException)
+    {
+        ErrorCode = errorCode;
+        IsTransient = isTransient;
+        StatusCode = statusCode;
+        FinishReason = finishReason;
+        BlockReason = blockReason;
+    }
+
+    public string ErrorCode { get; }
+    public bool IsTransient { get; }
+    public int? StatusCode { get; }
+    public string? FinishReason { get; }
+    public string? BlockReason { get; }
 }
