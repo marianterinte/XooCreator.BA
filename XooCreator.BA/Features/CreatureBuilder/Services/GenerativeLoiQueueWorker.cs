@@ -38,6 +38,21 @@ public class GenerativeLoiQueueWorker : BackgroundService
         _queueClient = queueClientFactory.CreateClient(queueName, "generative-loi-queue");
     }
 
+    /// <summary>Theme ideas for the creature origin story; one is picked at random per job to vary the stories.</summary>
+    private static readonly string[] LoiStoryThemes =
+    {
+        "friendship",
+        "cooperation",
+        "helping each other",
+        "play and fun",
+        "kindness",
+        "curiosity and discovery",
+        "sharing",
+        "bravery",
+        "teamwork",
+        "gentle magic"
+    };
+
     private static string GetLanguageName(string locale)
     {
         if (string.IsNullOrWhiteSpace(locale)) return "the user's language";
@@ -184,11 +199,12 @@ public class GenerativeLoiQueueWorker : BackgroundService
                         await db.SaveChangesAsync(stoppingToken);
                         Publish();
                         var creatureDesc = BuildCreatureDescription(combination);
+                        var theme = LoiStoryThemes[Random.Shared.Next(LoiStoryThemes.Length)];
                         var systemInstruction = "You write short, kid-friendly texts for a children's app. Safe only: no scary, violent, or mature content. " +
                             "Always write the output entirely in " + languageName + ". " +
                             "Output format: first line is a creative short name for the creature (one or two words, can be a portmanteau), then a blank line, then 3-5 sentences describing the creature in a magical, gentle way. " +
-                            "The story should be an origin story about how the creature came into the world from combining the animals, highlighting either friendship, or cooperation, or helping each other between them. No titles or labels.";
-                        var userContent = $"Hybrid creature made from: {creatureDesc}. Write a name and a very short origin story about how this creature came into the world, for children, in {languageName}, showing either friendship, or cooperation, or helping each other between these animals.";
+                            "The story should be an origin story about how the creature came into the world from combining the animals, highlighting " + theme + " between them. No titles or labels.";
+                        var userContent = $"Hybrid creature made from: {creatureDesc}. Write a name and a very short origin story about how this creature came into the world, for children, in {languageName}, showing {theme} between these animals.";
                         var storyText = await textService.GenerateContentAsync(systemInstruction, userContent, responseMimeType: "text/plain", ct: stoppingToken);
                         var (name, story) = ParseNameAndStory(storyText, combination);
 
