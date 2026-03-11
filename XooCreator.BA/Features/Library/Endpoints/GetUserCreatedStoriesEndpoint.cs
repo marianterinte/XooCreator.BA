@@ -36,6 +36,7 @@ public class GetUserCreatedStoriesEndpoint
         [FromServices] GetUserCreatedStoriesEndpoint ep,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20,
+        [FromQuery] string? visibility = null,
         CancellationToken ct = default)
     {
         var user = await ep._auth0.GetCurrentUserAsync(ct);
@@ -43,6 +44,8 @@ public class GetUserCreatedStoriesEndpoint
         
         var userId = user.Id;
         var isAdmin = ep._auth0.HasRole(user, UserRole.Admin);
+        var filterPrivate = string.Equals(visibility, "private", StringComparison.OrdinalIgnoreCase);
+        var filterPublic = string.Equals(visibility, "public", StringComparison.OrdinalIgnoreCase);
         
         // Get published/approved stories from UserCreatedStories
         // For admin: get all published stories, for regular user: get only their own
@@ -53,9 +56,12 @@ public class GetUserCreatedStoriesEndpoint
             .Where(ucs => ucs.IsPublished && ucs.StoryDefinition.IsActive);
         
         if (!isAdmin)
-        {
             publishedStoriesQuery = publishedStoriesQuery.Where(ucs => ucs.UserId == userId);
-        }
+        
+        if (filterPrivate)
+            publishedStoriesQuery = publishedStoriesQuery.Where(ucs => ucs.StoryDefinition.IsPrivate);
+        else if (filterPublic)
+            publishedStoriesQuery = publishedStoriesQuery.Where(ucs => !ucs.StoryDefinition.IsPrivate);
         
         var publishedStoriesData = await publishedStoriesQuery.ToListAsync(ct);
         
@@ -89,7 +95,8 @@ public class GetUserCreatedStoriesEndpoint
                 IsFullyInteractive = ucs.StoryDefinition.IsFullyInteractive,
                 AvailableLanguages = availableLangs,
                 AudioLanguages = ucs.StoryDefinition.AudioLanguages ?? new List<string>(),
-                AlwaysShowInStoriesList = ucs.StoryDefinition.AlwaysShowInStoriesList
+                AlwaysShowInStoriesList = ucs.StoryDefinition.AlwaysShowInStoriesList,
+                IsPrivate = ucs.StoryDefinition.IsPrivate
             });
         }
 
@@ -140,10 +147,27 @@ public class GetUserCreatedStoriesEndpoint
                 IsFullyInteractive = draft.IsFullyInteractive,
                 AvailableLanguages = draftLangs,
                 AudioLanguages = draft.AudioLanguages ?? new List<string>(),
-                AlwaysShowInStoriesList = draft.AlwaysShowInStoriesList
+                AlwaysShowInStoriesList = draft.AlwaysShowInStoriesList,
+                IsPrivate = false
             };
 
             draftStories.Add(storyDto);
+        }
+
+        // When filtering by visibility=private, only return published private stories (no drafts)
+        if (filterPrivate)
+        {
+            var skipP = Math.Max(0, (page - 1) * pageSize);
+            var takeP = Math.Clamp(pageSize, 1, 100);
+            var totalCountP = publishedStories.Count;
+            var pageStoriesP = publishedStories.Skip(skipP).Take(takeP).ToList();
+            var hasMoreP = (skipP + pageStoriesP.Count) < totalCountP;
+            return TypedResults.Ok(new GetUserCreatedStoriesResponse
+            {
+                Stories = pageStoriesP,
+                TotalCount = totalCountP,
+                HasMore = hasMoreP
+            });
         }
 
         // Combine published and draft stories, remove duplicates by StoryId

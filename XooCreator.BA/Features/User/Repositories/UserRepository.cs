@@ -68,7 +68,7 @@ public class UserRepository : IUserRepository
             UpdatedAt = DateTime.UtcNow
         };
         _db.AlchimaliaUsers.Add(user);
-        _db.CreditWallets.Add(new CreditWallet { UserId = user.Id, Balance = 0, UpdatedAt = DateTime.UtcNow });
+        _db.CreditWallets.Add(new CreditWallet { UserId = user.Id, Balance = 0, DiscoveryBalance = 0, GenerativeBalance = 0, FullStoryGenerationBalance = 0, UpdatedAt = DateTime.UtcNow });
         
         await _db.SaveChangesAsync(ct);
         return user;

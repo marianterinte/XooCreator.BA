@@ -299,6 +299,7 @@ public class XooDbContext : DbContext
                 Balance = 1000,
                 DiscoveryBalance = 0,
                 GenerativeBalance = 0,
+                FullStoryGenerationBalance = 0,
                 UpdatedAt = DateTime.UtcNow 
             }
         );

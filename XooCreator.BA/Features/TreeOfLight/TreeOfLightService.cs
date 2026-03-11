@@ -327,6 +327,8 @@ public class TreeOfLightService : ITreeOfLightService
                 UserId = userId,
                 Balance = 0,
                 DiscoveryBalance = discoveryCredits,
+                GenerativeBalance = 0,
+                FullStoryGenerationBalance = 0,
                 UpdatedAt = DateTime.UtcNow
             };
             _dbContext.CreditWallets.Add(wallet);

@@ -243,6 +243,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IGenerateFullStoryDraftAssetsGenerator, GenerateFullStoryDraftAssetsGenerator>();
         services.AddScoped<IGenerateFullStoryDraftHandler, GenerateFullStoryDraftHandler>();
 
+        // Your-story private generation: persist directly to StoryDefinition with IsPrivate
+        services.AddScoped<IPrivateStoryCreationService, PrivateStoryCreationService>();
+        services.AddScoped<IGeneratePrivateStoryHandler, GeneratePrivateStoryHandler>();
+
         return services;
     }
 

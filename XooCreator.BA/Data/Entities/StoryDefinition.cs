@@ -28,6 +28,8 @@ public class StoryDefinition
     public bool IsPartOfEpic { get; set; } = false; // If true, this story is part of an epic (draft or published) and should not appear as independent story
     public bool IsFullyInteractive { get; set; } = false; // If true, this story is full interactive
     public bool AlwaysShowInStoriesList { get; set; } = false; // If true and story is part of an epic, it can still appear in standalone marketplace story lists
+    /// <summary>If true, story is private to owner (your-story); never shown in marketplace.</summary>
+    public bool IsPrivate { get; set; } = false;
     public List<string> AudioLanguages { get; set; } = new(); // Language codes that have audio support (e.g., ["ro-ro", "en-us"])
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;

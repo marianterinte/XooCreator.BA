@@ -71,6 +71,7 @@ public static class SeedUserHelper
                 Balance = 0,
                 DiscoveryBalance = 0,
                 GenerativeBalance = 0,
+                FullStoryGenerationBalance = 0,
                 UpdatedAt = DateTime.UtcNow
             });
             

@@ -24,8 +24,10 @@ public class StoryAIGenerateJob
     public string? ErrorCode { get; set; }
     /// <summary>Set after draft is created (on completion).</summary>
     public string? StoryId { get; set; }
-    /// <summary>JSON-serialized GenerateFullStoryDraftRequest for the worker.</summary>
+    /// <summary>JSON-serialized GenerateFullStoryDraftRequest or GeneratePrivateStoryRequest (when IsPrivateStoryGeneration).</summary>
     public string RequestJson { get; set; } = string.Empty;
+    /// <summary>When true, job is for your-story private generation (credits + persist to StoryDefinition with IsPrivate).</summary>
+    public bool IsPrivateStoryGeneration { get; set; }
     /// <summary>Optional progress message for SSE (e.g. "Generating text...").</summary>
     public string? ProgressMessage { get; set; }
 }

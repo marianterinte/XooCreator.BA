@@ -12,6 +12,7 @@ public interface IUserProfileService
     Task<SpendCreditsResponse> SpendCreditsAsync(Guid userId, SpendCreditsRequest request);
     Task<SpendCreditsResponse> SpendDiscoveryCreditsAsync(Guid userId, SpendCreditsRequest request);
     Task<SpendCreditsResponse> SpendGenerativeCreditsAsync(Guid userId, SpendCreditsRequest request);
+    Task<SpendCreditsResponse> SpendFullStoryCreditsAsync(Guid userId, SpendCreditsRequest request);
 }
 
 public class UserProfileService : IUserProfileService
@@ -231,6 +232,45 @@ public class UserProfileService : IUserProfileService
     public Task<SpendCreditsResponse> SpendGenerativeCreditsAsync(Guid userId, SpendCreditsRequest request)
     {
         return SpendGenerativeCreditsCoreAsync(userId, request);
+    }
+
+    public Task<SpendCreditsResponse> SpendFullStoryCreditsAsync(Guid userId, SpendCreditsRequest request)
+    {
+        return SpendFullStoryCreditsCoreAsync(userId, request);
+    }
+
+    private async Task<SpendCreditsResponse> SpendFullStoryCreditsCoreAsync(Guid userId, SpendCreditsRequest request)
+    {
+        try
+        {
+            var wallet = await _db.CreditWallets.FirstOrDefaultAsync(w => w.UserId == userId);
+            if (wallet == null)
+                return new SpendCreditsResponse { Success = false, ErrorMessage = "Credit wallet not found", NewBalance = 0 };
+
+            if (wallet.FullStoryGenerationBalance < request.Amount)
+                return new SpendCreditsResponse { Success = false, ErrorMessage = "Insufficient full story generation credits", NewBalance = wallet.FullStoryGenerationBalance };
+
+            wallet.FullStoryGenerationBalance -= request.Amount;
+            wallet.UpdatedAt = DateTime.UtcNow;
+
+            var transaction = new CreditTransaction
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                Amount = -request.Amount,
+                Type = CreditTransactionType.Spend,
+                Reference = request.Reference ?? "full-story-generation",
+                CreatedAt = DateTime.UtcNow
+            };
+            _db.CreditTransactions.Add(transaction);
+            await _db.SaveChangesAsync();
+
+            return new SpendCreditsResponse { Success = true, NewBalance = wallet.FullStoryGenerationBalance };
+        }
+        catch (Exception ex)
+        {
+            return new SpendCreditsResponse { Success = false, ErrorMessage = ex.Message, NewBalance = 0 };
+        }
     }
 
     private async Task<SpendCreditsResponse> SpendGenerativeCreditsCoreAsync(Guid userId, SpendCreditsRequest request)

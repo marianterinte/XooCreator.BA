@@ -73,7 +73,8 @@ public class AcceptSupporterPackOrderEndpoint
 
         var plan = await ep._planConfig.GetPlanAsync(order.PlanId, ct);
         var creditsToAdd = plan != null ? plan.GenerativeCredits : (FallbackPlanGenerativeCredits.TryGetValue(order.PlanId, out var c) ? c : 0);
-        if (creditsToAdd > 0)
+        var fullStoryToAdd = plan?.FullStoryGenerationCount ?? 0;
+        if (creditsToAdd > 0 || fullStoryToAdd > 0)
         {
             var wallet = await ep._db.CreditWallets.FirstOrDefaultAsync(w => w.UserId == order.UserId, ct);
             if (wallet == null)
@@ -84,13 +85,15 @@ public class AcceptSupporterPackOrderEndpoint
                     Balance = 0,
                     DiscoveryBalance = 0,
                     GenerativeBalance = creditsToAdd,
+                    FullStoryGenerationBalance = fullStoryToAdd,
                     UpdatedAt = DateTime.UtcNow
                 };
                 ep._db.CreditWallets.Add(wallet);
             }
             else
             {
-                wallet.GenerativeBalance += creditsToAdd;
+                if (creditsToAdd > 0) wallet.GenerativeBalance += creditsToAdd;
+                if (fullStoryToAdd > 0) wallet.FullStoryGenerationBalance += fullStoryToAdd;
                 wallet.UpdatedAt = DateTime.UtcNow;
             }
         }

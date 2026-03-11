@@ -63,7 +63,7 @@ public sealed class GenerateFullStoryDraftHandler : IGenerateFullStoryDraftHandl
         if (request.GenerateImages || request.GenerateAudio)
         {
             var isOpenAi = string.Equals(request.Provider.Trim(), "OpenAI", StringComparison.OrdinalIgnoreCase);
-            await _assetsGenerator.FillImagesAndAudioAsync(request, dto, storyId, ownerEmail ?? string.Empty, isOpenAi, ct);
+            await _assetsGenerator.FillImagesAndAudioAsync(request, dto, storyId, ownerEmail ?? string.Empty, isOpenAi, usePublishedPaths: false, ct);
         }
 
         await _editorService.SaveDraftAsync(ownerUserId, storyId, request.LanguageCode, dto, false, null, ct);

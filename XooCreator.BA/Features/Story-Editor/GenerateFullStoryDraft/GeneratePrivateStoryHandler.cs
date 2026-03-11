@@ -1,0 +1,161 @@
+using System.Text;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using XooCreator.BA.Data.Enums;
+using XooCreator.BA.Features.StoryEditor.Services;
+using XooCreator.BA.Features.StoryEditor.Services.Content;
+
+namespace XooCreator.BA.Features.StoryEditor.GenerateFullStoryDraft;
+
+/// <summary>
+/// Generates private story: text via Google (server key), images/audio via assets generator (published paths), then creates StoryDefinition with IsPrivate.
+/// </summary>
+public sealed class GeneratePrivateStoryHandler : IGeneratePrivateStoryHandler
+{
+    private const int MaxIdeaLength = 2000;
+    private const int PrivateStoryPageCount = 10;
+
+    private readonly IStoryIdGenerator _storyIdGenerator;
+    private readonly IGoogleTextService _googleTextService;
+    private readonly IGenerateFullStoryDraftAssetsGenerator _assetsGenerator;
+    private readonly IPrivateStoryCreationService _privateStoryCreation;
+    private readonly IConfiguration _configuration;
+    private readonly ILogger<GeneratePrivateStoryHandler> _logger;
+
+    public GeneratePrivateStoryHandler(
+        IStoryIdGenerator storyIdGenerator,
+        IGoogleTextService googleTextService,
+        IGenerateFullStoryDraftAssetsGenerator assetsGenerator,
+        IPrivateStoryCreationService privateStoryCreation,
+        IConfiguration configuration,
+        ILogger<GeneratePrivateStoryHandler> logger)
+    {
+        _storyIdGenerator = storyIdGenerator;
+        _googleTextService = googleTextService;
+        _assetsGenerator = assetsGenerator;
+        _privateStoryCreation = privateStoryCreation;
+        _configuration = configuration;
+        _logger = logger;
+    }
+
+    public async Task<GeneratePrivateStoryResponse> ExecuteAsync(
+        GeneratePrivateStoryRequest request,
+        Guid ownerUserId,
+        string ownerFirstName,
+        string ownerLastName,
+        string ownerEmail,
+        CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(request.Idea) || request.Idea.Trim().Length < 20)
+            throw new ArgumentException("Idea must be at least 20 characters.", nameof(request));
+        if (request.Idea.Trim().Length > MaxIdeaLength)
+            throw new ArgumentException($"Idea must be at most {MaxIdeaLength} characters.", nameof(request));
+
+        var storyId = await _storyIdGenerator.GenerateNextAsync(ownerUserId, ownerFirstName, ownerLastName, ct);
+        var lang = (request.LanguageCode ?? "ro-ro").Trim().ToLowerInvariant();
+        _logger.LogInformation("GeneratePrivateStory: storyId={StoryId} lang={Lang}", storyId, lang);
+
+        var systemInstruction = BuildSystemInstruction(PrivateStoryPageCount, lang);
+        var userContent = BuildUserContent(request.Idea.Trim(), request.Title?.Trim(), PrivateStoryPageCount);
+        var apiKey = _configuration["GoogleAI:ApiKey"] ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(apiKey))
+            throw new InvalidOperationException("GoogleAI:ApiKey is not configured for private story generation.");
+
+        var rawText = await _googleTextService.GenerateContentAsync(
+            systemInstruction,
+            userContent,
+            apiKeyOverride: apiKey,
+            modelOverride: null,
+            responseMimeType: "text/plain",
+            ct: ct);
+
+        var parseResult = StoryTextDelimiterParser.Parse(rawText);
+        var dto = BuildEditableStoryDto(storyId, lang, parseResult);
+
+        var syntheticRequest = new GenerateFullStoryDraftRequest
+        {
+            ApiKey = apiKey,
+            Provider = "Google",
+            TextSeed = request.Idea.Trim(),
+            NumberOfPages = PrivateStoryPageCount,
+            LanguageCode = lang,
+            GenerateImages = true,
+            GenerateAudio = true,
+            UseConsistentImageStyle = true,
+            Title = request.Title
+        };
+
+        await _assetsGenerator.FillImagesAndAudioAsync(
+            syntheticRequest,
+            dto,
+            storyId,
+            ownerEmail ?? "unknown",
+            isOpenAi: false,
+            usePublishedPaths: true,
+            ct);
+
+        await _privateStoryCreation.CreateFromDtoAsync(dto, storyId, ownerUserId, ownerEmail ?? string.Empty, lang, ct);
+
+        _logger.LogInformation("GeneratePrivateStory completed: storyId={StoryId} title={Title}", storyId, parseResult.Title);
+        return new GeneratePrivateStoryResponse { StoryId = storyId };
+    }
+
+    private static string BuildSystemInstruction(int numberOfPages, string languageCode)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("You are a children's story writer. Reply with plain text only, using exactly these section markers.");
+        sb.AppendLine("Format:");
+        sb.AppendLine("###T");
+        sb.AppendLine("[Story title on one line]");
+        sb.AppendLine("###S");
+        sb.AppendLine("[Story summary in one short paragraph]");
+        for (var i = 1; i <= numberOfPages; i++)
+        {
+            sb.AppendLine($"###P{i}");
+            sb.AppendLine($"[Page {i} text; multiple lines allowed]");
+        }
+        sb.AppendLine($"Language: {languageCode}. Generate exactly {numberOfPages} pages. Content suitable for children.");
+        return sb.ToString();
+    }
+
+    private static string BuildUserContent(string idea, string? titleHint, int numberOfPages)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("Seed/summary for the story:");
+        sb.AppendLine(idea);
+        if (!string.IsNullOrWhiteSpace(titleHint))
+        {
+            sb.AppendLine();
+            sb.Append("Suggested title: ").AppendLine(titleHint);
+        }
+        sb.AppendLine();
+        sb.Append($"Generate the complete story in the requested format with exactly {numberOfPages} pages.");
+        return sb.ToString();
+    }
+
+    private static EditableStoryDto BuildEditableStoryDto(string storyId, string languageCode, StoryTextParseResult parseResult)
+    {
+        var tiles = parseResult.Pages
+            .Select(p => new EditableTileDto
+            {
+                Type = "page",
+                Id = p.PageId,
+                Caption = string.Empty,
+                Text = p.Text,
+                ImageUrl = string.Empty,
+                AudioUrl = string.Empty
+            })
+            .ToList();
+
+        return new EditableStoryDto
+        {
+            Id = storyId,
+            Title = parseResult.Title,
+            CoverImageUrl = string.Empty,
+            Summary = parseResult.Summary,
+            Language = languageCode,
+            StoryType = 1,
+            Tiles = tiles
+        };
+    }
+}

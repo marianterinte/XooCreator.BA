@@ -403,7 +403,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
     public async Task<List<string>> GetAvailableRegionsAsync()
     {
         var ids = await _context.StoryDefinitions
-            .Where(s => s.IsActive && s.Status == StoryStatus.Published)
+            .Where(s => s.IsActive && s.Status == StoryStatus.Published && !s.IsPrivate)
             .Select(s => s.StoryId)
             .ToListAsync();
         return ids.Select(ExtractRegionFromStoryId)
@@ -415,7 +415,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
     public async Task<List<string>> GetAvailableAgeRatingsAsync()
     {
         var ids = await _context.StoryDefinitions
-            .Where(s => s.IsActive && s.Status == StoryStatus.Published)
+            .Where(s => s.IsActive && s.Status == StoryStatus.Published && !s.IsPrivate)
             .Select(s => s.StoryId)
             .ToListAsync();
         return ids.Select(DetermineAgeRating)
@@ -427,7 +427,7 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
     public async Task<List<string>> GetAvailableCharactersAsync()
     {
         var ids = await _context.StoryDefinitions
-            .Where(s => s.IsActive && s.Status == StoryStatus.Published)
+            .Where(s => s.IsActive && s.Status == StoryStatus.Published && !s.IsPrivate)
             .Select(s => s.StoryId)
             .ToListAsync();
         return ids.SelectMany(ExtractCharactersFromStoryId)
@@ -538,7 +538,9 @@ public class StoriesMarketplaceRepository : IStoriesMarketplaceRepository
                 .ThenInclude(ag => ag.StoryAgeGroup)
                     .ThenInclude(ag => ag.Translations)
             .Include(s => s.CoAuthors).ThenInclude(c => c.User)
-            .FirstOrDefaultAsync(s => s.StoryId == storyId && s.IsActive && s.Status == StoryStatus.Published);
+            .FirstOrDefaultAsync(s => s.StoryId == storyId && s.IsActive && (
+                (s.Status == StoryStatus.Published && !s.IsPrivate) ||
+                (s.IsPrivate && s.CreatedBy == userId)));
 
         if (def == null)
             return null;

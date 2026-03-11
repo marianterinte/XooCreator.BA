@@ -62,6 +62,8 @@ public class ResetDiscoveryTokensEndpoint
                     UserId = user.Id,
                     Balance = 0,
                     DiscoveryBalance = 0,
+                    GenerativeBalance = 0,
+                    FullStoryGenerationBalance = 0,
                     UpdatedAt = DateTime.UtcNow
                 };
                 ep._context.CreditWallets.Add(wallet);

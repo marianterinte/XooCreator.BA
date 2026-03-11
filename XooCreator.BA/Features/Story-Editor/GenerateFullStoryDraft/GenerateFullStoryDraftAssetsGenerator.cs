@@ -14,12 +14,14 @@ namespace XooCreator.BA.Features.StoryEditor.GenerateFullStoryDraft;
 /// </summary>
 public interface IGenerateFullStoryDraftAssetsGenerator
 {
+    /// <param name="usePublishedPaths">When true, upload to published container and set full paths on dto (for private story).</param>
     Task FillImagesAndAudioAsync(
         GenerateFullStoryDraftRequest request,
         EditableStoryDto dto,
         string storyId,
         string ownerEmail,
         bool isOpenAi,
+        bool usePublishedPaths = false,
         CancellationToken ct = default);
 }
 
@@ -57,6 +59,7 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
         string storyId,
         string ownerEmail,
         bool isOpenAi,
+        bool usePublishedPaths = false,
         CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(ownerEmail))
@@ -78,9 +81,9 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
         if (request.GenerateImages)
         {
             if (request.UseConsistentImageStyle)
-                await FillImagesSequentialAsync(request, dto, storyId, ownerEmail, storyJson, imageSeedData, imageSeedMime, isOpenAi, ct);
+                await FillImagesSequentialAsync(request, dto, storyId, ownerEmail, storyJson, imageSeedData, imageSeedMime, isOpenAi, usePublishedPaths, ct);
             else
-                await FillImagesParallelAsync(request, dto, storyId, ownerEmail, storyJson, imageSeedData, imageSeedMime, isOpenAi, ct);
+                await FillImagesParallelAsync(request, dto, storyId, ownerEmail, storyJson, imageSeedData, imageSeedMime, isOpenAi, usePublishedPaths, ct);
         }
 
         if (request.GenerateAudio)
@@ -94,6 +97,7 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
             {
                 using var semaphore = new SemaphoreSlim(audioConcurrency, audioConcurrency);
                 var lang = (request.LanguageCode ?? "").Trim().ToLowerInvariant();
+                var container = usePublishedPaths ? _blobSas.PublishedContainer : _blobSas.DraftContainer;
                 var tasks = tilesWithText.Select(async item =>
                 {
                     await semaphore.WaitAsync(ct);
@@ -106,9 +110,11 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
                         var ext = string.Equals(format, "mp3", StringComparison.OrdinalIgnoreCase) ? "mp3" : "wav";
                         var filename = $"{item.Tile.Id}.{ext}";
                         var asset = new StoryAssetPathMapper.AssetInfo(filename, StoryAssetPathMapper.AssetType.Audio, lang);
-                        var blobPath = StoryAssetPathMapper.BuildDraftPath(asset, ownerEmail, storyId);
-                        await UploadBlobAsync(_blobSas.DraftContainer, blobPath, audioData, ext == "mp3" ? "audio/mpeg" : "audio/wav", ct);
-                        item.Tile.AudioUrl = filename;
+                        var blobPath = usePublishedPaths
+                            ? StoryAssetPathMapper.BuildPublishedPath(asset, ownerEmail, storyId)
+                            : StoryAssetPathMapper.BuildDraftPath(asset, ownerEmail, storyId);
+                        await UploadBlobAsync(container, blobPath, audioData, ext == "mp3" ? "audio/mpeg" : "audio/wav", ct);
+                        item.Tile.AudioUrl = usePublishedPaths ? blobPath : filename;
                     }
                     catch (Exception ex)
                     {
@@ -133,11 +139,12 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
         byte[]? referenceImageData,
         string? referenceImageMime,
         bool isOpenAi,
+        bool usePublishedPaths,
         CancellationToken ct)
     {
         if (isOpenAi)
         {
-            await FillImagesSequentialOpenAiAsync(request, dto, storyId, ownerEmail, storyJson, referenceImageData, referenceImageMime, ct);
+            await FillImagesSequentialOpenAiAsync(request, dto, storyId, ownerEmail, storyJson, referenceImageData, referenceImageMime, usePublishedPaths, ct);
             return;
         }
 
@@ -160,6 +167,7 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
             request.ImageModel,
             ct).ConfigureAwait(false);
 
+        var container = usePublishedPaths ? _blobSas.PublishedContainer : _blobSas.DraftContainer;
         for (var j = 0; j < generatedImages.Count && j < tilesWithText.Count; j++)
         {
             var (imageData, mimeType) = generatedImages[j];
@@ -168,10 +176,12 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
             var ext = (mimeType ?? "image/png").Contains("png", StringComparison.OrdinalIgnoreCase) ? "png" : "jpg";
             var filename = $"{tile.Id}.{ext}";
             var asset = new StoryAssetPathMapper.AssetInfo(filename, StoryAssetPathMapper.AssetType.Image, null);
-            var blobPath = StoryAssetPathMapper.BuildDraftPath(asset, ownerEmail, storyId);
-            await UploadBlobAsync(_blobSas.DraftContainer, blobPath, imageData, mimeType ?? "image/png", ct);
-            tile.ImageUrl = filename;
-            if (originalIndex == 0) dto.CoverImageUrl = filename;
+            var blobPath = usePublishedPaths
+                ? StoryAssetPathMapper.BuildPublishedPath(asset, ownerEmail, storyId)
+                : StoryAssetPathMapper.BuildDraftPath(asset, ownerEmail, storyId);
+            await UploadBlobAsync(container, blobPath, imageData, mimeType ?? "image/png", ct);
+            tile.ImageUrl = usePublishedPaths ? blobPath : filename;
+            if (originalIndex == 0) dto.CoverImageUrl = usePublishedPaths ? blobPath : filename;
         }
     }
 
@@ -183,8 +193,10 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
         string storyJson,
         byte[]? referenceImageData,
         string? referenceImageMime,
+        bool usePublishedPaths,
         CancellationToken ct)
     {
+        var container = usePublishedPaths ? _blobSas.PublishedContainer : _blobSas.DraftContainer;
         byte[]? previousImageData = referenceImageData;
         string? previousImageMime = referenceImageMime;
         for (var i = 0; i < dto.Tiles.Count; i++)
@@ -198,12 +210,14 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
                 var ext = (mimeType ?? "image/png").Contains("png", StringComparison.OrdinalIgnoreCase) ? "png" : "jpg";
                 var filename = $"{tile.Id}.{ext}";
                 var asset = new StoryAssetPathMapper.AssetInfo(filename, StoryAssetPathMapper.AssetType.Image, null);
-                var blobPath = StoryAssetPathMapper.BuildDraftPath(asset, ownerEmail, storyId);
-                await UploadBlobAsync(_blobSas.DraftContainer, blobPath, imageData, mimeType ?? "image/png", ct);
-                tile.ImageUrl = filename;
+                var blobPath = usePublishedPaths
+                    ? StoryAssetPathMapper.BuildPublishedPath(asset, ownerEmail, storyId)
+                    : StoryAssetPathMapper.BuildDraftPath(asset, ownerEmail, storyId);
+                await UploadBlobAsync(container, blobPath, imageData, mimeType ?? "image/png", ct);
+                tile.ImageUrl = usePublishedPaths ? blobPath : filename;
                 previousImageData = imageData;
                 previousImageMime = mimeType;
-                if (i == 0) dto.CoverImageUrl = filename;
+                if (i == 0) dto.CoverImageUrl = usePublishedPaths ? blobPath : filename;
             }
             catch (Exception ex)
             {
@@ -221,6 +235,7 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
         byte[]? referenceImageData,
         string? referenceImageMime,
         bool isOpenAi,
+        bool usePublishedPaths,
         CancellationToken ct)
     {
         var tilesWithText = dto.Tiles
@@ -248,16 +263,19 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
         });
         var results = await Task.WhenAll(tasks);
 
+        var container = usePublishedPaths ? _blobSas.PublishedContainer : _blobSas.DraftContainer;
         foreach (var r in results.OrderBy(x => x.Index))
         {
             if (r.Item3 == null || r.Item4 == null) continue;
             var ext = r.Item4.Contains("png", StringComparison.OrdinalIgnoreCase) ? "png" : "jpg";
             var filename = $"{r.Tile.Id}.{ext}";
             var asset = new StoryAssetPathMapper.AssetInfo(filename, StoryAssetPathMapper.AssetType.Image, null);
-            var blobPath = StoryAssetPathMapper.BuildDraftPath(asset, ownerEmail, storyId);
-            await UploadBlobAsync(_blobSas.DraftContainer, blobPath, r.Item3, r.Item4, ct);
-            r.Tile.ImageUrl = filename;
-            if (r.Index == 0) dto.CoverImageUrl = filename;
+            var blobPath = usePublishedPaths
+                ? StoryAssetPathMapper.BuildPublishedPath(asset, ownerEmail, storyId)
+                : StoryAssetPathMapper.BuildDraftPath(asset, ownerEmail, storyId);
+            await UploadBlobAsync(container, blobPath, r.Item3, r.Item4, ct);
+            r.Tile.ImageUrl = usePublishedPaths ? blobPath : filename;
+            if (r.Index == 0) dto.CoverImageUrl = usePublishedPaths ? blobPath : filename;
         }
     }
 

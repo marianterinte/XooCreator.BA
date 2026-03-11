@@ -8,6 +8,8 @@ using Microsoft.Extensions.Logging;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Features.StoryEditor.GenerateFullStoryDraft;
+using XooCreator.BA.Features.User.DTOs;
+using XooCreator.BA.Features.User.Services;
 using XooCreator.BA.Infrastructure.Services.Jobs;
 using XooCreator.BA.Infrastructure.Services.Queue;
 
@@ -107,79 +109,19 @@ public class StoryAIGenerateQueueWorker : BackgroundService
                     job.DequeueCount++;
                     await db.SaveChangesAsync(stoppingToken);
 
-                    var handler = scope.ServiceProvider.GetRequiredService<IGenerateFullStoryDraftHandler>();
-
-                    GenerateFullStoryDraftRequest? request = null;
-                    try
-                    {
-                        request = JsonSerializer.Deserialize<GenerateFullStoryDraftRequest>(job.RequestJson, JsonOptions);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Failed to deserialize RequestJson for jobId={JobId}", job.Id);
-                        job.Status = StoryAIGenerateJobStatus.Failed;
-                        job.CompletedAtUtc = DateTime.UtcNow;
-                        job.ErrorMessage = "Invalid request payload.";
-                        await db.SaveChangesAsync(stoppingToken);
-                        PublishJobEvent(job);
-                        await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
-                        continue;
-                    }
-
-                    if (request == null || string.IsNullOrWhiteSpace(request.ApiKey))
-                    {
-                        job.Status = StoryAIGenerateJobStatus.Failed;
-                        job.CompletedAtUtc = DateTime.UtcNow;
-                        job.ErrorMessage = "Invalid or missing request (ApiKey required).";
-                        await db.SaveChangesAsync(stoppingToken);
-                        PublishJobEvent(job);
-                        await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
-                        continue;
-                    }
-
                     job.Status = StoryAIGenerateJobStatus.Running;
                     job.StartedAtUtc = DateTime.UtcNow;
                     job.ProgressMessage = "Generating text...";
                     await db.SaveChangesAsync(stoppingToken);
                     PublishJobEvent(job);
 
-                    try
+                    if (job.IsPrivateStoryGeneration)
                     {
-                        if (request.GenerateImages || request.GenerateAudio)
-                            job.ProgressMessage = "Generating images and audio...";
-                        await db.SaveChangesAsync(stoppingToken);
-                        PublishJobEvent(job);
-
-                        var response = await handler.ExecuteAsync(
-                            request,
-                            job.OwnerUserId,
-                            job.OwnerFirstName ?? string.Empty,
-                            job.OwnerLastName ?? string.Empty,
-                            job.RequestedByEmail,
-                            stoppingToken);
-
-                        job.StoryId = response.StoryId;
-                        job.Status = StoryAIGenerateJobStatus.Completed;
-                        job.CompletedAtUtc = DateTime.UtcNow;
-                        job.ProgressMessage = null;
-                        job.ErrorMessage = null;
-                        job.ErrorCode = null;
-                        await db.SaveChangesAsync(stoppingToken);
-                        PublishJobEvent(job);
-                        _logger.LogInformation("StoryAIGenerateJob completed: jobId={JobId} storyId={StoryId}", job.Id, job.StoryId);
+                        await ProcessPrivateStoryJobAsync(scope, db, job, message, stoppingToken);
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        _logger.LogError(ex, "StoryAIGenerateJob failed: jobId={JobId}", job.Id);
-                        job.Status = StoryAIGenerateJobStatus.Failed;
-                        job.CompletedAtUtc = DateTime.UtcNow;
-                        job.ErrorMessage = ex.Message;
-                        job.ErrorCode = IsRateLimitException(ex) ? "RateLimitExceeded" : null;
-                        if (job.ErrorCode != null && (string.IsNullOrWhiteSpace(job.ErrorMessage) || !job.ErrorMessage.Contains("429")))
-                            job.ErrorMessage = "Generation stopped: rate limit exceeded (429). Please try again in a few minutes.";
-                        job.ProgressMessage = null;
-                        await db.SaveChangesAsync(stoppingToken);
-                        PublishJobEvent(job);
+                        await ProcessDraftStoryJobAsync(scope, db, job, message, stoppingToken);
                     }
 
                     await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
@@ -198,6 +140,178 @@ public class StoryAIGenerateQueueWorker : BackgroundService
         }
 
         _logger.LogInformation("StoryAIGenerateQueueWorker has stopped. QueueName={QueueName}", _queueClient.Name);
+    }
+
+    private async Task ProcessPrivateStoryJobAsync(
+        IServiceScope scope,
+        XooDbContext db,
+        StoryAIGenerateJob job,
+        Azure.Storage.Queues.Models.QueueMessage message,
+        CancellationToken stoppingToken)
+    {
+        var userProfile = scope.ServiceProvider.GetRequiredService<IUserProfileService>();
+        var privateHandler = scope.ServiceProvider.GetRequiredService<IGeneratePrivateStoryHandler>();
+
+        GeneratePrivateStoryRequest? request = null;
+        try
+        {
+            request = JsonSerializer.Deserialize<GeneratePrivateStoryRequest>(job.RequestJson, JsonOptions);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to deserialize private story RequestJson for jobId={JobId}", job.Id);
+            job.Status = StoryAIGenerateJobStatus.Failed;
+            job.CompletedAtUtc = DateTime.UtcNow;
+            job.ErrorMessage = "Invalid request payload.";
+            await db.SaveChangesAsync(stoppingToken);
+            PublishJobEvent(job);
+            await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
+            return;
+        }
+
+        if (request == null || string.IsNullOrWhiteSpace(request.Idea))
+        {
+            job.Status = StoryAIGenerateJobStatus.Failed;
+            job.CompletedAtUtc = DateTime.UtcNow;
+            job.ErrorMessage = "Invalid or missing idea.";
+            await db.SaveChangesAsync(stoppingToken);
+            PublishJobEvent(job);
+            await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
+            return;
+        }
+
+        var spendResult = await userProfile.SpendFullStoryCreditsAsync(
+            job.OwnerUserId,
+            new SpendCreditsRequest { Amount = 1, Reference = "full-story-generation" });
+        if (!spendResult.Success)
+        {
+            job.Status = StoryAIGenerateJobStatus.Failed;
+            job.CompletedAtUtc = DateTime.UtcNow;
+            job.ErrorMessage = spendResult.ErrorMessage ?? "Insufficient full story generation credits.";
+            await db.SaveChangesAsync(stoppingToken);
+            PublishJobEvent(job);
+            await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
+            return;
+        }
+
+        try
+        {
+            job.ProgressMessage = "Generating images and audio...";
+            await db.SaveChangesAsync(stoppingToken);
+            PublishJobEvent(job);
+
+            var response = await privateHandler.ExecuteAsync(
+                request,
+                job.OwnerUserId,
+                job.OwnerFirstName ?? string.Empty,
+                job.OwnerLastName ?? string.Empty,
+                job.RequestedByEmail,
+                stoppingToken);
+
+            job.StoryId = response.StoryId;
+            job.Status = StoryAIGenerateJobStatus.Completed;
+            job.CompletedAtUtc = DateTime.UtcNow;
+            job.ProgressMessage = null;
+            job.ErrorMessage = null;
+            job.ErrorCode = null;
+            await db.SaveChangesAsync(stoppingToken);
+            PublishJobEvent(job);
+            _logger.LogInformation("PrivateStoryAIGenerateJob completed: jobId={JobId} storyId={StoryId}", job.Id, job.StoryId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "PrivateStoryAIGenerateJob failed: jobId={JobId}", job.Id);
+            job.Status = StoryAIGenerateJobStatus.Failed;
+            job.CompletedAtUtc = DateTime.UtcNow;
+            job.ErrorMessage = ex.Message;
+            job.ErrorCode = IsRateLimitException(ex) ? "RateLimitExceeded" : null;
+            if (job.ErrorCode != null && (string.IsNullOrWhiteSpace(job.ErrorMessage) || !job.ErrorMessage.Contains("429")))
+                job.ErrorMessage = "Generation stopped: rate limit exceeded (429). Please try again in a few minutes.";
+            job.ProgressMessage = null;
+            await db.SaveChangesAsync(stoppingToken);
+            PublishJobEvent(job);
+        }
+
+        await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
+    }
+
+    private async Task ProcessDraftStoryJobAsync(
+        IServiceScope scope,
+        XooDbContext db,
+        StoryAIGenerateJob job,
+        Azure.Storage.Queues.Models.QueueMessage message,
+        CancellationToken stoppingToken)
+    {
+        var handler = scope.ServiceProvider.GetRequiredService<IGenerateFullStoryDraftHandler>();
+
+        GenerateFullStoryDraftRequest? request = null;
+        try
+        {
+            request = JsonSerializer.Deserialize<GenerateFullStoryDraftRequest>(job.RequestJson, JsonOptions);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to deserialize RequestJson for jobId={JobId}", job.Id);
+            job.Status = StoryAIGenerateJobStatus.Failed;
+            job.CompletedAtUtc = DateTime.UtcNow;
+            job.ErrorMessage = "Invalid request payload.";
+            await db.SaveChangesAsync(stoppingToken);
+            PublishJobEvent(job);
+            await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
+            return;
+        }
+
+        if (request == null || string.IsNullOrWhiteSpace(request.ApiKey))
+        {
+            job.Status = StoryAIGenerateJobStatus.Failed;
+            job.CompletedAtUtc = DateTime.UtcNow;
+            job.ErrorMessage = "Invalid or missing request (ApiKey required).";
+            await db.SaveChangesAsync(stoppingToken);
+            PublishJobEvent(job);
+            await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
+            return;
+        }
+
+        try
+        {
+            if (request.GenerateImages || request.GenerateAudio)
+                job.ProgressMessage = "Generating images and audio...";
+            await db.SaveChangesAsync(stoppingToken);
+            PublishJobEvent(job);
+
+            var response = await handler.ExecuteAsync(
+                request,
+                job.OwnerUserId,
+                job.OwnerFirstName ?? string.Empty,
+                job.OwnerLastName ?? string.Empty,
+                job.RequestedByEmail,
+                stoppingToken);
+
+            job.StoryId = response.StoryId;
+            job.Status = StoryAIGenerateJobStatus.Completed;
+            job.CompletedAtUtc = DateTime.UtcNow;
+            job.ProgressMessage = null;
+            job.ErrorMessage = null;
+            job.ErrorCode = null;
+            await db.SaveChangesAsync(stoppingToken);
+            PublishJobEvent(job);
+            _logger.LogInformation("StoryAIGenerateJob completed: jobId={JobId} storyId={StoryId}", job.Id, job.StoryId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "StoryAIGenerateJob failed: jobId={JobId}", job.Id);
+            job.Status = StoryAIGenerateJobStatus.Failed;
+            job.CompletedAtUtc = DateTime.UtcNow;
+            job.ErrorMessage = ex.Message;
+            job.ErrorCode = IsRateLimitException(ex) ? "RateLimitExceeded" : null;
+            if (job.ErrorCode != null && (string.IsNullOrWhiteSpace(job.ErrorMessage) || !job.ErrorMessage.Contains("429")))
+                job.ErrorMessage = "Generation stopped: rate limit exceeded (429). Please try again in a few minutes.";
+            job.ProgressMessage = null;
+            await db.SaveChangesAsync(stoppingToken);
+            PublishJobEvent(job);
+        }
+
+        await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
     }
 
     private void PublishJobEvent(StoryAIGenerateJob job)

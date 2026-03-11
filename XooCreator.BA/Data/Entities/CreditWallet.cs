@@ -10,5 +10,7 @@ public class CreditWallet
     public double DiscoveryBalance { get; set; }
     /// <summary>Supporter Pack generative LOI credits (consumed per generation).</summary>
     public double GenerativeBalance { get; set; }
+    /// <summary>Supporter Pack full story generation credits (consumed per private story generation).</summary>
+    public double FullStoryGenerationBalance { get; set; }
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }
