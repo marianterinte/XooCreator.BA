@@ -95,7 +95,7 @@ public sealed class GeneratePrivateStoryHandler : IGeneratePrivateStoryHandler
             GenerateImages = request.GenerateImages,
             GenerateAudio = request.GenerateAudio,
             UseConsistentImageStyle = true,
-            AudioModel = "gemini-2.5-pro-tts",
+            AudioModel = "gemini-2.5-pro-preview-tts",
             Title = request.Title
         };
 
