@@ -37,7 +37,7 @@ public class LOIImageGenerationService : ILOIImageGenerationService
     private static string BuildCreatureImagePrompt(IReadOnlyDictionary<string, string>? partToAnimalLabel)
     {
         if (partToAnimalLabel == null || partToAnimalLabel.Count == 0)
-            return "Children's book illustration. Kid-friendly, safe for children. Draw one cute hybrid fantasy creature. Style: colorful cartoon, soft shapes, magical forest. No scary elements. No text. Portrait, vertical 4:5.";
+            return "Children's book illustration. Kid-friendly, safe for children. Draw one cute hybrid fantasy creature. Style: colorful cartoon, soft shapes, magical forest. No scary elements. No text. Portrait, vertical 9:16 (9 wide, 16 tall).";
         var parts = new List<string>();
         foreach (var kv in partToAnimalLabel.OrderBy(x => x.Key))
         {
@@ -61,6 +61,6 @@ public class LOIImageGenerationService : ILOIImageGenerationService
         return "Children's book illustration. Kid-friendly, safe for children. " +
                "Draw one cute hybrid fantasy creature: " + creatureDesc + ". " +
                "Style: colorful cartoon, soft shapes, magical forest or gentle background. " +
-               "No scary, violent, or frightening elements. No text in the image. Portrait, vertical 4:5.";
+               "No scary, violent, or frightening elements. No text in the image. Portrait, vertical 9:16 (9 wide, 16 tall).";
     }
 }
