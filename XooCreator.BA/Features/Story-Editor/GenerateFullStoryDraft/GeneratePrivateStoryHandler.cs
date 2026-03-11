@@ -116,9 +116,10 @@ public sealed class GeneratePrivateStoryHandler : IGeneratePrivateStoryHandler
         for (var i = 1; i <= numberOfPages; i++)
         {
             sb.AppendLine($"###P{i}");
-            sb.AppendLine($"[Page {i} text; multiple lines allowed]");
+            sb.AppendLine($"[Page {i} text; multiple lines allowed; aim for similar length across pages]");
         }
         sb.AppendLine($"Language: {languageCode}. Generate exactly {numberOfPages} pages. Content suitable for children.");
+        sb.AppendLine("Length guidance: keep page lengths roughly similar. Aim for ~220–300 characters per page, with a soft maximum of 300 characters per page (avoid pages that are much longer than others).");
         return sb.ToString();
     }
 
