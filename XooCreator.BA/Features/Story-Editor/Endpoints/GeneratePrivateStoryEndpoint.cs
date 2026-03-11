@@ -95,7 +95,9 @@ public class GeneratePrivateStoryEndpoint
                 Idea = idea,
                 LanguageCode = request.LanguageCode?.Trim() ?? "ro-ro",
                 Title = request.Title?.Trim(),
-                PageCount = pageCount
+                PageCount = pageCount,
+                GenerateImages = request.GenerateImages,
+                GenerateAudio = request.GenerateAudio
             }, JsonOptions)
         };
         ep._db.StoryAIGenerateJobs.Add(job);

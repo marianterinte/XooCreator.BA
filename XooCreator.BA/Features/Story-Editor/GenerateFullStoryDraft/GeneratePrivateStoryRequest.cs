@@ -14,4 +14,8 @@ public sealed class GeneratePrivateStoryRequest
     public string? Title { get; init; }
     /// <summary>Requested number of pages for the generated story (5–10). Defaults to 5 when not provided.</summary>
     public int PageCount { get; init; } = 5;
+    /// <summary>When true (default), AI generates images for pages.</summary>
+    public bool GenerateImages { get; init; } = true;
+    /// <summary>When true (default), AI generates audio for pages.</summary>
+    public bool GenerateAudio { get; init; } = true;
 }

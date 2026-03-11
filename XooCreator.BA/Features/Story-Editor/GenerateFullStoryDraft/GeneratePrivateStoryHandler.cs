@@ -57,7 +57,13 @@ public sealed class GeneratePrivateStoryHandler : IGeneratePrivateStoryHandler
         var lang = (request.LanguageCode ?? "ro-ro").Trim().ToLowerInvariant();
         var rawPageCount = request.PageCount <= 0 ? MinPageCount : request.PageCount;
         var pageCount = Math.Clamp(rawPageCount, MinPageCount, MaxPageCount);
-        _logger.LogInformation("GeneratePrivateStory: storyId={StoryId} lang={Lang} pages={Pages}", storyId, lang, pageCount);
+        _logger.LogInformation(
+            "GeneratePrivateStory: storyId={StoryId} lang={Lang} pages={Pages} images={GenerateImages} audio={GenerateAudio}",
+            storyId,
+            lang,
+            pageCount,
+            request.GenerateImages,
+            request.GenerateAudio);
 
         var systemInstruction = BuildSystemInstruction(pageCount, lang);
         var userContent = BuildUserContent(request.Idea.Trim(), request.Title?.Trim(), pageCount);
@@ -86,24 +92,27 @@ public sealed class GeneratePrivateStoryHandler : IGeneratePrivateStoryHandler
             TextSeed = request.Idea.Trim(),
             NumberOfPages = pageCount,
             LanguageCode = lang,
-            GenerateImages = true,
-            GenerateAudio = true,
+            GenerateImages = request.GenerateImages,
+            GenerateAudio = request.GenerateAudio,
             UseConsistentImageStyle = true,
             AudioModel = "gemini-2.5-pro-tts",
             Title = request.Title
         };
 
-        await RetryAsync(
-            () => _assetsGenerator.FillImagesAndAudioAsync(
-                syntheticRequest,
-                dto,
-                storyId,
-                ownerEmail ?? "unknown",
-                isOpenAi: false,
-                usePublishedPaths: true,
-                ct),
-            "private-story-assets",
-            ct);
+        if (request.GenerateImages || request.GenerateAudio)
+        {
+            await RetryAsync(
+                () => _assetsGenerator.FillImagesAndAudioAsync(
+                    syntheticRequest,
+                    dto,
+                    storyId,
+                    ownerEmail ?? "unknown",
+                    isOpenAi: false,
+                    usePublishedPaths: true,
+                    ct),
+                "private-story-assets",
+                ct);
+        }
 
         await _privateStoryCreation.CreateFromDtoAsync(dto, storyId, ownerUserId, ownerEmail ?? string.Empty, lang, ct);
 

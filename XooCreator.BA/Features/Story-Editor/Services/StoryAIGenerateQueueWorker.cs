@@ -192,7 +192,9 @@ public class StoryAIGenerateQueueWorker : BackgroundService
 
         try
         {
-            job.ProgressMessage = "Generating images and audio...";
+            job.ProgressMessage = request.GenerateImages || request.GenerateAudio
+                ? "Generating images and audio..."
+                : "Finalizing story...";
             await db.SaveChangesAsync(stoppingToken);
             PublishJobEvent(job);
 
