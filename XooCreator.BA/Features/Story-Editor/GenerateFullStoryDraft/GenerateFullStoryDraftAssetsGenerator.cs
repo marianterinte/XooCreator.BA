@@ -40,6 +40,7 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
     private readonly ISequentialStoryImageGenerator _sequentialImageGenerator;
     private readonly IGoogleAudioGeneratorService _googleAudio;
     private readonly IOpenAIAudioWithApiKey _openAIAudio;
+    private readonly IDiacriticsNormalizer _diacriticsNormalizer;
     private readonly ILogger<GenerateFullStoryDraftAssetsGenerator> _logger;
 
     public GenerateFullStoryDraftAssetsGenerator(
@@ -49,6 +50,7 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
         ISequentialStoryImageGenerator sequentialImageGenerator,
         IGoogleAudioGeneratorService googleAudio,
         IOpenAIAudioWithApiKey openAIAudio,
+        IDiacriticsNormalizer diacriticsNormalizer,
         ILogger<GenerateFullStoryDraftAssetsGenerator> logger)
     {
         _blobSas = blobSas;
@@ -57,6 +59,7 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
         _sequentialImageGenerator = sequentialImageGenerator;
         _googleAudio = googleAudio;
         _openAIAudio = openAIAudio;
+        _diacriticsNormalizer = diacriticsNormalizer;
         _logger = logger;
     }
 
@@ -127,9 +130,10 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
                     try
                     {
                         var tileText = (item.Tile.Text ?? string.Empty).Trim();
+                        var normalizedText = await NormalizeForAudioAsync(tileText, request, ct);
                         var (audioData, format) = isOpenAi
-                            ? await _openAIAudio.GenerateAudioAsync(tileText, request.LanguageCode!, null, request.ApiKey.Trim(), request.AudioModel, ct)
-                            : await _googleAudio.GenerateAudioAsync(tileText, request.LanguageCode!, null, null, request.ApiKey.Trim(), request.AudioModel, ct);
+                            ? await _openAIAudio.GenerateAudioAsync(normalizedText, request.LanguageCode!, null, request.ApiKey.Trim(), request.AudioModel, ct)
+                            : await _googleAudio.GenerateAudioAsync(normalizedText, request.LanguageCode!, null, null, request.ApiKey.Trim(), request.AudioModel, ct);
                         var ext = string.Equals(format, "mp3", StringComparison.OrdinalIgnoreCase) ? "mp3" : "wav";
                         var filename = $"{item.Tile.Id}.{ext}";
                         var asset = new StoryAssetPathMapper.AssetInfo(filename, StoryAssetPathMapper.AssetType.Audio, lang);
@@ -449,6 +453,40 @@ CONSISTENCY RULES: Do not change character colors, sizes, or species.";
             ["summary"] = summary ?? string.Empty
         };
         return JsonSerializer.Serialize(obj);
+    }
+
+    /// <summary>
+    /// Best-effort diacritics normalization before sending text to TTS.
+    /// On any error, returns the original text.
+    /// </summary>
+    private async Task<string> NormalizeForAudioAsync(
+        string tileText,
+        GenerateFullStoryDraftRequest request,
+        CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(tileText))
+            return tileText;
+
+        var languageCode = request.LanguageCode ?? string.Empty;
+
+        try
+        {
+            return await _diacriticsNormalizer.NormalizeAsync(
+                tileText,
+                languageCode,
+                request.ApiKey.Trim(),
+                request.AudioModel,
+                ct);
+        }
+        catch (Exception ex) when (!ct.IsCancellationRequested)
+        {
+            _logger.LogWarning(
+                ex,
+                "Diacritics normalization failed for audio. Falling back to original text. Lang={LanguageCode}, Length={Length}",
+                languageCode,
+                tileText.Length);
+            return tileText;
+        }
     }
 
     private async Task UploadBlobAsync(string container, string blobPath, byte[] data, string contentType, CancellationToken ct)

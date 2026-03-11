@@ -240,6 +240,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IOpenAIImageWithApiKey, OpenAIImageApiKeyAdapter>();
 
         // Generate Full Story Draft: handler (create draft + generate text + parse + save)
+        services.AddScoped<IDiacriticsNormalizer, DiacriticsNormalizer>();
         services.AddScoped<IGenerateFullStoryDraftAssetsGenerator, GenerateFullStoryDraftAssetsGenerator>();
         services.AddScoped<IGenerateFullStoryDraftHandler, GenerateFullStoryDraftHandler>();
 
