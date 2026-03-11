@@ -22,6 +22,8 @@ public class GeneratePrivateStoryEndpoint
 {
     private const int MaxIdeaLength = 2000;
     private const int MinIdeaLength = 20;
+    private const int MinPageCount = 5;
+    private const int MaxPageCount = 10;
 
     private readonly IAuth0UserService _auth0;
     private readonly ILogger<GeneratePrivateStoryEndpoint> _logger;
@@ -65,6 +67,11 @@ public class GeneratePrivateStoryEndpoint
         if (idea.Length > MaxIdeaLength)
             return TypedResults.BadRequest($"Idea must be at most {MaxIdeaLength} characters.");
 
+        var pageCountRaw = request.PageCount;
+        var pageCount = pageCountRaw <= 0 ? MinPageCount : pageCountRaw;
+        if (pageCount < MinPageCount || pageCount > MaxPageCount)
+            return TypedResults.BadRequest($"PageCount must be between {MinPageCount} and {MaxPageCount}.");
+
         var wallet = await ep._db.CreditWallets.FirstOrDefaultAsync(w => w.UserId == user.Id, ct);
         if (wallet == null || wallet.FullStoryGenerationBalance < 1)
         {
@@ -87,7 +94,8 @@ public class GeneratePrivateStoryEndpoint
             {
                 Idea = idea,
                 LanguageCode = request.LanguageCode?.Trim() ?? "ro-ro",
-                Title = request.Title?.Trim()
+                Title = request.Title?.Trim(),
+                PageCount = pageCount
             }, JsonOptions)
         };
         ep._db.StoryAIGenerateJobs.Add(job);

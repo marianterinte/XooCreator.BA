@@ -13,7 +13,8 @@ namespace XooCreator.BA.Features.StoryEditor.GenerateFullStoryDraft;
 public sealed class GeneratePrivateStoryHandler : IGeneratePrivateStoryHandler
 {
     private const int MaxIdeaLength = 2000;
-    private const int PrivateStoryPageCount = 10;
+    private const int MinPageCount = 5;
+    private const int MaxPageCount = 10;
 
     private readonly IStoryIdGenerator _storyIdGenerator;
     private readonly IGoogleTextService _googleTextService;
@@ -53,10 +54,12 @@ public sealed class GeneratePrivateStoryHandler : IGeneratePrivateStoryHandler
 
         var storyId = await _storyIdGenerator.GenerateNextAsync(ownerUserId, ownerFirstName, ownerLastName, ct);
         var lang = (request.LanguageCode ?? "ro-ro").Trim().ToLowerInvariant();
-        _logger.LogInformation("GeneratePrivateStory: storyId={StoryId} lang={Lang}", storyId, lang);
+        var rawPageCount = request.PageCount <= 0 ? MinPageCount : request.PageCount;
+        var pageCount = Math.Clamp(rawPageCount, MinPageCount, MaxPageCount);
+        _logger.LogInformation("GeneratePrivateStory: storyId={StoryId} lang={Lang} pages={Pages}", storyId, lang, pageCount);
 
-        var systemInstruction = BuildSystemInstruction(PrivateStoryPageCount, lang);
-        var userContent = BuildUserContent(request.Idea.Trim(), request.Title?.Trim(), PrivateStoryPageCount);
+        var systemInstruction = BuildSystemInstruction(pageCount, lang);
+        var userContent = BuildUserContent(request.Idea.Trim(), request.Title?.Trim(), pageCount);
         var apiKey = _configuration["GoogleAI:ApiKey"] ?? string.Empty;
         if (string.IsNullOrWhiteSpace(apiKey))
             throw new InvalidOperationException("GoogleAI:ApiKey is not configured for private story generation.");
@@ -77,11 +80,12 @@ public sealed class GeneratePrivateStoryHandler : IGeneratePrivateStoryHandler
             ApiKey = apiKey,
             Provider = "Google",
             TextSeed = request.Idea.Trim(),
-            NumberOfPages = PrivateStoryPageCount,
+            NumberOfPages = pageCount,
             LanguageCode = lang,
             GenerateImages = true,
             GenerateAudio = true,
             UseConsistentImageStyle = true,
+            AudioModel = "gemini-2.5-pro-tts",
             Title = request.Title
         };
 

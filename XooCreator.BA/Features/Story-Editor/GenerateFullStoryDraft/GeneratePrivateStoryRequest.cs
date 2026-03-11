@@ -12,4 +12,6 @@ public sealed class GeneratePrivateStoryRequest
     public string LanguageCode { get; init; } = "ro-ro";
     /// <summary>Optional title hint.</summary>
     public string? Title { get; init; }
+    /// <summary>Requested number of pages for the generated story (5–10). Defaults to 5 when not provided.</summary>
+    public int PageCount { get; init; } = 5;
 }
