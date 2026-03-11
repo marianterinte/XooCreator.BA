@@ -243,6 +243,13 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IGenerateFullStoryDraftAssetsGenerator, GenerateFullStoryDraftAssetsGenerator>();
         services.AddScoped<IGenerateFullStoryDraftHandler, GenerateFullStoryDraftHandler>();
 
+        // Story Bible Pipeline: improved character consistency
+        services.AddScoped<IStoryBibleGenerator, StoryBibleGenerator>();
+        services.AddScoped<IStoryValidator, StoryValidator>();
+        services.AddScoped<IStoryRepairService, StoryRepairService>();
+        services.AddScoped<IScenePlanner, ScenePlanner>();
+        services.AddScoped<IIllustrationPromptBuilder, IllustrationPromptBuilder>();
+
         // Your-story private generation: persist directly to StoryDefinition with IsPrivate
         services.AddScoped<IPrivateStoryCreationService, PrivateStoryCreationService>();
         services.AddScoped<IGeneratePrivateStoryHandler, GeneratePrivateStoryHandler>();

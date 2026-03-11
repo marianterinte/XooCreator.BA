@@ -1,6 +1,8 @@
 using System.Text;
+using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using XooCreator.BA.Data.Enums;
+using XooCreator.BA.Features.StoryEditor.Models;
 using XooCreator.BA.Features.StoryEditor.Services;
 using XooCreator.BA.Features.StoryEditor.Services.Content;
 
@@ -9,6 +11,7 @@ namespace XooCreator.BA.Features.StoryEditor.GenerateFullStoryDraft;
 /// <summary>
 /// Creates draft, generates full story text with user API key, parses ###T/###S/###P,
 /// optionally generates images/audio via IGenerateFullStoryDraftAssetsGenerator, builds EditableStoryDto, saves draft.
+/// Supports Story Bible pipeline for improved character consistency when UseStoryBible is enabled.
 /// </summary>
 public sealed class GenerateFullStoryDraftHandler : IGenerateFullStoryDraftHandler
 {
@@ -20,6 +23,11 @@ public sealed class GenerateFullStoryDraftHandler : IGenerateFullStoryDraftHandl
     private readonly IGoogleTextService _googleTextService;
     private readonly IOpenAITextWithApiKey _openAITextWithApiKey;
     private readonly IGenerateFullStoryDraftAssetsGenerator _assetsGenerator;
+    private readonly IStoryBibleGenerator _storyBibleGenerator;
+    private readonly IStoryValidator _storyValidator;
+    private readonly IStoryRepairService _storyRepairService;
+    private readonly IScenePlanner _scenePlanner;
+    private readonly IIllustrationPromptBuilder _illustrationPromptBuilder;
     private readonly ILogger<GenerateFullStoryDraftHandler> _logger;
 
     public GenerateFullStoryDraftHandler(
@@ -28,6 +36,11 @@ public sealed class GenerateFullStoryDraftHandler : IGenerateFullStoryDraftHandl
         IGoogleTextService googleTextService,
         IOpenAITextWithApiKey openAITextWithApiKey,
         IGenerateFullStoryDraftAssetsGenerator assetsGenerator,
+        IStoryBibleGenerator storyBibleGenerator,
+        IStoryValidator storyValidator,
+        IStoryRepairService storyRepairService,
+        IScenePlanner scenePlanner,
+        IIllustrationPromptBuilder illustrationPromptBuilder,
         ILogger<GenerateFullStoryDraftHandler> logger)
     {
         _storyIdGenerator = storyIdGenerator;
@@ -35,6 +48,11 @@ public sealed class GenerateFullStoryDraftHandler : IGenerateFullStoryDraftHandl
         _googleTextService = googleTextService;
         _openAITextWithApiKey = openAITextWithApiKey;
         _assetsGenerator = assetsGenerator;
+        _storyBibleGenerator = storyBibleGenerator;
+        _storyValidator = storyValidator;
+        _storyRepairService = storyRepairService;
+        _scenePlanner = scenePlanner;
+        _illustrationPromptBuilder = illustrationPromptBuilder;
         _logger = logger;
     }
 
@@ -48,22 +66,147 @@ public sealed class GenerateFullStoryDraftHandler : IGenerateFullStoryDraftHandl
     {
         ValidateRequest(request);
 
+        var provider = (request.Provider ?? "Google").Trim();
+        var isOpenAiProvider = string.Equals(provider, "OpenAI", StringComparison.OrdinalIgnoreCase);
+        var useStoryBiblePipeline = request.UseStoryBible && !isOpenAiProvider;
+
         var storyId = await _storyIdGenerator.GenerateNextAsync(ownerUserId, ownerFirstName, ownerLastName, ct);
-        _logger.LogInformation("GenerateFullStoryDraft: storyId={StoryId} provider={Provider} pages={Pages}",
-            storyId, request.Provider, request.NumberOfPages);
+        _logger.LogInformation("GenerateFullStoryDraft: storyId={StoryId} provider={Provider} pages={Pages} useStoryBible={UseStoryBible}",
+            storyId, request.Provider, request.NumberOfPages, request.UseStoryBible);
 
         await _editorService.EnsureDraftAsync(ownerUserId, storyId, StoryType.Indie, ct);
         await _editorService.EnsureTranslationAsync(ownerUserId, storyId, request.LanguageCode, "AI Story", ct);
 
-        var rawText = await GenerateFullStoryTextAsync(request, ct);
+        StoryBible? storyBible = null;
+        ScenePlan? scenePlan = null;
+
+        // Story Bible Pipeline (when enabled)
+        if (useStoryBiblePipeline)
+        {
+            _logger.LogInformation("Using Story Bible pipeline for improved consistency (Google-only)");
+
+            try
+            {
+                // Step 1: Generate Story Bible
+                storyBible = await _storyBibleGenerator.GenerateAsync(
+                    request.TextSeed.Trim(),
+                    request.Title,
+                    request.NumberOfPages,
+                    request.LanguageCode,
+                    request.ApiKey.Trim(),
+                    request.TextModel,
+                    ct);
+                _logger.LogInformation("Story Bible pipeline: StoryBibleUsed=true StoryId={StoryId}", storyId);
+            }
+            catch (Exception ex) when (!ct.IsCancellationRequested)
+            {
+                useStoryBiblePipeline = false;
+                storyBible = null;
+                _logger.LogWarning(ex,
+                    "Story Bible generation failed for storyId={StoryId}. Falling back to classic flow.",
+                    storyId);
+            }
+        }
+        else if (request.UseStoryBible && isOpenAiProvider)
+        {
+            _logger.LogInformation(
+                "Story Bible pipeline disabled for storyId={StoryId} because provider=OpenAI. Falling back to classic flow.",
+                storyId);
+        }
+
+        // Generate story text (with or without Bible)
+        var rawText = useStoryBiblePipeline && storyBible != null
+            ? await GenerateStoryTextWithBibleAsync(request, storyBible, ct)
+            : await GenerateFullStoryTextAsync(request, ct);
+
         var parseResult = StoryTextDelimiterParser.Parse(rawText);
+
+        // Validate and repair (when Story Bible is enabled)
+        if (useStoryBiblePipeline && storyBible != null)
+        {
+            StoryValidationResult? validation = null;
+
+            try
+            {
+                validation = await _storyValidator.ValidateAsync(
+                    storyBible,
+                    rawText,
+                    request.ApiKey.Trim(),
+                    request.TextModel,
+                    ct);
+            }
+            catch (Exception ex) when (!ct.IsCancellationRequested)
+            {
+                _logger.LogWarning(ex,
+                    "Story Bible validation failed for storyId={StoryId}. Continuing without validator.",
+                    storyId);
+            }
+
+            // Guardrail: only run Repair when we have error/critical issues (IsValid=false)
+            if (validation is { IsValid: false } && validation.Issues.Count > 0)
+            {
+                try
+                {
+                    _logger.LogInformation("Story validation found {IssueCount} issues, attempting repair", validation.Issues.Count);
+                    rawText = await _storyRepairService.RepairAsync(
+                        storyBible,
+                        rawText,
+                        validation,
+                        request.ApiKey.Trim(),
+                        request.TextModel,
+                        ct);
+                    parseResult = StoryTextDelimiterParser.Parse(rawText);
+                }
+                catch (Exception ex) when (!ct.IsCancellationRequested)
+                {
+                    _logger.LogWarning(ex,
+                        "Story Bible repair failed for storyId={StoryId}. Keeping original story text.",
+                        storyId);
+                }
+            }
+
+            // Generate scene plan for images (best-effort)
+            if (request.GenerateImages)
+            {
+                try
+                {
+                    var pageTexts = parseResult.Pages.Select(p => p.Text).ToList();
+                    scenePlan = await _scenePlanner.PlanAsync(
+                        storyBible,
+                        pageTexts,
+                        storyId,
+                        request.ApiKey.Trim(),
+                        request.TextModel,
+                        ct);
+                }
+                catch (Exception ex) when (!ct.IsCancellationRequested)
+                {
+                    scenePlan = null;
+                    _logger.LogWarning(ex,
+                        "Scene planning failed for storyId={StoryId}. Falling back to classic image prompts.",
+                        storyId);
+                }
+            }
+        }
 
         var dto = BuildEditableStoryDto(storyId, request.LanguageCode, parseResult);
 
         if (request.GenerateImages || request.GenerateAudio)
         {
-            var isOpenAi = string.Equals(request.Provider.Trim(), "OpenAI", StringComparison.OrdinalIgnoreCase);
-            await _assetsGenerator.FillImagesAndAudioAsync(request, dto, storyId, ownerEmail ?? string.Empty, isOpenAi, usePublishedPaths: false, ct);
+            var isOpenAi = isOpenAiProvider;
+
+            // Pass Story Bible context to asset generator
+            await _assetsGenerator.FillImagesAndAudioAsync(
+                request, 
+                dto, 
+                storyId, 
+                ownerEmail ?? string.Empty, 
+                isOpenAi, 
+                usePublishedPaths: false, 
+                ct,
+                storyBible,
+                scenePlan,
+                _illustrationPromptBuilder);
         }
 
         await _editorService.SaveDraftAsync(ownerUserId, storyId, request.LanguageCode, dto, false, null, ct);
@@ -126,6 +269,85 @@ public sealed class GenerateFullStoryDraftHandler : IGenerateFullStoryDraftHandl
             request.TextModel,
             responseMimeType: "text/plain",
             ct);
+    }
+
+    /// <summary>
+    /// Generate story text using Story Bible for improved consistency.
+    /// </summary>
+    private async Task<string> GenerateStoryTextWithBibleAsync(
+        GenerateFullStoryDraftRequest request,
+        StoryBible storyBible,
+        CancellationToken ct)
+    {
+        var n = request.NumberOfPages;
+        var lang = request.LanguageCode;
+        var instructions = request.Instructions?.Trim() ?? string.Empty;
+
+        var systemInstruction = BuildGoogleSystemInstructionWithBible(n, lang, storyBible);
+        var userContent = BuildGoogleUserContentWithBible(storyBible, instructions, n);
+
+        return await _googleTextService.GenerateContentAsync(
+            systemInstruction,
+            userContent,
+            request.ApiKey.Trim(),
+            request.TextModel,
+            responseMimeType: "text/plain",
+            ct);
+    }
+
+    private static string BuildGoogleSystemInstructionWithBible(int numberOfPages, string languageCode, StoryBible bible)
+    {
+        var characterList = string.Join("\n", bible.Characters.Select(c =>
+            $"- {c.Name}: {c.Visual.PrimaryColor} {c.Species}, {c.Visual.Size}. Features: {string.Join(", ", c.Visual.Features)}. Personality: {string.Join(", ", c.Personality)}"));
+
+        var sb = new StringBuilder();
+        sb.AppendLine("You are a children's story writer. Write a story based on the Story Bible below.");
+        sb.AppendLine();
+        sb.AppendLine("STORY BIBLE:");
+        sb.AppendLine($"Title: {bible.Title}");
+        sb.AppendLine($"Tone: {bible.Tone}");
+        sb.AppendLine($"Setting: {bible.Setting.Place}, {bible.Setting.Time}");
+        sb.AppendLine($"Plot: {bible.Plot.Problem} → {bible.Plot.Resolution}. Moral: {bible.Plot.Moral}");
+        sb.AppendLine();
+        sb.AppendLine("CHARACTERS (mention their colors/features naturally in the story):");
+        sb.AppendLine(characterList);
+        sb.AppendLine();
+        sb.AppendLine("SCENE SKELETON:");
+        for (var i = 0; i < bible.SceneSkeleton.Count && i < numberOfPages; i++)
+        {
+            sb.AppendLine($"- Page {i + 1}: {bible.SceneSkeleton[i]}");
+        }
+        sb.AppendLine();
+        sb.AppendLine("OUTPUT FORMAT (strict):");
+        sb.AppendLine("###T");
+        sb.AppendLine("[Story title on one line]");
+        sb.AppendLine("###S");
+        sb.AppendLine("[Story summary in one short paragraph]");
+        for (var i = 1; i <= numberOfPages; i++)
+        {
+            sb.AppendLine($"###P{i}");
+            sb.AppendLine($"[Page {i} text - follow the scene skeleton]");
+        }
+        sb.AppendLine($"Language: {languageCode}. Generate exactly {numberOfPages} pages.");
+        sb.AppendLine();
+        sb.AppendLine("IMPORTANT: Naturally mention character visual details (colors, features) throughout the story.");
+        return sb.ToString();
+    }
+
+    private static string BuildGoogleUserContentWithBible(StoryBible bible, string instructions, int numberOfPages)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine($"Write the story '{bible.Title}' following the Story Bible.");
+        if (!string.IsNullOrWhiteSpace(instructions))
+        {
+            sb.AppendLine();
+            sb.AppendLine("Additional instructions:");
+            sb.AppendLine(instructions);
+        }
+        sb.AppendLine();
+        sb.AppendLine($"Generate exactly {numberOfPages} pages, one for each scene in the skeleton.");
+        sb.AppendLine("Make sure to mention character visual details naturally in the narrative.");
+        return sb.ToString();
     }
 
     private static string BuildGoogleSystemInstruction(int numberOfPages, string languageCode)

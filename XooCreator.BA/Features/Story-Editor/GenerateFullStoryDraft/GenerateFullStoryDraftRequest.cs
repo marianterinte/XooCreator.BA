@@ -26,4 +26,6 @@ public sealed class GenerateFullStoryDraftRequest
     public string? ImageQuality { get; init; }
     /// <summary>When true, endpoint returns 202 and enqueues job; when false, runs synchronously and returns 200 with storyId.</summary>
     public bool RunInBackground { get; init; }
+    /// <summary>When true, uses Story Bible pipeline for improved character consistency. Adds ~$0.015 to generation cost.</summary>
+    public bool UseStoryBible { get; init; } = true;
 }

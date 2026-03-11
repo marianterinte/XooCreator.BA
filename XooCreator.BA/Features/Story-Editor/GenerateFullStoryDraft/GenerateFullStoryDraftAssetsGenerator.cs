@@ -3,6 +3,7 @@ using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using XooCreator.BA.Infrastructure.Services.Blob;
 using XooCreator.BA.Features.StoryEditor.Mappers;
+using XooCreator.BA.Features.StoryEditor.Models;
 using XooCreator.BA.Features.StoryEditor.Services;
 using XooCreator.BA.Features.StoryEditor.Services.Content;
 
@@ -15,6 +16,9 @@ namespace XooCreator.BA.Features.StoryEditor.GenerateFullStoryDraft;
 public interface IGenerateFullStoryDraftAssetsGenerator
 {
     /// <param name="usePublishedPaths">When true, upload to published container and set full paths on dto (for private story).</param>
+    /// <param name="storyBible">Optional Story Bible for improved character consistency in image prompts.</param>
+    /// <param name="scenePlan">Optional scene plan with detailed scene definitions.</param>
+    /// <param name="promptBuilder">Optional prompt builder for Story Bible-based prompts.</param>
     Task FillImagesAndAudioAsync(
         GenerateFullStoryDraftRequest request,
         EditableStoryDto dto,
@@ -22,7 +26,10 @@ public interface IGenerateFullStoryDraftAssetsGenerator
         string ownerEmail,
         bool isOpenAi,
         bool usePublishedPaths = false,
-        CancellationToken ct = default);
+        CancellationToken ct = default,
+        StoryBible? storyBible = null,
+        ScenePlan? scenePlan = null,
+        IIllustrationPromptBuilder? promptBuilder = null);
 }
 
 public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDraftAssetsGenerator
@@ -60,12 +67,19 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
         string ownerEmail,
         bool isOpenAi,
         bool usePublishedPaths = false,
-        CancellationToken ct = default)
+        CancellationToken ct = default,
+        StoryBible? storyBible = null,
+        ScenePlan? scenePlan = null,
+        IIllustrationPromptBuilder? promptBuilder = null)
     {
         if (string.IsNullOrWhiteSpace(ownerEmail))
             ownerEmail = "unknown";
 
-        var storyJson = BuildMinimalStoryJson(dto.Title, dto.Summary);
+        // Use Story Bible-enhanced context if available
+        var storyJson = storyBible != null 
+            ? BuildStoryBibleContext(storyBible, dto.Title, dto.Summary)
+            : BuildMinimalStoryJson(dto.Title, dto.Summary);
+            
         byte[]? imageSeedData = null;
         string? imageSeedMime = null;
         if (request.GenerateImages && !string.IsNullOrWhiteSpace(request.ImageSeedBase64))
@@ -80,10 +94,19 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
 
         if (request.GenerateImages)
         {
-            if (request.UseConsistentImageStyle)
+            // Use Story Bible pipeline if available
+            if (storyBible != null && scenePlan != null && promptBuilder != null)
+            {
+                await FillImagesWithStoryBibleAsync(request, dto, storyId, ownerEmail, storyBible, scenePlan, promptBuilder, imageSeedData, imageSeedMime, isOpenAi, usePublishedPaths, ct);
+            }
+            else if (request.UseConsistentImageStyle)
+            {
                 await FillImagesSequentialAsync(request, dto, storyId, ownerEmail, storyJson, imageSeedData, imageSeedMime, isOpenAi, usePublishedPaths, ct);
+            }
             else
+            {
                 await FillImagesParallelAsync(request, dto, storyId, ownerEmail, storyJson, imageSeedData, imageSeedMime, isOpenAi, usePublishedPaths, ct);
+            }
         }
 
         if (request.GenerateAudio)
@@ -277,6 +300,145 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
             r.Tile.ImageUrl = usePublishedPaths ? blobPath : filename;
             if (r.Index == 0) dto.CoverImageUrl = usePublishedPaths ? blobPath : filename;
         }
+    }
+
+    /// <summary>
+    /// Generate images using Story Bible pipeline for improved character consistency.
+    /// </summary>
+    private async Task FillImagesWithStoryBibleAsync(
+        GenerateFullStoryDraftRequest request,
+        EditableStoryDto dto,
+        string storyId,
+        string ownerEmail,
+        StoryBible storyBible,
+        ScenePlan scenePlan,
+        IIllustrationPromptBuilder promptBuilder,
+        byte[]? referenceImageData,
+        string? referenceImageMime,
+        bool isOpenAi,
+        bool usePublishedPaths,
+        CancellationToken ct)
+    {
+        var container = usePublishedPaths ? _blobSas.PublishedContainer : _blobSas.DraftContainer;
+        byte[]? currentRefBytes = referenceImageData;
+        string? currentRefMime = referenceImageMime;
+
+        // Match tiles with scenes
+        var tilesWithScenes = dto.Tiles
+            .Select((tile, idx) => (Tile: tile, Index: idx, Scene: idx < scenePlan.Scenes.Count ? scenePlan.Scenes[idx] : null))
+            .Where(x => !string.IsNullOrWhiteSpace(x.Tile.Text))
+            .ToList();
+
+        for (var i = 0; i < tilesWithScenes.Count; i++)
+        {
+            var (tile, index, scene) = tilesWithScenes[i];
+            
+            try
+            {
+                // Build prompt using Story Bible context
+                string promptText;
+                if (scene != null)
+                {
+                    var illustrationPrompt = promptBuilder.Build(storyBible, scene);
+                    promptText = promptBuilder.GetPromptText(illustrationPrompt);
+                }
+                else
+                {
+                    // Fallback: use tile text with character descriptions
+                    promptText = BuildFallbackPromptWithBible(storyBible, tile.Text ?? string.Empty);
+                }
+
+                _logger.LogDebug("Generating image {Index} with Story Bible prompt", index + 1);
+
+                var (imageData, mimeType) = isOpenAi
+                    ? await _openAIImage.GenerateStoryImageAsync(
+                        BuildStoryBibleContext(storyBible, dto.Title, dto.Summary),
+                        promptText,
+                        request.LanguageCode,
+                        request.ImageSeedInstructions,
+                        currentRefBytes,
+                        currentRefMime,
+                        request.ApiKey.Trim(),
+                        request.ImageModel,
+                        request.ImageQuality?.Trim(),
+                        ct)
+                    : await _googleImage.GenerateStoryImageAsync(
+                        BuildStoryBibleContext(storyBible, dto.Title, dto.Summary),
+                        promptText,
+                        request.LanguageCode,
+                        request.ImageSeedInstructions,
+                        currentRefBytes,
+                        currentRefMime,
+                        ct,
+                        request.ApiKey.Trim(),
+                        request.ImageModel);
+
+                var ext = (mimeType ?? "image/png").Contains("png", StringComparison.OrdinalIgnoreCase) ? "png" : "jpg";
+                var filename = $"{tile.Id}.{ext}";
+                var asset = new StoryAssetPathMapper.AssetInfo(filename, StoryAssetPathMapper.AssetType.Image, null);
+                var blobPath = usePublishedPaths
+                    ? StoryAssetPathMapper.BuildPublishedPath(asset, ownerEmail, storyId)
+                    : StoryAssetPathMapper.BuildDraftPath(asset, ownerEmail, storyId);
+
+                await UploadBlobAsync(container, blobPath, imageData, mimeType ?? "image/png", ct);
+                tile.ImageUrl = usePublishedPaths ? blobPath : filename;
+
+                // Use this image as reference for next (chaining for consistency)
+                currentRefBytes = imageData;
+                currentRefMime = mimeType;
+
+                if (index == 0)
+                    dto.CoverImageUrl = usePublishedPaths ? blobPath : filename;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Story Bible image generation failed for tile {TileId}, index {Index}", tile.Id, index);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Build enhanced story context including character descriptions from Story Bible.
+    /// </summary>
+    private static string BuildStoryBibleContext(StoryBible bible, string? title, string? summary)
+    {
+        var characters = bible.Characters.Select(c => new
+        {
+            c.Name,
+            c.Species,
+            Visual = $"{c.Visual.PrimaryColor} {c.Visual.Size}, features: {string.Join(", ", c.Visual.Features)}"
+        });
+
+        var obj = new
+        {
+            title = title ?? bible.Title,
+            summary = summary ?? string.Empty,
+            visualStyle = bible.VisualStyle,
+            setting = $"{bible.Setting.Place}, {bible.Setting.Time}",
+            characters
+        };
+
+        return JsonSerializer.Serialize(obj);
+    }
+
+    /// <summary>
+    /// Build a fallback prompt with character descriptions when scene is not available.
+    /// </summary>
+    private static string BuildFallbackPromptWithBible(StoryBible bible, string tileText)
+    {
+        var characterDescriptions = string.Join("\n", bible.Characters.Select(c =>
+            $"- {c.Name}: {c.Visual.PrimaryColor} {c.Visual.Size} {c.Species}, {string.Join(", ", c.Visual.Features)}"));
+
+        return $@"Children's book illustration. Colorful, friendly. No text. Portrait, vertical composition.
+Visual style: {bible.VisualStyle}
+Setting: {bible.Setting.Place}, {bible.Setting.Time}
+
+Characters (maintain EXACT appearance):
+{characterDescriptions}
+
+Scene: {tileText}
+
+CONSISTENCY RULES: Do not change character colors, sizes, or species.";
     }
 
     private static string BuildMinimalStoryJson(string? title, string? summary)
