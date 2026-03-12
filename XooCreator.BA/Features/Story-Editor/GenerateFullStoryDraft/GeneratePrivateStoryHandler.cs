@@ -1,5 +1,6 @@
 using System.Net.Http;
 using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using XooCreator.BA.Data.Enums;
@@ -17,6 +18,9 @@ public sealed class GeneratePrivateStoryHandler : IGeneratePrivateStoryHandler
     private const int MaxIdeaLength = 2000;
     private const int MinPageCount = 5;
     private const int MaxPageCount = 10;
+    private static readonly Regex UnsafePromptPattern = new(
+        @"\b(porn|pornograf|porno|nudity|nude|explicit sexual|sex explicit|violenta sexuala|abuz sexual|sex cu minori|child sexual|child porn|rape|gore|snuff)\b",
+        RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled);
 
     private readonly IStoryIdGenerator _storyIdGenerator;
     private readonly IGoogleTextService _googleTextService;
@@ -65,6 +69,7 @@ public sealed class GeneratePrivateStoryHandler : IGeneratePrivateStoryHandler
             throw new ArgumentException("Idea must be at least 20 characters.", nameof(request));
         if (request.Idea.Trim().Length > MaxIdeaLength)
             throw new ArgumentException($"Idea must be at most {MaxIdeaLength} characters.", nameof(request));
+        ValidateChildSafetyOrThrow(request.Idea);
 
         var storyId = await _storyIdGenerator.GenerateNextAsync(ownerUserId, ownerFirstName, ownerLastName, ct);
         var lang = (request.LanguageCode ?? "ro-ro").Trim().ToLowerInvariant();
@@ -193,10 +198,15 @@ public sealed class GeneratePrivateStoryHandler : IGeneratePrivateStoryHandler
                 ct);
         }
 
+        var warnings = CollectGenerationWarnings(dto, request.GenerateImages, request.GenerateAudio);
         await _privateStoryCreation.CreateFromDtoAsync(dto, storyId, ownerUserId, ownerEmail ?? string.Empty, lang, ct);
 
         _logger.LogInformation("GeneratePrivateStory completed: storyId={StoryId} title={Title}", storyId, parseResult.Title);
-        return new GeneratePrivateStoryResponse { StoryId = storyId };
+        return new GeneratePrivateStoryResponse
+        {
+            StoryId = storyId,
+            Warnings = warnings
+        };
     }
 
     private static string BuildSystemInstruction(int numberOfPages, string languageCode)
@@ -407,5 +417,58 @@ Keep exact colors, species, proportions, and unique accessories.
 
 CHARACTER ROSTER (IMMUTABLE):
 {roster}";
+    }
+
+    private void ValidateChildSafetyOrThrow(string idea)
+    {
+        if (string.IsNullOrWhiteSpace(idea))
+            return;
+
+        var match = UnsafePromptPattern.Match(idea);
+        if (match.Success)
+        {
+            _logger.LogWarning(
+                "Private story input blocked by child safety gate. matchedTerm={MatchedTerm}",
+                match.Value);
+            throw new ChildSafetyPolicyViolationException();
+        }
+    }
+
+    private static List<string> CollectGenerationWarnings(
+        EditableStoryDto dto,
+        bool generateImages,
+        bool generateAudio)
+    {
+        var warnings = new List<string>();
+
+        if (generateImages)
+        {
+            var missingImageTiles = dto.Tiles
+                .Where(t => string.IsNullOrWhiteSpace(t.ImageUrl))
+                .Select(t => t.Id)
+                .ToList();
+
+            if (missingImageTiles.Count > 0)
+            {
+                warnings.Add(
+                    $"ImageGenerationPartial: {missingImageTiles.Count} pagini fără imagine ({string.Join(", ", missingImageTiles)}).");
+            }
+        }
+
+        if (generateAudio)
+        {
+            var missingAudioTiles = dto.Tiles
+                .Where(t => string.IsNullOrWhiteSpace(t.AudioUrl))
+                .Select(t => t.Id)
+                .ToList();
+
+            if (missingAudioTiles.Count > 0)
+            {
+                warnings.Add(
+                    $"AudioGenerationPartial: {missingAudioTiles.Count} pagini fără audio ({string.Join(", ", missingAudioTiles)}).");
+            }
+        }
+
+        return warnings;
     }
 }

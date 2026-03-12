@@ -18,4 +18,5 @@ public interface IGeneratePrivateStoryHandler
 public sealed class GeneratePrivateStoryResponse
 {
     public string StoryId { get; init; } = string.Empty;
+    public List<string> Warnings { get; init; } = [];
 }

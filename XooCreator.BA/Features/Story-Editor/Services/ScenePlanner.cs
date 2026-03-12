@@ -93,7 +93,9 @@ OUTPUT FORMAT (JSON array of scenes):
 IMPORTANT:
 - visualFocus should describe the exact visual composition including character colors and features
 - Always reference character colors from the Bible
-- Environment should match the story setting";
+- Environment should match the story setting
+- Keep all descriptions child-safe and gentle (no explicit violence, no sexual content, no nudity, no graphic details)
+- If a scene implies conflict, describe it in age-appropriate, non-graphic terms";
     }
 
     private static string BuildUserContent(StoryBible bible, List<string> storyPages)

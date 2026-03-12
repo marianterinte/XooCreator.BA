@@ -102,7 +102,7 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
         if (request.GenerateImages)
         {
             // Use Story Bible pipeline if available
-            if (storyBible != null && scenePlan != null && promptBuilder != null)
+            if (storyBible != null && promptBuilder != null && (scenePlan != null || usePublishedPaths))
             {
                 await FillImagesWithStoryBibleAsync(request, dto, storyId, ownerEmail, storyBible, scenePlan, promptBuilder, imageSeedData, imageSeedMime, isOpenAi, usePublishedPaths, ct);
             }
@@ -179,6 +179,21 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
             return;
         }
 
+        if (usePublishedPaths)
+        {
+            await FillImagesSequentialGoogleResilientPrivateAsync(
+                request,
+                dto,
+                storyId,
+                ownerEmail,
+                storyJson,
+                referenceImageData,
+                referenceImageMime,
+                usePublishedPaths,
+                ct);
+            return;
+        }
+
         // Google path: reuse shared sequential + reference chaining logic (same as Story Image Export).
         var tilesWithText = dto.Tiles
             .Select((t, idx) => (Tile: t, Index: idx, Text: (t.Text ?? string.Empty).Trim()))
@@ -213,6 +228,80 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
             await UploadBlobAsync(container, blobPath, imageData, mimeType ?? "image/png", ct);
             tile.ImageUrl = usePublishedPaths ? blobPath : filename;
             if (originalIndex == 0) dto.CoverImageUrl = usePublishedPaths ? blobPath : filename;
+        }
+    }
+
+    private async Task FillImagesSequentialGoogleResilientPrivateAsync(
+        GenerateFullStoryDraftRequest request,
+        EditableStoryDto dto,
+        string storyId,
+        string ownerEmail,
+        string storyJson,
+        byte[]? referenceImageData,
+        string? referenceImageMime,
+        bool usePublishedPaths,
+        CancellationToken ct)
+    {
+        var container = usePublishedPaths ? _blobSas.PublishedContainer : _blobSas.DraftContainer;
+        byte[]? currentRefBytes = referenceImageData;
+        string? currentRefMime = referenceImageMime;
+
+        for (var i = 0; i < dto.Tiles.Count; i++)
+        {
+            var tile = dto.Tiles[i];
+            var tileText = (tile.Text ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(tileText))
+                continue;
+
+            try
+            {
+                _logger.LogInformation(
+                    "Private image generation attempt. storyId={StoryId} tileId={TileId} index={Index} attempt={Attempt} fallbackUsed={FallbackUsed}",
+                    storyId,
+                    tile.Id,
+                    i,
+                    1,
+                    false);
+
+                var (imageData, mimeType) = await GenerateGoogleImageWithPromptFallbackAsync(
+                    storyJson,
+                    tileText,
+                    BuildGenericImageFallbackPrompt(tileText, request.LanguageCode ?? "ro-ro"),
+                    request.LanguageCode ?? "en-us",
+                    request.ImageSeedInstructions,
+                    currentRefBytes,
+                    currentRefMime,
+                    request.ApiKey.Trim(),
+                    request.ImageModel,
+                    storyId,
+                    tile.Id,
+                    i,
+                    ct);
+
+                var ext = (mimeType ?? "image/png").Contains("png", StringComparison.OrdinalIgnoreCase) ? "png" : "jpg";
+                var filename = $"{tile.Id}.{ext}";
+                var asset = new StoryAssetPathMapper.AssetInfo(filename, StoryAssetPathMapper.AssetType.Image, null);
+                var blobPath = usePublishedPaths
+                    ? StoryAssetPathMapper.BuildPublishedPath(asset, ownerEmail, storyId)
+                    : StoryAssetPathMapper.BuildDraftPath(asset, ownerEmail, storyId);
+
+                await UploadBlobAsync(container, blobPath, imageData, mimeType ?? "image/png", ct);
+                tile.ImageUrl = usePublishedPaths ? blobPath : filename;
+                currentRefBytes = imageData;
+                currentRefMime = mimeType;
+
+                if (i == 0)
+                    dto.CoverImageUrl = usePublishedPaths ? blobPath : filename;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(
+                    ex,
+                    "Private resilient image generation failed. storyId={StoryId} tileId={TileId} index={Index}. Skipping tile image.",
+                    storyId,
+                    tile.Id,
+                    i);
+            }
         }
     }
 
@@ -319,7 +408,7 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
         string storyId,
         string ownerEmail,
         StoryBible storyBible,
-        ScenePlan scenePlan,
+        ScenePlan? scenePlan,
         IIllustrationPromptBuilder promptBuilder,
         byte[]? referenceImageData,
         string? referenceImageMime,
@@ -336,7 +425,7 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
 
         // Match tiles with scenes
         var tilesWithScenes = dto.Tiles
-            .Select((tile, idx) => (Tile: tile, Index: idx, Scene: idx < scenePlan.Scenes.Count ? scenePlan.Scenes[idx] : null))
+            .Select((tile, idx) => (Tile: tile, Index: idx, Scene: scenePlan != null && idx < scenePlan.Scenes.Count ? scenePlan.Scenes[idx] : null))
             .Where(x => !string.IsNullOrWhiteSpace(x.Tile.Text))
             .ToList();
 
@@ -402,15 +491,19 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
                         request.ImageModel,
                         request.ImageQuality?.Trim(),
                         ct)
-                    : await GenerateGoogleImageWithReferenceFallbackAsync(
+                    : await GenerateGoogleImageWithPromptFallbackAsync(
                         storyBibleContext,
                         promptText,
+                        BuildGenericImageFallbackPrompt(tile.Text ?? string.Empty, request.LanguageCode ?? "ro-ro"),
                         request.LanguageCode,
                         request.ImageSeedInstructions,
                         currentRefBytes,
                         currentRefMime,
                         request.ApiKey.Trim(),
                         request.ImageModel,
+                        storyId,
+                        tile.Id,
+                        index,
                         ct);
 
                 var ext = (mimeType ?? "image/png").Contains("png", StringComparison.OrdinalIgnoreCase) ? "png" : "jpg";
@@ -688,5 +781,78 @@ CONSISTENCY RULES: Do not change character colors, sizes, or species.";
                || string.Equals(ex.ErrorCode, "GoogleImageUnexpectedFinishReason", StringComparison.OrdinalIgnoreCase)
                || string.Equals(ex.ErrorCode, "GoogleImageNoInlineData", StringComparison.OrdinalIgnoreCase)
                || string.Equals(ex.ErrorCode, "GoogleImageMissingParts", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private async Task<(byte[] ImageData, string MimeType)> GenerateGoogleImageWithPromptFallbackAsync(
+        string storyJson,
+        string primaryPrompt,
+        string genericFallbackPrompt,
+        string languageCode,
+        string? extraInstructions,
+        byte[]? referenceImageData,
+        string? referenceImageMime,
+        string apiKey,
+        string? imageModel,
+        string storyId,
+        string tileId,
+        int tileIndex,
+        CancellationToken ct)
+    {
+        try
+        {
+            return await GenerateGoogleImageWithReferenceFallbackAsync(
+                storyJson,
+                primaryPrompt,
+                languageCode,
+                extraInstructions,
+                referenceImageData,
+                referenceImageMime,
+                apiKey,
+                imageModel,
+                ct);
+        }
+        catch (GoogleImageGenerationException ex) when (ShouldAttemptGenericFallback(ex))
+        {
+            _logger.LogWarning(
+                "Primary image prompt failed, trying generic fallback. storyId={StoryId} tileId={TileId} index={TileIndex} attempt={Attempt} finishReason={FinishReason} errorCode={ErrorCode} fallbackUsed={FallbackUsed}",
+                storyId,
+                tileId,
+                tileIndex,
+                2,
+                ex.FinishReason,
+                ex.ErrorCode,
+                true);
+
+            return await GenerateGoogleImageWithReferenceFallbackAsync(
+                storyJson,
+                genericFallbackPrompt,
+                languageCode,
+                extraInstructions,
+                referenceImageData: null,
+                referenceImageMime: null,
+                apiKey,
+                imageModel,
+                ct);
+        }
+    }
+
+    private static bool ShouldAttemptGenericFallback(GoogleImageGenerationException ex)
+    {
+        if (ex.IsTransient)
+            return true;
+
+        return string.Equals(ex.FinishReason, "IMAGE_OTHER", StringComparison.OrdinalIgnoreCase)
+               || string.Equals(ex.ErrorCode, "GoogleImageMissingContent", StringComparison.OrdinalIgnoreCase)
+               || string.Equals(ex.ErrorCode, "GoogleImageNoInlineData", StringComparison.OrdinalIgnoreCase)
+               || string.Equals(ex.ErrorCode, "GoogleImageMissingParts", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string BuildGenericImageFallbackPrompt(string tileText, string languageCode)
+    {
+        return
+            "Children's book illustration, safe and friendly, no text, no nudity, no sexual content, no graphic violence. " +
+            "Use a simple composition, bright colors, and age-appropriate tone. " +
+            $"Language context: {languageCode}. " +
+            $"Scene summary: {tileText}";
     }
 }

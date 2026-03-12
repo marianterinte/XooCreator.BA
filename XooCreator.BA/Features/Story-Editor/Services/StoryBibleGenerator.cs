@@ -332,23 +332,307 @@ public sealed class StoryBibleGenerator : IStoryBibleGenerator
 
     private StoryBible ParseStoryBible(string jsonResponse, string languageCode, int numberOfPages)
     {
+        var cleanJson = CleanJsonResponse(jsonResponse);
+
         try
         {
-            var cleanJson = CleanJsonResponse(jsonResponse);
-            var bible = JsonSerializer.Deserialize<StoryBible>(cleanJson, JsonOptions);
-            
-            if (bible == null)
-                throw new InvalidOperationException("Failed to parse Story Bible JSON");
+            var strictBible = JsonSerializer.Deserialize<StoryBible>(cleanJson, JsonOptions);
+            if (strictBible == null)
+                throw new JsonException("Strict Story Bible parse produced null object.");
 
-            return bible;
+            return NormalizeStoryBible(strictBible, languageCode, numberOfPages);
         }
-        catch (JsonException ex)
+        catch (JsonException strictEx)
         {
-            _logger.LogError(ex, "Failed to parse Story Bible JSON: {Response}", 
-                jsonResponse.Length > 500 ? jsonResponse[..500] : jsonResponse);
-            
+            _logger.LogWarning(
+                strictEx,
+                "Strict Story Bible parse failed; attempting tolerant parse. ResponsePreview={ResponsePreview}",
+                TrimForLog(cleanJson, 500));
+
+            if (TryParseStoryBibleTolerant(cleanJson, out var tolerantBible, out var tolerantError))
+            {
+                _logger.LogWarning(
+                    "Story Bible recovered via tolerant parse after strict parse failure. Detail={Detail}",
+                    tolerantError);
+                return NormalizeStoryBible(tolerantBible, languageCode, numberOfPages);
+            }
+
+            _logger.LogError(
+                strictEx,
+                "Tolerant parse also failed; using deterministic fallback Story Bible. TolerantError={TolerantError}",
+                tolerantError);
+
             return CreateFallbackBible(languageCode, numberOfPages);
         }
+    }
+
+    private static StoryBible NormalizeStoryBible(StoryBible bible, string languageCode, int numberOfPages)
+    {
+        var clampedPages = Math.Clamp(numberOfPages, 1, 10);
+
+        var normalizedCharacters = (bible.Characters ?? [])
+            .Select((c, i) =>
+            {
+                var visual = c.Visual ?? new VisualProfile
+                {
+                    PrimaryColor = string.Empty,
+                    SecondaryColor = null,
+                    Size = string.Empty,
+                    Features = [],
+                    Accessories = []
+                };
+
+                return new CharacterProfile
+                {
+                    Id = string.IsNullOrWhiteSpace(c.Id) ? $"char_{i + 1}" : c.Id.Trim(),
+                    Name = string.IsNullOrWhiteSpace(c.Name) ? $"Character {i + 1}" : c.Name.Trim(),
+                    Role = string.IsNullOrWhiteSpace(c.Role) ? (i == 0 ? "main" : "supporting") : c.Role.Trim(),
+                    Species = string.IsNullOrWhiteSpace(c.Species) ? "animal" : c.Species.Trim(),
+                    Visual = new VisualProfile
+                    {
+                        PrimaryColor = visual.PrimaryColor?.Trim() ?? string.Empty,
+                        SecondaryColor = string.IsNullOrWhiteSpace(visual.SecondaryColor) ? null : visual.SecondaryColor.Trim(),
+                        Size = visual.Size?.Trim() ?? string.Empty,
+                        Features = (visual.Features ?? [])
+                            .Where(f => !string.IsNullOrWhiteSpace(f))
+                            .Select(f => f.Trim())
+                            .ToList(),
+                        Accessories = (visual.Accessories ?? [])
+                            .Where(a => !string.IsNullOrWhiteSpace(a))
+                            .Select(a => a.Trim())
+                            .ToList()
+                    },
+                    Personality = (c.Personality ?? [])
+                        .Where(p => !string.IsNullOrWhiteSpace(p))
+                        .Select(p => p.Trim())
+                        .ToList()
+                };
+            })
+            .ToList();
+
+        if (normalizedCharacters.Count == 0)
+        {
+            normalizedCharacters.Add(new CharacterProfile
+            {
+                Id = "char_1",
+                Name = "Character 1",
+                Role = "main",
+                Species = "animal",
+                Visual = new VisualProfile
+                {
+                    PrimaryColor = string.Empty,
+                    SecondaryColor = null,
+                    Size = string.Empty,
+                    Features = [],
+                    Accessories = []
+                },
+                Personality = ["curious"]
+            });
+        }
+
+        var normalizedSkeleton = (bible.SceneSkeleton ?? [])
+            .Where(s => !string.IsNullOrWhiteSpace(s))
+            .Select(s => s.Trim())
+            .ToList();
+
+        while (normalizedSkeleton.Count < clampedPages)
+            normalizedSkeleton.Add($"Scene {normalizedSkeleton.Count + 1}");
+
+        if (normalizedSkeleton.Count > clampedPages)
+            normalizedSkeleton = normalizedSkeleton.Take(clampedPages).ToList();
+
+        return new StoryBible
+        {
+            Title = string.IsNullOrWhiteSpace(bible.Title) ? "Story" : bible.Title.Trim(),
+            Language = string.IsNullOrWhiteSpace(bible.Language) ? languageCode : bible.Language.Trim(),
+            AgeRange = string.IsNullOrWhiteSpace(bible.AgeRange) ? "4-6" : bible.AgeRange.Trim(),
+            Tone = string.IsNullOrWhiteSpace(bible.Tone) ? "warm, gentle" : bible.Tone.Trim(),
+            VisualStyle = string.IsNullOrWhiteSpace(bible.VisualStyle) ? "storybook, colorful, soft light" : bible.VisualStyle.Trim(),
+            Setting = new StorySetting
+            {
+                Place = string.IsNullOrWhiteSpace(bible.Setting?.Place) ? "meadow" : bible.Setting.Place.Trim(),
+                Time = string.IsNullOrWhiteSpace(bible.Setting?.Time) ? "morning" : bible.Setting.Time.Trim()
+            },
+            Characters = normalizedCharacters,
+            Plot = new PlotOutline
+            {
+                Problem = string.IsNullOrWhiteSpace(bible.Plot?.Problem) ? "character faces a challenge" : bible.Plot.Problem.Trim(),
+                Escalation = string.IsNullOrWhiteSpace(bible.Plot?.Escalation) ? null : bible.Plot.Escalation.Trim(),
+                Resolution = string.IsNullOrWhiteSpace(bible.Plot?.Resolution) ? "character resolves the challenge" : bible.Plot.Resolution.Trim(),
+                Moral = string.IsNullOrWhiteSpace(bible.Plot?.Moral) ? "friendship and courage matter" : bible.Plot.Moral.Trim()
+            },
+            SceneSkeleton = normalizedSkeleton,
+            Version = string.IsNullOrWhiteSpace(bible.Version) ? null : bible.Version.Trim()
+        };
+    }
+
+    private static bool TryParseStoryBibleTolerant(string cleanJson, out StoryBible bible, out string detail)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(cleanJson);
+            if (doc.RootElement.ValueKind != JsonValueKind.Object)
+            {
+                detail = "Root element is not a JSON object.";
+                bible = CreateFallbackBible("en-US", 5);
+                return false;
+            }
+
+            var root = doc.RootElement;
+
+            var setting = GetObjectProperty(root, "setting");
+            var plot = GetObjectProperty(root, "plot");
+
+            var characters = GetArrayProperty(root, "characters")
+                .Select((c, i) => ParseCharacterProfile(c, i))
+                .ToList();
+
+            var sceneSkeleton = GetArrayProperty(root, "sceneSkeleton")
+                .Select(GetStringValue)
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .Select(s => s!)
+                .ToList();
+
+            bible = new StoryBible
+            {
+                Title = GetStringProperty(root, "title") ?? string.Empty,
+                Language = GetStringProperty(root, "language") ?? string.Empty,
+                AgeRange = GetStringProperty(root, "ageRange") ?? string.Empty,
+                Tone = GetStringProperty(root, "tone") ?? string.Empty,
+                VisualStyle = GetStringProperty(root, "visualStyle") ?? string.Empty,
+                Setting = new StorySetting
+                {
+                    Place = GetStringProperty(setting, "place") ?? string.Empty,
+                    Time = GetStringProperty(setting, "time") ?? string.Empty
+                },
+                Characters = characters,
+                Plot = new PlotOutline
+                {
+                    Problem = GetStringProperty(plot, "problem") ?? string.Empty,
+                    Escalation = GetStringProperty(plot, "escalation"),
+                    Resolution = GetStringProperty(plot, "resolution") ?? string.Empty,
+                    Moral = GetStringProperty(plot, "moral") ?? string.Empty
+                },
+                SceneSkeleton = sceneSkeleton,
+                Version = GetStringProperty(root, "version")
+            };
+
+            detail = "Tolerant JSON mapping succeeded.";
+            return true;
+        }
+        catch (Exception ex)
+        {
+            detail = ex.Message;
+            bible = CreateFallbackBible("en-US", 5);
+            return false;
+        }
+    }
+
+    private static CharacterProfile ParseCharacterProfile(JsonElement element, int index)
+    {
+        var visual = GetObjectProperty(element, "visual");
+
+        var features = GetArrayProperty(visual, "features")
+            .Select(GetStringValue)
+            .Where(v => !string.IsNullOrWhiteSpace(v))
+            .Select(v => v!)
+            .ToList();
+
+        var accessories = GetArrayProperty(visual, "accessories")
+            .Select(GetStringValue)
+            .Where(v => !string.IsNullOrWhiteSpace(v))
+            .Select(v => v!)
+            .ToList();
+
+        var personality = GetArrayProperty(element, "personality")
+            .Select(GetStringValue)
+            .Where(v => !string.IsNullOrWhiteSpace(v))
+            .Select(v => v!)
+            .ToList();
+
+        return new CharacterProfile
+        {
+            Id = GetStringProperty(element, "id") ?? $"char_{index + 1}",
+            Name = GetStringProperty(element, "name") ?? $"Character {index + 1}",
+            Role = GetStringProperty(element, "role") ?? (index == 0 ? "main" : "supporting"),
+            Species = GetStringProperty(element, "species") ?? "animal",
+            Visual = new VisualProfile
+            {
+                PrimaryColor = GetStringProperty(visual, "primaryColor") ?? string.Empty,
+                SecondaryColor = GetStringProperty(visual, "secondaryColor"),
+                Size = GetStringProperty(visual, "size") ?? string.Empty,
+                Features = features,
+                Accessories = accessories
+            },
+            Personality = personality
+        };
+    }
+
+    private static JsonElement GetObjectProperty(JsonElement element, string name)
+    {
+        if (element.ValueKind == JsonValueKind.Object &&
+            TryGetPropertyIgnoreCase(element, name, out var child) &&
+            child.ValueKind == JsonValueKind.Object)
+        {
+            return child;
+        }
+
+        return default;
+    }
+
+    private static List<JsonElement> GetArrayProperty(JsonElement element, string name)
+    {
+        if (element.ValueKind == JsonValueKind.Object &&
+            TryGetPropertyIgnoreCase(element, name, out var child) &&
+            child.ValueKind == JsonValueKind.Array)
+        {
+            return child.EnumerateArray().ToList();
+        }
+
+        return [];
+    }
+
+    private static string? GetStringProperty(JsonElement element, string name)
+    {
+        if (element.ValueKind != JsonValueKind.Object ||
+            !TryGetPropertyIgnoreCase(element, name, out var child))
+        {
+            return null;
+        }
+
+        return GetStringValue(child);
+    }
+
+    private static string? GetStringValue(JsonElement element)
+    {
+        if (element.ValueKind != JsonValueKind.String)
+            return null;
+
+        var value = element.GetString();
+        return string.IsNullOrWhiteSpace(value) ? null : value;
+    }
+
+    private static bool TryGetPropertyIgnoreCase(JsonElement element, string name, out JsonElement value)
+    {
+        foreach (var prop in element.EnumerateObject())
+        {
+            if (string.Equals(prop.Name, name, StringComparison.OrdinalIgnoreCase))
+            {
+                value = prop.Value;
+                return true;
+            }
+        }
+
+        value = default;
+        return false;
+    }
+
+    private static string TrimForLog(string value, int maxLength)
+    {
+        if (string.IsNullOrEmpty(value))
+            return string.Empty;
+
+        return value.Length > maxLength ? value[..maxLength] : value;
     }
 
     private static string CleanJsonResponse(string response)

@@ -209,9 +209,20 @@ public class StoryAIGenerateQueueWorker : BackgroundService
             job.StoryId = response.StoryId;
             job.Status = StoryAIGenerateJobStatus.Completed;
             job.CompletedAtUtc = DateTime.UtcNow;
-            job.ProgressMessage = null;
+            var warnings = response.Warnings ?? [];
+            if (warnings.Count > 0)
+            {
+                job.ProgressMessage = BuildCompletedWarningsProgress(warnings);
+                // Keep completed jobs non-error from UI perspective.
+                // Warnings are surfaced through progress message only.
+                job.ErrorCode = null;
+            }
+            else
+            {
+                job.ProgressMessage = null;
+                job.ErrorCode = null;
+            }
             job.ErrorMessage = null;
-            job.ErrorCode = null;
             await db.SaveChangesAsync(stoppingToken);
             PublishJobEvent(job);
             _logger.LogInformation("PrivateStoryAIGenerateJob completed: jobId={JobId} storyId={StoryId}", job.Id, job.StoryId);
@@ -359,6 +370,9 @@ public class StoryAIGenerateQueueWorker : BackgroundService
 
     private static string? ResolveErrorCode(Exception ex)
     {
+        if (ex is ChildSafetyPolicyViolationException)
+            return "ChildSafetyPolicyViolation";
+
         if (ex is GoogleImageGenerationException imageEx)
             return imageEx.ErrorCode;
 
@@ -366,6 +380,12 @@ public class StoryAIGenerateQueueWorker : BackgroundService
             return "RateLimitExceeded";
 
         return null;
+    }
+
+    private static string BuildCompletedWarningsProgress(List<string> warnings)
+    {
+        var text = "Completed with warnings: " + string.Join(" | ", warnings);
+        return text.Length > 900 ? text[..900] + "..." : text;
     }
 
     private sealed record StoryAIGenerateQueuePayload(Guid JobId);
