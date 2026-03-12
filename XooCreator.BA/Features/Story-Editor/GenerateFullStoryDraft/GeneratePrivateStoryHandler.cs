@@ -3,6 +3,7 @@ using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using XooCreator.BA.Data.Enums;
+using XooCreator.BA.Features.StoryEditor.Models;
 using XooCreator.BA.Features.StoryEditor.Services;
 using XooCreator.BA.Features.StoryEditor.Services.Content;
 
@@ -19,23 +20,35 @@ public sealed class GeneratePrivateStoryHandler : IGeneratePrivateStoryHandler
 
     private readonly IStoryIdGenerator _storyIdGenerator;
     private readonly IGoogleTextService _googleTextService;
+    private readonly IGoogleImageService _googleImageService;
     private readonly IGenerateFullStoryDraftAssetsGenerator _assetsGenerator;
     private readonly IPrivateStoryCreationService _privateStoryCreation;
+    private readonly IStoryBibleGenerator _storyBibleGenerator;
+    private readonly IScenePlanner _scenePlanner;
+    private readonly IIllustrationPromptBuilder _illustrationPromptBuilder;
     private readonly IConfiguration _configuration;
     private readonly ILogger<GeneratePrivateStoryHandler> _logger;
 
     public GeneratePrivateStoryHandler(
         IStoryIdGenerator storyIdGenerator,
         IGoogleTextService googleTextService,
+        IGoogleImageService googleImageService,
         IGenerateFullStoryDraftAssetsGenerator assetsGenerator,
         IPrivateStoryCreationService privateStoryCreation,
+        IStoryBibleGenerator storyBibleGenerator,
+        IScenePlanner scenePlanner,
+        IIllustrationPromptBuilder illustrationPromptBuilder,
         IConfiguration configuration,
         ILogger<GeneratePrivateStoryHandler> logger)
     {
         _storyIdGenerator = storyIdGenerator;
         _googleTextService = googleTextService;
+        _googleImageService = googleImageService;
         _assetsGenerator = assetsGenerator;
         _privateStoryCreation = privateStoryCreation;
+        _storyBibleGenerator = storyBibleGenerator;
+        _scenePlanner = scenePlanner;
+        _illustrationPromptBuilder = illustrationPromptBuilder;
         _configuration = configuration;
         _logger = logger;
     }
@@ -65,25 +78,85 @@ public sealed class GeneratePrivateStoryHandler : IGeneratePrivateStoryHandler
             request.GenerateImages,
             request.GenerateAudio);
 
-        var systemInstruction = BuildSystemInstruction(pageCount, lang);
-        var userContent = BuildUserContent(request.Idea.Trim(), request.Title?.Trim(), pageCount);
         var apiKey = _configuration["GoogleAI:ApiKey"] ?? string.Empty;
         if (string.IsNullOrWhiteSpace(apiKey))
             throw new InvalidOperationException("GoogleAI:ApiKey is not configured for private story generation.");
 
-        var rawText = await RetryAsync(
-            () => _googleTextService.GenerateContentAsync(
-                systemInstruction,
-                userContent,
-                apiKeyOverride: apiKey,
-                modelOverride: null,
-                responseMimeType: "text/plain",
-                ct: ct),
-            "private-story-text",
-            ct);
+        StoryBible? storyBible = null;
+        ScenePlan? scenePlan = null;
+
+        try
+        {
+            storyBible = await RetryAsync(
+                () => _storyBibleGenerator.GenerateAsync(
+                    request.Idea.Trim(),
+                    request.Title?.Trim(),
+                    pageCount,
+                    lang,
+                    apiKey,
+                    model: null,
+                    ct),
+                "private-story-bible",
+                ct);
+        }
+        catch (Exception ex) when (!ct.IsCancellationRequested)
+        {
+            storyBible = null;
+            _logger.LogWarning(ex, "Private story Story Bible generation failed for storyId={StoryId}. Falling back to classic prompts.", storyId);
+        }
+
+        string rawText;
+        if (storyBible != null)
+        {
+            try
+            {
+                rawText = await GenerateStoryTextWithBibleAsync(storyBible, pageCount, lang, apiKey, ct);
+            }
+            catch (Exception ex) when (!ct.IsCancellationRequested)
+            {
+                _logger.LogWarning(ex, "Private story Story Bible text generation failed for storyId={StoryId}. Falling back to classic prompts.", storyId);
+                rawText = await GenerateStoryTextClassicAsync(request.Idea.Trim(), request.Title?.Trim(), pageCount, lang, apiKey, ct);
+            }
+        }
+        else
+        {
+            rawText = await GenerateStoryTextClassicAsync(request.Idea.Trim(), request.Title?.Trim(), pageCount, lang, apiKey, ct);
+        }
 
         var parseResult = StoryTextDelimiterParser.Parse(rawText);
         var dto = BuildEditableStoryDto(storyId, lang, parseResult);
+
+        if (request.GenerateImages && storyBible != null)
+        {
+            try
+            {
+                var pageTexts = parseResult.Pages.Select(p => p.Text).ToList();
+                scenePlan = await RetryAsync(
+                    () => _scenePlanner.PlanAsync(
+                        storyBible,
+                        pageTexts,
+                        storyId,
+                        apiKey,
+                        model: null,
+                        ct),
+                    "private-story-scene-plan",
+                    ct);
+            }
+            catch (Exception ex) when (!ct.IsCancellationRequested)
+            {
+                scenePlan = null;
+                _logger.LogWarning(ex, "Private story scene planning failed for storyId={StoryId}. Falling back to sequential prompts.", storyId);
+            }
+        }
+
+        byte[]? characterSeedImageData = null;
+        string? characterSeedMimeType = null;
+        if (request.GenerateImages && storyBible != null)
+        {
+            var seedResult = await TryGenerateCharacterReferenceSeedAsync(storyBible, apiKey, ct);
+            characterSeedImageData = seedResult.ImageData;
+            characterSeedMimeType = seedResult.MimeType;
+        }
 
         var syntheticRequest = new GenerateFullStoryDraftRequest
         {
@@ -95,8 +168,11 @@ public sealed class GeneratePrivateStoryHandler : IGeneratePrivateStoryHandler
             GenerateImages = request.GenerateImages,
             GenerateAudio = request.GenerateAudio,
             UseConsistentImageStyle = true,
+            UseStoryBible = storyBible != null,
             AudioModel = "gemini-2.5-pro-preview-tts",
-            Title = request.Title
+            Title = request.Title,
+            ImageSeedBase64 = characterSeedImageData != null ? Convert.ToBase64String(characterSeedImageData) : null,
+            ImageSeedMimeType = characterSeedMimeType
         };
 
         if (request.GenerateImages || request.GenerateAudio)
@@ -109,7 +185,10 @@ public sealed class GeneratePrivateStoryHandler : IGeneratePrivateStoryHandler
                     ownerEmail ?? "unknown",
                     isOpenAi: false,
                     usePublishedPaths: true,
-                    ct),
+                    ct,
+                    storyBible,
+                    scenePlan,
+                    _illustrationPromptBuilder),
                 "private-story-assets",
                 ct);
         }
@@ -238,5 +317,95 @@ public sealed class GeneratePrivateStoryHandler : IGeneratePrivateStoryHandler
                || message.Contains("timeout")
                || message.Contains("temporarily unavailable")
                || message.Contains("service unavailable");
+    }
+
+    private async Task<string> GenerateStoryTextClassicAsync(
+        string idea,
+        string? title,
+        int pageCount,
+        string languageCode,
+        string apiKey,
+        CancellationToken ct)
+    {
+        var systemInstruction = BuildSystemInstruction(pageCount, languageCode);
+        var userContent = BuildUserContent(idea, title, pageCount);
+        return await RetryAsync(
+            () => _googleTextService.GenerateContentAsync(
+                systemInstruction,
+                userContent,
+                apiKeyOverride: apiKey,
+                modelOverride: null,
+                responseMimeType: "text/plain",
+                ct: ct),
+            "private-story-text",
+            ct);
+    }
+
+    private async Task<string> GenerateStoryTextWithBibleAsync(
+        StoryBible storyBible,
+        int pageCount,
+        string languageCode,
+        string apiKey,
+        CancellationToken ct)
+    {
+        var systemInstruction = StoryBibleTextPromptBuilder.BuildGoogleSystemInstruction(pageCount, languageCode, storyBible);
+        var userContent = StoryBibleTextPromptBuilder.BuildGoogleUserContent(storyBible, string.Empty, pageCount);
+        return await RetryAsync(
+            () => _googleTextService.GenerateContentAsync(
+                systemInstruction,
+                userContent,
+                apiKeyOverride: apiKey,
+                modelOverride: null,
+                responseMimeType: "text/plain",
+                ct: ct),
+            "private-story-text-with-bible",
+            ct);
+    }
+
+    private async Task<(byte[]? ImageData, string? MimeType)> TryGenerateCharacterReferenceSeedAsync(
+        StoryBible storyBible,
+        string apiKey,
+        CancellationToken ct)
+    {
+        try
+        {
+            var prompt = BuildCharacterReferenceSheetPrompt(storyBible);
+            var (imageData, mimeType) = await RetryAsync(
+                () => _googleImageService.GenerateImageFromPromptAsync(
+                    prompt,
+                    ct,
+                    apiKeyOverride: apiKey,
+                    modelOverride: null),
+                "private-story-character-reference-seed",
+                ct);
+
+            return (imageData, mimeType);
+        }
+        catch (Exception ex) when (!ct.IsCancellationRequested)
+        {
+            _logger.LogWarning(ex, "Private story character reference seed generation failed. Continuing without seed image.");
+            return (null, null);
+        }
+    }
+
+    private static string BuildCharacterReferenceSheetPrompt(StoryBible storyBible)
+    {
+        var roster = string.Join(
+            Environment.NewLine,
+            storyBible.Characters.Select(c =>
+            {
+                var marker = c.Visual.Accessories.Count > 0 ? string.Join(", ", c.Visual.Accessories) : "no marker";
+                var features = c.Visual.Features.Count > 0 ? string.Join(", ", c.Visual.Features) : "distinctive silhouette";
+                return $"- {c.Name}: {c.Visual.PrimaryColor} {c.Visual.Size} {c.Species}; features: {features}; unique marker: {marker}";
+            }));
+
+        return $@"Character reference sheet for a children's book illustration pipeline.
+Portrait 4:5 composition. Soft storybook style. White or very light neutral background.
+Show ALL recurring characters in full body, side-by-side, clearly separated, facing camera.
+Do not add text, labels, watermark, or speech bubbles.
+Keep exact colors, species, proportions, and unique accessories.
+
+CHARACTER ROSTER (IMMUTABLE):
+{roster}";
     }
 }

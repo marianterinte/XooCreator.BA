@@ -13,7 +13,7 @@ public sealed record SceneDefinition
     public required string Environment { get; init; }
     public required string Emotion { get; init; }
     public required string VisualFocus { get; init; }
-    public required string SourceText { get; init; }
+    public string SourceText { get; init; } = string.Empty;
 }
 
 /// <summary>

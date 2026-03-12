@@ -13,12 +13,6 @@ public sealed class ScenePlanner : IScenePlanner
     private readonly IGoogleTextService _googleTextService;
     private readonly ILogger<ScenePlanner> _logger;
 
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        PropertyNameCaseInsensitive = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-    };
-
     public ScenePlanner(
         IGoogleTextService googleTextService,
         ILogger<ScenePlanner> logger)
@@ -118,33 +112,138 @@ IMPORTANT:
 
     private List<SceneDefinition> ParseScenes(string jsonResponse, List<string> storyPages)
     {
+        var cleanJson = CleanJsonResponse(jsonResponse);
+
         try
         {
-            var cleanJson = CleanJsonResponse(jsonResponse);
-            var scenes = JsonSerializer.Deserialize<List<SceneDefinition>>(cleanJson, JsonOptions);
-            
-            if (scenes == null || scenes.Count == 0)
+            var scenes = ParseScenesLenient(cleanJson, storyPages);
+            if (scenes.Count == 0)
             {
-                _logger.LogWarning("Failed to parse scenes, creating fallback");
+                _logger.LogWarning("Scene planner returned no usable scenes. Using deterministic fallback scenes.");
                 return CreateFallbackScenes(storyPages);
-            }
-
-            // Ensure sourceText is set
-            for (var i = 0; i < scenes.Count && i < storyPages.Count; i++)
-            {
-                if (string.IsNullOrEmpty(scenes[i].SourceText))
-                {
-                    scenes[i] = scenes[i] with { SourceText = storyPages[i] };
-                }
             }
 
             return scenes;
         }
         catch (JsonException ex)
         {
-            _logger.LogError(ex, "Failed to parse scenes JSON");
+            _logger.LogWarning(ex, "Failed to parse scenes JSON; using deterministic fallback scenes.");
             return CreateFallbackScenes(storyPages);
         }
+    }
+
+    private static List<SceneDefinition> ParseScenesLenient(string cleanJson, List<string> storyPages)
+    {
+        using var doc = JsonDocument.Parse(cleanJson);
+        var root = doc.RootElement;
+
+        JsonElement sceneArray;
+        if (root.ValueKind == JsonValueKind.Array)
+        {
+            sceneArray = root;
+        }
+        else if (root.ValueKind == JsonValueKind.Object
+                 && root.TryGetProperty("scenes", out var scenesProp)
+                 && scenesProp.ValueKind == JsonValueKind.Array)
+        {
+            sceneArray = scenesProp;
+        }
+        else
+        {
+            return [];
+        }
+
+        var rawScenes = sceneArray.EnumerateArray().ToList();
+        var result = new List<SceneDefinition>(storyPages.Count);
+
+        for (var i = 0; i < storyPages.Count; i++)
+        {
+            var pageText = storyPages[i];
+            if (i >= rawScenes.Count || rawScenes[i].ValueKind != JsonValueKind.Object)
+            {
+                result.Add(CreateFallbackScene(i, pageText));
+                continue;
+            }
+
+            var sceneEl = rawScenes[i];
+            var sceneId = GetOptionalString(sceneEl, "sceneId") ?? $"scene-{i + 1:D2}";
+            var orderIndex = GetOptionalInt(sceneEl, "orderIndex") ?? i;
+            var title = GetOptionalString(sceneEl, "title") ?? $"Scene {i + 1}";
+            var summary = GetOptionalString(sceneEl, "summary");
+            if (string.IsNullOrWhiteSpace(summary))
+                summary = pageText.Length > 100 ? pageText[..100] + "..." : pageText;
+
+            var charactersPresent = GetOptionalStringArray(sceneEl, "charactersPresent");
+            var environment = GetOptionalString(sceneEl, "environment") ?? "story setting";
+            var emotion = GetOptionalString(sceneEl, "emotion") ?? "neutral";
+            var visualFocus = GetOptionalString(sceneEl, "visualFocus") ?? pageText;
+            var sourceText = GetOptionalString(sceneEl, "sourceText") ?? pageText;
+
+            result.Add(new SceneDefinition
+            {
+                SceneId = sceneId,
+                OrderIndex = orderIndex,
+                Title = title,
+                Summary = summary,
+                CharactersPresent = charactersPresent,
+                Environment = environment,
+                Emotion = emotion,
+                VisualFocus = visualFocus,
+                SourceText = sourceText
+            });
+        }
+
+        return result;
+    }
+
+    private static SceneDefinition CreateFallbackScene(int index, string sourceText)
+    {
+        return new SceneDefinition
+        {
+            SceneId = $"scene-{index + 1:D2}",
+            OrderIndex = index,
+            Title = $"Scene {index + 1}",
+            Summary = sourceText.Length > 100 ? sourceText[..100] + "..." : sourceText,
+            CharactersPresent = [],
+            Environment = "story setting",
+            Emotion = "neutral",
+            VisualFocus = sourceText,
+            SourceText = sourceText
+        };
+    }
+
+    private static string? GetOptionalString(JsonElement element, string propertyName)
+    {
+        if (!element.TryGetProperty(propertyName, out var value) || value.ValueKind != JsonValueKind.String)
+            return null;
+
+        var s = value.GetString();
+        return string.IsNullOrWhiteSpace(s) ? null : s;
+    }
+
+    private static int? GetOptionalInt(JsonElement element, string propertyName)
+    {
+        if (!element.TryGetProperty(propertyName, out var value))
+            return null;
+
+        if (value.ValueKind == JsonValueKind.Number && value.TryGetInt32(out var i))
+            return i;
+
+        return null;
+    }
+
+    private static List<string> GetOptionalStringArray(JsonElement element, string propertyName)
+    {
+        if (!element.TryGetProperty(propertyName, out var value) || value.ValueKind != JsonValueKind.Array)
+            return [];
+
+        return value
+            .EnumerateArray()
+            .Where(v => v.ValueKind == JsonValueKind.String)
+            .Select(v => v.GetString())
+            .Where(v => !string.IsNullOrWhiteSpace(v))
+            .Cast<string>()
+            .ToList();
     }
 
     private static List<SceneDefinition> CreateFallbackScenes(List<string> storyPages)

@@ -114,7 +114,8 @@ public class GoogleImageService : IGoogleImageService
         // Optimizare: extragem doar ultimele 3 pagini + summary pentru a reduce tokenii
         var optimizedJson = ExtractOptimizedStoryContext(storyJson);
 
-        var prompt = BuildImagePrompt(optimizedJson, tileText, languageCode, extraInstructions);
+        var hasReferenceImage = referenceImage != null && referenceImage.Length > 0;
+        var prompt = BuildImagePrompt(optimizedJson, tileText, languageCode, extraInstructions, hasReferenceImage);
 
         // Construim parts: text + (opțional) imagine de referință
         var parts = new List<object>
@@ -122,7 +123,7 @@ public class GoogleImageService : IGoogleImageService
             new { text = prompt }
         };
 
-        if (referenceImage != null && referenceImage.Length > 0)
+        if (hasReferenceImage)
         {
             var mimeType = string.IsNullOrWhiteSpace(referenceImageMimeType)
                 ? "image/png"
@@ -357,12 +358,19 @@ public class GoogleImageService : IGoogleImageService
         string storyJson,
         string tileText,
         string languageCode,
-        string? extraInstructions)
+        string? extraInstructions,
+        bool hasReferenceImage)
     {
         var sb = new StringBuilder();
         sb.AppendLine("Children's book illustration. Colorful, friendly. No text. Portrait, vertical composition, 4:5 aspect ratio. Consistent style.");
         sb.AppendLine($"Context: {storyJson}");
         sb.AppendLine($"Scene: {tileText}");
+
+        if (hasReferenceImage)
+        {
+            sb.AppendLine("REFERENCE IMAGE: The attached image defines established character appearance and art style.");
+            sb.AppendLine("Match character colors, proportions, features, and accessories EXACTLY as shown.");
+        }
 
         if (!string.IsNullOrWhiteSpace(extraInstructions))
         {
@@ -407,9 +415,9 @@ public class GoogleImageService : IGoogleImageService
 
         var candidate = candidates[0];
 
-        // Check finish reason (why generation stopped)
-        // Valid reasons: STOP (normal completion), MAX_TOKENS (reached token limit but content is valid)
-        // Invalid reasons: SAFETY, RECITATION (blocked by filters)
+        // Check finish reason (why generation stopped).
+        // We keep the flow permissive for non-safety reasons and still attempt to extract image data.
+        string? nonBlockingFinishReason = null;
         if (candidate.TryGetProperty("finishReason", out var finishReason))
         {
             var reason = finishReason.GetString();
@@ -452,12 +460,8 @@ public class GoogleImageService : IGoogleImageService
                         isTransient: false,
                         finishReason: reason);
                 }
-                
-                throw new GoogleImageGenerationException(
-                    "GoogleImageUnexpectedFinishReason",
-                    $"Image generation finished unexpectedly. Reason: {reason}",
-                    isTransient: true,
-                    finishReason: reason);
+
+                nonBlockingFinishReason = reason;
             }
         }
 
@@ -476,9 +480,12 @@ public class GoogleImageService : IGoogleImageService
             parts.GetArrayLength() == 0)
         {
             _logger.LogError("Gemini image response has no content parts. Candidate: {Candidate}", candidate.GetRawText());
+            var finishNote = string.IsNullOrWhiteSpace(nonBlockingFinishReason)
+                ? string.Empty
+                : $" Finish reason: {nonBlockingFinishReason}.";
             throw new GoogleImageGenerationException(
                 "GoogleImageMissingParts",
-                BuildDebugMessage("Gemini image response does not contain content parts. The content may have been blocked or the response format is unexpected.", candidate.GetRawText()),
+                BuildDebugMessage($"Gemini image response does not contain content parts.{finishNote} The content may have been blocked or the response format is unexpected.", candidate.GetRawText()),
                 isTransient: true);
         }
 
@@ -509,10 +516,14 @@ public class GoogleImageService : IGoogleImageService
         }
 
         _logger.LogError("No inline image data found in Gemini response. Parts count: {PartsCount}", parts.GetArrayLength());
+        var noImageFinishNote = string.IsNullOrWhiteSpace(nonBlockingFinishReason)
+            ? string.Empty
+            : $" Finish reason: {nonBlockingFinishReason}.";
         throw new GoogleImageGenerationException(
             "GoogleImageNoInlineData",
-            BuildDebugMessage("No inline image data found in Gemini response. The model may not have generated an image.", responseJson),
-            isTransient: true);
+            BuildDebugMessage($"No inline image data found in Gemini response.{noImageFinishNote} The model may not have generated an image.", responseJson),
+            isTransient: true,
+            finishReason: nonBlockingFinishReason);
     }
 
     private static string BuildDebugMessage(string baseMessage, string? rawResponse)

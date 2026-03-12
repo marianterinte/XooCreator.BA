@@ -399,16 +399,16 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
                         request.ImageModel,
                         request.ImageQuality?.Trim(),
                         ct)
-                    : await _googleImage.GenerateStoryImageAsync(
+                    : await GenerateGoogleImageWithReferenceFallbackAsync(
                         storyBibleContext,
                         promptText,
                         request.LanguageCode,
                         request.ImageSeedInstructions,
                         currentRefBytes,
                         currentRefMime,
-                        ct,
                         request.ApiKey.Trim(),
-                        request.ImageModel);
+                        request.ImageModel,
+                        ct);
 
                 var ext = (mimeType ?? "image/png").Contains("png", StringComparison.OrdinalIgnoreCase) ? "png" : "jpg";
                 var filename = $"{tile.Id}.{ext}";
@@ -629,5 +629,63 @@ CONSISTENCY RULES: Do not change character colors, sizes, or species.";
         var client = _blobSas.GetBlobClient(container, blobPath);
         using var stream = new MemoryStream(data);
         await client.UploadAsync(stream, overwrite: true, ct);
+    }
+
+    private async Task<(byte[] ImageData, string MimeType)> GenerateGoogleImageWithReferenceFallbackAsync(
+        string storyJson,
+        string tileText,
+        string languageCode,
+        string? extraInstructions,
+        byte[]? referenceImageData,
+        string? referenceImageMime,
+        string apiKey,
+        string? imageModel,
+        CancellationToken ct)
+    {
+        try
+        {
+            return await _googleImage.GenerateStoryImageAsync(
+                storyJson,
+                tileText,
+                languageCode,
+                extraInstructions,
+                referenceImageData,
+                referenceImageMime,
+                ct,
+                apiKey,
+                imageModel);
+        }
+        catch (GoogleImageGenerationException ex) when (
+            referenceImageData is { Length: > 0 } &&
+            ShouldRetryWithoutReference(ex))
+        {
+            _logger.LogWarning(
+                ex,
+                "Google image generation failed with reference image (code={ErrorCode}, finishReason={FinishReason}). Retrying once without reference image.",
+                ex.ErrorCode,
+                ex.FinishReason);
+
+            return await _googleImage.GenerateStoryImageAsync(
+                storyJson,
+                tileText,
+                languageCode,
+                extraInstructions,
+                referenceImage: null,
+                referenceImageMimeType: null,
+                ct: ct,
+                apiKeyOverride: apiKey,
+                modelOverride: imageModel);
+        }
+    }
+
+    private static bool ShouldRetryWithoutReference(GoogleImageGenerationException ex)
+    {
+        if (ex.IsTransient)
+            return true;
+
+        return string.Equals(ex.FinishReason, "IMAGE_OTHER", StringComparison.OrdinalIgnoreCase)
+               || string.Equals(ex.ErrorCode, "GoogleImageUnexpectedFinishReason", StringComparison.OrdinalIgnoreCase)
+               || string.Equals(ex.ErrorCode, "GoogleImageNoInlineData", StringComparison.OrdinalIgnoreCase)
+               || string.Equals(ex.ErrorCode, "GoogleImageMissingParts", StringComparison.OrdinalIgnoreCase);
     }
 }
