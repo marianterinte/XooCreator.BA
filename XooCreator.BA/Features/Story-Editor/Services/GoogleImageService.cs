@@ -226,10 +226,6 @@ public class GoogleImageService : IGoogleImageService
         }
         catch (Exception ex)
         {
-            _logger.LogError(
-                ex,
-                "{ColoredStatus}",
-                ColoredLogHelper.FormatImageGeneration(modelName, "FAIL", ex.GetType().Name));
             throw;
         }
     }
