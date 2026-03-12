@@ -93,6 +93,9 @@ OUTPUT FORMAT (JSON array of scenes):
 IMPORTANT:
 - visualFocus should describe the exact visual composition including character colors and features
 - Always reference character colors from the Bible
+- When multiple characters of the same species appear, ALWAYS include each character's NAME + COLOR inline in visualFocus
+  (example: ""Miau the BLACK cat scratches the curtain while Torc the ORANGE cat watches from the sofa"")
+- NEVER use generic references like ""the cat"" or ""one of the cats"" when multiple same-species characters exist in that scene
 - Environment should match the story setting
 - Keep all descriptions child-safe and gentle (no explicit violence, no sexual content, no nudity, no graphic details)
 - If a scene implies conflict, describe it in age-appropriate, non-graphic terms";
@@ -113,6 +116,7 @@ IMPORTANT:
 
         sb.AppendLine($"Generate exactly {storyPages.Count} scenes, one for each page.");
         sb.AppendLine("Include character visual details in the visualFocus field.");
+        sb.AppendLine("For same-species characters, write visualFocus with explicit NAME + COLOR bindings (no generic species-only wording).");
         
         return sb.ToString();
     }

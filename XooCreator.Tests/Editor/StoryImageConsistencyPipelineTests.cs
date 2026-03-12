@@ -22,6 +22,7 @@ public class StoryImageConsistencyPipelineTests
         var openAiAudio = new Mock<IOpenAIAudioWithApiKey>();
         var diacritics = new Mock<IDiacriticsNormalizer>();
         var promptValidator = new Mock<IStoryImagePromptConsistencyValidator>();
+        var characterPresenceResolver = new Mock<ICharacterPresenceResolver>();
         var logger = new Mock<ILogger<GenerateFullStoryDraftAssetsGenerator>>();
 
         SceneDefinition? capturedScene = null;
@@ -49,21 +50,28 @@ public class StoryImageConsistencyPipelineTests
                 It.IsAny<IReadOnlyList<string>>()))
             .Returns((string p, StoryBible _, SceneDefinition? __, IReadOnlyList<string> ___) => (p, 0));
 
-        string? capturedStoryJson = null;
+        string? capturedPrompt = null;
         googleImage
-            .Setup(x => x.GenerateStoryImageAsync(
+            .Setup(x => x.GenerateFromBuiltPromptAsync(
                 It.IsAny<string>(),
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                It.IsAny<string?>(),
                 It.IsAny<byte[]?>(),
                 It.IsAny<string?>(),
                 It.IsAny<CancellationToken>(),
                 It.IsAny<string?>(),
                 It.IsAny<string?>()))
-            .Callback<string, string, string, string?, byte[]?, string?, CancellationToken, string?, string?>(
-                (storyJson, _, _, _, _, _, _, _, _) => capturedStoryJson = storyJson)
+            .Callback<string, byte[]?, string?, CancellationToken, string?, string?>(
+                (prompt, _, _, _, _, _) => capturedPrompt = prompt)
             .ThrowsAsync(new InvalidOperationException("forced for test"));
+
+        characterPresenceResolver
+            .Setup(x => x.ResolveAsync(
+                It.IsAny<StoryBible>(),
+                It.IsAny<SceneDefinition>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string?>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(["cat_black"]);
 
         var sut = new GenerateFullStoryDraftAssetsGenerator(
             blobSas.Object,
@@ -74,6 +82,7 @@ public class StoryImageConsistencyPipelineTests
             openAiAudio.Object,
             diacritics.Object,
             promptValidator.Object,
+            characterPresenceResolver.Object,
             logger.Object);
 
         var request = new GenerateFullStoryDraftRequest
@@ -190,9 +199,8 @@ public class StoryImageConsistencyPipelineTests
             scenePlan,
             promptBuilder.Object);
 
-        Assert.NotNull(capturedStoryJson);
-        Assert.Contains(@"""fullContext"":true", capturedStoryJson);
-        Assert.Contains("Doua pisici pleaca la stapani diferiti.", capturedStoryJson);
+        Assert.NotNull(capturedPrompt);
+        Assert.Contains("CHARACTER ROSTER LOCK", capturedPrompt);
         Assert.NotNull(capturedScene);
         Assert.Contains("cat_black", capturedScene!.CharactersPresent);
     }

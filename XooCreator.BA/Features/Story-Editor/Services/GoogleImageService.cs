@@ -65,6 +65,18 @@ public interface IGoogleImageService
         CancellationToken ct = default,
         string? apiKeyOverride = null,
         string? modelOverride = null);
+
+    /// <summary>
+    /// Generates a single image from a fully-built prompt and optional reference image.
+    /// The prompt is sent as-is without additional wrapping.
+    /// </summary>
+    Task<(byte[] ImageData, string MimeType)> GenerateFromBuiltPromptAsync(
+        string prompt,
+        byte[]? referenceImage = null,
+        string? referenceImageMimeType = null,
+        CancellationToken ct = default,
+        string? apiKeyOverride = null,
+        string? modelOverride = null);
 }
 
 /// <summary>
@@ -175,9 +187,9 @@ public class GoogleImageService : IGoogleImageService
         var apiKey = !string.IsNullOrWhiteSpace(apiKeyOverride) ? apiKeyOverride : _apiKey;
         request.Headers.Add("x-goog-api-key", apiKey);
 
+        var modelName = modelOverride ?? _imageDefaultModel ?? "gemini-2.5-flash-image";
         try
         {
-            var modelName = modelOverride ?? _imageDefaultModel ?? "gemini-2.5-flash-image";
             _logger.LogInformation(
                 "{ColoredStatus}",
                 ColoredLogHelper.FormatImageGeneration(modelName, "START", $"lang={languageCode}, ref={hasReferenceImage}"));
@@ -226,6 +238,10 @@ public class GoogleImageService : IGoogleImageService
         }
         catch (Exception ex)
         {
+            _logger.LogError(
+                ex,
+                "{ColoredStatus}",
+                ColoredLogHelper.FormatImageGeneration(modelName, "FAIL", ex.GetType().Name));
             throw;
         }
     }
@@ -236,11 +252,45 @@ public class GoogleImageService : IGoogleImageService
         string? apiKeyOverride = null,
         string? modelOverride = null)
     {
+        return await GenerateFromBuiltPromptAsync(
+            prompt,
+            referenceImage: null,
+            referenceImageMimeType: null,
+            ct,
+            apiKeyOverride,
+            modelOverride);
+    }
+
+    public async Task<(byte[] ImageData, string MimeType)> GenerateFromBuiltPromptAsync(
+        string prompt,
+        byte[]? referenceImage = null,
+        string? referenceImageMimeType = null,
+        CancellationToken ct = default,
+        string? apiKeyOverride = null,
+        string? modelOverride = null)
+    {
         if (string.IsNullOrWhiteSpace(prompt))
             throw new ArgumentException("Prompt cannot be empty", nameof(prompt));
 
         var modelName = modelOverride ?? _imageDefaultModel ?? "gemini-2.5-flash-image";
         var parts = new List<object> { new { text = prompt } };
+        var hasReferenceImage = referenceImage != null && referenceImage.Length > 0;
+        if (hasReferenceImage)
+        {
+            var mimeType = string.IsNullOrWhiteSpace(referenceImageMimeType)
+                ? "image/png"
+                : referenceImageMimeType;
+            var base64 = Convert.ToBase64String(referenceImage);
+            parts.Add(new
+            {
+                inlineData = new
+                {
+                    mimeType,
+                    data = base64
+                }
+            });
+        }
+
         var requestBody = new
         {
             contents = new[] { new { parts = parts.ToArray() } },
@@ -260,7 +310,7 @@ public class GoogleImageService : IGoogleImageService
 
         _logger.LogInformation(
             "{ColoredStatus}",
-            ColoredLogHelper.FormatImageGeneration(modelName, "START", "from-prompt"));
+            ColoredLogHelper.FormatImageGeneration(modelName, "START", $"built-prompt, ref={hasReferenceImage}"));
 
         try
         {

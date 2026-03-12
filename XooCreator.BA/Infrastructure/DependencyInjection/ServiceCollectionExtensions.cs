@@ -249,6 +249,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IStoryValidator, StoryValidator>();
         services.AddScoped<IStoryRepairService, StoryRepairService>();
         services.AddScoped<IScenePlanner, ScenePlanner>();
+        services.AddScoped<ICharacterPresenceResolver, CharacterPresenceResolver>();
         services.AddScoped<IIllustrationPromptBuilder, IllustrationPromptBuilder>();
         services.AddScoped<IStoryImagePromptConsistencyValidator, StoryImagePromptConsistencyValidator>();
 

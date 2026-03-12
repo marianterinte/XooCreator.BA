@@ -43,6 +43,7 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
     private readonly IOpenAIAudioWithApiKey _openAIAudio;
     private readonly IDiacriticsNormalizer _diacriticsNormalizer;
     private readonly IStoryImagePromptConsistencyValidator _promptConsistencyValidator;
+    private readonly ICharacterPresenceResolver _characterPresenceResolver;
     private readonly ILogger<GenerateFullStoryDraftAssetsGenerator> _logger;
 
     public GenerateFullStoryDraftAssetsGenerator(
@@ -54,6 +55,7 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
         IOpenAIAudioWithApiKey openAIAudio,
         IDiacriticsNormalizer diacriticsNormalizer,
         IStoryImagePromptConsistencyValidator promptConsistencyValidator,
+        ICharacterPresenceResolver characterPresenceResolver,
         ILogger<GenerateFullStoryDraftAssetsGenerator> logger)
     {
         _blobSas = blobSas;
@@ -64,6 +66,7 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
         _openAIAudio = openAIAudio;
         _diacriticsNormalizer = diacriticsNormalizer;
         _promptConsistencyValidator = promptConsistencyValidator;
+        _characterPresenceResolver = characterPresenceResolver;
         _logger = logger;
     }
 
@@ -373,12 +376,12 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
                 var (imageData, mimeType) = isOpenAi
                     ? await _openAIImage.GenerateStoryImageAsync(storyJson, tileText, request.LanguageCode, request.ImageSeedInstructions, referenceImageData, referenceImageMime, request.ApiKey.Trim(), request.ImageModel, request.ImageQuality?.Trim(), ct)
                     : await _googleImage.GenerateStoryImageAsync(storyJson, tileText, request.LanguageCode, request.ImageSeedInstructions, referenceImageData, referenceImageMime, ct, request.ApiKey.Trim(), request.ImageModel);
-                return (item.Tile, item.Index, ImageData: imageData, MimeType: mimeType ?? "image/png");
+                return (Tile: item.Tile, Index: item.Index, ImageData: imageData, MimeType: mimeType ?? "image/png");
             }
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "GenerateFullStoryDraft: image generation failed for tile {TileId}", tile.Id);
-                return (item.Tile, item.Index, (byte[]?)null, (string?)null);
+                return (Tile: item.Tile, Index: item.Index, ImageData: (byte[]?)null, MimeType: (string?)null);
             }
         });
         var results = await Task.WhenAll(tasks);
@@ -421,7 +424,7 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
         string? currentRefMime = referenceImageMime;
         var expectedAnchorsTotal = 0;
         var patchedAnchorsTotal = 0;
-        var storyBibleContext = BuildStoryBibleContext(storyBible, dto.Title, dto.Summary, dto.Tiles, fullContext: true);
+        var languageCode = request.LanguageCode ?? "en-us";
 
         // Match tiles with scenes
         var tilesWithScenes = dto.Tiles
@@ -439,7 +442,13 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
                 string promptText;
                 if (scene != null)
                 {
-                    var mergedScene = MergeCharactersPresentWithTextHints(scene, storyBible, tile.Text ?? string.Empty, out var wasPatchedByHints);
+                    var (mergedScene, wasPatchedByHints) = await MergeCharactersPresentWithTextHintsAsync(
+                        scene,
+                        storyBible,
+                        tile.Text ?? string.Empty,
+                        request.ApiKey.Trim(),
+                        request.TextModel,
+                        ct);
                     if (wasPatchedByHints)
                     {
                         _logger.LogInformation(
@@ -479,11 +488,12 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
                     "{ColoredProgress}",
                     ColoredLogHelper.FormatProgress(i + 1, tilesWithScenes.Count, $"tile={tile.Id}"));
 
+                var promptForGeneration = BuildPromptWithReferenceInstruction(promptText, currentRefBytes != null && currentRefBytes.Length > 0);
                 var (imageData, mimeType) = isOpenAi
                     ? await _openAIImage.GenerateStoryImageAsync(
-                        storyBibleContext,
-                        promptText,
-                        request.LanguageCode,
+                        BuildStoryBibleContext(storyBible, dto.Title, dto.Summary, dto.Tiles, fullContext: true),
+                        promptForGeneration,
+                        languageCode,
                         request.ImageSeedInstructions,
                         currentRefBytes,
                         currentRefMime,
@@ -491,12 +501,9 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
                         request.ImageModel,
                         request.ImageQuality?.Trim(),
                         ct)
-                    : await GenerateGoogleImageWithPromptFallbackAsync(
-                        storyBibleContext,
-                        promptText,
+                    : await GenerateGoogleImageFromBuiltPromptWithFallbackAsync(
+                        promptForGeneration,
                         BuildGenericImageFallbackPrompt(tile.Text ?? string.Empty, request.LanguageCode ?? "ro-ro"),
-                        request.LanguageCode,
-                        request.ImageSeedInstructions,
                         currentRefBytes,
                         currentRefMime,
                         request.ApiKey.Trim(),
@@ -581,60 +588,81 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
         return JsonSerializer.Serialize(obj);
     }
 
-    private static SceneDefinition MergeCharactersPresentWithTextHints(
+    private async Task<(SceneDefinition Scene, bool WasPatched)> MergeCharactersPresentWithTextHintsAsync(
         SceneDefinition scene,
         StoryBible bible,
         string tileText,
-        out bool wasPatched)
+        string apiKey,
+        string? model,
+        CancellationToken ct)
     {
-        wasPatched = false;
-        var existing = new HashSet<string>(scene.CharactersPresent, StringComparer.OrdinalIgnoreCase);
+        var wasPatched = false;
+        var existing = NormalizeCharacterReferences(scene.CharactersPresent, bible);
         var text = tileText.Trim();
         if (string.IsNullOrWhiteSpace(text))
-            return scene;
+            return (scene with { CharactersPresent = existing.ToList() }, false);
 
+        // Deterministic layer: add direct character name mentions from page text.
         foreach (var character in bible.Characters)
         {
             var nameMentioned = text.Contains(character.Name, StringComparison.OrdinalIgnoreCase);
-            var speciesMentioned = IsSpeciesMentioned(text, character.Species);
-
-            if ((nameMentioned || speciesMentioned) && !existing.Contains(character.Id) && !existing.Contains(character.Name))
+            if (nameMentioned && !existing.Contains(character.Id))
             {
                 existing.Add(character.Id);
                 wasPatched = true;
             }
         }
 
-        if (!wasPatched)
-            return scene;
+        // AI layer: infer additional present characters without language-specific hardcoding.
+        if (!string.IsNullOrWhiteSpace(apiKey))
+        {
+            try
+            {
+                var inferredCharacterIds = await _characterPresenceResolver.ResolveAsync(
+                    bible,
+                    scene,
+                    text,
+                    apiKey,
+                    model,
+                    ct);
 
-        return scene with { CharactersPresent = existing.ToList() };
+                foreach (var inferredId in inferredCharacterIds)
+                {
+                    if (!existing.Contains(inferredId))
+                    {
+                        existing.Add(inferredId);
+                        wasPatched = true;
+                    }
+                }
+            }
+            catch (Exception ex) when (!ct.IsCancellationRequested)
+            {
+                _logger.LogWarning(
+                    ex,
+                    "Character presence AI resolver failed. sceneId={SceneId}. Continuing with deterministic character matches.",
+                    scene.SceneId);
+            }
+        }
+
+        if (!wasPatched)
+            return (scene with { CharactersPresent = existing.ToList() }, false);
+
+        return (scene with { CharactersPresent = existing.ToList() }, true);
     }
 
-    private static bool IsSpeciesMentioned(string text, string species)
+    private static HashSet<string> NormalizeCharacterReferences(IEnumerable<string> references, StoryBible bible)
     {
-        if (string.IsNullOrWhiteSpace(species))
-            return false;
-
-        var s = species.Trim().ToLowerInvariant();
-        if (text.Contains(s, StringComparison.OrdinalIgnoreCase))
-            return true;
-
-        return s switch
+        var normalized = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var reference in references.Where(r => !string.IsNullOrWhiteSpace(r)))
         {
-            "cat" => text.Contains("cats", StringComparison.OrdinalIgnoreCase)
-                || text.Contains("pisica", StringComparison.OrdinalIgnoreCase)
-                || text.Contains("pisici", StringComparison.OrdinalIgnoreCase)
-                || text.Contains("pisicile", StringComparison.OrdinalIgnoreCase),
-            "dog" => text.Contains("dogs", StringComparison.OrdinalIgnoreCase)
-                || text.Contains("caine", StringComparison.OrdinalIgnoreCase)
-                || text.Contains("caini", StringComparison.OrdinalIgnoreCase),
-            "duck" => text.Contains("ducks", StringComparison.OrdinalIgnoreCase)
-                || text.Contains("rata", StringComparison.OrdinalIgnoreCase)
-                || text.Contains("ratusca", StringComparison.OrdinalIgnoreCase)
-                || text.Contains("ratuste", StringComparison.OrdinalIgnoreCase),
-            _ => false
-        };
+            var character = bible.Characters.FirstOrDefault(c =>
+                c.Id.Equals(reference, StringComparison.OrdinalIgnoreCase) ||
+                c.Name.Equals(reference, StringComparison.OrdinalIgnoreCase));
+
+            normalized.Add(character?.Id ?? reference);
+        }
+
+        return normalized;
     }
 
     private static string AddHardRosterLock(string promptText, StoryBible bible)
@@ -653,7 +681,7 @@ CHARACTER ROSTER LOCK (IMMUTABLE FOR ALL PAGES):
 LOCK RULES:
 - Keep character identities stable across all pages.
 - Do not swap colors/markers between characters.
-- If scene text references a species pair (e.g. two cats), include the matching recurring characters.";
+- If scene text references a character pair or group, include the matching recurring characters.";
     }
 
     /// <summary>
@@ -834,6 +862,93 @@ CONSISTENCY RULES: Do not change character colors, sizes, or species.";
                 imageModel,
                 ct);
         }
+    }
+
+    private async Task<(byte[] ImageData, string MimeType)> GenerateGoogleImageFromBuiltPromptWithFallbackAsync(
+        string primaryPrompt,
+        string genericFallbackPrompt,
+        byte[]? referenceImageData,
+        string? referenceImageMime,
+        string apiKey,
+        string? imageModel,
+        string storyId,
+        string tileId,
+        int tileIndex,
+        CancellationToken ct)
+    {
+        try
+        {
+            return await _googleImage.GenerateFromBuiltPromptAsync(
+                primaryPrompt,
+                referenceImageData,
+                referenceImageMime,
+                ct,
+                apiKey,
+                imageModel);
+        }
+        catch (GoogleImageGenerationException ex) when (
+            referenceImageData is { Length: > 0 } &&
+            ShouldRetryWithoutReference(ex))
+        {
+            _logger.LogWarning(
+                "{ColoredStatus}",
+                ColoredLogHelper.FormatImageGeneration("gemini-image", "RETRY", $"dropping ref image, reason={ex.FinishReason}"));
+
+            try
+            {
+                return await _googleImage.GenerateFromBuiltPromptAsync(
+                    primaryPrompt,
+                    referenceImage: null,
+                    referenceImageMimeType: null,
+                    ct: ct,
+                    apiKeyOverride: apiKey,
+                    modelOverride: imageModel);
+            }
+            catch (GoogleImageGenerationException innerEx) when (ShouldAttemptGenericFallback(innerEx))
+            {
+                _logger.LogWarning(
+                    "Primary built prompt failed after ref-drop retry, trying generic fallback. storyId={StoryId} tileId={TileId} index={TileIndex} finishReason={FinishReason} errorCode={ErrorCode}",
+                    storyId,
+                    tileId,
+                    tileIndex,
+                    innerEx.FinishReason,
+                    innerEx.ErrorCode);
+
+                return await _googleImage.GenerateFromBuiltPromptAsync(
+                    genericFallbackPrompt,
+                    referenceImage: null,
+                    referenceImageMimeType: null,
+                    ct: ct,
+                    apiKeyOverride: apiKey,
+                    modelOverride: imageModel);
+            }
+        }
+        catch (GoogleImageGenerationException ex) when (ShouldAttemptGenericFallback(ex))
+        {
+            _logger.LogWarning(
+                "Primary built prompt failed, trying generic fallback. storyId={StoryId} tileId={TileId} index={TileIndex} finishReason={FinishReason} errorCode={ErrorCode}",
+                storyId,
+                tileId,
+                tileIndex,
+                ex.FinishReason,
+                ex.ErrorCode);
+
+            return await _googleImage.GenerateFromBuiltPromptAsync(
+                genericFallbackPrompt,
+                referenceImage: null,
+                referenceImageMimeType: null,
+                ct: ct,
+                apiKeyOverride: apiKey,
+                modelOverride: imageModel);
+        }
+    }
+
+    private static string BuildPromptWithReferenceInstruction(string promptText, bool hasReferenceImage)
+    {
+        if (!hasReferenceImage)
+            return promptText;
+
+        return $"{promptText}{Environment.NewLine}{Environment.NewLine}REFERENCE IMAGE: The attached image defines established character appearance and art style.{Environment.NewLine}Match character colors, proportions, features, and accessories EXACTLY as shown.";
     }
 
     private static bool ShouldAttemptGenericFallback(GoogleImageGenerationException ex)

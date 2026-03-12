@@ -18,6 +18,13 @@ public sealed class GeneratePrivateStoryHandler : IGeneratePrivateStoryHandler
     private const int MaxIdeaLength = 2000;
     private const int MinPageCount = 5;
     private const int MaxPageCount = 10;
+    private const decimal StoryBibleCostPerCallUsd = 0.002m;
+    private const decimal StoryTextCostPerCallUsd = 0.002m;
+    private const decimal ScenePlanCostPerCallUsd = 0.001m;
+    private const decimal CharacterReferenceSheetCostPerCallUsd = 0.04m;
+    private const decimal StoryImageCostPerCallUsd = 0.04m;
+    private const decimal StoryAudioCostPerCallUsd = 0.015m;
+    private const decimal DiacriticsCostPerCallUsd = 0.0005m;
     private static readonly Regex UnsafePromptPattern = new(
         @"\b(porn|pornograf|porno|nudity|nude|explicit sexual|sex explicit|violenta sexuala|abuz sexual|sex cu minori|child sexual|child porn|rape|gore|snuff)\b",
         RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled);
@@ -89,9 +96,13 @@ public sealed class GeneratePrivateStoryHandler : IGeneratePrivateStoryHandler
 
         StoryBible? storyBible = null;
         ScenePlan? scenePlan = null;
+        var attemptedStoryBible = false;
+        var attemptedScenePlan = false;
+        var attemptedCharacterRefSheet = false;
 
         try
         {
+            attemptedStoryBible = true;
             storyBible = await RetryAsync(
                 () => _storyBibleGenerator.GenerateAsync(
                     request.Idea.Trim(),
@@ -136,6 +147,7 @@ public sealed class GeneratePrivateStoryHandler : IGeneratePrivateStoryHandler
             try
             {
                 var pageTexts = parseResult.Pages.Select(p => p.Text).ToList();
+                attemptedScenePlan = true;
                 scenePlan = await RetryAsync(
                     () => _scenePlanner.PlanAsync(
                         storyBible,
@@ -158,6 +170,7 @@ public sealed class GeneratePrivateStoryHandler : IGeneratePrivateStoryHandler
         string? characterSeedMimeType = null;
         if (request.GenerateImages && storyBible != null)
         {
+            attemptedCharacterRefSheet = true;
             var seedResult = await TryGenerateCharacterReferenceSeedAsync(storyBible, apiKey, ct);
             characterSeedImageData = seedResult.ImageData;
             characterSeedMimeType = seedResult.MimeType;
@@ -200,6 +213,16 @@ public sealed class GeneratePrivateStoryHandler : IGeneratePrivateStoryHandler
 
         var warnings = CollectGenerationWarnings(dto, request.GenerateImages, request.GenerateAudio);
         await _privateStoryCreation.CreateFromDtoAsync(dto, storyId, ownerUserId, ownerEmail ?? string.Empty, lang, ct);
+        LogEstimatedStoryCost(
+            storyId,
+            dto,
+            request,
+            attemptedStoryBible,
+            storyBible != null,
+            attemptedScenePlan,
+            scenePlan != null,
+            attemptedCharacterRefSheet,
+            characterSeedImageData != null);
 
         _logger.LogInformation("GeneratePrivateStory completed: storyId={StoryId} title={Title}", storyId, parseResult.Title);
         return new GeneratePrivateStoryResponse
@@ -470,5 +493,54 @@ CHARACTER ROSTER (IMMUTABLE):
         }
 
         return warnings;
+    }
+
+    private void LogEstimatedStoryCost(
+        string storyId,
+        EditableStoryDto dto,
+        GeneratePrivateStoryRequest request,
+        bool attemptedStoryBible,
+        bool hasStoryBible,
+        bool attemptedScenePlan,
+        bool hasScenePlan,
+        bool attemptedCharacterRefSheet,
+        bool hasCharacterRefSheet)
+    {
+        var pageTiles = dto.Tiles.Where(t => string.Equals(t.Type, "page", StringComparison.OrdinalIgnoreCase)).ToList();
+        var pagesWithText = pageTiles.Count(t => !string.IsNullOrWhiteSpace(t.Text));
+        var generatedImages = pageTiles.Count(t => !string.IsNullOrWhiteSpace(t.ImageUrl));
+        var generatedAudio = pageTiles.Count(t => !string.IsNullOrWhiteSpace(t.AudioUrl));
+
+        var storyBibleCalls = attemptedStoryBible ? 1 : 0;
+        var storyTextCalls = 1;
+        var scenePlanCalls = attemptedScenePlan ? 1 : 0;
+        var referenceSheetCalls = attemptedCharacterRefSheet ? 1 : 0;
+        var imageCalls = request.GenerateImages ? generatedImages : 0;
+        var audioCalls = request.GenerateAudio ? generatedAudio : 0;
+        var diacriticsCalls = request.GenerateAudio ? pagesWithText : 0;
+
+        var storyBibleCost = storyBibleCalls * StoryBibleCostPerCallUsd;
+        var storyTextCost = storyTextCalls * StoryTextCostPerCallUsd;
+        var scenePlanCost = scenePlanCalls * ScenePlanCostPerCallUsd;
+        var refSheetCost = referenceSheetCalls * CharacterReferenceSheetCostPerCallUsd;
+        var imagesCost = imageCalls * StoryImageCostPerCallUsd;
+        var audioCost = audioCalls * StoryAudioCostPerCallUsd;
+        var diacriticsCost = diacriticsCalls * DiacriticsCostPerCallUsd;
+        var totalCost = storyBibleCost + storyTextCost + scenePlanCost + refSheetCost + imagesCost + audioCost + diacriticsCost;
+
+        _logger.LogInformation(
+            "Private story estimated cost summary: storyId={StoryId} storyBibleCalls={StoryBibleCalls} storyBibleOk={StoryBibleOk} textCalls={TextCalls} scenePlanCalls={ScenePlanCalls} scenePlanOk={ScenePlanOk} refSheetCalls={RefSheetCalls} refSheetOk={RefSheetOk} imageCalls={ImageCalls} audioCalls={AudioCalls} diacriticsCalls={DiacriticsCalls} estTotalUsd={EstTotalUsd:F3}",
+            storyId,
+            storyBibleCalls,
+            hasStoryBible,
+            storyTextCalls,
+            scenePlanCalls,
+            hasScenePlan,
+            referenceSheetCalls,
+            hasCharacterRefSheet,
+            imageCalls,
+            audioCalls,
+            diacriticsCalls,
+            totalCost);
     }
 }

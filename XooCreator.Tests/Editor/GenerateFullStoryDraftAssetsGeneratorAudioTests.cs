@@ -27,6 +27,7 @@ public class GenerateFullStoryDraftAssetsGeneratorAudioTests
         var openAiAudio = new Mock<IOpenAIAudioWithApiKey>();
         diacriticsMock = new Mock<IDiacriticsNormalizer>();
         var promptValidator = new Mock<IStoryImagePromptConsistencyValidator>();
+        var characterPresenceResolver = new Mock<ICharacterPresenceResolver>();
         var logger = new Mock<ILogger<GenerateFullStoryDraftAssetsGenerator>>();
 
         // Blob client stub
@@ -54,6 +55,7 @@ public class GenerateFullStoryDraftAssetsGeneratorAudioTests
             openAiAudio.Object,
             diacriticsMock.Object,
             promptValidator.Object,
+            characterPresenceResolver.Object,
             logger.Object);
     }
 

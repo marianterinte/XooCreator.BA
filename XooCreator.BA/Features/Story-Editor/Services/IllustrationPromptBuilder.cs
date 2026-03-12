@@ -67,30 +67,33 @@ public sealed class IllustrationPromptBuilder : IIllustrationPromptBuilder
 
     private static string FormatCharacterDescription(CharacterProfile character)
     {
-        var parts = new List<string>
-        {
-            character.Name,
-            character.Visual.PrimaryColor,
-            character.Visual.Size,
-            character.Species
-        };
+        var primaryColor = ToUpperInvariantSafe(character.Visual.PrimaryColor);
+        var secondaryColor = ToUpperInvariantSafe(character.Visual.SecondaryColor);
+        var accessories = character.Visual.Accessories
+            .Where(a => !string.IsNullOrWhiteSpace(a))
+            .Select(ToUpperInvariantSafe)
+            .ToList();
+        var features = character.Visual.Features
+            .Where(f => !string.IsNullOrWhiteSpace(f))
+            .ToList();
 
-        if (character.Visual.Features.Count > 0)
+        var sb = new StringBuilder();
+        sb.Append($"CHARACTER \"{character.Name}\" = {primaryColor} {character.Visual.Size} {character.Species}.");
+        if (features.Count > 0)
         {
-            parts.Add(string.Join(", ", character.Visual.Features));
+            sb.Append($" Features: {string.Join(", ", features)}.");
         }
-
-        if (character.Visual.Accessories.Count > 0)
+        if (accessories.Count > 0)
         {
-            parts.Add($"unique marker: {string.Join(", ", character.Visual.Accessories)}");
+            sb.Append($" Unique marker: {string.Join(", ", accessories)}.");
         }
-
-        if (!string.IsNullOrEmpty(character.Visual.SecondaryColor))
+        if (!string.IsNullOrWhiteSpace(secondaryColor))
         {
-            parts.Add($"with {character.Visual.SecondaryColor} accents");
+            sb.Append($" Accent color: {secondaryColor}.");
         }
+        sb.Append($" {character.Name} is ALWAYS {primaryColor}.");
 
-        return string.Join(" ", parts.Where(p => !string.IsNullOrWhiteSpace(p)));
+        return sb.ToString();
     }
 
     private static string BuildPromptText(
@@ -130,7 +133,51 @@ public sealed class IllustrationPromptBuilder : IIllustrationPromptBuilder
         sb.AppendLine("- Do not remove or alter unique markers/accessories.");
         sb.AppendLine("- Keep recurring characters visually identical across pages 1-10.");
         sb.AppendLine("- If user explicitly described a trait, preserve it exactly.");
+        AppendAntiSwapRules(sb, bible, scene);
 
         return sb.ToString();
+    }
+
+    private static void AppendAntiSwapRules(StringBuilder sb, StoryBible bible, SceneDefinition scene)
+    {
+        var presentCharacters = scene.CharactersPresent
+            .Select(id => bible.Characters.FirstOrDefault(c =>
+                c.Id.Equals(id, StringComparison.OrdinalIgnoreCase) ||
+                c.Name.Equals(id, StringComparison.OrdinalIgnoreCase)))
+            .Where(c => c != null)
+            .Cast<CharacterProfile>()
+            .ToList();
+
+        var sameSpeciesGroups = presentCharacters
+            .GroupBy(c => c.Species, StringComparer.OrdinalIgnoreCase)
+            .Where(g => g.Count() > 1)
+            .ToList();
+
+        if (sameSpeciesGroups.Count == 0)
+            return;
+
+        sb.AppendLine();
+        sb.AppendLine("ANTI-SWAP RULES (MANDATORY):");
+        foreach (var group in sameSpeciesGroups)
+        {
+            foreach (var character in group)
+            {
+                var primaryColor = ToUpperInvariantSafe(character.Visual.PrimaryColor);
+                var accessories = character.Visual.Accessories
+                    .Where(a => !string.IsNullOrWhiteSpace(a))
+                    .Select(ToUpperInvariantSafe)
+                    .ToList();
+                var marker = accessories.Count > 0
+                    ? string.Join(", ", accessories)
+                    : "NO ACCESSORY";
+                sb.AppendLine($"- {character.Name} is ALWAYS the {primaryColor} {character.Species} with {marker}.");
+            }
+            sb.AppendLine("- NEVER interchange colors, accessories, or identities between these same-species characters.");
+        }
+    }
+
+    private static string ToUpperInvariantSafe(string? value)
+    {
+        return (value ?? string.Empty).Trim().ToUpperInvariant();
     }
 }
