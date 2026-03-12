@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using XooCreator.BA.Features.StoryEditor.Models;
+using XooCreator.BA.Infrastructure.Logging;
 
 namespace XooCreator.BA.Features.StoryEditor.Services;
 
@@ -51,8 +52,9 @@ public sealed class StoryBibleGenerator : IStoryBibleGenerator
         var systemInstruction = BuildSystemInstruction(numberOfPages, languageCode);
         var userContent = BuildUserContent(userPrompt, title, numberOfPages);
 
-        _logger.LogInformation("Generating Story Bible for prompt: {PromptPreview}...", 
-            userPrompt.Length > 50 ? userPrompt[..50] : userPrompt);
+        _logger.LogInformation(
+            "{ColoredStatus}",
+            ColoredLogHelper.FormatStoryBible("START", $"pages={numberOfPages}, lang={languageCode}"));
 
         var jsonResponse = await _googleTextService.GenerateContentAsync(
             systemInstruction,
@@ -73,8 +75,9 @@ public sealed class StoryBibleGenerator : IStoryBibleGenerator
             model,
             ct);
         
-        _logger.LogInformation("Story Bible generated: Title={Title}, Characters={CharCount}, Scenes={SceneCount}",
-            bible.Title, bible.Characters.Count, bible.SceneSkeleton.Count);
+        _logger.LogInformation(
+            "{ColoredStatus}",
+            ColoredLogHelper.FormatStoryBible("OK", $"chars={bible.Characters.Count}, scenes={bible.SceneSkeleton.Count}"));
 
         return bible;
     }

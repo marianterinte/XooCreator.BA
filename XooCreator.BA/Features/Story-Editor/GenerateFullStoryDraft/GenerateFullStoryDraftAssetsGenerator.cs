@@ -1,6 +1,7 @@
 using System.IO;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
+using XooCreator.BA.Infrastructure.Logging;
 using XooCreator.BA.Infrastructure.Services.Blob;
 using XooCreator.BA.Features.StoryEditor.Mappers;
 using XooCreator.BA.Features.StoryEditor.Models;
@@ -385,7 +386,9 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
                     patchedAnchorsTotal += validation.PatchedCount;
                 }
 
-                _logger.LogDebug("Generating image {Index} with Story Bible prompt", index + 1);
+                _logger.LogInformation(
+                    "{ColoredProgress}",
+                    ColoredLogHelper.FormatProgress(i + 1, tilesWithScenes.Count, $"tile={tile.Id}"));
 
                 var (imageData, mimeType) = isOpenAi
                     ? await _openAIImage.GenerateStoryImageAsync(
@@ -660,10 +663,8 @@ CONSISTENCY RULES: Do not change character colors, sizes, or species.";
             ShouldRetryWithoutReference(ex))
         {
             _logger.LogWarning(
-                ex,
-                "Google image generation failed with reference image (code={ErrorCode}, finishReason={FinishReason}). Retrying once without reference image.",
-                ex.ErrorCode,
-                ex.FinishReason);
+                "{ColoredStatus}",
+                ColoredLogHelper.FormatImageGeneration("gemini-image", "RETRY", $"dropping ref image, reason={ex.FinishReason}"));
 
             return await _googleImage.GenerateStoryImageAsync(
                 storyJson,

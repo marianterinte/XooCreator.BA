@@ -2,6 +2,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using XooCreator.BA.Infrastructure.Logging;
 
 namespace XooCreator.BA.Features.StoryEditor.Services;
 
@@ -176,11 +177,10 @@ public class GoogleImageService : IGoogleImageService
 
         try
         {
+            var modelName = modelOverride ?? _imageDefaultModel ?? "gemini-2.5-flash-image";
             _logger.LogInformation(
-                "Calling Gemini Image for story illustration. URL: {RequestUrl}, Language: {LanguageCode}, HasReferenceImage: {HasRef}",
-                requestUrl,
-                languageCode,
-                referenceImage != null);
+                "{ColoredStatus}",
+                ColoredLogHelper.FormatImageGeneration(modelName, "START", $"lang={languageCode}, ref={hasReferenceImage}"));
 
             using var response = await _httpClient.SendAsync(request, ct);
             var responseContent = await response.Content.ReadAsStringAsync(ct);
@@ -219,11 +219,17 @@ public class GoogleImageService : IGoogleImageService
 
             var (bytes, mimeType) = ExtractImageFromResponse(responseContent);
             var cropped = StoryImageAspectRatio.CropTo4x5(bytes);
+            _logger.LogInformation(
+                "{ColoredStatus}",
+                ColoredLogHelper.FormatImageGeneration(modelName, "OK", $"{cropped.Length / 1024}KB"));
             return (cropped, "image/png");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error while generating story image with Gemini.");
+            _logger.LogError(
+                ex,
+                "{ColoredStatus}",
+                ColoredLogHelper.FormatImageGeneration(modelName, "FAIL", ex.GetType().Name));
             throw;
         }
     }
@@ -236,6 +242,8 @@ public class GoogleImageService : IGoogleImageService
     {
         if (string.IsNullOrWhiteSpace(prompt))
             throw new ArgumentException("Prompt cannot be empty", nameof(prompt));
+
+        var modelName = modelOverride ?? _imageDefaultModel ?? "gemini-2.5-flash-image";
         var parts = new List<object> { new { text = prompt } };
         var requestBody = new
         {
@@ -253,16 +261,35 @@ public class GoogleImageService : IGoogleImageService
         using var request = new HttpRequestMessage(HttpMethod.Post, requestUrl) { Content = content };
         var apiKey = !string.IsNullOrWhiteSpace(apiKeyOverride) ? apiKeyOverride : _apiKey;
         request.Headers.Add("x-goog-api-key", apiKey);
-        using var response = await _httpClient.SendAsync(request, ct);
-        var responseContent = await response.Content.ReadAsStringAsync(ct);
-        if (!response.IsSuccessStatusCode)
+
+        _logger.LogInformation(
+            "{ColoredStatus}",
+            ColoredLogHelper.FormatImageGeneration(modelName, "START", "from-prompt"));
+
+        try
         {
-            _logger.LogError("Gemini Image API returned {StatusCode}: {Body}", (int)response.StatusCode, responseContent);
-            response.EnsureSuccessStatusCode();
+            using var response = await _httpClient.SendAsync(request, ct);
+            var responseContent = await response.Content.ReadAsStringAsync(ct);
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogError("Gemini Image API returned {StatusCode}: {Body}", (int)response.StatusCode, responseContent);
+                response.EnsureSuccessStatusCode();
+            }
+            var (bytes, _) = ExtractImageFromResponse(responseContent);
+            var cropped = StoryImageAspectRatio.CropTo4x5(bytes);
+            _logger.LogInformation(
+                "{ColoredStatus}",
+                ColoredLogHelper.FormatImageGeneration(modelName, "OK", $"{cropped.Length / 1024}KB"));
+            return (cropped, "image/png");
         }
-        var (bytes, _) = ExtractImageFromResponse(responseContent);
-        var cropped = StoryImageAspectRatio.CropTo4x5(bytes);
-        return (cropped, "image/png");
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "{ColoredStatus}",
+                ColoredLogHelper.FormatImageGeneration(modelName, "FAIL", ex.GetType().Name));
+            throw;
+        }
     }
 
     /// <summary>

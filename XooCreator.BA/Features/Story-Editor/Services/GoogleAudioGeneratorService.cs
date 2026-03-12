@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using XooCreator.BA.Infrastructure.Logging;
 
 namespace XooCreator.BA.Features.StoryEditor.Services;
 
@@ -148,11 +149,12 @@ public class GoogleAudioGeneratorService : IGoogleAudioGeneratorService
         }
         request.Headers.Add("x-goog-api-key", apiKeyToUse);
 
+        var modelName = ttsModelOverride ?? "gemini-2.5-flash-preview-tts";
         try
         {
             _logger.LogInformation(
-                "Calling Gemini TTS with language: {LanguageCode}, voice: {VoiceName}, hasStyleInstructions: {HasStyle}, model: {Model}",
-                languageCode, voiceName, !string.IsNullOrWhiteSpace(finalStyleInstructions), ttsModelOverride ?? "default");
+                "{ColoredStatus}",
+                ColoredLogHelper.FormatAudioGeneration(modelName, "START", $"voice={voiceName}, lang={languageCode}"));
 
             using var response = await _httpClient.SendAsync(request, ct);
             var responseContent = await response.Content.ReadAsStringAsync(ct);
@@ -249,11 +251,17 @@ public class GoogleAudioGeneratorService : IGoogleAudioGeneratorService
             var pcmBytes = Convert.FromBase64String(base64Audio);
             var wavBytes = WrapPcmAsWav(pcmBytes, sampleRate: 24000, bitsPerSample: 16, channels: 1);
 
+            _logger.LogInformation(
+                "{ColoredStatus}",
+                ColoredLogHelper.FormatAudioGeneration(modelName, "OK", $"{wavBytes.Length / 1024}KB"));
             return (wavBytes, "wav");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error processing Gemini TTS response");
+            _logger.LogError(
+                ex,
+                "{ColoredStatus}",
+                ColoredLogHelper.FormatAudioGeneration(modelName, "FAIL", ex.GetType().Name));
             throw;
         }
     }

@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using XooCreator.BA.Features.StoryEditor.Models;
+using XooCreator.BA.Infrastructure.Logging;
 
 namespace XooCreator.BA.Features.StoryEditor.Services;
 
@@ -35,7 +36,9 @@ public sealed class ScenePlanner : IScenePlanner
         var systemPrompt = BuildSystemPrompt(bible);
         var userContent = BuildUserContent(bible, storyPages);
 
-        _logger.LogInformation("Planning {PageCount} scenes for story", storyPages.Count);
+        _logger.LogInformation(
+            "{ColoredStatus}",
+            ColoredLogHelper.FormatScenePlan("START", $"pages={storyPages.Count}"));
 
         var response = await _googleTextService.GenerateContentAsync(
             systemPrompt,
@@ -47,7 +50,9 @@ public sealed class ScenePlanner : IScenePlanner
 
         var scenes = ParseScenes(response, storyPages);
 
-        _logger.LogInformation("Scene plan generated with {SceneCount} scenes", scenes.Count);
+        _logger.LogInformation(
+            "{ColoredStatus}",
+            ColoredLogHelper.FormatScenePlan("OK", $"scenes={scenes.Count}"));
 
         return new ScenePlan
         {
@@ -119,7 +124,9 @@ IMPORTANT:
             var scenes = ParseScenesLenient(cleanJson, storyPages);
             if (scenes.Count == 0)
             {
-                _logger.LogWarning("Scene planner returned no usable scenes. Using deterministic fallback scenes.");
+                _logger.LogWarning(
+                    "{ColoredStatus}",
+                    ColoredLogHelper.FormatScenePlan("FALLBACK", "no usable scenes, using deterministic fallback"));
                 return CreateFallbackScenes(storyPages);
             }
 
@@ -127,7 +134,10 @@ IMPORTANT:
         }
         catch (JsonException ex)
         {
-            _logger.LogWarning(ex, "Failed to parse scenes JSON; using deterministic fallback scenes.");
+            _logger.LogWarning(
+                ex,
+                "{ColoredStatus}",
+                ColoredLogHelper.FormatScenePlan("FALLBACK", "JSON parse error"));
             return CreateFallbackScenes(storyPages);
         }
     }
