@@ -473,7 +473,7 @@ public class StoryAudioImportProcessor : IStoryAudioImportProcessor
     /// <summary>Builds the same ordered list as full audio export: one slot per page/quiz with text, one per dialog node with text.</summary>
     private static List<AudioImportTarget> BuildAudioImportTargets(StoryCraft craft, string locale)
     {
-        var pageOrQuizOrDialog = new[] { "page", "quiz", "dialog" };
+        var pageOrQuizOrDialog = new[] { "page", "quiz", "dialog", "character-selection" };
         var list = new List<AudioImportTarget>();
         var tileSequenceIndex = 0;
         foreach (var tile in craft.Tiles

@@ -255,7 +255,7 @@ public class StoryAudioExportQueueWorker : BackgroundService
 
         // Build audio items: one per page/quiz tile, one per dialog node (replica text) so full export includes dialogues
         // Naming convention uses tile sequence index (one index per tile) + dialog replica index.
-        var pageOrQuizOrDialogTypes = new[] { "page", "quiz", "dialog" };
+        var pageOrQuizOrDialogTypes = new[] { "page", "quiz", "dialog", "character-selection" };
         var locale = (job.Locale ?? string.Empty).Trim().ToLowerInvariant();
         var allPages = new List<AudioPage>();
         var runningIndex = 1;
