@@ -45,6 +45,12 @@ public record StoryDetailsDto
     public bool IsFullyInteractive { get; init; } = false; // If true, this story is full interactive
     public bool AlwaysShowInStoriesList { get; init; } = false; // If true and story is part of an epic, it can still appear in standalone marketplace story lists
     public List<StoryCoAuthorDto> CoAuthors { get; init; } = new(); // Co-authors (user or free text)
+    /// <summary>True when this story is in a Supporter Pack exclusive bundle.</summary>
+    public bool IsExclusive { get; init; }
+    /// <summary>When IsExclusive, the minimum plan tier required (e.g. "Gold", "Platinum"). FE uses for tier label.</summary>
+    public string? MinimumTier { get; init; }
+    /// <summary>True when current user has access to this exclusive story (has a pack that includes it).</summary>
+    public bool HasExclusiveAccess { get; init; }
 }
 
 public record StoryCoAuthorDto
@@ -90,6 +96,10 @@ public record StoryMarketplaceItemDto
     public bool IsFullyInteractive { get; init; } = false;
     /// <summary>True when this story is in a Supporter Pack exclusive bundle (07).</summary>
     public bool IsExclusive { get; init; }
+    /// <summary>When IsExclusive, the minimum plan tier (e.g. "Gold", "Platinum"). FE builds label from this.</summary>
+    public string? MinimumTier { get; init; }
+    /// <summary>True when current user has access to this exclusive story (has a pack that includes it). FE uses for locked Play on cards.</summary>
+    public bool HasExclusiveAccess { get; init; }
 }
 
 public record PurchaseStoryRequest
@@ -255,6 +265,10 @@ public record EpicMarketplaceItemDto
     public List<string> AudioLanguages { get; init; } = new(); // Language codes that have audio support
     /// <summary>True when this epic is in a Supporter Pack exclusive bundle (07).</summary>
     public bool IsExclusive { get; init; }
+    /// <summary>When IsExclusive, the minimum plan tier (e.g. "Gold", "Platinum"). FE builds label from this.</summary>
+    public string? MinimumTier { get; init; }
+    /// <summary>True when current user has access to this exclusive epic (has a pack that includes it). FE uses for locked Play on cards.</summary>
+    public bool HasExclusiveAccess { get; init; }
 }
 
 public record EpicCoAuthorDto
@@ -284,6 +298,12 @@ public record EpicDetailsDto
     public List<string> AvailableLanguages { get; init; } = new(); // e.g., ["ro-ro", "en-us", "hu-hu"]
     public List<string> AudioLanguages { get; init; } = new(); // Language codes that have audio support
     public List<EpicCoAuthorDto> CoAuthors { get; init; } = new();
+    /// <summary>When true, this epic is in a Supporter Pack exclusive bundle.</summary>
+    public bool IsExclusive { get; init; }
+    /// <summary>When IsExclusive, the minimum plan tier (e.g. "Gold", "Platinum"). FE builds label from this.</summary>
+    public string? MinimumTier { get; init; }
+    /// <summary>True when current user has access to this exclusive epic (has a pack that includes it).</summary>
+    public bool HasExclusiveAccess { get; init; }
 }
 
 public record GetMarketplaceEpicsResponse

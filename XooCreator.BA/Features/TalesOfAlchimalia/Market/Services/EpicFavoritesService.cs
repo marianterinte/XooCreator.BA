@@ -43,7 +43,15 @@ public class EpicFavoritesService : IEpicFavoritesService
     {
         var epics = await _repository.GetFavoriteEpicsAsync(userId, locale);
         var (_, exclusiveEpicIds) = await _exclusiveContent.GetAllExclusiveIdsAsync();
-        var enrichedEpics = epics.Select(e => e with { IsExclusive = exclusiveEpicIds.Contains(e.Id) }).ToList();
+        var minimumTiers = await _exclusiveContent.GetMinimumTiersForExclusiveEpicsAsync();
+        var (_, userEpicIds) = await _exclusiveContent.GetUserExclusiveContentAsync(userId);
+        var enrichedEpics = epics.Select(e =>
+        {
+            var isExclusive = exclusiveEpicIds.Contains(e.Id);
+            var minimumTier = isExclusive && minimumTiers.TryGetValue(e.Id, out var tier) ? tier : null;
+            var hasExclusiveAccess = !isExclusive || userEpicIds.Contains(e.Id);
+            return e with { IsExclusive = isExclusive, MinimumTier = minimumTier, HasExclusiveAccess = hasExclusiveAccess };
+        }).ToList();
 
         return new GetMarketplaceEpicsResponse
         {

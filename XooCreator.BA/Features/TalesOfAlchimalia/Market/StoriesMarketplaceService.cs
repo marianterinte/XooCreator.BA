@@ -41,7 +41,17 @@ public class StoriesMarketplaceService : IStoriesMarketplaceService
         {
             var (stories, totalCount, hasMore) = await _repository.GetMarketplaceStoriesWithPaginationAsync(userId, locale, request);
             var (exclusiveStoryIds, _) = await _exclusiveContent.GetAllExclusiveIdsAsync();
-            var enrichedStories = stories.Select(s => s with { IsExclusive = exclusiveStoryIds.Contains(s.Id) }).ToList();
+            var minimumTiers = await _exclusiveContent.GetMinimumTiersForExclusiveStoriesAsync();
+            var (userStoryIds, _) = userId == Guid.Empty
+                ? (Array.Empty<string>().AsReadOnly(), Array.Empty<string>().AsReadOnly())
+                : await _exclusiveContent.GetUserExclusiveContentAsync(userId);
+            var enrichedStories = stories.Select(s =>
+            {
+                var isExclusive = exclusiveStoryIds.Contains(s.Id);
+                var minimumTier = isExclusive && minimumTiers.TryGetValue(s.Id, out var tier) ? tier : null;
+                var hasExclusiveAccess = !isExclusive || userStoryIds.Contains(s.Id);
+                return s with { IsExclusive = isExclusive, MinimumTier = minimumTier, HasExclusiveAccess = hasExclusiveAccess };
+            }).ToList();
 
             return new GetMarketplaceStoriesResponse
             {
@@ -160,7 +170,16 @@ public class StoriesMarketplaceService : IStoriesMarketplaceService
     {
         try
         {
-            return await _repository.GetStoryDetailsAsync(storyId, userId, locale);
+            var dto = await _repository.GetStoryDetailsAsync(storyId, userId, locale);
+            if (dto == null) return null;
+
+            var isExclusive = await _exclusiveContent.IsStoryExclusiveAsync(storyId);
+            var minimumTier = isExclusive ? await _exclusiveContent.GetMinimumTierForStoryAsync(storyId) : null;
+            var hasExclusiveAccess = userId == Guid.Empty
+                ? false
+                : !isExclusive || await _exclusiveContent.HasAccessToStoryAsync(userId, storyId);
+
+            return dto with { IsExclusive = isExclusive, MinimumTier = minimumTier, HasExclusiveAccess = hasExclusiveAccess };
         }
         catch (Exception ex)
         {

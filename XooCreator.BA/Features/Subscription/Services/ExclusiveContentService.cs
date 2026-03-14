@@ -19,6 +19,18 @@ public interface IExclusiveContentService
     Task<(IReadOnlyList<string> StoryIds, IReadOnlyList<string> EpicIds)> GetUserExclusiveContentAsync(Guid userId, CancellationToken ct = default);
     /// <summary>Returns the union of all story/epic IDs that are in any plan's exclusive bundle (for listing badges).</summary>
     Task<(IReadOnlySet<string> StoryIds, IReadOnlySet<string> EpicIds)> GetAllExclusiveIdsAsync(CancellationToken ct = default);
+    /// <summary>Returns plan IDs that include this story in their exclusive bundle (e.g. ["Gold","Platinum"]).</summary>
+    Task<IReadOnlyList<string>> GetPlanIdsForExclusiveStoryAsync(string storyId, CancellationToken ct = default);
+    /// <summary>Returns plan IDs that include this epic in their exclusive bundle.</summary>
+    Task<IReadOnlyList<string>> GetPlanIdsForExclusiveEpicAsync(string epicId, CancellationToken ct = default);
+    /// <summary>Minimum tier for story: lowest plan in order Bronze&lt;Silver&lt;Gold&lt;Platinum that contains the story, or null if not exclusive.</summary>
+    Task<string?> GetMinimumTierForStoryAsync(string storyId, CancellationToken ct = default);
+    /// <summary>Minimum tier for epic: same as story.</summary>
+    Task<string?> GetMinimumTierForEpicAsync(string epicId, CancellationToken ct = default);
+    /// <summary>Returns minimum tier for every exclusive story (storyId -> tier). Used to enrich list without N+1.</summary>
+    Task<IReadOnlyDictionary<string, string>> GetMinimumTiersForExclusiveStoriesAsync(CancellationToken ct = default);
+    /// <summary>Returns minimum tier for every exclusive epic (epicId -> tier).</summary>
+    Task<IReadOnlyDictionary<string, string>> GetMinimumTiersForExclusiveEpicsAsync(CancellationToken ct = default);
 }
 
 public class ExclusiveContentService : IExclusiveContentService
@@ -88,6 +100,130 @@ public class ExclusiveContentService : IExclusiveContentService
         var storyIds = await GetAllExclusiveStoryIdsAsync(ct);
         var epicIds = await GetAllExclusiveEpicIdsAsync(ct);
         return (storyIds, epicIds);
+    }
+
+    /// <summary>Plan tier order for minimum tier: Bronze=0, Silver=1, Gold=2, Platinum=3.</summary>
+    private static readonly string[] PlanTierOrder = { "Bronze", "Silver", "Gold", "Platinum" };
+
+    public async Task<IReadOnlyList<string>> GetPlanIdsForExclusiveStoryAsync(string storyId, CancellationToken ct = default)
+    {
+        var normalized = NormalizeId(storyId);
+        if (string.IsNullOrEmpty(normalized)) return Array.Empty<string>();
+        var bundles = await _db.SupporterPackPlanExclusives.AsNoTracking().ToListAsync(ct);
+        var planIds = new List<string>();
+        foreach (var b in bundles)
+        {
+            foreach (var id in ParseJsonIds(b.ExclusiveStoryIdsJson))
+            {
+                if (string.Equals(id, normalized, StringComparison.OrdinalIgnoreCase))
+                {
+                    planIds.Add(b.PlanId.Trim());
+                    break;
+                }
+            }
+        }
+        return planIds;
+    }
+
+    public async Task<IReadOnlyList<string>> GetPlanIdsForExclusiveEpicAsync(string epicId, CancellationToken ct = default)
+    {
+        var normalized = NormalizeId(epicId);
+        if (string.IsNullOrEmpty(normalized)) return Array.Empty<string>();
+        var bundles = await _db.SupporterPackPlanExclusives.AsNoTracking().ToListAsync(ct);
+        var planIds = new List<string>();
+        foreach (var b in bundles)
+        {
+            foreach (var id in ParseJsonIds(b.ExclusiveEpicIdsJson))
+            {
+                if (string.Equals(id, normalized, StringComparison.OrdinalIgnoreCase))
+                {
+                    planIds.Add(b.PlanId.Trim());
+                    break;
+                }
+            }
+        }
+        return planIds;
+    }
+
+    public async Task<string?> GetMinimumTierForStoryAsync(string storyId, CancellationToken ct = default)
+    {
+        var planIds = await GetPlanIdsForExclusiveStoryAsync(storyId, ct);
+        return GetMinimumTierFromPlanIds(planIds);
+    }
+
+    public async Task<string?> GetMinimumTierForEpicAsync(string epicId, CancellationToken ct = default)
+    {
+        var planIds = await GetPlanIdsForExclusiveEpicAsync(epicId, ct);
+        return GetMinimumTierFromPlanIds(planIds);
+    }
+
+    private static string? GetMinimumTierFromPlanIds(IReadOnlyList<string> planIds)
+    {
+        if (planIds == null || planIds.Count == 0) return null;
+        var tierIndex = int.MaxValue;
+        for (var i = 0; i < PlanTierOrder.Length; i++)
+        {
+            if (planIds.Any(p => string.Equals(p, PlanTierOrder[i], StringComparison.OrdinalIgnoreCase)))
+            {
+                tierIndex = i;
+                break;
+            }
+        }
+        return tierIndex < PlanTierOrder.Length ? PlanTierOrder[tierIndex] : null;
+    }
+
+    public async Task<IReadOnlyDictionary<string, string>> GetMinimumTiersForExclusiveStoriesAsync(CancellationToken ct = default)
+    {
+        var bundles = await _db.SupporterPackPlanExclusives.AsNoTracking().ToListAsync(ct);
+        var storyIdToPlans = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
+        foreach (var b in bundles)
+        {
+            foreach (var id in ParseJsonIds(b.ExclusiveStoryIdsJson))
+            {
+                if (string.IsNullOrWhiteSpace(id)) continue;
+                if (!storyIdToPlans.TryGetValue(id, out var set))
+                {
+                    set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    storyIdToPlans[id] = set;
+                }
+                set.Add(b.PlanId.Trim());
+            }
+        }
+        var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var kv in storyIdToPlans)
+        {
+            var tier = GetMinimumTierFromPlanIds(kv.Value.ToList());
+            if (tier != null)
+                result[kv.Key] = tier;
+        }
+        return result;
+    }
+
+    public async Task<IReadOnlyDictionary<string, string>> GetMinimumTiersForExclusiveEpicsAsync(CancellationToken ct = default)
+    {
+        var bundles = await _db.SupporterPackPlanExclusives.AsNoTracking().ToListAsync(ct);
+        var epicIdToPlans = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
+        foreach (var b in bundles)
+        {
+            foreach (var id in ParseJsonIds(b.ExclusiveEpicIdsJson))
+            {
+                if (string.IsNullOrWhiteSpace(id)) continue;
+                if (!epicIdToPlans.TryGetValue(id, out var set))
+                {
+                    set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    epicIdToPlans[id] = set;
+                }
+                set.Add(b.PlanId.Trim());
+            }
+        }
+        var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var kv in epicIdToPlans)
+        {
+            var tier = GetMinimumTierFromPlanIds(kv.Value.ToList());
+            if (tier != null)
+                result[kv.Key] = tier;
+        }
+        return result;
     }
 
     private async Task<HashSet<string>> GetAllExclusiveStoryIdsAsync(CancellationToken ct)

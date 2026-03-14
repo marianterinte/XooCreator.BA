@@ -5,7 +5,6 @@ using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.DTOs;
 using XooCreator.BA.Features.TalesOfAlchimalia.Market.Services;
-using XooCreator.BA.Features.Subscription.Services;
 
 namespace XooCreator.BA.Features.TalesOfAlchimalia.Market.Endpoints;
 
@@ -14,18 +13,15 @@ public class GetEpicDetailsEndpoint
 {
     private readonly IEpicsMarketplaceService _epicsMarketplaceService;
     private readonly IUserContextService _userContext;
-    private readonly IExclusiveContentService _exclusiveContent;
     private readonly ILogger<GetEpicDetailsEndpoint>? _logger;
 
     public GetEpicDetailsEndpoint(
         IEpicsMarketplaceService epicsMarketplaceService,
         IUserContextService userContext,
-        IExclusiveContentService exclusiveContent,
         ILogger<GetEpicDetailsEndpoint>? logger = null)
     {
         _epicsMarketplaceService = epicsMarketplaceService;
         _userContext = userContext;
-        _exclusiveContent = exclusiveContent;
         _logger = logger;
     }
 
@@ -40,22 +36,13 @@ public class GetEpicDetailsEndpoint
         try
         {
             var userId = await ep._userContext.GetUserIdAsync();
-
-            var isExclusive = await ep._exclusiveContent.IsEpicExclusiveAsync(epicId, ct);
-            if (isExclusive)
-            {
-                if (userId == null)
-                    return TypedResults.Problem("Exclusive content. Supporter Pack required.", statusCode: StatusCodes.Status403Forbidden);
-                if (!await ep._exclusiveContent.HasAccessToEpicAsync(userId.Value, epicId, ct))
-                    return TypedResults.Problem("Exclusive content. Supporter Pack required.", statusCode: StatusCodes.Status403Forbidden);
-            }
-
             var effectiveUserId = userId ?? Guid.Empty;
             var epicDetails = await ep._epicsMarketplaceService.GetEpicDetailsAsync(epicId, effectiveUserId, locale);
 
             if (epicDetails == null)
                 return TypedResults.NotFound();
 
+            // Always return 200 with details; HasExclusiveAccess is set in service. Restriction enforced at play (state-with-progress).
             return TypedResults.Ok(epicDetails);
         }
         catch (Exception ex)

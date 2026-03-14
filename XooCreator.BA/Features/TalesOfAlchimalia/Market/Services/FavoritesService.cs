@@ -43,7 +43,15 @@ public class FavoritesService : IFavoritesService
     {
         var stories = await _repository.GetFavoriteStoriesAsync(userId, locale);
         var (exclusiveStoryIds, _) = await _exclusiveContent.GetAllExclusiveIdsAsync();
-        var enrichedStories = stories.Select(s => s with { IsExclusive = exclusiveStoryIds.Contains(s.Id) }).ToList();
+        var minimumTiers = await _exclusiveContent.GetMinimumTiersForExclusiveStoriesAsync();
+        var (userStoryIds, _) = await _exclusiveContent.GetUserExclusiveContentAsync(userId);
+        var enrichedStories = stories.Select(s =>
+        {
+            var isExclusive = exclusiveStoryIds.Contains(s.Id);
+            var minimumTier = isExclusive && minimumTiers.TryGetValue(s.Id, out var tier) ? tier : null;
+            var hasExclusiveAccess = !isExclusive || userStoryIds.Contains(s.Id);
+            return s with { IsExclusive = isExclusive, MinimumTier = minimumTier, HasExclusiveAccess = hasExclusiveAccess };
+        }).ToList();
 
         return new GetMarketplaceStoriesResponse
         {

@@ -32,7 +32,17 @@ public class EpicsMarketplaceService : IEpicsMarketplaceService
             locale,
             request);
         var (_, exclusiveEpicIds) = await _exclusiveContent.GetAllExclusiveIdsAsync();
-        var enrichedEpics = epics.Select(e => e with { IsExclusive = exclusiveEpicIds.Contains(e.Id) }).ToList();
+        var minimumTiers = await _exclusiveContent.GetMinimumTiersForExclusiveEpicsAsync();
+        var (_, userEpicIds) = userId == Guid.Empty
+            ? (Array.Empty<string>().AsReadOnly(), Array.Empty<string>().AsReadOnly())
+            : await _exclusiveContent.GetUserExclusiveContentAsync(userId);
+        var enrichedEpics = epics.Select(e =>
+        {
+            var isExclusive = exclusiveEpicIds.Contains(e.Id);
+            var minimumTier = isExclusive && minimumTiers.TryGetValue(e.Id, out var tier) ? tier : null;
+            var hasExclusiveAccess = !isExclusive || userEpicIds.Contains(e.Id);
+            return e with { IsExclusive = isExclusive, MinimumTier = minimumTier, HasExclusiveAccess = hasExclusiveAccess };
+        }).ToList();
 
         return new GetMarketplaceEpicsResponse
         {
@@ -44,7 +54,16 @@ public class EpicsMarketplaceService : IEpicsMarketplaceService
 
     public async Task<EpicDetailsDto?> GetEpicDetailsAsync(string epicId, Guid userId, string locale)
     {
-        return await _repository.GetEpicDetailsAsync(epicId, userId, locale);
+        var dto = await _repository.GetEpicDetailsAsync(epicId, userId, locale);
+        if (dto == null) return null;
+
+        var isExclusive = await _exclusiveContent.IsEpicExclusiveAsync(epicId);
+        var minimumTier = isExclusive ? await _exclusiveContent.GetMinimumTierForEpicAsync(epicId) : null;
+        var hasExclusiveAccess = userId == Guid.Empty
+            ? false
+            : !isExclusive || await _exclusiveContent.HasAccessToEpicAsync(userId, epicId);
+
+        return dto with { IsExclusive = isExclusive, MinimumTier = minimumTier, HasExclusiveAccess = hasExclusiveAccess };
     }
 }
 
