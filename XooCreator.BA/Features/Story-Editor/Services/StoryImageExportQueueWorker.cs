@@ -9,6 +9,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using XooCreator.BA.Data;
 using XooCreator.BA.Data.Entities;
+using XooCreator.BA.Features.StoryEditor.Models;
 using XooCreator.BA.Features.StoryEditor.Repositories;
 using XooCreator.BA.Infrastructure.Services.Blob;
 using XooCreator.BA.Infrastructure.Services.Jobs;
@@ -105,6 +106,9 @@ public class StoryImageExportQueueWorker : BackgroundService
                     var db = scope.ServiceProvider.GetRequiredService<XooDbContext>();
                     var crafts = scope.ServiceProvider.GetRequiredService<IStoryCraftsRepository>();
                     var sequentialImageGenerator = scope.ServiceProvider.GetRequiredService<ISequentialStoryImageGenerator>();
+                    var storyBibleGenerator = scope.ServiceProvider.GetRequiredService<IStoryBibleGenerator>();
+                    var scenePlanner = scope.ServiceProvider.GetRequiredService<IScenePlanner>();
+                    var illustrationPromptBuilder = scope.ServiceProvider.GetRequiredService<IIllustrationPromptBuilder>();
                     var sas = scope.ServiceProvider.GetRequiredService<IBlobSasService>();
 
                     var job = await db.StoryImageExportJobs.FirstOrDefaultAsync(j => j.Id == payload.JobId, stoppingToken);
@@ -150,7 +154,14 @@ public class StoryImageExportQueueWorker : BackgroundService
                         _logger.LogInformation("Processing StoryImageExportJob: jobId={JobId} storyId={StoryId} locale={Locale}",
                             job.Id, job.StoryId, job.Locale);
 
-                        var exportResult = await ProcessImageExportAsync(job, crafts, sequentialImageGenerator, stoppingToken);
+                        var exportResult = await ProcessImageExportAsync(
+                            job,
+                            crafts,
+                            sequentialImageGenerator,
+                            storyBibleGenerator,
+                            scenePlanner,
+                            illustrationPromptBuilder,
+                            stoppingToken);
 
                         var zipBlobPath = $"exports/images/{job.Id}/{exportResult.FileName}";
                         var blobClient = sas.GetBlobClient(sas.DraftContainer, zipBlobPath);
@@ -212,6 +223,9 @@ public class StoryImageExportQueueWorker : BackgroundService
         StoryImageExportJob job,
         IStoryCraftsRepository crafts,
         ISequentialStoryImageGenerator sequentialImageGenerator,
+        IStoryBibleGenerator storyBibleGenerator,
+        IScenePlanner scenePlanner,
+        IIllustrationPromptBuilder illustrationPromptBuilder,
         CancellationToken ct)
     {
         var craft = await crafts.GetWithLanguageAsync(job.StoryId, job.Locale, ct);
@@ -281,13 +295,71 @@ public class StoryImageExportQueueWorker : BackgroundService
 
         var orderedPages = pages.OrderBy(p => p.Index).ToList();
         var tileTexts = orderedPages.Select(p => p.Text).ToList();
+        var promptsForGeneration = tileTexts;
+
+        // Align editor image full-generation with Story Bible flow used by generate-full-story / your-story.
+        // If this best-effort step fails, we safely fallback to the legacy context + tile texts path.
+        try
+        {
+            var title = ResolveStoryTitle(craft, job.Locale);
+            var summary = ResolveStorySummary(craft, job.Locale);
+            var bibleSeed = BuildStoryBibleSeed(title, summary, tileTexts);
+
+            var storyBible = await storyBibleGenerator.GenerateAsync(
+                bibleSeed,
+                title,
+                tileTexts.Count,
+                job.Locale,
+                job.ApiKeyOverride!,
+                model: null,
+                ct);
+
+            var scenePlan = await scenePlanner.PlanAsync(
+                storyBible,
+                tileTexts,
+                job.StoryId,
+                job.ApiKeyOverride!,
+                model: null,
+                ct);
+
+            var orderedScenes = scenePlan.Scenes
+                .OrderBy(s => s.OrderIndex)
+                .ToList();
+            var prompts = illustrationPromptBuilder.BuildAll(storyBible, orderedScenes);
+            var promptTexts = prompts
+                .Select(illustrationPromptBuilder.GetPromptText)
+                .Where(p => !string.IsNullOrWhiteSpace(p))
+                .ToList();
+
+            if (promptTexts.Count == tileTexts.Count)
+            {
+                promptsForGeneration = promptTexts;
+            }
+            else
+            {
+                _logger.LogWarning(
+                    "Story Bible prompts count mismatch for image export jobId={JobId}. promptCount={PromptCount} tileCount={TileCount}. Falling back to page texts.",
+                    job.Id,
+                    promptTexts.Count,
+                    tileTexts.Count);
+            }
+
+            storyContextJson = BuildStoryBibleContextJson(craft.StoryId, title, summary, storyBible);
+        }
+        catch (Exception ex) when (!ct.IsCancellationRequested)
+        {
+            _logger.LogWarning(
+                ex,
+                "Story Bible enhancement failed for image export jobId={JobId}. Using legacy image-export prompt flow.",
+                job.Id);
+        }
 
         List<(byte[] ImageData, string MimeType)> generatedImages;
         try
         {
             generatedImages = await sequentialImageGenerator.GenerateSequentialWithChainingAsync(
                 storyContextJson,
-                tileTexts,
+                promptsForGeneration,
                 job.Locale,
                 extraInstructions,
                 referenceImageBytes,
@@ -342,6 +414,99 @@ public class StoryImageExportQueueWorker : BackgroundService
             ImageCount = results.Count,
             ZipSizeBytes = zipBytes.Length
         };
+    }
+
+    private static string ResolveStoryTitle(StoryCraft craft, string locale)
+    {
+        var lang = (locale ?? string.Empty).Trim().ToLowerInvariant();
+        var translation = craft.Translations.FirstOrDefault(tr => tr.LanguageCode == lang) ?? craft.Translations.FirstOrDefault();
+        return (translation?.Title ?? string.Empty).Trim();
+    }
+
+    private static string ResolveStorySummary(StoryCraft craft, string locale)
+    {
+        var lang = (locale ?? string.Empty).Trim().ToLowerInvariant();
+        var translation = craft.Translations.FirstOrDefault(tr => tr.LanguageCode == lang) ?? craft.Translations.FirstOrDefault();
+        return (translation?.Summary ?? string.Empty).Trim();
+    }
+
+    private static string BuildStoryBibleSeed(string title, string summary, IReadOnlyList<string> pageTexts)
+    {
+        var sb = new StringBuilder();
+        if (!string.IsNullOrWhiteSpace(title))
+        {
+            sb.AppendLine($"Title: {title}");
+        }
+        if (!string.IsNullOrWhiteSpace(summary))
+        {
+            sb.AppendLine($"Summary: {summary}");
+        }
+
+        var excerptPages = pageTexts
+            .Where(t => !string.IsNullOrWhiteSpace(t))
+            .Take(6)
+            .ToList();
+
+        if (excerptPages.Count > 0)
+        {
+            sb.AppendLine("Story pages excerpt:");
+            for (var i = 0; i < excerptPages.Count; i++)
+            {
+                sb.AppendLine($"Page {i + 1}: {excerptPages[i]}");
+            }
+        }
+
+        var seed = sb.ToString().Trim();
+        if (seed.Length > 6000)
+        {
+            seed = seed[..6000];
+        }
+        return string.IsNullOrWhiteSpace(seed) ? "Children story with consistent characters." : seed;
+    }
+
+    private static string BuildStoryBibleContextJson(string storyId, string title, string summary, StoryBible storyBible)
+    {
+        var obj = new
+        {
+            storyId,
+            title,
+            summary,
+            language = storyBible.Language,
+            ageRange = storyBible.AgeRange,
+            tone = storyBible.Tone,
+            visualStyle = storyBible.VisualStyle,
+            setting = new
+            {
+                place = storyBible.Setting.Place,
+                time = storyBible.Setting.Time
+            },
+            characters = storyBible.Characters.Select(c => new
+            {
+                id = c.Id,
+                name = c.Name,
+                role = c.Role,
+                species = c.Species,
+                visual = new
+                {
+                    primaryColor = c.Visual.PrimaryColor,
+                    secondaryColor = c.Visual.SecondaryColor,
+                    size = c.Visual.Size,
+                    features = c.Visual.Features,
+                    accessories = c.Visual.Accessories
+                },
+                personality = c.Personality
+            }),
+            plot = new
+            {
+                problem = storyBible.Plot.Problem,
+                escalation = storyBible.Plot.Escalation,
+                resolution = storyBible.Plot.Resolution,
+                moral = storyBible.Plot.Moral
+            },
+            sceneSkeleton = storyBible.SceneSkeleton
+        };
+
+        return JsonSerializer.Serialize(obj, new JsonSerializerOptions { WriteIndented = false });
     }
 
     private static string BuildStoryContextJson(StoryCraft craft, string locale)
