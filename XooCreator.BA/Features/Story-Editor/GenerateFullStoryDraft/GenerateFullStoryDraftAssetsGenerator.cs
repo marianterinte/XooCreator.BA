@@ -104,8 +104,8 @@ public sealed class GenerateFullStoryDraftAssetsGenerator : IGenerateFullStoryDr
 
         if (request.GenerateImages)
         {
-            // Use Story Bible pipeline if available
-            if (storyBible != null && promptBuilder != null && (scenePlan != null || usePublishedPaths))
+            // Use Story Bible pipeline if available (same as your-story; works with or without scenePlan)
+            if (storyBible != null && promptBuilder != null)
             {
                 await FillImagesWithStoryBibleAsync(request, dto, storyId, ownerEmail, storyBible, scenePlan, promptBuilder, imageSeedData, imageSeedMime, isOpenAi, usePublishedPaths, ct);
             }
