@@ -379,6 +379,9 @@ public class StoryAIGenerateQueueWorker : BackgroundService
         if (IsRateLimitException(ex))
             return "RateLimitExceeded";
 
+        if (ex is InvalidOperationException && (ex.Message.Contains("GoogleAI", StringComparison.OrdinalIgnoreCase) || ex.Message.Contains("ApiKey", StringComparison.OrdinalIgnoreCase)))
+            return "GoogleApiKeyNotConfigured";
+
         return null;
     }
 
