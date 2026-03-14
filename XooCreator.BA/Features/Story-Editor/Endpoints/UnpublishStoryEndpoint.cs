@@ -7,6 +7,7 @@ using XooCreator.BA.Data.Entities;
 using XooCreator.BA.Data.Enums;
 using XooCreator.BA.Features.StoryEditor.Models;
 using XooCreator.BA.Features.StoryEditor.Services;
+using XooCreator.BA.Features.TalesOfAlchimalia.Market.Caching;
 using XooCreator.BA.Infrastructure.Endpoints;
 using XooCreator.BA.Infrastructure.Services;
 
@@ -20,17 +21,20 @@ public class UnpublishStoryEndpoint
     private readonly XooDbContext _db;
     private readonly IAuth0UserService _auth0;
     private readonly IStoryPublishedAssetCleanupService _publishedCleanup;
+    private readonly IMarketplaceCacheInvalidator _marketplaceCacheInvalidator;
     private readonly ILogger<UnpublishStoryEndpoint> _logger;
 
     public UnpublishStoryEndpoint(
         XooDbContext db,
         IAuth0UserService auth0,
         IStoryPublishedAssetCleanupService publishedCleanup,
+        IMarketplaceCacheInvalidator marketplaceCacheInvalidator,
         ILogger<UnpublishStoryEndpoint> logger)
     {
         _db = db;
         _auth0 = auth0;
         _publishedCleanup = publishedCleanup;
+        _marketplaceCacheInvalidator = marketplaceCacheInvalidator;
         _logger = logger;
     }
 
@@ -146,6 +150,16 @@ public class UnpublishStoryEndpoint
 
         await ep._db.SaveChangesAsync(ct);
         await tx.CommitAsync(ct);
+
+        // Keep marketplace in sync immediately after unpublish.
+        try
+        {
+            ep._marketplaceCacheInvalidator.ResetAll();
+        }
+        catch (Exception cacheEx)
+        {
+            ep._logger.LogWarning(cacheEx, "Failed to reset marketplace cache after unpublish. storyId={StoryId}", def.StoryId);
+        }
 
         if (!string.IsNullOrWhiteSpace(ownerEmail))
         {
